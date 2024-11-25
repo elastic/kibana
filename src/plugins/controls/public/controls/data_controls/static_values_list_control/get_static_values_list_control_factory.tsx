@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EuiComboBox } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
+import { esqlVariablesService } from '@kbn/esql-variables/public';
 import { ESQL_CONTROL_STATIC_VALUES } from '../../../../common';
 import type { StaticValuesListControlState, StaticValuesListControlApi } from './types';
 import { initializeDataControl } from '../initialize_data_control';
@@ -27,10 +27,12 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
     order: 3,
     getIconType: () => 'editorChecklist',
     getDisplayName: () => 'Static values list',
-    isFieldCompatible: () => true,
+    isFieldCompatible: () => false,
     CustomOptionsComponent: undefined,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
-      console.log('the factory');
+      // initialize the interval variable
+      esqlVariablesService.addVariable({ key: 'interval', value: initialState.selectedOptions[0] });
+
       const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
       const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -101,6 +103,8 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
                 onChange={(options) => {
                   const selectedValues = options.map((option) => option.label);
                   selections.setSelectedOptions(selectedValues);
+                  // take the name from the variable name
+                  esqlVariablesService.updateVariable('interval', selectedValues[0]);
                 }}
               />
             </div>

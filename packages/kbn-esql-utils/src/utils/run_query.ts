@@ -126,6 +126,7 @@ export async function getESQLResults({
   filter,
   dropNullColumns,
   timeRange,
+  variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -133,11 +134,23 @@ export async function getESQLResults({
   filter?: unknown;
   dropNullColumns?: boolean;
   timeRange?: TimeRange;
+  variables?: Array<{
+    key: string;
+    value: string;
+  }>;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
-  const namedParams = getStartEndParams(esqlQuery, timeRange);
+  const namedParams: Array<Record<string, string | undefined>> = getStartEndParams(
+    esqlQuery,
+    timeRange
+  );
+  if (variables?.length) {
+    variables?.forEach(({ key, value }) => {
+      namedParams.push({ [key]: value });
+    });
+  }
   const result = await lastValueFrom(
     search(
       {

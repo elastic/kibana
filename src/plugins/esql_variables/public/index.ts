@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ESQLControlsFlyout } from './src/create_control_flyout';
-export { EsqlControlType } from './src/types';
+import { ESQLVariablesPlugin } from './plugin';
+import { EsqlVariablesService } from './esql_variables_service';
+
+const esqlVariablesService = new EsqlVariablesService();
+
+export { esqlVariablesService, type EsqlVariablesService };
+
+export function plugin() {
+  return new ESQLVariablesPlugin();
+}

@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ESQLControlsFlyout } from './src/create_control_flyout';
-export { EsqlControlType } from './src/types';
+import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
+// import { EsqlVariablesService } from './esql_variables_service';
+
+export class ESQLVariablesPlugin implements Plugin<{}, void> {
+  public setup(_: CoreSetup, {}: {}) {
+    return {};
+  }
+
+  public start(core: CoreStart, {}: {}): void {}
+
+  public stop() {}
+}

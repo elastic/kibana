@@ -11,14 +11,20 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type EsqlControlType, ESQLControlsFlyout } from '@kbn/esql-controls';
 import type { CoreStart } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import { monaco } from '@kbn/monaco';
+import { esqlVariablesService } from '@kbn/esql-variables/public';
 
 interface Context {
   queryString: string;
   core: CoreStart;
+  uiActions: UiActionsStart;
   controlType: EsqlControlType;
-  dashboardApi: PresentationContainer;
+  dashboardApi: DashboardApi;
+  panelId?: string;
+  cursorPosition?: monaco.Position;
 }
 
 export async function isActionCompatible(queryString: string) {
@@ -26,11 +32,29 @@ export async function isActionCompatible(queryString: string) {
   return isOfAggregateQueryType({ esql: queryString });
 }
 
-export async function executeAction({ queryString, core, controlType, dashboardApi }: Context) {
+export async function executeAction({
+  queryString,
+  core,
+  uiActions,
+  controlType,
+  dashboardApi,
+  panelId,
+  cursorPosition,
+}: Context) {
   const isCompatibleAction = await isActionCompatible(queryString);
   if (!isCompatibleAction) {
     throw new IncompatibleActionError();
   }
+
+  const openEditFlyout = async (embeddable: unknown) => {
+    await uiActions.getTrigger('EDIT_IN_DASH_TRIGGER').exec({
+      embeddable,
+    });
+  };
+
+  const addVariable = (key: string, value: string) => {
+    esqlVariablesService.addVariable({ key, value });
+  };
 
   const handle = core.overlays.openFlyout(
     toMountPoint(
@@ -42,6 +66,10 @@ export async function executeAction({ queryString, core, controlType, dashboardA
             handle.close();
           }}
           dashboardApi={dashboardApi}
+          panelId={panelId}
+          cursorPosition={cursorPosition}
+          openEditFlyout={openEditFlyout}
+          addVariable={addVariable}
         />,
         {
           closeFlyout: () => {

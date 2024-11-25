@@ -222,6 +222,7 @@ export async function getEditLensConfiguration(
       onCancelCb,
       hideTimeFilterInfo,
       dashboardApi,
+      panelId,
     };
 
     return getWrapper(

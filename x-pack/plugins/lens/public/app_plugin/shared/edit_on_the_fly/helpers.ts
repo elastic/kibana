@@ -48,7 +48,8 @@ export const getGridAttrs = async (
   query: AggregateQuery,
   adHocDataViews: DataViewSpec[],
   deps: LensPluginStartDependencies,
-  abortController?: AbortController
+  abortController?: AbortController,
+  esqlVariables: Array<{ key: string; value: string }> = []
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -68,6 +69,7 @@ export const getGridAttrs = async (
     filter,
     dropNullColumns: true,
     timeRange: deps.data.query.timefilter.timefilter.getAbsoluteTime(),
+    variables: esqlVariables,
   });
 
   const columns = formatESQLColumns(results.response.columns);
@@ -87,14 +89,16 @@ export const getSuggestions = async (
   adHocDataViews: DataViewSpec[],
   setErrors: (errors: Error[]) => void,
   abortController?: AbortController,
-  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void
+  setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
+  esqlVariables: Array<{ key: string; value: string }> = []
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
       query,
       adHocDataViews,
       deps,
-      abortController
+      abortController,
+      esqlVariables
     );
 
     setDataGridAttrs?.({

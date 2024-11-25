@@ -85,6 +85,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   dashboardApi,
+  panelId,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -252,10 +253,13 @@ export const ESQLEditor = memo(function ESQLEditor({
     if (!dashboardApi) {
       return;
     }
+    const position = editor1.current?.getPosition();
     await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
       queryString: query.esql,
       controlType: 'time_literal',
       dashboardApi,
+      panelId,
+      cursorPosition: position,
     });
   });
 

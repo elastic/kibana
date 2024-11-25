@@ -18,7 +18,8 @@
       "expressions",
       "dataViews",
       "uiActions",
-      "contentManagement"
+      "contentManagement",
+      "esqlVariables",
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -75,9 +75,9 @@ const openInlineLensConfigEditor = (
     }
   );
 
-  overlayTracker?.openOverlay(handle, {
-    focusedPanelId: embeddable.id,
-  });
+  // overlayTracker?.openOverlay(handle, {
+  //   focusedPanelId: embeddable.id,
+  // });
 };
 
 export async function executeEditAction({

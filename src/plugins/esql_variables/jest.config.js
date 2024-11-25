@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ESQLControlsFlyout } from './src/create_control_flyout';
-export { EsqlControlType } from './src/types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/plugins/esql_variables'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/esql_variables',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/src/plugins/esql_variables/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
+  setupFiles: ['jest-canvas-mock'],
+};

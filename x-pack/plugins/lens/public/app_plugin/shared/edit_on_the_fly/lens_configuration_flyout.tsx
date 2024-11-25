@@ -22,12 +22,14 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+// import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
   getAggregateQueryMode,
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { esqlVariablesService } from '@kbn/esql-variables/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
@@ -79,12 +81,23 @@ export function LensEditConfigurationFlyout({
   onCancelCb,
   hideTimeFilterInfo,
   dashboardApi,
+  panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
-  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+  const [query, setQuery] = useState<AggregateQuery | Query>(
+    attributes.state.queryWithVariables ?? attributes.state.query
+  );
+
+  const [esqlVariables, setEsqlVariables] = useState<
+    Array<{
+      key: string;
+      value: string;
+    }>
+  >(esqlVariablesService.getVariables());
+
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -116,6 +129,12 @@ export function LensEditConfigurationFlyout({
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
+  esqlVariablesService?.esqlVariables$.subscribe((nextVariables) => {
+    if (nextVariables.length && !isEqual(nextVariables, esqlVariables)) {
+      setEsqlVariables(nextVariables);
+    }
+  });
+
   const dispatch = useLensDispatch();
   useEffect(() => {
     const s = output$?.subscribe(() => {
@@ -145,7 +164,8 @@ export function LensEditConfigurationFlyout({
           query,
           adHocDataViews,
           startDependencies,
-          abortController
+          abortController,
+          esqlVariables
         );
 
         setDataGridAttrs({
@@ -156,7 +176,7 @@ export function LensEditConfigurationFlyout({
       }
     };
     getESQLGridAttrs();
-  }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
+  }, [adHocDataViews, dataGridAttrs, esqlVariables, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -333,7 +353,8 @@ export function LensEditConfigurationFlyout({
         adHocDataViews,
         setErrors,
         abortController,
-        setDataGridAttrs
+        setDataGridAttrs,
+        esqlVariables
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -350,6 +371,7 @@ export function LensEditConfigurationFlyout({
       adHocDataViews,
       setCurrentAttributes,
       updateSuggestion,
+      esqlVariables,
     ]
   );
 
@@ -521,6 +543,7 @@ export function LensEditConfigurationFlyout({
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
                 dashboardApi={dashboardApi}
+                panelId={panelId}
               />
             </EuiFlexItem>
           )}

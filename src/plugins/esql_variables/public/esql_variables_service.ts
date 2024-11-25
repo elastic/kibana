@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { BehaviorSubject } from 'rxjs';
+
+interface ESQLVariables {
+  key: string;
+  value: string;
+}
+
+// interface EsqlVariablesServiceParams {
+//   esqlVariables: ESQLVariables[];
+// }
+
+export class EsqlVariablesService {
+  esqlVariables$: BehaviorSubject<ESQLVariables[]>;
+  esqlVariables: ESQLVariables[] = [];
+
+  constructor() {
+    this.esqlVariables$ = new BehaviorSubject<ESQLVariables[]>([]);
+    this.esqlVariables = [];
+  }
+
+  addVariable(variable: ESQLVariables) {
+    const variables = [...this.esqlVariables];
+    const variableExists = variables.find((v) => v.key === variable.key);
+    if (variableExists) {
+      return;
+    }
+    variables.push(variable);
+    this.esqlVariables$.next(variables);
+    this.esqlVariables = variables;
+  }
+
+  getVariables() {
+    return this.esqlVariables;
+  }
+
+  getVariable(key: string) {
+    return this.esqlVariables.find((variable) => variable.key === key);
+  }
+
+  updateVariable(key: string, value: string) {
+    const variables = this.esqlVariables.map((variable) => {
+      if (variable.key === key) {
+        return { ...variable, value };
+      }
+      return variable;
+    });
+    this.esqlVariables$.next(variables);
+    this.esqlVariables = variables;
+  }
+
+  removeVariable(key: string) {
+    const variables = this.esqlVariables.filter((variable) => variable.key !== key);
+    this.esqlVariables$.next(variables);
+    this.esqlVariables = variables;
+  }
+}

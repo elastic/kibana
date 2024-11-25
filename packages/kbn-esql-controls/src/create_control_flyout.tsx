@@ -25,14 +25,19 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import type { PresentationContainer } from '@kbn/presentation-containers';
+import { monaco } from '@kbn/monaco';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { EsqlControlType, EsqlControlFlyoutType } from './types';
 
 interface ESQLControlsFlyoutProps {
   controlType: EsqlControlType;
   queryString: string;
-  dashboardApi: PresentationContainer;
+  dashboardApi: DashboardApi;
+  panelId?: string;
+  cursorPosition?: monaco.Position;
   closeFlyout: () => void;
+  addVariable: (key: string, value: string) => void;
+  openEditFlyout: (embeddable: unknown) => Promise<void>;
 }
 
 const getControlFlyoutType = (controlType: EsqlControlType) => {
@@ -104,13 +109,18 @@ export function ESQLControlsFlyout({
   controlType,
   queryString,
   dashboardApi,
+  panelId,
+  cursorPosition,
+  addVariable,
   closeFlyout,
+  openEditFlyout,
 }: ESQLControlsFlyoutProps) {
   const flyoutType = getControlFlyoutType(controlType);
   const [controlFlyoutType, setControlFlyoutType] = useState<EuiComboBoxOptionOption[]>([
     controlTypeOptions.find((option) => option.key === flyoutType)!,
   ]);
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
+  const panels = useStateFromPublishingSubject(dashboardApi.panels$);
   const suggestedVariableName = getVariableName(controlType);
   const [variableName, setVariableName] = useState(suggestedVariableName);
 
@@ -147,16 +157,61 @@ export function ESQLControlsFlyout({
     setMinimumWidth(optionId);
   }, []);
 
-  const createVariableControl = useCallback(() => {
+  const createVariableControl = useCallback(async () => {
+    const availableOptions = values?.split(',').map((value) => value.trim()) ?? [];
+    const varName = variableName.replace('?', '');
     const state = {
-      availableOptions: values?.split(',').map((value) => value.trim()) ?? [],
-      selectedOptions: [],
+      availableOptions,
+      selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      title: label || variableName,
-      variableName,
+      title: label || varName,
+      variableName: varName,
     };
     controlGroupApi?.addNewControl('esqlControlStaticValues', state);
-  }, [controlGroupApi, label, minimumWidth, values, variableName]);
+
+    if (panelId && cursorPosition) {
+      const cursorColumn = cursorPosition?.column ?? 0;
+      const query = [
+        queryString.slice(0, cursorColumn - 1),
+        variableName,
+        queryString.slice(cursorColumn - 1),
+      ].join('');
+      const panel = panels[panelId];
+      const updatedPanelInput = {
+        ...panel.explicitInput,
+        attributes: {
+          ...panel.explicitInput.attributes,
+          state: {
+            ...panel.explicitInput.attributes.state,
+            queryWithVariables: {
+              esql: query,
+            },
+          },
+        },
+      };
+      const factory = await dashboardApi.getFactory(panel.type);
+      const embeddable = await factory?.create(updatedPanelInput);
+      embeddable.updateInput(updatedPanelInput);
+      await openEditFlyout(embeddable);
+      // add the variable to the service
+      addVariable(varName, availableOptions[0]);
+    }
+    closeFlyout();
+  }, [
+    closeFlyout,
+    controlGroupApi,
+    dashboardApi,
+    label,
+    minimumWidth,
+    panelId,
+    values,
+    variableName,
+    panels,
+    queryString,
+    cursorPosition,
+    openEditFlyout,
+    addVariable,
+  ]);
 
   return (
     <>

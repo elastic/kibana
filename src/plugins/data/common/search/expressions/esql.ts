@@ -15,6 +15,7 @@ import type {
   IKibanaSearchResponse,
   ISearchGeneric,
 } from '@kbn/search-types';
+import { esqlVariablesService } from '@kbn/esql-variables/public';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getStartEndParams } from '@kbn/esql-utils';
@@ -171,7 +172,18 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
 
-            const namedParams = getStartEndParams(query, input.timeRange);
+            const namedParams: Array<Record<string, string | undefined>> = getStartEndParams(
+              query,
+              input.timeRange
+            );
+            const variables = esqlVariablesService.getVariables();
+            console.log('variables', variables);
+
+            if (variables?.length) {
+              variables?.forEach(({ key, value }) => {
+                namedParams.push({ [key]: value });
+              });
+            }
 
             if (namedParams.length) {
               params.params = namedParams;

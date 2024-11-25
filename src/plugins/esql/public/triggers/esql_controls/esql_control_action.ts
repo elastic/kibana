@@ -11,14 +11,17 @@ import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { EsqlControlType } from '@kbn/esql-controls';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { monaco } from '@kbn/monaco';
 const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
 
 interface Context {
   queryString: string;
   controlType: EsqlControlType;
-  dashboardApi: PresentationContainer;
+  dashboardApi: DashboardApi;
+  panelId?: string;
+  cursorPosition?: monaco.Position;
 }
 
 export const getHelpersAsync = async () => await import('./esql_control_helpers');
@@ -28,7 +31,7 @@ export class CreateESQLControlAction implements Action<Context> {
   public id = ACTION_CREATE_ESQL_CONTROL;
   public order = 50;
 
-  constructor(protected readonly core: CoreStart) {}
+  constructor(protected readonly core: CoreStart, protected readonly uiActions: UiActionsStart) {}
 
   public getDisplayName(): string {
     return i18n.translate('esql.createESQLControlLabel', {
@@ -45,13 +48,22 @@ export class CreateESQLControlAction implements Action<Context> {
     return isActionCompatible(queryString);
   }
 
-  public async execute({ queryString, controlType, dashboardApi }: Context) {
+  public async execute({
+    queryString,
+    controlType,
+    dashboardApi,
+    panelId,
+    cursorPosition,
+  }: Context) {
     const { executeAction } = await getHelpersAsync();
     return executeAction({
       queryString,
       core: this.core,
+      uiActions: this.uiActions,
       controlType,
       dashboardApi,
+      panelId,
+      cursorPosition,
     });
   }
 }

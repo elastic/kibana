@@ -61,7 +61,7 @@ export class EsqlPlugin implements Plugin<{}, void> {
     // Register triggers
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
-    const createESQLControlAction = new CreateESQLControlAction(core);
+    const createESQLControlAction = new CreateESQLControlAction(core, uiActions);
     uiActions.addTriggerAction(ESQL_CONTROL_TRIGGER, createESQLControlAction);
 
     setKibanaServices(

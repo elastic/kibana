@@ -71,6 +71,8 @@ export interface ESQLEditorProps {
 
   /** very important for controls creation from the editor **/
   dashboardApi?: PresentationContainer;
+
+  panelId?: string;
 }
 
 export interface ESQLEditorDeps {

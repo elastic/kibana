@@ -112,6 +112,10 @@ import {
   inAppEmbeddableEditTrigger,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
+import {
+  EDIT_IN_DASH_TRIGGER,
+  editInDashboardTrigger,
+} from './trigger_actions/open_lens_config/edit_in_dashboard_trigger';
 import { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
@@ -612,6 +616,7 @@ export class LensPlugin {
 
     // this trigger enables external consumers to use the inline editing flyout
     startDependencies.uiActions.registerTrigger(inAppEmbeddableEditTrigger);
+    startDependencies.uiActions.registerTrigger(editInDashboardTrigger);
 
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_FIELD_TRIGGER,
@@ -636,6 +641,7 @@ export class LensPlugin {
     const editInLensAction = new ConfigureInLensPanelAction(startDependencies, core);
     // dashboard edit panel action
     startDependencies.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
+    startDependencies.uiActions.addTriggerAction(EDIT_IN_DASH_TRIGGER, editInLensAction);
 
     // Allows the Lens embeddable to easily open the inapp editing flyout
     const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);

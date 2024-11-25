@@ -40,6 +40,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/std",
     "@kbn/react-hooks",
+    "@kbn/esql-variables",
   ],
   "exclude": ["target/**/*"]
 }
