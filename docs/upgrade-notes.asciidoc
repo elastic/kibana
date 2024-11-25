@@ -55,10 +55,10 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 [%collapsible]
 ====
 *Details* +
-`GET /api/cases/status` has been deprecated with no replacement
-`GET /api/cases/{case_id}/comments` has been replaced by `GET /api/cases/{case_id}/comments/_find` released in 7.13
-`GET /api/cases/<case_id>/user_actions` has been replaced by `GET /api/cases/<case_id>/user_actions/_find` released in 8.7
-`includeComments` parameter in `GET /api/cases/{case_id}`has been deprecated. Use `GET /api/cases/{case_id}/comments/_find` instead, released in 7.13
+- `GET /api/cases/status` has been deprecated with no replacement
+- `GET /api/cases/{case_id}/comments` has been replaced by `GET /api/cases/{case_id}/comments/_find` released in 7.13
+- `GET /api/cases/<case_id>/user_actions` has been replaced by `GET /api/cases/<case_id>/user_actions/_find` released in 8.7
+- `includeComments` parameter in `GET /api/cases/{case_id}`has been deprecated. Use `GET /api/cases/{case_id}/comments/_find` instead, released in 7.13
 
 *Impact* +
 Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
@@ -126,7 +126,6 @@ Use the **Kibana Upgrade Assistant** to prepare for your upgrade to the next ver
 The assistant identifies deprecated settings in your configuration and guides you through the process of 
 resolving issues if any deprecated features are enabled. 
 To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
-
 
 
 
