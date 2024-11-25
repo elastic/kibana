@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../common/lib/kibana';
 import {
   mockedAlertSummaryResponse,
@@ -33,7 +33,7 @@ describe('useLoadAlertSummary', () => {
       ...mockedAlertSummaryResponse,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadAlertSummary({
         ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
@@ -48,7 +48,7 @@ describe('useLoadAlertSummary', () => {
       },
     });
 
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const { alertSummary, error } = result.current;
     expect(alertSummary).toEqual({
@@ -69,15 +69,13 @@ describe('useLoadAlertSummary', () => {
       ...mockedAlertSummaryResponse,
     });
 
-    const { waitForNextUpdate } = renderHook(() =>
+    renderHook(() =>
       useLoadAlertSummary({
         ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
         filter,
       })
     );
-
-    await waitForNextUpdate();
 
     const body = JSON.stringify({
       fixed_interval: fixedInterval,
@@ -86,11 +84,14 @@ describe('useLoadAlertSummary', () => {
       ruleTypeIds,
       filter: [filter],
     });
-    expect(mockedPostAPI).toHaveBeenCalledWith(
-      '/internal/rac/alerts/_alert_summary',
-      expect.objectContaining({
-        body,
-      })
+
+    await waitFor(() =>
+      expect(mockedPostAPI).toHaveBeenCalledWith(
+        '/internal/rac/alerts/_alert_summary',
+        expect.objectContaining({
+          body,
+        })
+      )
     );
   });
 
@@ -98,15 +99,13 @@ describe('useLoadAlertSummary', () => {
     const error = new Error('Fetch Alert Summary Failed');
     mockedPostAPI.mockRejectedValueOnce(error);
 
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useLoadAlertSummary({
         ruleTypeIds,
         timeRange: mockedAlertSummaryTimeRange,
       })
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.error).toMatch(error.message);
+    await waitFor(() => expect(result.current.error).toMatch(error.message));
   });
 });

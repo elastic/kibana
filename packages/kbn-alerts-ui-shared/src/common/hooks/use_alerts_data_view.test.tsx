@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -62,7 +62,7 @@ describe('useAlertsDataView', () => {
       dataView: undefined,
     };
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
@@ -77,7 +77,7 @@ describe('useAlertsDataView', () => {
   });
 
   it('fetches indexes and fields for non-siem rule type ids, returning a DataViewBase object', async () => {
-    const { result, waitForValueToChange } = renderHook(
+    const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
@@ -88,7 +88,7 @@ describe('useAlertsDataView', () => {
       }
     );
 
-    await waitForValueToChange(() => result.current.isLoading, { timeout: 5000 });
+    await waitFor(() => result.current.isLoading, { timeout: 5000 });
 
     expect(mockFetchAlertsFields).toHaveBeenCalledTimes(1);
     expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
@@ -96,7 +96,7 @@ describe('useAlertsDataView', () => {
   });
 
   it('only fetches index names for the siem rule type ids, returning a DataView', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useAlertsDataView({ ...mockServices, ruleTypeIds: ['siem.esqlRule', 'siem.eqlRule'] }),
       {
         wrapper,
@@ -110,7 +110,7 @@ describe('useAlertsDataView', () => {
   });
 
   it('does not fetch anything if siem and other rule type ids are mixed together', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
@@ -132,7 +132,7 @@ describe('useAlertsDataView', () => {
   });
 
   it('does not fetch anything with empty array nor create a virtual data view', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () =>
         useAlertsDataView({
           ...mockServices,
@@ -157,7 +157,7 @@ describe('useAlertsDataView', () => {
   it('returns an undefined data view if any of the queries fails', async () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useAlertsDataView({ ...mockServices, ruleTypeIds: ['.es-query'] }),
       {
         wrapper,
@@ -175,12 +175,9 @@ describe('useAlertsDataView', () => {
   it('shows an error toast if any of the queries fails', async () => {
     mockFetchAlertsIndexNames.mockRejectedValue('error');
 
-    const { waitFor } = renderHook(
-      () => useAlertsDataView({ ...mockServices, ruleTypeIds: ['.es-query'] }),
-      {
-        wrapper,
-      }
-    );
+    renderHook(() => useAlertsDataView({ ...mockServices, ruleTypeIds: ['.es-query'] }), {
+      wrapper,
+    });
 
     await waitFor(() => expect(mockServices.toasts.addDanger).toHaveBeenCalled());
   });
