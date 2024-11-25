@@ -57,6 +57,8 @@ import {
   deleteEntityIndex,
   createPlatformPipeline,
   deletePlatformPipeline,
+  createKeywordBuilderPipeline,
+  deleteKeywordBuilderPipeline,
   createEntityIndexComponentTemplate,
   deleteEntityIndexComponentTemplate,
   createFieldRetentionEnrichPolicy,
@@ -395,6 +397,7 @@ export class EntityStoreDataClient {
         logger,
       });
       this.log(`debug`, entityType, `Executed field retention enrich policy`);
+      
       await createPlatformPipeline({
         debugMode: pipelineDebugMode,
         unitedDefinition,
@@ -402,6 +405,13 @@ export class EntityStoreDataClient {
         esClient: this.esClient,
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
+      
+      await createKeywordBuilderPipeline({
+        debugMode: pipelineDebugMode,
+        logger,
+        esClient: this.esClient,
+      });
+      this.log(`debug`, entityType, `Created keyword builder pipeline`);
 
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });
@@ -626,6 +636,12 @@ export class EntityStoreDataClient {
         esClient: this.esClient,
       });
       this.log('debug', entityType, `Deleted platform pipeline`);
+
+      await deleteKeywordBuilderPipeline({
+        logger,
+        esClient: this.esClient,
+      });
+      this.log('debug', entityType, `Deleted keyword builder pipeline`);
 
       await deleteFieldRetentionEnrichPolicy({
         unitedDefinition,
