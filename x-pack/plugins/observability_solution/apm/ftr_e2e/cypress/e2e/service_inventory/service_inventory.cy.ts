@@ -84,7 +84,7 @@ describe('Service inventory', () => {
     it('opens the inventory plugin', () => {
       cy.wait(mainAliasNames);
       cy.contains('h1', 'Services');
-      cy.get('[data-test-subj="apmEntitiesInventoryCalloutLink"]').click();
+      cy.contains('Try our new Inventory!').click();
       cy.url().should('include', '/inventory');
     });
   });
