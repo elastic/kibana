@@ -23,7 +23,6 @@ export type {
   ServerRouteRepository,
   ServerRoute,
   RouteParamsRT,
-  RouteState,
   DefaultRouteCreateOptions,
   DefaultRouteHandlerResources,
   IoTsParamsObject,

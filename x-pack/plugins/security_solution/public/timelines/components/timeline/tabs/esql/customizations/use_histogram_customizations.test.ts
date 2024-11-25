@@ -11,7 +11,7 @@ import type {
   ClickTriggerEvent,
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type {
   DiscoverStateContainer,
   UnifiedHistogramCustomization,
