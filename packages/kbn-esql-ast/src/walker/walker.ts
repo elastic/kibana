@@ -361,6 +361,12 @@ export class Walker {
     }
   }
 
+  public walkInlineCast(node: ESQLInlineCast): void {
+    const { options } = this;
+    (options.visitInlineCast ?? options.visitAny)?.(node);
+    this.walkAstItem(node.value);
+  }
+
   public walkFunction(node: ESQLFunction): void {
     const { options } = this;
     (options.visitFunction ?? options.visitAny)?.(node);
@@ -427,7 +433,7 @@ export class Walker {
         break;
       }
       case 'inlineCast': {
-        (options.visitInlineCast ?? options.visitAny)?.(node);
+        this.walkInlineCast(node);
         break;
       }
       case 'identifier': {

@@ -15,7 +15,6 @@ import type {
   ESQLColumn,
   ESQLCommand,
   ESQLIdentifier,
-  ESQLLiteral,
   ESQLParamLiteral,
   ESQLProperNode,
 } from '../../../types';
@@ -47,11 +46,19 @@ export type ESQLAstFieldTemplate = string | string[] | ESQLAstField;
 
 const fieldTemplateToField = (template: ESQLAstFieldTemplate): ESQLAstField => {
   if (typeof template === 'string') {
-    const identifier = Builder.identifier({ name: template });
-    const column = Builder.expression.column({ args: [identifier] });
+    const part = template.startsWith('?')
+      ? Builder.param.build(template)
+      : Builder.identifier({ name: template });
+    const column = Builder.expression.column({ args: [part] });
     return column;
   } else if (Array.isArray(template)) {
-    const identifiers = template.map((name) => Builder.identifier({ name }));
+    const identifiers = template.map((name) => {
+      if (name.startsWith('?')) {
+        return Builder.param.build(name);
+      } else {
+        return Builder.identifier({ name });
+      }
+    });
     const column = Builder.expression.column({ args: identifiers });
     return column;
   }
@@ -60,36 +67,14 @@ const fieldTemplateToField = (template: ESQLAstFieldTemplate): ESQLAstField => {
 };
 
 const matchNodeAgainstField = (node: ESQLProperNode, field: ESQLAstField): boolean => {
-  switch (node.type) {
-    case 'column':
-    case 'identifier': {
-      switch (field.type) {
-        case 'column':
-        case 'identifier': {
-          return LeafPrinter.print(node) === LeafPrinter.print(field);
-        }
-      }
-    }
-    case 'literal': {
-      const literal = node as ESQLLiteral;
-      if (literal.literalType !== 'param') {
-        return false;
-      }
-      if (field.type !== 'literal') {
-        return false;
-      }
-      if (literal.literalType === field.literalType && literal.value === field.value) {
-        return true;
-      }
-    }
-  }
-  return false;
+  return LeafPrinter.print(node) === LeafPrinter.print(field);
 };
 
 /**
  * Finds the first "WHERE" command which contains the specified text as one of
  * its comparison operands. The text can represent a field (including nested
- * fields or a single identifier), or a param.
+ * fields or a single identifier), or a param. If the text starts with "?", it
+ * is assumed to be a param.
  *
  * Examples:
  *
@@ -100,6 +85,14 @@ const matchNodeAgainstField = (node: ESQLProperNode, field: ESQLAstField): boole
  * byField(ast, ['nested', '?param']);
  * byField(ast, ['nested', 'positional', 'param', '?123']);
  * byField(ast, '?');
+ * ```
+ *
+ * Alternatively you can build your own field template using the builder:
+ *
+ * ```ts
+ * byField(ast, Builder.expression.column({
+ *   args: [Builder.identifier({ name: 'field' })]
+ * }));
  * ```
  *
  * @param ast The root AST node search for "WHERE" commands.
@@ -115,6 +108,9 @@ export const byField = (
     let found = false;
 
     const matchNode = (node: ESQLProperNode) => {
+      if (found) {
+        return;
+      }
       if (matchNodeAgainstField(node, field)) {
         found = true;
       }

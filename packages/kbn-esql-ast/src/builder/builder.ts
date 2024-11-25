@@ -29,6 +29,7 @@ import {
   ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
+  ESQLParamLiteral,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -261,6 +262,26 @@ export namespace Builder {
       };
 
       return node;
+    };
+
+    export const build = (
+      name: string,
+      options: Partial<ESQLParamLiteral> = {},
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLParam => {
+      const value: string = name.startsWith('?') ? name.slice(1) : name;
+
+      if (!value) {
+        return Builder.param.unnamed(options);
+      }
+
+      const isNumeric = !isNaN(Number(value)) && String(Number(value)) === value;
+
+      if (isNumeric) {
+        return Builder.param.positional({ ...options, value: Number(value) }, fromParser);
+      } else {
+        return Builder.param.named({ ...options, value }, fromParser);
+      }
     };
   }
 }
