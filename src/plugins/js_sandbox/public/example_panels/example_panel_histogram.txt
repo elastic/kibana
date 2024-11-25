@@ -56,8 +56,8 @@ function(props) {
       view.tooltip(new vegaTooltip.Handler().call);
 
       view.addSignalListener('brushX', function(event, item) {
-          if (item.monthdate_date) {
-            props.dispatch(`WHERE @timestamp >= "${new Date(item.monthdate_date[0]).toISOString().replace('2012-', '2024-')}" AND @timestamp < "${new Date(item.monthdate_date[1]).toISOString().replace('2012-', '2024-')}"`);
+          if (item.date) {
+            props.dispatch(`WHERE @timestamp >= "${new Date(item.date[0]).toISOString()}" AND @timestamp < "${new Date(item.date[1]).toISOString()}"`);
           } else {
             props.dispatch('');
           }
@@ -77,13 +77,13 @@ function(props) {
     const brush = vl.selectInterval().name('brushX').encodings('x');
 
     // now you can use the API!
-    const spec = vl.markBar({ tooltip: true })
+    const spec = vl.markBar({ tooltip: true, width: 15 })
       .data({ name: 'table'})
       .encode(
         // https://vega.github.io/vega-lite/docs/timeunit.html
-        vl.x().timeMD('date').axis({title: 'Date', grid: false}),
+        vl.x().fieldT('date').axis({title: 'Date', grid: false}),
         vl.y().sum("count"),
-        vl.color().fieldN('type').scale({ range: ['#ddd','#00a69b'] }).legend({disable: true}),
+        vl.color().fieldN('type').scale({ range: ['#ccc','#00a69b'] }).legend({disable: true}),
         vl.opacity().condition({test:"datum['type'] == 'context'",value:0.3}).value(1),
         vl.order().field('typeOrder'),
         vl.tooltip([vl.fieldT("date"), vl.fieldQ("count")])
