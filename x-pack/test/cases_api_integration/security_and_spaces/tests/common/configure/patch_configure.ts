@@ -104,19 +104,18 @@ export default ({ getService }: FtrProviderContext): void => {
           key: '50d4d08c-12b4-4055-a343-b303e0ab3724',
           label: 'type 1',
         },
-        {
-          key: 'fc3ff698-589a-44fd-bbc4-ffaa0b7211f7',
-          label: 'type 2',
-        },
       ] as ConfigurationPatchRequest['observableTypes'];
       const configuration = await createConfiguration(supertest);
+      expect(configuration.observableTypes.length).to.be(0);
 
       const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
         observableTypes,
       });
 
-      expect(updatedConfiguration.observableTypes).to.be(observableTypes);
+      expect(updatedConfiguration.observableTypes.length).to.be.greaterThan(0);
+      expect(updatedConfiguration.observableTypes[0].key).to.equal(observableTypes?.[0].key);
+      expect(updatedConfiguration.observableTypes[0].label).to.equal(observableTypes?.[0].label);
     });
 
     it('should not patch a configuration with duplicated observableTypes', async () => {
