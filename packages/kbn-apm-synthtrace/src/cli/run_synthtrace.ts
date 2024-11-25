@@ -48,6 +48,11 @@ function options(y: Argv) {
       description: 'Generate and index data continuously',
       boolean: true,
     })
+    .option('liveBucketSize', {
+      description: 'Bucket size in ms for live streaming',
+      default: 1000,
+      number: true,
+    })
     .option('clean', {
       describe: 'Clean APM indices before indexing new data',
       default: false,

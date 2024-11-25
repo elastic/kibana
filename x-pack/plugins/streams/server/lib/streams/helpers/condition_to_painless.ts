@@ -69,7 +69,7 @@ function toPainless(condition: FilterCondition) {
 
 export function conditionToPainless(condition: Condition, nested = false): string {
   if (isFilterCondition(condition)) {
-    return toPainless(condition);
+    return `(${safePainlessField(condition)} !== null && ${toPainless(condition)})`;
   }
   if (isAndCondition(condition)) {
     const and = condition.and.map((filter) => conditionToPainless(filter, true)).join(' && ');
