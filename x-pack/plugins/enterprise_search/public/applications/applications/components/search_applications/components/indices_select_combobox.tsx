@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiHighlight,
+  EuiFormRow,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -36,12 +37,14 @@ export type IndicesSelectComboBoxProps = Omit<
 > & {
   'data-telemetry-id'?: string;
   ignoredOptions?: string[];
+  label?: string;
 };
 
 export const IndicesSelectComboBox = ({ ignoredOptions, ...props }: IndicesSelectComboBoxProps) => {
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
   const { makeRequest } = useActions(FetchIndicesForSearchApplicationsAPILogic);
   const { status, data } = useValues(FetchIndicesForSearchApplicationsAPILogic);
+  const isInvalid = Boolean(searchQuery && !props.selectedOptions?.length);
 
   useEffect(() => {
     makeRequest({ searchQuery });
@@ -85,7 +88,20 @@ export const IndicesSelectComboBox = ({ ignoredOptions, ...props }: IndicesSelec
     renderOption,
     ...props,
   };
-  return <EuiComboBox async {...defaultedProps} />;
+
+  return (
+    <EuiFormRow
+      label={props.label || null}
+      fullWidth={props.fullWidth}
+      isInvalid={isInvalid}
+      error={i18n.translate(
+        'xpack.enterpriseSearch.searchApplications.indicesSelectComboBox.error',
+        { defaultMessage: 'No indices match the entered value' }
+      )}
+    >
+      <EuiComboBox async isInvalid={isInvalid} {...defaultedProps} />
+    </EuiFormRow>
+  );
 };
 
 export const indexToOption = (
