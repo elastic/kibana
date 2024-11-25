@@ -35,6 +35,7 @@ processors:
       target_field: {% if value.target_field | startswith('@') %}"{{ value.target_field }}"{% else %}{{ value.target_field }}{% endif %}
       ignore_missing: true{% endif %}
   {% if key == 'date' %}
+  {% if not value.field | includes('.@') %} {# Leaving fields of type 'test.log.@timestamp' #}
   - script:
       description: Ensures the date processor does not receive an array value.
       tag: script_convert_array_to_string
@@ -43,7 +44,7 @@ processors:
         if (ctx.{% endraw %}{{ value.field.replaceAll('.', '?.') }}{% raw %} != null &&
             ctx.{% endraw %}{{ value.field }}{% raw %} instanceof ArrayList){
             ctx.{% endraw %}{{ value.field }}{% raw %} = ctx.{% endraw %}{{ value.field }}{% raw %}[0];
-        }{% endraw %}
+        }{% endraw %}{% endif %}
   - {{ key }}:
       field: {{ value.field }}
       target_field: {% if value.target_field | startswith('@') %}"{{ value.target_field }}"{% else %}{{ value.target_field }}{% endif %}
