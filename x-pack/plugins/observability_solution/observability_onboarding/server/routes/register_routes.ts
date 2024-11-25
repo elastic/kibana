@@ -17,10 +17,10 @@ import {
   passThroughValidationObject,
 } from '@kbn/server-route-repository';
 import * as t from 'io-ts';
+import { ObservabilityOnboardingConfig } from '..';
 import { EsLegacyConfigService } from '../services/es_legacy_config_service';
 import { ObservabilityOnboardingRequestHandlerContext } from '../types';
 import { ObservabilityOnboardingRouteHandlerResources } from './types';
-import { ObservabilityOnboardingConfig } from '../config';
 
 interface RegisterRoutes {
   core: CoreSetup;
