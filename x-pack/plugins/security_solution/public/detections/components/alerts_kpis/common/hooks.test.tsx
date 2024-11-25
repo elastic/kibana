@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
@@ -120,7 +120,7 @@ describe('hooks', () => {
       jest.clearAllMocks();
     });
     it('returns only aggregateable fields', () => {
-      const wrapper = ({ children }: { children: JSX.Element }) => (
+      const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
       );
       const { result, unmount } = renderHook(() => useStackByFields(), { wrapper });
@@ -137,7 +137,7 @@ describe('hooks', () => {
         browserFields: { base: mockBrowserFields.base },
       });
 
-      const wrapper = ({ children }: { children: JSX.Element }) => (
+      const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
       );
       const useLensCompatibleFields = true;
@@ -155,7 +155,7 @@ describe('hooks', () => {
         browserFields: { nestedField: mockBrowserFields.nestedField },
       });
 
-      const wrapper = ({ children }: { children: JSX.Element }) => (
+      const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
       );
       const useLensCompatibleFields = true;

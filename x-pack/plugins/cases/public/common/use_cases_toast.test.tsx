@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
 import { useKibana, useToasts } from './lib/kibana';
 import type { AppMockRenderer } from './mock';
 import { createAppMockRenderer, TestProviders } from './mock';
@@ -14,7 +13,7 @@ import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import type { SupportedCaseAttachment } from '../types';
-import { getByTestId, queryByTestId, screen } from '@testing-library/react';
+import { getByTestId, queryByTestId, screen, renderHook } from '@testing-library/react';
 import { OWNER_INFO } from '../../common/constants';
 import { useApplication } from './lib/kibana/use_application';
 
