@@ -17,7 +17,6 @@ main () {
   fi
 
   report_main_step "Bootstrapping Kibana"
-
   cd "$KIBANA_DIR"
   .buildkite/scripts/bootstrap.sh
 
