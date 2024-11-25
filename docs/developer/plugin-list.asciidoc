@@ -579,6 +579,10 @@ security and spaces filtering.
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager_app/README.md[entityManagerApp]
+|This plugin provides a user interface to interact with the Entity Manager.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
@@ -911,6 +915,10 @@ routes, etc.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/streams/README.md[streams]
 |This plugin provides an interface to manage streams
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/streams_app/README.md[streamsApp]
+|Home of the Streams app plugin, which allows users to manage Streams via the UI.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/synthetics/README.md[synthetics]
