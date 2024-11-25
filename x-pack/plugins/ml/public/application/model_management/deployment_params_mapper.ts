@@ -6,6 +6,7 @@
  */
 
 import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { pick } from 'lodash';
 import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
@@ -25,7 +26,7 @@ type VCPUBreakpoints = Record<
     max: number;
     /**
      * Static value is used for the number of vCPUs when the adaptive resources are disabled.
-     * Not allowed in certain environments.
+     * Not allowed in certain environments, Obs and Security serverless projects.
      */
     static?: number;
   }
@@ -89,6 +90,7 @@ export class DeploymentParamsMapper {
   ) {
     /**
      * Initial value can be different for serverless and ESS with autoscaling.
+     * Also not available with 0 ML active nodes.
      */
     const maxSingleMlNodeProcessors = this.mlServerLimits.max_single_ml_node_processors;
 
@@ -236,18 +238,27 @@ export class DeploymentParamsMapper {
         ? input.adaptive_allocations!.max_number_of_allocations!
         : input.number_of_allocations);
 
+    // The deployment can be created via API with a number of allocations that do not exactly match our vCPU ranges.
+    // In this case, we should find the closest vCPU range that does not exceed the max or static value of the range.
     const [vCPUUsage] = Object.entries(this.vCpuBreakpoints)
-      .reverse()
-      .find(([key, val]) => vCPUs >= val.min) as [
-      DeploymentParamsUI['vCPUUsage'],
-      { min: number; max: number }
-    ];
+      .filter((range) => {
+        const comparedRange = (adaptiveResources ? range[1].max : range[1].static) as number;
+        return vCPUs <= comparedRange;
+      })
+      .reduce((curr, prev) => {
+        const comparedRangePrev = (adaptiveResources ? prev[1].max : prev[1].static) as number;
+        const comparedRangeCurr = (adaptiveResources ? curr[1].max : curr[1].static) as number;
+
+        return Math.abs(vCPUs - comparedRangePrev) <= Math.abs(vCPUs - comparedRangeCurr)
+          ? prev
+          : curr;
+      }, Object.entries(pick(this.vCpuBreakpoints, 'high'))[0]);
 
     return {
       deploymentId: input.deployment_id,
       optimized,
       adaptiveResources,
-      vCPUUsage,
+      vCPUUsage: vCPUUsage as DeploymentParamsUI['vCPUUsage'],
     };
   }
 }
