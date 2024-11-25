@@ -55,6 +55,10 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
     },
     PlaygroundStartChatPage: {
+      async expectPlaygroundStartChatPageToBeLoaded() {
+        await testSubjects.existOrFail('setupPage');
+      },
+
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
