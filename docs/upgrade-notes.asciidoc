@@ -68,12 +68,13 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 `POST /api/alerts/alert/{alert_id}/alert_instance/{alert_instance_id}/_unmute` has been replaced by `POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute`
 `POST /api/alerts/alert/{id}/_mute_all` has been replaced by `POST /api/alerting/rule/{id}/_mute_all`
 `POST /api/alerts/alert/{id}/_unmute_all` has been replaced by `POST /api/alerting/rule/{id}/_unmute_all`
-`PUT /api/alerts/alert/{id}/_update_api_key` has been replaced by `POST /api/alerting/rule/{id}/_update_api_key`
+`POST /api/alerts/alert/{id}/_update_api_key` has been replaced by `POST /api/alerting/rule/{id}/_update_api_key`
 `GET /api/alerts/{id}/_instance_summary` has been deprecated without replacement
 `GET /api/alerts/{id}/state` has been deprecated without replacement
 
 *Impact* +
 Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
 *Action* +
 Remove references to `GET /api/alerts/{id}/_instance_summary` endpoint.
 Remove references to `GET /api/alerts/{id}/state` endpoint.
