@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -14,9 +14,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const from = '2024-06-10T14:00:00.000Z';
   const to = '2024-06-10T16:30:00.000Z';
 
-  describe('discover/observabilitySolution/context_awareness', function () {
-    this.tags(['esGate']);
-
+  describe('discover/observabilitySolution/context_awareness/telemetry', function () {
     before(async () => {
       await esArchiver.load('test/functional/fixtures/es_archiver/discover/context_awareness');
       await kibanaServer.importExport.load(
@@ -35,9 +33,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
-    loadTestFile(require.resolve('./_get_row_indicator_provider'));
-    loadTestFile(require.resolve('./_get_doc_viewer'));
-    loadTestFile(require.resolve('./_get_cell_renderers'));
-    loadTestFile(require.resolve('./_get_app_menu'));
+    loadTestFile(require.resolve('./_telemetry'));
   });
 }

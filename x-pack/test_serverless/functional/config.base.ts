@@ -41,10 +41,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
             'isUsingRuleCreateFlyout',
           ])}`,
-          `--plugin-path=${resolve(
-            __dirname,
-            '../../../test/analytics/plugins/analytics_ftr_helpers'
-          )}`,
           ...(options.kbnServerArgs ?? []),
         ],
       },
