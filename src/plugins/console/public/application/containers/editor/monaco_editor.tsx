@@ -36,10 +36,9 @@ export interface EditorProps {
   localStorageValue: string | undefined;
   value: string;
   setValue: (value: string) => void;
-  isEmbeddable?: boolean;
 }
 
-export const MonacoEditor = ({ localStorageValue, value, setValue, isEmbeddable }: EditorProps) => {
+export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
   const context = useServicesContext();
   const {
     services: { notifications, settings: settingsService, autocompleteInfo },
@@ -212,12 +211,11 @@ export const MonacoEditor = ({ localStorageValue, value, setValue, isEmbeddable 
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
-          // Make the quick-fix window be fixed to the window rather than clipped by
-          // the parent content set with overflow: hidden/auto
-          // TODO: This quick fix is a work around for the Monaco editor not being able to
-          // handle overflow: hidden/auto on the parent container when the container is
-          // being animated.
-          fixedOverflowWidgets: isEmbeddable ? false : true,
+          // Force the hover views to always render below the cursor to avoid clipping
+          // when the cursor is near the top of the editor.
+          hover: {
+            above: false,
+          },
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
