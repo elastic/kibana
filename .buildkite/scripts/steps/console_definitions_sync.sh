@@ -16,7 +16,10 @@ main () {
     exit 1
   fi
 
+  report_main_step "Bootstrapping Kibana"
+
   cd "$KIBANA_DIR"
+  .buildkite/scripts/bootstrap.sh
 
   report_main_step "Generating console definitions"
   node scripts/generate_console_definitions.js --source "$PARENT_DIR/elasticsearch-specification" --emptyDest
