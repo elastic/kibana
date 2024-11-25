@@ -50,7 +50,7 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 
 
 [discrete]
-[[breaking-201004]]
+[[breaking-201550]]
 .[Alerting] Legacy deprecations (9.0.0)
 [%collapsible]
 ====
