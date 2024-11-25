@@ -72,7 +72,7 @@ export const streamWithoutIdDefinitonSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        condition: conditionSchema,
+        condition: z.optional(conditionSchema),
       })
     )
     .default([]),
