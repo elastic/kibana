@@ -25,6 +25,7 @@ import {
   sendCreatePackagePolicy,
   sendBulkInstallPackages,
   sendGetPackagePolicies,
+  useMultipleAgentPolicies,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
@@ -152,6 +153,8 @@ export function useOnSubmit({
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
