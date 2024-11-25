@@ -163,6 +163,7 @@ pageLoadAssetSize:
   stackAlerts: 58316
   stackConnectors: 67227
   streams: 16742
+  streamsApp: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586

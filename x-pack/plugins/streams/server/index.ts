@@ -17,3 +17,5 @@ export const plugin = async (context: PluginInitializerContext<StreamsConfig>) =
   const { StreamsPlugin } = await import('./plugin');
   return new StreamsPlugin(context);
 };
+
+export type { ListStreamResponse } from './lib/streams/stream_crud';
