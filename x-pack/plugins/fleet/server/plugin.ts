@@ -143,6 +143,7 @@ import { registerFieldsMetadataExtractors } from './services/register_fields_met
 import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
+import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -619,6 +620,7 @@ export class FleetPlugin
     // Register task
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
+    registerBumpAgentPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
