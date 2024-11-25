@@ -17,6 +17,7 @@ interface UseRulePreviewFlyoutParams {
   rules: RuleResponse[];
   ruleActionsFactory: (rule: RuleResponse, closeRulePreview: () => void) => ReactNode;
   extraTabsFactory?: (rule: RuleResponse) => EuiTabbedContentTab[];
+  subHeaderFactory?: (rule: RuleResponse) => ReactNode;
   flyoutProps: RulePreviewFlyoutProps;
 }
 
@@ -38,10 +39,15 @@ export function useRulePreviewFlyout({
   rules,
   extraTabsFactory,
   ruleActionsFactory,
+  subHeaderFactory,
   flyoutProps,
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
   const closeRulePreview = useCallback(() => setRuleForPreview(undefined), []);
+  const subHeader = useMemo(
+    () => (rule ? subHeaderFactory?.(rule) : null),
+    [subHeaderFactory, rule]
+  );
   const ruleActions = useMemo(
     () => rule && ruleActionsFactory(rule, closeRulePreview),
     [rule, ruleActionsFactory, closeRulePreview]
@@ -61,6 +67,7 @@ export function useRulePreviewFlyout({
         closeFlyout={closeRulePreview}
         ruleActions={ruleActions}
         extraTabs={extraTabs}
+        subHeader={subHeader}
       />
     ),
     openRulePreview: useCallback(

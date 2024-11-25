@@ -25,7 +25,6 @@ import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logi
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
-import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type {
@@ -37,12 +36,14 @@ import { isNonUpgradeableFieldName } from '../../../../rule_management/model/pre
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
 import { MlJobUpgradeModal } from './modals/ml_job_upgrade_modal';
 import { UpgradeConflictsModal } from './modals/upgrade_conflicts_modal';
-import * as i18n from './translations';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
 import { useMlJobUpgradeModal, useUpgradeConflictsModal } from './use_upgrade_modals';
 import { RuleTypeChangeCallout } from './rule_type_change_callout';
+import { UpgradeFlyoutSubHeader } from './upgrade_flyout_subheader';
+import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
+import * as i18n from './translations';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
@@ -263,6 +264,13 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [isPrebuiltRulesCustomizationEnabled, upgradeRulesToResolved, upgradeRulesToTarget]
   );
 
+  const subHeaderFactory = useCallback(
+    (rule: RuleResponse) =>
+      rulesUpgradeState[rule.rule_id] ? (
+        <UpgradeFlyoutSubHeader ruleUpgradeState={rulesUpgradeState[rule.rule_id]} />
+      ) : null,
+    [rulesUpgradeState]
+  );
   const ruleActionsFactory = useCallback(
     (rule: RuleResponse, closeRulePreview: () => void) => {
       const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
@@ -369,6 +377,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   );
   const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
     rules: filteredRules,
+    subHeaderFactory,
     ruleActionsFactory,
     extraTabsFactory,
     flyoutProps: {
