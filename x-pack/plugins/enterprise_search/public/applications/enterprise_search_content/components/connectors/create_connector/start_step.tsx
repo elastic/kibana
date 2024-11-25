@@ -34,7 +34,7 @@ import { GeneratedConfigFields } from '../../connector_detail/components/generat
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
-import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
+import { ChooseConnector } from './components/choose_connector';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
 import { SelfManagePreference } from './create_connector';
@@ -104,7 +104,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Connector' }
                   )}
                 >
-                  <ChooseConnectorSelectable selfManaged={selfManagePreference} />
+                  <ChooseConnector selfManaged={selfManagePreference} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={5}>

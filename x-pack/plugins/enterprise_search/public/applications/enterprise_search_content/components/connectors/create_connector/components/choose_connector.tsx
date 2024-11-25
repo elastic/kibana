@@ -42,9 +42,7 @@ interface OptionData {
   secondaryContent?: string;
 }
 
-export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps> = ({
-  selfManaged,
-}) => {
+export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({ selfManaged }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedOption, setSelectedOption] = useState<Array<EuiComboBoxOptionOption<OptionData>>>(
     []
@@ -143,33 +141,31 @@ export const ChooseConnectorSelectable: React.FC<ChooseConnectorSelectableProps>
   }, [selfManaged]);
 
   return (
-    <EuiFlexItem>
-      <EuiComboBox
-        aria-label={i18n.translate(
-          'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
-          { defaultMessage: 'Select a data source for your connector to use.' }
-        )}
-        prepend={<EuiIcon type={selectedConnector?.iconPath ?? connectorLogo} size="l" />}
-        singleSelection
-        fullWidth
-        placeholder={i18n.translate(
-          'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.placeholder.text',
-          { defaultMessage: 'Choose a data source' }
-        )}
-        options={selectableOptions}
-        selectedOptions={selectedOption}
-        onChange={(selectedItem) => {
-          setSelectedOption(selectedItem);
-          if (selectedItem.length === 0) {
-            setSelectedConnector(null);
-            return;
-          }
-          const keySelected = Number(selectedItem[0].key);
-          setSelectedConnector(allConnectors[keySelected]);
-        }}
-        renderOption={renderOption}
-        rowHeight={(euiTheme.base / 2) * 5}
-      />
-    </EuiFlexItem>
+    <EuiComboBox
+      aria-label={i18n.translate(
+        'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
+        { defaultMessage: 'Select a data source for your connector to use.' }
+      )}
+      prepend={<EuiIcon type={selectedConnector?.iconPath ?? connectorLogo} size="l" />}
+      singleSelection
+      fullWidth
+      placeholder={i18n.translate(
+        'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.placeholder.text',
+        { defaultMessage: 'Choose a data source' }
+      )}
+      options={selectableOptions}
+      selectedOptions={selectedOption}
+      onChange={(selectedItem) => {
+        setSelectedOption(selectedItem);
+        if (selectedItem.length === 0) {
+          setSelectedConnector(null);
+          return;
+        }
+        const keySelected = Number(selectedItem[0].key);
+        setSelectedConnector(allConnectors[keySelected]);
+      }}
+      renderOption={renderOption}
+      rowHeight={(euiTheme.base / 2) * 5}
+    />
   );
 };
