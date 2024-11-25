@@ -1618,6 +1618,18 @@ The following security_linux and security_windows job configurations are updated
 ** v3_windows_rare_user_type10_remote_login
 ====
 
+// Setup
+
+[discrete]
+[[deprecation-macos-x8664]]
+.[Setup] New versions of Kibana for macOS x86_64 will end after 8.17.
+[%collapsible]
+====
+*Details* +
+New versions of Kibana builds for macOS x86_64 are deprecated and will no longer be released after 8.17.  Kibana for macOS AArch64 is unaffected. 
+
+Use Docker to run new versions of Kibana on macOS 86x_64.
+====
 
 // Sharing & Reporting
 
