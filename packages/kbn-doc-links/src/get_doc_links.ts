@@ -359,6 +359,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
+      restApis: `${KIBANA_DOCS}api.html`,
+      dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
@@ -430,6 +432,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingSimilarity: `${ELASTICSEARCH_DOCS}similarity.html`,
       mappingSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html`,
       mappingSourceFieldsDisable: `${ELASTICSEARCH_DOCS}mapping-source-field.html#disable-source-field`,
+      mappingSyntheticSourceFields: `${ELASTICSEARCH_DOCS}mapping-source-field.html#synthetic-source`,
       mappingStore: `${ELASTICSEARCH_DOCS}mapping-store.html`,
       mappingSubobjects: `${ELASTICSEARCH_DOCS}subobjects.html`,
       mappingTermVector: `${ELASTICSEARCH_DOCS}term-vector.html`,
@@ -472,6 +475,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
       avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-av-comparatives-business-security-test`,
+      bidirectionalIntegrations: `${SECURITY_SOLUTION_DOCS}third-party-actions.html`,
       trustedApps: `${SECURITY_SOLUTION_DOCS}trusted-apps-ov.html`,
       eventFilters: `${SECURITY_SOLUTION_DOCS}event-filters.html`,
       blocklist: `${SECURITY_SOLUTION_DOCS}blocklist.html`,
@@ -718,6 +722,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+      deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
@@ -999,6 +1004,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       retrieval: `${KIBANA_DOCS}playground-query.html`,
       context: `${KIBANA_DOCS}playground-context.html`,
       hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
+    },
+    inferenceManagement: {
+      inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
     },
   });
 };

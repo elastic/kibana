@@ -215,5 +215,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
       });
     });
+
+    it('should show actions menu when the first line of the request is not in the viewport', async () => {
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText(`PUT _ingest/pipeline/testme
+        {
+          "processors": [
+            {
+              "inference": {
+                "model_id": "azure_openai_embeddings",
+                "input_output": {
+                  "input_field": "body_content",
+                  "output_field": "body_content_vector"
+                },
+                "if": "ctx?.body_content!=null",
+                "ignore_failure": true,
+                 "on_failure": [
+                  {
+                    "append": {
+                      "field": "_source._ingest.inference_errors",
+                      "allow_duplicates": false,
+                      "value": [
+                        {
+                          "message": "...",
+                          "pipeline": "ml-inference-search-edf-azureopenai-embeddings",
+                          "timestamp": "{{{ _ingest.timestamp }}}"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+      }`);
+
+      // Reduce the height of the browser window so that the first line of the request is not in the viewport
+      await browser.setWindowSize(1300, 500);
+      expect(await PageObjects.console.isPlayButtonVisible()).to.be(true);
+
+      // Reset it back to the original height
+      await browser.setWindowSize(1300, 1100);
+    });
+
+    it('Shows OK when status code is 200 but body is empty', async () => {
+      await PageObjects.console.clearEditorText();
+
+      // This request will return 200 but with an empty body
+      await PageObjects.console.enterText(
+        'POST /_cluster/voting_config_exclusions?node_names=node'
+      );
+      await PageObjects.console.clickPlay();
+
+      await retry.try(async () => {
+        const actualResponse = await PageObjects.console.getOutputText();
+        log.debug(actualResponse);
+        expect(actualResponse).to.contain('OK');
+      });
+    });
   });
 }

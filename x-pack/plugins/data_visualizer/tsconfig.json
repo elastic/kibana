@@ -76,7 +76,6 @@
     "@kbn/ml-time-buckets",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme",
     "@kbn/presentation-publishing",
     "@kbn/shared-ux-utility",
     "@kbn/search-types",

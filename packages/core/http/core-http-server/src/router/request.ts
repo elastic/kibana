@@ -48,9 +48,11 @@ export interface KibanaRequestState extends RequestApplicationState {
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
  */
-export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
+export type KibanaRequestRouteOptions<Method extends RouteMethod> = (Method extends
+  | 'get'
+  | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>;
+  : Required<RouteConfigOptions<Method>>) & { security?: RouteSecurity };
 
 /**
  * Request specific route information exposed to a handler.
