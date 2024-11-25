@@ -16,8 +16,7 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
-import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
+import React, { useCallback } from 'react';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
@@ -27,23 +26,16 @@ import { PIPELINE_URL } from '../../../../constants';
 interface UsageProps {
   usageItem: InferenceUsageInfo;
 }
-export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
+export const PipelineItem: React.FC<UsageProps> = ({ usageItem }) => {
   const {
     services: { application },
   } = useKibana();
-  const handleNavigateToIndex = () => {
-    if (usageItem.type === 'Index') {
-      application?.navigateToApp(ENTERPRISE_SEARCH_CONTENT_APP_ID, {
-        path: `search_indices/${usageItem.id}`,
-        openInNewTab: true,
-      });
-    } else if (usageItem.type === 'Pipeline') {
-      application?.navigateToApp(MANAGEMENT_APP_ID, {
-        path: `${PIPELINE_URL}?pipeline=${usageItem.id}`,
-        openInNewTab: true,
-      });
-    }
-  };
+  const navigateToPipeline = useCallback(() => {
+    application?.navigateToApp(MANAGEMENT_APP_ID, {
+      path: `${PIPELINE_URL}?pipeline=${usageItem.id}`,
+      openInNewTab: true,
+    });
+  }, [application, usageItem.id]);
 
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="usageItem">
@@ -62,7 +54,7 @@ export const UsageItem: React.FC<UsageProps> = ({ usageItem }) => {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="navigateToIndexPage" onClick={handleNavigateToIndex}>
+            <EuiLink data-test-subj="navigateToPipelinePage" onClick={navigateToPipeline}>
               <EuiIcon size="s" type="popout" />
             </EuiLink>
           </EuiFlexItem>
