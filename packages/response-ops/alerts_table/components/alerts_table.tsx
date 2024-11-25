@@ -52,13 +52,12 @@ import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/cons
 import { queryKeys } from '../constants';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { EmptyState } from './empty_state';
-import { RowSelectionState } from '../types';
+import { RenderContext, RowSelectionState } from '../types';
 import {
   AdditionalContext,
   AlertsDataGridProps,
   AlertsTableImperativeApi,
   AlertsTableProps,
-  RenderContext,
 } from '../types';
 import {
   ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
@@ -476,6 +475,8 @@ const AlertsTableContent = typedForwardRef(
           fieldFormats,
           http,
           application,
+          notifications,
+          casesService,
           openAlertInFlyout,
 
           bulkActionsStore,
@@ -510,6 +511,8 @@ const AlertsTableContent = typedForwardRef(
         fieldFormats,
         http,
         application,
+        notifications,
+        casesService,
         openAlertInFlyout,
         bulkActionsStore,
         renderCellValue,

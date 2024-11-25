@@ -11,6 +11,8 @@ import React from 'react';
 import { DefaultAlertActions } from './default_alert_actions';
 import { render, screen } from '@testing-library/react';
 import type { AlertActionsProps } from '../types';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query', () => ({
   useLoadRuleTypesQuery: jest.fn(),
@@ -43,7 +45,15 @@ jest.mock('./mark_as_untracked_alert_action', () => {
 const { useLoadRuleTypesQuery } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query'
 );
-const props = { alert: {}, refresh: jest.fn() } as unknown as AlertActionsProps;
+
+const http = httpServiceMock.createStartContract();
+const notifications = notificationServiceMock.createStartContract();
+const props = {
+  alert: {},
+  refresh: jest.fn(),
+  http,
+  notifications,
+} as unknown as AlertActionsProps;
 
 describe('DefaultAlertActions component', () => {
   it('should show "Mute" and "Marked as untracked" option', async () => {

@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/types/tanstack_query_utility_types';
 import { ServerError } from '@kbn/response-ops-alerts-apis/types';
 import type { HttpStart } from '@kbn/core-http-browser';

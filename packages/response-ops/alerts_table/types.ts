@@ -14,8 +14,8 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   type ValidFeatureId,
 } from '@kbn/rule-data-utils';
-import { HttpStart } from '@kbn/core-http-browser';
-import React, {
+import type { HttpStart } from '@kbn/core-http-browser';
+import type {
   ComponentClass,
   ComponentProps,
   ComponentType,
@@ -23,13 +23,11 @@ import React, {
   Key,
   MutableRefObject,
   ReactNode,
-  ReducerAction,
-  ReducerState,
   RefAttributes,
   SetStateAction,
 } from 'react';
-import { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
-import {
+import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
   EuiDataGridControlColumn,
@@ -39,24 +37,23 @@ import {
   EuiDataGridSorting,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import {
-  type MappingRuntimeFields,
+import type {
+  MappingRuntimeFields,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BrowserFields } from '@kbn/alerting-types';
-import { SetRequired } from 'type-fest';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SetRequired } from 'type-fest';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Alert } from '@kbn/alerting-types';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
-import { NotificationsStart } from '@kbn/core-notifications-browser';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ApplicationStart } from '@kbn/core-application-browser';
-import { Case } from './hooks/apis/bulk_get_cases';
-import type { bulkActionsReducer } from './reducers/bulk_actions_reducer';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { Case } from './hooks/apis/bulk_get_cases';
 
 export interface Consumer {
   id: AlertConsumers;
@@ -102,19 +99,9 @@ export interface CasesService {
     useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
-    groupAlertsByRule: (items?: any[]) => any[];
-    canUseCases: (owners: string[]) => Record<string, unknown>;
+    groupAlertsByRule: (items: any[]) => any[];
+    canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
   };
-}
-
-export interface AlertsTableContextType {
-  mutedAlerts: MutedAlerts;
-  bulkActions: [
-    ReducerState<typeof bulkActionsReducer>,
-    Dispatch<ReducerAction<typeof bulkActionsReducer>>
-  ];
-  resolveRulePagePath?: (ruleId: string) => string;
-  resolveAlertPagePath?: (alertId: string) => string;
 }
 
 type MergeProps<T, AP> = T extends (args: infer Props) => unknown
@@ -198,8 +185,8 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
 /**
  * A utility type to extract the type of a prop from `AlertsTableProps`, excluding `undefined`.
  */
-export type GetAlertsTableProp<Key extends keyof AlertsTableProps> = NonNullable<
-  AlertsTableProps[Key]
+export type GetAlertsTableProp<PropKey extends keyof AlertsTableProps> = NonNullable<
+  AlertsTableProps[PropKey]
 >;
 
 export interface AlertsTableImperativeApi {
@@ -210,31 +197,22 @@ export interface AlertsTableImperativeApi {
 export type AlertsTablePropsWithRef<AC extends AdditionalContext> = AlertsTableProps<AC> &
   RefAttributes<AlertsTableImperativeApi>;
 
-export type FlyoutSectionRenderer<AC extends AdditionalContext = AdditionalContext> =
-  ComponentRenderer<
-    AC & {
-      alert: Alert;
-      flyoutIndex: number;
-      isLoading: boolean;
-      onClose: () => void;
-      onPaginate: (pageIndex: number) => void;
-    }
-  >;
+export type FlyoutSectionProps<AC extends AdditionalContext = AdditionalContext> =
+  RenderContext<AC> & {
+    alert: Alert;
+    flyoutIndex: number;
+    isLoading: boolean;
+    onClose: () => void;
+    onPaginate: (pageIndex: number) => void;
+  };
 
-export interface BaseRenderContext
-  extends SetRequired<
-    Pick<
-      AlertsTableProps,
-      | 'columns'
-      | 'renderCellValue'
-      | 'renderCellPopover'
-      | 'renderActionsCell'
-      | 'renderFlyoutHeader'
-      | 'renderFlyoutBody'
-      | 'renderFlyoutFooter'
-    >,
-    'columns'
-  > {
+export type FlyoutSectionRenderer<AC extends AdditionalContext = AdditionalContext> = ComponentType<
+  FlyoutSectionProps<AC>
+>;
+
+export type AdditionalContext = object;
+
+export type RenderContext<AC extends AdditionalContext> = {
   tableId?: string;
   dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
 
@@ -273,21 +251,30 @@ export interface BaseRenderContext
   pageIndex: number;
   pageSize: number;
 
-  casesService: CasesService;
-  fieldFormats: FieldFormatsStart;
   http: HttpStart;
+  fieldFormats: FieldFormatsStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  casesService?: CasesService;
   openAlertInFlyout: (alertId: string) => void;
 
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
-}
-
-export type AdditionalContext = object;
-
-export type RenderContext<AC extends AdditionalContext> = BaseRenderContext & AC;
+} & SetRequired<
+  Pick<
+    AlertsTableProps<AC>,
+    | 'columns'
+    | 'renderCellValue'
+    | 'renderCellPopover'
+    | 'renderActionsCell'
+    | 'renderFlyoutHeader'
+    | 'renderFlyoutBody'
+    | 'renderFlyoutFooter'
+  >,
+  'columns'
+> &
+  AC;
 
 export type ComponentRenderer<AC extends AdditionalContext> = ComponentType<RenderContext<AC>>;
 
@@ -318,7 +305,7 @@ export interface PublicAlertsDataGridProps
   showInspectButton?: boolean;
   casesConfiguration?: {
     featureId: string;
-    owner: string[];
+    owner: Parameters<CasesService['helpers']['canUseCases']>[0];
     appId?: string;
     syncAlerts?: boolean;
   };
@@ -450,11 +437,6 @@ export interface BulkActionsState {
   rowCount: number;
   updatedAt: number;
 }
-
-export type AlertTableFlyoutComponent =
-  | React.FunctionComponent<AlertsTableFlyoutBaseProps>
-  | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
-  | null;
 
 export interface AlertsTableFlyoutBaseProps {
   alert: Alert;

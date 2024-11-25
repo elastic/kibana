@@ -12,17 +12,17 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { ALERT_CASE_IDS, isSiemRuleType } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
-import {
+import type {
   BulkActionsConfig,
   BulkActionsPanelConfig,
   BulkActionsState,
-  BulkActionsVerbs,
   BulkActionsReducerAction,
   TimelineItem,
 } from '../types';
-import { CasesService, PublicAlertsDataGridProps } from '../types';
+import { BulkActionsVerbs } from '../types';
+import type { CasesService, PublicAlertsDataGridProps } from '../types';
 import {
   ADD_TO_EXISTING_CASE,
   ADD_TO_NEW_CASE,
