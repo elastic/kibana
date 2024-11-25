@@ -6,7 +6,7 @@
  */
 
 import { alertComment } from '../../../containers/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
@@ -47,12 +47,11 @@ describe('use cases add to new case flyout hook', () => {
   });
 
   it('should throw if called outside of a cases context', () => {
-    const { result } = renderHook(() => {
-      useCasesAddToNewCaseFlyout();
-    });
-    expect(result.error?.message).toContain(
-      'useCasesContext must be used within a CasesProvider and have a defined value'
-    );
+    expect(() =>
+      renderHook(() => {
+        useCasesAddToNewCaseFlyout();
+      })
+    ).toThrow(/useCasesContext must be used within a CasesProvider and have a defined value/);
   });
 
   it('should dispatch the open action when invoked without attachments', () => {
