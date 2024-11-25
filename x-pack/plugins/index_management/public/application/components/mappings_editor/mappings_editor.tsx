@@ -9,7 +9,6 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
-import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { useAppContext } from '../../app_context';
 import { IndexMode } from '../../../../common/types/data_streams';
 import {
@@ -61,9 +60,7 @@ export interface Props {
 
 export const MappingsEditor = React.memo(
   ({ onChange, value, docLinks, indexSettings, esNodesPlugins, indexMode }: Props) => {
-    const {
-      plugins: { licensing },
-    } = useAppContext();
+    const { canUseSyntheticSource } = useAppContext();
     const { parsedDefaultValue, multipleMappingsDeclared } = useMemo<MappingsEditorParsedMetadata>(
       () => parseMappings(value),
       [value]
@@ -128,39 +125,22 @@ export const MappingsEditor = React.memo(
       [dispatch]
     );
 
-    const [isLicenseCheckComplete, setIsLicenseCheckComplete] = useState(false);
-    useEffect(() => {
-      const subscription = licensing?.license$.subscribe((license: ILicense) => {
-        dispatch({
-          type: 'hasEnterpriseLicense.update',
-          value: license.isActive && license.hasAtLeast('enterprise'),
-        });
-        setIsLicenseCheckComplete(true);
-      });
-
-      return () => subscription?.unsubscribe();
-    }, [dispatch, licensing]);
-
     useEffect(() => {
       if (
-        isLicenseCheckComplete &&
         !state.configuration.defaultValue._source &&
         (indexMode === LOGSDB_INDEX_MODE || indexMode === TIME_SERIES_MODE)
       ) {
-        if (state.hasEnterpriseLicense) {
+        if (canUseSyntheticSource) {
+          // If the source field is undefined (hasn't been set in the form)
+          // and if the user has selected a `logsdb` or `time_series` index mode in the Logistics step,
+          // update the form data with synthetic _source
           dispatch({
             type: 'configuration.save',
             value: { ...state.configuration.defaultValue, _source: { mode: 'synthetic' } } as any,
           });
         }
       }
-    }, [
-      indexMode,
-      dispatch,
-      state.configuration,
-      state.hasEnterpriseLicense,
-      isLicenseCheckComplete,
-    ]);
+    }, [indexMode, dispatch, state.configuration, canUseSyntheticSource]);
 
     const tabToContentMap = {
       fields: (

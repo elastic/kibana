@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { badRequest, internal, notFound } from '@hapi/boom';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -19,18 +20,15 @@ import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id'
 import { isChildOf } from '../../lib/streams/helpers/hierarchy';
 
 export const forkStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/_fork 2023-10-31',
+  endpoint: 'POST /api/streams/{id}/_fork',
   options: {
-    access: 'public',
-    availability: {
-      stability: 'experimental',
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-      },
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   params: z.object({
@@ -39,7 +37,12 @@ export const forkStreamsRoute = createServerRoute({
     }),
     body: z.object({ stream: streamDefinitonWithoutChildrenSchema, condition: conditionSchema }),
   }),
-  handler: async ({ response, params, logger, request, getScopedClients }) => {
+  handler: async ({
+    params,
+    logger,
+    request,
+    getScopedClients,
+  }): Promise<{ acknowledged: true }> => {
     try {
       if (!params.body.condition) {
         throw new ForkConditionMissing('You must provide a condition to fork a stream');
@@ -92,10 +95,10 @@ export const forkStreamsRoute = createServerRoute({
         logger,
       });
 
-      return response.ok({ body: { acknowledged: true } });
+      return { acknowledged: true };
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {
-        return response.notFound({ body: e });
+        throw notFound(e);
       }
 
       if (
@@ -103,10 +106,10 @@ export const forkStreamsRoute = createServerRoute({
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId
       ) {
-        return response.customError({ body: e, statusCode: 400 });
+        throw badRequest(e);
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });
