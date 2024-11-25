@@ -504,6 +504,7 @@ describe('createRuleRoute', () => {
       licenseState,
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
+      docLinks,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -611,7 +612,7 @@ describe('createRuleRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects });
+    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
 
     const [, handler] = router.post.mock.calls[0];
 
