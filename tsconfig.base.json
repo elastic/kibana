@@ -756,6 +756,8 @@
       "@kbn/default-nav-management/*": ["packages/default-nav/management/*"],
       "@kbn/default-nav-ml": ["packages/default-nav/ml"],
       "@kbn/default-nav-ml/*": ["packages/default-nav/ml/*"],
+      "@kbn/dependency-usage": ["packages/kbn-dependency-usage"],
+      "@kbn/dependency-usage/*": ["packages/kbn-dependency-usage/*"],
       "@kbn/dev-cli-errors": ["packages/kbn-dev-cli-errors"],
       "@kbn/dev-cli-errors/*": ["packages/kbn-dev-cli-errors/*"],
       "@kbn/dev-cli-runner": ["packages/kbn-dev-cli-runner"],
