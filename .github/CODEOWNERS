@@ -1941,7 +1941,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/fixtures/kbn_archiver/rollup @elastic/kibana-management # Assigned per only uses are in management tests
 /test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management # Assigned per only uses are in management tests
 /test/functional/fixtures/es_archiver/makelogs @elastic/kibana-management # Assigned per only uses are in management tests
-/test/api_integration/fixtures/kbn_archiver/management @elastic/kibana-management
 /x-pack/test/functional/services/ace_editor.js @elastic/kibana-management
 /x-pack/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/test/stack_functional_integration/apps/ccs @elastic/kibana-management
