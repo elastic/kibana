@@ -133,5 +133,9 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
+    "@kbn/core-http-server-utils",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-security-server",
   ]
 }

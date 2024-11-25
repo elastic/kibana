@@ -9,7 +9,7 @@
 
 import React, { ReactElement } from 'react';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { act, renderHook, WrapperComponent } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -121,9 +121,7 @@ describe('useDiscoverHistogram', () => {
       hideChart,
     };
 
-    const Wrapper: WrapperComponent<React.PropsWithChildren<UseDiscoverHistogramProps>> = ({
-      children,
-    }) => (
+    const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <DiscoverMainProvider value={stateContainer}>{children as ReactElement}</DiscoverMainProvider>
     );
 
