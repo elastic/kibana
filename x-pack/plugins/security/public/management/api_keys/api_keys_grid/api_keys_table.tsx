@@ -230,7 +230,7 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
           color: 'danger',
           onClick: (item) => onDelete([item]),
           available: deletable,
-          'data-test-subj': 'apiKeysTableDeleteAction',
+          'data-test-subj': (item) => `apiKeysTableDeleteAction-${item.name}`,
         },
       ],
     });
