@@ -28,7 +28,8 @@ export const CreateIntegrationAssistant = React.memo(() => {
 
   const celInputStepIndex = isGenerateCelEnabled && state.hasCelInput ? 5 : null;
   const celReviewStepIndex = isGenerateCelEnabled && state.celInputResult ? 6 : null;
-  const deployStepIndex = isGenerateCelEnabled && state.hasCelInput ? 7 : 5;
+  const deployStepIndex =
+    celInputStepIndex !== null || celReviewStepIndex !== null || state.step === 7 ? 7 : 5;
 
   const telemetry = useTelemetry();
   useEffect(() => {

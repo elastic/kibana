@@ -40,26 +40,26 @@ const AnalyzeCelButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerati
 AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
 
 interface FooterProps {
-  isGenerating: State['isGenerating'];
-  isAnalyzeStep: boolean;
-  isAnalyzeCelStep: boolean;
-  isLastStep: boolean;
-  isNextStepEnabled: boolean;
-  isNextAddingToElastic: boolean;
-  onBack: () => void;
-  onNext: () => void;
+  isGenerating?: State['isGenerating'];
+  isAnalyzeStep?: boolean;
+  isAnalyzeCelStep?: boolean;
+  isLastStep?: boolean;
+  isNextStepEnabled?: boolean;
+  isNextAddingToElastic?: boolean;
+  onBack?: () => void;
+  onNext?: () => void;
 }
 
 export const Footer = React.memo<FooterProps>(
   ({
-    isGenerating,
-    isAnalyzeStep,
-    isAnalyzeCelStep,
-    isLastStep,
-    isNextStepEnabled,
-    isNextAddingToElastic,
-    onBack,
-    onNext,
+    isGenerating = false,
+    isAnalyzeStep = false,
+    isAnalyzeCelStep = false,
+    isLastStep = false,
+    isNextStepEnabled = false,
+    isNextAddingToElastic = false,
+    onBack = () => {},
+    onNext = () => {},
   }) => {
     const nextButtonText = useMemo(
       () =>
