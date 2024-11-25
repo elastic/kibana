@@ -13,8 +13,19 @@ import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/rule-data-utils';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
+import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
+import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
+import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
+import { afterAll } from '@elastic/synthetics';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
   AlertsDataGridProps,
   AlertsTableProps,
@@ -27,25 +38,12 @@ import { AlertsDataGrid } from './alerts_data_grid';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getCasesMock, createCasesServiceMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMock } from '../mocks/maintenance_windows.mock';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
-import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { bulkGetCases } from '../hooks/apis/bulk_get_cases';
 import { bulkGetMaintenanceWindows } from '../hooks/apis/bulk_get_maintenance_windows';
-import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useLicense } from '../hooks/use_license';
-import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { getJsDomPerformanceFix } from '../test_utils';
-import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { afterAll } from '@elastic/synthetics';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 type BaseAlertsTableProps = AlertsTableProps;
-
-jest.mock('@kbn/kibana-utils-plugin/public');
 
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
@@ -236,12 +234,6 @@ const applicationMock = applicationServiceMock.createStartContract();
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
 const mockCaseService = createCasesServiceMock();
 
-// Storage mock
-const mockStorage = Storage as jest.Mock;
-mockStorage.mockImplementation(() => {
-  return { get: jest.fn(), set: jest.fn() };
-});
-
 const { fix, cleanup } = getJsDomPerformanceFix();
 
 beforeAll(() => {
@@ -262,6 +254,15 @@ const TestComponent: FunctionComponent<BaseAlertsTableProps> = (props) => (
 );
 
 describe('AlertsTable', () => {
+  // Storage mock
+  const mockStorageGet = jest.fn();
+  jest.mock('../utils/storage', () => ({
+    Storage: jest.fn().mockReturnValue({
+      get: mockStorageGet,
+      set: jest.fn(),
+    }),
+  }));
+
   const tableProps: BaseAlertsTableProps = {
     id: 'test-alerts-table',
     ruleTypeIds: ['logs'],
@@ -311,6 +312,7 @@ describe('AlertsTable', () => {
       fieldFormats: fieldFormatsMock,
       licensing: licensingMock.createStart(),
       notifications: notificationServiceMock.createStartContract(),
+      settings: settingsServiceMock.createStartContract(),
     },
   };
 
@@ -775,23 +777,18 @@ describe('AlertsTable', () => {
     });
 
     it('should restore a default element that has been removed previously', async () => {
-      mockStorage.mockClear();
-      mockStorage.mockImplementation(() => ({
-        get: () => {
-          return {
-            columns: [{ displayAsText: 'Reason', id: AlertsField.reason, schema: undefined }],
-            sort: [
-              {
-                [AlertsField.reason]: {
-                  order: 'asc',
-                },
-              },
-            ],
-            visibleColumns: [AlertsField.reason],
-          };
-        },
-        set: jest.fn(),
-      }));
+      mockStorageGet.mockClear();
+      mockStorageGet.mockReturnValue({
+        columns: [{ displayAsText: 'Reason', id: AlertsField.reason, schema: undefined }],
+        sort: [
+          {
+            [AlertsField.reason]: {
+              order: 'asc',
+            },
+          },
+        ],
+        visibleColumns: [AlertsField.reason],
+      });
 
       render(<TestComponent {...tableProps} />);
 

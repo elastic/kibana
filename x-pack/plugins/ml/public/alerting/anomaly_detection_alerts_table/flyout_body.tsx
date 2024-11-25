@@ -15,7 +15,7 @@ import { getAlertFormatters } from './render_cell_value';
 export const AlertsTableFlyoutBody: GetAlertsTableProp<'renderFlyoutBody'> = ({
   alert,
   columns,
-  fieldFormats,
+  services: { fieldFormats },
 }) => {
   const formatter = getAlertFormatters(fieldFormats);
   return (

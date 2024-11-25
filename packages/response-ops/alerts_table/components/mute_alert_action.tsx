@@ -21,7 +21,7 @@ import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
  * Alerts table row action to mute/unmute the selected alert
  */
 export const MuteAlertAction = memo(
-  ({ alert, refresh, onActionExecuted, http, notifications }: AlertActionsProps) => {
+  ({ alert, refresh, onActionExecuted, services: { http, notifications } }: AlertActionsProps) => {
     const { isMuted, ruleId, rule, alertInstanceId } = useAlertMutedState(alert);
     const { mutateAsync: muteAlert } = useMuteAlertInstanceMutation({ http, notifications });
     const { mutateAsync: unmuteAlert } = useUnmuteAlertInstanceMutation({ http, notifications });

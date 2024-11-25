@@ -57,7 +57,7 @@ import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from '../translations';
 import { useGetToolbarVisibility } from '../hooks/toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
 import { SystemCell, systemCells } from './system_cell';
-import { typedMemo } from '../utils';
+import { typedMemo } from '../utils/react';
 import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout';
 import { ErrorBoundary } from './error_boundary';
 
@@ -321,10 +321,7 @@ export const AlertsDataGrid = typedMemo(
       refresh: refreshQueries,
       columns,
       dataGridRef,
-      http,
-      notifications,
-      application,
-      casesService,
+      services: { http, notifications, application, cases: casesService, settings },
     } = renderContext;
 
     const { colorMode } = useEuiTheme();
@@ -397,6 +394,7 @@ export const AlertsDataGrid = typedMemo(
         alertsQuerySnapshot,
         showInspectButton,
         toolbarVisibilityProp,
+        settings,
       };
     }, [
       bulkActions,
@@ -416,6 +414,7 @@ export const AlertsDataGrid = typedMemo(
       alertsQuerySnapshot,
       showInspectButton,
       toolbarVisibilityProp,
+      settings,
     ]);
 
     const toolbarVisibility = useGetToolbarVisibility(toolbarVisibilityArgs);
