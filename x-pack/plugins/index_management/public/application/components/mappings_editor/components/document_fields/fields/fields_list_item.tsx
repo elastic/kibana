@@ -19,7 +19,11 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, NormalizedFields, State } from '../../../types';
 import { getTypeLabelFromField } from '../../../lib';
-import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
+import {
+  CHILD_FIELD_INDENT_SIZE,
+  ELSER_PRECONFIGURED_ENDPOINTS,
+  LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER,
+} from '../../../constants';
 
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
@@ -105,6 +109,7 @@ function FieldListItemComponent(
   const indent = treeDepth * CHILD_FIELD_INDENT_SIZE - substractIndentAmount;
 
   const isSemanticText = source.type === 'semantic_text';
+  const inferenceId: string = (source.inference_id as string) ?? ELSER_PRECONFIGURED_ENDPOINTS;
 
   const indentCreateField =
     (treeDepth + 1) * CHILD_FIELD_INDENT_SIZE +
@@ -293,7 +298,7 @@ function FieldListItemComponent(
 
             {isSemanticText && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{source.inference_id as string}</EuiBadge>
+                <EuiBadge color="hollow">{inferenceId}</EuiBadge>
               </EuiFlexItem>
             )}
 
