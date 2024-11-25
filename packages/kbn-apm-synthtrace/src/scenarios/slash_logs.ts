@@ -30,9 +30,7 @@ const LINUX_PROCESSES = ['cron', 'sshd', 'systemd', 'nginx', 'apache2'];
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const constructCommonMetadata = () => ({
-    agent: {
-      name: getAgentName(),
-    },
+    'agent.name': getAgentName(),
     'cloud.provider': getCloudProvider(),
     'cloud.region': getCloudRegion(Math.floor(Math.random() * 3)),
     'cloud.availability_zone': `${getCloudRegion(0)}a`,

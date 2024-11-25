@@ -13,7 +13,6 @@ import { Router as ReactRouter } from '@kbn/shared-ux-router';
 
 import { RouteMap, Router } from './types';
 import { RouterContextProvider } from './use_router';
-import { BreadcrumbsContextProvider } from './breadcrumbs/context';
 
 export function RouterProvider({
   children,
@@ -26,9 +25,7 @@ export function RouterProvider({
 }) {
   return (
     <ReactRouter history={history}>
-      <RouterContextProvider router={router}>
-        <BreadcrumbsContextProvider>{children}</BreadcrumbsContextProvider>
-      </RouterContextProvider>
+      <RouterContextProvider router={router}>{children}</RouterContextProvider>
     </ReactRouter>
   );
 }

@@ -155,7 +155,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           },
           security,
           validate: validationObject,
-          security: options.security,
         },
         wrappedHandler
       );
