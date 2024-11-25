@@ -114,6 +114,7 @@ export const useGridLayoutState = ({
 
   const { ref: setDimensionsRef } = useResizeObserver<HTMLDivElement>({
     onResize: (dimensions) => {
+      console.log('on resize', dimensions);
       gridLayoutStateManager.gridDimensions$.next(dimensions);
     },
   });

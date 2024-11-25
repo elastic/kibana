@@ -12,7 +12,7 @@ import 'react-resizable/css/styles.css';
 
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
@@ -35,6 +35,7 @@ import { DashboardGridItem } from './dashboard_grid_item';
 export const DashboardGrid = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
+  const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const animatePanelTransforms = useStateFromPublishingSubject(
     dashboardInternalApi.animatePanelTransforms$
@@ -112,9 +113,14 @@ export const DashboardGrid = () => {
       const currentPanels = dashboardApi.panels$.getValue();
       if (!currentPanels[id]) return;
 
+      if (!panelRefs.current[id]) {
+        panelRefs.current[id] = React.createRef();
+      }
+
       const type = currentPanels[id].type;
       return (
         <DashboardGridItem
+          ref={panelRefs.current[id]}
           data-grid={currentPanels[id].gridData}
           key={id}
           id={id}
