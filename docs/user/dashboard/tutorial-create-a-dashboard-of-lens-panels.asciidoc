@@ -1,5 +1,5 @@
 [[create-a-dashboard-of-panels-with-web-server-data]]
-== Create your first dashboard
+== Create a simple dashboard to monitor website logs
 
 Learn the most common ways to create a dashboard from your own data.
 The tutorial will use sample data from the perspective of an analyst looking
@@ -18,15 +18,9 @@ Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 Add the sample web logs data, and create and set up the dashboard.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the web logs sample data set>>.
 
-. Click *Other sample data sets*. 
-
-. On the *Sample web logs* card, click *Add data*.
-
-Create the dashboard where you'll display the visualization panels.
-
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboards*.
 
 . Click *Create dashboard*.
 
@@ -57,7 +51,10 @@ To create the visualizations in this tutorial, you'll use the following fields:
 
 * *referer.keyword*
 
-To see the most frequent values in a field, hover over the field name, then click *i*.
+Click a field name to view more details, such as its top values and distribution.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt25c7a05e0f5daaa3/671966b9b1d3dd705a2ae650/tutorial-field-more-info.gif[Clicking a field name to view more details]
 
 [discrete]
 [[view-the-number-of-website-visitors]]
@@ -70,12 +67,12 @@ The only number function that you can use with *clientip* is *Unique count*, als
 . Open the *Visualization type* dropdown, then select *Metric*.
 +
 [role="screenshot"]
-image::images/lens_visualizationTypeDropdown_8.4.0.png[Visualization type dropdown]
+image::images/visualization-type-dropdown-8.16.0.png[Visualization type dropdown]
 
 . From the *Available fields* list, drag *clientip* to the workspace or layer pane.
 +
 [role="screenshot"]
-image::images/lens_metricUniqueCountOfClientip_8.4.0.png[Metric visualization of the clientip field]
+image::images/tutorial-unique-count-of-client-ip-8.16.0.png[Metric visualization of the clientip field]
 +
 In the layer pane, *Unique count of clientip* appears because the editor automatically applies the *Unique count* function to the *clientip* field. *Unique count* is the only numeric function that works with IP addresses.
 
@@ -130,20 +127,20 @@ To save space on the dashboard, hide the axis labels.
 . Open the *Left axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTimeLeftAxis_8.7.png[Left axis menu]
+image::images/line-chart-left-axis-8.16.0.png[Left axis menu, width=50%]
 
 . Open the *Bottom axis* menu, then select *None* from the *Axis title* dropdown.
 +
 [role="screenshot"]
-image::images/lens_lineChartMetricOverTimeBottomAxis_8.7.png[Bottom axis menu]
+image::images/line-chart-bottom-axis-8.16.0.png[Bottom axis menu, width=50%]
 
 . Click *Save and return*
 
 Since you removed the axis labels, add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Median of bytes`, then click *Save*.
+. In the *Title* field, enter `Median of bytes`, then click *Apply*.
 +
 [role="screenshot"]
 image::images/lens_lineChartMetricOverTime_8.4.0.png[Line chart that displays metric data over time]
@@ -167,7 +164,7 @@ The visualization editor automatically applies the *Unique count* function. If y
 . Drag *request.keyword* to the workspace.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_2_1_1.png[Vertical bar chart with top values of request.keyword by most unique visitors]
+image::images/tutorial-top-values-of-field-8.16.0.png[Vertical bar chart with top values of request.keyword by most unique visitors]
 +
 When you drag a text or IP address field to the workspace,
 the editor adds the *Top values* function ranked by *Count of records* to show the most frequent values.
@@ -177,7 +174,7 @@ The chart labels are unable to display because the *request.keyword* field conta
 . Open the *Visualization type* dropdown, then select *Table*.
 +
 [role="screenshot"]
-image::images/lens_end_to_end_2_1_2.png[Table with top values of request.keyword by most unique visitors]
+image::images/table-with-request-keyword-and-client-ip-8.16.0.png[Table with top values of request.keyword by most unique visitors, width=70%]
 
 . In the layer pane, click *Top 5 values of request.keyword*.
 
@@ -208,7 +205,7 @@ Create a proportional visualization that helps you determine if your users trans
 
 . Click the *Sum* quick function, then click *Close*.
 
-. From the *Available fields* list, drag *bytes* to the *Break down by* field in the layer pane.
+. From the *Available fields* list, drag *bytes* to the *Breakdown* field in the layer pane.
 
 To select documents based on the number range of a field, use the *Intervals* function.
 When the ranges are non numeric, or the query requires multiple clauses, you could use the *Filters* function.
@@ -245,9 +242,9 @@ image::images/lens_pieChartCompareSubsetOfDocs_7.16.png[Pie chart that compares 
 
 Add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Sum of bytes from large requests`, then click *Save*.
+. In the *Title* field, enter `Sum of bytes from large requests`, then click *Apply*.
 
 [discrete]
 [[histogram]]
@@ -278,9 +275,9 @@ image::images/lens_barChartDistributionOfNumberField_7.16.png[Bar chart that dis
 
 Add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Website traffic`, then click *Save*.
+. In the *Title* field, enter `Website traffic`, then click *Apply*.
 
 [discrete]
 [[treemap]]
@@ -342,9 +339,9 @@ image::images/lens_treemapMultiLevelChart_7.16.png[Treemap visualization]
 
 Add a panel title:
 
-. Open the panel menu, then select *Panel settings*.
+. Open the panel menu, then select *Settings*.
 
-. In the *Title* field, enter `Page views by location and referrer`, then click *Save*.
+. In the *Title* field, enter `Page views by location and referrer`, then click *Apply*.
 
 [float]
 [[arrange-the-lens-panels]]

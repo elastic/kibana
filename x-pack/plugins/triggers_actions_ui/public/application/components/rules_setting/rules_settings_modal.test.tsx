@@ -15,14 +15,14 @@ import { IToasts } from '@kbn/core/public';
 import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
 import { RulesSettingsModal, RulesSettingsModalProps } from './rules_settings_modal';
 import { useKibana } from '../../../common/lib/kibana';
-import { getFlappingSettings } from '../../lib/rule_api/get_flapping_settings';
+import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
 import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settings';
 import { updateQueryDelaySettings } from '../../lib/rule_api/update_query_delay_settings';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../lib/rule_api/get_flapping_settings', () => ({
-  getFlappingSettings: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => ({
+  fetchFlappingSettings: jest.fn(),
 }));
 jest.mock('../../lib/rule_api/update_flapping_settings', () => ({
   updateFlappingSettings: jest.fn(),
@@ -47,8 +47,8 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 const mocks = coreMock.createSetup();
 
-const getFlappingSettingsMock = getFlappingSettings as unknown as jest.MockedFunction<
-  typeof getFlappingSettings
+const fetchFlappingSettingsMock = fetchFlappingSettings as unknown as jest.MockedFunction<
+  typeof fetchFlappingSettings
 >;
 const updateFlappingSettingsMock = updateFlappingSettings as unknown as jest.MockedFunction<
   typeof updateFlappingSettings
@@ -116,6 +116,8 @@ const waitForModalLoad = async (options?: {
 
 describe('rules_settings_modal', () => {
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     const [
       {
         application: { capabilities },
@@ -142,7 +144,7 @@ describe('rules_settings_modal', () => {
 
     useKibanaMock().services.isServerless = true;
 
-    getFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
+    fetchFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     updateFlappingSettingsMock.mockResolvedValue(mockFlappingSetting);
     getQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
     updateQueryDelaySettingsMock.mockResolvedValue(mockQueryDelaySetting);
@@ -156,7 +158,7 @@ describe('rules_settings_modal', () => {
 
   test('renders flapping settings correctly', async () => {
     const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
-    expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
+    expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     await waitForModalLoad();
     expect(
       result.getByTestId('rulesSettingsFlappingEnableSwitch').getAttribute('aria-checked')
@@ -182,7 +184,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
 
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -204,7 +206,7 @@ describe('rules_settings_modal', () => {
 
   test('reset flapping settings to initial state on cancel without triggering another server reload', async () => {
     const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
-    expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
+    expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
     await waitForModalLoad();
 
@@ -218,7 +220,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('3');
 
     // Try cancelling
-    userEvent.click(result.getByTestId('rulesSettingsModalCancelButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalCancelButton'));
 
     expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
@@ -228,7 +230,7 @@ describe('rules_settings_modal', () => {
     expect(lookBackWindowInput.getAttribute('value')).toBe('10');
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('10');
 
-    expect(getFlappingSettingsMock).toHaveBeenCalledTimes(1);
+    expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -269,7 +271,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
@@ -284,7 +286,7 @@ describe('rules_settings_modal', () => {
     await waitForModalLoad();
 
     expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).toBe(null);
-    userEvent.click(result.getByTestId('rulesSettingsFlappingEnableSwitch'));
+    await userEvent.click(result.getByTestId('rulesSettingsFlappingEnableSwitch'));
     expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).not.toBe(null);
   });
 
@@ -356,7 +358,7 @@ describe('rules_settings_modal', () => {
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
 
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -385,7 +387,7 @@ describe('rules_settings_modal', () => {
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });

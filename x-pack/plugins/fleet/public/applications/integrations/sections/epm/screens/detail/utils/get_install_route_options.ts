@@ -32,6 +32,11 @@ interface GetInstallPkgRouteOptionsParams {
   isGuidedOnboardingActive: boolean;
 }
 
+export type InstallPkgRouteOptions = [
+  string,
+  { path: string; state: CreatePackagePolicyRouteState }
+];
+
 const isPackageExemptFromStepsLayout = (pkgkey: string) =>
   EXCLUDED_PACKAGES.some((pkgname) => pkgkey.startsWith(pkgname));
 /*
@@ -47,7 +52,7 @@ export const getInstallPkgRouteOptions = ({
   isCloud,
   isExperimentalAddIntegrationPageEnabled,
   isGuidedOnboardingActive,
-}: GetInstallPkgRouteOptionsParams): [string, { path: string; state: unknown }] => {
+}: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
   const useMultiPageLayout =

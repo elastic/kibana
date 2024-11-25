@@ -95,7 +95,11 @@
     "@kbn/presentation-containers",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/fields-metadata-plugin",
-    "@kbn/security-solution-common"
+    "@kbn/logs-data-access-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/discover-contextual-components",
+    "@kbn/esql-ast",
+    "@kbn/discover-shared-plugin"
   ],
   "exclude": [
     "target/**/*"

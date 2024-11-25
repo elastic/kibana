@@ -176,7 +176,7 @@ export function DurationDistributionChart({
                     visible: true,
                   },
                   point: {
-                    visible: false,
+                    visible: 'never',
                     radius: 0,
                   },
                 },

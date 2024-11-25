@@ -41,7 +41,9 @@ export const ValidationError = memo<
       }
       data-test-subj={getTestId('validationError')}
     >
-      <div data-test-subj={getTestId('validationError-message')}>{store.errorMessage}</div>
+      <div data-test-subj={getTestId('validationError-message')}>
+        {store.errorMessage as ReactNode}
+      </div>
 
       {!command.commandDefinition.helpHidden && (
         <div data-test-subj={getTestId('validationError-commandUsage')}>

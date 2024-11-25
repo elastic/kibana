@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -42,6 +43,7 @@ export async function changeDataView(
   let nextDataView: DataView | null = null;
 
   internalState.transitions.setIsDataViewLoading(true);
+  internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 
   try {
     nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
@@ -69,5 +71,4 @@ export async function changeDataView(
   }
 
   internalState.transitions.setIsDataViewLoading(false);
-  internalState.transitions.setResetDefaultProfileState({ columns: true, rowHeight: true });
 }

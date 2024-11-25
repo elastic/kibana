@@ -6,9 +6,6 @@
  */
 
 import React from 'react';
-// TODO(jbudz): should be removed when upgrading to TS@4.8
-// this is a skip for the errors created when typechecking with isolatedModules
-export {};
 
 jest.mock('../../hooks', () => {
   return {

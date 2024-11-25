@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import {
@@ -17,10 +16,12 @@ import {
   createAppMockRenderer,
   noDeleteCasesPermissions,
   onlyDeleteCasesPermission,
+  noReopenCasesPermissions,
+  onlyReopenCasesPermission,
 } from '../../common/mock';
 import { useBulkActions } from './use_bulk_actions';
 import * as api from '../../containers/api';
-import { basicCase } from '../../containers/mock';
+import { basicCase, basicCaseClosed } from '../../containers/mock';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/user_profiles/api');
@@ -117,7 +118,7 @@ describe('useBulkActions', () => {
               "items": Array [
                 Object {
                   "data-test-subj": "cases-bulk-action-status-open",
-                  "disabled": true,
+                  "disabled": false,
                   "icon": "empty",
                   "key": "cases-bulk-action-status-open",
                   "name": "Open",
@@ -188,7 +189,7 @@ describe('useBulkActions', () => {
     it('change the status of cases', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -205,7 +206,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('case-bulk-action-status'));
+      await userEvent.click(res.getByTestId('case-bulk-action-status'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
@@ -213,11 +214,11 @@ describe('useBulkActions', () => {
         expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'), {
+        pointerEventsCheck: 0,
       });
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -225,7 +226,7 @@ describe('useBulkActions', () => {
     it('change the severity of cases', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -242,7 +243,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('case-bulk-action-severity'));
+      await userEvent.click(res.getByTestId('case-bulk-action-severity'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
@@ -251,11 +252,11 @@ describe('useBulkActions', () => {
         expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'), undefined, {
-        skipPointerEventsCheck: true,
+      await userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'), {
+        pointerEventsCheck: 0,
       });
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -264,7 +265,7 @@ describe('useBulkActions', () => {
       it('delete a case', async () => {
         const deleteSpy = jest.spyOn(api, 'deleteCases');
 
-        const { result, waitFor: waitForHook } = renderHook(
+        const { result } = renderHook(
           () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
           {
             wrapper: appMockRender.AppWrapper,
@@ -281,7 +282,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+        await userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
         modals = result.current.modals;
         res.rerender(
@@ -295,9 +296,9 @@ describe('useBulkActions', () => {
           expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
         });
 
-        userEvent.click(res.getByTestId('confirmModalConfirmButton'));
+        await userEvent.click(res.getByTestId('confirmModalConfirmButton'));
 
-        await waitForHook(() => {
+        await waitFor(() => {
           expect(deleteSpy).toHaveBeenCalled();
         });
       });
@@ -320,7 +321,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+        await userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
         modals = result.current.modals;
         res.rerender(
@@ -334,7 +335,7 @@ describe('useBulkActions', () => {
           expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
         });
 
-        userEvent.click(res.getByTestId('confirmModalCancelButton'));
+        await userEvent.click(res.getByTestId('confirmModalCancelButton'));
 
         modals = result.current.modals;
         res.rerender(
@@ -353,7 +354,7 @@ describe('useBulkActions', () => {
     it('change the tags of the case', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -370,7 +371,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('cases-bulk-action-tags'));
+      await userEvent.click(res.getByTestId('cases-bulk-action-tags'));
 
       flyouts = result.current.flyouts;
 
@@ -389,10 +390,10 @@ describe('useBulkActions', () => {
         expect(res.getByText('coke')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByText('coke'));
-      userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
+      await userEvent.click(res.getByText('coke'));
+      await userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -400,7 +401,7 @@ describe('useBulkActions', () => {
     it('change the assignees of the case', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -417,7 +418,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
+      await userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
 
       flyouts = result.current.flyouts;
 
@@ -436,10 +437,10 @@ describe('useBulkActions', () => {
         expect(res.getByText('Damaged Raccoon')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByText('Damaged Raccoon'));
-      userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
+      await userEvent.click(res.getByText('Damaged Raccoon'));
+      await userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -448,7 +449,7 @@ describe('useBulkActions', () => {
   describe('Permissions', () => {
     it('shows the correct actions with all permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: allCasesPermissions() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -465,7 +466,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.getByTestId('bulk-actions-separator')).toBeInTheDocument();
@@ -474,7 +475,7 @@ describe('useBulkActions', () => {
 
     it('shows the correct actions with no delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: noDeleteCasesPermissions() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -491,7 +492,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
         expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
         expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
@@ -500,7 +501,7 @@ describe('useBulkActions', () => {
 
     it('shows the correct actions with only delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -517,10 +518,77 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.queryByTestId('case-bulk-action-status')).toBeFalsy();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
+      });
+    });
+
+    it('shows the correct actions with no reopen permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: noReopenCasesPermissions() });
+      const { result } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const res = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      await waitFor(() => {
+        expect(res.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
+        res.queryByTestId('case-bulk-action-status')?.click();
+      });
+
+      await waitFor(() => {
+        expect(res.queryByTestId('cases-bulk-action-status-open')).toBeDisabled();
+        expect(res.queryByTestId('cases-bulk-action-status-in-progress')).toBeDisabled();
+        expect(res.queryByTestId('cases-bulk-action-status-closed')).toBeDisabled();
+      });
+    });
+
+    it('shows the correct actions with reopen permissions', async () => {
+      appMockRender = createAppMockRenderer({ permissions: onlyReopenCasesPermission() });
+      const { result } = renderHook(
+        () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      const { modals, flyouts, panels } = result.current;
+      const renderResult = appMockRender.render(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+          {flyouts}
+        </>
+      );
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('case-bulk-action-severity')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('bulk-actions-separator')).not.toBeInTheDocument();
+        expect(renderResult.queryByTestId('case-bulk-action-delete')).not.toBeInTheDocument();
+      });
+
+      userEvent.click(renderResult.getByTestId('case-bulk-action-status'));
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('cases-bulk-action-status-open')).not.toBeDisabled();
+        expect(
+          renderResult.queryByTestId('cases-bulk-action-status-in-progress')
+        ).not.toBeDisabled();
+        expect(renderResult.queryByTestId('cases-bulk-action-status-closed')).not.toBeDisabled();
       });
     });
   });

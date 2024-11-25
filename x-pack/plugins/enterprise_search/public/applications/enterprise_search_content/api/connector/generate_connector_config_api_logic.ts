@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface GenerateConfigApiArgs {
   connectorId: string;
 }
+
+export type GenerateConfigApiActions = Actions<GenerateConfigApiArgs, {}>;
 
 export const generateConnectorConfig = async ({ connectorId }: GenerateConfigApiArgs) => {
   const route = `/internal/enterprise_search/connectors/${connectorId}/generate_config`;

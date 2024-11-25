@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { Either } from 'fp-ts/lib/Either';
@@ -111,7 +112,7 @@ import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
-import type { IndexMappingsIncomplete, TypesChanged } from './check_target_mappings';
+import type { IndexMappingsIncomplete, TypesAdded, TypesChanged } from './check_target_mappings';
 
 export type {
   CheckForUnknownDocsParams,
@@ -192,6 +193,7 @@ export interface ActionErrorTypeMap {
   synchronization_failed: SynchronizationFailed;
   index_mappings_incomplete: IndexMappingsIncomplete;
   types_changed: TypesChanged;
+  types_added: TypesAdded;
   operation_not_supported: OperationNotSupported;
   source_equals_target: SourceEqualsTarget;
 }

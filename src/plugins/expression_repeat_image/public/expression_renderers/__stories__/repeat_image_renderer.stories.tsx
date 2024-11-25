@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
@@ -28,7 +30,13 @@ const Renderer = ({
     emptyImage: elasticOutline,
   };
 
-  return <Render renderer={getRepeatImageRenderer()} config={config} width="400px" />;
+  return (
+    <Render
+      renderer={getRepeatImageRenderer(coreMock.createStart().theme.theme$)}
+      config={config}
+      width="400px"
+    />
+  );
 };
 
 storiesOf('enderers/repeatImage', module).add(

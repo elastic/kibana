@@ -18,7 +18,7 @@ import type { CompleteRule, RuleParams } from '../../rule_schema';
 import { buildReasonMessageForNewTermsAlert } from '../utils/reason_formatters';
 import type { SignalSource } from '../types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { buildBulkBody } from '../factories/utils/build_bulk_body';
+import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 export interface EventsAndTerms {
   event: estypes.SearchHit<SignalSource>;
@@ -34,6 +34,7 @@ export const wrapNewTermsAlerts = ({
   alertTimestampOverride,
   ruleExecutionLogger,
   publicBaseUrl,
+  intendedTimestamp,
 }: {
   eventsAndTerms: EventsAndTerms[];
   spaceId: string | null | undefined;
@@ -43,6 +44,7 @@ export const wrapNewTermsAlerts = ({
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
+  intendedTimestamp: Date | undefined;
 }): Array<WrappedFieldsLatest<NewTermsFieldsLatest>> => {
   return eventsAndTerms.map((eventAndTerms) => {
     const id = objectHash([
@@ -52,20 +54,22 @@ export const wrapNewTermsAlerts = ({
       `${spaceId}:${completeRule.alertId}`,
       eventAndTerms.newTerms,
     ]);
-    const baseAlert: BaseFieldsLatest = buildBulkBody(
+    const baseAlert: BaseFieldsLatest = transformHitToAlert({
       spaceId,
       completeRule,
-      eventAndTerms.event,
+      doc: eventAndTerms.event,
       mergeStrategy,
-      [],
-      true,
-      buildReasonMessageForNewTermsAlert,
+      ignoreFields: {},
+      ignoreFieldsRegexes: [],
+      applyOverrides: true,
+      buildReasonMessage: buildReasonMessageForNewTermsAlert,
       indicesToQuery,
       alertTimestampOverride,
       ruleExecutionLogger,
-      id,
-      publicBaseUrl
-    );
+      alertUuid: id,
+      publicBaseUrl,
+      intendedTimestamp,
+    });
 
     return {
       _id: id,

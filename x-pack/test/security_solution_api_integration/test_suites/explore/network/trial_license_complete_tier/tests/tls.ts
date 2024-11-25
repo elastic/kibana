@@ -14,7 +14,8 @@ import {
   NetworkTlsStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import TestAgent from 'supertest/lib/agent';
-import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
+
+import { SearchService } from '@kbn/ftr-common-functional-services';
 
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
@@ -89,11 +90,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('Tls Test with Packetbeat', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
     describe('Tls Test', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        bsearch = await utils.createBsearch();
+        search = await utils.createSearch();
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
       });
       after(
@@ -101,7 +102,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+        const tls = await search.send<NetworkTlsStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: NetworkQueries.tls,
@@ -130,7 +131,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
 
       it('Ensure data is returned for FlowTarget.Destination', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+        const tls = await search.send<NetworkTlsStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: NetworkQueries.tls,
@@ -162,7 +163,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('Tls Overview Test', () => {
       before(async () => {
         supertest = await utils.createSuperTest();
-        bsearch = await utils.createBsearch();
+        search = await utils.createSearch();
         await esArchiver.load('x-pack/test/functional/es_archives/packetbeat/tls');
       });
       after(
@@ -170,7 +171,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       );
 
       it('Ensure data is returned for FlowTarget.Source', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+        const tls = await search.send<NetworkTlsStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: NetworkQueries.tls,
@@ -199,7 +200,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       });
 
       it('Ensure data is returned for FlowTarget.Destination', async () => {
-        const tls = await bsearch.send<NetworkTlsStrategyResponse>({
+        const tls = await search.send<NetworkTlsStrategyResponse>({
           supertest,
           options: {
             factoryQueryType: NetworkQueries.tls,

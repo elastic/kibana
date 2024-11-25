@@ -41,7 +41,7 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
-import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
+import { getDataStreamDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
@@ -52,10 +52,13 @@ import { IndexTablePagination, PAGE_SIZE_OPTIONS } from './index_table_paginatio
 
 const getColumnConfigs = ({
   showIndexStats,
+  showSizeAndDocCount,
   history,
   filterChanged,
   extensionsService,
   location,
+  application,
+  http,
 }) => {
   const columns = [
     {
@@ -64,17 +67,27 @@ const getColumnConfigs = ({
         defaultMessage: 'Name',
       }),
       order: 10,
-      render: (index) => (
-        <>
-          <EuiLink
-            data-test-subj="indexTableIndexNameLink"
-            onClick={() => history.push(getIndexDetailsLink(index.name, location.search || ''))}
-          >
-            {index.name}
-          </EuiLink>
-          {renderBadges(index, extensionsService, filterChanged)}
-        </>
-      ),
+      render: (index) => {
+        return (
+          <>
+            <EuiLink
+              data-test-subj="indexTableIndexNameLink"
+              onClick={() => {
+                navigateToIndexDetailsPage(
+                  index.name,
+                  location.search || '',
+                  extensionsService,
+                  application,
+                  http
+                );
+              }}
+            >
+              {index.name}
+            </EuiLink>
+            {renderBadges(index, extensionsService, filterChanged)}
+          </>
+        );
+      },
     },
     {
       fieldName: 'data_stream',
@@ -100,6 +113,28 @@ const getColumnConfigs = ({
     },
   ];
 
+  // size and docs count enabled by either "enableIndexStats" or "enableSizeAndDocCount" configs
+  if (showIndexStats || showSizeAndDocCount) {
+    columns.push(
+      {
+        fieldName: 'documents',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
+          defaultMessage: 'Documents count',
+        }),
+        order: 60,
+        render: (index) => {
+          return Number(index.documents ?? 0).toLocaleString();
+        },
+      },
+      {
+        fieldName: 'size',
+        label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
+          defaultMessage: 'Storage size',
+        }),
+        order: 70,
+      }
+    );
+  }
   if (showIndexStats) {
     columns.push(
       {
@@ -130,25 +165,6 @@ const getColumnConfigs = ({
           defaultMessage: 'Replicas',
         }),
         order: 50,
-      },
-      {
-        fieldName: 'documents',
-        label: i18n.translate('xpack.idxMgmt.indexTable.headers.documentsHeader', {
-          defaultMessage: 'Docs count',
-        }),
-        order: 60,
-        render: (index) => {
-          if (index.documents) {
-            return Number(index.documents).toLocaleString();
-          }
-        },
-      },
-      {
-        fieldName: 'size',
-        label: i18n.translate('xpack.idxMgmt.indexTable.headers.storageSizeHeader', {
-          defaultMessage: 'Storage size',
-        }),
-        order: 70,
       }
     );
   }
@@ -388,24 +404,47 @@ export class IndexTable extends Component {
   }
 
   renderBanners(extensionsService) {
-    const { allIndices = [], filterChanged } = this.props;
+    const { allIndices = [], filterChanged, performExtensionAction } = this.props;
     return extensionsService.banners.map((bannerExtension, i) => {
       const bannerData = bannerExtension(allIndices);
       if (!bannerData) {
         return null;
       }
 
-      const { type, title, message, filter, filterLabel } = bannerData;
+      const { type, title, message, filter, filterLabel, action } = bannerData;
 
       return (
         <Fragment key={`bannerExtension${i}`}>
           <EuiCallOut color={type} size="m" title={title}>
-            <EuiText>
-              {message}
-              {filter ? (
-                <EuiLink onClick={() => filterChanged(filter)}>{filterLabel}</EuiLink>
-              ) : null}
-            </EuiText>
+            {message && <p>{message}</p>}
+            {action || filter ? (
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                {action ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="warning"
+                      fill
+                      onClick={() => {
+                        performExtensionAction(
+                          action.requestMethod,
+                          action.successMessage,
+                          action.indexNames
+                        );
+                      }}
+                    >
+                      {action.buttonLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                ) : null}
+                {filter ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      <EuiLink onClick={() => filterChanged(filter)}>{filterLabel}</EuiLink>
+                    </EuiText>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            ) : null}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </Fragment>
@@ -529,14 +568,19 @@ export class IndexTable extends Component {
 
     return (
       <AppContextConsumer>
-        {({ services, config }) => {
+        {({ services, config, core, plugins }) => {
           const { extensionsService } = services;
+          const { application, http } = core;
+          const { share } = plugins;
           const columnConfigs = getColumnConfigs({
             showIndexStats: config.enableIndexStats,
+            showSizeAndDocCount: config.enableSizeAndDocCount,
             extensionsService,
             filterChanged,
             history,
             location,
+            application,
+            http,
           });
           const columnsCount = columnConfigs.length + 1;
           return (
@@ -649,7 +693,7 @@ export class IndexTable extends Component {
                   </>
                 )}
                 <EuiFlexItem grow={false}>
-                  <CreateIndexButton loadIndices={loadIndices} />
+                  <CreateIndexButton loadIndices={loadIndices} share={share} />
                 </EuiFlexItem>
               </EuiFlexGroup>
 
@@ -694,6 +738,7 @@ export class IndexTable extends Component {
                         <EuiTableRowCell align="center" colSpan={columnsCount}>
                           <NoMatch
                             loadIndices={loadIndices}
+                            share={share}
                             filter={filter}
                             resetFilter={() => filterChanged('')}
                             extensionsService={extensionsService}

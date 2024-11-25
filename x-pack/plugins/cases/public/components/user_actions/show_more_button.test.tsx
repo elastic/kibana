@@ -6,30 +6,25 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ShowMoreButton } from './show_more_button';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 
 const showMoreClickMock = jest.fn();
 
 describe('ShowMoreButton', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', () => {
-    appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
+    render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 
     expect(screen.getByTestId('cases-show-more-user-actions')).toBeInTheDocument();
   });
 
   it('shows loading state and is disabled when isLoading is true', () => {
-    appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} isLoading={true} />);
+    render(<ShowMoreButton onShowMoreClick={showMoreClickMock} isLoading={true} />);
 
     const btn = screen.getByTestId('cases-show-more-user-actions');
 
@@ -38,10 +33,10 @@ describe('ShowMoreButton', () => {
     expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
-  it('calls onShowMoreClick on button click', () => {
-    appMockRender.render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
+  it('calls onShowMoreClick on button click', async () => {
+    render(<ShowMoreButton onShowMoreClick={showMoreClickMock} />);
 
-    userEvent.click(screen.getByTestId('cases-show-more-user-actions'));
+    await userEvent.click(screen.getByTestId('cases-show-more-user-actions'));
     expect(showMoreClickMock).toHaveBeenCalled();
   });
 });

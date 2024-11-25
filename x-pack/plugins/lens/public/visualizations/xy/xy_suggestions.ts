@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { FittingFunctions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+
 import type {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -20,12 +21,13 @@ import { getColorMappingDefaults } from '../../utils';
 import {
   State,
   XYState,
-  visualizationTypes,
+  visualizationSubtypes,
   XYLayerConfig,
   XYDataLayerConfig,
   SeriesType,
+  defaultSeriesType,
 } from './types';
-import { getIconForSeries } from './state_helpers';
+import { flipSeriesType, getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
 
 const columnSortOrder = {
@@ -100,21 +102,24 @@ function getSuggestionForColumns(
   allowMixed?: boolean
 ): VisualizationSuggestion<State> | Array<VisualizationSuggestion<State>> | undefined {
   const [buckets, values] = partition(table.columns, (col) => col.operation.isBucketed);
+  const sharedArgs = {
+    layerId: table.layerId,
+    changeType: table.changeType,
+    currentState,
+    tableLabel: table.label,
+    keptLayerIds,
+    requestedSeriesType: seriesType,
+    mainPalette,
+    allowMixed,
+  };
 
   if (buckets.length === 1 || buckets.length === 2) {
-    const [x, splitBy] = getBucketMappings(table, currentState);
+    const [xValue, splitBy] = getBucketMappings(table, currentState);
     return getSuggestionsForLayer({
-      layerId: table.layerId,
-      changeType: table.changeType,
-      xValue: x,
+      ...sharedArgs,
+      xValue,
       yValues: values,
       splitBy,
-      currentState,
-      tableLabel: table.label,
-      keptLayerIds,
-      requestedSeriesType: seriesType,
-      mainPalette,
-      allowMixed,
     });
   } else if (buckets.length === 0) {
     const [yValues, [xValue, splitBy]] = partition(
@@ -122,35 +127,11 @@ function getSuggestionForColumns(
       (col) => col.operation.dataType === 'number' && !col.operation.isBucketed
     );
     return getSuggestionsForLayer({
-      layerId: table.layerId,
-      changeType: table.changeType,
+      ...sharedArgs,
       xValue,
       yValues,
       splitBy,
-      currentState,
-      tableLabel: table.label,
-      keptLayerIds,
-      requestedSeriesType: seriesType,
-      mainPalette,
-      allowMixed,
     });
-  }
-}
-
-function flipSeriesType(seriesType: SeriesType) {
-  switch (seriesType) {
-    case 'bar_horizontal':
-      return 'bar';
-    case 'bar_horizontal_stacked':
-      return 'bar_stacked';
-    case 'bar':
-      return 'bar_horizontal';
-    case 'bar_horizontal_percentage_stacked':
-      return 'bar_percentage_stacked';
-    case 'bar_percentage_stacked':
-      return 'bar_horizontal_percentage_stacked';
-    default:
-      return 'bar_horizontal';
   }
 }
 
@@ -255,7 +236,7 @@ function getSuggestionsForLayer({
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     // Chart switcher needs to include every chart type
-    return visualizationTypes
+    return visualizationSubtypes
       .map((visType) => {
         return {
           ...buildSuggestion({
@@ -337,7 +318,7 @@ function getSuggestionsForLayer({
 
   // Combine all pre-built suggestions with hidden suggestions for remaining chart types
   return sameStateSuggestions.concat(
-    visualizationTypes
+    visualizationSubtypes
       .filter((visType) => {
         return !sameStateSuggestions.find(
           (suggestion) => suggestion.state.preferredSeriesType === visType.id
@@ -450,18 +431,16 @@ function getSeriesType(
   layerId: string,
   xValue?: TableSuggestionColumn
 ): SeriesType {
-  const defaultType = 'bar_stacked';
-
   const oldLayer = getExistingLayer(currentState, layerId);
   const oldLayerSeriesType = oldLayer && isDataLayer(oldLayer) ? oldLayer.seriesType : false;
 
   const closestSeriesType =
-    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultType;
+    oldLayerSeriesType || (currentState && currentState.preferredSeriesType) || defaultSeriesType;
 
   // Attempt to keep the seriesType consistent on initial add of a layer
   // Ordinal scales should always use a bar because there is no interpolation between buckets
   if (xValue && xValue.operation.scale && xValue.operation.scale === 'ordinal') {
-    return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultType;
+    return closestSeriesType.startsWith('bar') ? closestSeriesType : defaultSeriesType;
   }
 
   return closestSeriesType;
@@ -590,7 +569,7 @@ function buildSuggestion({
   const state: State = {
     legend: currentState ? currentState.legend : { isVisible: true, position: Position.Right },
     valueLabels: currentState?.valueLabels || 'hide',
-    fittingFunction: currentState?.fittingFunction || 'None',
+    fittingFunction: currentState?.fittingFunction ?? FittingFunctions.LINEAR,
     curveType: currentState?.curveType,
     fillOpacity: currentState?.fillOpacity,
     xTitle: currentState?.xTitle,
@@ -661,7 +640,7 @@ function getScore(
       ? 0.5
       : 1;
   // chart with multiple y values and split series will have a score of 1, single y value and no split series reduce score
-  return (((yValues.length > 1 ? 2 : 1) + (splitBy ? 1 : 0)) / 3) * changeFactor;
+  return (((yValues.length > 1 ? 3 : 2) + (splitBy ? 1 : 0)) / 4) * changeFactor;
 }
 
 function getExistingLayer(currentState: XYState | undefined, layerId: string) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type {
   FilePickerState,
   ValidationStepState,
@@ -48,4 +49,13 @@ export const buildAnnotationsFromError = (
   });
 
   return annotations;
+};
+
+export const formatTimeFromNow = (time: string | undefined): string => {
+  if (!time) {
+    return '';
+  }
+
+  const scheduleTime = moment(time);
+  return scheduleTime.fromNow(true);
 };

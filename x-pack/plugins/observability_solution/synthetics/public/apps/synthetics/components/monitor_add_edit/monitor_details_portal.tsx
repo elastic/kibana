@@ -22,17 +22,21 @@ interface Props {
 export const MonitorDetailsLinkPortal = ({ name, configId, locationId, updateUrl }: Props) => {
   return (
     <InPortal node={MonitorDetailsLinkPortalNode}>
-      <MonitorDetailsLink
-        name={name}
-        configId={configId}
-        locationId={locationId}
-        updateUrl={updateUrl}
-      />
+      {locationId ? (
+        <MonitorDetailsLinkWithLocation
+          name={name}
+          configId={configId}
+          locationId={locationId}
+          updateUrl={updateUrl}
+        />
+      ) : (
+        <MonitorDetailsLink name={name} configId={configId} />
+      )}
     </InPortal>
   );
 };
 
-export const MonitorDetailsLink = ({ name, configId, locationId, updateUrl }: Props) => {
+const MonitorDetailsLinkWithLocation = ({ name, configId, locationId, updateUrl }: Props) => {
   const selectedLocation = useSelectedLocation(updateUrl);
 
   let locId = locationId;
@@ -45,6 +49,18 @@ export const MonitorDetailsLink = ({ name, configId, locationId, updateUrl }: Pr
   const href = history.createHref({
     pathname: locId ? `monitor/${configId}?locationId=${locId}` : `monitor/${configId}`,
   });
+  return <MonitorLink href={href} name={name} />;
+};
+
+const MonitorDetailsLink = ({ name, configId }: Props) => {
+  const history = useHistory();
+  const href = history.createHref({
+    pathname: `monitor/${configId}`,
+  });
+  return <MonitorLink href={href} name={name} />;
+};
+
+const MonitorLink = ({ href, name }: { href: string; name: string }) => {
   return (
     <EuiLink data-test-subj="syntheticsMonitorDetailsLinkLink" href={href}>
       <EuiIcon type="arrowLeft" /> {name}

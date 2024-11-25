@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
@@ -93,7 +94,10 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     );
   } catch (error) {
     // return an empty set for closed indices
-    if (error.message.startsWith('cluster_block_exception')) {
+    if (
+      error.message.startsWith('index_closed_exception') ||
+      error.message.startsWith('cluster_block_exception')
+    ) {
       return { body: { indices: [], fields: {} } };
     }
     throw convertEsError(indices, error);

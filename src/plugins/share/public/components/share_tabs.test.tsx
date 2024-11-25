@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -52,7 +53,6 @@ const mockShareContext = {
   allowShortUrl: true,
   anonymousAccess: { getCapabilities: jest.fn(), getState: jest.fn() },
   urlService: service,
-  isEmbedded: true,
   theme: themeServiceMock.createStartContract(),
   objectTypeMeta: { title: 'title' },
   objectType: 'type',
@@ -62,12 +62,19 @@ const mockShareContext = {
   toasts: toastsServiceMock.createStartContract(),
   i18n: i18nServiceMock.createStartContract(),
 };
+const mockGenerateExport = jest.fn();
+const mockGenerateExportUrl = jest.fn().mockImplementation(() => 'generated-export-url');
 const CSV = 'CSV' as const;
 const PNG = 'PNG' as const;
 describe('Share modal tabs', () => {
   it('should render export tab when there are share menu items that are not disabled', async () => {
     const testItem = [
-      { shareMenuItem: { name: 'test', disabled: false }, label: CSV, generateExport: jest.fn() },
+      {
+        shareMenuItem: { name: 'test', disabled: false },
+        label: CSV,
+        generateExport: mockGenerateExport,
+        generateExportUrl: mockGenerateExportUrl,
+      },
     ];
     const wrapper = mountWithIntl(
       <ShareTabsContext.Provider value={{ ...mockShareContext, shareMenuItems: testItem }}>
@@ -78,7 +85,12 @@ describe('Share modal tabs', () => {
   });
   it('should not render export tab when the license is disabled', async () => {
     const testItems = [
-      { shareMenuItem: { name: 'test', disabled: true }, label: CSV, generateExport: jest.fn() },
+      {
+        shareMenuItem: { name: 'test', disabled: true },
+        label: CSV,
+        generateExport: mockGenerateExport,
+        generateExportUrl: mockGenerateExportUrl,
+      },
     ];
     const wrapper = mountWithIntl(
       <ShareTabsContext.Provider value={{ ...mockShareContext, shareMenuItems: testItems }}>
@@ -90,8 +102,18 @@ describe('Share modal tabs', () => {
 
   it('should render export tab is at least one is not disabled', async () => {
     const testItem = [
-      { shareMenuItem: { name: 'test', disabled: false }, label: CSV, generateExport: jest.fn() },
-      { shareMenuItem: { name: 'test', disabled: true }, label: PNG, generateExport: jest.fn() },
+      {
+        shareMenuItem: { name: 'test', disabled: false },
+        label: CSV,
+        generateExport: mockGenerateExport,
+        generateExportUrl: mockGenerateExportUrl,
+      },
+      {
+        shareMenuItem: { name: 'test', disabled: true },
+        label: PNG,
+        generateExport: mockGenerateExport,
+        generateExportUrl: mockGenerateExportUrl,
+      },
     ];
     const wrapper = mountWithIntl(
       <ShareTabsContext.Provider value={{ ...mockShareContext, shareMenuItems: testItem }}>

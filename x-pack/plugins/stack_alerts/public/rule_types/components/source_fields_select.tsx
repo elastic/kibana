@@ -77,7 +77,7 @@ export const SourceFields: React.FC<SourceFieldsProps> = ({
       fullWidth
       // @ts-expect-error upgrade typescript v5.1.6
       isInvalid={errors.length > 0 && sourceFields !== undefined}
-      error={errors}
+      error={errors as string[]}
       label={
         <FormattedMessage
           id="xpack.stackAlerts.components.ui.sourceFieldsSelect.title"

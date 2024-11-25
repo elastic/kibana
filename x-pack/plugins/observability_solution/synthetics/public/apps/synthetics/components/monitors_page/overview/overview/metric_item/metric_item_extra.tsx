@@ -14,10 +14,10 @@ export const MetricItemExtra = ({
   stats,
 }: {
   stats: {
-    medianDuration: number;
-    avgDuration: number;
-    minDuration: number;
-    maxDuration: number;
+    medianDuration: number | null;
+    avgDuration: number | null;
+    minDuration: number | null;
+    maxDuration: number | null;
   };
 }) => {
   const { avgDuration, minDuration, maxDuration } = stats;
@@ -36,20 +36,31 @@ export const MetricItemExtra = ({
         })}
       </EuiFlexItem>
       <EuiFlexItem grow={false} component="span">
-        <EuiIconTip
-          title={i18n.translate('xpack.synthetics.overview.duration.description', {
-            defaultMessage: 'Median duration of last 50 checks',
-          })}
-          content={i18n.translate('xpack.synthetics.overview.duration.description.values', {
-            defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
-            values: {
-              avg: formatDuration(avgDuration, { noSpace: true }),
-              min: formatDuration(minDuration, { noSpace: true }),
-              max: formatDuration(maxDuration, { noSpace: true }),
-            },
-          })}
-          position="top"
-        />
+        {avgDuration && minDuration && maxDuration ? (
+          <EuiIconTip
+            title={i18n.translate('xpack.synthetics.overview.duration.description', {
+              defaultMessage: 'Median duration of last 50 checks',
+            })}
+            content={i18n.translate('xpack.synthetics.overview.duration.description.values', {
+              defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
+              values: {
+                avg: formatDuration(avgDuration, { noSpace: true }),
+                min: formatDuration(minDuration, { noSpace: true }),
+                max: formatDuration(maxDuration, { noSpace: true }),
+              },
+            })}
+            position="top"
+          />
+        ) : (
+          <EuiIconTip
+            title={i18n.translate('xpack.synthetics.overview.metricsTooltip.noMetrics.title', {
+              defaultMessage: 'Metric data is not available',
+            })}
+            content={i18n.translate('xpack.synthetics.overview.metricsTooltip.noMetrics.content', {
+              defaultMessage: 'No metric data available for this monitor',
+            })}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

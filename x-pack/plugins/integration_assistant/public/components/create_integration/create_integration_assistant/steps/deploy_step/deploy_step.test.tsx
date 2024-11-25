@@ -44,7 +44,7 @@ const builtIntegration = new Blob();
 const mockRunBuildIntegration = jest.fn((_: unknown) => builtIntegration);
 const integrationName = 'my_integration_33-1.0.0';
 const mockRunInstallPackage = jest.fn((_: unknown) => ({
-  response: [{ id: 'audit-my_integration_33.data-stream-1.0.0' }],
+  items: [{ id: 'audit-my_integration_33.data-stream-1.0.0', type: 'ingest_pipeline' }],
 }));
 jest.mock('../../../../../common/lib/api', () => ({
   runBuildIntegration: (params: unknown) => mockRunBuildIntegration(params),
@@ -56,7 +56,7 @@ jest.mock('@elastic/filesaver', () => ({
   saveAs: (...params: unknown[]) => mockSaveAs(...params),
 }));
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>

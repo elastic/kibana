@@ -12,15 +12,20 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import { InferenceEndpoints, getInferenceEndpointsProvider } from './embeddable';
 import {
+  AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchInferenceEndpointsConfigType,
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from './types';
+import { INFERENCE_ENDPOINTS_UI_FLAG } from '.';
+import { registerLocators } from './locators';
+import { INFERENCE_ENDPOINTS_PATH } from './components/routes';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
@@ -32,13 +37,26 @@ export class SearchInferenceEndpointsPlugin
   }
 
   public setup(
-    core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>
+    core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>,
+    plugins: AppPluginSetupDependencies
   ): SearchInferenceEndpointsPluginSetup {
-    if (!this.config.ui?.enabled) return {};
-
+    if (
+      !this.config.ui?.enabled &&
+      !core.uiSettings.get<boolean>(INFERENCE_ENDPOINTS_UI_FLAG, false)
+    )
+      return {};
     core.application.register({
       id: PLUGIN_ID,
-      appRoute: '/app/search_inference_endpoints',
+      appRoute: '/app/elasticsearch/relevance',
+      deepLinks: [
+        {
+          id: 'inferenceEndpoints',
+          path: `/${INFERENCE_ENDPOINTS_PATH}`,
+          title: i18n.translate('xpack.searchInferenceEndpoints.InferenceEndpointsLinkLabel', {
+            defaultMessage: 'Inference Endpoints',
+          }),
+        },
+      ],
       title: PLUGIN_NAME,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
@@ -51,6 +69,8 @@ export class SearchInferenceEndpointsPlugin
         return renderApp(coreStart, startDeps, element);
       },
     });
+
+    registerLocators(plugins.share);
 
     return {};
   }

@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EndpointIcon } from './endpoint_icon';
 
-export const EndpointsHeaderAction: React.FC = ({ children }) => {
+export const EndpointsHeaderAction: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const [open, setOpen] = React.useState(false);
 
   return (

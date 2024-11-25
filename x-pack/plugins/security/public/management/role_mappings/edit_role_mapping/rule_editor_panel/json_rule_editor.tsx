@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import 'react-ace';
-import 'brace/mode/json';
-import 'brace/theme/github';
-
 import { EuiButton, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 

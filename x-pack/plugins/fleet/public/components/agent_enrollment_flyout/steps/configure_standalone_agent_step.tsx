@@ -34,6 +34,7 @@ export const ConfigureStandaloneAgentStep = ({
   downloadYaml,
   apiKey,
   onCreateApiKey,
+  isCreatingApiKey,
   isComplete,
   onCopy,
 }: {
@@ -43,6 +44,7 @@ export const ConfigureStandaloneAgentStep = ({
   downloadYaml: () => void;
   apiKey: string | undefined;
   onCreateApiKey: () => void;
+  isCreatingApiKey: boolean;
   isComplete?: boolean;
   onCopy?: () => void;
 }): EuiContainedStepProps => {
@@ -167,7 +169,7 @@ export const ConfigureStandaloneAgentStep = ({
             <EuiSpacer size="s" />
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onCreateApiKey}>
+                <EuiButton onClick={onCreateApiKey} isLoading={isCreatingApiKey}>
                   <FormattedMessage
                     id="xpack.fleet.agentEnrollment.createApiKeyButton"
                     defaultMessage="Create API key"

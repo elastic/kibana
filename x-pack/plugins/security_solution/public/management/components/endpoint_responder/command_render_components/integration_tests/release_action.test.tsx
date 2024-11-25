@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import {
   ConsoleManagerTestComponent,
@@ -15,8 +14,8 @@ import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { enterConsoleCommand } from '../../../console/mocks';
 import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
-import { getDeferred } from '../../../../mocks/utils';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -24,65 +23,100 @@ import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations'
 
 jest.mock('../../../../../common/experimental_features_service');
 
+const prepareTest = () => {
+  // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+  const mockedContext = createAppRootMockRenderer();
+
+  const apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+
+  const render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
+    const renderResult = mockedContext.render(
+      <ConsoleManagerTestComponent
+        registerConsoleProps={() => {
+          return {
+            consoleProps: {
+              'data-test-subj': 'test',
+              commands: getEndpointConsoleCommands({
+                agentType: 'endpoint',
+                endpointAgentId: 'a.b.c',
+                endpointCapabilities: [...capabilities],
+                endpointPrivileges: {
+                  ...getEndpointAuthzInitialState(),
+                  canUnIsolateHost: true,
+                  loading: false,
+                },
+              }),
+            },
+          };
+        }}
+      />
+    );
+
+    const consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(
+      user,
+      renderResult
+    );
+
+    await consoleManagerMockAccess.clickOnRegisterNewConsole();
+    await consoleManagerMockAccess.openRunningConsole();
+
+    return { consoleManagerMockAccess, renderResult };
+  };
+
+  return { apiMocks, render, user };
+};
+
+const prepareTestConsoleClosed = async () => {
+  const { apiMocks, render: _render, user } = prepareTest();
+
+  const render = async () => {
+    const { consoleManagerMockAccess, renderResult } = await _render();
+    await enterConsoleCommand(renderResult, user, 'release');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
+    });
+
+    // Hide the console
+    await consoleManagerMockAccess.hideOpenedConsole();
+
+    return { consoleManagerMockAccess, renderResult };
+  };
+
+  return { apiMocks, render, user };
+};
+
 describe('When using the release action from response actions console', () => {
-  let render: (
-    capabilities?: EndpointCapabilities[]
-  ) => Promise<ReturnType<AppContextTestRender['render']>>;
-  let renderResult: ReturnType<AppContextTestRender['render']>;
-  let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
-  let consoleManagerMockAccess: ReturnType<
-    typeof getConsoleManagerMockRenderResultQueriesAndActions
-  >;
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
 
-  beforeEach(() => {
-    const mockedContext = createAppRootMockRenderer();
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
-    apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
-
-    render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
-      renderResult = mockedContext.render(
-        <ConsoleManagerTestComponent
-          registerConsoleProps={() => {
-            return {
-              consoleProps: {
-                'data-test-subj': 'test',
-                commands: getEndpointConsoleCommands({
-                  agentType: 'endpoint',
-                  endpointAgentId: 'a.b.c',
-                  endpointCapabilities: [...capabilities],
-                  endpointPrivileges: {
-                    ...getEndpointAuthzInitialState(),
-                    canUnIsolateHost: true,
-                    loading: false,
-                  },
-                }),
-              },
-            };
-          }}
-        />
-      );
-
-      consoleManagerMockAccess = getConsoleManagerMockRenderResultQueriesAndActions(renderResult);
-
-      await consoleManagerMockAccess.clickOnRegisterNewConsole();
-      await consoleManagerMockAccess.openRunningConsole();
-
-      return renderResult;
-    };
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should show an error if the `isolation` capability is not present in the endpoint', async () => {
-    await render([]);
-    enterConsoleCommand(renderResult, 'release');
+    const { render, user } = prepareTest();
+    const { renderResult } = await render([]);
+    await enterConsoleCommand(renderResult, user, 'release');
 
-    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'release')
-    );
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+        UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'release')
+      );
+    });
   });
 
   it('should call `release` api when command is entered', async () => {
-    await render();
-    enterConsoleCommand(renderResult, 'release');
+    const { apiMocks, render, user } = prepareTest();
+    const { renderResult } = await render();
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
@@ -91,8 +125,9 @@ describe('When using the release action from response actions console', () => {
   });
 
   it('should accept an optional `--comment`', async () => {
-    await render();
-    enterConsoleCommand(renderResult, 'release --comment "This is a comment"');
+    const { apiMocks, render, user } = prepareTest();
+    const { renderResult } = await render();
+    await enterConsoleCommand(renderResult, user, 'release --comment "This is a comment"');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledWith(
@@ -104,8 +139,9 @@ describe('When using the release action from response actions console', () => {
   });
 
   it('should only accept one `--comment`', async () => {
-    await render();
-    enterConsoleCommand(renderResult, 'release --comment "one" --comment "two"');
+    const { render, user } = prepareTest();
+    const { renderResult } = await render();
+    await enterConsoleCommand(renderResult, user, 'release --comment "one" --comment "two"');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
@@ -113,8 +149,9 @@ describe('When using the release action from response actions console', () => {
   });
 
   it('should call the action status api after creating the `release` request', async () => {
-    await render();
-    enterConsoleCommand(renderResult, 'release');
+    const { apiMocks, render, user } = prepareTest();
+    const { renderResult } = await render();
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
@@ -122,8 +159,9 @@ describe('When using the release action from response actions console', () => {
   });
 
   it('should show success when `release` action completes with no errors', async () => {
-    await render();
-    enterConsoleCommand(renderResult, 'release');
+    const { render, user } = prepareTest();
+    const { renderResult } = await render();
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('release-success')).toBeTruthy();
@@ -131,6 +169,9 @@ describe('When using the release action from response actions console', () => {
   });
 
   it('should show error if release failed to complete successfully', async () => {
+    const { apiMocks, render, user } = prepareTest();
+    const { renderResult } = await render();
+
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
@@ -146,8 +187,8 @@ describe('When using the release action from response actions console', () => {
       },
     };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
-    await render();
-    enterConsoleCommand(renderResult, 'release');
+
+    await enterConsoleCommand(renderResult, user, 'release');
 
     await waitFor(() => {
       expect(renderResult.getByTestId('release-actionFailure').textContent).toMatch(
@@ -156,18 +197,27 @@ describe('When using the release action from response actions console', () => {
     });
   });
 
-  it('should create action request and store id even if console is closed prior to request api response', async () => {
-    const deferrable = getDeferred();
-    apiMocks.responseProvider.releaseHost.mockDelay.mockReturnValue(deferrable.promise);
-    await render();
+  // TODO The last assertion fails after the update to user-event v14 https://github.com/elastic/kibana/pull/189949
+  it.skip('should create action request and store id even if console is closed prior to request api response', async () => {
+    const { apiMocks, render, user } = prepareTest();
+    const { consoleManagerMockAccess, renderResult } = await render();
+
+    apiMocks.responseProvider.releaseHost.mockImplementation(
+      // @ts-expect-error This satisfies the test, but the type is incorrect
+      () => new Promise((resolve) => setTimeout(() => resolve(), 500))
+    );
+    apiMocks.responseProvider.actionDetails.mockImplementation(
+      // @ts-expect-error This satisfies the test, but the type is incorrect
+      () => new Promise((resolve) => setTimeout(() => resolve(), 500))
+    );
 
     // enter command
-    enterConsoleCommand(renderResult, 'release');
+    await enterConsoleCommand(renderResult, user, 'release');
     // hide console
     await consoleManagerMockAccess.hideOpenedConsole();
 
     // Release API response
-    deferrable.resolve();
+    jest.advanceTimersByTime(510);
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
     });
@@ -181,33 +231,17 @@ describe('When using the release action from response actions console', () => {
   });
 
   describe('and when console is closed (not terminated) and then reopened', () => {
-    beforeEach(() => {
-      const _render = render;
-
-      render = async () => {
-        const response = await _render();
-        enterConsoleCommand(response, 'release');
-
-        await waitFor(() => {
-          expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
-          expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
-        });
-
-        // Hide the console
-        await consoleManagerMockAccess.hideOpenedConsole();
-
-        return response;
-      };
-    });
-
     it('should NOT send the `release` request again', async () => {
-      await render();
+      const { apiMocks, render } = await prepareTestConsoleClosed();
+      const { consoleManagerMockAccess } = await render();
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
     });
 
     it('should continue to check action status when still pending', async () => {
+      const { apiMocks, render } = await prepareTestConsoleClosed();
+
       const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
         path: '/api/endpoint/action/1.2.3',
       });
@@ -215,7 +249,8 @@ describe('When using the release action from response actions console', () => {
       pendingDetailResponse.data.isCompleted = false;
       apiMocks.responseProvider.actionDetails.mockClear();
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
-      await render();
+
+      const { consoleManagerMockAccess } = await render();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
 
@@ -227,7 +262,8 @@ describe('When using the release action from response actions console', () => {
     });
 
     it('should display completion output if done (no additional API calls)', async () => {
-      await render();
+      const { apiMocks, render } = await prepareTestConsoleClosed();
+      const { consoleManagerMockAccess } = await render();
       await waitFor(() => {
         expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
       });

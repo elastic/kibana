@@ -66,6 +66,8 @@ describe('useSystemPromptTable', () => {
       const onDeleteActionClicked = jest.fn();
       const columns = result.current.getColumns({
         isActionsDisabled: false,
+        isDeleteEnabled: jest.fn(),
+        isEditEnabled: jest.fn(),
         onEditActionClicked,
         onDeleteActionClicked,
       });

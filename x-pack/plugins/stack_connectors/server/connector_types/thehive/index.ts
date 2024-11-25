@@ -13,6 +13,7 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   UptimeConnectorFeatureId,
+  CasesConnectorFeatureId,
 } from '@kbn/actions-plugin/common/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { TheHiveConnector } from './thehive';
@@ -36,6 +37,7 @@ export function getConnectorType(): TheHiveConnectorType {
       AlertingConnectorFeatureId,
       SecurityConnectorFeatureId,
       UptimeConnectorFeatureId,
+      CasesConnectorFeatureId,
     ],
     schema: {
       config: TheHiveConfigSchema,

@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { TimelineResponse } from '../model/components.gen';
+import { ResolvedTimeline } from '../model/components.gen';
 
 export type ResolveTimelineRequestQuery = z.infer<typeof ResolveTimelineRequestQuery>;
 export const ResolveTimelineRequestQuery = z.object({
@@ -32,8 +32,4 @@ export const ResolveTimelineRequestQuery = z.object({
 export type ResolveTimelineRequestQueryInput = z.input<typeof ResolveTimelineRequestQuery>;
 
 export type ResolveTimelineResponse = z.infer<typeof ResolveTimelineResponse>;
-export const ResolveTimelineResponse = z.object({
-  data: z.object({
-    getOneTimeline: TimelineResponse.nullable(),
-  }),
-});
+export const ResolveTimelineResponse = ResolvedTimeline;

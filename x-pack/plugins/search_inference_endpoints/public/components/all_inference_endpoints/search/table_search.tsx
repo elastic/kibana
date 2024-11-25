@@ -15,7 +15,7 @@ interface TableSearchComponentProps {
 
 export const TableSearch: React.FC<TableSearchComponentProps> = ({ searchKey, setSearchKey }) => {
   const onSearch = useCallback(
-    (newSearch) => {
+    (newSearch: string) => {
       const trimSearch = newSearch.trim();
       setSearchKey(trimSearch);
     },
@@ -29,6 +29,7 @@ export const TableSearch: React.FC<TableSearchComponentProps> = ({ searchKey, se
       onChange={(e) => setSearchKey(e.target.value)}
       onSearch={onSearch}
       value={searchKey}
+      data-test-subj="search-field-endpoints"
     />
   );
 };

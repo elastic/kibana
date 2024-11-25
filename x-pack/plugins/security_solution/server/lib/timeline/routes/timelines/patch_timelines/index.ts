@@ -7,38 +7,40 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import type { ConfigType } from '../../../../..';
-
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
-import { patchTimelineSchema } from '../../../../../../common/api/timeline';
+import {
+  PatchTimelineRequestBody,
+  type PatchTimelineResponse,
+} from '../../../../../../common/api/timeline';
 import { buildFrameworkRequest, TimelineStatusActions } from '../../../utils/common';
 import { createTimelines } from '../create_timelines';
 import { CompareTimelinesStatus } from '../../../utils/compare_timelines_status';
-import type { PatchTimelinesResponse } from '../../../../../../common/api/timeline';
 
-export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter, _: ConfigType) => {
+export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: TIMELINE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
     .addVersion(
       {
         validate: {
-          request: { body: buildRouteValidationWithExcess(patchTimelineSchema) },
+          request: { body: buildRouteValidationWithZod(PatchTimelineRequestBody) },
         },
         version: '2023-10-31',
       },
-      async (context, request, response): Promise<IKibanaResponse<PatchTimelinesResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<PatchTimelineResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -71,13 +73,16 @@ export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter, _: Con
               timelineVersion: version,
             });
 
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: updatedTimeline,
-                },
-              },
-            });
+            if (updatedTimeline.code === 200) {
+              return response.ok({
+                body: updatedTimeline.timeline,
+              });
+            } else {
+              return siemResponse.error({
+                statusCode: updatedTimeline.code,
+                body: updatedTimeline.message,
+              });
+            }
           } else {
             const error = compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.update);
             return siemResponse.error(

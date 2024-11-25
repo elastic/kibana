@@ -71,6 +71,8 @@ const ContextWrapper: React.FC<{ children: React.ReactNode; isILMAvailable: bool
       },
     ]}
     setSelectedIlmPhaseOptions={jest.fn()}
+    defaultStartTime={'now-7d'}
+    defaultEndTime={'now'}
   >
     {children}
   </DataQualityProvider>
@@ -114,7 +116,7 @@ describe('useIlmExplain', () => {
 
     beforeEach(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useIlmExplain(pattern), {
-        wrapper: ({ children }) => (
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
           <DataQualityProvider
             httpFetch={mockHttpFetch}
             telemetryEvents={mockTelemetryEvents}
@@ -159,6 +161,8 @@ describe('useIlmExplain', () => {
               },
             ]}
             setSelectedIlmPhaseOptions={jest.fn()}
+            defaultStartTime={'now-7d'}
+            defaultEndTime={'now'}
           >
             {children}
           </DataQualityProvider>

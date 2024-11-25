@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 require('../../../src/setup_node_env');
@@ -23,12 +24,13 @@ const ROOT = resolve(__dirname, '..');
       includeLabels: ['serverless'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Lists API (Elastic Cloud Serverless)',
+          title: 'Security Lists API (Elastic Cloud Serverless)',
           description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
         },
         tags: [
           {
-            name: 'Security Solution Lists API',
+            name: 'Security Lists API',
+            'x-displayName': 'Security lists',
             description:
               'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
           },
@@ -47,12 +49,13 @@ const ROOT = resolve(__dirname, '..');
       includeLabels: ['ess'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Lists API (Elastic Cloud and self-hosted)',
+          title: 'Security Lists API (Elastic Cloud and self-hosted)',
           description: 'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
         },
         tags: [
           {
-            name: 'Security Solution Lists API',
+            name: 'Security Lists API',
+            'x-displayName': 'Security lists',
             description:
               'Lists API allows you to manage lists of keywords, IPs or IP ranges items.',
           },

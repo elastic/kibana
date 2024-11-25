@@ -24,6 +24,7 @@ export const renderApp = (
   core: CoreStart,
   plugins: InfraClientStartDeps,
   pluginStart: InfraClientStartExports,
+  isLogsExplorerAccessible: boolean,
   { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
 ) => {
   const storage = new Storage(window.localStorage);
@@ -39,6 +40,7 @@ export const renderApp = (
       pluginStart={pluginStart}
       setHeaderActionMenu={setHeaderActionMenu}
       theme$={theme$}
+      isLogsExplorerAccessible={isLogsExplorerAccessible}
     />,
     element
   );
@@ -56,8 +58,18 @@ const LogsApp: React.FC<{
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
   theme$: AppMountParameters['theme$'];
-}> = ({ core, history, pluginStart, plugins, setHeaderActionMenu, storage, theme$ }) => {
-  const uiCapabilities = core.application.capabilities;
+  isLogsExplorerAccessible: boolean;
+}> = ({
+  core,
+  history,
+  pluginStart,
+  plugins,
+  setHeaderActionMenu,
+  storage,
+  theme$,
+  isLogsExplorerAccessible,
+}) => {
+  const { logs } = core.application.capabilities;
 
   return (
     <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
@@ -74,17 +86,21 @@ const LogsApp: React.FC<{
             toastsService={core.notifications.toasts}
           >
             <Routes>
-              <Route
-                path="/"
-                exact
-                render={() =>
-                  plugins.share.url.locators
-                    .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
-                    ?.navigate({})
-                }
-              />
+              {isLogsExplorerAccessible && (
+                <Route
+                  path="/"
+                  exact
+                  render={() => {
+                    plugins.share.url.locators
+                      .get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID)
+                      ?.navigate({});
+
+                    return null;
+                  }}
+                />
+              )}
               <Route path="/link-to" component={LinkToLogsPage} />
-              {uiCapabilities?.logs?.show && <Route path="/" component={LogsPage} />}
+              {logs?.show && <Route path="/" component={LogsPage} />}
             </Routes>
           </KbnUrlStateStorageFromRouterProvider>
         </Router>

@@ -17,7 +17,8 @@ import { EventCollectionCard } from './event_collection_card';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
 import userEvent from '@testing-library/user-event';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { within } from '@testing-library/react';
 
 describe('Policy Event Collection Card common component', () => {
@@ -76,11 +77,11 @@ describe('Policy Event Collection Card common component', () => {
     expect(isChecked('test-network')).toBe(true);
   });
 
-  it('should allow items to be unchecked', () => {
+  it('should allow items to be unchecked', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.events.file', false);
     render();
-    userEvent.click(renderResult.getByTestId('test-file'));
+    await userEvent.click(renderResult.getByTestId('test-file'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -88,7 +89,7 @@ describe('Policy Event Collection Card common component', () => {
     });
   });
 
-  it('should allow items to be checked', () => {
+  it('should allow items to be checked', async () => {
     set(formProps.policy, 'windows.events.file', false);
     formProps.selection.file = false;
 
@@ -102,7 +103,7 @@ describe('Policy Event Collection Card common component', () => {
     );
     expect(isChecked('test-file')).toBe(false);
 
-    userEvent.click(getByTestId('test-file'));
+    await userEvent.click(getByTestId('test-file'));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

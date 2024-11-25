@@ -16,10 +16,12 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/entity_analytics/asset_criticality/types';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { SecuritySolutionLinkButton } from '../../../../common/components/links';
+import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
 import { buildAnnotationsFromError } from '../helpers';
+import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 
 export const AssetCriticalityResultStep: React.FC<{
   result?: BulkUpsertAssetCriticalityRecordsResponse;
@@ -59,18 +61,31 @@ export const AssetCriticalityResultStep: React.FC<{
       <>
         <EuiCallOut
           data-test-subj="asset-criticality-result-step-success"
-          title={i18n.translate(
-            'xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successTitle',
-            { defaultMessage: 'Success' }
-          )}
+          title={
+            <FormattedMessage
+              defaultMessage="Success"
+              id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successTitle"
+            />
+          }
           color="success"
           iconType="checkInCircleFilled"
         >
           <FormattedMessage
-            defaultMessage="Your asset criticality levels have been assigned."
+            defaultMessage="Your asset criticality levels have been assigned. Note that your assignments can take a few moments to populate."
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
+          <EuiSpacer size="s" />
+          <SecuritySolutionLinkButton deepLinkId={SecurityPageName.entityAnalytics} color="success">
+            {
+              <FormattedMessage
+                defaultMessage="View asset criticality assignments."
+                id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.viewAssetCriticalityAssignments"
+              />
+            }
+          </SecuritySolutionLinkButton>
         </EuiCallOut>
+        <EuiSpacer size="s" />
+        <ScheduleRiskEngineCallout />
         <ResultStepFooter onReturn={onReturn} />
       </>
     );

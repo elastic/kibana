@@ -46,6 +46,7 @@ exports[`it renders without crashing 1`] = `
   }
   validator={
     RoleValidator {
+      "buildFlavor": undefined,
       "shouldValidate": undefined,
     }
   }

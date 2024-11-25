@@ -20,6 +20,7 @@ import { getPackageInfo } from '../epm/packages';
 import {
   generateFleetConfig,
   getFullAgentPolicy,
+  getFullMonitoringSettings,
   transformOutputToFullPolicyOutput,
 } from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
@@ -108,7 +109,7 @@ jest.mock('../output', () => {
       getDefaultDataOutputId: async () => 'test-id',
       getDefaultMonitoringOutputId: async () => 'test-id',
       get: (soClient: any, id: string): Output => OUTPUTS[id] || OUTPUTS['test-id'],
-      bulkGet: async (soClient: any, ids: string[]): Promise<Output[]> => {
+      bulkGet: async (ids: string[]): Promise<Output[]> => {
         return ids.map((id) => OUTPUTS[id] || OUTPUTS['test-id']);
       },
     },
@@ -887,6 +888,10 @@ describe('getFullAgentPolicy', () => {
       advanced_settings: {
         agent_limits_go_max_procs: 2,
         agent_logging_level: 'debug',
+        agent_logging_to_files: true,
+        agent_logging_files_rotateeverybytes: 10000,
+        agent_logging_files_keepfiles: 10,
+        agent_logging_files_interval: '7h',
       },
     });
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
@@ -895,8 +900,173 @@ describe('getFullAgentPolicy', () => {
       id: 'agent-policy',
       agent: {
         limits: { go_max_procs: 2 },
-        logging: { level: 'debug' },
+        logging: {
+          level: 'debug',
+          to_files: true,
+          files: { rotateeverybytes: 10000, keepfiles: 10, interval: '7h' },
+        },
       },
+    });
+  });
+});
+
+describe('getFullMonitoringSettings', () => {
+  it('should return the correct settings when all values are present', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: ['metrics', 'logs', 'traces'],
+        monitoring_pprof_enabled: true,
+        monitoring_http: {
+          enabled: true,
+          host: 'localhost',
+          port: 1111,
+        },
+        monitoring_diagnostics: {
+          limit: {
+            interval: '1m',
+            burst: 10,
+          },
+          uploader: {
+            max_retries: 3,
+            init_dur: '1m',
+            max_dur: '10m',
+          },
+        },
+      },
+      {
+        id: 'some-output',
+        is_default: false,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: true,
+      logs: true,
+      metrics: true,
+      traces: true,
+      namespace: 'default',
+      use_output: 'some-output',
+      pprof: { enabled: true },
+      http: {
+        enabled: true,
+        host: 'localhost',
+        port: 1111,
+      },
+      diagnostics: {
+        limit: {
+          interval: '1m',
+          burst: 10,
+        },
+        uploader: {
+          max_retries: 3,
+          init_dur: '1m',
+          max_dur: '10m',
+        },
+      },
+    });
+  });
+
+  it('should return the correct settings when some values are present', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: ['metrics'],
+        monitoring_pprof_enabled: false,
+        monitoring_http: {
+          enabled: true,
+          host: 'localhost',
+        },
+        monitoring_diagnostics: {
+          limit: {
+            interval: '1m',
+          },
+          uploader: {
+            max_dur: '10m',
+          },
+        },
+      },
+      {
+        id: 'some-output',
+        is_default: true,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: true,
+      logs: false,
+      metrics: true,
+      traces: false,
+      namespace: 'default',
+      use_output: 'default',
+      pprof: { enabled: false },
+      http: {
+        enabled: true,
+        host: 'localhost',
+      },
+      diagnostics: {
+        limit: {
+          interval: '1m',
+        },
+        uploader: {
+          max_dur: '10m',
+        },
+      },
+    });
+  });
+
+  it('should return the correct settings when beats monitoring is disabled and minimal values are present', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: [],
+        monitoring_http: {
+          enabled: true,
+        },
+        monitoring_diagnostics: {},
+      },
+      {
+        id: 'some-output',
+        is_default: true,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: true,
+      logs: false,
+      metrics: false,
+      traces: false,
+      http: {
+        enabled: true,
+      },
+    });
+  });
+
+  it('should disable monitoring if beats and http monitoring are disabled', async () => {
+    const monitoringSettings = getFullMonitoringSettings(
+      {
+        namespace: 'default',
+        monitoring_enabled: [],
+        monitoring_http: {
+          enabled: false,
+        },
+        monitoring_diagnostics: {},
+      },
+      {
+        id: 'some-output',
+        is_default: true,
+        type: 'elasticsearch',
+      }
+    );
+
+    expect(monitoringSettings).toEqual({
+      enabled: false,
+      logs: false,
+      metrics: false,
+      traces: false,
     });
   });
 });
@@ -1036,16 +1206,7 @@ ssl.test: 123
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',
       hosts: ['test:9999'],
-      topics: [
-        {
-          topic: 'test',
-        },
-        // Deprecated conditionnal topic
-        {
-          topic: 'deprecated',
-          when: { condition: 'test:100', type: 'equals' },
-        },
-      ],
+      topic: 'test',
       is_default: false,
       is_default_monitoring: false,
       name: 'test output',

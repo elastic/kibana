@@ -66,7 +66,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       expect(filterCountStatus).toBeTruthy();
     });
 
-    it('should call onAlertEventCategorySelected with alert category when filter item is clicked ', () => {
+    it('should call onAlertEventCategorySelected with alert category when filter item is clicked ', async () => {
       const mockAlertEventCategorySelectedEvent = jest.fn();
       renderResult = mockedContext.render(
         <ProcessTreeAlertsFilter
@@ -77,7 +77,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
       const filterButton = renderResult.getByTestId(
         'sessionView:sessionViewAlertDetailsEmptyFilterButton'
       );
-      userEvent.click(filterButton);
+      await userEvent.click(filterButton);
 
       renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network').click();
 
@@ -118,7 +118,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenu = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterSelectorContainerMenu'
@@ -136,7 +136,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-network'
@@ -153,7 +153,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-process'
@@ -170,7 +170,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-file'
@@ -196,7 +196,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-network'
@@ -211,7 +211,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-process'
@@ -226,7 +226,7 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
 
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         const filterMenuItem = renderResult.queryByTestId(
           'sessionView:sessionViewAlertDetailsFilterItem-file'
@@ -255,44 +255,44 @@ describe('ProcessTreeAlertsFiltersFilter component', () => {
         expect(filterButton).toHaveTextContent('View: all alerts');
       });
 
-      it('should set the EmptyFilterButton text content to  display "View: file alerts"  when file alert option is clicked', () => {
+      it('should set the EmptyFilterButton text content to  display "View: file alerts"  when file alert option is clicked', async () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-file').click();
 
         expect(filterButton).toHaveTextContent('View: file alerts');
       });
 
-      it('should set the EmptyFilterButton text content to  display "View: all alerts"  when default filter option is clicked', () => {
+      it('should set the EmptyFilterButton text content to  display "View: all alerts"  when default filter option is clicked', async () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-default').click();
 
         expect(filterButton).toHaveTextContent(`View: ${DEFAULT_ALERT_FILTER_VALUE} alerts`);
       });
 
-      it('should set the EmptyFilterButton text content to  display "View: process alerts"  when process alert option is clicked', () => {
+      it('should set the EmptyFilterButton text content to  display "View: process alerts"  when process alert option is clicked', async () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-process').click();
 
         expect(filterButton).toHaveTextContent('View: process alerts');
       });
 
-      it('should set the EmptyFilterButton text content to  display "View: network alerts"  when network alert option is clicked', () => {
+      it('should set the EmptyFilterButton text content to  display "View: network alerts"  when network alert option is clicked', async () => {
         const filterButton = renderResult.getByTestId(
           'sessionView:sessionViewAlertDetailsEmptyFilterButton'
         );
-        userEvent.click(filterButton);
+        await userEvent.click(filterButton);
 
         renderResult.getByTestId('sessionView:sessionViewAlertDetailsFilterItem-network').click();
 

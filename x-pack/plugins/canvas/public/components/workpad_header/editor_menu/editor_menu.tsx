@@ -21,11 +21,6 @@ import {
 import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public/actions';
 
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../../lib/ui_metric';
-import {
-  useEmbeddablesService,
-  useUiActionsService,
-  useVisualizationsService,
-} from '../../../services';
 import { CANVAS_APP } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { EditorMenu as Component } from './editor_menu.component';
@@ -33,6 +28,11 @@ import { embeddableInputToExpression } from '../../../../canvas_plugin_src/rende
 import { EmbeddableInput as CanvasEmbeddableInput } from '../../../../canvas_plugin_src/expression_types';
 import { useCanvasApi } from '../../hooks/use_canvas_api';
 import { ADD_CANVAS_ELEMENT_TRIGGER } from '../../../state/triggers/add_canvas_element_trigger';
+import {
+  embeddableService,
+  uiActionsService,
+  visualizationsService,
+} from '../../../services/kibana_services';
 
 interface Props {
   /**
@@ -47,18 +47,15 @@ interface UnwrappedEmbeddableFactory {
 }
 
 export const EditorMenu: FC<Props> = ({ addElement }) => {
-  const embeddablesService = useEmbeddablesService();
   const { pathname, search, hash } = useLocation();
-  const stateTransferService = embeddablesService.getStateTransfer();
-  const visualizationsService = useVisualizationsService();
-  const uiActions = useUiActionsService();
+  const stateTransferService = embeddableService.getStateTransfer();
   const canvasApi = useCanvasApi();
 
   const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>>>([]);
 
   const embeddableFactories = useMemo(
-    () => (embeddablesService ? Array.from(embeddablesService.getEmbeddableFactories()) : []),
-    [embeddablesService]
+    () => (embeddableService ? Array.from(embeddableService.getEmbeddableFactories()) : []),
+    []
   );
 
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
@@ -79,7 +76,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
   useEffect(() => {
     let mounted = true;
     async function loadPanelActions() {
-      const registeredActions = await uiActions?.getTriggerCompatibleActions?.(
+      const registeredActions = await uiActionsService.getTriggerCompatibleActions(
         ADD_CANVAS_ELEMENT_TRIGGER,
         { embeddable: canvasApi }
       );
@@ -89,7 +86,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
     return () => {
       mounted = false;
     };
-  }, [uiActions, canvasApi]);
+  }, [canvasApi]);
 
   const createNewVisType = useCallback(
     (visType?: BaseVisType | VisTypeAlias) => () => {

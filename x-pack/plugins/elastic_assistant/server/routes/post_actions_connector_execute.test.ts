@@ -46,7 +46,18 @@ jest.mock('../lib/executor', () => ({
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
 const mockLangChainExecute = langChainExecute as jest.Mock;
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
-jest.mock('./helpers');
+jest.mock('./helpers', () => {
+  const original = jest.requireActual('./helpers');
+
+  return {
+    ...original,
+    getIsKnowledgeBaseInstalled: jest.fn(),
+    appendAssistantMessageToConversation: jest.fn(),
+    langChainExecute: jest.fn(),
+    getPluginNameFromRequest: jest.fn(),
+    getSystemPromptFromUserConversation: jest.fn(),
+  };
+});
 const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
 const appendConversationMessages = jest.fn();
@@ -78,6 +89,9 @@ const mockContext = {
         updateConversation: jest.fn().mockResolvedValue(existingConversation),
         appendConversationMessages:
           appendConversationMessages.mockResolvedValue(existingConversation),
+      }),
+      getAIAssistantPromptsDataClient: jest.fn().mockResolvedValue({
+        findDocuments: jest.fn(),
       }),
       getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
         findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),

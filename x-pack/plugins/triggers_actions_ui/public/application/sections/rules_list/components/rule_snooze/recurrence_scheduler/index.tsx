@@ -8,7 +8,6 @@
 import {
   EuiButtonGroup,
   EuiDatePicker,
-  EuiFormControlLayout,
   EuiFormRow,
   EuiHorizontalRule,
   EuiSelect,
@@ -243,24 +242,20 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           <EuiFormRow
             display="columnCompressed"
             style={{ alignItems: 'center' }}
-            label=" "
+            hasEmptyLabelSpace
             fullWidth
           >
             <EuiDatePicker
               selected={recurrenceEndDate}
               onChange={setRecurrenceEndDate}
               minDate={startDate ?? moment()}
+              compressed
             />
           </EuiFormRow>
         )}
         {recurrenceEnds === 'afterx' && (
-          <EuiFormRow
-            display="columnCompressed"
-            style={{ alignItems: 'center' }}
-            label=" "
-            fullWidth
-          >
-            <EuiFormControlLayout
+          <EuiFormRow display="columnCompressed" hasEmptyLabelSpace fullWidth>
+            <NumberField
               compressed
               prepend={i18n.translate(
                 'xpack.triggersActionsUI.ruleSnoozeScheduler.afterOccurrencesLabel',
@@ -275,14 +270,10 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
                   values: { occurrences },
                 }
               )}
-            >
-              <NumberField
-                compressed
-                min={1}
-                value={occurrences}
-                onChange={(value) => setOccurrrences(Number(value))}
-              />
-            </EuiFormControlLayout>
+              min={1}
+              value={occurrences}
+              onChange={(value) => setOccurrrences(Number(value))}
+            />
           </EuiFormRow>
         )}
       </EuiSplitPanel.Inner>

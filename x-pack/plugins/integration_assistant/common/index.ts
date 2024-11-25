@@ -4,18 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { BuildIntegrationRequestBody } from './api/build_integration/build_integration';
+export { BuildIntegrationRequestBody } from './api/build_integration/build_integration.gen';
 export {
   CategorizationRequestBody,
   CategorizationResponse,
-} from './api/categorization/categorization_route';
+} from './api/categorization/categorization_route.gen';
 export {
   CheckPipelineRequestBody,
   CheckPipelineResponse,
-} from './api/check_pipeline/check_pipeline';
-export { EcsMappingRequestBody, EcsMappingResponse } from './api/ecs/ecs_route';
-export { RelatedRequestBody, RelatedResponse } from './api/related/related_route';
-export { AnalyzeLogsRequestBody, AnalyzeLogsResponse } from './api/analyze_logs/analyze_logs_route';
+} from './api/check_pipeline/check_pipeline.gen';
+export { EcsMappingRequestBody, EcsMappingResponse } from './api/ecs/ecs_route.gen';
+export { RelatedRequestBody, RelatedResponse } from './api/related/related_route.gen';
+export {
+  AnalyzeLogsRequestBody,
+  AnalyzeLogsResponse,
+} from './api/analyze_logs/analyze_logs_route.gen';
+export { CelInputRequestBody, CelInputResponse } from './api/cel/cel_input_route.gen';
+
+export { partialShuffleArray } from './utils';
 
 export type {
   DataStream,
@@ -23,12 +29,15 @@ export type {
   Integration,
   Pipeline,
   Docs,
-  SamplesFormat,
-} from './api/model/common_attributes';
-export type { ESProcessorItem } from './api/model/processor_attributes';
+  LangSmithOptions,
+} from './api/model/common_attributes.gen';
+export { SamplesFormat, SamplesFormatName } from './api/model/common_attributes.gen';
+export type { ESProcessorItem } from './api/model/processor_attributes.gen';
+export type { CelInput } from './api/model/cel_input_attributes.gen';
 
 export {
   CATEGORIZATION_GRAPH_PATH,
+  CEL_INPUT_GRAPH_PATH,
   ECS_GRAPH_PATH,
   INTEGRATION_ASSISTANT_APP_ROUTE,
   INTEGRATION_ASSISTANT_BASE_PATH,

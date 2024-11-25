@@ -34,5 +34,9 @@ spec:
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
+        kibana-security:
+          access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+      tags:
+        - kibana

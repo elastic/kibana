@@ -62,11 +62,15 @@ export const transformFilters: SearchFilterConfig[] = [
 ];
 
 function stringMatch(str: string | undefined, substr: any) {
-  return (
-    typeof str === 'string' &&
-    typeof substr === 'string' &&
-    (str.toLowerCase().match(substr.toLowerCase()) === null) === false
-  );
+  try {
+    return (
+      typeof str === 'string' &&
+      typeof substr === 'string' &&
+      (str.toLowerCase().match(substr.toLowerCase()) === null) === false
+    );
+  } catch (error) {
+    return false;
+  }
 }
 
 export const filterTransforms = (transforms: TransformListRow[], clauses: Clause[]) => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -30,6 +31,7 @@ export interface FieldPopoverHeaderProps {
   buttonAddFilterProps?: Partial<EuiButtonIconProps>;
   buttonEditFieldProps?: Partial<EuiButtonIconProps>;
   buttonDeleteFieldProps?: Partial<EuiButtonIconProps>;
+  onAddBreakdownField?: (field: DataViewField | undefined) => void;
   onAddFieldToWorkspace?: (field: DataViewField) => unknown;
   onAddFilter?: AddFieldFilterHandler;
   onEditField?: (fieldName: string) => unknown;
@@ -46,6 +48,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   buttonAddFilterProps,
   buttonEditFieldProps,
   buttonDeleteFieldProps,
+  onAddBreakdownField,
   onAddFieldToWorkspace,
   onAddFilter,
   onEditField,
@@ -81,6 +84,13 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
     defaultMessage: 'Delete data view field',
   });
 
+  const addBreakdownFieldTooltip = i18n.translate(
+    'unifiedFieldList.fieldPopover.addBreakdownFieldLabel',
+    {
+      defaultMessage: 'Add breakdown',
+    }
+  );
+
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -102,6 +112,21 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
                 onClick={() => {
                   closePopover();
                   onAddFieldToWorkspace(field);
+                }}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {onAddBreakdownField && (
+          <EuiFlexItem grow={false} data-test-subj="fieldPopoverHeader_addBreakdownField">
+            <EuiToolTip content={addBreakdownFieldTooltip}>
+              <EuiButtonIcon
+                data-test-subj={`fieldPopoverHeader_addBreakdownField-${field.name}`}
+                aria-label={addBreakdownFieldTooltip}
+                iconType="visBarVerticalStacked"
+                onClick={() => {
+                  closePopover();
+                  onAddBreakdownField(field);
                 }}
               />
             </EuiToolTip>
@@ -167,7 +192,7 @@ export const FieldPopoverHeader: React.FC<FieldPopoverHeaderProps> = ({
   );
 };
 
-const FieldDescriptionWrapper: React.FC = ({ children }) => {
+const FieldDescriptionWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   return (
     <>
       <EuiSpacer size="xs" />

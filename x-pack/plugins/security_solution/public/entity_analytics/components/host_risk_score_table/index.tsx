@@ -8,7 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type {
   Columns,
   Criteria,
@@ -33,7 +33,7 @@ import * as i18nHosts from './translations';
 
 import { SeverityBadges } from '../severity/severity_badges';
 import { SeverityBar } from '../severity/severity_bar';
-import { SeverityFilterGroup } from '../severity/severity_filter_group';
+import { SeverityFilter } from '../severity/severity_filter';
 
 import type { SeverityCount } from '../severity/types';
 import { RiskInformationButtonEmpty } from '../risk_information';
@@ -185,12 +185,13 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
             <RiskInformationButtonEmpty riskEntity={RiskScoreEntity.host} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <SeverityFilterGroup
-              selectedSeverities={severitySelectionRedux}
-              severityCount={severityCount}
-              onSelect={onSelect}
-              riskEntity={RiskScoreEntity.host}
-            />
+            <EuiFilterGroup>
+              <SeverityFilter
+                selectedItems={severitySelectionRedux}
+                onSelect={onSelect}
+                riskEntity={RiskScoreEntity.host}
+              />
+            </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

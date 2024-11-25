@@ -7,14 +7,13 @@
 
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
 
 import {
   EnableRuleRequestParamsV1,
   enableRuleRequestParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/enable';
-
 export const enableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
@@ -34,6 +33,15 @@ export const enableRuleRoute = (
         response: {
           204: {
             description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
+          403: {
+            description: 'Indicates that this call is forbidden.',
+          },
+          404: {
+            description: 'Indicates a rule with the given ID does not exist.',
           },
         },
       },

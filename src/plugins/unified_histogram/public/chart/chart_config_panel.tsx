@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React, { ComponentProps, useCallback, useEffect, useRef, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type { AggregateQuery, Query } from '@kbn/es-query';
@@ -12,6 +14,7 @@ import { isEqual, isObject } from 'lodash';
 import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { EditLensConfigPanelComponent } from '@kbn/lens-plugin/public/plugin';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { deriveLensSuggestionFromLensAttributes } from '../utils/external_vis_context';
 
 import {
@@ -142,5 +145,13 @@ export function ChartConfigPanel({
     currentSuggestionType,
   ]);
 
-  return isPlainRecord ? editLensConfigPanel : null;
+  const flyoutElement = isPlainRecord ? editLensConfigPanel : null;
+
+  useEffect(() => {
+    if (flyoutElement) {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.lensEdit);
+    }
+  }, [flyoutElement]);
+
+  return flyoutElement;
 }

@@ -8,6 +8,7 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import { hasNoParams } from '../../formatters/formatting_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
@@ -94,6 +95,7 @@ export const getNormalizeCommonFields = ({
       : defaultFields[ConfigKey.PARAMS],
     // picking out keys specifically, so users can't add arbitrary fields
     [ConfigKey.ALERT_CONFIG]: getAlertConfig(monitor),
+    [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
   };
   return { normalizedFields, errors };
 };
@@ -407,6 +409,10 @@ export const getOptionalListField = (value?: string[] | string): string[] => {
  * @returns `true` if `new URL` does not throw an error, `false` otherwise
  */
 export const isValidURL = (url: string): boolean => {
+  if (!hasNoParams(url)) {
+    // this is done to avoid parsing urls with variables
+    return true;
+  }
   try {
     new URL(url);
     return true;
@@ -459,7 +465,9 @@ export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = ''
     return acc;
   }, {});
 
-export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) => {
+export const normalizeYamlConfig = (data: NormalizedProjectProps['monitor']) => {
+  // we map fields to labels
+  const { fields: _fields, ...monitor } = data;
   const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
   const supportedKeys = Object.keys(defaultFields);
   const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);

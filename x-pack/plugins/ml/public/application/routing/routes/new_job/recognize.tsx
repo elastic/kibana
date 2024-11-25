@@ -17,11 +17,9 @@ import { useMlApi, useMlKibana, useNavigateToPath } from '../../../contexts/kiba
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { mlJobServiceFactory } from '../../../services/job_service';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
 import { DataSourceContextProvider } from '../../../contexts/ml';
-import { useToastNotificationService } from '../../../services/toast_notification_service';
 
 const Page = dynamic(async () => ({
   default: (await import('../../../jobs/new_job/recognize')).Page,
@@ -56,12 +54,10 @@ export const checkViewOrCreateRouteFactory = (): MlRoute => ({
 const PageWrapper: FC<PageProps> = ({ location }) => {
   const { id } = parse(location.search, { sort: false });
   const mlApi = useMlApi();
-  const toastNotificationService = useToastNotificationService();
 
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),
-    existingJobsAndGroups: () =>
-      mlJobServiceFactory(toastNotificationService, mlApi).getJobAndGroupIds(),
+    existingJobsAndGroups: () => mlApi.jobs.getAllJobAndGroupIds(),
   });
 
   return (

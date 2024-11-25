@@ -90,32 +90,13 @@
     "functions": [
       {
         "parentPluginId": "ml",
-        "id": "def-public.getMlSharedImports",
-        "type": "Function",
-        "tags": [],
-        "label": "getMlSharedImports",
-        "description": [],
-        "signature": [
-          "() => Promise<typeof ",
-          "x-pack/plugins/ml/public/shared",
-          ">"
-        ],
-        "path": "x-pack/plugins/ml/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-public.MLJobsAwaitingNodeWarning",
         "type": "Function",
         "tags": [],
         "label": "MLJobsAwaitingNodeWarning",
         "description": [],
         "signature": [
-          "({ jobIds }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ jobIds }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
         "deprecated": false,
@@ -124,12 +105,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-public.MLJobsAwaitingNodeWarning.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ jobIds }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
             "deprecated": false,
@@ -148,7 +129,7 @@
         "label": "MlNodeAvailableWarningShared",
         "description": [],
         "signature": [
-          "({ nodeAvailableCallback, size }: React.PropsWithChildren<Props>) => JSX.Element | null"
+          "({ nodeAvailableCallback, size }: Props) => React.JSX.Element | null"
         ],
         "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
         "deprecated": false,
@@ -157,12 +138,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-public.MlNodeAvailableWarningShared.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ nodeAvailableCallback, size }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
             "deprecated": false,
@@ -499,7 +480,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; canCreateInferenceEndpoint: boolean; }"
+              "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canDeleteForecast: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; canCreateInferenceEndpoint: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false,
@@ -1080,22 +1061,6 @@
       },
       {
         "parentPluginId": "ml",
-        "id": "def-public.GetMlSharedImportsReturnType",
-        "type": "Type",
-        "tags": [],
-        "label": "GetMlSharedImportsReturnType",
-        "description": [],
-        "signature": [
-          "typeof ",
-          "x-pack/plugins/ml/public/shared"
-        ],
-        "path": "x-pack/plugins/ml/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-public.MlLocator",
         "type": "Type",
         "tags": [],
@@ -1188,7 +1153,7 @@
         "label": "ML_PAGES",
         "description": [],
         "signature": [
-          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly DATA_DRIFT_INDEX_SELECT: \"data_drift_index_select\"; readonly DATA_DRIFT_CUSTOM: \"data_drift_custom\"; readonly DATA_DRIFT: \"data_drift\"; readonly NODES: \"nodes\"; readonly MEMORY_USAGE: \"memory_usage\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_ESQL: \"datavisualizer/esql\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC: \"jobs/new_job/single_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC: \"jobs/new_job/multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC: \"jobs/new_job/convert_to_multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_POPULATION: \"jobs/new_job/population\"; readonly ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION: \"jobs/new_job/categorization\"; readonly ANOMALY_DETECTION_CREATE_JOB_RARE: \"jobs/new_job/rare\"; readonly ANOMALY_DETECTION_CREATE_JOB_GEO: \"jobs/new_job/geo\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: \"jobs/new_job/convert_to_advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS: \"jobs/new_job/from_pattern_analysis\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: \"jobs/new_job/from_map\"; readonly ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: \"modules/check_view_or_create\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly OVERVIEW: \"overview\"; readonly NOTIFICATIONS: \"notifications\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; readonly AIOPS_LOG_RATE_ANALYSIS: \"aiops/log_rate_analysis\"; readonly AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT: \"aiops/log_rate_analysis_index_select\"; readonly AIOPS_LOG_CATEGORIZATION: \"aiops/log_categorization\"; readonly AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: \"aiops/log_categorization_index_select\"; readonly AIOPS_CHANGE_POINT_DETECTION: \"aiops/change_point_detection\"; readonly AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: \"aiops/change_point_detection_index_select\"; }"
+          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly DATA_DRIFT_INDEX_SELECT: \"data_drift_index_select\"; readonly DATA_DRIFT_CUSTOM: \"data_drift_custom\"; readonly DATA_DRIFT: \"data_drift\"; readonly NODES: \"nodes\"; readonly MEMORY_USAGE: \"memory_usage\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly SUPPLIED_CONFIGURATIONS: \"supplied_configurations\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_ESQL: \"datavisualizer/esql\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC: \"jobs/new_job/single_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC: \"jobs/new_job/multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC: \"jobs/new_job/convert_to_multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_POPULATION: \"jobs/new_job/population\"; readonly ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION: \"jobs/new_job/categorization\"; readonly ANOMALY_DETECTION_CREATE_JOB_RARE: \"jobs/new_job/rare\"; readonly ANOMALY_DETECTION_CREATE_JOB_GEO: \"jobs/new_job/geo\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: \"jobs/new_job/convert_to_advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS: \"jobs/new_job/from_pattern_analysis\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: \"jobs/new_job/from_map\"; readonly ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: \"modules/check_view_or_create\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_DST_MANAGE: \"settings/calendars_dst_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_DST_NEW: \"settings/calendars_dst_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly CALENDARS_DST_EDIT: \"settings/calendars_dst_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly OVERVIEW: \"overview\"; readonly NOTIFICATIONS: \"notifications\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; readonly AIOPS_LOG_RATE_ANALYSIS: \"aiops/log_rate_analysis\"; readonly AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT: \"aiops/log_rate_analysis_index_select\"; readonly AIOPS_LOG_CATEGORIZATION: \"aiops/log_categorization\"; readonly AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: \"aiops/log_categorization_index_select\"; readonly AIOPS_CHANGE_POINT_DETECTION: \"aiops/change_point_detection\"; readonly AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: \"aiops/change_point_detection_index_select\"; }"
         ],
         "path": "x-pack/plugins/ml/common/constants/locator.ts",
         "deprecated": false,
@@ -1284,17 +1249,23 @@
         "MlPutDatafeedResponse",
         ">; updateDatafeed({ datafeedId, datafeedConfig, }: { datafeedId: string; datafeedConfig: Partial<",
         "MlDatafeed",
-        ">; }): Promise<any>; deleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceDeleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; startDatafeed({ datafeedId, start, end, }: { datafeedId: string; start?: number | undefined; end?: number | undefined; }): Promise<any>; stopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceStopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; datafeedPreview({ datafeedId }: { datafeedId: string; }): Promise<any>; validateDetector({ detector }: { detector: ",
-        "MlDetector",
-        "; }): Promise<any>; forecast({ jobId, duration }: { jobId: string; duration?: string | undefined; }): Promise<any>; overallBuckets({ jobId, topN, bucketSpan, start, end, overallScore, }: { jobId: string; topN: string; bucketSpan: string; start: number; end: number; overallScore?: number | undefined; }): Promise<any>; hasPrivileges(obj: any): Promise<",
+        ">; }): Promise<any>; deleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceDeleteDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; startDatafeed({ datafeedId, start, end, }: { datafeedId: string; start?: number | undefined; end?: number | undefined; }): Promise<any>; stopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; forceStopDatafeed({ datafeedId }: { datafeedId: string; }): Promise<any>; datafeedPreview({ datafeedId }: { datafeedId: string; }): Promise<any>; forecast({ jobId, duration, neverExpires, }: { jobId: string; duration?: string | undefined; neverExpires?: boolean | undefined; }): Promise<any>; deleteForecast({ jobId, forecastId }: { jobId: string; forecastId: string; }): Promise<",
+        "DeleteForecastResponse",
+        ">; overallBuckets({ jobId, topN, bucketSpan, start, end, overallScore, }: { jobId: string[]; topN: string; bucketSpan: string; start: number; end: number; overallScore?: number | undefined; }): Promise<",
+        "MlGetOverallBucketsResponse",
+        ">; hasPrivileges(obj: any): Promise<",
         "MlHasPrivilegesResponse",
         ">; checkMlCapabilities(): Promise<",
         "MlCapabilitiesResponse",
         ">; checkIndicesExists({ indices }: { indices: string[]; }): Promise<Record<string, { exists: boolean; }>>; recognizeIndex({ indexPatternTitle, filter, }: { indexPatternTitle: string; filter?: string[] | undefined; }): Promise<",
         "RecognizeResult",
-        "[]>; listDataRecognizerModules(filter?: string[] | undefined): Promise<any>; getDataRecognizerModule({ moduleId, filter }: { moduleId: string; filter?: string[] | undefined; }): Promise<",
+        "[]>; recognizeModule({ moduleId, size }: { moduleId: string; size?: number | undefined; }): Promise<",
+        "RecognizeModuleResult",
+        ">; listDataRecognizerModules(filter?: string[] | undefined): Promise<any>; getDataRecognizerModule(params?: { moduleId: string; filter?: string[] | undefined; } | undefined): Promise<",
         "Module",
-        ">; dataRecognizerModuleJobsExist({ moduleId }: { moduleId: string; }): Promise<any>; setupDataRecognizerConfig({ moduleId, prefix, groups, indexPatternName, query, useDedicatedIndex, startDatafeed, start, end, jobOverrides, estimateModelMemory, }: { moduleId: string; prefix?: string | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; query?: any; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; start?: number | undefined; end?: number | undefined; jobOverrides?: Partial<",
+        " | ",
+        "Module",
+        "[]>; dataRecognizerModuleJobsExist({ moduleId }: { moduleId: string; }): Promise<any>; setupDataRecognizerConfig({ moduleId, prefix, groups, indexPatternName, query, useDedicatedIndex, startDatafeed, start, end, jobOverrides, estimateModelMemory, }: { moduleId: string; prefix?: string | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; query?: any; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; start?: number | undefined; end?: number | undefined; jobOverrides?: Partial<",
         "MlJob",
         ">[] | undefined; estimateModelMemory?: boolean | undefined; }): Promise<",
         "DataRecognizerConfigResponse",
@@ -1303,9 +1274,9 @@
         "[]; samplerShardSize?: number | undefined; runtimeMappings?: ",
         "MappingRuntimeFields",
         " | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
-        "Calendar",
+        "MlCalendar",
         "[]>; addCalendar(obj: ",
-        "Calendar",
+        "MlCalendar",
         "): Promise<any>; updateCalendar(obj: ",
         "UpdateCalendar",
         "): Promise<any>; deleteCalendar({ calendarId }: { calendarId?: string | undefined; }): Promise<any>; mlNodeCount(): Promise<",
@@ -1415,7 +1386,13 @@
           "text": "DataFrameAnalyticsConfig"
         },
         ">): Promise<",
-        "ValidateAnalyticsJobResponse",
+        {
+          "pluginId": "@kbn/ml-validators",
+          "scope": "common",
+          "docId": "kibKbnMlValidatorsPluginApi",
+          "section": "def-common.ValidateAnalyticsJobResponse",
+          "text": "ValidateAnalyticsJobResponse"
+        },
         ">; newJobCapsAnalytics(indexPatternTitle: string, isRollup?: boolean): Promise<",
         {
           "pluginId": "@kbn/ml-anomaly-utils",
@@ -1696,7 +1673,11 @@
         },
         ">; getTrainedModelsNodesOverview(): Promise<",
         "NodesOverviewResponse",
-        ">; startModelAllocation(modelId: string, queryParams?: { number_of_allocations: number; threads_per_allocation: number; priority: \"normal\" | \"low\"; deployment_id?: string | undefined; } | undefined): Promise<{ acknowledge: boolean; }>; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
+        ">; startModelAllocation(modelId: string, queryParams?: ",
+        "CommonDeploymentParams",
+        " | undefined, bodyParams?: ",
+        "AdaptiveAllocationsParams",
+        " | undefined): Promise<{ acknowledge: boolean; }>; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
         {
           "pluginId": "@kbn/ml-error-utils",
           "scope": "common",
@@ -1704,7 +1685,9 @@
           "section": "def-common.ErrorType",
           "text": "ErrorType"
         },
-        "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: { number_of_allocations: number; }): Promise<{ acknowledge: boolean; }>; inferTrainedModel(modelId: string, deploymentsId: string, payload: { docs: Record<string, any>[]; inference_config?: ",
+        "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: ",
+        "UpdateAllocationParams",
+        "): Promise<{ acknowledge: boolean; }>; inferTrainedModel(modelId: string, deploymentsId: string, payload: { docs: Record<string, any>[]; inference_config?: ",
         "MlInferenceConfigUpdateContainer",
         " | undefined; } | undefined, timeout?: string | undefined): Promise<",
         "MlInferTrainedModelResponse",
@@ -1752,7 +1735,7 @@
         "GetSchemaDefinitionParams",
         "): Promise<object>; }; } | undefined; components: { AnomalySwimLane: React.ForwardRefExoticComponent<",
         "AnomalySwimLaneProps",
-        " & { children?: React.ReactNode; } & React.RefAttributes<{}>>; }; }"
+        " & React.RefAttributes<{}>>; }; }"
       ],
       "path": "x-pack/plugins/ml/public/plugin.ts",
       "deprecated": false,
@@ -2708,41 +2691,6 @@
     "functions": [
       {
         "parentPluginId": "ml",
-        "id": "def-common.composeValidators",
-        "type": "Function",
-        "tags": [],
-        "label": "composeValidators",
-        "description": [
-          "\nComposes multiple validators into a single function"
-        ],
-        "signature": [
-          "(validators: ((value: any) => { [key: string]: any; } | null)[]) => (value: any) => { [key: string]: any; } | null"
-        ],
-        "path": "x-pack/plugins/ml/common/util/validators.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.composeValidators.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "validators",
-            "description": [],
-            "signature": [
-              "((value: any) => { [key: string]: any; } | null)[]"
-            ],
-            "path": "x-pack/plugins/ml/common/util/validators.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
         "id": "def-common.getDefaultCapabilities",
         "type": "Function",
         "tags": [],
@@ -2756,41 +2704,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "ml",
-        "id": "def-common.patternValidator",
-        "type": "Function",
-        "tags": [],
-        "label": "patternValidator",
-        "description": [
-          "\nProvides a validator function for checking against pattern."
-        ],
-        "signature": [
-          "(pattern: RegExp) => (value: string) => { pattern: { matchPattern: string; }; } | null"
-        ],
-        "path": "x-pack/plugins/ml/common/util/validators.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "ml",
-            "id": "def-common.patternValidator.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "pattern",
-            "description": [],
-            "signature": [
-              "RegExp"
-            ],
-            "path": "x-pack/plugins/ml/common/util/validators.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
         "returnComment": [],
         "initialIsOpen": false
       }

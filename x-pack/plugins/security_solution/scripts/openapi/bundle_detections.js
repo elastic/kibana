@@ -22,13 +22,14 @@ const ROOT = resolve(__dirname, '../..');
       includeLabels: ['serverless'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Detections API (Elastic Cloud Serverless)',
+          title: 'Security Detections API (Elastic Cloud Serverless)',
           description:
             'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
         },
         tags: [
           {
-            name: 'Security Solution Detections API',
+            name: 'Security Detections API',
+            'x-displayName': 'Security detections',
             description:
               'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
           },
@@ -47,13 +48,14 @@ const ROOT = resolve(__dirname, '../..');
       includeLabels: ['ess'],
       prototypeDocument: {
         info: {
-          title: 'Security Solution Detections API (Elastic Cloud and self-hosted)',
+          title: 'Security Detections API (Elastic Cloud and self-hosted)',
           description:
             'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
         },
         tags: [
           {
-            name: 'Security Solution Detections API',
+            name: 'Security Detections API',
+            'x-displayName': 'Security detections',
             description:
               'You can create rules that automatically turn events and external alerts sent to Elastic Security into detection alerts. These alerts are displayed on the Detections page.',
           },

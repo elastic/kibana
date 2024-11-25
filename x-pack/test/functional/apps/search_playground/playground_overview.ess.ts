@@ -110,6 +110,7 @@ export default function (ftrContext: FtrProviderContext) {
         before(async () => {
           await createConnector();
           await createIndex();
+          await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
 
@@ -170,6 +171,10 @@ export default function (ftrContext: FtrProviderContext) {
 
         it('save selected fields between modes', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectSaveFieldsBetweenModes();
+        });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
         });
       });
 

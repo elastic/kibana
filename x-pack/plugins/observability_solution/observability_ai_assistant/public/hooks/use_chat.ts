@@ -10,6 +10,7 @@ import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import {
   MessageRole,
   type Message,
@@ -55,6 +56,7 @@ interface UseChatPropsWithoutContext {
   disableFunctions?: boolean;
   onConversationUpdate?: (event: ConversationCreateEvent | ConversationUpdateEvent) => void;
   onChatComplete?: (messages: Message[]) => void;
+  scopes: AssistantScope[];
 }
 
 export type UseChatProps = Omit<UseChatPropsWithoutContext, 'notifications'>;
@@ -70,6 +72,7 @@ function useChatWithoutContext({
   onChatComplete,
   persist,
   disableFunctions,
+  scopes,
 }: UseChatPropsWithoutContext): UseChatResult {
   const [chatState, setChatState] = useState(ChatState.Ready);
   const systemMessage = useMemo(() => {
@@ -101,9 +104,10 @@ function useChatWithoutContext({
     (error: Error) => {
       if (error instanceof AbortError) {
         setChatState(ChatState.Aborted);
-      } else {
-        setChatState(ChatState.Error);
+        return;
       }
+
+      setChatState(ChatState.Error);
 
       if (isTokenLimitReachedError(error)) {
         setMessages((msgs) => [
@@ -161,6 +165,7 @@ function useChatWithoutContext({
         disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
         conversationId,
+        scopes,
       });
 
       function getPendingMessages() {
@@ -259,6 +264,7 @@ function useChatWithoutContext({
       disableFunctions,
       service,
       systemMessage,
+      scopes,
     ]
   );
 

@@ -10,3 +10,5 @@ export const CREATE_FIELD_BUTTON = '[data-test-subj="create-field"]';
 export const RUNTIME_FIELD_INPUT = '.indexPatternFieldEditorMaskOverlay [data-test-subj="input"]';
 
 export const SAVE_FIELD_BUTTON = '[data-test-subj="fieldSaveButton"]';
+
+export const TIMELINE_CREATE_FIELD_BUTTON = '[data-test-subj="dataView-add-field_btn"]';

@@ -37,12 +37,13 @@ describe('useFileValidation', () => {
   test('should call onError when an error occurs', () => {
     const onErrorMock = jest.fn();
     const onCompleteMock = jest.fn();
+    const invalidFileType = 'invalid file type';
 
     const { result } = renderHook(
       () => useFileValidation({ onError: onErrorMock, onComplete: onCompleteMock }),
       { wrapper: TestProviders }
     );
-    result.current(new File([invalidLine], 'test.csv'));
+    result.current(new File([invalidLine], 'test.csv', { type: invalidFileType }));
 
     expect(onErrorMock).toHaveBeenCalled();
     expect(onCompleteMock).not.toHaveBeenCalled();

@@ -10,29 +10,36 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
 import { DisabledCallout } from '../monitors_page/management/disabled_callout';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { EditMonitorNotFound } from './edit_monitor_not_found';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
-import { getServiceLocations, selectServiceLocationsState } from '../../state';
+import {
+  getMonitorAction,
+  getServiceLocations,
+  selectServiceLocationsState,
+  selectSyntheticsMonitor,
+  selectSyntheticsMonitorError,
+  selectSyntheticsMonitorLoading,
+} from '../../state';
 import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { LocationsLoadingError } from './locations_loading_error';
 import { MonitorDetailsLinkPortal } from './monitor_details_portal';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
-import { getDecryptedMonitorAPI } from '../../state/monitor_management/api';
 import { EDIT_MONITOR_STEPS } from './steps/step_config';
 import { useMonitorNotFound } from './hooks/use_monitor_not_found';
+import { useGetUrlParams } from '../../hooks';
 
 export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { spaceId } = useGetUrlParams();
   useMonitorAddEditBreadcrumbs(true);
   const dispatch = useDispatch();
   const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
@@ -43,17 +50,15 @@ export const MonitorEditPage: React.FC = () => {
     }
   }, [locationsLoaded, dispatch]);
 
-  const { data, loading, error } = useFetcher(() => {
-    return getDecryptedMonitorAPI({ id: monitorId });
-    // FIXME: Dario thinks there is a better way to do this but
-    // he's getting tired and maybe the Synthetics folks can fix it
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const data = useSelector(selectSyntheticsMonitor);
+  const isLoading = useSelector(selectSyntheticsMonitorLoading);
+  const error = useSelector(selectSyntheticsMonitorError);
 
-  const monitorNotFoundError = useMonitorNotFound(
-    error as IHttpFetchError<ResponseErrorBody>,
-    data?.id
-  );
+  useEffect(() => {
+    dispatch(getMonitorAction.get({ monitorId, spaceId }));
+  }, [dispatch, monitorId, spaceId]);
+
+  const monitorNotFoundError = useMonitorNotFound(error, data?.id);
 
   const canUsePublicLocations = useCanUsePublicLocations(data?.[ConfigKey.LOCATIONS]);
 
@@ -93,7 +98,7 @@ export const MonitorEditPage: React.FC = () => {
     );
   }
 
-  return data && locationsLoaded && !loading && !error ? (
+  return data && locationsLoaded && !isLoading && !error ? (
     <>
       <DisabledCallout />
       <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />

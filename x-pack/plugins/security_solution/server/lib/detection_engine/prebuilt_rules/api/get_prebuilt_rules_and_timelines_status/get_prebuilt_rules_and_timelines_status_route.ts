@@ -6,8 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { checkTimelineStatusRt } from '../../../../../../common/api/timeline';
+import { InstallPrepackedTimelinesRequestBody } from '../../../../../../common/api/timeline';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -31,8 +30,10 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
     .get({
       access: 'public',
       path: PREBUILT_RULES_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(
@@ -69,10 +70,8 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (router: SecuritySolution
 
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const prebuiltTimelineStatus = await checkTimelinesStatus(frameworkRequest);
-          const [validatedPrebuiltTimelineStatus] = validate(
-            prebuiltTimelineStatus,
-            checkTimelineStatusRt
-          );
+          const validatedPrebuiltTimelineStatus =
+            InstallPrepackedTimelinesRequestBody.parse(prebuiltTimelineStatus);
 
           const responseBody: ReadPrebuiltRulesAndTimelinesStatusResponse = {
             rules_custom_installed: customRules.total,

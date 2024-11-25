@@ -13,7 +13,7 @@
         "signature": [
           "({ label, icon, onClick, dataTestSubj, }: { label: string; icon?: ",
           "IconType",
-          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => JSX.Element"
+          " | undefined; onClick: () => void; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/chart_switch_trigger.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
             "section": "def-public.ColorPickerProps",
             "text": "ColorPickerProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/color_picker.tsx",
         "deprecated": false,
@@ -96,7 +96,7 @@
           "\nWhen testing this component, mock the \"debounce\" function in lodash (see this module test for an example)"
         ],
         "signature": [
-          "(props: Props) => JSX.Element"
+          "(props: Props) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/debounced_input.tsx",
         "deprecated": false,
@@ -133,7 +133,7 @@
           "DimensionButtonProps",
           "> & { readonly type: ({ groupLabel, children, onClick, onRemoveClick, accessorConfig, label, message, ...otherProps }: ",
           "DimensionButtonProps",
-          ") => JSX.Element; }"
+          ") => React.JSX.Element; }"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/dimension_button.tsx",
         "deprecated": false,
@@ -150,7 +150,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -165,7 +165,7 @@
         "label": "DimensionEditorSection",
         "description": [],
         "signature": [
-          "({ children, title, }: { title?: string | undefined; children?: React.ReactNode | React.ReactNode[]; }) => JSX.Element"
+          "({ children, title, }: { title?: string | undefined; children?: React.ReactNode | React.ReactNode[]; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_editor_section.tsx",
         "deprecated": false,
@@ -224,9 +224,9 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
           "Property",
-          ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
+          ".Color | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
         "deprecated": false,
@@ -251,7 +251,7 @@
                 "label": "label",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/trigger.tsx",
                 "deprecated": false,
@@ -279,7 +279,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -315,7 +315,7 @@
         "label": "DragDropBuckets",
         "description": [],
         "signature": [
-          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined; }) => JSX.Element"
+          "({\n  items,\n  onDragStart,\n  onDragEnd,\n  droppableId,\n  children,\n  bgColor,\n}: { items: T[]; droppableId: string; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>[]; onDragStart?: (() => void) | undefined; onDragEnd?: ((items: T[]) => void) | undefined; bgColor?: \"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"transparent\" | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
         "deprecated": false,
@@ -427,7 +427,7 @@
                 "label": "bgColor",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"transparent\" | undefined"
+                  "\"warning\" | \"success\" | \"plain\" | \"subdued\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"transparent\" | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
                 "deprecated": false,
@@ -471,7 +471,7 @@
           "BucketContainerProps",
           "> | undefined; }, Omit<",
           "BucketContainerProps",
-          ", \"draggableProvided\">>>) => JSX.Element"
+          ", \"draggableProvided\">>>) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/buckets.tsx",
         "deprecated": false,
@@ -527,7 +527,7 @@
         "label": "EmptyDimensionButton",
         "description": [],
         "signature": [
-          "({ label, ariaLabel, onClick, dataTestSubj, iconType, ...otherProps }: { label: React.ReactNode; ariaLabel: string; onClick: () => void; dataTestSubj?: string | undefined; iconType?: string | undefined; }) => JSX.Element"
+          "({ label, ariaLabel, onClick, dataTestSubj, iconType, ...otherProps }: { label: React.ReactNode; ariaLabel: string; onClick: () => void; dataTestSubj?: string | undefined; iconType?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
         "deprecated": false,
@@ -552,7 +552,7 @@
                 "label": "label",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/empty_button.tsx",
                 "deprecated": false,
@@ -629,7 +629,7 @@
         "signature": [
           "(props: ",
           "FieldPickerProps",
-          "<T>) => JSX.Element"
+          "<T>) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/field_picker/field_picker.tsx",
         "deprecated": false,
@@ -665,7 +665,7 @@
         "signature": [
           "({ idx, onRemoveClick, removeTitle, children, draggableProvided, isNotRemovable, isNotDraggable, isDragging, \"data-test-subj\": dataTestSubj, }: ",
           "BucketContainerProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/fields_bucket_container.tsx",
         "deprecated": false,
@@ -700,7 +700,7 @@
         "signature": [
           "({\n  inputFilter,\n  onChange,\n  dataView,\n  helpMessage,\n  label = filterByLabel,\n  initiallyOpen,\n  ['data-test-subj']: dataTestSubj,\n  queryInputServices,\n  appName,\n}: ",
           "FilterQueryInputProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
         "deprecated": false,
@@ -776,7 +776,7 @@
             "section": "def-public.IconSet",
             "text": "IconSet"
           },
-          "<Icon>; defaultIcon?: string | undefined; }) => JSX.Element"
+          "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
         "deprecated": false,
@@ -891,7 +891,7 @@
             "section": "def-public.IconSet",
             "text": "IconSet"
           },
-          "<Icon>; defaultIcon?: string | undefined; }) => JSX.Element"
+          "<Icon>; defaultIcon?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/icon_select.tsx",
         "deprecated": false,
@@ -1179,7 +1179,7 @@
         "label": "LineStyleSettings",
         "description": [],
         "signature": [
-          "({ currentConfig, setConfig, idPrefix, }: { currentConfig?: LineStyleConfig | undefined; setConfig: (config: LineStyleConfig) => void; idPrefix: string; }) => JSX.Element"
+          "({ currentConfig, setConfig, idPrefix, }: { currentConfig?: LineStyleConfig | undefined; setConfig: (config: LineStyleConfig) => void; idPrefix: string; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/line_style_settings.tsx",
         "deprecated": false,
@@ -1267,7 +1267,7 @@
         "label": "NameInput",
         "description": [],
         "signature": [
-          "({ value, onChange, defaultValue, }: { value: string; onChange: (value: string) => void; defaultValue?: string | undefined; }) => JSX.Element"
+          "({ value, onChange, defaultValue, }: { value: string; onChange: (value: string) => void; defaultValue?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/name_input.tsx",
         "deprecated": false,
@@ -1355,7 +1355,7 @@
         "label": "NewBucketButton",
         "description": [],
         "signature": [
-          "({ label, onClick, isDisabled, className, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => JSX.Element"
+          "({ label, onClick, isDisabled, className, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
         "deprecated": false,
@@ -1412,7 +1412,7 @@
             "section": "def-public.QueryInputServices",
             "text": "QueryInputServices"
           },
-          "; }) => JSX.Element"
+          "; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/query_input/query_input.tsx",
         "deprecated": false,
@@ -1617,7 +1617,7 @@
         "label": "TextDecorationSetting",
         "description": [],
         "signature": [
-          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined; }) => JSX.Element"
+          "({\n  idPrefix,\n  currentConfig,\n  setConfig,\n  isQueryBased,\n  children,\n}: { idPrefix: string; currentConfig?: TextDecorationConfig | undefined; setConfig: (config: TextDecorationConfig) => void; isQueryBased?: boolean | undefined; children?: ((textDecoration: \"none\" | \"name\" | \"field\") => JSX.Element | null) | undefined; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-visualization-ui-components/components/text_decoration_setting.tsx",
         "deprecated": false,
@@ -1854,7 +1854,7 @@
             "label": "triggerIconType",
             "description": [],
             "signature": [
-              "\"none\" | \"color\" | \"aggregate\" | \"disabled\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
+              "\"none\" | \"disabled\" | \"color\" | \"aggregate\" | \"custom\" | \"colorBy\" | \"invisible\" | undefined"
             ],
             "path": "packages/kbn-visualization-ui-components/components/dimension_buttons/types.ts",
             "deprecated": false,

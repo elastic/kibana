@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseAssistantParams, UseAssistantResult } from './use_assistant';
 import { useAssistant } from './use_assistant';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
@@ -25,7 +25,7 @@ const renderUseAssistant = () =>
   });
 
 describe('useAssistant', () => {
-  let hookResult: RenderHookResult<UseAssistantParams, UseAssistantResult>;
+  let hookResult: RenderHookResult<UseAssistantResult, UseAssistantParams>;
 
   it(`should return showAssistant true and a value for promptContextId`, () => {
     jest.mocked(useAssistantAvailability).mockReturnValue({
@@ -33,6 +33,7 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest
@@ -51,6 +52,7 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest
@@ -69,6 +71,7 @@ describe('useAssistant', () => {
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
       hasUpdateAIAssistantAnonymization: true,
+      hasManageGlobalKnowledgeBase: true,
       isAssistantEnabled: true,
     });
     jest

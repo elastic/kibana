@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import { connector, choices } from '../mock';
 import { useGetChoices } from './use_get_choices';
@@ -23,6 +23,16 @@ const useGetChoicesMock = useGetChoices as jest.Mock;
 let appMockRenderer: AppMockRenderer;
 
 describe('ServiceNowITSM Fields', () => {
+  let user: UserEvent;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   const fields = {
     severity: '1',
     urgency: '2',
@@ -32,6 +42,10 @@ describe('ServiceNowITSM Fields', () => {
   };
 
   beforeEach(() => {
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
     appMockRenderer = createAppMockRenderer();
     useGetChoicesMock.mockReturnValue({
       isLoading: false,
@@ -169,7 +183,7 @@ describe('ServiceNowITSM Fields', () => {
         );
 
         const select = await screen.findByTestId(`${subj}Select`);
-        userEvent.selectOptions(select, '4 - Low');
+        await user.selectOptions(select, '4 - Low');
 
         expect(select).toHaveValue('4');
       })
@@ -193,21 +207,20 @@ describe('ServiceNowITSM Fields', () => {
       [impactSelect, 'impact'],
     ];
 
-    selectables.forEach(([element]) => {
-      userEvent.selectOptions(element, ['2']);
-    });
-
+    for (const [element] of selectables) {
+      await user.selectOptions(element, ['2']);
+    }
     const categorySelect = await screen.findByTestId('categorySelect');
 
     expect(await within(categorySelect).findByRole('option', { name: 'Software' }));
 
-    userEvent.selectOptions(categorySelect, ['software']);
+    await user.selectOptions(categorySelect, ['software']);
 
     const subcategorySelect = await screen.findByTestId('subcategorySelect');
 
     expect(await within(subcategorySelect).findByRole('option', { name: 'Operation System' }));
 
-    userEvent.selectOptions(subcategorySelect, ['os']);
+    await user.selectOptions(subcategorySelect, ['os']);
 
     expect(severitySelect).toHaveValue('2');
     expect(urgencySelect).toHaveValue('2');
@@ -227,7 +240,7 @@ describe('ServiceNowITSM Fields', () => {
 
     expect(await within(categorySelect).findByRole('option', { name: 'Software' }));
 
-    userEvent.selectOptions(categorySelect, ['software']);
+    await user.selectOptions(categorySelect, ['software']);
 
     const subcategorySelect = await screen.findByTestId('subcategorySelect');
 
@@ -235,7 +248,7 @@ describe('ServiceNowITSM Fields', () => {
 
     expect(subcategorySelect).toHaveValue('os');
 
-    userEvent.selectOptions(categorySelect, ['Privilege Escalation']);
+    await user.selectOptions(categorySelect, ['Privilege Escalation']);
 
     await waitFor(() => {
       expect(subcategorySelect).not.toHaveValue();

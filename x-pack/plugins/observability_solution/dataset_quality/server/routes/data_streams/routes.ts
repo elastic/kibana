@@ -6,16 +6,18 @@
  */
 
 import * as t from 'io-ts';
-import { keyBy, merge, values } from 'lodash';
 import {
   DataStreamDetails,
   DataStreamSettings,
   DataStreamStat,
-  DegradedDocs,
   NonAggregatableDatasets,
   DegradedFieldResponse,
   DatasetUserPrivileges,
   DegradedFieldValues,
+  DegradedFieldAnalysis,
+  DataStreamDocsStat,
+  UpdateFieldLimitResponse,
+  DataStreamRolloverResponse,
 } from '../../../common/api_types';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -27,6 +29,11 @@ import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { getDegradedFields } from './get_degraded_fields';
 import { getDegradedFieldValues } from './get_degraded_field_values';
+import { analyzeDegradedField } from './get_degraded_field_analysis';
+import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
+import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
+import { updateFieldLimit } from './update_field_limit';
+import { createDatasetQualityESClient } from '../../utils';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -47,30 +54,41 @@ const statsRoute = createDatasetQualityServerRoute({
   }> {
     const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
-    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
+    const isServerless = (await getEsCapabilities()).serverless;
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClientAsSecondaryAuthUser = coreContext.elasticsearch.client.asSecondaryAuthUser;
 
-    const { items, datasetUserPrivileges } = await getDataStreams({
+    const { dataStreams, datasetUserPrivileges } = await getDataStreams({
       esClient,
       ...params.query,
       uncategorisedOnly: false,
     });
 
-    const privilegedDataStreams = items.filter((stream) => {
-      return stream.userPrivileges.canMonitor;
+    const privilegedDataStreams = dataStreams.filter((dataStream) => {
+      return dataStream.userPrivileges.canMonitor;
     });
 
-    const dataStreamsStats = await getDataStreamsStats({
-      esClient,
-      dataStreams: privilegedDataStreams.map((stream) => stream.name),
-      sizeStatsAvailable,
-    });
+    const dataStreamsStats = isServerless
+      ? await getDataStreamsMeteringStats({
+          esClient: esClientAsSecondaryAuthUser,
+          dataStreams: privilegedDataStreams.map((stream) => stream.name),
+        })
+      : await getDataStreamsStats({
+          esClient,
+          dataStreams: privilegedDataStreams.map((stream) => stream.name),
+        });
 
     return {
       datasetUserPrivileges,
-      dataStreamsStats: values(merge(keyBy(items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
+      dataStreamsStats: dataStreams.map((dataStream: DataStreamStat) => {
+        dataStream.size = dataStreamsStats[dataStream.name]?.size;
+        dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
+        dataStream.totalDocs = dataStreamsStats[dataStream.name]?.totalDocs;
+
+        return dataStream;
+      }),
     };
   },
 });
@@ -80,7 +98,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   params: t.type({
     query: t.intersection([
       rangeRt,
-      typeRt,
+      t.type({ types: typesRt }),
       t.partial({
         datasetQuery: t.string,
       }),
@@ -90,18 +108,12 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
-    degradedDocs: DegradedDocs[];
+    degradedDocs: DataStreamDocsStat[];
   }> {
     const { context, params } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-    await datasetQualityPrivileges.throwIfCannotReadDataset(
-      esClient,
-      params.query.type,
-      params.query.datasetQuery
-    );
 
     const degradedDocs = await getDegradedDocsPaginated({
       esClient,
@@ -110,6 +122,39 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
 
     return {
       degradedDocs,
+    };
+  },
+});
+
+const totalDocsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/total_docs',
+  params: t.type({
+    query: t.intersection([rangeRt, typeRt]),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<{
+    totalDocs: DataStreamDocsStat[];
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
+
+    const { type, start, end } = params.query;
+
+    const totalDocs = await getAggregatedDatasetPaginatedResults({
+      esClient,
+      start,
+      end,
+      index: `${type}-*-*`,
+    });
+
+    return {
+      totalDocs,
     };
   },
 });
@@ -265,29 +310,115 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     const { start, end } = params.query;
     const coreContext = await context.core;
 
-    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const esClient = coreContext.elasticsearch.client;
 
-    const sizeStatsAvailable = !(await getEsCapabilities()).serverless;
+    const isServerless = (await getEsCapabilities()).serverless;
     const dataStreamDetails = await getDataStreamDetails({
       esClient,
       dataStream,
       start,
       end,
-      sizeStatsAvailable,
+      isServerless,
     });
 
     return dataStreamDetails;
   },
 });
 
+const analyzeDegradedFieldRoute = createDatasetQualityServerRoute({
+  endpoint:
+    'GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/analyze',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+      degradedField: t.string,
+    }),
+    query: t.type({
+      lastBackingIndex: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DegradedFieldAnalysis> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const degradedFieldAnalysis = await analyzeDegradedField({
+      esClient,
+      dataStream: params.path.dataStream,
+      degradedField: params.path.degradedField,
+      lastBackingIndex: params.query.lastBackingIndex,
+    });
+
+    return degradedFieldAnalysis;
+  },
+});
+
+const updateFieldLimitRoute = createDatasetQualityServerRoute({
+  endpoint: 'PUT /internal/dataset_quality/data_streams/{dataStream}/update_field_limit',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+    body: t.type({
+      newFieldLimit: t.number,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<UpdateFieldLimitResponse> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const updatedLimitResponse = await updateFieldLimit({
+      esClient,
+      newFieldLimit: params.body.newFieldLimit,
+      dataStream: params.path.dataStream,
+    });
+
+    return updatedLimitResponse;
+  },
+});
+
+const rolloverDataStream = createDatasetQualityServerRoute({
+  endpoint: 'POST /internal/dataset_quality/data_streams/{dataStream}/rollover',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DataStreamRolloverResponse> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+    const datasetQualityESClient = createDatasetQualityESClient(esClient);
+
+    const { acknowledged } = await datasetQualityESClient.rollover({
+      alias: params.path.dataStream,
+    });
+
+    return { acknowledged };
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
+  ...totalDocsRoute,
   ...nonAggregatableDatasetsRoute,
   ...nonAggregatableDatasetRoute,
   ...degradedFieldsRoute,
   ...degradedFieldValuesRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
+  ...analyzeDegradedFieldRoute,
+  ...updateFieldLimitRoute,
+  ...rolloverDataStream,
 };

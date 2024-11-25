@@ -13,7 +13,7 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { useLocalStorage } from 'react-use';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
 import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
@@ -21,13 +21,13 @@ import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
 import { UpsellingProvider } from '../../common/components/upselling_provider';
-import { mockFindAnonymizationFieldsResponse } from '../mock/mock_find_anonymization_fields_response';
+import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymization_fields_response';
 import {
   getMockUseAttackDiscoveriesWithCachedAttackDiscoveries,
   getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading,
-} from '../mock/mock_use_attack_discovery';
+} from './mock/mock_use_attack_discovery';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
-import { useAttackDiscovery } from '../use_attack_discovery';
+import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
 const mockConnectors: unknown[] = [
@@ -38,15 +38,10 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-use', () => {
-  const actual = jest.requireActual('react-use');
-
-  return {
-    ...actual,
-    useLocalStorage: jest.fn().mockReturnValue(['test-id', jest.fn()]),
-    useSessionStorage: jest.fn().mockReturnValue([undefined, jest.fn()]),
-  };
-});
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['test-id', jest.fn()]));
+jest.mock('react-use/lib/useSessionStorage', () =>
+  jest.fn().mockReturnValue([undefined, jest.fn()])
+);
 
 jest.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
@@ -80,7 +75,7 @@ jest.mock('../../common/links', () => ({
   }),
 }));
 
-jest.mock('../use_attack_discovery', () => ({
+jest.mock('./use_attack_discovery', () => ({
   useAttackDiscovery: jest.fn().mockReturnValue({
     approximateFutureTime: null,
     attackDiscoveries: [],

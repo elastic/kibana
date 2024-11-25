@@ -7,6 +7,7 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { AssociatedFilter } from '../../../common/notes/constants';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
@@ -348,7 +349,6 @@ export const mockGlobalState: State = {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventIdToNoteIds: { '1': ['1'] },
@@ -357,7 +357,6 @@ export const mockGlobalState: State = {
         historyIds: [],
         isFavorite: false,
         isLive: false,
-        isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null },
         loadingEventIds: [],
@@ -445,7 +444,7 @@ export const mockGlobalState: State = {
     [TableId.test]: EMPTY_RESOLVER,
     [TimelineId.test]: EMPTY_RESOLVER,
     [TimelineId.active]: EMPTY_RESOLVER,
-    flyout: EMPTY_RESOLVER,
+    [`securitySolution-${TableId.test}`]: EMPTY_RESOLVER,
   },
   sourcerer: {
     ...mockSourcererState,
@@ -527,12 +526,14 @@ export const mockGlobalState: State = {
     ids: ['1'],
     status: {
       fetchNotesByDocumentIds: ReqStatus.Idle,
+      fetchNotesBySavedObjectIds: ReqStatus.Idle,
       createNote: ReqStatus.Idle,
       deleteNotes: ReqStatus.Idle,
       fetchNotes: ReqStatus.Idle,
     },
     error: {
       fetchNotesByDocumentIds: null,
+      fetchNotesBySavedObjectIds: null,
       createNote: null,
       deleteNotes: null,
       fetchNotes: null,
@@ -547,6 +548,8 @@ export const mockGlobalState: State = {
       direction: 'desc' as const,
     },
     filter: '',
+    createdByFilter: '',
+    associatedFilter: AssociatedFilter.all,
     search: '',
     selectedIds: [],
     pendingDeleteIds: [],

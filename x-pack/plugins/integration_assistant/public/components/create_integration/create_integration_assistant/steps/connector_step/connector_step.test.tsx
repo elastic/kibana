@@ -41,7 +41,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
   ConnectorAddModal: () => <div data-test-subj="connectorAddModal" />,
 }));
 
-const wrapper: React.FC = ({ children }) => (
+const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <TestProvider>
     <ActionsProvider value={mockActions}>{children}</ActionsProvider>
   </TestProvider>

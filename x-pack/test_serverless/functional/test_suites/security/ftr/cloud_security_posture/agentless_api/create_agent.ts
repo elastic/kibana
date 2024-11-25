@@ -29,6 +29,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
+      // If process.env.TEST_CLOUD is set, then the test is running in the Serverless Quality Gates
+      // and this MSW server will be listening for a request that will never come.
       mockApiServer = mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8089
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
@@ -51,6 +53,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.selectSetupTechnology('agentless');
       await cisIntegration.selectAwsCredentials('direct');
+
+      if (
+        process.env.TEST_CLOUD &&
+        process.env.CSPM_AWS_ACCOUNT_ID &&
+        process.env.CSPM_AWS_SECRET_KEY
+      ) {
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
+          process.env.CSPM_AWS_ACCOUNT_ID
+        );
+
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID,
+          process.env.CSPM_AWS_SECRET_KEY
+        );
+      }
 
       await pageObjects.header.waitUntilLoadingHasFinished();
 

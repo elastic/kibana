@@ -8,10 +8,15 @@
 import { createParser } from 'eventsource-parser';
 import { partition } from 'lodash';
 import { merge, of, throwError } from 'rxjs';
-import { InferenceTaskEvent } from '../../common/tasks';
+import type { InferenceTaskEvent } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
+import type { Logger } from '@kbn/logging';
 
 describe('observableIntoEventSourceStream', () => {
+  const logger = {
+    debug: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
   function renderStream<T extends InferenceTaskEvent>(events: Array<T | Error>) {
     const [inferenceEvents, errors] = partition(
       events,
@@ -20,7 +25,7 @@ describe('observableIntoEventSourceStream', () => {
 
     const source$ = merge(of(...inferenceEvents), ...errors.map((error) => throwError(error)));
 
-    const stream = observableIntoEventSourceStream(source$);
+    const stream = observableIntoEventSourceStream(source$, logger);
 
     return new Promise<string[]>((resolve, reject) => {
       const chunks: string[] = [];

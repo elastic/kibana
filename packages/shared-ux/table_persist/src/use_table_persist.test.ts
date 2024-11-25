@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Criteria } from '@elastic/eui';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { CriteriaWithPagination } from '@elastic/eui';
+import { renderHook, act } from '@testing-library/react';
 import { useEuiTablePersist } from './use_table_persist';
 import { createStorage } from './storage'; // Mock this if it's external
 
@@ -57,7 +58,7 @@ describe('useEuiTablePersist', () => {
     };
 
     act(() => {
-      result.current.onTableChange(nextCriteria as Criteria<any>);
+      result.current.onTableChange(nextCriteria as CriteriaWithPagination<any>);
     });
 
     expect(result.current.pageSize).toBe(100);
@@ -84,7 +85,7 @@ describe('useEuiTablePersist', () => {
     };
 
     act(() => {
-      result.current.onTableChange(nextCriteria as Criteria<any>);
+      result.current.onTableChange(nextCriteria as CriteriaWithPagination<any>);
     });
 
     expect(customOnTableChange).toHaveBeenCalledWith(nextCriteria);
@@ -97,7 +98,7 @@ describe('useEuiTablePersist', () => {
     const { result } = renderHook(() => useEuiTablePersist({ tableId: 'testTable' }));
 
     act(() => {
-      result.current.onTableChange({}); // Empty change
+      result.current.onTableChange({} as CriteriaWithPagination<any>); // Empty change
     });
 
     expect(result.current.pageSize).toBe(25);
@@ -117,7 +118,7 @@ describe('useEuiTablePersist', () => {
     };
 
     act(() => {
-      result.current.onTableChange(nextCriteria as Criteria<any>);
+      result.current.onTableChange(nextCriteria as CriteriaWithPagination<any>);
     });
 
     expect(result.current.pageSize).toBe(100);

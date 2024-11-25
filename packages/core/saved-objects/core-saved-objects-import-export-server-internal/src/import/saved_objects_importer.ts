@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsImporter,
@@ -26,15 +28,18 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #importSizeLimit: number;
   readonly #importHooks: Record<string, SavedObjectsImportHook[]>;
+  readonly #log: Logger;
 
   constructor({
     savedObjectsClient,
     typeRegistry,
     importSizeLimit,
+    logger,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     importSizeLimit: number;
+    logger: Logger;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
@@ -45,6 +50,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       }
       return hooks;
     }, {} as Record<string, SavedObjectsImportHook[]>);
+    this.#log = logger;
   }
 
   public import({
@@ -68,6 +74,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
       typeRegistry: this.#typeRegistry,
       importHooks: this.#importHooks,
       managed,
+      log: this.#log,
     });
   }
 
@@ -79,6 +86,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     retries,
     managed,
   }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+    this.#log.debug('Resolving import errors');
     return resolveSavedObjectsImportErrors({
       readStream,
       createNewCopies,

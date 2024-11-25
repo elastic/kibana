@@ -119,13 +119,6 @@ export const WEBSITE_URL_LABEL = i18n.translate(
   }
 );
 
-export const WEBSITE_URL_PLACEHOLDER = i18n.translate(
-  'xpack.synthetics.monitorManagement.websiteUrlPlaceholder',
-  {
-    defaultMessage: 'Enter a website URL',
-  }
-);
-
 export const WEBSITE_URL_HELP_TEXT = i18n.translate(
   'xpack.synthetics.monitorManagement.websiteUrlHelpText',
   {

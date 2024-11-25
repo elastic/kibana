@@ -45,7 +45,7 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
   );
 
   const handleTimelineChange = useCallback(
-    (timelineTitle, timelineId, graphEventId) => {
+    (timelineTitle: string, timelineId: string | null, graphEventId?: string) => {
       const url = formatUrl(getTimelineUrl(timelineId ?? '', graphEventId), {
         absolute: true,
         skipSearch: true,
@@ -78,7 +78,7 @@ const TimelineEditor = memo(TimelineEditorComponent);
 export const plugin = ({
   interactionsUpsellingMessage,
 }: {
-  interactionsUpsellingMessage: string | null;
+  interactionsUpsellingMessage?: string;
 }): EuiMarkdownEditorUiPlugin => {
   return {
     name: ID,

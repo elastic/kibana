@@ -7,11 +7,9 @@
 
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { enableManagementCardsLanding } from './management_cards';
 import { initSideNavigation } from './side_navigation';
 
 export const startNavigation = (services: Services) => {
   initSideNavigation(services);
   subscribeBreadcrumbs(services);
-  enableManagementCardsLanding(services);
 };

@@ -90,6 +90,7 @@ export interface NewPackagePolicy {
     privileges?: {
       cluster?: string[];
     };
+    [key: string]: any;
   };
   overrides?: { inputs?: { [key: string]: any } } | null;
 }

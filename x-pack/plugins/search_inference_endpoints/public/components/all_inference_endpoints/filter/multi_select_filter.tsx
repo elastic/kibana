@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
+import _ from 'lodash';
 import * as i18n from './translations';
 
 export interface MultiSelectFilterOption {
@@ -32,6 +33,7 @@ interface UseFilterParams {
   options: MultiSelectFilterOption[];
   renderOption?: (option: MultiSelectFilterOption) => React.ReactNode;
   selectedOptionKeys?: string[];
+  dataTestSubj?: string;
 }
 
 export const MultiSelectFilter: React.FC<UseFilterParams> = ({
@@ -40,18 +42,22 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   options: rawOptions,
   selectedOptionKeys = [],
   renderOption,
+  dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
-  const options: MultiSelectFilterOption[] = rawOptions.map(({ key, label }) => ({
-    label,
-    key,
-    checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
-  }));
+  const options: MultiSelectFilterOption[] = _.uniqBy(
+    rawOptions.map(({ key, label }) => ({
+      label,
+      key,
+      checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
+    })),
+    'label'
+  );
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup data-test-subj={dataTestSubj}>
       <EuiPopover
         ownFocus
         button={

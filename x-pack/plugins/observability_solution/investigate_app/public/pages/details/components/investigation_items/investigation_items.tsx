@@ -6,35 +6,21 @@
  */
 
 import datemath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { GetInvestigationResponse, Item } from '@kbn/investigation-shared';
-import { pick } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { useRenderItems } from '../../hooks/use_render_items';
+import { EventsTimeLine } from '../events_timeline/events_timeline';
+import { useInvestigation } from '../../contexts/investigation_context';
 import { AddInvestigationItem } from '../add_investigation_item/add_investigation_item';
 import { InvestigationItemsList } from '../investigation_items_list/investigation_items_list';
 import { InvestigationSearchBar } from '../investigation_search_bar/investigation_search_bar';
+import { AssistantHypothesis } from '../assistant_hypothesis/assistant_hypothesis';
 
-export interface Props {
-  investigation: GetInvestigationResponse;
-}
-
-export function InvestigationItems({ investigation }: Props) {
-  const {
-    renderableItems,
-    globalParams,
-    updateInvestigationParams,
-    addItem,
-    deleteItem,
-    isAdding,
-    isDeleting,
-  } = useRenderItems({
-    investigation,
-  });
+export function InvestigationItems() {
+  const { globalParams, updateInvestigationParams, investigation } = useInvestigation();
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="column" gutterSize="m">
+    <>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <InvestigationSearchBar
           dateRangeFrom={globalParams.timeRange.from}
           dateRangeTo={globalParams.timeRange.to}
@@ -44,28 +30,27 @@ export function InvestigationItems({ investigation }: Props) {
               to: datemath.parse(dateRange.to)!.toISOString(),
             };
 
-            updateInvestigationParams({ ...globalParams, timeRange: nextTimeRange });
+            updateInvestigationParams({ timeRange: nextTimeRange });
           }}
         />
 
         <EuiFlexItem grow={false}>
-          <InvestigationItemsList
-            isLoading={isAdding || isDeleting}
-            items={renderableItems}
-            onItemCopy={async (copiedItem) => {
-              await addItem(pick(copiedItem, ['title', 'type', 'params']));
-            }}
-            onItemDelete={async (deletedItem) => {
-              await deleteItem(deletedItem.id);
-            }}
-          />
+          <EventsTimeLine />
+        </EuiFlexItem>
+
+        {investigation?.id && (
+          <EuiFlexItem grow={false}>
+            <AssistantHypothesis investigationId={investigation.id} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <InvestigationItemsList />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <AddInvestigationItem
-        timeRange={globalParams.timeRange}
-        onItemAdd={async (item: Item) => await addItem(item)}
-      />
-    </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      <AddInvestigationItem />
+    </>
   );
 }

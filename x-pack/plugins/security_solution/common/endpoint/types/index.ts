@@ -538,6 +538,7 @@ export interface HostMetadataInterface {
     status: EndpointStatus;
     policy: {
       applied: {
+        /** The Endpoint integration policy UUID */
         id: string;
         status: HostPolicyResponseActionStatus;
         name: string;
@@ -705,6 +706,8 @@ export type WinlogEvent = Partial<{
  * Safer version of ResolverEvent. Please use this going forward.
  */
 export type SafeEndpointEvent = Partial<{
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp': ECSField<number>;
   agent: Partial<{
     id: ECSField<string>;
@@ -815,6 +818,8 @@ export type SafeEndpointEvent = Partial<{
 }>;
 
 export interface SafeLegacyEndpointEvent {
+  _id: ECSField<string>;
+  _index: ECSField<string>;
   '@timestamp'?: ECSField<number>;
   /**
    * 'legacy' events must have an `endgame` key.
@@ -1325,17 +1330,6 @@ export interface HostPolicyResponse {
  */
 export interface GetHostPolicyResponse {
   policy_response: HostPolicyResponse;
-}
-
-/**
- * REST API response for retrieving agent summary
- */
-export interface GetAgentSummaryResponse {
-  summary_response: {
-    package: string;
-    policy_id?: string;
-    versions_count: { [key: string]: number };
-  };
 }
 
 /**

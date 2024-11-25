@@ -9,20 +9,12 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { deleteIndex, addIndex, createPackagePolicy } from '../helper';
+import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
+import { createPackagePolicy } from '../helper';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
-
-const INDEX_ARRAY = [
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-];
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -30,6 +22,8 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const findingsIndex = new EsIndexDataProvider(es, FINDINGS_INDEX_DEFAULT_NS);
+  const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_INDEX_DEFAULT_NS);
 
   describe('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
@@ -49,13 +43,13 @@ export default function (providerContext: FtrProviderContext) {
           });
 
         agentPolicyId = agentPolicyResponse.item.id;
-        await deleteIndex(es, INDEX_ARRAY);
-        await addIndex(es, findingsMockData, FINDINGS_INDEX_DEFAULT_NS);
-        await addIndex(es, vulnerabilityMockData, VULNERABILITIES_INDEX_DEFAULT_NS);
+        await findingsIndex.deleteAll();
+        await vulnerabilitiesIndex.deleteAll();
       });
 
       afterEach(async () => {
-        await deleteIndex(es, INDEX_ARRAY);
+        await findingsIndex.deleteAll();
+        await vulnerabilitiesIndex.deleteAll();
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
@@ -69,6 +63,8 @@ export default function (providerContext: FtrProviderContext) {
           'vanilla',
           'kspm'
         );
+
+        await findingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
@@ -92,6 +88,8 @@ export default function (providerContext: FtrProviderContext) {
           'cspm'
         );
 
+        await findingsIndex.addBulk(findingsMockData);
+
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -113,6 +111,8 @@ export default function (providerContext: FtrProviderContext) {
           'aws',
           'vuln_mgmt'
         );
+
+        await vulnerabilitiesIndex.addBulk(vulnerabilityMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertest
           .get(`/internal/cloud_security_posture/status`)

@@ -19,6 +19,7 @@ import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,
   formatAnomalyDetectionJobManagementUrl,
+  formatSuppliedConfigurationsManagementUrl,
   formatExplorerUrl,
   formatSingleMetricViewerUrl,
   formatDataFrameAnalyticsCreateJobUrl,
@@ -28,6 +29,7 @@ import {
   formatGenericMlUrl,
   formatEditCalendarUrl,
   formatEditFilterUrl,
+  formatEditCalendarDstUrl,
 } from './formatters';
 import {
   formatTrainedModelsManagementUrl,
@@ -45,6 +47,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
     switch (params.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
         path = formatAnomalyDetectionJobManagementUrl('', params.pageState);
+        break;
+      case ML_PAGES.SUPPLIED_CONFIGURATIONS:
+        path = formatSuppliedConfigurationsManagementUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_EXPLORER:
         path = formatExplorerUrl('', params.pageState);
@@ -110,7 +115,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.FILTER_LISTS_MANAGE:
       case ML_PAGES.FILTER_LISTS_NEW:
       case ML_PAGES.CALENDARS_MANAGE:
+      case ML_PAGES.CALENDARS_DST_MANAGE:
       case ML_PAGES.CALENDARS_NEW:
+      case ML_PAGES.CALENDARS_DST_NEW:
         path = formatGenericMlUrl('', params.page, params.pageState);
         break;
       case ML_PAGES.FILTER_LISTS_EDIT:
@@ -118,6 +125,9 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
         break;
       case ML_PAGES.CALENDARS_EDIT:
         path = formatEditCalendarUrl('', params.pageState);
+        break;
+      case ML_PAGES.CALENDARS_DST_EDIT:
+        path = formatEditCalendarDstUrl('', params.pageState);
         break;
       case ML_PAGES.NOTIFICATIONS:
         path = formatNotificationsUrl('', params.pageState);

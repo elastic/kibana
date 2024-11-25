@@ -57,7 +57,7 @@ export async function getRule<Params extends RuleParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: result.attributes.name },
         error,
       })
     );
@@ -66,7 +66,7 @@ export async function getRule<Params extends RuleParams = never>(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: result.attributes.name },
     })
   );
 

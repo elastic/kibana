@@ -7,6 +7,7 @@ xpack.fleet.internal.disableILMPolicies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
+xpack.fleet.internal.useMeteringApi: true
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -110,6 +111,11 @@ xpack.index_management.editableIndexSettings: limited
 xpack.index_management.enableMappingsSourceFieldSection: false
 # Disable toggle for enabling data retention in DSL form from Index Management UI
 xpack.index_management.enableTogglingDataRetention: false
+# Disable project level rentention checks in DSL form from Index Management UI
+xpack.index_management.enableProjectLevelRetentionChecks: false
+
+# Disable Manage Processors UI in Ingest Pipelines
+xpack.ingest_pipelines.enableManageProcessors: false
 
 # Keep deeplinks visible so that they are shown in the sidenav
 dev_tools.deeplinks.navLinkStatus: visible
@@ -150,7 +156,7 @@ server.versioned.versionResolution: newest
 server.versioned.strictClientVersionCheck: false
 
 # Enforce single "default" space and disable feature visibility controls
-xpack.spaces.maxSpaces: 1
+xpack.spaces.maxSpaces: 100
 xpack.spaces.allowFeatureVisibility: false
 xpack.spaces.allowSolutionVisibility: false
 
@@ -223,3 +229,8 @@ monitoring.ui.enabled: false
 xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
+
+## Data Usage in stack management
+xpack.dataUsage.enabled: true
+# This feature is disabled in Serverless until fully tested within a Serverless environment
+xpack.dataUsage.enableExperimental: ['dataUsageDisabled']

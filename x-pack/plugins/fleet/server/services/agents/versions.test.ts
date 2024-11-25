@@ -221,7 +221,34 @@ describe('getAvailableVersions', () => {
     expect(res).toEqual(['8.10.0', '8.9.2', '8.1.0', '8.0.0', '7.17.0']);
   });
 
-  it('should not include duplicate', async () => {
+  it('should filter out rc and beta versions', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.0.0',
+              version_number: '8.0.0-rc1',
+            },
+            {
+              title: 'Elastic Agent 8.0.0',
+              version_number: '8.0.0-beta1',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    // Should sort, uniquify and filter out versions < 7.17
+    expect(res).toEqual(['8.1.0', '8.0.0', '7.17.0']);
+  });
+
+  it('should include build version', async () => {
     mockKibanaVersion = '300.0.0';
     mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
     mockedFetch.mockResolvedValueOnce({
@@ -245,6 +272,10 @@ describe('getAvailableVersions', () => {
               title: 'Elastic Agent 8.9.2',
               version_number: '8.9.2',
             },
+            {
+              title: 'Elastic Agent 8.9.2',
+              version_number: '8.9.2',
+            },
             ,
           ],
         ])
@@ -254,7 +285,14 @@ describe('getAvailableVersions', () => {
     const res = await getAvailableVersions({ ignoreCache: true });
 
     // Should sort, uniquify and filter out versions < 7.17
-    expect(res).toEqual(['8.10.0', '8.9.2', '8.1.0', '8.0.0', '7.17.0']);
+    expect(res).toEqual([
+      '8.10.0',
+      '8.10.0+build202407291657',
+      '8.9.2',
+      '8.1.0',
+      '8.0.0',
+      '7.17.0',
+    ]);
   });
 
   it('should cache results', async () => {

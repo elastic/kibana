@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -166,6 +167,36 @@ describe('saml_auth', () => {
       ).rejects.toThrow(
         'Failed to create the new cloud session, check retry arguments: {"attemptsCount":0,"attemptDelay":100}'
       );
+    });
+
+    test(`should fail without retry when response has 'mfa_required: true'`, async () => {
+      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
+        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
+          return Promise.resolve({
+            data: { user_id: 12345, authenticated: false, mfa_required: true },
+            status: 200,
+          });
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      });
+
+      await expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 3,
+            attemptDelay: 100,
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to create the new cloud session: MFA must be disabled for the test account'
+      );
+      expect(axiosRequestMock).toBeCalledTimes(1);
     });
   });
 

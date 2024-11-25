@@ -1,10 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import { cloneDeep } from 'lodash';
+import React from 'react';
+import { batch } from 'react-redux';
 
 import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -13,23 +18,28 @@ import {
   isReferenceOrValueEmbeddable,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import { cloneDeep } from 'lodash';
-import React from 'react';
-import { batch } from 'react-redux';
-import { i18n } from '@kbn/i18n';
+
 import {
   DashboardContainerInput,
   DashboardPanelMap,
   prefixReferencesFromPanel,
 } from '../../../../common';
+import type { DashboardAttributes } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
   SavedDashboardInput,
-} from '../../../services/dashboard_content_management/types';
-import { pluginServices } from '../../../services/plugin_services';
+} from '../../../services/dashboard_content_management_service/types';
+import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
+import {
+  coreServices,
+  dataService,
+  embeddableService,
+  savedObjectsTaggingService,
+} from '../../../services/kibana_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
@@ -38,9 +48,6 @@ import { DashboardSaveModal } from './overlays/save_modal';
 const serializeAllPanelState = async (
   dashboard: DashboardContainer
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
-  const {
-    embeddable: { reactEmbeddableRegistryHasKey },
-  } = pluginServices.getServices();
   const references: Reference[] = [];
   const panels = cloneDeep(dashboard.getInput().panels);
 
@@ -48,7 +55,7 @@ const serializeAllPanelState = async (
     Promise<{ uuid: string; serialized: SerializedPanelState<object> }>
   > = [];
   for (const [uuid, panel] of Object.entries(panels)) {
-    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
+    if (!embeddableService.reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
 
     if (api && apiHasSerializableState(api)) {
@@ -74,16 +81,11 @@ const serializeAllPanelState = async (
  * Save the current state of this dashboard to a saved object without showing any save modal.
  */
 export async function runQuickSave(this: DashboardContainer) {
-  const {
-    dashboardContentManagement: { saveDashboardState },
-  } = pluginServices.getServices();
+  const { explicitInput: currentState } = this.getState();
 
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId, managed },
-  } = this.getState();
+  const lastSavedId = this.savedObjectId.value;
 
-  if (managed) return;
+  if (this.managed$.value) return;
 
   const { panels: nextPanels, references } = await serializeAllPanelState(this);
   const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
@@ -94,10 +96,14 @@ export async function runQuickSave(this: DashboardContainer) {
     const { rawState: controlGroupSerializedState, references: extractedReferences } =
       await controlGroupApi.serializeState();
     controlGroupReferences = extractedReferences;
-    stateToSave = { ...stateToSave, controlGroupInput: controlGroupSerializedState };
+    stateToSave = {
+      ...stateToSave,
+      controlGroupInput:
+        controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
+    };
   }
 
-  const saveResult = await saveDashboardState({
+  const saveResult = await getDashboardContentManagementService().saveDashboardState({
     controlGroupReferences,
     panelReferences: references,
     currentState: stateToSave,
@@ -106,7 +112,7 @@ export async function runQuickSave(this: DashboardContainer) {
   });
 
   this.savedObjectReferences = saveResult.references ?? [];
-  this.dispatch.setLastSavedInput(dashboardStateToSave);
+  this.setLastSavedInput(dashboardStateToSave);
   this.saveNotification$.next();
 
   return saveResult;
@@ -117,20 +123,10 @@ export async function runQuickSave(this: DashboardContainer) {
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
 export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
-  const {
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-    savedObjectsTagging: { hasApi: hasSavedObjectsTagging },
-    dashboardContentManagement: { checkForDuplicateDashboardTitle, saveDashboardState },
-  } = pluginServices.getServices();
-
-  const {
-    explicitInput: currentState,
-    componentState: { lastSavedId, managed },
-  } = this.getState();
+  const { explicitInput: currentState } = this.getState();
+  const dashboardContentManagementService = getDashboardContentManagementService();
+  const lastSavedId = this.savedObjectId.value;
+  const managed = this.managed$.value;
 
   return new Promise<SaveDashboardReturn | undefined>((resolve, reject) => {
     if (interactionMode === ViewMode.EDIT && managed) {
@@ -155,7 +151,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
       try {
         if (
-          !(await checkForDuplicateDashboardTitle({
+          !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
             title: newTitle,
             onTitleDuplicate,
             lastSavedTitle: currentState.title,
@@ -171,11 +167,13 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           tags: [] as string[],
           description: newDescription,
           timeRestore: newTimeRestore,
-          timeRange: newTimeRestore ? timefilter.getTime() : undefined,
-          refreshInterval: newTimeRestore ? timefilter.getRefreshInterval() : undefined,
+          timeRange: newTimeRestore ? dataService.query.timefilter.timefilter.getTime() : undefined,
+          refreshInterval: newTimeRestore
+            ? dataService.query.timefilter.timefilter.getRefreshInterval()
+            : undefined,
         };
 
-        if (hasSavedObjectsTagging && newTags) {
+        if (savedObjectsTaggingService && newTags) {
           // remove `hasSavedObjectsTagging` once the savedObjectsTagging service is optional
           stateFromSaveModal.tags = newTags;
         }
@@ -193,7 +191,8 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           controlGroupReferences = references;
           dashboardStateToSave = {
             ...dashboardStateToSave,
-            controlGroupInput: controlGroupSerializedState,
+            controlGroupInput:
+              controlGroupSerializedState as unknown as DashboardAttributes['controlGroupInput'],
           };
         }
 
@@ -225,7 +224,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
         const beforeAddTime = window.performance.now();
 
-        const saveResult = await saveDashboardState({
+        const saveResult = await dashboardContentManagementService.saveDashboardState({
           controlGroupReferences,
           panelReferences: references,
           saveOptions,
@@ -239,7 +238,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
         const addDuration = window.performance.now() - beforeAddTime;
 
-        reportPerformanceMetricEvent(pluginServices.getServices().analytics, {
+        reportPerformanceMetricEvent(coreServices.analytics, {
           eventName: SAVED_OBJECT_POST_TIME,
           duration: addDuration,
           meta: {
@@ -247,12 +246,11 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
           },
         });
 
-        stateFromSaveModal.lastSavedId = saveResult.id;
-
         if (saveResult.id) {
           batch(() => {
             this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-            this.dispatch.setLastSavedInput(dashboardStateToSave);
+            this.setSavedObjectId(saveResult.id);
+            this.setLastSavedInput(dashboardStateToSave);
           });
         }
 
@@ -278,7 +276,7 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
           newTitle = `${baseTitle} (${baseCount + 1})`;
 
-          await checkForDuplicateDashboardTitle({
+          await dashboardContentManagementService.checkForDuplicateDashboardTitle({
             title: newTitle,
             lastSavedTitle: currentState.title,
             copyOnSave: true,

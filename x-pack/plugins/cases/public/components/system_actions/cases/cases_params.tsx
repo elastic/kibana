@@ -27,15 +27,33 @@ import { CASES_CONNECTOR_SUB_ACTION } from '../../../../common/constants';
 import { DEFAULT_TIME_WINDOW, TIME_UNITS } from './constants';
 import { getTimeUnitOptions } from './utils';
 import { useKibana } from '../../../common/lib/kibana';
+import { TemplateSelector } from '../../create/templates';
+import type { CasesConfigurationUITemplate } from '../../../containers/types';
+import { getOwnerFromRuleConsumerProducer } from '../../../../common/utils/owner';
+import { getConfigurationByOwner } from '../../../containers/configure/utils';
+import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+
+const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
 export const CasesParamsFieldsComponent: React.FunctionComponent<
   ActionParamsProps<CasesActionParams>
-> = ({ actionParams, editAction, errors, index, producerId }) => {
+> = ({ actionParams, editAction, errors, index, producerId, featureId }) => {
   const {
+    cloud,
+    data: { dataViews: dataViewsService },
     http,
     notifications: { toasts },
-    data: { dataViews: dataViewsService },
   } = useKibana().services;
+
+  const owner = getOwnerFromRuleConsumerProducer({
+    consumer: featureId,
+    producer: producerId,
+    // This is a workaround for a very specific bug with the cases action in serverless security
+    // More info here: https://github.com/elastic/kibana/issues/195599
+    isServerlessSecurity:
+      cloud?.isServerlessEnabled && cloud?.serverless.projectType === 'security',
+  });
+
   const { dataView, isLoading: loadingAlertDataViews } = useAlertsDataView({
     http,
     toasts,
@@ -45,12 +63,25 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       : [],
   });
 
-  const { timeWindow, reopenClosedCases, groupingBy } = useMemo(
+  const { data: configurations, isLoading: isLoadingCaseConfiguration } =
+    useGetAllCaseConfigurations();
+
+  const currentConfiguration = useMemo(
+    () =>
+      getConfigurationByOwner({
+        configurations,
+        owner,
+      }),
+    [configurations, owner]
+  );
+
+  const { timeWindow, reopenClosedCases, groupingBy, templateId } = useMemo(
     () =>
       actionParams.subActionParams ?? {
         timeWindow: `${DEFAULT_TIME_WINDOW}`,
         reopenClosedCases: false,
         groupingBy: [],
+        templateId: null,
       },
     [actionParams.subActionParams]
   );
@@ -78,6 +109,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           timeWindow: `${DEFAULT_TIME_WINDOW}`,
           reopenClosedCases: false,
           groupingBy: [],
+          templateId: null,
         },
         index
       );
@@ -132,6 +164,19 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   }, [dataView]);
 
   const selectedOptions = groupingBy.map((field) => ({ value: field, label: field }));
+  const selectedTemplate = currentConfiguration.templates.find((t) => t.key === templateId);
+  const defaultTemplate = {
+    key: DEFAULT_EMPTY_TEMPLATE_KEY,
+    name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
+    caseFields: null,
+  };
+
+  const onTemplateChange = useCallback(
+    ({ key, caseFields }: Pick<CasesConfigurationUITemplate, 'caseFields' | 'key'>) => {
+      editSubActionProperty('templateId', key === DEFAULT_EMPTY_TEMPLATE_KEY ? null : key);
+    },
+    [editSubActionProperty]
+  );
 
   return (
     <>
@@ -157,7 +202,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       <EuiFormRow
         fullWidth
         id="timeWindow"
-        error={errors.timeWindow}
+        error={errors.timeWindow as string[]}
         isInvalid={
           errors.timeWindow !== undefined &&
           Number(errors.timeWindow.length) > 0 &&
@@ -190,6 +235,18 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={true}>
+          <TemplateSelector
+            key={currentConfiguration.id}
+            isLoading={isLoadingCaseConfiguration}
+            templates={[defaultTemplate, ...currentConfiguration.templates]}
+            onTemplateChange={onTemplateChange}
+            initialTemplate={selectedTemplate}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>

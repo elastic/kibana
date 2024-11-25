@@ -11,18 +11,45 @@ import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
-import { ChatFlyout } from '../chat/chat_flyout';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { AIAssistantAppService, useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
 import { useKibana } from '../../hooks/use_kibana';
-import { useIsNavControlVisible } from '../../hooks/is_nav_control_visible';
 import { useTheme } from '../../hooks/use_theme';
 import { useNavControlScreenContext } from '../../hooks/use_nav_control_screen_context';
+import { SharedProviders } from '../../utils/shared_providers';
+import { ObservabilityAIAssistantAppPluginStartDependencies } from '../../types';
+import { useNavControlScope } from '../../hooks/use_nav_control_scope';
 
-export function NavControl({}: {}) {
-  const service = useObservabilityAIAssistantAppService();
+interface NavControlWithProviderDeps {
+  appService: AIAssistantAppService;
+  coreStart: CoreStart;
+  pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+}
+
+export const NavControlWithProvider = ({
+  appService,
+  coreStart,
+  pluginsStart,
+}: NavControlWithProviderDeps) => {
+  return (
+    <SharedProviders
+      coreStart={coreStart}
+      pluginsStart={pluginsStart}
+      service={appService}
+      theme$={coreStart.theme.theme$}
+    >
+      <NavControl />
+    </SharedProviders>
+  );
+};
+
+export function NavControl() {
+  const service = useAIAssistantAppService();
 
   const {
     services: {
+      application,
+      http,
       notifications,
       plugins: {
         start: {
@@ -35,6 +62,7 @@ export function NavControl({}: {}) {
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
   useNavControlScreenContext();
+  useNavControlScope();
 
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -63,8 +91,6 @@ export function NavControl({}: {}) {
 
   const keyRef = useRef(v4());
 
-  const { isVisible } = useIsNavControlVisible();
-
   useEffect(() => {
     const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
       keyRef.current = v4();
@@ -77,9 +103,12 @@ export function NavControl({}: {}) {
     };
   }, [service.conversations.predefinedConversation$]);
 
-  const { messages, title } = useObservable(service.conversations.predefinedConversation$) ?? {
+  const { messages, title, hideConversationList } = useObservable(
+    service.conversations.predefinedConversation$
+  ) ?? {
     messages: [],
     title: undefined,
+    hideConversationList: false,
   };
 
   const theme = useTheme();
@@ -107,10 +136,6 @@ export function NavControl({}: {}) {
       window.removeEventListener('keypress', keyboardListener);
     };
   }, [service.conversations]);
-
-  if (!isVisible) {
-    return null;
-  }
 
   return (
     <>
@@ -142,6 +167,14 @@ export function NavControl({}: {}) {
             onClose={() => {
               setIsOpen(false);
             }}
+            navigateToConversation={(conversationId?: string) => {
+              application.navigateToUrl(
+                http.basePath.prepend(
+                  `/app/observabilityAIAssistant/conversations/${conversationId || ''}`
+                )
+              );
+            }}
+            hideConversationList={hideConversationList}
           />
         </ObservabilityAIAssistantChatServiceContext.Provider>
       ) : undefined}

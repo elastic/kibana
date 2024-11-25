@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IncludeExcludeRow, IncludeExcludeRowProps } from './include_exclude_options';
 
@@ -46,26 +46,26 @@ describe('IncludeExcludeComponent', () => {
     expect(screen.getAllByRole('combobox').length).toEqual(2);
   });
 
-  it('should run updateParams function on update', () => {
+  it('should run updateParams function on update', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     fireEvent.click(screen.getByRole('option', { name: 'ABC' }));
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('ABC');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should run updateParams function onCreateOption', () => {
+  it('should run updateParams function onCreateOption', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test.*{Enter}');
     expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test.*');
     expect(onUpdateSpy).toHaveBeenCalledTimes(1);
   });
@@ -89,13 +89,13 @@ describe('IncludeExcludeComponent', () => {
     expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('ABC');
   });
 
-  it('should initialize the options correctly', () => {
+  it('should initialize the options correctly', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
       tableRows,
     });
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
     expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
       'ABC',
       'FEF',
@@ -114,18 +114,18 @@ describe('IncludeExcludeComponent', () => {
     ).toBeInTheDocument();
   });
 
-  it('should run updateParams on the input text if pattern is selected', () => {
+  it('should run updateParams on the input text if pattern is selected', async () => {
     renderIncludeExcludeRow({
       include: ['test.*'],
       exclude: undefined,
       includeIsRegex: false,
       tableRows,
     });
-    userEvent.click(screen.getByTestId('lens-include-terms-regex-switch'));
+    await userEvent.click(screen.getByTestId('lens-include-terms-regex-switch'));
     expect(onUpdateSpy).toHaveBeenCalledWith('include', [], 'includeIsRegex', true);
   });
 
-  it('should run as multi selection if normal string is given', () => {
+  it('should run as multi selection if normal string is given', async () => {
     renderIncludeExcludeRow({
       include: undefined,
       exclude: undefined,
@@ -133,14 +133,14 @@ describe('IncludeExcludeComponent', () => {
       tableRows,
     });
     const typedValues = ['test.*', 'ABC'];
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[0]}{Enter}`
     );
 
-    userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
-    userEvent.type(
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(
       screen.getByRole('combobox', { name: 'Include values' }),
       `${typedValues[1]}{Enter}`
     );
@@ -151,5 +151,169 @@ describe('IncludeExcludeComponent', () => {
         expect(pill).toHaveTextContent(typedValues[i]);
       });
     expect(onUpdateSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('should prevent identical include and exclude values on change when making single selections', async () => {
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      isNumberField: false,
+      tableRows,
+    });
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('option', { name: 'ABC' }));
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('ABC');
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Exclude values' }));
+    await userEvent.click(screen.getByRole('option', { name: 'ABC' }));
+    expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('ABC');
+
+    expect(screen.getByTestId('lens-include-terms-combobox')).not.toHaveTextContent('ABC');
+
+    expect(onUpdateSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('should prevent identical include and exclude values on change when making multiple selections', async () => {
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      isNumberField: false,
+      tableRows,
+    });
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('option', { name: 'ABC' }));
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('ABC');
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.click(screen.getByRole('option', { name: 'FEF' }));
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('FEF');
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Exclude values' }));
+    await userEvent.click(screen.getByRole('option', { name: 'ABC' }));
+    expect(screen.getByTestId('lens-include-terms-combobox')).not.toHaveTextContent('ABC');
+
+    expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('ABC');
+
+    expect(onUpdateSpy).toHaveBeenCalledTimes(4);
+  });
+
+  it('should prevent identical include and exclude values on create option', async () => {
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      isNumberField: false,
+      tableRows,
+    });
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test{enter}');
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test');
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Exclude values' }));
+    await userEvent.type(screen.getByRole('combobox', { name: 'Exclude values' }), 'test{enter}');
+    expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('test');
+
+    expect(screen.getByTestId('lens-include-terms-combobox')).not.toHaveTextContent('test');
+
+    expect(onUpdateSpy).toHaveBeenCalledTimes(3);
+  });
+
+  it('should prevent identical include and exclude values when creating multiple options', async () => {
+    renderIncludeExcludeRow({
+      include: undefined,
+      exclude: undefined,
+      isNumberField: false,
+      tableRows,
+    });
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Include values' }));
+    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test{enter}');
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test');
+
+    await userEvent.type(screen.getByRole('combobox', { name: 'Include values' }), 'test1{enter}');
+    expect(screen.getByTestId('lens-include-terms-combobox')).toHaveTextContent('test1');
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Exclude values' }));
+    await userEvent.type(screen.getByRole('combobox', { name: 'Exclude values' }), 'test1{enter}');
+    expect(screen.getByTestId('lens-exclude-terms-combobox')).toHaveTextContent('test1');
+
+    expect(screen.getByTestId('lens-include-terms-combobox')).not.toHaveTextContent('test1');
+
+    expect(onUpdateSpy).toHaveBeenCalledTimes(4);
+  });
+
+  it('should prevent identical include value on exclude regex value change', async () => {
+    jest.useFakeTimers();
+
+    renderIncludeExcludeRow({
+      include: [''],
+      exclude: [''],
+      includeIsRegex: true,
+      excludeIsRegex: true,
+      tableRows,
+    });
+
+    const includeRegexInput = screen.getByTestId('lens-include-terms-regex-input');
+    const excludeRegexInput = screen.getByTestId('lens-exclude-terms-regex-input');
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+    await user.type(includeRegexInput, 'test.*');
+    act(() => {
+      jest.advanceTimersByTime(256);
+    });
+    expect(includeRegexInput).toHaveValue('test.*');
+    expect(onUpdateSpy).toHaveBeenCalledWith('include', ['test.*'], 'includeIsRegex', true);
+
+    await user.type(excludeRegexInput, 'test.*');
+    act(() => {
+      jest.advanceTimersByTime(256);
+    });
+    expect(excludeRegexInput).toHaveValue('test.*');
+    expect(onUpdateSpy).toHaveBeenCalledWith('exclude', ['test.*'], 'excludeIsRegex', true);
+
+    expect(includeRegexInput).toHaveValue('');
+    expect(onUpdateSpy).toHaveBeenCalledWith('include', [''], 'includeIsRegex', true);
+
+    expect(onUpdateSpy).toHaveBeenCalledTimes(3);
+
+    jest.useRealTimers();
+  });
+
+  it('should prevent identical exclude value on include regex value change', async () => {
+    jest.useFakeTimers();
+
+    renderIncludeExcludeRow({
+      include: [''],
+      exclude: [''],
+      includeIsRegex: true,
+      excludeIsRegex: true,
+      tableRows,
+    });
+
+    const includeRegexInput = screen.getByTestId('lens-include-terms-regex-input');
+    const excludeRegexInput = screen.getByTestId('lens-exclude-terms-regex-input');
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+    await user.type(excludeRegexInput, 'test.*');
+    act(() => {
+      jest.advanceTimersByTime(256);
+    });
+    expect(excludeRegexInput).toHaveValue('test.*');
+    expect(onUpdateSpy).toHaveBeenCalledWith('exclude', ['test.*'], 'excludeIsRegex', true);
+
+    await user.type(includeRegexInput, 'test.*');
+    act(() => {
+      jest.advanceTimersByTime(256);
+    });
+    expect(includeRegexInput).toHaveValue('test.*');
+    expect(onUpdateSpy).toHaveBeenCalledWith('include', ['test.*'], 'includeIsRegex', true);
+
+    expect(excludeRegexInput).toHaveValue('');
+    expect(onUpdateSpy).toHaveBeenCalledWith('exclude', [''], 'excludeIsRegex', true);
+
+    expect(onUpdateSpy).toHaveBeenCalledTimes(3);
+    jest.useRealTimers();
   });
 });

@@ -20,7 +20,6 @@ import type { LensApi } from '@kbn/lens-plugin/public';
 import type { JobCreatorType } from '../common/job_creator';
 import { createEmptyJob, createEmptyDatafeed } from '../common/job_creator/util/default_configs';
 import type { MlApi } from '../../../services/ml_api_service';
-import type { MlJobService } from '../../../services/job_service';
 import {
   CREATED_BY_LABEL,
   DEFAULT_BUCKET_SPAN,
@@ -34,6 +33,7 @@ import {
 } from './utils';
 import { VisualizationExtractor } from './visualization_extractor';
 import { QuickJobCreatorBase, type CreateState } from '../job_from_dashboard';
+import { jobCloningService } from '../../../services/job_cloning_service';
 
 export class QuickLensJobCreator extends QuickJobCreatorBase {
   constructor(
@@ -42,10 +42,9 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
     dashboardService: DashboardStart,
-    mlApi: MlApi,
-    mlJobService: MlJobService
+    mlApi: MlApi
   ) {
-    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi, mlJobService);
+    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi);
   }
 
   public async createAndSaveJob(
@@ -116,7 +115,7 @@ export class QuickLensJobCreator extends QuickJobCreatorBase {
       // add job config and start and end dates to the
       // job cloning stash, so they can be used
       // by the new job wizards
-      this.mlJobService.stashJobForCloning(
+      jobCloningService.stashJobForCloning(
         {
           jobConfig,
           datafeedConfig,

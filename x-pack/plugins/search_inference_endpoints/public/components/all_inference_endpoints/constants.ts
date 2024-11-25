@@ -14,7 +14,7 @@ import {
 } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 10;
+export const DEFAULT_TABLE_LIMIT = 25;
 
 export const DEFAULT_QUERY_PARAMS: QueryParams = {
   page: DEFAULT_TABLE_ACTIVE_PAGE,
@@ -32,3 +32,6 @@ export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AllInferenceEndpointsTable
   filterOptions: DEFAULT_FILTER_OPTIONS,
   queryParams: DEFAULT_QUERY_PARAMS,
 };
+
+export const PIPELINE_URL = 'ingest/ingest_pipelines';
+export const SERVERLESS_INDEX_MANAGEMENT_URL = 'index_details';

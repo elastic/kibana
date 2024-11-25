@@ -6,77 +6,100 @@
  */
 
 import { z } from '@kbn/zod';
-
-import {
-  RuleSignatureId,
-  RuleVersion,
-  RuleName,
-  RuleTagArray,
-  RuleDescription,
-  Severity,
-  SeverityMapping,
-  RiskScore,
-  RiskScoreMapping,
-  RuleReferenceArray,
-  RuleFalsePositiveArray,
-  ThreatArray,
-  InvestigationGuide,
-  SetupGuide,
-  RelatedIntegrationArray,
-  RequiredFieldArray,
-  MaxSignals,
-  BuildingBlockType,
-  RuleIntervalFrom,
-  RuleInterval,
-  RuleExceptionList,
-  RuleNameOverride,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-  TimelineTemplateId,
-  TimelineTemplateTitle,
-  IndexPatternArray,
-  DataViewId,
-  RuleQuery,
-  QueryLanguage,
-  RuleFilterArray,
-  SavedQueryId,
-  KqlQueryLanguage,
-} from '../../model/rule_schema/common_attributes.gen';
-import {
-  MachineLearningJobId,
-  AnomalyThreshold,
-} from '../../model/rule_schema/specific_attributes/ml_attributes.gen';
-import {
-  ThreatQuery,
-  ThreatMapping,
-  ThreatIndex,
-  ThreatFilters,
-  ThreatIndicatorPath,
-} from '../../model/rule_schema/specific_attributes/threat_match_attributes.gen';
-import {
-  NewTermsFields,
-  HistoryWindowStart,
-} from '../../model/rule_schema/specific_attributes/new_terms_attributes.gen';
+import { mapValues } from 'lodash';
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
-import { AggregatedPrebuiltRuleError } from '../model';
+import { AggregatedPrebuiltRuleError, DiffableAllFields } from '../model';
+import { RuleSignatureId, RuleVersion } from '../../model';
+
+export type Mode = z.infer<typeof Mode>;
+export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
+export type ModeEnum = typeof Mode.enum;
+export const ModeEnum = Mode.enum;
 
 export type PickVersionValues = z.infer<typeof PickVersionValues>;
 export const PickVersionValues = z.enum(['BASE', 'CURRENT', 'TARGET', 'MERGED']);
 export type PickVersionValuesEnum = typeof PickVersionValues.enum;
 export const PickVersionValuesEnum = PickVersionValues.enum;
 
-const createUpgradeFieldSchema = <T extends z.ZodType>(fieldSchema: T) =>
-  z
-    .discriminatedUnion('pick_version', [
-      z.object({
+// Specific handling of special fields according to:
+// https://github.com/elastic/kibana/issues/186544
+export const FIELDS_TO_UPGRADE_TO_CURRENT_VERSION = [
+  'enabled',
+  'exceptions_list',
+  'alert_suppression',
+  'actions',
+  'throttle',
+  'response_actions',
+  'meta',
+  'output_index',
+  'namespace',
+  'alias_purpose',
+  'alias_target_id',
+  'outcome',
+  'concurrent_searches',
+  'items_per_search',
+] as const;
+
+export const FIELDS_TO_UPGRADE_TO_TARGET_VERSION = [
+  'type',
+  'rule_id',
+  'version',
+  'author',
+  'license',
+] as const;
+
+// Fields which are part of DiffableRule but are not upgradeable
+// and need to be omittted from the DiffableUpgradableFields
+export const NON_UPGRADEABLE_DIFFABLE_FIELDS = ['type', 'rule_id', 'version'] as const;
+
+type NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE = {
+  readonly [key in (typeof NON_UPGRADEABLE_DIFFABLE_FIELDS)[number]]: true;
+};
+
+// This transformation is needed to have Zod's `omit` accept the rule fields that need to be omitted
+export const DiffableFieldsToOmit = NON_UPGRADEABLE_DIFFABLE_FIELDS.reduce((acc, field) => {
+  return { ...acc, [field]: true };
+}, {} as NON_UPGRADEABLE_DIFFABLE_FIELDS_TO_OMIT_TYPE);
+
+/**
+ * Fields upgradable by the /upgrade/_perform endpoint.
+ * Specific fields are omitted because they are not upgradeable, and
+ * handled under the hood by endpoint logic.
+ * See: https://github.com/elastic/kibana/issues/186544
+ */
+export type DiffableUpgradableFields = z.infer<typeof DiffableUpgradableFields>;
+export const DiffableUpgradableFields = DiffableAllFields.omit(DiffableFieldsToOmit);
+
+export type FieldUpgradeSpecifier<T> = z.infer<
+  ReturnType<typeof fieldUpgradeSpecifier<z.ZodType<T>>>
+>;
+export const fieldUpgradeSpecifier = <T extends z.ZodTypeAny>(fieldSchema: T) =>
+  z.discriminatedUnion('pick_version', [
+    z
+      .object({
         pick_version: PickVersionValues,
-      }),
-      z.object({
+      })
+      .strict(),
+    z
+      .object({
         pick_version: z.literal('RESOLVED'),
         resolved_value: fieldSchema,
-      }),
-    ])
-    .optional();
+      })
+      .strict(),
+  ]);
+
+type FieldUpgradeSpecifiers<TFields> = {
+  [Field in keyof TFields]?: FieldUpgradeSpecifier<TFields[Field]>;
+};
+
+export type RuleFieldsToUpgrade = FieldUpgradeSpecifiers<DiffableUpgradableFields>;
+export const RuleFieldsToUpgrade = z
+  .object(
+    mapValues(DiffableUpgradableFields.shape, (fieldSchema) => {
+      return fieldUpgradeSpecifier(fieldSchema).optional();
+    })
+  )
+  .strict();
 
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
 export const RuleUpgradeSpecifier = z.object({
@@ -86,52 +109,7 @@ export const RuleUpgradeSpecifier = z.object({
   pick_version: PickVersionValues.optional(),
   // Fields that can be customized during the upgrade workflow
   // as decided in: https://github.com/elastic/kibana/issues/186544
-  fields: z
-    .object({
-      name: createUpgradeFieldSchema(RuleName),
-      tags: createUpgradeFieldSchema(RuleTagArray),
-      description: createUpgradeFieldSchema(RuleDescription),
-      severity: createUpgradeFieldSchema(Severity),
-      severity_mapping: createUpgradeFieldSchema(SeverityMapping),
-      risk_score: createUpgradeFieldSchema(RiskScore),
-      risk_score_mapping: createUpgradeFieldSchema(RiskScoreMapping),
-      references: createUpgradeFieldSchema(RuleReferenceArray),
-      false_positives: createUpgradeFieldSchema(RuleFalsePositiveArray),
-      threat: createUpgradeFieldSchema(ThreatArray),
-      note: createUpgradeFieldSchema(InvestigationGuide),
-      setup: createUpgradeFieldSchema(SetupGuide),
-      related_integrations: createUpgradeFieldSchema(RelatedIntegrationArray),
-      required_fields: createUpgradeFieldSchema(RequiredFieldArray),
-      max_signals: createUpgradeFieldSchema(MaxSignals),
-      building_block_type: createUpgradeFieldSchema(BuildingBlockType),
-      from: createUpgradeFieldSchema(RuleIntervalFrom),
-      interval: createUpgradeFieldSchema(RuleInterval),
-      exceptions_list: createUpgradeFieldSchema(RuleExceptionList),
-      rule_name_override: createUpgradeFieldSchema(RuleNameOverride),
-      timestamp_override: createUpgradeFieldSchema(TimestampOverride),
-      timestamp_override_fallback_disabled: createUpgradeFieldSchema(
-        TimestampOverrideFallbackDisabled
-      ),
-      timeline_id: createUpgradeFieldSchema(TimelineTemplateId),
-      timeline_title: createUpgradeFieldSchema(TimelineTemplateTitle),
-      index: createUpgradeFieldSchema(IndexPatternArray),
-      data_view_id: createUpgradeFieldSchema(DataViewId),
-      query: createUpgradeFieldSchema(RuleQuery),
-      language: createUpgradeFieldSchema(QueryLanguage),
-      filters: createUpgradeFieldSchema(RuleFilterArray),
-      saved_id: createUpgradeFieldSchema(SavedQueryId),
-      machine_learning_job_id: createUpgradeFieldSchema(MachineLearningJobId),
-      anomaly_threshold: createUpgradeFieldSchema(AnomalyThreshold),
-      threat_query: createUpgradeFieldSchema(ThreatQuery),
-      threat_mapping: createUpgradeFieldSchema(ThreatMapping),
-      threat_index: createUpgradeFieldSchema(ThreatIndex),
-      threat_filters: createUpgradeFieldSchema(ThreatFilters),
-      threat_indicator_path: createUpgradeFieldSchema(ThreatIndicatorPath),
-      threat_language: createUpgradeFieldSchema(KqlQueryLanguage),
-      new_terms_fields: createUpgradeFieldSchema(NewTermsFields),
-      history_window_start: createUpgradeFieldSchema(HistoryWindowStart),
-    })
-    .optional(),
+  fields: RuleFieldsToUpgrade.optional(),
 });
 
 export type UpgradeSpecificRulesRequest = z.infer<typeof UpgradeSpecificRulesRequest>;

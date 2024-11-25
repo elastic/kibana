@@ -8,6 +8,8 @@
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
@@ -52,6 +54,7 @@ export interface ObservabilityAIAssistantChatService {
       functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       functionCall?: string;
       signal: AbortSignal;
+      scopes: AssistantScope[];
     }
   ) => Observable<ChatCompletionChunkEvent>;
   complete: (options: {
@@ -67,8 +70,14 @@ export interface ObservabilityAIAssistantChatService {
         };
     signal: AbortSignal;
     instructions?: AdHocInstruction[];
+    scopes: AssistantScope[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
-  getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
+  getFunctions: (options?: {
+    contexts?: string[];
+    filter?: string;
+    scopes: AssistantScope[];
+  }) => FunctionDefinition[];
+  functions$: BehaviorSubject<FunctionDefinition[]>;
   hasFunction: (name: string) => boolean;
   getSystemMessage: () => Message;
   hasRenderFunction: (name: string) => boolean;
@@ -78,11 +87,20 @@ export interface ObservabilityAIAssistantChatService {
     response: { data?: string; content?: string },
     onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
+  getScopes: () => AssistantScope[];
 }
 
 export interface ObservabilityAIAssistantConversationService {
-  openNewConversation: ({}: { messages: Message[]; title?: string }) => void;
-  predefinedConversation$: Observable<{ messages: Message[]; title?: string }>;
+  openNewConversation: ({}: {
+    messages: Message[];
+    title?: string;
+    hideConversationList?: boolean;
+  }) => void;
+  predefinedConversation$: Observable<{
+    messages: Message[];
+    title?: string;
+    hideConversationList?: boolean;
+  }>;
 }
 
 export interface ObservabilityAIAssistantService {
@@ -94,6 +112,9 @@ export interface ObservabilityAIAssistantService {
   getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
   conversations: ObservabilityAIAssistantConversationService;
   navigate: (callback: () => void) => Promise<Observable<MessageAddEvent>>;
+  scope$: BehaviorSubject<AssistantScope[]>;
+  setScopes: (scope: AssistantScope[]) => void;
+  getScopes: () => AssistantScope[];
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -111,7 +132,9 @@ export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ConfigSchema {}
+export interface ConfigSchema {
+  scope?: AssistantScope;
+}
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   licensing: {};

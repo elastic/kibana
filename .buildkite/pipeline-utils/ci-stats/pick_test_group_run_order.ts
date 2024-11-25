@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Fs from 'fs';
@@ -11,7 +12,6 @@ import * as Fs from 'fs';
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';
@@ -196,6 +196,32 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   }
 }
 
+/**
+ * Collects environment variables from labels on the PR
+ * TODO: extract this (and other functions from this big file) to a separate module
+ */
+function collectEnvFromLabels() {
+  const LABEL_MAPPING: Record<string, Record<string, string>> = {
+    'ci:use-chrome-beta': {
+      USE_CHROME_BETA: 'true',
+    },
+  };
+
+  const envFromlabels: Record<string, string> = {};
+  if (!process.env.GITHUB_PR_LABELS) {
+    return envFromlabels;
+  } else {
+    const labels = process.env.GITHUB_PR_LABELS.split(',');
+    labels.forEach((label) => {
+      const env = LABEL_MAPPING[label];
+      if (env) {
+        Object.assign(envFromlabels, env);
+      }
+    });
+    return envFromlabels;
+  }
+}
+
 export async function pickTestGroupRunOrder() {
   const bk = new BuildkiteClient();
   const ciStats = new CiStatsClient();
@@ -272,9 +298,10 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
-  const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
+  const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
     : {};
+  const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
@@ -513,7 +540,8 @@ export async function pickTestGroupRunOrder() {
                   agents: expandAgentQueue(queue),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
-                    ...FTR_EXTRA_ARGS,
+                    ...ftrExtraArgs,
+                    ...envFromlabels,
                   },
                   retry: {
                     automatic: [

@@ -8,6 +8,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
+import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
+
 import type { Agent } from '../../../types';
 
 import {
@@ -348,7 +350,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               setAgentToUpgrade(undefined);
               refreshAgents();
             }}
-            isUpdating={Boolean(agentToUpgrade.upgrade_started_at && !agentToUpgrade.upgraded_at)}
+            isUpdating={isStuckInUpdating(agentToUpgrade)}
           />
         </EuiPortal>
       )}
@@ -427,11 +429,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
+        sortField={sortField}
+        sortOrder={sortOrder}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         totalAgents={nAgentsInTable}
+        totalManagedAgents={totalManagedAgentIds.length || 0}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}
         managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}

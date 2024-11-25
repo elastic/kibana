@@ -27,7 +27,7 @@
         "label": "DocumentList",
         "description": [],
         "signature": [
-          "({ dataTelemetryIdPrefix, docs, docsPerPage, isLoading, mappings, meta, onPaginate, setDocsPerPage, }: React.PropsWithChildren<DocumentListProps>) => JSX.Element"
+          "({ dataTelemetryIdPrefix, docs, docsPerPage, isLoading, mappings, meta, onPaginate, setDocsPerPage, onDocumentClick, resultProps, }: DocumentListProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-index-documents/components/document_list.tsx",
         "deprecated": false,
@@ -36,12 +36,12 @@
           {
             "parentPluginId": "@kbn/search-index-documents",
             "id": "def-common.DocumentList.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n}",
+            "label": "{\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n  onDocumentClick,\n  resultProps = {},\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<DocumentListProps>"
+              "DocumentListProps"
             ],
             "path": "packages/kbn-search-index-documents/components/document_list.tsx",
             "deprecated": false,
@@ -60,7 +60,7 @@
         "label": "DocumentsOverview",
         "description": [],
         "signature": [
-          "({ accessControlSwitch, dataTelemetryIdPrefix, documentComponent, searchQueryCallback, }: React.PropsWithChildren<DocumentsProps>) => JSX.Element"
+          "({ accessControlSwitch, dataTelemetryIdPrefix, documentComponent, searchQueryCallback, }: DocumentsProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-search-index-documents/components/documents_overview.tsx",
         "deprecated": false,
@@ -69,12 +69,12 @@
           {
             "parentPluginId": "@kbn/search-index-documents",
             "id": "def-common.DocumentsOverview.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  accessControlSwitch,\n  dataTelemetryIdPrefix,\n  documentComponent,\n  searchQueryCallback,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<DocumentsProps>"
+              "DocumentsProps"
             ],
             "path": "packages/kbn-search-index-documents/components/documents_overview.tsx",
             "deprecated": false,
@@ -101,7 +101,7 @@
             "section": "def-server.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ", indexName: string, query?: string | undefined, from?: number, size?: number) => Promise<",
+          ", indexName: string, query?: string | undefined, from?: number, size?: number, trackTotalHits?: boolean) => Promise<",
           {
             "pluginId": "@kbn/search-index-documents",
             "scope": "common",
@@ -197,6 +197,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.fetchSearchResults.$6",
+            "type": "boolean",
+            "tags": [],
+            "label": "trackTotalHits",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-search-index-documents/lib/fetch_search_results.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -268,13 +283,59 @@
       },
       {
         "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.reorderFieldsInImportance",
+        "type": "Function",
+        "tags": [],
+        "label": "reorderFieldsInImportance",
+        "description": [
+          "\nReorders an array of fields based on their importance.\n\nThe function sorts the fields by checking if their names are in the `SPECIAL_NAME_FIELDS` array first and then by\ntheir mapping type (semantic_text, dense_vector, sparse_vector) if they are not in the `SPECIAL_NAME_FIELDS` array.\n"
+        ],
+        "signature": [
+          "(fields: ",
+          "FieldProps",
+          "[]) => ",
+          "FieldProps",
+          "[]"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.reorderFieldsInImportance.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "- An array of field properties to be reordered."
+            ],
+            "signature": [
+              "FieldProps",
+              "[]"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The reordered array of field properties."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
         "id": "def-common.Result",
         "type": "Function",
         "tags": [],
         "label": "Result",
         "description": [],
         "signature": [
-          "({ metaData, fields }: React.PropsWithChildren<ResultProps>) => JSX.Element"
+          "({ metaData, fields, defaultVisibleFields, compactCard, showScore, onDocumentClick, onDocumentDelete, hasDeleteDocumentsPrivilege, }: ",
+          "ResultProps",
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-search-index-documents/components/result/result.tsx",
         "deprecated": false,
@@ -283,17 +344,167 @@
           {
             "parentPluginId": "@kbn/search-index-documents",
             "id": "def-common.Result.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
-            "label": "{ metaData, fields }",
+            "label": "{\n  metaData,\n  fields,\n  defaultVisibleFields = DEFAULT_VISIBLE_FIELDS,\n  compactCard = true,\n  showScore = false,\n  onDocumentClick,\n  onDocumentDelete,\n  hasDeleteDocumentsPrivilege,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<ResultProps>"
+              "ResultProps"
             ],
             "path": "packages/kbn-search-index-documents/components/result/result.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.resultMetaData",
+        "type": "Function",
+        "tags": [],
+        "label": "resultMetaData",
+        "description": [],
+        "signature": [
+          "(result: ",
+          "SearchHit",
+          "<unknown>) => ",
+          "MetaDataProps"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultMetaData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "SearchHit",
+              "<unknown>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.resultToFieldFromMappingResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "resultToFieldFromMappingResponse",
+        "description": [],
+        "signature": [
+          "(result: ",
+          "SearchHit",
+          "<unknown>, mappings?: ",
+          "IndicesGetMappingResponse",
+          " | undefined) => ",
+          "FieldProps",
+          "[]"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultToFieldFromMappingResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "SearchHit",
+              "<unknown>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultToFieldFromMappingResponse.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "IndicesGetMappingResponse",
+              " | undefined"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-index-documents",
+        "id": "def-common.resultToFieldFromMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "resultToFieldFromMappings",
+        "description": [],
+        "signature": [
+          "(result: ",
+          "SearchHit",
+          "<unknown>, mappings?: Record<string, ",
+          "MappingProperty",
+          "> | undefined) => ",
+          "FieldProps",
+          "[]"
+        ],
+        "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultToFieldFromMappings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "SearchHit",
+              "<unknown>"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-index-documents",
+            "id": "def-common.resultToFieldFromMappings.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "Record<string, ",
+              "MappingProperty",
+              "> | undefined"
+            ],
+            "path": "packages/kbn-search-index-documents/components/result/result_metadata.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

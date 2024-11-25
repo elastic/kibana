@@ -21,10 +21,10 @@ jest.mock('../validation', () => ({
 }));
 const { hasExpressionValidationErrors } = jest.requireMock('../validation');
 
-jest.mock('@kbn/text-based-editor', () => ({
+jest.mock('@kbn/esql-editor', () => ({
   fetchFieldsFromESQL: jest.fn(),
 }));
-const { fetchFieldsFromESQL } = jest.requireMock('@kbn/text-based-editor');
+const { fetchFieldsFromESQL } = jest.requireMock('@kbn/esql-editor');
 const { getFields } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (

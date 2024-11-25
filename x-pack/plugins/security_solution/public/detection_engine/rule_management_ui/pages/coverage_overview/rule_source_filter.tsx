@@ -54,7 +54,7 @@ const RuleSourceFilterComponent = ({
   ) as EuiSelectableOption[];
 
   const handleSelectableOnChange = useCallback(
-    (newOptions) => {
+    (newOptions: EuiSelectableOption[]) => {
       const formattedOptions = extractSelected<CoverageOverviewRuleSource>(newOptions);
       onChange(formattedOptions);
     },

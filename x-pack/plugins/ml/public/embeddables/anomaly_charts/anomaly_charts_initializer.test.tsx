@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MlApi } from '../../application/services/ml_api_service';
 
@@ -50,17 +50,15 @@ describe('AnomalyChartsInitializer', () => {
       defaultOptions
     );
 
-    act(() => {
-      const confirmButton = screen.getByText(/Confirm/i).closest('button');
-      expect(confirmButton).toBeDefined();
-      expect(onCreate).toHaveBeenCalledTimes(0);
+    const confirmButton = screen.getByText(/Confirm/i).closest('button');
+    expect(confirmButton).toBeDefined();
+    expect(onCreate).toHaveBeenCalledTimes(0);
 
-      userEvent.click(confirmButton!);
-      expect(onCreate).toHaveBeenCalledWith({
-        jobIds: ['job1', 'job2'],
-        title: defaultTitle,
-        maxSeriesToPlot: input.maxSeriesToPlot,
-      });
+    await userEvent.click(confirmButton!);
+    expect(onCreate).toHaveBeenCalledWith({
+      jobIds: ['job1', 'job2'],
+      title: defaultTitle,
+      maxSeriesToPlot: input.maxSeriesToPlot,
     });
   });
 });

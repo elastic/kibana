@@ -87,8 +87,6 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
 
   const { serviceEntitySummary, serviceEntitySummaryStatus } = useServiceEntitySummaryFetcher({
     serviceName,
-    start,
-    end,
     environment,
   });
 

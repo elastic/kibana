@@ -363,7 +363,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should create a policy with is_managed true if agentless feature flag is set and in serverless env', async () => {
+    it('should create a policy  agentless feature flag is set and in serverless env', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ agentless: true } as any);
@@ -392,7 +392,7 @@ describe('Agent policy', () => {
         namespace: 'default',
         supports_agentless: true,
         status: 'active',
-        is_managed: true,
+        is_managed: false,
         revision: 1,
         updated_at: expect.anything(),
         updated_by: 'system',
@@ -401,7 +401,7 @@ describe('Agent policy', () => {
       });
     });
 
-    it('should create a policy with is_managed true if agentless feature flag is set and in cloud env', async () => {
+    it('should create a policy if agentless feature flag is set and in cloud env', async () => {
       jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
       jest.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
@@ -428,7 +428,7 @@ describe('Agent policy', () => {
         namespace: 'default',
         supports_agentless: true,
         status: 'active',
-        is_managed: true,
+        is_managed: false,
         revision: 1,
         updated_at: expect.anything(),
         updated_by: 'system',
@@ -952,8 +952,11 @@ describe('Agent policy', () => {
           });
         }
       });
-
-      await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+      mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+      await agentPolicyService.removeOutputFromAll(esClient, 'output-id-123');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
@@ -993,6 +996,10 @@ describe('Agent policy', () => {
       mockedDownloadSourceService.getDefaultDownloadSourceId.mockResolvedValue(
         'default-download-source-id'
       );
+      mockedAppContextService.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(
+        soClient
+      );
+      mockedAppContextService.getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
       soClient.find.mockResolvedValue({
         saved_objects: [
           {
@@ -1010,11 +1017,7 @@ describe('Agent policy', () => {
         ],
       } as any);
 
-      await agentPolicyService.removeDefaultSourceFromAll(
-        soClient,
-        esClient,
-        'default-download-source-id'
-      );
+      await agentPolicyService.removeDefaultSourceFromAll(esClient, 'default-download-source-id');
 
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledTimes(2);
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
@@ -1281,6 +1284,68 @@ describe('Agent policy', () => {
           supports_agentless: true,
         })
       ).resolves.not.toThrow();
+    });
+
+    it('should run external "agentPolicyPostUpdate" callbacks when update is successful', async () => {
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const postUpdateCallback = jest.fn(async (policy) => policy);
+      mockedAppContextService.getExternalCallbacks.mockImplementation((type) => {
+        if (type === 'agentPolicyPostUpdate') {
+          return new Set([postUpdateCallback]);
+        }
+      });
+
+      soClient.get.mockResolvedValue({
+        attributes: {},
+        id: 'test-id',
+        type: 'mocked',
+        references: [],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          name: 'test',
+          namespace: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(mockedAppContextService.getExternalCallbacks).toHaveBeenCalledWith(
+        'agentPolicyPostUpdate'
+      );
+
+      expect(postUpdateCallback).toHaveBeenCalled();
+    });
+  });
+
+  describe('copy', () => {
+    let soClient: ReturnType<typeof savedObjectsClientMock.create>;
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
+
+    beforeEach(() => {
+      soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    });
+
+    it('should throw error for agent policy which has managed package policy', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+          is_managed: true,
+        },
+      ] as any);
+      try {
+        await agentPolicyService.copy(soClient, esClient, 'mocked', {
+          name: 'copy mocked',
+        });
+      } catch (e) {
+        expect(e.message).toEqual(
+          new PackagePolicyRestrictionRelatedError(
+            `Cannot copy an agent policy mocked that contains managed package policies`
+          ).message
+        );
+      }
     });
   });
 

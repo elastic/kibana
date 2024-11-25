@@ -345,7 +345,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -357,7 +365,9 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TEXT; value: string | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
+          ".TEXT; value: string | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -557,7 +567,15 @@
               "section": "def-common.ConnectorTypes",
               "text": "ConnectorTypes"
             },
-            ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); severity: ",
+            ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+            {
+              "pluginId": "cases",
+              "scope": "common",
+              "docId": "kibCasesPluginApi",
+              "section": "def-common.ConnectorTypes",
+              "text": "ConnectorTypes"
+            },
+            ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
             {
               "pluginId": "cases",
               "scope": "common",
@@ -569,7 +587,9 @@
             "CustomFieldTypes",
             ".TEXT; value: string | null; } | { key: string; type: ",
             "CustomFieldTypes",
-            ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+            ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+            "CustomFieldTypes",
+            ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
             {
               "pluginId": "@kbn/cases-components",
               "scope": "common",
@@ -1335,6 +1355,20 @@
             "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesApiTags.createComment",
+            "type": "Object",
+            "tags": [],
+            "label": "createComment",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1422,6 +1456,28 @@
             "type": "boolean",
             "tags": [],
             "label": "[CASES_SETTINGS_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.CREATE_COMMENT_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[CREATE_COMMENT_CAPABILITY]",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesCapabilities.CASES_REOPEN_CAPABILITY",
+            "type": "boolean",
+            "tags": [],
+            "label": "[CASES_REOPEN_CAPABILITY]",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
@@ -1528,6 +1584,28 @@
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.reopenCase",
+            "type": "boolean",
+            "tags": [],
+            "label": "reopenCase",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesPermissions.createComment",
+            "type": "boolean",
+            "tags": [],
+            "label": "createComment",
+            "description": [],
+            "path": "x-pack/plugins/cases/common/ui/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1591,6 +1669,34 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.reopenCase",
+            "type": "Object",
+            "tags": [],
+            "label": "reopenCase",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.CasesUiCapabilities.createComment",
+            "type": "Object",
+            "tags": [],
+            "label": "createComment",
             "description": [],
             "signature": [
               "readonly string[]"
@@ -1926,7 +2032,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -1938,7 +2052,9 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2058,6 +2174,107 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CasePatchRequest",
+        "type": "Type",
+        "tags": [],
+        "label": "CasePatchRequest",
+        "description": [],
+        "signature": [
+          "{ description?: string | undefined; tags?: string[] | undefined; title?: string | undefined; connector?: ({ id: string; } & (({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".casesWebhook; fields: null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".none; fields: null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; }))) | undefined; severity?: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CaseSeverity",
+            "text": "CaseSeverity"
+          },
+          " | undefined; assignees?: { uid: string; }[] | undefined; category?: string | null | undefined; customFields?: ({ key: string; type: ",
+          "CustomFieldTypes",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".TEXT; value: string | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; settings?: { syncAlerts: boolean; } | undefined; } & { status?: ",
+          {
+            "pluginId": "@kbn/cases-components",
+            "scope": "common",
+            "docId": "kibKbnCasesComponentsPluginApi",
+            "section": "def-common.CaseStatuses",
+            "text": "CaseStatuses"
+          },
+          " | undefined; owner?: string | undefined; } & { id: string; version: string; }"
+        ],
+        "path": "x-pack/plugins/cases/common/types/api/case/v1.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CasePostRequest",
         "type": "Type",
         "tags": [],
@@ -2120,7 +2337,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); settings: { syncAlerts: boolean; }; owner: string; } & { assignees?: { uid: string; }[] | undefined; severity?: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2132,7 +2357,9 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TEXT; value: string | null; })[] | undefined; }"
+          ".TEXT; value: string | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/case/v1.ts",
         "deprecated": false,
@@ -2203,7 +2430,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2215,7 +2450,9 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2335,6 +2572,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CASES_REOPEN_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "CASES_REOPEN_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"case_reopen\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.CASES_SETTINGS_CAPABILITY",
         "type": "string",
         "tags": [],
@@ -2429,7 +2681,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2441,7 +2701,9 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2608,7 +2870,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; name: string; }; severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; name: string; } | { id: string; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; name: string; }; severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2620,7 +2890,9 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2823,7 +3095,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; name: string; }; severity: ",
+          ".swimlane; fields: { caseId: string | null; } | null; name: string; } | { id: string; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; name: string; }; severity: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -2835,7 +3115,9 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; settings: { syncAlerts: boolean; }; status: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; settings: { syncAlerts: boolean; }; status: ",
           {
             "pluginId": "@kbn/cases-components",
             "scope": "common",
@@ -2952,6 +3234,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.CREATE_COMMENT_CAPABILITY",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_COMMENT_CAPABILITY",
+        "description": [],
+        "signature": [
+          "\"create_comment\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.DELETE_CASES_CAPABILITY",
         "type": "string",
         "tags": [],
@@ -2969,11 +3266,29 @@
         "parentPluginId": "cases",
         "id": "def-common.FEATURE_ID",
         "type": "string",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "FEATURE_ID",
         "description": [],
         "signature": [
           "\"generalCases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/application.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.FEATURE_ID_V2",
+        "type": "string",
+        "tags": [],
+        "label": "FEATURE_ID_V2",
+        "description": [],
+        "signature": [
+          "\"generalCasesV2\""
         ],
         "path": "x-pack/plugins/cases/common/constants/application.ts",
         "deprecated": false,
@@ -3240,7 +3555,9 @@
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[]; }; } | { type: \"comment\"; payload: { comment: { type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[]; }; } | { type: \"comment\"; payload: { comment: { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3384,11 +3701,21 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); } & { assignees: { uid: string; }[]; description: string; status: string; severity: string; tags: string[]; title: string; settings: { syncAlerts: boolean; }; owner: string; } & { category?: string | null | undefined; customFields?: ({ key: string; type: ",
           "CustomFieldTypes",
           ".TEXT; value: string | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TOGGLE; value: boolean | null; })[] | undefined; }; }) | { type: \"connector\"; payload: { connector: { id: string; } & (({ type: ",
+          ".TOGGLE; value: boolean | null; } | { key: string; type: ",
+          "CustomFieldTypes",
+          ".NUMBER; value: number | null; })[] | undefined; }; }) | { type: \"connector\"; payload: { connector: { id: string; } & (({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -3444,7 +3771,15 @@
             "section": "def-common.ConnectorTypes",
             "text": "ConnectorTypes"
           },
-          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; })); }; } | { type: \"pushed\"; payload: { externalService: { connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }; }; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; action: \"create\" | \"update\" | \"delete\" | \"add\" | \"push_to_service\"; }) & { comment_id: string | null; }) & { id: string; version: string; })[]; page: number; perPage: number; total: number; }"
+          ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }) | ({ type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ConnectorTypes",
+            "text": "ConnectorTypes"
+          },
+          ".theHive; fields: { tlp: number | null; } | null; } & { name: string; })); }; } | { type: \"pushed\"; payload: { externalService: { connector_id: string; } & { connector_name: string; external_id: string; external_title: string; external_url: string; pushed_at: string; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; }; }; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; action: \"create\" | \"update\" | \"delete\" | \"add\" | \"push_to_service\"; }) & { comment_id: string | null; }) & { id: string; version: string; })[]; page: number; perPage: number; total: number; }"
         ],
         "path": "x-pack/plugins/cases/common/types/api/user_action/v1.ts",
         "deprecated": false,

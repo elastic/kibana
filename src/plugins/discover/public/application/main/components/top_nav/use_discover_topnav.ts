@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useMemo } from 'react';
@@ -19,7 +20,7 @@ import {
 } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getTopNavBadges } from './get_top_nav_badges';
-import { getTopNavLinks } from './get_top_nav_links';
+import { useTopNavLinks } from './use_top_nav_links';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -54,29 +55,16 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const topNavMenu = useMemo(
-    () =>
-      getTopNavLinks({
-        dataView,
-        services,
-        state: stateContainer,
-        onOpenInspector,
-        isEsqlMode,
-        adHocDataViews,
-        topNavCustomization,
-        shouldShowESQLToDataViewTransitionModal,
-      }),
-    [
-      adHocDataViews,
-      dataView,
-      isEsqlMode,
-      onOpenInspector,
-      services,
-      stateContainer,
-      topNavCustomization,
-      shouldShowESQLToDataViewTransitionModal,
-    ]
-  );
+  const topNavMenu = useTopNavLinks({
+    dataView,
+    services,
+    state: stateContainer,
+    onOpenInspector,
+    isEsqlMode,
+    adHocDataViews,
+    topNavCustomization,
+    shouldShowESQLToDataViewTransitionModal,
+  });
 
   return {
     topNavMenu,

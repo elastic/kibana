@@ -14,7 +14,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/esql-ast",
-    "@kbn/utility-types",
+    "@kbn/utility-types"
   ],
   "exclude": [
     "target/**/*",

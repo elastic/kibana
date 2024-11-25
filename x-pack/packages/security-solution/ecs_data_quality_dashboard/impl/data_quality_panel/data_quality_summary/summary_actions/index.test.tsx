@@ -120,10 +120,10 @@ describe('SummaryActions', () => {
     expect(screen.getByTestId('actions')).toBeInTheDocument();
   });
 
-  test('it invokes addSuccessToast when the copy to clipboard button is clicked', () => {
+  test('it invokes addSuccessToast when the copy to clipboard button is clicked', async () => {
     const button = screen.getByTestId('copyToClipboard');
 
-    userEvent.click(button);
+    await userEvent.click(button);
 
     expect(addSuccessToast).toBeCalledWith({
       title: 'Copied results to the clipboard',

@@ -36,67 +36,14 @@ const configurationUtilities = actionsConfigMock.create();
 
 const issueTypesResponse = createAxiosResponse({
   data: {
-    projects: [
+    issueTypes: [
       {
-        issuetypes: [
-          {
-            id: '10006',
-            name: 'Task',
-          },
-          {
-            id: '10007',
-            name: 'Bug',
-          },
-        ],
+        id: '10006',
+        name: 'Task',
       },
-    ],
-  },
-});
-
-const fieldsResponse = createAxiosResponse({
-  data: {
-    projects: [
       {
-        issuetypes: [
-          {
-            id: '10006',
-            name: 'Task',
-            fields: {
-              summary: { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-              priority: {
-                required: false,
-                schema: { type: 'string' },
-                fieldId: 'priority',
-                allowedValues: [
-                  {
-                    name: 'Highest',
-                    id: '1',
-                  },
-                  {
-                    name: 'High',
-                    id: '2',
-                  },
-                  {
-                    name: 'Medium',
-                    id: '3',
-                  },
-                  {
-                    name: 'Low',
-                    id: '4',
-                  },
-                  {
-                    name: 'Lowest',
-                    id: '5',
-                  },
-                ],
-                defaultValue: {
-                  name: 'Medium',
-                  id: '3',
-                },
-              },
-            },
-          },
-        ],
+        id: '10007',
+        name: 'Bug',
       },
     ],
   },
@@ -109,30 +56,6 @@ const issueResponse = {
 };
 
 const issuesResponse = [issueResponse];
-
-const mockNewAPI = () =>
-  requestMock.mockImplementationOnce(() =>
-    createAxiosResponse({
-      data: {
-        capabilities: {
-          'list-project-issuetypes':
-            'https://coolsite.net/rest/capabilities/list-project-issuetypes',
-          'list-issuetype-fields': 'https://coolsite.net/rest/capabilities/list-issuetype-fields',
-        },
-      },
-    })
-  );
-
-const mockOldAPI = () =>
-  requestMock.mockImplementationOnce(() =>
-    createAxiosResponse({
-      data: {
-        capabilities: {
-          navigation: 'https://coolsite.net/rest/capabilities/navigation',
-        },
-      },
-    })
-  );
 
 describe('Jira service', () => {
   let service: ExternalService;
@@ -347,23 +270,6 @@ describe('Jira service', () => {
     });
 
     test('it creates the incident correctly without issue type', async () => {
-      /* The response from Jira when creating an issue contains only the key and the id.
-      The function makes the following calls when creating an issue:
-        1. Get issueTypes to set a default ONLY when incident.issueType is missing
-        2. Create the issue.
-        3. Get the created issue with all the necessary fields.
-    */
-      // getIssueType mocks
-      requestMock.mockImplementationOnce(() =>
-        createAxiosResponse({
-          data: {
-            capabilities: {
-              navigation: 'https://coolsite.net/rest/capabilities/navigation',
-            },
-          },
-        })
-      );
-
       // getIssueType mocks
       requestMock.mockImplementationOnce(() => issueTypesResponse);
 
@@ -419,16 +325,6 @@ describe('Jira service', () => {
     });
 
     test('removes newline characters and trialing spaces from summary', async () => {
-      requestMock.mockImplementationOnce(() =>
-        createAxiosResponse({
-          data: {
-            capabilities: {
-              navigation: 'https://coolsite.net/rest/capabilities/navigation',
-            },
-          },
-        })
-      );
-
       // getIssueType mocks
       requestMock.mockImplementationOnce(() => issueTypesResponse);
 
@@ -800,28 +696,47 @@ describe('Jira service', () => {
     });
   });
 
-  describe('getCapabilities', () => {
-    test('it should return the capabilities', async () => {
-      mockOldAPI();
-      const res = await service.getCapabilities();
-      expect(res).toEqual({
-        capabilities: {
-          navigation: 'https://coolsite.net/rest/capabilities/navigation',
+  describe('getIssueTypes', () => {
+    test('it should return the issue types', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            issueTypes: issueTypesResponse.data.issueTypes,
+          },
+        })
+      );
+
+      const res = await service.getIssueTypes();
+
+      expect(res).toEqual([
+        {
+          id: '10006',
+          name: 'Task',
         },
-      });
+        {
+          id: '10007',
+          name: 'Bug',
+        },
+      ]);
     });
 
     test('it should call request with correct arguments', async () => {
-      mockOldAPI();
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            issueTypes: issueTypesResponse.data.issueTypes,
+          },
+        })
+      );
 
-      await service.getCapabilities();
+      await service.getIssueTypes();
 
-      expect(requestMock).toHaveBeenCalledWith({
+      expect(requestMock).toHaveBeenLastCalledWith({
         axios,
         logger,
         method: 'get',
         configurationUtilities,
-        url: 'https://coolsite.net/rest/capabilities',
+        url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
         connectorUsageCollector,
       });
     });
@@ -829,25 +744,12 @@ describe('Jira service', () => {
     test('it should throw an error', async () => {
       requestMock.mockImplementation(() => {
         const error: ResponseError = new Error('An error has occurred');
-        error.response = { data: { errors: { capabilities: 'Could not get capabilities' } } };
+        error.response = { data: { errors: { issuetypes: 'Could not get issue types' } } };
         throw error;
       });
 
-      await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Could not get capabilities'
-      );
-    });
-
-    test('it should return unknown if the error is a string', async () => {
-      requestMock.mockImplementation(() => {
-        const error = new Error('An error has occurred');
-        // @ts-ignore
-        error.response = { data: 'Unauthorized' };
-        throw error;
-      });
-
-      await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: unknown: errorResponse.errors was null'
+      await expect(service.getIssueTypes()).rejects.toThrow(
+        '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Could not get issue types'
       );
     });
 
@@ -856,346 +758,178 @@ describe('Jira service', () => {
         createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
       );
 
-      await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
+      await expect(service.getIssueTypes()).rejects.toThrow(
+        '[Action][Jira]: Unable to get issue types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
       );
     });
 
-    test('it should throw if the required attributes are not there', async () => {
-      requestMock.mockImplementation(() => createAxiosResponse({ data: { notRequired: 'test' } }));
-
-      await expect(service.getCapabilities()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: Response is missing at least one of the expected fields: capabilities. Reason: unknown: errorResponse was null'
+    test('it should work with data center response - issueTypes returned in data.values', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            values: issueTypesResponse.data.issueTypes,
+          },
+        })
       );
-    });
-  });
 
-  describe('getIssueTypes', () => {
-    describe('Old API', () => {
-      test('it should return the issue types', async () => {
-        mockOldAPI();
+      await service.getIssueTypes();
 
-        requestMock.mockImplementationOnce(() => issueTypesResponse);
-
-        const res = await service.getIssueTypes();
-
-        expect(res).toEqual([
-          {
-            id: '10006',
-            name: 'Task',
-          },
-          {
-            id: '10007',
-            name: 'Bug',
-          },
-        ]);
-      });
-
-      test('it should call request with correct arguments', async () => {
-        mockOldAPI();
-
-        requestMock.mockImplementationOnce(() => issueTypesResponse);
-
-        await service.getIssueTypes();
-
-        expect(requestMock).toHaveBeenLastCalledWith({
-          axios,
-          logger,
-          method: 'get',
-          configurationUtilities,
-          url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&expand=projects.issuetypes.fields',
-          connectorUsageCollector,
-        });
-      });
-
-      test('it should throw an error', async () => {
-        mockOldAPI();
-
-        requestMock.mockImplementation(() => {
-          const error: ResponseError = new Error('An error has occurred');
-          error.response = { data: { errors: { issuetypes: 'Could not get issue types' } } };
-          throw error;
-        });
-
-        await expect(service.getIssueTypes()).rejects.toThrow(
-          '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Could not get issue types'
-        );
-      });
-
-      test('it should throw if the request is not a JSON', async () => {
-        mockOldAPI();
-
-        requestMock.mockImplementation(() =>
-          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
-        );
-
-        await expect(service.getIssueTypes()).rejects.toThrow(
-          '[Action][Jira]: Unable to get issue types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
-        );
-      });
-    });
-    describe('New API', () => {
-      test('it should return the issue types', async () => {
-        mockNewAPI();
-
-        requestMock.mockImplementationOnce(() =>
-          createAxiosResponse({
-            data: {
-              values: issueTypesResponse.data.projects[0].issuetypes,
-            },
-          })
-        );
-
-        const res = await service.getIssueTypes();
-
-        expect(res).toEqual([
-          {
-            id: '10006',
-            name: 'Task',
-          },
-          {
-            id: '10007',
-            name: 'Bug',
-          },
-        ]);
-      });
-
-      test('it should call request with correct arguments', async () => {
-        mockNewAPI();
-
-        requestMock.mockImplementationOnce(() =>
-          createAxiosResponse({
-            data: {
-              values: issueTypesResponse.data.projects[0].issuetypes,
-            },
-          })
-        );
-
-        await service.getIssueTypes();
-
-        expect(requestMock).toHaveBeenLastCalledWith({
-          axios,
-          logger,
-          method: 'get',
-          configurationUtilities,
-          url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
-          connectorUsageCollector,
-        });
-      });
-
-      test('it should throw an error', async () => {
-        mockNewAPI();
-
-        requestMock.mockImplementation(() => {
-          const error: ResponseError = new Error('An error has occurred');
-          error.response = { data: { errors: { issuetypes: 'Could not get issue types' } } };
-          throw error;
-        });
-
-        await expect(service.getIssueTypes()).rejects.toThrow(
-          '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Could not get issue types'
-        );
-      });
-
-      test('it should throw if the request is not a JSON', async () => {
-        mockNewAPI();
-
-        requestMock.mockImplementation(() =>
-          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
-        );
-
-        await expect(service.getIssueTypes()).rejects.toThrow(
-          '[Action][Jira]: Unable to get issue types. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
-        );
+      expect(requestMock).toHaveBeenLastCalledWith({
+        axios,
+        logger,
+        method: 'get',
+        configurationUtilities,
+        url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
+        connectorUsageCollector,
       });
     });
   });
 
   describe('getFieldsByIssueType', () => {
-    describe('Old API', () => {
-      test('it should return the fields', async () => {
-        mockOldAPI();
-
-        requestMock.mockImplementationOnce(() => fieldsResponse);
-
-        const res = await service.getFieldsByIssueType('10006');
-
-        expect(res).toEqual({
-          priority: {
-            required: false,
-            schema: { type: 'string' },
-            allowedValues: [
-              { id: '1', name: 'Highest' },
-              { id: '2', name: 'High' },
-              { id: '3', name: 'Medium' },
-              { id: '4', name: 'Low' },
-              { id: '5', name: 'Lowest' },
+    test('it should return the fields', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            fields: [
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              {
+                required: false,
+                schema: { type: 'string' },
+                fieldId: 'priority',
+                allowedValues: [
+                  {
+                    name: 'Medium',
+                    id: '3',
+                  },
+                ],
+                defaultValue: {
+                  name: 'Medium',
+                  id: '3',
+                },
+              },
             ],
-            defaultValue: { id: '3', name: 'Medium' },
           },
-          summary: {
-            required: true,
-            schema: { type: 'string' },
-            allowedValues: [],
-            defaultValue: {},
-          },
-        });
-      });
+        })
+      );
 
-      test('it should call request with correct arguments', async () => {
-        mockOldAPI();
+      const res = await service.getFieldsByIssueType('10006');
 
-        requestMock.mockImplementationOnce(() => fieldsResponse);
-
-        await service.getFieldsByIssueType('10006');
-
-        expect(requestMock).toHaveBeenLastCalledWith({
-          axios,
-          logger,
-          method: 'get',
-          configurationUtilities,
-          url: 'https://coolsite.net/rest/api/2/issue/createmeta?projectKeys=CK&issuetypeIds=10006&expand=projects.issuetypes.fields',
-          connectorUsageCollector,
-        });
-      });
-
-      test('it should throw an error', async () => {
-        mockOldAPI();
-
-        requestMock.mockImplementation(() => {
-          const error: ResponseError = new Error('An error has occurred');
-          error.response = { data: { errors: { fields: 'Could not get fields' } } };
-          throw error;
-        });
-
-        await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
-          '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get fields'
-        );
-      });
-
-      test('it should throw if the request is not a JSON', async () => {
-        mockOldAPI();
-
-        requestMock.mockImplementation(() =>
-          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
-        );
-
-        await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
-          '[Action][Jira]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
-        );
+      expect(res).toEqual({
+        priority: {
+          required: false,
+          schema: { type: 'string' },
+          allowedValues: [{ id: '3', name: 'Medium' }],
+          defaultValue: { id: '3', name: 'Medium' },
+        },
+        summary: {
+          required: true,
+          schema: { type: 'string' },
+          allowedValues: [],
+          defaultValue: {},
+        },
       });
     });
 
-    describe('New API', () => {
-      test('it should return the fields', async () => {
-        mockNewAPI();
-
-        requestMock.mockImplementationOnce(() =>
-          createAxiosResponse({
-            data: {
-              values: [
-                { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-                {
-                  required: false,
-                  schema: { type: 'string' },
-                  fieldId: 'priority',
-                  allowedValues: [
-                    {
-                      name: 'Medium',
-                      id: '3',
-                    },
-                  ],
-                  defaultValue: {
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            fields: [
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              {
+                required: true,
+                schema: { type: 'string' },
+                fieldId: 'priority',
+                allowedValues: [
+                  {
                     name: 'Medium',
                     id: '3',
                   },
+                ],
+                defaultValue: {
+                  name: 'Medium',
+                  id: '3',
                 },
-              ],
-            },
-          })
-        );
-
-        const res = await service.getFieldsByIssueType('10006');
-
-        expect(res).toEqual({
-          priority: {
-            required: false,
-            schema: { type: 'string' },
-            allowedValues: [{ id: '3', name: 'Medium' }],
-            defaultValue: { id: '3', name: 'Medium' },
+              },
+            ],
           },
-          summary: {
-            required: true,
-            schema: { type: 'string' },
-            allowedValues: [],
-            defaultValue: {},
-          },
-        });
+        })
+      );
+
+      await service.getFieldsByIssueType('10006');
+
+      expect(requestMock).toHaveBeenLastCalledWith({
+        axios,
+        logger,
+        method: 'get',
+        configurationUtilities,
+        url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
+      });
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        const error: ResponseError = new Error('An error has occurred');
+        error.response = { data: { errors: { issuetypes: 'Could not get issue types' } } };
+        throw error;
       });
 
-      test('it should call request with correct arguments', async () => {
-        mockNewAPI();
+      await expect(service.getFieldsByIssueType('10006')).rejects.toThrowError(
+        '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get issue types'
+      );
+    });
 
-        requestMock.mockImplementationOnce(() =>
-          createAxiosResponse({
-            data: {
-              values: [
-                { required: true, schema: { type: 'string' }, fieldId: 'summary' },
-                {
-                  required: true,
-                  schema: { type: 'string' },
-                  fieldId: 'priority',
-                  allowedValues: [
-                    {
-                      name: 'Medium',
-                      id: '3',
-                    },
-                  ],
-                  defaultValue: {
+    test('it should throw if the request is not a JSON', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
+      );
+
+      await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
+        '[Action][Jira]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
+      );
+    });
+
+    test('it should work with data center response - issueTypes returned in data.values', async () => {
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            values: [
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              {
+                required: false,
+                schema: { type: 'string' },
+                fieldId: 'priority',
+                allowedValues: [
+                  {
                     name: 'Medium',
                     id: '3',
                   },
+                ],
+                defaultValue: {
+                  name: 'Medium',
+                  id: '3',
                 },
-              ],
-            },
-          })
-        );
+              },
+            ],
+          },
+        })
+      );
 
-        await service.getFieldsByIssueType('10006');
+      const res = await service.getFieldsByIssueType('10006');
 
-        expect(requestMock).toHaveBeenLastCalledWith({
-          axios,
-          logger,
-          method: 'get',
-          configurationUtilities,
-          url: 'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
-        });
-      });
-
-      test('it should throw an error', async () => {
-        mockNewAPI();
-
-        requestMock.mockImplementation(() => {
-          const error: ResponseError = new Error('An error has occurred');
-          error.response = { data: { errors: { issuetypes: 'Could not get issue types' } } };
-          throw error;
-        });
-
-        await expect(service.getFieldsByIssueType('10006')).rejects.toThrowError(
-          '[Action][Jira]: Unable to get fields. Error: An error has occurred. Reason: Could not get issue types'
-        );
-      });
-
-      test('it should throw if the request is not a JSON', async () => {
-        mockNewAPI();
-
-        requestMock.mockImplementation(() =>
-          createAxiosResponse({ data: { id: '1' }, headers: { ['content-type']: 'text/html' } })
-        );
-
-        await expect(service.getFieldsByIssueType('10006')).rejects.toThrow(
-          '[Action][Jira]: Unable to get fields. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json. Reason: unknown: errorResponse was null'
-        );
+      expect(res).toEqual({
+        priority: {
+          required: false,
+          schema: { type: 'string' },
+          allowedValues: [{ id: '3', name: 'Medium' }],
+          defaultValue: { id: '3', name: 'Medium' },
+        },
+        summary: {
+          required: true,
+          schema: { type: 'string' },
+          allowedValues: [],
+          defaultValue: {},
+        },
       });
     });
   });
@@ -1403,50 +1137,14 @@ describe('Jira service', () => {
         .mockImplementationOnce(() =>
           createAxiosResponse({
             data: {
-              capabilities: {
-                'list-project-issuetypes':
-                  'https://coolsite.net/rest/capabilities/list-project-issuetypes',
-                'list-issuetype-fields':
-                  'https://coolsite.net/rest/capabilities/list-issuetype-fields',
-              },
+              issueTypes: issueTypesResponse.data.issueTypes,
             },
           })
         )
         .mockImplementationOnce(() =>
           createAxiosResponse({
             data: {
-              values: issueTypesResponse.data.projects[0].issuetypes,
-            },
-          })
-        )
-        .mockImplementationOnce(() =>
-          createAxiosResponse({
-            data: {
-              capabilities: {
-                'list-project-issuetypes':
-                  'https://coolsite.net/rest/capabilities/list-project-issuetypes',
-                'list-issuetype-fields':
-                  'https://coolsite.net/rest/capabilities/list-issuetype-fields',
-              },
-            },
-          })
-        )
-        .mockImplementationOnce(() =>
-          createAxiosResponse({
-            data: {
-              capabilities: {
-                'list-project-issuetypes':
-                  'https://coolsite.net/rest/capabilities/list-project-issuetypes',
-                'list-issuetype-fields':
-                  'https://coolsite.net/rest/capabilities/list-issuetype-fields',
-              },
-            },
-          })
-        )
-        .mockImplementationOnce(() =>
-          createAxiosResponse({
-            data: {
-              values: [
+              fields: [
                 { required: true, schema: { type: 'string' }, fieldId: 'summary' },
                 { required: true, schema: { type: 'string' }, fieldId: 'description' },
                 {
@@ -1471,7 +1169,7 @@ describe('Jira service', () => {
         .mockImplementationOnce(() =>
           createAxiosResponse({
             data: {
-              values: [
+              fields: [
                 { required: true, schema: { type: 'string' }, fieldId: 'summary' },
                 { required: true, schema: { type: 'string' }, fieldId: 'description' },
               ],
@@ -1488,10 +1186,7 @@ describe('Jira service', () => {
       callMocks();
       await service.getFields();
       const callUrls = [
-        'https://coolsite.net/rest/capabilities',
         'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes',
-        'https://coolsite.net/rest/capabilities',
-        'https://coolsite.net/rest/capabilities',
         'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes/10006',
         'https://coolsite.net/rest/api/2/issue/createmeta/CK/issuetypes/10007',
       ];
@@ -1525,7 +1220,7 @@ describe('Jira service', () => {
         throw error;
       });
       await expect(service.getFields()).rejects.toThrow(
-        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Required field'
+        '[Action][Jira]: Unable to get issue types. Error: An error has occurred. Reason: Required field'
       );
     });
   });

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { AuthenticatedUser, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import { AnalyticsServiceSetup, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -20,13 +20,25 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 
+import { CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT } from '../../../lib/telemetry/event_based_telemetry';
 import { performChecks } from '../../helpers';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '../../../../common/constants';
-import { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
+import {
+  EsKnowledgeBaseEntrySchema,
+  UpdateKnowledgeBaseEntrySchema,
+} from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
-import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
-import { transformToCreateSchema } from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
+import {
+  transformESSearchToKnowledgeBaseEntry,
+  transformESToKnowledgeBase,
+} from '../../../ai_assistant_data_clients/knowledge_base/transforms';
+import {
+  getUpdateScript,
+  transformToCreateSchema,
+  transformToUpdateSchema,
+} from '../../../ai_assistant_data_clients/knowledge_base/create_knowledge_base_entry';
+import { getKBUserFilter } from './utils';
 
 export interface BulkOperationError {
   message: string;
@@ -41,8 +53,6 @@ export type BulkResponse = KnowledgeBaseEntryBulkCrudActionResults & {
   errors?: BulkOperationError[];
 };
 
-export type BulkActionError = BulkOperationError | unknown;
-
 const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
@@ -51,7 +61,8 @@ const buildBulkResponse = (
     created = [],
     deleted = [],
     skipped = [],
-  }: KnowledgeBaseEntryBulkCrudActionResults & { errors: BulkOperationError[] }
+  }: KnowledgeBaseEntryBulkCrudActionResults & { errors: BulkOperationError[] },
+  telemetry: AnalyticsServiceSetup
 ): IKibanaResponse<KnowledgeBaseEntryBulkCrudActionResponse> => {
   const numSucceeded = updated.length + created.length + deleted.length;
   const numSkipped = skipped.length;
@@ -71,6 +82,16 @@ const buildBulkResponse = (
     skipped,
   };
 
+  if (created.length) {
+    created.forEach((entry) => {
+      telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, {
+        entryType: entry.type,
+        required: 'required' in entry ? entry.required ?? false : false,
+        sharing: entry.users.length ? 'private' : 'global',
+        ...(entry.type === 'document' ? { source: entry.source } : {}),
+      });
+    });
+  }
   if (numFailed > 0) {
     return response.custom<KnowledgeBaseEntryBulkCrudActionResponse>({
       headers: { 'content-type': 'application/json' },
@@ -132,15 +153,12 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
-            capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           logger.debug(
@@ -168,10 +186,20 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           request.events.completed$.subscribe(() => abortController.abort());
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const spaceId = ctx.elasticAssistant.getSpaceId();
-          // Authenticated user null check completed in `performChecks()` above
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser() as AuthenticatedUser;
+          const authenticatedUser = checkResponse.currentUser;
+          const userFilter = getKBUserFilter(authenticatedUser);
+          const manageGlobalKnowledgeBaseAIAssistant =
+            kbDataClient?.options.manageGlobalKnowledgeBaseAIAssistant;
 
           if (body.create && body.create.length > 0) {
+            // RBAC validation
+            body.create.forEach((entry) => {
+              const isGlobal = entry.users != null && entry.users.length === 0;
+              if (isGlobal && !manageGlobalKnowledgeBaseAIAssistant) {
+                throw new Error(`User lacks privileges to create global knowledge base entries`);
+              }
+            });
+
             const result = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
               perPage: 100,
               page: 1,
@@ -190,6 +218,43 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             }
           }
 
+          const validateDocumentsModification = async (
+            documentIds: string[],
+            operation: 'delete' | 'update'
+          ) => {
+            if (!documentIds.length) {
+              return;
+            }
+            const documentsFilter = documentIds.map((id) => `_id:${id}`).join(' OR ');
+            const entries = await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
+              page: 1,
+              perPage: 100,
+              filter: `${documentsFilter} AND ${userFilter}`,
+            });
+            const availableEntries = entries
+              ? transformESSearchToKnowledgeBaseEntry(entries.data)
+              : [];
+            availableEntries.forEach((entry) => {
+              // RBAC validation
+              const isGlobal = entry.users != null && entry.users.length === 0;
+              if (isGlobal && !manageGlobalKnowledgeBaseAIAssistant) {
+                throw new Error(
+                  `User lacks privileges to ${operation} global knowledge base entries`
+                );
+              }
+            });
+            const availableIds = availableEntries.map((doc) => doc.id);
+            const nonAvailableIds = documentIds.filter((id) => !availableIds.includes(id));
+            if (nonAvailableIds.length > 0) {
+              throw new Error(`Could not find documents to ${operation}: ${nonAvailableIds}.`);
+            }
+          };
+          await validateDocumentsModification(body.delete?.ids ?? [], 'delete');
+          await validateDocumentsModification(
+            body.update?.map((entry) => entry.id) ?? [],
+            'update'
+          );
+
           const writer = await kbDataClient?.getWriter();
           const changedAt = new Date().toISOString();
           const {
@@ -199,11 +264,25 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             docs_deleted: docsDeleted,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           } = await writer!.bulk({
-            documentsToCreate: body.create?.map((c) =>
-              transformToCreateSchema(changedAt, spaceId, authenticatedUser, c)
+            documentsToCreate: body.create?.map((entry) =>
+              transformToCreateSchema({
+                createdAt: changedAt,
+                spaceId,
+                user: authenticatedUser,
+                entry,
+                global: entry.users != null && entry.users.length === 0,
+              })
             ),
             documentsToDelete: body.delete?.ids,
-            documentsToUpdate: [], // TODO: Support bulk update
+            documentsToUpdate: body.update?.map((entry) =>
+              transformToUpdateSchema({
+                user: authenticatedUser,
+                updatedAt: changedAt,
+                entry,
+                global: entry.users != null && entry.users.length === 0,
+              })
+            ),
+            getUpdateScript: (entry: UpdateKnowledgeBaseEntrySchema) => getUpdateScript({ entry }),
             authenticatedUser,
           });
           const created =
@@ -215,13 +294,18 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 })
               : undefined;
 
-          return buildBulkResponse(response, {
-            // @ts-ignore-next-line TS2322
-            updated: docsUpdated,
-            created: created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [],
-            deleted: docsDeleted ?? [],
-            errors,
-          });
+          return buildBulkResponse(
+            response,
+            {
+              // @ts-ignore-next-line TS2322
+              updated: transformESToKnowledgeBase(docsUpdated),
+              created: created?.data ? transformESSearchToKnowledgeBaseEntry(created?.data) : [],
+              deleted: docsDeleted ?? [],
+              skipped: [],
+              errors,
+            },
+            ctx.elasticAssistant.telemetry
+          );
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

@@ -8,7 +8,11 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateExceptionListItem
       x-codegen-enabled: true
-      summary: Creates an exception list item
+      summary: Create an exception list item
+      description: |
+        Create an exception item and associate it with the specified exception list.
+        > info
+        > Before creating exception items, you must create an exception list.
       requestBody:
         description: Exception list item's properties
         required: true

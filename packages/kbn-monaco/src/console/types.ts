@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export interface ErrorAnnotation {
@@ -18,6 +19,16 @@ export interface ParsedRequest {
 export interface ConsoleParserResult {
   errors: ErrorAnnotation[];
   requests: ParsedRequest[];
+}
+
+export interface ConsoleOutputParsedResponse {
+  startOffset: number;
+  endOffset?: number;
+  data?: Array<Record<string, unknown>>;
+}
+export interface ConsoleOutputParserResult {
+  errors: ErrorAnnotation[];
+  responses: ConsoleOutputParsedResponse[];
 }
 
 export interface ConsoleWorkerDefinition {

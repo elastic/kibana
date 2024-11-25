@@ -47,6 +47,9 @@ export class SearchPlaygroundPlugin
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
+
+        coreStart.chrome.docTitle.change(PLUGIN_NAME);
+
         const startDeps: AppPluginStartDependencies = {
           ...depsStart,
           history,

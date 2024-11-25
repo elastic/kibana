@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useCallback, useMemo, useState } from 'react';
@@ -15,8 +16,9 @@ import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
 import { useLoadRuleTypesQuery, useAlertsDataView, useRuleAADFields } from '../common/hooks';
 
-const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
+export type { AlertsSearchBarProps } from './types';
 
+const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 const EMPTY_FEATURE_IDS: ValidFeatureId[] = [];
 
 export const AlertsSearchBar = ({
@@ -39,14 +41,14 @@ export const AlertsSearchBar = ({
   http,
   toasts,
   unifiedSearchBar,
-  dataViewsService,
+  dataService,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataView } = useAlertsDataView({
     featureIds,
     http,
     toasts,
-    dataViewsService,
+    dataViewsService: dataService.dataViews,
   });
   const { aadFields, loading: fieldsLoading } = useRuleAADFields({
     ruleTypeId,
@@ -117,7 +119,10 @@ export const AlertsSearchBar = ({
     displayStyle: 'inPage',
     showFilterBar,
     onQuerySubmit: onSearchQuerySubmit,
-    onFiltersUpdated,
+    onFiltersUpdated: (newFilters) => {
+      dataService.query.filterManager.setFilters(newFilters);
+      onFiltersUpdated?.(newFilters);
+    },
     onRefresh,
     showDatePicker,
     showQueryInput: true,

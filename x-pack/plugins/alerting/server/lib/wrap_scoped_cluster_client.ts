@@ -359,17 +359,22 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       const end = Date.now();
       const durationMs = end - start;
 
-      let took = 0;
+      let body: SearchResponse<TDocument, TAggregations>;
       if (searchOptions.meta) {
         // when meta: true, response is TransportResult<SearchResponse<TDocument, TAggregations>, unknown>
-        took = (result as TransportResult<SearchResponse<TDocument, TAggregations>, unknown>).body
-          .took;
+        body = (result as TransportResult<SearchResponse<TDocument, TAggregations>, unknown>).body;
       } else {
         // when meta: false, response is SearchResponse<TDocument, TAggregations>
-        took = (result as SearchResponse<TDocument, TAggregations>).took;
+        body = result as SearchResponse<TDocument, TAggregations>;
       }
 
-      opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
+      opts.logMetricsFn({ esSearchDuration: body?.took ?? 0, totalSearchDuration: durationMs });
+      opts.logger.trace(
+        () =>
+          `result of executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+            opts.rule.spaceId
+          }: ${JSON.stringify(body)}`
+      );
       return result;
     } catch (e) {
       if (opts.abortController.signal.aborted) {

@@ -38,7 +38,10 @@ export function getLogRateChange(
         }
       );
 
-      return { message, factor: roundedFactor };
+      return {
+        message,
+        factor: roundedFactor,
+      };
     } else {
       return {
         message: i18n.translate(
@@ -66,7 +69,10 @@ export function getLogRateChange(
         }
       );
 
-      return { message, factor: roundedFactor };
+      return {
+        message,
+        factor: roundedFactor,
+      };
     } else {
       return {
         message: i18n.translate(

@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import { EsAttackDiscoverySchema } from '../ai_assistant_data_clients/attack_discovery/types';
+import { EsAttackDiscoverySchema } from '../lib/attack_discovery/persistence/types';
 
 export const getAttackDiscoverySearchEsMock = () => {
   const searchResponse: estypes.SearchResponse<EsAttackDiscoverySchema> = {

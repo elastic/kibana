@@ -142,7 +142,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
             {i18n.REQUIRED_LABEL}
           </EuiText>
         }
-        error={errors.severity}
+        error={errors.severity as string}
         isInvalid={isFieldInvalid(severity, errors.severity)}
       >
         <EuiSelect
@@ -167,7 +167,7 @@ const ServiceNowITOMParamsFields: React.FunctionComponent<
       />
       <EuiFormRow
         fullWidth
-        error={errors['subActionParams.additional_info']}
+        error={errors['subActionParams.additional_info'] as string[]}
         isInvalid={
           errors['subActionParams.additional_info'] !== undefined &&
           Number(errors['subActionParams.additional_info'].length) > 0

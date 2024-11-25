@@ -5,30 +5,43 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
+import { last } from 'lodash';
 import { defer, switchMap, throwError } from 'rxjs';
-import type { ChatCompleteAPI, ChatCompletionResponse } from '../../common/chat_complete';
-import { createInferenceRequestError } from '../../common/errors';
-import type { InferenceStartDependencies } from '../types';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import {
+  type ChatCompleteAPI,
+  type ChatCompleteCompositeResponse,
+  createInferenceRequestError,
+  type ToolOptions,
+  ChatCompleteOptions,
+} from '@kbn/inference-common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { getInferenceAdapter } from './adapters';
-import { createInferenceExecutor, chunksIntoMessage } from './utils';
+import { createInferenceExecutor, chunksIntoMessage, streamToResponse } from './utils';
 
-export function createChatCompleteApi({
-  request,
-  actions,
-}: {
+interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
-  actions: InferenceStartDependencies['actions'];
-}) {
-  const chatCompleteAPI: ChatCompleteAPI = ({
+  actions: ActionsPluginStart;
+  logger: Logger;
+}
+
+export function createChatCompleteApi(options: CreateChatCompleteApiOptions): ChatCompleteAPI;
+export function createChatCompleteApi({ request, actions, logger }: CreateChatCompleteApiOptions) {
+  return ({
     connectorId,
     messages,
     toolChoice,
     tools,
     system,
-  }): ChatCompletionResponse => {
-    return defer(async () => {
+    functionCalling,
+    stream,
+  }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
+    ToolOptions,
+    boolean
+  > => {
+    const obs$ = defer(async () => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       const connector = await getConnectorById({ connectorId, actionsClient });
       const executor = createInferenceExecutor({ actionsClient, connector });
@@ -44,20 +57,32 @@ export function createChatCompleteApi({
           );
         }
 
+        logger.debug(() => `Sending request: ${JSON.stringify(last(messages))}`);
+        logger.trace(() => JSON.stringify({ messages, toolChoice, tools, system }));
+
         return inferenceAdapter.chatComplete({
           system,
           executor,
           messages,
           toolChoice,
           tools,
+          logger,
+          functionCalling,
         });
       }),
       chunksIntoMessage({
-        toolChoice,
-        tools,
+        toolOptions: {
+          toolChoice,
+          tools,
+        },
+        logger,
       })
     );
-  };
 
-  return chatCompleteAPI;
+    if (stream) {
+      return obs$;
+    } else {
+      return streamToResponse(obs$);
+    }
+  };
 }

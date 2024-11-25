@@ -9,7 +9,6 @@ import type { AssetCriticalityService } from './asset_criticality_service';
 
 const buildMockAssetCriticalityService = (): jest.Mocked<AssetCriticalityService> => ({
   getCriticalitiesByIdentifiers: jest.fn().mockResolvedValue([]),
-  isEnabled: jest.fn().mockReturnValue(true),
 });
 
 export const assetCriticalityServiceMock = {

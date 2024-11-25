@@ -26,7 +26,7 @@ import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved
 import {
   removeMonitorEmptyValues,
   transformPublicKeys,
-} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/formatters/saved_object_to_monitor';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
@@ -54,8 +54,17 @@ export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statu
   return result.body;
 };
 
+export const keyToOmitList = [
+  'created_at',
+  'updated_at',
+  'id',
+  'config_id',
+  'form_monitor_type',
+  'spaceId',
+];
+
 export const omitMonitorKeys = (monitor: any) => {
-  return omitBy(transformPublicKeys(monitor), removeMonitorEmptyValues);
+  return omitBy(omit(transformPublicKeys(monitor), keyToOmitList), removeMonitorEmptyValues);
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -154,10 +163,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
+      epct(apiResponse).toEqual(epct.objectContaining({ retest_on_failure: false }));
     });
 
-    it('can enable retries', async () => {
+    it('can enable retries with max attempts', async () => {
       const maxAttempts = 2;
       const newMonitor = {
         max_attempts: maxAttempts,
@@ -169,7 +178,21 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      epct(apiResponse).toEqual(epct.objectContaining({ max_attempts: maxAttempts }));
+      epct(apiResponse).toEqual(epct.objectContaining({ retest_on_failure: true }));
+    });
+
+    it('can enable retries', async () => {
+      const newMonitor = {
+        retest_on_failure: false,
+        urls: 'https://elastic.co',
+        name: `Sample name ${uuidv4()}`,
+        type: 'http',
+        locations: [localLoc],
+      };
+
+      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+
+      epct(apiResponse).toEqual(epct.objectContaining({ retest_on_failure: false }));
     });
 
     it('cannot create a invalid monitor without a monitor type', async () => {
@@ -281,7 +304,9 @@ export default function ({ getService }: FtrProviderContext) {
             .send(httpMonitorJson);
 
           expect(apiResponse.status).eql(403);
-          expect(apiResponse.body.message).eql('Forbidden');
+          expect(apiResponse.body.message).eql(
+            'API [POST /api/synthetics/monitors] is unauthorized for user, this action is granted by the Kibana privileges [uptime-write]'
+          );
         });
     });
 

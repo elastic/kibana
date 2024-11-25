@@ -14,10 +14,10 @@ import * as monitorDetailLocatorModule from '../../../../hooks/use_monitor_detai
 import * as monitorEnableHandlerModule from '../../../../hooks/use_monitor_enable_handler';
 import * as enablementHook from '../../../../hooks/use_enablement';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
-import { MonitorOverviewItem } from '../types';
+import { OverviewStatusMetaData } from '../types';
 
 describe('ActionsPopover', () => {
-  let testMonitor: MonitorOverviewItem;
+  let testMonitor: OverviewStatusMetaData;
 
   beforeEach(() => {
     jest.spyOn(enablementHook, 'useEnablement').mockReturnValue({
@@ -32,19 +32,17 @@ describe('ActionsPopover', () => {
     });
 
     testMonitor = {
-      location: {
-        id: 'us_central',
-        isServiceManaged: true,
-      },
+      locationId: 'us_central',
       isEnabled: true,
       isStatusAlertEnabled: true,
       name: 'Monitor 1',
-      id: 'somelongstring',
       configId: '1lkjelre',
       type: 'browser',
       tags: [],
       schedule: '120',
-    };
+      monitorQueryId: '123',
+      status: 'up',
+    } as any;
   });
 
   afterEach(() => {
@@ -58,7 +56,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={false}
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
     expect(getByLabelText('Open actions menu'));
@@ -74,7 +72,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={isPopoverOpen}
         setIsPopoverOpen={setIsPopoverOpen}
         monitor={testMonitor}
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
     const popoverButton = getByLabelText('Open actions menu');
@@ -94,7 +92,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={isPopoverOpen}
         setIsPopoverOpen={setIsPopoverOpen}
         monitor={testMonitor}
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
     const popoverButton = getByLabelText('Open actions menu');
@@ -115,7 +113,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={true}
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
 
@@ -132,7 +130,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={true}
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
 
@@ -151,7 +149,7 @@ describe('ActionsPopover', () => {
         isPopoverOpen={true}
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
     expect(getByTestId('actionsPopoverGoToMonitor')?.getAttribute('href')).toBe(
@@ -172,7 +170,7 @@ describe('ActionsPopover', () => {
         position="relative"
         setIsPopoverOpen={jest.fn()}
         monitor={testMonitor}
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
     const enableButton = getByText('Disable monitor (all locations)');
@@ -194,7 +192,7 @@ describe('ActionsPopover', () => {
         setIsPopoverOpen={jest.fn()}
         monitor={{ ...testMonitor, isEnabled: false }}
         position="relative"
-        locationId={testMonitor.location.id}
+        locationId={testMonitor.locationId}
       />
     );
     const enableButton = getByText('Enable monitor (all locations)');

@@ -198,7 +198,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(response.body.item.policy_id).to.eql(null);
+      expect(response.body.item.policy_id).to.eql(undefined);
       expect(response.body.item.policy_ids).to.eql([]);
     });
 
@@ -640,6 +640,24 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
       expect(body.item.inputs[0].enabled).to.eql(false);
+    });
+
+    it('should return 400 for content packages', async function () {
+      const response = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'content-pkg-policy',
+          description: '',
+          namespace: 'default',
+          policy_ids: [],
+          package: {
+            name: 'good_content',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(response.body.message).to.eql('Cannot create policy for content only packages');
     });
 
     describe('input only packages', () => {

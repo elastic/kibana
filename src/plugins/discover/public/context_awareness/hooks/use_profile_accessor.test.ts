@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { ComposableProfile, getMergedAccessor } from '../composable_profile';
+import { renderHook } from '@testing-library/react';
+import { AppliedProfile, getMergedAccessor } from '../composable_profile';
 import { useProfileAccessor } from './use_profile_accessor';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { useProfiles } from './use_profiles';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
-let mockProfiles: ComposableProfile[] = [];
+let mockProfiles: AppliedProfile[] = [];
 
 jest.mock('./use_profiles', () => ({
   useProfiles: jest.fn(() => mockProfiles),
@@ -29,12 +31,19 @@ jest.mock('../composable_profile', () => {
 
 const record = getDataTableRecords(dataViewWithTimefieldMock)[0];
 
+const getCellRenderersParams = {
+  actions: { addFilter: jest.fn() },
+  dataView: dataViewWithTimefieldMock,
+  density: DataGridDensity.COMPACT,
+  rowHeight: 0,
+};
+
 describe('useProfileAccessor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockProfiles = [
-      { getCellRenderers: (prev) => () => ({ ...prev(), profile1: jest.fn() }) },
-      { getCellRenderers: (prev) => () => ({ ...prev(), profile2: jest.fn() }) },
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile1: jest.fn() }) },
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile2: jest.fn() }) },
     ];
   });
 
@@ -46,7 +55,7 @@ describe('useProfileAccessor', () => {
     const accessor = result.current(base);
     expect(getMergedAccessor).toHaveBeenCalledTimes(1);
     expect(getMergedAccessor).toHaveBeenCalledWith(mockProfiles, 'getCellRenderers', base);
-    const renderers = accessor();
+    const renderers = accessor(getCellRenderersParams);
     expect(renderers).toEqual({
       base: expect.any(Function),
       profile1: expect.any(Function),
@@ -71,7 +80,9 @@ describe('useProfileAccessor', () => {
       useProfileAccessor('getCellRenderers', { record })
     );
     const prevResult = result.current;
-    mockProfiles = [{ getCellRenderers: (prev) => () => ({ ...prev(), profile3: jest.fn() }) }];
+    mockProfiles = [
+      { getCellRenderers: (prev) => (params) => ({ ...prev(params), profile3: jest.fn() }) },
+    ];
     rerender();
     expect(result.current).not.toBe(prevResult);
   });

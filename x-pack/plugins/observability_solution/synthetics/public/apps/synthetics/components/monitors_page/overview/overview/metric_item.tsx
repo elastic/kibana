@@ -6,19 +6,25 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { FlyoutParamProps } from './types';
 import { MetricItemBody } from './metric_item/metric_item_body';
-import { MetricItemExtra } from './metric_item/metric_item_extra';
-import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
+import {
+  selectErrorPopoverState,
+  selectOverviewTrends,
+  toggleErrorPopoverOpen,
+} from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover';
 import {
   hideTestNowFlyoutAction,
@@ -26,6 +32,9 @@ import {
   toggleTestNowFlyoutAction,
 } from '../../../../state/manual_test_runs';
 import { MetricItemIcon } from './metric_item_icon';
+import { MetricItemExtra } from './metric_item/metric_item_extra';
+
+const METRIC_ITEM_HEIGHT = 160;
 
 export const getColor = (
   theme: ReturnType<typeof useTheme>,
@@ -49,26 +58,20 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  stats,
-  data,
   onClick,
+  style,
 }: {
-  monitor: MonitorOverviewItem;
-  data: Array<{ x: number; y: number }>;
-  stats: {
-    medianDuration: number;
-    avgDuration: number;
-    minDuration: number;
-    maxDuration: number;
-  };
-  onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
+  monitor: OverviewStatusMetaData;
+  style?: React.CSSProperties;
+  onClick: (params: FlyoutParamProps) => void;
 }) => {
+  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
   const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
     configId: monitor.configId,
-    locationId: monitor.location.id,
+    locationId: monitor.locationId,
   });
   const theme = useTheme();
 
@@ -77,7 +80,10 @@ export const MetricItem = ({
   const dispatch = useDispatch();
 
   return (
-    <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
+    <div
+      data-test-subj={`${monitor.name}-${monitor.locationId}-metric-item`}
+      style={style ?? { height: METRIC_ITEM_HEIGHT }}
+    >
       <EuiPanel
         data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
         paddingSize="none"
@@ -119,9 +125,10 @@ export const MetricItem = ({
               if (!testInProgress && locationName) {
                 onClick({
                   configId: monitor.configId,
-                  id: monitor.id,
+                  id: monitor.configId,
                   location: locationName,
-                  locationId: monitor.location.id,
+                  locationId: monitor.locationId,
+                  spaceId: monitor.spaceId,
                 });
               }
             }}
@@ -130,16 +137,33 @@ export const MetricItem = ({
             locale={i18n.getLocale()}
           />
           <Metric
-            id={`${monitor.configId}-${monitor.location?.id}`}
+            id={`${monitor.configId}-${monitor.locationId}`}
             data={[
               [
                 {
                   title: monitor.name,
                   subtitle: locationName,
-                  value: stats.medianDuration,
+                  value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
                   trendShape: MetricTrendShape.Area,
-                  trend: data,
-                  extra: <MetricItemExtra stats={stats} />,
+                  trend: trendData !== 'loading' && !!trendData?.data ? trendData.data : [],
+                  extra:
+                    trendData !== 'loading' && !!trendData ? (
+                      <MetricItemExtra
+                        stats={{
+                          medianDuration: trendData.median,
+                          minDuration: trendData.min,
+                          maxDuration: trendData.max,
+                          avgDuration: trendData.avg,
+                        }}
+                      />
+                    ) : trendData === 'loading' ? (
+                      <div>
+                        <FormattedMessage
+                          defaultMessage="Loading metrics"
+                          id="xpack.synthetics.overview.metricItem.loadingMessage"
+                        />
+                      </div>
+                    ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(theme, monitor.isEnabled, status),
                   body: <MetricItemBody monitor={monitor} />,
@@ -154,7 +178,7 @@ export const MetricItem = ({
             isPopoverOpen={isPopoverOpen}
             setIsPopoverOpen={setIsPopoverOpen}
             position="relative"
-            locationId={monitor.location.id}
+            locationId={monitor.locationId}
           />
         </div>
         {configIdByLocation && (
@@ -167,6 +191,7 @@ export const MetricItem = ({
           />
         )}
       </EuiPanel>
+      <EuiSpacer size="s" />
     </div>
   );
 };

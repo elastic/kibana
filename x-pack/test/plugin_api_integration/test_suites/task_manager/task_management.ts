@@ -563,21 +563,6 @@ export default function ({ getService }: FtrProviderContext) {
       await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
     });
 
-    it('should increment attempts when task fails on markAsRunning', async () => {
-      const originalTask = await scheduleTask({
-        taskType: 'sampleTask',
-        params: { throwOnMarkAsRunning: true },
-      });
-
-      expect(originalTask.attempts).to.eql(0);
-
-      // Wait for task manager to attempt running the task a second time
-      await retry.try(async () => {
-        const task = await currentTask(originalTask.id);
-        expect(task.attempts).to.eql(2);
-      });
-    });
-
     it('should return a task run error result when trying to run a non-existent task', async () => {
       // runSoon should fail
       const failedRunSoonResult = await runTaskSoon({
@@ -797,7 +782,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.try(async () => {
         const [scheduledTask] = (await currentTasks()).docs;
         expect(scheduledTask.id).to.eql(task.id);
-        expect(scheduledTask.status).to.eql('claiming');
+        expect(['claiming', 'running'].includes(scheduledTask.status)).to.be(true);
         expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
     });

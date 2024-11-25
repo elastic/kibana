@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { StarterPrompt } from '../../common/types';
 
-export const defaultStarterPrompts = [
+export const defaultStarterPrompts: StarterPrompt[] = [
   {
     title: i18n.translate(
       'xpack.observabilityAiAssistant.app.starterPrompts.exampleQuestions.title',
@@ -20,6 +21,7 @@ export const defaultStarterPrompts = [
       }
     ),
     icon: 'sparkles',
+    scopes: ['all'],
   },
   {
     title: i18n.translate(
@@ -33,6 +35,7 @@ export const defaultStarterPrompts = [
       }
     ),
     icon: 'inspect',
+    scopes: ['all'],
   },
   {
     title: i18n.translate('xpack.observabilityAiAssistant.app.starterPrompts.doIHaveAlerts.title', {
@@ -45,6 +48,7 @@ export const defaultStarterPrompts = [
       }
     ),
     icon: 'bell',
+    scopes: ['observability'],
   },
   {
     title: i18n.translate('xpack.observabilityAiAssistant.app.starterPrompts.whatAreSlos.title', {
@@ -54,5 +58,6 @@ export const defaultStarterPrompts = [
       defaultMessage: 'What are SLOs?',
     }),
     icon: 'bullseye',
+    scopes: ['observability'],
   },
 ];

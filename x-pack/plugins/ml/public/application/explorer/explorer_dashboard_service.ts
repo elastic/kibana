@@ -21,21 +21,38 @@ import type { ExplorerState } from './reducers';
 import { explorerReducer, getExplorerDefaultState } from './reducers';
 import type { MlFieldFormatService } from '../services/field_format_service';
 import type { MlJobService } from '../services/job_service';
+import type { ExplorerJob } from './explorer_utils';
 
-type ExplorerAction = Action | Observable<ActionPayload>;
-export const explorerAction$ = new Subject<ExplorerAction>();
+type ExplorerAction = (typeof EXPLORER_ACTION)[keyof typeof EXPLORER_ACTION];
 
-export type ActionPayload = any;
-
-export interface Action {
-  type: string;
-  payload?: ActionPayload;
+export interface ExplorerActionPayloads {
+  [EXPLORER_ACTION.SET_EXPLORER_DATA]: DeepPartial<ExplorerState>;
+  [EXPLORER_ACTION.JOB_SELECTION_CHANGE]: {
+    loading: boolean;
+    selectedJobs: ExplorerJob[];
+    noInfluencersConfigured: boolean;
+  };
 }
+
+export type ExplorerActions = {
+  [K in ExplorerAction]: K extends keyof ExplorerActionPayloads
+    ? {
+        type: K;
+        payload: ExplorerActionPayloads[K];
+      }
+    : {
+        type: K;
+      };
+}[ExplorerAction];
+
+type ExplorerActionMaybeObservable = ExplorerActions | Observable<ExplorerActions | null>;
+
+export const explorerAction$ = new Subject<ExplorerActionMaybeObservable>();
 
 const explorerFilteredAction$ = explorerAction$.pipe(
   // consider observables as side-effects
-  flatMap((action: ExplorerAction) =>
-    isObservable(action) ? action : (from([action]) as Observable<ExplorerAction>)
+  flatMap((action: ExplorerActionMaybeObservable) =>
+    isObservable(action) ? action : (from([action]) as Observable<ExplorerActionMaybeObservable>)
   ),
   distinctUntilChanged(isEqual)
 );
@@ -47,11 +64,6 @@ const explorerState$: Observable<ExplorerState> = explorerFilteredAction$.pipe(
   shareReplay(1)
 );
 
-const setExplorerDataActionCreator = (payload: DeepPartial<ExplorerState>) => ({
-  type: EXPLORER_ACTION.SET_EXPLORER_DATA,
-  payload,
-});
-
 // Export observable state and action dispatchers as service
 export const explorerServiceFactory = (
   mlJobService: MlJobService,
@@ -62,7 +74,9 @@ export const explorerServiceFactory = (
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_EXPLORER_DATA });
   },
   clearInfluencerFilterSettings: () => {
-    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
+    explorerAction$.next({
+      type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS,
+    });
   },
   clearJobs: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_JOBS });
@@ -73,7 +87,7 @@ export const explorerServiceFactory = (
     );
   },
   setExplorerData: (payload: DeepPartial<ExplorerState>) => {
-    explorerAction$.next(setExplorerDataActionCreator(payload));
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_EXPLORER_DATA, payload });
   },
   setChartsDataLoading: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });

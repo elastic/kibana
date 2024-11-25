@@ -65,7 +65,21 @@ describe('updateMaintenanceWindowRoute', () => {
     );
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/{id}');
-    expect(config.options?.tags?.[0]).toEqual('access:write-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "write-maintenance-window",
+          ],
+        },
+      }
+    `);
 
     await handler(context, req, res);
 
@@ -75,7 +89,6 @@ describe('updateMaintenanceWindowRoute', () => {
     });
 
     expect(res.ok).toHaveBeenLastCalledWith({
-      // @ts-expect-error upgrade typescript v5.1.6
       body: rewritePartialMaintenanceBodyRes(mockMaintenanceWindow),
     });
   });

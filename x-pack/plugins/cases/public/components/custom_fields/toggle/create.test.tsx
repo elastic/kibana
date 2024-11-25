@@ -58,8 +58,8 @@ describe.skip('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByRole('switch'));
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByRole('switch'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -89,7 +89,7 @@ describe.skip('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(await screen.findByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(

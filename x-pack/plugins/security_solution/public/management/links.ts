@@ -15,9 +15,8 @@ import {
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   ENDPOINTS_PATH,
-  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+  ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -38,12 +37,13 @@ import {
   RESPONSE_ACTIONS_HISTORY,
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
-  ASSET_CRITICALITY,
+  ENTITY_STORE,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
 import { cloudDefendLink } from '../cloud_defend/links';
+import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
 import { IconEndpoints } from '../common/icons/endpoints';
@@ -62,7 +62,7 @@ const categories = [
     }),
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
-      SecurityPageName.entityAnalyticsAssetClassification,
+      SecurityPageName.entityAnalyticsEntityStoreManagement,
     ],
   },
   {
@@ -84,6 +84,12 @@ const categories = [
       defaultMessage: 'Cloud Security',
     }),
     linkIds: [SecurityPageName.cloudDefendPolicies],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
+      defaultMessage: 'Investigations',
+    }),
+    linkIds: [SecurityPageName.notes],
   },
 ];
 
@@ -188,20 +194,16 @@ export const links: LinkItem = {
       licenseType: 'platinum',
     },
     {
-      id: SecurityPageName.entityAnalyticsAssetClassification,
-      title: ASSET_CRITICALITY,
-      description: i18n.translate(
-        'xpack.securitySolution.appLinks.assetClassificationDescription',
-        {
-          defaultMessage: 'Represents the criticality of an asset to your business infrastructure.',
-        }
-      ),
+      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
+      title: ENTITY_STORE,
+      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
+        defaultMessage: 'Store host and user entities observed in events.',
+      }),
       landingIcon: IconAssetCriticality,
-      path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
+      path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SERVER_APP_ID}.entity-analytics`],
-      uiSettingRequired: ENABLE_ASSET_CRITICALITY_SETTING,
     },
     {
       id: SecurityPageName.responseActionsHistory,
@@ -215,6 +217,7 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     cloudDefendLink,
+    notesLink,
   ],
 };
 

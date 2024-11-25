@@ -7,17 +7,23 @@
 
 import { catchError, map, Observable, of } from 'rxjs';
 import { PassThrough } from 'stream';
+import type { Logger } from '@kbn/logging';
 import {
+  InferenceTaskEventType,
   InferenceTaskErrorCode,
   InferenceTaskErrorEvent,
   isInferenceError,
-} from '../../common/errors';
-import { InferenceTaskEventType } from '../../common/tasks';
+} from '@kbn/inference-common';
 
-export function observableIntoEventSourceStream(source$: Observable<unknown>) {
+export function observableIntoEventSourceStream(
+  source$: Observable<unknown>,
+  logger: Pick<Logger, 'debug' | 'error'>
+) {
   const withSerializedErrors$ = source$.pipe(
     catchError((error): Observable<InferenceTaskErrorEvent> => {
       if (isInferenceError(error)) {
+        logger?.error(error);
+        logger?.debug(() => JSON.stringify(error));
         return of({
           type: InferenceTaskEventType.error,
           error: {

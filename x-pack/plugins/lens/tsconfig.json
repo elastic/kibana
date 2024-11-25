@@ -58,7 +58,7 @@
     "@kbn/ui-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/monaco",
-    "@kbn/language-documentation-popover",
+    "@kbn/language-documentation",
     "@kbn/core-saved-objects-common",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-saved-objects-server",
@@ -101,7 +101,7 @@
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/esql-utils",
-    "@kbn/text-based-editor",
+    "@kbn/esql-editor",
     "@kbn/managed-content-badge",
     "@kbn/sort-predicates",
     "@kbn/presentation-publishing",
@@ -113,6 +113,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/es-types",
     "@kbn/esql-datagrid",
+    "@kbn/transpose-utils",
   ],
   "exclude": ["target/**/*"]
 }

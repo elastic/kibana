@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
   ChromeStart,
+  ChromeBreadcrumb,
   SideNavComponent,
-  ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
   AppDeepLinkId,
@@ -17,6 +18,7 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionNavigationDefinitions,
+  SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
 
@@ -65,7 +67,7 @@ export interface InternalChromeStart extends ChromeStart {
       Id extends string = string,
       ChildrenId extends string = Id
     >(
-      id: string,
+      id: SolutionId,
       navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
 
@@ -86,6 +88,9 @@ export interface InternalChromeStart extends ChromeStart {
      */
     setSideNavComponent(component: SideNavComponent | null): void;
 
+    /** Get an Observable of the current project breadcrumbs */
+    getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+
     /**
      * Set project breadcrumbs
      * @param breadcrumbs
@@ -94,7 +99,7 @@ export interface InternalChromeStart extends ChromeStart {
      * Use {@link ServerlessPluginStart.setBreadcrumbs} to set project breadcrumbs.
      */
     setBreadcrumbs(
-      breadcrumbs: ChromeProjectBreadcrumb[] | ChromeProjectBreadcrumb,
+      breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
 
@@ -113,6 +118,6 @@ export interface InternalChromeStart extends ChromeStart {
      * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
      * will be replaced with the legacy Kibana navigation.
      */
-    changeActiveSolutionNavigation(id: string | null): void;
+    changeActiveSolutionNavigation(id: SolutionId | null): void;
   };
 }

@@ -32,12 +32,12 @@ export interface FleetConfigType {
   };
   agentless?: {
     enabled: boolean;
-    api: {
-      url: string;
-      tls: {
-        certificate: string;
-        key: string;
-        ca: string;
+    api?: {
+      url?: string;
+      tls?: {
+        certificate?: string;
+        key?: string;
+        ca?: string;
       };
     };
   };
@@ -49,6 +49,7 @@ export interface FleetConfigType {
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
   agentIdVerificationEnabled?: boolean;
+  eventIngestedEnabled?: boolean;
   enableExperimental?: string[];
   packageVerification?: {
     gpgKeyPath?: string;
@@ -65,6 +66,7 @@ export interface FleetConfigType {
     disableBundledPackagesCache?: boolean;
   };
   internal?: {
+    useMeteringApi?: boolean;
     disableILMPolicies: boolean;
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;

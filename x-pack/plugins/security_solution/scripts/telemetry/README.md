@@ -13,7 +13,7 @@ If you have further events to be included in the data views, please update the s
 
 ### Usage
 
-1. Login with Vault (`vault login -method github`), ensure you have siem-team access. If you have never accessed Vault before, follow [these instructions](https://github.com/elastic/infra/blob/master/docs/vault/README.md)
+1. Login with Vault (`vault login -method oidc`), ensure you have siem-team access. If you have never accessed Vault before, follow [these instructions](https://github.com/elastic/infra/blob/master/docs/vault/README.md)
 2. cd into this directory
 3. Run the script with the appropriate arguments. By default, the script will run for the `security-solution-ebt-kibana-browser` data view in the `securitysolution` space. If you want to run the script for the server data view, pass the `--telemetry_type` argument with the value `server`.
 

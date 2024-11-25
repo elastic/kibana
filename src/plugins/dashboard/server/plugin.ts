@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -29,6 +30,7 @@ import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
+import { registerAPIRoutes } from './api';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -73,6 +75,8 @@ export class DashboardPlugin
       },
     });
 
+    plugins.contentManagement.favorites.registerFavoriteType('dashboard');
+
     if (plugins.taskManager) {
       initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
     }
@@ -109,6 +113,12 @@ export class DashboardPlugin
     );
 
     core.uiSettings.register(getUISettings());
+
+    registerAPIRoutes({
+      http: core.http,
+      contentManagement: plugins.contentManagement,
+      logger: this.logger,
+    });
 
     return {};
   }

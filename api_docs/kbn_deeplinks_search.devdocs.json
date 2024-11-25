@@ -30,7 +30,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"appSearch\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchRelevance\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:searchIndices\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"enterpriseSearchApplications:playground\" | \"appSearch:engines\" | \"enterpriseSearchRelevance:inferenceEndpoints\""
+          "\"appSearch\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"searchInferenceEndpoints\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:searchIndices\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"enterpriseSearchApplications:playground\" | \"appSearch:engines\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\""
         ],
         "path": "packages/deeplinks/search/deep_links.ts",
         "deprecated": false,
@@ -120,7 +120,7 @@
         "label": "ENTERPRISE_SEARCH_RELEVANCE_APP_ID",
         "description": [],
         "signature": [
-          "\"enterpriseSearchRelevance\""
+          "\"searchInferenceEndpoints\""
         ],
         "path": "packages/deeplinks/search/constants.ts",
         "deprecated": false,
@@ -228,6 +228,66 @@
           "\"workplaceSearch\""
         ],
         "path": "packages/deeplinks/search/deep_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_AI_SEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_AI_SEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchAISearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_ELASTICSEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_ELASTICSEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchElasticsearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_SEMANTIC_SEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_SEMANTIC_SEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchSemanticSearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.SEARCH_VECTOR_SEARCH",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_VECTOR_SEARCH",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchVectorSearch\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

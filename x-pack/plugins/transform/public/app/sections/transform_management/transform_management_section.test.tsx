@@ -11,7 +11,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { TransformManagementSection } from './transform_management_section';
 
-jest.mock('../../../shared_imports');
 jest.mock('../../services/navigation');
 
 const queryClient = new QueryClient();

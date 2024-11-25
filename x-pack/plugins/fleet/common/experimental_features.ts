@@ -27,6 +27,8 @@ const _allowedExperimentalValues = {
   advancedPolicySettings: true,
   useSpaceAwareness: false,
   enableReusableIntegrationPolicies: true,
+  asyncDeployPolicies: true,
+  enableExportCSV: false,
 };
 
 /**

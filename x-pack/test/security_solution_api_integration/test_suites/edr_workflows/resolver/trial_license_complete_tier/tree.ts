@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
     alwaysGenMaxChildrenPerNode: true,
     ancestryArraySize: 2,
   };
-  describe('@ess @serverless Resolver tree', function () {
+  describe('@ess @serverless @serverlessQA Resolver tree', function () {
     let adminSupertest: TestAgent;
 
     before(async () => {
@@ -467,11 +467,11 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         verifyTree({
           expectations: [
-            { origin: tree.origin.id, nodeExpectations: { descendantLevels: 1, descendants: 1 } },
+            { origin: tree.origin.id, nodeExpectations: { descendantLevels: 2, descendants: 2 } },
             // the origin's grandparent should only have the origin's parent as a descendant
             {
               origin: originGrandparent,
-              nodeExpectations: { descendantLevels: 1, descendants: 1 },
+              nodeExpectations: { descendantLevels: 0, descendants: 0 },
             },
           ],
           response: body,

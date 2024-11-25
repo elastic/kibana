@@ -74,7 +74,6 @@ async function finishWithOCC(
 
     // Generate new events with new expiration date
     const newEvents = generateMaintenanceWindowEvents({
-      // @ts-expect-error upgrade typescript v5.1.6
       rRule: maintenanceWindow.rRule,
       duration: maintenanceWindow.duration,
       expirationDate: expirationDate.toISOString(),

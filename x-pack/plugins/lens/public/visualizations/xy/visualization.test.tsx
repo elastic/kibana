@@ -143,7 +143,7 @@ describe('xy_visualization', () => {
       const desc = xyVisualization.getDescription(mixedState());
 
       expect(desc.icon).toEqual(IconChartBar);
-      expect(desc.label).toEqual('Bar vertical');
+      expect(desc.label).toEqual('Bar');
     });
 
     it('should show mixed horizontal bar chart when multiple horizontal bar types', () => {
@@ -156,18 +156,15 @@ describe('xy_visualization', () => {
 
     it('should show bar chart when bar only', () => {
       const desc = xyVisualization.getDescription(mixedState('bar_horizontal', 'bar_horizontal'));
-
-      expect(desc.label).toEqual('Bar horizontal');
+      expect(desc.label).toEqual('Bar');
     });
 
     it('should show the chart description if not mixed', () => {
       expect(xyVisualization.getDescription(mixedState('area')).label).toEqual('Area');
       expect(xyVisualization.getDescription(mixedState('line')).label).toEqual('Line');
-      expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual(
-        'Area stacked'
-      );
+      expect(xyVisualization.getDescription(mixedState('area_stacked')).label).toEqual('Area');
       expect(xyVisualization.getDescription(mixedState('bar_horizontal_stacked')).label).toEqual(
-        'Bar horizontal stacked'
+        'Bar'
       );
     });
   });
@@ -196,17 +193,15 @@ describe('xy_visualization', () => {
     it('should combine multiple layers into one type', () => {
       expect(
         xyVisualization.getVisualizationTypeId(mixedState('bar_horizontal', 'bar_horizontal'))
-      ).toEqual('bar_horizontal');
+      ).toEqual('bar');
     });
 
     it('should return the subtype for single layers', () => {
       expect(xyVisualization.getVisualizationTypeId(mixedState('area'))).toEqual('area');
       expect(xyVisualization.getVisualizationTypeId(mixedState('line'))).toEqual('line');
-      expect(xyVisualization.getVisualizationTypeId(mixedState('area_stacked'))).toEqual(
-        'area_stacked'
-      );
+      expect(xyVisualization.getVisualizationTypeId(mixedState('area_stacked'))).toEqual('area');
       expect(xyVisualization.getVisualizationTypeId(mixedState('bar_horizontal_stacked'))).toEqual(
-        'bar_horizontal_stacked'
+        'bar'
       );
     });
   });
@@ -4217,6 +4212,32 @@ describe('xy_visualization', () => {
           "title": "Delete \\"My saved object title\\"",
         }
       `);
+    });
+  });
+  describe('switchVisualizationType', () => {
+    it('should switch all the layers to the new visualization type if layerId is not specified (AI assistant case)', () => {
+      const state = exampleState();
+      state.layers[1] = state.layers[0];
+      state.layers[1].layerId = 'second';
+      state.layers[2] = state.layers[0];
+      state.layers[2].layerId = 'third';
+      const newType = 'bar';
+      const newState = xyVisualization.switchVisualizationType!(newType, state);
+      expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
+      expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual(newType);
+      expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual(newType);
+    });
+    it('should switch only the second layer to the new visualization type if layerId is specified (chart switch case)', () => {
+      const state = exampleState();
+      state.layers[1] = { ...state.layers[0] };
+      state.layers[1].layerId = 'second';
+      state.layers[2] = { ...state.layers[0] };
+      state.layers[2].layerId = 'third';
+      const newType = 'bar';
+      const newState = xyVisualization.switchVisualizationType!(newType, state, 'first');
+      expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
+      expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual('area');
+      expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual('area');
     });
   });
 });

@@ -68,13 +68,13 @@ import {
   SavedQueryId,
   KqlQueryLanguage,
 } from './common_attributes.gen';
+import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
 import {
   EventCategoryOverride,
   TiebreakerField,
   TimestampField,
 } from './specific_attributes/eql_attributes.gen';
-import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import {
   Threshold,
   ThresholdAlertSuppression,
@@ -117,6 +117,7 @@ export const BaseOptionalFields = z.object({
   meta: RuleMetadata.optional(),
   investigation_fields: InvestigationFields.optional(),
   throttle: RuleActionThrottle.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
@@ -160,7 +161,7 @@ export const ResponseFields = z.object({
   id: RuleObjectId,
   rule_id: RuleSignatureId,
   immutable: IsRuleImmutable,
-  rule_source: RuleSource.optional(),
+  rule_source: RuleSource,
   updated_at: z.string().datetime(),
   updated_by: z.string(),
   created_at: z.string().datetime(),
@@ -261,7 +262,6 @@ export const QueryRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   saved_id: SavedQueryId.optional(),
-  response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
 });
 
@@ -312,7 +312,6 @@ export const SavedQueryRuleOptionalFields = z.object({
   index: IndexPatternArray.optional(),
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
-  response_actions: z.array(ResponseAction).optional(),
   alert_suppression: AlertSuppression.optional(),
   query: RuleQuery.optional(),
 });
@@ -597,7 +596,7 @@ export const EsqlRuleUpdateProps = SharedUpdateProps.merge(EsqlRuleCreateFields)
 export type EsqlRulePatchProps = z.infer<typeof EsqlRulePatchProps>;
 export const EsqlRulePatchProps = SharedPatchProps.merge(EsqlRulePatchFields.partial());
 
-const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
+export const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleCreateFields,
   QueryRuleCreateFields,
   SavedQueryRuleCreateFields,
@@ -612,7 +611,7 @@ export type TypeSpecificCreateProps = z.infer<typeof TypeSpecificCreatePropsInte
 export const TypeSpecificCreateProps =
   TypeSpecificCreatePropsInternal as z.ZodType<TypeSpecificCreateProps>;
 
-const TypeSpecificPatchPropsInternal = z.union([
+export const TypeSpecificPatchPropsInternal = z.union([
   EqlRulePatchFields,
   QueryRulePatchFields,
   SavedQueryRulePatchFields,
@@ -627,7 +626,7 @@ export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchPropsIntern
 export const TypeSpecificPatchProps =
   TypeSpecificPatchPropsInternal as z.ZodType<TypeSpecificPatchProps>;
 
-const TypeSpecificResponseInternal = z.discriminatedUnion('type', [
+export const TypeSpecificResponseInternal = z.discriminatedUnion('type', [
   EqlRuleResponseFields,
   QueryRuleResponseFields,
   SavedQueryRuleResponseFields,
@@ -641,7 +640,7 @@ const TypeSpecificResponseInternal = z.discriminatedUnion('type', [
 export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponseInternal>;
 export const TypeSpecificResponse = TypeSpecificResponseInternal as z.ZodType<TypeSpecificResponse>;
 
-const RuleCreatePropsInternal = z.discriminatedUnion('type', [
+export const RuleCreatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleCreateProps,
   QueryRuleCreateProps,
   SavedQueryRuleCreateProps,
@@ -655,7 +654,7 @@ const RuleCreatePropsInternal = z.discriminatedUnion('type', [
 export type RuleCreateProps = z.infer<typeof RuleCreatePropsInternal>;
 export const RuleCreateProps = RuleCreatePropsInternal as z.ZodType<RuleCreateProps>;
 
-const RuleUpdatePropsInternal = z.discriminatedUnion('type', [
+export const RuleUpdatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleUpdateProps,
   QueryRuleUpdateProps,
   SavedQueryRuleUpdateProps,
@@ -669,7 +668,7 @@ const RuleUpdatePropsInternal = z.discriminatedUnion('type', [
 export type RuleUpdateProps = z.infer<typeof RuleUpdatePropsInternal>;
 export const RuleUpdateProps = RuleUpdatePropsInternal as z.ZodType<RuleUpdateProps>;
 
-const RulePatchPropsInternal = z.union([
+export const RulePatchPropsInternal = z.union([
   EqlRulePatchProps,
   QueryRulePatchProps,
   SavedQueryRulePatchProps,
@@ -683,7 +682,7 @@ const RulePatchPropsInternal = z.union([
 export type RulePatchProps = z.infer<typeof RulePatchPropsInternal>;
 export const RulePatchProps = RulePatchPropsInternal as z.ZodType<RulePatchProps>;
 
-const RuleResponseInternal = z.discriminatedUnion('type', [
+export const RuleResponseInternal = z.discriminatedUnion('type', [
   EqlRule,
   QueryRule,
   SavedQueryRule,

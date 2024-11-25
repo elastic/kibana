@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -99,7 +100,6 @@ type GetColorFn = (
 type GetPointConfigFn = (config: {
   xAccessor: string | undefined;
   markSizeAccessor: string | undefined;
-  emphasizeFitting?: boolean;
   showPoints?: boolean;
   pointsRadius?: number;
 }) => Partial<AreaSeriesStyle['point']>;
@@ -296,17 +296,13 @@ export const getSeriesName: GetSeriesNameFn = (
   return splitValues.length > 0 ? splitValues.join(' - ') : yAccessorTitle;
 };
 
-const getPointConfig: GetPointConfigFn = ({
-  xAccessor,
-  markSizeAccessor,
-  emphasizeFitting,
-  showPoints,
-  pointsRadius,
-}) => ({
-  visible: showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined,
-  radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
-  fill: markSizeAccessor ? ColorVariant.Series : undefined,
-});
+const getPointConfig: GetPointConfigFn = ({ markSizeAccessor, showPoints, pointsRadius }) => {
+  return {
+    visible: showPoints || markSizeAccessor ? 'always' : 'auto',
+    radius: pointsRadius,
+    fill: markSizeAccessor ? ColorVariant.Series : undefined,
+  };
+};
 
 const getFitLineConfig = () => ({
   visible: true,
@@ -545,7 +541,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       point: getPointConfig({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
-        emphasizeFitting,
         showPoints: layer.showPoints,
         pointsRadius: layer.pointsRadius,
       }),
@@ -562,7 +557,6 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       point: getPointConfig({
         xAccessor: xColumnId,
         markSizeAccessor: markSizeColumnId,
-        emphasizeFitting,
         showPoints: layer.showPoints,
         pointsRadius: layer.pointsRadius,
       }),

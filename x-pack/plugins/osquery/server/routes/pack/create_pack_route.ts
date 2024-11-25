@@ -40,7 +40,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     .post({
       access: 'public',
       path: '/api/osquery/packs',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {
@@ -152,9 +156,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                     }
 
                     set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                      shard: policyShards[packagePolicy.policy_ids[0]] // TODO
-                        ? policyShards[packagePolicy.policy_ids[0]]
-                        : 100,
+                      shard: policyShards[agentPolicyId] ?? 100,
                       queries: convertSOQueriesToPackConfig(queries),
                     });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SamplesFormatName } from '../../common';
 import type { Pipeline } from '../../common';
 
 export const categorizationInitialPipeline: Pipeline = {
@@ -161,7 +162,6 @@ export const testPipelineInvalidEcs: { pipelineResults: object[]; errors: object
 export const categorizationTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
-  formattedSamples: '{"test1": "test1"}',
   ecsTypes: 'testtypes',
   ecsCategories: 'testcategories',
   exAnswer: 'testanswer',
@@ -172,8 +172,8 @@ export const categorizationTestState = {
   previousError: 'testprevious',
   previousInvalidCategorization: 'testinvalid',
   pipelineResults: [{ test: 'testresult' }],
-  finalized: false,
-  reviewed: false,
+  previousPipelineResults: [{ test: 'testresult' }],
+  lastReviewedSamples: [],
   currentPipeline: { test: 'testpipeline' },
   currentProcessors: [
     {
@@ -190,6 +190,10 @@ export const categorizationTestState = {
   invalidCategorization: [{ test: 'testinvalid' }],
   initialPipeline: categorizationInitialPipeline,
   results: { test: 'testresults' },
+  samplesFormat: { name: SamplesFormatName.Values.json },
+  stableSamples: [],
+  reviewCount: 0,
+  finalized: false,
 };
 
 export const categorizationMockProcessors = [

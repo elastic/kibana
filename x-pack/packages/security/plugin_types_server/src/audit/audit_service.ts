@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-
 import type { AuditLogger } from '@kbn/core-security-server';
 
 export interface AuditServiceSetup {

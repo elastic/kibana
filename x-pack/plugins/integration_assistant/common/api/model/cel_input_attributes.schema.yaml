@@ -1,0 +1,30 @@
+openapi: 3.0.3
+info:
+  title: Cel Input Attributes
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ApiDefinition:
+      type: string
+      description: String form of the Open API schema.
+
+    CelInput:
+      type: object
+      description: Optional CEL input details.
+      required:
+        - program
+        - stateSettings
+        - redactVars
+      properties:
+        program:
+          type: string
+        stateSettings:
+          type: object
+          additionalProperties: true
+        redactVars:
+          type: array
+          items:
+            type: string
+        

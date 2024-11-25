@@ -911,7 +911,7 @@ describe('ManifestManager', () => {
       }
     });
 
-    test(`when it has endpoint artifact management and response actions app features it should generate all exceptions`, async () => {
+    test(`when it has endpoint artifact management and endpoint host isolation exceptions app features it should generate all exceptions`, async () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
@@ -931,7 +931,7 @@ describe('ManifestManager', () => {
       });
       const context = buildManifestManagerContextMock({}, [
         ProductFeatureSecurityKey.endpointArtifactManagement,
-        ProductFeatureSecurityKey.endpointResponseActions,
+        ProductFeatureSecurityKey.endpointHostIsolationExceptions,
       ]);
       const manifestManager = new ManifestManager(context);
 

@@ -8,9 +8,8 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useUiTracker, useUrlState } from '@kbn/observability-shared-plugin/public';
 
 import {
   MutationContext,
@@ -24,7 +23,6 @@ import {
   UpdateMetricsExplorerViewAttributesRequestPayload,
 } from '../../common/http_api/latest';
 import { MetricsExplorerView } from '../../common/metrics_explorer_views';
-import { useUrlState } from './use_url_state';
 import { useSavedViewsNotifier } from './use_saved_views_notifier';
 import { useSourceContext } from '../containers/metrics_source';
 import { useKibanaContextForPlugin } from './use_kibana';
@@ -72,7 +70,10 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     isFetching: isFetchingViews,
   } = useQuery({
     queryKey: queryKeys.find,
-    queryFn: () => metricsExplorerViews.client.findMetricsExplorerViews(),
+    queryFn: async () => {
+      const client = await metricsExplorerViews.getClient();
+      return client.findMetricsExplorerViews();
+    },
     enabled: false, // We will manually fetch the list when necessary
     placeholderData: [], // Use a default empty array instead of undefined
     onError: (error: ServerError) => notify.getViewFailure(error.body?.message ?? error.message),
@@ -84,7 +85,10 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
 
   const { data: currentView, isFetching: isFetchingCurrentView } = useQuery({
     queryKey: queryKeys.getById(currentViewId),
-    queryFn: ({ queryKey: [, id] }) => metricsExplorerViews.client.getMetricsExplorerView(id),
+    queryFn: async ({ queryKey: [, id] }) => {
+      const client = await metricsExplorerViews.getClient();
+      return client.getMetricsExplorerView(id);
+    },
     onError: (error: ServerError) => {
       notify.getViewFailure(error.body?.message ?? error.message);
       switchViewById(defaultViewId);
@@ -128,7 +132,10 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     ServerError,
     CreateMetricsExplorerViewAttributesRequestPayload
   >({
-    mutationFn: (attributes) => metricsExplorerViews.client.createMetricsExplorerView(attributes),
+    mutationFn: async (attributes) => {
+      const client = await metricsExplorerViews.getClient();
+      return client.createMetricsExplorerView(attributes);
+    },
     onError: (error) => {
       notify.upsertViewFailure(error.body?.message ?? error.message);
     },
@@ -143,8 +150,10 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     ServerError,
     UpdateViewParams<UpdateMetricsExplorerViewAttributesRequestPayload>
   >({
-    mutationFn: ({ id, attributes }) =>
-      metricsExplorerViews.client.updateMetricsExplorerView(id, attributes),
+    mutationFn: async ({ id, attributes }) => {
+      const client = await metricsExplorerViews.getClient();
+      return client.updateMetricsExplorerView(id, attributes);
+    },
     onError: (error) => {
       notify.upsertViewFailure(error.body?.message ?? error.message);
     },
@@ -159,7 +168,10 @@ export const useMetricsExplorerViews = (): UseMetricsExplorerViewsResult => {
     string,
     MutationContext<MetricsExplorerView>
   >({
-    mutationFn: (id: string) => metricsExplorerViews.client.deleteMetricsExplorerView(id),
+    mutationFn: async (id: string) => {
+      const client = await metricsExplorerViews.getClient();
+      return client.deleteMetricsExplorerView(id);
+    },
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when deleting a view.

@@ -55,7 +55,7 @@ const agentKeysPrivilegesRoute = createApmServerRoute({
 
 const invalidateAgentKeyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/api_key/invalidate',
-  options: { tags: ['access:apm', 'access:apm_write'] },
+  options: { tags: ['access:apm', 'access:apm_settings_write'] },
   params: t.type({
     body: t.type({ id: t.string }),
   }),
@@ -91,7 +91,7 @@ const invalidateAgentKeyRoute = createApmServerRoute({
 
 const createAgentKeyRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/agent_keys 2023-10-31',
-  options: { tags: ['access:apm', 'access:apm_write', 'oas-tag:APM agent keys'] },
+  options: { tags: ['access:apm', 'access:apm_settings_write', 'oas-tag:APM agent keys'] },
   params: t.type({
     body: t.type({
       name: t.string,

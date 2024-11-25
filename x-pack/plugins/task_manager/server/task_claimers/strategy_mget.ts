@@ -13,12 +13,10 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import apm, { Logger } from 'elastic-apm-node';
+import { Subject } from 'rxjs';
+import { createWrappedLogger } from '../lib/wrapped_logger';
 
-import apm from 'elastic-apm-node';
-import { Subject, Observable } from 'rxjs';
-
-import { omit } from 'lodash';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
   TaskClaimerOpts,
@@ -26,7 +24,13 @@ import {
   getEmptyClaimOwnershipResult,
   getExcludedTaskTypes,
 } from '.';
-import { ConcreteTaskInstance, TaskStatus, ConcreteTaskInstanceVersion, TaskCost } from '../task';
+import {
+  ConcreteTaskInstance,
+  TaskStatus,
+  ConcreteTaskInstanceVersion,
+  TaskCost,
+  PartialConcreteTaskInstance,
+} from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
@@ -53,7 +57,6 @@ interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
   size: number;
   taskTypes: Set<string>;
-  removedTypes: Set<string>;
   getCapacity: (taskType?: string | undefined) => number;
   excludedTaskTypePatterns: string[];
   taskStore: TaskStore;
@@ -61,28 +64,14 @@ interface OwnershipClaimingOpts {
   definitions: TaskTypeDictionary;
   taskMaxAttempts: Record<string, number>;
   taskPartitioner: TaskPartitioner;
+  logger: Logger;
 }
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
-export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<ClaimOwnershipResult> {
-  const taskClaimOwnership$ = new Subject<ClaimOwnershipResult>();
-
-  claimAvailableTasksApm(opts)
-    .then((result) => {
-      taskClaimOwnership$.next(result);
-    })
-    .catch((err) => {
-      taskClaimOwnership$.error(err);
-    })
-    .finally(() => {
-      taskClaimOwnership$.complete();
-    });
-
-  return taskClaimOwnership$;
-}
-
-async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
+export async function claimAvailableTasksMget(
+  opts: TaskClaimerOpts
+): Promise<ClaimOwnershipResult> {
   const apmTrans = apm.startTransaction(
     TASK_MANAGER_MARK_AS_CLAIMED,
     TASK_MANAGER_TRANSACTION_TYPE
@@ -100,21 +89,16 @@ async function claimAvailableTasksApm(opts: TaskClaimerOpts): Promise<ClaimOwner
 
 async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershipResult> {
   const { getCapacity, claimOwnershipUntil, batches, events$, taskStore, taskPartitioner } = opts;
-  const { definitions, unusedTypes, excludedTaskTypes, taskMaxAttempts } = opts;
-  const { logger } = opts;
-  const loggerTag = claimAvailableTasksMget.name;
-  const logMeta = { tags: [loggerTag] };
+  const { definitions, excludedTaskTypes, taskMaxAttempts } = opts;
+  const logger = createWrappedLogger({ logger: opts.logger, tags: [claimAvailableTasksMget.name] });
   const initialCapacity = getCapacity();
   const stopTaskTimer = startTaskTimer();
-
-  const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
 
   // get a list of candidate tasks to claim, with their version info
   const { docs, versionMap } = await searchAvailableTasks({
     definitions,
     taskTypes: new Set(definitions.getAllTypes()),
     excludedTaskTypePatterns: excludedTaskTypes,
-    removedTypes,
     taskStore,
     events$,
     claimOwnershipUntil,
@@ -125,6 +109,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     size: initialCapacity * TaskCost.Tiny * SIZE_MULTIPLIER_FOR_TASK_FETCH,
     taskMaxAttempts,
     taskPartitioner,
+    logger,
   });
 
   if (docs.length === 0)
@@ -136,18 +121,12 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // use mget to get the latest version of each task
   const docLatestVersions = await taskStore.getDocVersions(docs.map((doc) => `task:${doc.id}`));
 
-  // filter out stale, missing and removed tasks
+  // filter out stale and missing tasks
   const currentTasks: ConcreteTaskInstance[] = [];
   const staleTasks: ConcreteTaskInstance[] = [];
   const missingTasks: ConcreteTaskInstance[] = [];
-  const removedTasks: ConcreteTaskInstance[] = [];
 
   for (const searchDoc of docs) {
-    if (removedTypes.has(searchDoc.taskType)) {
-      removedTasks.push(searchDoc);
-      continue;
-    }
-
     const searchVersion = versionMap.get(searchDoc.id);
     const latestVersion = docLatestVersions.get(`task:${searchDoc.id}`);
     if (!searchVersion || !latestVersion) {
@@ -188,12 +167,11 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   // build the updated task objects we'll claim
   const now = new Date();
-  const taskUpdates: ConcreteTaskInstance[] = [];
+  const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
     taskUpdates.push({
-      // omits "enabled" field from task updates so we don't overwrite
-      // any user initiated changes to "enabled" while the task was running
-      ...omit(task, 'enabled'),
+      id: task.id,
+      version: task.version,
       scheduledAt:
         task.retryAt != null && new Date(task.retryAt).getTime() < Date.now()
           ? task.retryAt
@@ -207,88 +185,50 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // perform the task object updates, deal with errors
-  const updatedTasks: ConcreteTaskInstance[] = [];
-  let conflicts = staleTasks.length;
+  const updatedTasks: Record<string, PartialConcreteTaskInstance> = {};
+  let conflicts = 0;
   let bulkUpdateErrors = 0;
   let bulkGetErrors = 0;
 
-  const updateResults = await taskStore.bulkUpdate(taskUpdates, {
-    validate: false,
-    excludeLargeFields: true,
-  });
+  const updateResults = await taskStore.bulkPartialUpdate(taskUpdates);
   for (const updateResult of updateResults) {
     if (isOk(updateResult)) {
-      updatedTasks.push(updateResult.value);
+      updatedTasks[updateResult.value.id] = updateResult.value;
     } else {
-      const { id, type, error } = updateResult.error;
+      const { id, type, error, status } = updateResult.error;
 
-      // this check is needed so error will be typed correctly for isConflictError
-      if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
-        if (SavedObjectsErrorHelpers.isConflictError(error)) {
-          conflicts++;
-        } else {
-          logger.error(
-            `Saved Object error updating task ${id}:${type} during claim: ${error.error}`,
-            logMeta
-          );
-          bulkUpdateErrors++;
-        }
+      // check for 409 conflict errors
+      if (status === 409) {
+        conflicts++;
       } else {
-        logger.error(`Error updating task ${id}:${type} during claim: ${error.message}`, logMeta);
+        logger.error(`Error updating task ${id}:${type} during claim: ${JSON.stringify(error)}`);
         bulkUpdateErrors++;
       }
     }
   }
 
   // perform an mget to get the full task instance for claiming
-  const fullTasksToRun = (await taskStore.bulkGet(updatedTasks.map((task) => task.id))).reduce<
+  const fullTasksToRun = (await taskStore.bulkGet(Object.keys(updatedTasks))).reduce<
     ConcreteTaskInstance[]
   >((acc, task) => {
-    if (isOk(task)) {
+    if (isOk(task) && task.value.version !== updatedTasks[task.value.id].version) {
+      logger.warn(
+        `Task ${task.value.id} was modified during the claiming phase, skipping until the next claiming cycle.`
+      );
+      conflicts++;
+    } else if (isOk(task)) {
       acc.push(task.value);
     } else {
       const { id, type, error } = task.error;
-      logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`, logMeta);
+      logger.error(`Error getting full task ${id}:${type} during claim: ${error.message}`);
       bulkGetErrors++;
     }
     return acc;
   }, []);
 
-  // separate update for removed tasks; shouldn't happen often, so unlikely
-  // a performance concern, and keeps the rest of the logic simpler
-  let removedCount = 0;
-  if (removedTasks.length > 0) {
-    const tasksToRemove = Array.from(removedTasks);
-    for (const task of tasksToRemove) {
-      task.status = TaskStatus.Unrecognized;
-    }
-
-    // don't worry too much about errors, we'll get them next time
-    try {
-      const removeResults = await taskStore.bulkUpdate(tasksToRemove, {
-        validate: false,
-        excludeLargeFields: true,
-      });
-      for (const removeResult of removeResults) {
-        if (isOk(removeResult)) {
-          removedCount++;
-        } else {
-          const { id, type, error } = removeResult.error;
-          logger.warn(
-            `Error updating task ${id}:${type} to mark as unrecognized during claim: ${error.message}`,
-            logMeta
-          );
-        }
-      }
-    } catch (err) {
-      // swallow the error because this is unrelated to the claim cycle
-      logger.warn(`Error updating tasks to mark as unrecognized during claim: ${err}`, logMeta);
-    }
-  }
-
   // TODO: need a better way to generate stats
-  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; removed: ${removedCount};`;
-  logger.debug(message, logMeta);
+  const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors};`;
+  logger.debug(message);
 
   // build results
   const finalResult = {
@@ -298,6 +238,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
       tasksErrors: bulkUpdateErrors + bulkGetErrors,
+      staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,
     timing: stopTaskTimer(),
@@ -315,25 +256,44 @@ interface SearchAvailableTasksResponse {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
+let lastPartitionWarningLog: number | undefined;
+export const NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL = 60000;
+
 async function searchAvailableTasks({
   definitions,
   taskTypes,
-  removedTypes,
   excludedTaskTypePatterns,
   taskStore,
   getCapacity,
   size,
   taskPartitioner,
+  logger,
 }: OwnershipClaimingOpts): Promise<SearchAvailableTasksResponse> {
   const excludedTaskTypes = new Set(getExcludedTaskTypes(definitions, excludedTaskTypePatterns));
   const claimPartitions = buildClaimPartitions({
     types: taskTypes,
     excludedTaskTypes,
-    removedTypes,
     getCapacity,
     definitions,
   });
   const partitions = await taskPartitioner.getPartitions();
+  if (
+    partitions.length === 0 &&
+    (lastPartitionWarningLog == null ||
+      lastPartitionWarningLog <= Date.now() - NO_ASSIGNED_PARTITIONS_WARNING_INTERVAL)
+  ) {
+    logger.warn(
+      `Background task node "${taskPartitioner.getPodName()}" has no assigned partitions, claiming against all partitions`
+    );
+    lastPartitionWarningLog = Date.now();
+  }
+
+  if (partitions.length !== 0 && lastPartitionWarningLog) {
+    lastPartitionWarningLog = undefined;
+    logger.info(
+      `Background task node "${taskPartitioner.getPodName()}" now claiming with assigned partitions`
+    );
+  }
 
   const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const searches: SearchOpts[] = [];
@@ -357,7 +317,7 @@ async function searchAvailableTasks({
     const queryUnlimitedTasks = matchesClauses(
       queryForUnlimitedTasks,
       filterDownBy(InactiveTasks),
-      tasksWithPartitions(partitions)
+      partitions.length ? tasksWithPartitions(partitions) : undefined
     );
     searches.push({
       query: queryUnlimitedTasks,
@@ -384,7 +344,7 @@ async function searchAvailableTasks({
     const query = matchesClauses(
       queryForLimitedTasks,
       filterDownBy(InactiveTasks),
-      tasksWithPartitions(partitions)
+      partitions.length ? tasksWithPartitions(partitions) : undefined
     );
     searches.push({
       query,
@@ -398,7 +358,6 @@ async function searchAvailableTasks({
 }
 
 interface ClaimPartitions {
-  removedTypes: string[];
   unlimitedTypes: string[];
   limitedTypes: Map<string, number>;
 }
@@ -406,29 +365,22 @@ interface ClaimPartitions {
 interface BuildClaimPartitionsOpts {
   types: Set<string>;
   excludedTaskTypes: Set<string>;
-  removedTypes: Set<string>;
   getCapacity: (taskType?: string) => number;
   definitions: TaskTypeDictionary;
 }
 
 function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
   const result: ClaimPartitions = {
-    removedTypes: [],
     unlimitedTypes: [],
     limitedTypes: new Map(),
   };
 
-  const { types, excludedTaskTypes, removedTypes, getCapacity, definitions } = opts;
+  const { types, excludedTaskTypes, getCapacity, definitions } = opts;
   for (const type of types) {
     const definition = definitions.get(type);
     if (definition == null) continue;
 
     if (excludedTaskTypes.has(type)) continue;
-
-    if (removedTypes.has(type)) {
-      result.removedTypes.push(type);
-      continue;
-    }
 
     if (definition.maxConcurrency == null) {
       result.unlimitedTypes.push(definition.type);

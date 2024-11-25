@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -166,7 +167,7 @@ const LinksEditor = ({
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m" data-test-subj="links--panelEditor--title">
+            <EuiTitle size="s" data-test-subj="links--panelEditor--title">
               <h2>
                 {isEditingExisting
                   ? LinksStrings.editor.panelEditor.getEditFlyoutTitle()
@@ -250,7 +251,6 @@ const LinksEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onClose}
-              iconType="cross"
               flush="left"
               data-test-subj="links--panelEditor--closeBtn"
             >
@@ -267,6 +267,7 @@ const LinksEditor = ({
                     data-test-subj="links--panelEditor--saveByReferenceTooltip"
                   >
                     <EuiSwitch
+                      compressed
                       label={LinksStrings.editor.panelEditor.getSaveToLibrarySwitchLabel()}
                       checked={saveByReference}
                       disabled={hasZeroLinks}

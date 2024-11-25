@@ -101,8 +101,9 @@ export function LogsSection({ bucketSize }: Props) {
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.logs.appLink', {
-          defaultMessage: 'Show log stream',
+          defaultMessage: 'Show Logs Explorer',
         }),
+        prependBasePath: false,
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >

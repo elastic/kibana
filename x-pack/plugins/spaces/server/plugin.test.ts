@@ -117,7 +117,7 @@ describe('Spaces plugin', () => {
 
       const coreStart = coreMock.createStart();
 
-      const spacesStart = plugin.start(coreStart);
+      const spacesStart = plugin.start(coreStart, { features: featuresPluginMock.createStart() });
       expect(spacesStart).toMatchInlineSnapshot(`
         Object {
           "hasOnlyDefaultSpace$": Observable {
@@ -154,7 +154,7 @@ describe('Spaces plugin', () => {
 
     const spacesSetup = plugin.setup(core, { features, licensing, usageCollection });
     const coreStart = coreMock.createStart();
-    const spacesStart = plugin.start(coreStart);
+    const spacesStart = plugin.start(coreStart, { features: featuresPluginMock.createStart() });
 
     await expect(firstValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(true);
     await expect(firstValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(true);
@@ -172,7 +172,7 @@ describe('Spaces plugin', () => {
 
     const spacesSetup = plugin.setup(core, { features, licensing, usageCollection });
     const coreStart = coreMock.createStart();
-    const spacesStart = plugin.start(coreStart);
+    const spacesStart = plugin.start(coreStart, { features: featuresPluginMock.createStart() });
 
     await expect(firstValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(false);
     await expect(firstValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(false);

@@ -6,14 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 
 import moment from 'moment';
 
-import { useDiscoverLocator, useStartServices, useAuthz } from '../../../../../hooks';
+import { EuiButton } from '@elastic/eui';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { useStartServices, useAuthz } from '../../../../../hooks';
 
 interface ViewLogsProps {
   logStreamQuery: string;
@@ -32,8 +34,6 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
   startTime,
   endTime,
 }) => {
-  const discoverLocator = useDiscoverLocator();
-
   const { share } = useStartServices();
   const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
   const authz = useAuthz();
@@ -54,11 +54,11 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
     });
   }, [endTime, logStreamQuery, logsLocator, startTime]);
 
-  return authz.fleet.readAgents && (logsLocator || discoverLocator) ? (
+  return authz.fleet.readAgents && logsLocator ? (
     <EuiButton href={logsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
       <FormattedMessage
         id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-        defaultMessage="Open in Logs"
+        defaultMessage="Open in Logs Explorer"
       />
     </EuiButton>
   ) : null;

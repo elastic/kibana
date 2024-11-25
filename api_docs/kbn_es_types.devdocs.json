@@ -108,6 +108,20 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.include_ccs_metadata",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "include_ccs_metadata",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchParams.dropNullColumns",
             "type": "CompoundType",
             "tags": [],
@@ -206,6 +220,35 @@
                 "text": "ESQLRow"
               },
               "[]"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchResponse.took",
+            "type": "number",
+            "tags": [],
+            "label": "took",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchResponse._clusters",
+            "type": "Object",
+            "tags": [],
+            "label": "_clusters",
+            "description": [],
+            "signature": [
+              "ClusterStatistics",
+              " | undefined"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -450,6 +493,8 @@
           "AggregationsRateAggregation",
           "; reverse_nested: ",
           "AggregationsReverseNestedAggregation",
+          "; random_sampler: ",
+          "AggregationsRandomSamplerAggregation",
           "; sampler: ",
           "AggregationsSamplerAggregation",
           "; scripted_metric: ",
@@ -472,6 +517,8 @@
           "AggregationsSumBucketAggregation",
           "; terms: ",
           "AggregationsTermsAggregation",
+          "; time_series: ",
+          "AggregationsTimeSeriesAggregation",
           "; top_hits: ",
           "AggregationsTopHitsAggregation",
           "; t_test: ",
@@ -640,7 +687,7 @@
           "SearchHit",
           "<unknown>, \"fields\" | \"_source\"> & (TSource extends false ? {} : { _source: TSource; }) & (TFields extends (string | ",
           "QueryDslFieldAndFormat",
-          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : {}) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
+          ")[] ? { fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>; } : { fields?: Record<string, unknown[]> | undefined; }) & (TDocValueFields extends DocValueFields ? { fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>; } : {})"
         ],
         "path": "packages/kbn-es-types/src/search.ts",
         "deprecated": false,

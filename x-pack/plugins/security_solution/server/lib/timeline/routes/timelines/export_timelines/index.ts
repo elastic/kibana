@@ -6,16 +6,16 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { ConfigType } from '../../../../../config';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import {
-  exportTimelinesQuerySchema,
-  exportTimelinesRequestBodySchema,
+  ExportTimelinesRequestQuery,
+  ExportTimelinesRequestBody,
 } from '../../../../../../common/api/timeline';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 import { getExportTimelineByObjectIds } from './helpers';
@@ -26,8 +26,10 @@ export const exportTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
   router.versioned
     .post({
       path: TIMELINE_EXPORT_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -35,8 +37,8 @@ export const exportTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
       {
         validate: {
           request: {
-            query: buildRouteValidationWithExcess(exportTimelinesQuerySchema),
-            body: buildRouteValidationWithExcess(exportTimelinesRequestBodySchema),
+            query: buildRouteValidationWithZod(ExportTimelinesRequestQuery),
+            body: buildRouteValidationWithZod(ExportTimelinesRequestBody),
           },
         },
         version: '2023-10-31',

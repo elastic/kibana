@@ -14,17 +14,15 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
-  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
-  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
 } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '..';
-import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
+import { EntitiesDetails } from '../components/entities_details';
 import {
   THREAT_INTELLIGENCE_TAB_ID,
   ThreatIntelligenceDetails,
@@ -33,17 +31,18 @@ import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_d
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+
+const ENTITIES_TAB_ID = 'entity';
 
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
     id: ENTITIES_TAB_ID,
     label: (
-      <div data-test-subj={INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID}>
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
-          defaultMessage="Entities"
-        />
-      </div>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
+        defaultMessage="Entities"
+      />
     ),
     'data-test-subj': INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   },
@@ -60,12 +59,10 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
     id: PREVALENCE_TAB_ID,
     label: (
-      <div data-test-subj={INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID}>
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
-          defaultMessage="Prevalence"
-        />
-      </div>
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
+        defaultMessage="Prevalence"
+      />
     ),
     'data-test-subj': INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   },
@@ -117,7 +114,7 @@ export const InsightsTab = memo(() => {
           scopeId,
         },
       });
-      telemetry.reportDetailsFlyoutTabClicked({
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutTabClicked, {
         location: scopeId,
         panel: 'left',
         tabId: optionId,

@@ -14,15 +14,18 @@ import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 export const listAlertTypesRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
-  usageCounter?: UsageCounter
+  usageCounter?: UsageCounter,
+  isServerless?: boolean
 ) => {
   router.get(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`,
       validate: {},
       options: {
+        access: isServerless ? 'internal' : 'public',
         summary: 'Get the alert types',
         tags: ['oas-tag:alerting'],
+        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
         deprecated: true,
       },
     },

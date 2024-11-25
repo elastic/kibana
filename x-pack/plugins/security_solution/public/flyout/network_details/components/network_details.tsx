@@ -26,6 +26,7 @@ import { networkModel } from '../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
+import type { NarrowDateRange } from '../../../common/components/ml/types';
 
 export interface NetworkDetailsProps {
   /**
@@ -58,7 +59,7 @@ export const NetworkDetails = ({
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const type = networkModel.NetworkType.details;
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
@@ -75,10 +76,10 @@ export const NetworkDetails = ({
     services: { uiSettings },
   } = useKibana();
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
-    indexPattern,
+    dataViewSpec: sourcererDataView,
     queries: [query],
     filters,
   });

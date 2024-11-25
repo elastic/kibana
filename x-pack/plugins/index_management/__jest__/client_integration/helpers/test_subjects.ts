@@ -100,6 +100,7 @@ export type TestSubjects =
   | 'configuredByILMWarning'
   | 'show-filters-button'
   | 'filter-option-h'
+  | 'filter-option-d'
   | 'infiniteRetentionPeriod.input'
   | 'saveButton'
   | 'dsIsFullyManagedByILM'

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import type { FilterConfig, FilterConfigRenderParams } from './types';
@@ -64,7 +64,9 @@ describe('useFilterConfig', () => {
 
   it('should remove a selected option if the filter is deleted', async () => {
     const { rerender } = renderHook(useFilterConfig, {
-      wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
+      wrapper: ({ children }: React.PropsWithChildren) => (
+        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
+      ),
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,
@@ -104,7 +106,9 @@ describe('useFilterConfig', () => {
     );
 
     const { result } = renderHook(useFilterConfig, {
-      wrapper: ({ children }) => <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>,
+      wrapper: ({ children }: React.PropsWithChildren) => (
+        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
+      ),
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,

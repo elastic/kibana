@@ -7,8 +7,8 @@
 
 import { GetPreviewDataResponse, Indicator, Objective } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 export interface UseGetPreviewData {
   data: GetPreviewDataResponse | undefined;
@@ -16,6 +16,20 @@ export interface UseGetPreviewData {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
+}
+
+interface Props {
+  isValid: boolean;
+  groupBy?: string | string[];
+  instanceId?: string;
+  remoteName?: string;
+  groupings?: Record<string, unknown>;
+  objective?: Objective;
+  indicator: Indicator;
+  range: {
+    from: Date;
+    to: Date;
+  };
 }
 
 export function useGetPreviewData({
@@ -27,36 +41,29 @@ export function useGetPreviewData({
   groupings,
   instanceId,
   remoteName,
-}: {
-  isValid: boolean;
-  groupBy?: string;
-  instanceId?: string;
-  remoteName?: string;
-  groupings?: Record<string, unknown>;
-  objective?: Objective;
-  indicator: Indicator;
-  range: { from: Date; to: Date };
-}): UseGetPreviewData {
-  const { http } = useKibana().services;
+}: Props): UseGetPreviewData {
+  const { sloClient } = usePluginContext();
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
     queryKey: sloKeys.preview(indicator, range, groupings),
     queryFn: async ({ signal }) => {
-      const response = await http.post<GetPreviewDataResponse>(
-        '/internal/observability/slos/_preview',
-        {
-          body: JSON.stringify({
+      const response = await sloClient.fetch('POST /internal/observability/slos/_preview', {
+        params: {
+          body: {
             indicator,
-            range,
+            range: {
+              from: range.from.toISOString(),
+              to: range.to.toISOString(),
+            },
             groupBy,
             instanceId,
             groupings,
             remoteName,
             ...(objective ? { objective } : null),
-          }),
-          signal,
-        }
-      );
+          },
+        },
+        signal,
+      });
 
       return Array.isArray(response) ? response : [];
     },

@@ -32,7 +32,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await ml.api.cleanMlIndices();
       await esDeleteAllIndices('user-index_dfa*');
 
       // delete created ingest pipelines
@@ -42,6 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
         )
       );
       await ml.testResources.cleanMLSavedObjects();
+      await ml.api.cleanMlIndices();
     });
 
     it('returns all trained models with associated pipelines including aliases', async () => {

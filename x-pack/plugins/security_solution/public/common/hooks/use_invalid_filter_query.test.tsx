@@ -38,7 +38,7 @@ const getProps = () => ({
   endDate: '2018-01-02T00:00:00.000Z',
 });
 
-const getWrapper = (store: Store): React.FC => {
+const getWrapper = <P,>(store: Store): React.FC<React.PropsWithChildren<P>> => {
   // eslint-disable-next-line react/display-name
   return ({ children }) => (
     <TestProviders store={store} startServices={kibanaMock}>

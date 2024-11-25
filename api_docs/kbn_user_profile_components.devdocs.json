@@ -80,7 +80,7 @@
           "\nRenders an avatar given a user profile"
         ],
         "signature": [
-          "({ user, avatar, ...rest }: React.PropsWithChildren<",
+          "({ user, avatar, ...rest }: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -88,7 +88,7 @@
             "section": "def-common.UserAvatarProps",
             "text": "UserAvatarProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
@@ -97,20 +97,18 @@
           {
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserAvatar.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ user, avatar, ...rest }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/user-profile-components",
                 "scope": "common",
                 "docId": "kibKbnUserProfileComponentsPluginApi",
                 "section": "def-common.UserAvatarProps",
                 "text": "UserAvatarProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
             "deprecated": false,
@@ -131,7 +129,7 @@
           "\nRenders a user avatar with tooltip"
         ],
         "signature": [
-          "({ user, avatar, ...rest }: React.PropsWithChildren<",
+          "({ user, avatar, ...rest }: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -139,7 +137,7 @@
             "section": "def-common.UserAvatarProps",
             "text": "UserAvatarProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
         "deprecated": false,
@@ -148,20 +146,18 @@
           {
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserAvatarTip.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ user, avatar, ...rest }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/user-profile-components",
                 "scope": "common",
                 "docId": "kibKbnUserProfileComponentsPluginApi",
                 "section": "def-common.UserAvatarProps",
                 "text": "UserAvatarProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
             "deprecated": false,
@@ -182,7 +178,7 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -190,7 +186,7 @@
             "section": "def-common.UserProfilesKibanaDependencies",
             "text": "UserProfilesKibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
@@ -204,7 +200,7 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/user-profile-components",
                 "scope": "common",
@@ -212,7 +208,7 @@
                 "section": "def-common.UserProfilesKibanaDependencies",
                 "text": "UserProfilesKibanaDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
@@ -249,7 +245,7 @@
             "section": "def-common.UserProfilesPopoverProps",
             "text": "UserProfilesPopoverProps"
           },
-          "<Option>) => JSX.Element"
+          "<Option>) => React.JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
         "deprecated": false,
@@ -291,9 +287,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "Services",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/services.tsx",
         "deprecated": false,
@@ -307,9 +303,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "Services",
-              ">>"
+              ">"
             ],
             "path": "packages/kbn-user-profile-components/src/services.tsx",
             "deprecated": false,
@@ -346,7 +342,7 @@
             "section": "def-common.UserProfilesSelectableProps",
             "text": "UserProfilesSelectableProps"
           },
-          "<Option>) => JSX.Element"
+          "<Option>) => React.JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
@@ -388,7 +384,7 @@
           "\nRenders a tooltip with user information"
         ],
         "signature": [
-          "({ user, avatar, ...rest }: React.PropsWithChildren<",
+          "({ user, avatar, ...rest }: ",
           {
             "pluginId": "@kbn/user-profile-components",
             "scope": "common",
@@ -396,7 +392,7 @@
             "section": "def-common.UserToolTipProps",
             "text": "UserToolTipProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
         "deprecated": false,
@@ -405,20 +401,18 @@
           {
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserToolTip.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ user, avatar, ...rest }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/user-profile-components",
                 "scope": "common",
                 "docId": "kibKbnUserProfileComponentsPluginApi",
                 "section": "def-common.UserToolTipProps",
                 "text": "UserToolTipProps"
-              },
-              ">"
+              }
             ],
             "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
@@ -949,7 +943,7 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,
@@ -982,9 +976,9 @@
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-public.ThemeServiceStart",
+                    "section": "def-common.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
                   "; }"
@@ -1025,7 +1019,7 @@
           {
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesPopoverProps.title",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [
               "see"
             ],
@@ -1034,7 +1028,7 @@
               "\nTitle of the popover"
             ],
             "signature": [
-              "any"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,
@@ -1087,7 +1081,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"singleSelection\" | \"data-test-subj\" | \"height\" | \"errorMessage\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
+          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"loadingMessage\" | \"noMatchesMessage\" | \"emptyMessage\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "deprecated": false,
@@ -1359,7 +1353,7 @@
               "\nLabel for clear button."
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "deprecated": false,
@@ -1403,7 +1397,7 @@
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",

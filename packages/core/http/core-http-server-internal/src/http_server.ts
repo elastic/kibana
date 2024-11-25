@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server, Request } from '@hapi/hapi';
@@ -14,7 +15,6 @@ import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn
 import type { Duration } from 'moment';
 import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
-// @ts-expect-error no type definition
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
@@ -35,10 +35,12 @@ import type {
   HttpServerInfo,
   HttpAuth,
   IAuthHeadersStorage,
+  RouterDeprecatedApiDetails,
+  RouteMethod,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity } from 'lodash';
+import { identity, isObject } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
@@ -140,6 +142,7 @@ export interface HttpServerSetup {
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
+  getDeprecatedRoutes: HttpServiceSetup['getDeprecatedRoutes'];
   authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
@@ -280,6 +283,7 @@ export class HttpServer {
 
     return {
       registerRouter: this.registerRouter.bind(this),
+      getDeprecatedRoutes: this.getDeprecatedRoutes.bind(this),
       registerRouterAfterListening: this.registerRouterAfterListening.bind(this),
       registerStaticDir: this.registerStaticDir.bind(this),
       staticAssets,
@@ -383,6 +387,52 @@ export class HttpServer {
     if (authRequired === false) {
       return false;
     }
+  }
+
+  private getDeprecatedRoutes(): RouterDeprecatedApiDetails[] {
+    const deprecatedRoutes: RouterDeprecatedApiDetails[] = [];
+
+    for (const router of this.registeredRouters) {
+      const allRouterRoutes = [
+        // exclude so we dont get double entries.
+        // we need to call the versioned getRoutes to grab the full version options details
+        router.getRoutes({ excludeVersionedRoutes: true }),
+        router.versioned.getRoutes(),
+      ].flat();
+
+      deprecatedRoutes.push(
+        ...allRouterRoutes
+          .flat()
+          .map((route) => {
+            const access = route.options.access;
+            if (route.isVersioned === true) {
+              return [...route.handlers.entries()].map(([_, { options }]) => {
+                const deprecated = options.options?.deprecated;
+                return { route, version: `${options.version}`, deprecated, access };
+              });
+            }
+
+            return { route, version: undefined, deprecated: route.options.deprecated, access };
+          })
+          .flat()
+          .filter(({ deprecated, access }) => {
+            const isRouteDeprecation = isObject(deprecated);
+            const isAccessDeprecation = access === 'internal';
+            return isRouteDeprecation || isAccessDeprecation;
+          })
+          .flatMap(({ route, deprecated, version, access }) => {
+            return {
+              routeDeprecationOptions: deprecated!,
+              routeMethod: route.method as RouteMethod,
+              routePath: route.path,
+              routeVersion: version,
+              routeAccess: access,
+            };
+          })
+      );
+    }
+
+    return deprecatedRoutes;
   }
 
   private setupGracefulShutdownHandlers() {
@@ -693,12 +743,14 @@ export class HttpServer {
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
-    const { authRequired, tags, body = {}, timeout } = route.options;
+    const { authRequired, tags, body = {}, timeout, deprecated } = route.options;
     const { accepts: allow, override, maxBytes, output, parse } = body;
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? 'internal',
+      deprecated,
+      security: route.security,
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(
@@ -720,7 +772,6 @@ export class HttpServer {
         // validation applied in ./http_tools#getServerOptions
         // (All NP routes are already required to specify their own validation in order to access the payload)
         validate,
-        // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
         payload: [allow, override, maxBytes, output, parse, timeout?.payload].some(
           (x) => x !== undefined
         )

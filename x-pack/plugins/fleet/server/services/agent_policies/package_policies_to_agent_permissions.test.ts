@@ -11,6 +11,7 @@ import type { PackagePolicy, RegistryDataStream } from '../../types';
 
 import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
+  ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
   UNIVERSAL_PROFILING_PERMISSIONS,
@@ -253,6 +254,48 @@ packageInfoCache.set('apm-8.9.0-preview', {
   owner: { github: 'elastic/apm-server' },
   data_streams: [],
   latestVersion: '8.9.0-preview',
+  status: 'not_installed',
+  assets: {
+    kibana: {
+      csp_rule_template: [],
+      dashboard: [],
+      visualization: [],
+      search: [],
+      index_pattern: [],
+      map: [],
+      lens: [],
+      security_rule: [],
+      ml_module: [],
+      tag: [],
+      osquery_pack_asset: [],
+      osquery_saved_query: [],
+    },
+    elasticsearch: {
+      component_template: [],
+      ingest_pipeline: [],
+      ilm_policy: [],
+      transform: [],
+      index_template: [],
+      data_stream_ilm_policy: [],
+      ml_model: [],
+    },
+  },
+});
+
+packageInfoCache.set('elastic_connectors-1.0.0', {
+  format_version: '2.7.0',
+  name: 'elastic_connectors',
+  title: 'Elastic Connectors',
+  version: '1.0.0',
+  license: 'basic',
+  description: 'Sync data from source to the Elasticsearch index.',
+  type: 'integration',
+  release: 'beta',
+  categories: ['connector'],
+  icons: [],
+  owner: { github: 'elastic/ingestion-team' },
+  data_streams: [],
+  latestVersion: '1.0.0',
   status: 'not_installed',
   assets: {
     kibana: {
@@ -759,5 +802,57 @@ describe('getDataStreamPrivileges()', () => {
       names: ['logs-*-*'],
       privileges: ['auto_configure', 'create_doc'],
     });
+  });
+});
+
+it('Returns the Elastic Connectors permissions for elastic_connectors package', async () => {
+  const packagePolicies: PackagePolicy[] = [
+    {
+      id: 'package-policy-uuid-test-123',
+      name: 'test-policy',
+      namespace: '',
+      enabled: true,
+      package: { name: 'elastic_connectors', version: '1.0.0', title: 'Elastic Connectors' },
+      inputs: [
+        {
+          type: 'connectors-py',
+          enabled: true,
+          streams: [],
+        },
+      ],
+      created_at: '',
+      updated_at: '',
+      created_by: '',
+      updated_by: '',
+      revision: 1,
+      policy_id: '',
+      policy_ids: [''],
+    },
+  ];
+
+  const permissions = await storedPackagePoliciesToAgentPermissions(
+    packageInfoCache,
+    'test',
+    packagePolicies
+  );
+
+  expect(permissions).toMatchObject({
+    'package-policy-uuid-test-123': {
+      cluster: ['manage_connector'],
+      indices: [
+        {
+          names: ['.elastic-connectors*'],
+          privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
+        },
+        {
+          names: ['content-*', '.search-acl-filter-*'],
+          privileges: ELASTIC_CONNECTORS_INDEX_PERMISSIONS,
+        },
+        {
+          names: ['logs-elastic_agent*'],
+          privileges: ['auto_configure', 'create_doc'],
+        },
+      ],
+    },
   });
 });

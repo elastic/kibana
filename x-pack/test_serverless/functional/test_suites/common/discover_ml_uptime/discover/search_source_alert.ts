@@ -195,7 +195,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return ruleName === alertName;
     });
     await testSubjects.click('thresholdPopover');
-    await testSubjects.setValue('alertThresholdInput', '1');
+    await testSubjects.setValue('alertThresholdInput0', '1');
 
     await testSubjects.click('forLastExpression');
     await testSubjects.setValue('timeWindowSizeNumber', '30');
@@ -365,7 +365,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  describe('Search source Alert', () => {
+  describe('Search source Alert', function () {
+    // see details: https://github.com/elastic/kibana/issues/193842
+    this.tags(['failsOnMKI', 'skipSvlOblt']);
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -499,7 +501,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
 
       await testSubjects.click('thresholdPopover');
-      await testSubjects.setValue('alertThresholdInput', '1');
+      await testSubjects.setValue('alertThresholdInput0', '1');
       await testSubjects.click('saveEditedRuleButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

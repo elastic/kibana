@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { Component, Fragment, ReactNode } from 'react';
@@ -35,6 +36,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { HttpStart, IBasePath } from '@kbn/core/public';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import {
+  withEuiTablePersist,
+  type EuiTablePersistInjectedProps,
+} from '@kbn/shared-ux-table-persist';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import {
   importFile,
@@ -49,6 +54,7 @@ import { ImportSummary } from './import_summary';
 
 const CREATE_NEW_COPIES_DEFAULT = false;
 const OVERWRITE_ALL_DEFAULT = true;
+const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
 export interface FlyoutProps {
   close: () => void;
@@ -64,7 +70,6 @@ export interface FlyoutProps {
 
 export interface FlyoutState {
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
-  unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
   successfulImports?: ProcessedImportResponse['successfulImports'];
   conflictingRecord?: ConflictingRecord;
@@ -94,16 +99,15 @@ const getErrorMessage = (e: any) => {
   });
 };
 
-export class Flyout extends Component<FlyoutProps, FlyoutState> {
-  constructor(props: FlyoutProps) {
+export class FlyoutClass extends Component<
+  FlyoutProps & EuiTablePersistInjectedProps<any>,
+  FlyoutState
+> {
+  constructor(props: FlyoutProps & EuiTablePersistInjectedProps<unknown>) {
     super(props);
 
     this.state = {
       unmatchedReferences: undefined,
-      unmatchedReferencesTablePagination: {
-        pageIndex: 0,
-        pageSize: 5,
-      },
       conflictingRecord: undefined,
       error: undefined,
       file: undefined,
@@ -274,7 +278,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   renderUnmatchedReferences() {
-    const { unmatchedReferences, unmatchedReferencesTablePagination: tablePagination } = this.state;
+    const { unmatchedReferences } = this.state;
+    const {
+      euiTablePersist: { pageSize, onTableChange },
+    } = this.props;
 
     if (!unmatchedReferences) {
       return null;
@@ -366,8 +373,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     ];
 
     const pagination = {
-      ...tablePagination,
-      pageSizeOptions: [5, 10, 25],
+      pageSize,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
     return (
@@ -375,16 +382,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         items={unmatchedReferences as any[]}
         columns={columns}
         pagination={pagination}
-        onTableChange={({ page }) => {
-          if (page) {
-            this.setState({
-              unmatchedReferencesTablePagination: {
-                pageSize: page.size,
-                pageIndex: page.index,
-              },
-            });
-          }
-        }}
+        onTableChange={onTableChange}
       />
     );
   }
@@ -656,3 +654,9 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     );
   }
 }
+
+export const Flyout = withEuiTablePersist(FlyoutClass, {
+  tableId: 'savedObjectsMgmtUnmatchedReferences',
+  pageSizeOptions: PAGE_SIZE_OPTIONS,
+  initialPageSize: 5,
+});

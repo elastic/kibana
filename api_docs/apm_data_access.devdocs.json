@@ -295,7 +295,9 @@
             "label": "fieldCaps",
             "description": [],
             "signature": [
-              "(operationName: string, params: APMEventFieldCapsRequest) => Promise<",
+              "(operationName: string, params: ",
+              "APMEventFieldCapsRequest",
+              ") => Promise<",
               "FieldCapsResponse",
               ">"
             ],
@@ -344,7 +346,9 @@
             "label": "termsEnum",
             "description": [],
             "signature": [
-              "(operationName: string, params: APMEventTermsEnumRequest) => Promise<",
+              "(operationName: string, params: ",
+              "APMEventTermsEnumRequest",
+              ") => Promise<",
               "TermsEnumResponse",
               ">"
             ],
@@ -437,78 +441,6 @@
     ],
     "functions": [],
     "interfaces": [
-      {
-        "parentPluginId": "apmDataAccess",
-        "id": "def-server.ApmDataAccessPrivilegesCheck",
-        "type": "Interface",
-        "tags": [],
-        "label": "ApmDataAccessPrivilegesCheck",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.ApmDataAccessPrivilegesCheck.request",
-            "type": "Object",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
-              "<unknown, unknown, unknown, any>"
-            ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.ApmDataAccessPrivilegesCheck.security",
-            "type": "Object",
-            "tags": [],
-            "label": "security",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.SecurityPluginStart",
-                "text": "SecurityPluginStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
-            "id": "def-server.ApmDataAccessPrivilegesCheck.getApmIndices",
-            "type": "Function",
-            "tags": [],
-            "label": "getApmIndices",
-            "description": [],
-            "signature": [
-              "() => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
-            ],
-            "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/check_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "apmDataAccess",
         "id": "def-server.ApmDataAccessServicesParams",
@@ -1886,7 +1818,15 @@
               },
               "<unknown, unknown, unknown, any>, ",
               "InspectResponse",
-              "> | undefined; }"
+              "> | undefined; excludedDataTiers?: ",
+              {
+                "pluginId": "observabilityShared",
+                "scope": "common",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-common.DataTier",
+                "text": "DataTier"
+              },
+              "[] | undefined; }"
             ],
             "path": "x-pack/plugins/observability_solution/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
             "deprecated": false,
@@ -2244,7 +2184,9 @@
             "section": "def-common.ApmDataSourceWithSummary",
             "text": "ApmDataSourceWithSummary"
           },
-          "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; }"
+          "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; getHostServices: ({ start, end, size, filters, documentSources }: ",
+          "HostServicesRequest",
+          ") => Promise<{ services: { serviceName: string; agentName: string | null; }[]; }>; }"
         ],
         "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
         "deprecated": false,
@@ -2351,42 +2293,12 @@
           "label": "getApmIndices",
           "description": [],
           "signature": [
-            "(soClient: ",
-            {
-              "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "server",
-              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-server.SavedObjectsClientContract",
-              "text": "SavedObjectsClientContract"
-            },
-            ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
+            "() => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
           ],
           "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "apmDataAccess",
-              "id": "def-server.ApmDataAccessPluginSetup.getApmIndices.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "soClient",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-server.SavedObjectsClientContract",
-                  "text": "SavedObjectsClientContract"
-                }
-              ],
-              "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
+          "children": [],
           "returnComment": []
         },
         {
@@ -2445,7 +2357,9 @@
               "section": "def-common.ApmDataSourceWithSummary",
               "text": "ApmDataSourceWithSummary"
             },
-            "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; }"
+            "<AnyApmDocumentType>; bucketSizeInSeconds: number; }; documentTypeConfig: DocumentTypeConfigOf<AnyApmDocumentType>; }; getHostServices: ({ start, end, size, filters, documentSources }: ",
+            "HostServicesRequest",
+            ") => Promise<{ services: { serviceName: string; agentName: string | null; }[]; }>; }"
           ],
           "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
           "deprecated": false,
@@ -2488,56 +2402,7 @@
       "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "apmDataAccess",
-          "id": "def-server.ApmDataAccessPluginStart.hasPrivileges",
-          "type": "Function",
-          "tags": [],
-          "label": "hasPrivileges",
-          "description": [],
-          "signature": [
-            "(params: Pick<",
-            {
-              "pluginId": "apmDataAccess",
-              "scope": "server",
-              "docId": "kibApmDataAccessPluginApi",
-              "section": "def-server.ApmDataAccessPrivilegesCheck",
-              "text": "ApmDataAccessPrivilegesCheck"
-            },
-            ", \"request\">) => Promise<boolean>"
-          ],
-          "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "apmDataAccess",
-              "id": "def-server.ApmDataAccessPluginStart.hasPrivileges.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "params",
-              "description": [],
-              "signature": [
-                "Pick<",
-                {
-                  "pluginId": "apmDataAccess",
-                  "scope": "server",
-                  "docId": "kibApmDataAccessPluginApi",
-                  "section": "def-server.ApmDataAccessPrivilegesCheck",
-                  "text": "ApmDataAccessPrivilegesCheck"
-                },
-                ", \"request\">"
-              ],
-              "path": "x-pack/plugins/observability_solution/apm_data_access/server/types.ts",
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": true
-            }
-          ],
-          "returnComment": []
-        }
-      ],
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }

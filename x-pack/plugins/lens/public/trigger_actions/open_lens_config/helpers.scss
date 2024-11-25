@@ -1,12 +1,12 @@
 // styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
 .lnsConfigPanel__overlay {
   clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
-  @include euiBreakpoint('xs', 's', 'm') {
-    clip-path: none;
-  }
   max-inline-size: $euiSizeXXL * 20;
   min-inline-size: $euiSizeXXL * 8;
   background: $euiColorLightestShade;
+  @include euiBreakpoint('xs', 's', 'm') {
+    clip-path: none;
+  }
   .kbnOverlayMountWrapper {
     padding-left: $euiFormMaxWidth;
     margin-left: -$euiFormMaxWidth;

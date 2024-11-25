@@ -15,6 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
 /**
  * AI assistant KnowledgeBase.
@@ -26,6 +27,19 @@ export const KnowledgeBaseResponse = z.object({
    */
   success: z.boolean().optional(),
 });
+
+export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
+export const CreateKnowledgeBaseRequestQuery = z.object({
+  /**
+   * Optional ELSER modelId to use when setting up the Knowledge Base
+   */
+  modelId: z.string().optional(),
+  /**
+   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+   */
+  ignoreSecurityLabs: BooleanFromString.optional().default(false),
+});
+export type CreateKnowledgeBaseRequestQueryInput = z.input<typeof CreateKnowledgeBaseRequestQuery>;
 
 export type CreateKnowledgeBaseRequestParams = z.infer<typeof CreateKnowledgeBaseRequestParams>;
 export const CreateKnowledgeBaseRequestParams = z.object({
@@ -41,20 +55,6 @@ export type CreateKnowledgeBaseRequestParamsInput = z.input<
 export type CreateKnowledgeBaseResponse = z.infer<typeof CreateKnowledgeBaseResponse>;
 export const CreateKnowledgeBaseResponse = KnowledgeBaseResponse;
 
-export type DeleteKnowledgeBaseRequestParams = z.infer<typeof DeleteKnowledgeBaseRequestParams>;
-export const DeleteKnowledgeBaseRequestParams = z.object({
-  /**
-   * The KnowledgeBase `resource` value.
-   */
-  resource: z.string().optional(),
-});
-export type DeleteKnowledgeBaseRequestParamsInput = z.input<
-  typeof DeleteKnowledgeBaseRequestParams
->;
-
-export type DeleteKnowledgeBaseResponse = z.infer<typeof DeleteKnowledgeBaseResponse>;
-export const DeleteKnowledgeBaseResponse = KnowledgeBaseResponse;
-
 export type ReadKnowledgeBaseRequestParams = z.infer<typeof ReadKnowledgeBaseRequestParams>;
 export const ReadKnowledgeBaseRequestParams = z.object({
   /**
@@ -67,9 +67,10 @@ export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBa
 export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
 export const ReadKnowledgeBaseResponse = z.object({
   elser_exists: z.boolean().optional(),
-  esql_exists: z.boolean().optional(),
   index_exists: z.boolean().optional(),
   is_setup_available: z.boolean().optional(),
   is_setup_in_progress: z.boolean().optional(),
   pipeline_exists: z.boolean().optional(),
+  security_labs_exists: z.boolean().optional(),
+  user_data_exists: z.boolean().optional(),
 });

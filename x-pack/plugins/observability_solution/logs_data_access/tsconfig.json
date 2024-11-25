@@ -22,6 +22,8 @@
     "@kbn/logging",
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",
-    "@kbn/use-tracked-promise"
+    "@kbn/use-tracked-promise",
+    "@kbn/core-application-browser",
+    "@kbn/i18n-react"
   ]
 }

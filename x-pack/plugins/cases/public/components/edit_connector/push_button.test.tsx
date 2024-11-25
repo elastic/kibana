@@ -55,7 +55,7 @@ describe('PushButton ', () => {
   it('pushed correctly', async () => {
     appMockRender.render(<PushButton {...defaultProps} />);
 
-    userEvent.click(await screen.findByTestId('push-to-external-service'));
+    await userEvent.click(await screen.findByTestId('push-to-external-service'));
 
     await waitFor(() => {
       expect(pushToService).toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe('PushButton ', () => {
   it('shows the tooltip context correctly', async () => {
     appMockRender.render(<PushButton {...defaultProps} showTooltip={true} />);
 
-    userEvent.hover(await screen.findByTestId('push-to-external-service'));
+    await userEvent.hover(await screen.findByTestId('push-to-external-service'));
 
     expect(await screen.findByText('My SN connector incident is up to date')).toBeInTheDocument();
     expect(await screen.findByText('No update is required')).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('PushButton ', () => {
       />
     );
 
-    userEvent.hover(await screen.findByTestId('push-to-external-service'));
+    await userEvent.hover(await screen.findByTestId('push-to-external-service'));
 
     expect(await screen.findByText('My title')).toBeInTheDocument();
     expect(await screen.findByText('My desc')).toBeInTheDocument();

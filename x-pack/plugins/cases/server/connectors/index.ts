@@ -22,12 +22,14 @@ export function registerConnectorTypes({
   core,
   getCasesClient,
   getSpaceId,
+  isServerlessSecurity,
 }: {
   actions: ActionsPluginSetupContract;
   alerting: AlertingPluginSetup;
   core: CoreSetup;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
   getSpaceId: (request?: KibanaRequest) => string;
+  isServerlessSecurity?: boolean;
 }) {
   const getUnsecuredSavedObjectsClient = async (
     request: KibanaRequest,
@@ -53,8 +55,13 @@ export function registerConnectorTypes({
   };
 
   actions.registerSubActionConnectorType(
-    getCasesConnectorType({ getCasesClient, getSpaceId, getUnsecuredSavedObjectsClient })
+    getCasesConnectorType({
+      getCasesClient,
+      getSpaceId,
+      getUnsecuredSavedObjectsClient,
+      isServerlessSecurity,
+    })
   );
 
-  alerting.registerConnectorAdapter(getCasesConnectorAdapter());
+  alerting.registerConnectorAdapter(getCasesConnectorAdapter({ isServerlessSecurity }));
 }

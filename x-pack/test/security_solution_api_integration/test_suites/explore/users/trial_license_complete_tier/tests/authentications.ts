@@ -15,7 +15,7 @@ import {
 import type { UserAuthenticationsRequestOptions } from '@kbn/security-solution-plugin/common/api/search_strategy';
 import TestAgent from 'supertest/lib/agent';
 
-import { BsearchService } from '@kbn/test-suites-src/common/services/bsearch';
+import { SearchService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -33,11 +33,11 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
   describe('authentications', () => {
     let supertest: TestAgent;
-    let bsearch: BsearchService;
+    let search: SearchService;
 
     before(async () => {
       supertest = await utils.createSuperTest();
-      bsearch = await utils.createBsearch();
+      search = await utils.createSearch();
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         filterQuery: '',
       };
 
-      const authentications = await bsearch.send<UserAuthenticationsStrategyResponse>({
+      const authentications = await search.send<UserAuthenticationsStrategyResponse>({
         supertest,
         options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',
@@ -96,7 +96,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         filterQuery: '',
       };
 
-      const authentications = await bsearch.send<UserAuthenticationsStrategyResponse>({
+      const authentications = await search.send<UserAuthenticationsStrategyResponse>({
         supertest,
         options: requestOptions,
         strategy: 'securitySolutionSearchStrategy',

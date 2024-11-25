@@ -20,16 +20,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  assistantBedrockChat:
-                    type: boolean
-                  assistantKnowledgeBaseByDefault:
-                    type: boolean
                   assistantModelEvaluation:
                     type: boolean
+                  defendInsights:
+                    type: boolean
                 required:
-                  - assistantBedrockChat
-                  - assistantKnowledgeBaseByDefault
                   - assistantModelEvaluation
+                  - defendInsights
         '400':
           description: Generic Error
           content:

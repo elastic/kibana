@@ -12,6 +12,7 @@ import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugi
 import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
 import { registerExploreRoute } from './routes/explore';
@@ -68,6 +69,7 @@ export class GraphPlugin implements Plugin {
         }),
         order: 600,
         category: DEFAULT_APP_CATEGORIES.kibana,
+        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: ['graph', 'kibana'],
         catalogue: ['graph'],
         minimumLicense: 'platinum',

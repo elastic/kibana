@@ -5,29 +5,9 @@
  * 2.0.
  */
 
-export type { Index } from '@kbn/index-management';
+import { IndicesIndexSettingsKeys } from '@elastic/elasticsearch/lib/api/types';
 
-export interface IndexModule {
-  number_of_shards: number | string;
-  codec: string;
-  routing_partition_size: number;
-  refresh_interval: string;
-  load_fixed_bitset_filters_eagerly: boolean;
-  shard: {
-    check_on_startup: boolean | 'checksum';
-  };
-  number_of_replicas: number;
-  auto_expand_replicas: false | string;
-  lifecycle: LifecycleModule;
-  routing: {
-    allocation: {
-      enable: 'all' | 'primaries' | 'new_primaries' | 'none';
-    };
-    rebalance: {
-      enable: 'all' | 'primaries' | 'replicas' | 'none';
-    };
-  };
-}
+export type { Index } from '@kbn/index-management-shared-types';
 
 interface AnalysisModule {
   analyzer: {
@@ -41,15 +21,8 @@ interface AnalysisModule {
   };
 }
 
-interface LifecycleModule {
-  name: string;
-  rollover_alias?: string;
-  parse_origination_date?: boolean;
-  origination_date?: number;
-}
-
 export interface IndexSettings {
-  index?: Partial<IndexModule>;
+  index?: IndicesIndexSettingsKeys;
   analysis?: AnalysisModule;
   [key: string]: any;
 }

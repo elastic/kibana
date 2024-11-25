@@ -6,8 +6,13 @@
  */
 
 import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
+import {
+  PerformPromptsBulkActionRequestBody,
+  PerformPromptsBulkActionResponse,
+  PromptCreateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { deleteAllDocuments } from './elasticsearch';
-import { getMockConversation } from '../../objects/assistant';
+import { getMockConversation, getMockCreatePrompt } from '../../objects/assistant';
 import { getSpaceUrl } from '../space';
 import { rootRequest, waitForRootRequest } from './common';
 
@@ -35,4 +40,22 @@ export const deleteConversations = () => {
 export const deletePrompts = () => {
   cy.log('Delete all prompts');
   deleteAllDocuments(`.kibana-elastic-ai-assistant-prompts-*`);
+};
+
+const bulkPrompts = (
+  body: PerformPromptsBulkActionRequestBody
+): Cypress.Chainable<Cypress.Response<PerformPromptsBulkActionResponse>> =>
+  cy.currentSpace().then((spaceId) =>
+    rootRequest<PerformPromptsBulkActionResponse>({
+      method: 'POST',
+      url: spaceId
+        ? getSpaceUrl(spaceId, `api/security_ai_assistant/prompts/_bulk_action`)
+        : `api/security_ai_assistant/prompts/_bulk_action`,
+      body,
+    })
+  );
+export const waitForCreatePrompts = (prompts: Array<Partial<PromptCreateProps>>) => {
+  return waitForRootRequest<PerformPromptsBulkActionResponse>(
+    bulkPrompts({ create: prompts.map((prompt) => getMockCreatePrompt(prompt)) })
+  );
 };

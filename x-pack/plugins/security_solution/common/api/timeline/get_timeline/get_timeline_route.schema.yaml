@@ -5,20 +5,14 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/_get_timeline_or_timeline_template_by_savedobjectid.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timeline:
     get:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetTimeline
-      summary: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
+      summary: Get Timeline or Timeline template details
+      description: Get the details of an existing saved Timeline or Timeline template.
       tags:
         - access:securitySolution
       parameters:
@@ -31,20 +25,11 @@ paths:
           name: id
           schema:
             type: string
-          description: The ID of the timeline to retrieve
+          description: The ID of the Timeline to retrieve.
       responses:
         '200':
-          description: Indicates that the (template) timeline was found and returned.
+          description: Indicates that the (template) Timeline was found and returned.
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [getOneTimeline]
-                    properties:
-                      getOneTimeline:
-                        $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                        nullable: true
+                $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'

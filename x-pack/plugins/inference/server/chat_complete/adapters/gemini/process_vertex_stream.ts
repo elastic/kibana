@@ -10,8 +10,8 @@ import {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
   ChatCompletionEventType,
-} from '../../../../common/chat_complete';
-import { generateFakeToolCallId } from '../../utils';
+} from '@kbn/inference-common';
+import { generateFakeToolCallId } from '../../../../common';
 import type { GenerateContentResponseChunk } from './types';
 
 export function processVertexStream() {

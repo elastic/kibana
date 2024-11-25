@@ -74,10 +74,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Home page', function () {
     this.tags('includeFirefox');
+    let synthEsClient: InfraSynthtraceEsClient;
 
     before(async () => {
+      synthEsClient = await getInfraSynthtraceEsClient(esClient);
       await kibanaServer.savedObjects.cleanStandardList();
+      return synthEsClient.clean();
     });
+
+    after(() => synthEsClient.clean());
 
     describe('without metrics present', () => {
       it('renders an empty data prompt and redirects to the onboarding page', async () => {
@@ -110,10 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('with metrics present', () => {
-      let synthEsClient: InfraSynthtraceEsClient;
       before(async () => {
-        synthEsClient = await getInfraSynthtraceEsClient(esClient);
-        await synthEsClient.clean();
         await synthEsClient.index([
           generateHostData({
             from: DATE_WITH_HOSTS_DATA_FROM,
@@ -134,16 +136,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.waitForLoading();
       });
-      after(async () => {
-        await browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY);
-        await synthEsClient.clean();
-      });
+
+      after(async () => browser.removeLocalStorageItem(KUBERNETES_TOUR_STORAGE_KEY));
 
       it('renders the correct page title', async () => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         const documentTitle = await browser.getTitle();
-        expect(documentTitle).to.contain('Inventory - Infrastructure - Observability - Elastic');
+        expect(documentTitle).to.contain(
+          'Infrastructure inventory - Infrastructure - Observability - Elastic'
+        );
       });
 
       it('renders the inventory survey link', async () => {
@@ -424,8 +426,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(nodesWithValue).to.eql([
             { name: 'host-5', value: 10, color: '#6092c0' },
             { name: 'host-4', value: 30, color: '#9ab6d5' },
-            { name: 'host-1', value: 50, color: '#f1d9b9' },
-            { name: 'host-2', value: 70, color: '#eba47a' },
+            { name: 'host-1', value: 50, color: '#f6e0b9' },
+            { name: 'host-2', value: 70, color: '#eda77a' },
             { name: 'host-3', value: 90, color: '#e7664c' },
           ]);
         });
@@ -457,7 +459,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await retry.tryForTime(5000, async () => {
             const documentTitle = await browser.getTitle();
             expect(documentTitle).to.contain(
-              'host-5 - Inventory - Infrastructure - Observability - Elastic'
+              'host-5 - Infrastructure inventory - Infrastructure - Observability - Elastic'
             );
           });
 
@@ -474,7 +476,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -492,7 +494,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.tryForTime(5000, async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'container-id-4 - Inventory - Infrastructure - Observability - Elastic'
+                'container-id-4 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 

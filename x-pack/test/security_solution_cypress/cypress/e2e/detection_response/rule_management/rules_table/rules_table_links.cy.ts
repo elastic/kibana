@@ -13,7 +13,7 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
-describe('Rules table: links', { tags: ['@ess', '@serverless'] }, () => {
+describe('Rules table: links', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

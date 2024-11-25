@@ -16,6 +16,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   UpgradeSpecificRulesRequest,
+  PickVersionValues,
   PerformRuleUpgradeResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
@@ -150,6 +151,7 @@ export const patchRule = async ({
  */
 export const previewRule = async ({
   rule,
+  enableLoggedRequests,
   signal,
 }: PreviewRulesProps): Promise<RulePreviewResponse> =>
   KibanaServices.get().http.fetch<RulePreviewResponse>(DETECTION_ENGINE_RULES_PREVIEW, {
@@ -157,6 +159,7 @@ export const previewRule = async ({
     version: '2023-10-31',
     body: JSON.stringify(rule),
     signal,
+    query: enableLoggedRequests ? { enable_logged_requests: enableLoggedRequests } : undefined,
   });
 
 /**
@@ -239,12 +242,12 @@ export const fetchRulesSnoozeSettings = async ({
   const response = await KibanaServices.get().http.fetch<RulesSnoozeSettingsBatchResponse>(
     INTERNAL_ALERTING_API_FIND_RULES_PATH,
     {
-      method: 'GET',
-      query: {
+      method: 'POST',
+      body: JSON.stringify({
         filter: ids.map((x) => `alert.id:"alert:${x}"`).join(' or '),
         fields: JSON.stringify(['muteAll', 'activeSnoozes', 'isSnoozedUntil', 'snoozeSchedule']),
         per_page: ids.length,
-      },
+      }),
       signal,
     }
   );
@@ -676,18 +679,9 @@ export const performInstallSpecificRules = async (
     }),
   });
 
-export const performUpgradeAllRules = async (): Promise<PerformRuleUpgradeResponseBody> =>
-  KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
-    method: 'POST',
-    version: '1',
-    body: JSON.stringify({
-      mode: 'ALL_RULES',
-      pick_version: 'TARGET',
-    }),
-  });
-
 export const performUpgradeSpecificRules = async (
-  rules: UpgradeSpecificRulesRequest['rules']
+  rules: UpgradeSpecificRulesRequest['rules'],
+  pickVersion: PickVersionValues
 ): Promise<PerformRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(PERFORM_RULE_UPGRADE_URL, {
     method: 'POST',
@@ -695,7 +689,7 @@ export const performUpgradeSpecificRules = async (
     body: JSON.stringify({
       mode: 'SPECIFIC_RULES',
       rules,
-      pick_version: 'TARGET', // Setting fixed 'TARGET' temporarily for Milestone 2
+      pick_version: pickVersion,
     }),
   });
 

@@ -15,9 +15,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  Metadata,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/common_attributes.gen';
-import type { Document } from 'langchain/document';
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
@@ -49,26 +47,22 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           // Perform license, authenticated user and FF checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
-            capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
-          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
-          const documents: Array<Document<Metadata>> = [
-            {
-              metadata: request.body.metadata,
-              pageContent: request.body.text,
-            },
-          ];
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
-          const createResponse = await kbDataClient?.addKnowledgeBaseDocuments({ documents });
+
+          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
+          const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
+            knowledgeBaseEntry: request.body,
+            global: request.body.users != null && request.body.users.length === 0,
+            telemetry: ctx.elasticAssistant.telemetry,
+          });
 
           if (createResponse == null) {
             return assistantResponse.error({
@@ -76,7 +70,7 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
               statusCode: 400,
             });
           }
-          return response.ok({ body: KnowledgeBaseEntryResponse.parse(createResponse[0]) });
+          return response.ok({ body: createResponse });
         } catch (err) {
           const error = transformError(err as Error);
           return assistantResponse.error({

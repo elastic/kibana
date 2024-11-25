@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -17,7 +18,7 @@ import { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/publ
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PhaseEvent, PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { act, render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { createDataViewDataSource } from '../../common/data_sources';
@@ -142,8 +143,10 @@ describe('saved search embeddable', () => {
       expect(api.dataLoading.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
-      expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable').textContent).toEqual(
-        'No results found'
+      await waitFor(() =>
+        expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable').textContent).toEqual(
+          'No results found'
+        )
       );
     });
 
@@ -237,7 +240,7 @@ describe('saved search embeddable', () => {
       await waitOneTick(); // wait for build to complete
 
       expect(resolveRootProfileSpy).toHaveBeenCalledWith({ solutionNavId: 'test' });
-      resolveRootProfileSpy.mockReset();
+      resolveRootProfileSpy.mockClear();
       expect(resolveRootProfileSpy).not.toHaveBeenCalled();
     });
 

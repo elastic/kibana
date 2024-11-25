@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Listr } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { isFailError } from '@kbn/dev-cli-errors';
 import { I18nCheckTaskContext, MessageDescriptor } from '../types';
@@ -23,13 +23,7 @@ import {
 import { TaskReporter } from '../utils/task_reporter';
 import { flagFailError, isDefined, undefinedOrBoolean } from '../utils/verify_bin_flags';
 
-const toolingLog = new ToolingLog({
-  level: 'info',
-  writeTo: process.stdout,
-});
-
 const runStartTime = Date.now();
-const reportTime = getTimeReporter(toolingLog, 'scripts/i18n_check');
 
 const skipOnNoTranslations = ({ config }: I18nCheckTaskContext) =>
   !config?.translations.length && 'No translations found.';
@@ -49,9 +43,13 @@ run(
       namespace: namespace,
       fix = false,
       path,
+      silent,
+      quiet,
     },
     log,
   }) => {
+    const reportTime = getTimeReporter(log, 'scripts/i18n_check');
+
     if (
       fix &&
       (isDefined(ignoreIncompatible) ||
@@ -112,7 +110,7 @@ run(
         },
         {
           title: 'Checking Untracked i18n Messages outside defined namespaces',
-          enabled: (_) => !ignoreUntracked || !!(filterNamespaces && filterNamespaces.length),
+          enabled: (_) => !ignoreUntracked && !!(filterNamespaces && filterNamespaces.length),
           task: (context, task) => checkUntrackedNamespacesTask(context, task, { rootPaths }),
         },
         {
@@ -130,13 +128,15 @@ run(
       {
         concurrent: false,
         exitOnError: true,
-        renderer: process.env.CI ? 'verbose' : ('default' as any),
+        forceTTY: false,
+        renderer:
+          ((silent || quiet) && 'silent') || (process.env.CI ? 'verbose' : ('default' as any)),
       }
     );
 
     try {
       const messages: Map<string, MessageDescriptor[]> = new Map();
-      const taskReporter = new TaskReporter({ toolingLog });
+      const taskReporter = new TaskReporter({ toolingLog: log });
       await list.run({ messages, taskReporter });
 
       reportTime(runStartTime, 'total', {
@@ -149,6 +149,7 @@ run(
         reportTime(runStartTime, 'error', {
           success: false,
         });
+        log.error(error);
       } else {
         log.error('Unhandled exception!');
         log.error(error);

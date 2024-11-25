@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
-import type { UseAlerts, UseAlertsQueryProps } from './use_summary_chart_data';
+import type { UseAlertsQueryProps } from './use_summary_chart_data';
 import { useSummaryChartData, getAlertsQuery } from './use_summary_chart_data';
 import * as aggregations from './aggregations';
 import * as severityMock from '../severity_level_panel/mock_data';
@@ -75,7 +75,7 @@ describe('getAlertsQuery', () => {
 
 // helper function to render the hook
 const renderUseSummaryChartData = (props: Partial<UseAlertsQueryProps> = {}) =>
-  renderHook<UseAlertsQueryProps, ReturnType<UseAlerts>>(
+  renderHook(
     () =>
       useSummaryChartData({
         aggregations: aggregations.severityAggregations,

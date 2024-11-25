@@ -104,7 +104,8 @@ export type StreamingChatResponseEvent =
   | ConversationUpdateEvent
   | MessageAddEvent
   | ChatCompletionErrorEvent
-  | TokenCountEvent;
+  | TokenCountEvent
+  | BufferFlushEvent;
 
 export type StreamingChatResponseEventWithoutError = Exclude<
   StreamingChatResponseEvent,

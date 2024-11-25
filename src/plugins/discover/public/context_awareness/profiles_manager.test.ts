@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
@@ -11,15 +12,20 @@ import { createEsqlDataSource } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
 import { SolutionType } from './profiles/root_profile';
 import { createContextAwarenessMocks } from './__mocks__';
+import type { ComposableProfile } from './composable_profile';
 
 jest.mock('../utils/add_log');
 
 let mocks = createContextAwarenessMocks();
 
+const toAppliedProfile = (profile: ComposableProfile<{}, {}>) =>
+  Object.keys(profile).reduce((acc, key) => ({ ...acc, [key]: expect.any(Function) }), {});
+
 describe('ProfilesManager', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mocks = createContextAwarenessMocks();
+    jest.spyOn(mocks.ebtManagerMock, 'updateProfilesContextWith');
   });
 
   it('should return default profiles', () => {
@@ -30,13 +36,17 @@ describe('ProfilesManager', () => {
   it('should resolve root profile', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({});
     const profiles = mocks.profilesManagerMock.getProfiles();
-    expect(profiles).toEqual([mocks.rootProfileProviderMock.profile, {}, {}]);
+    expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
   });
 
   it('should resolve data source profile', async () => {
     await mocks.profilesManagerMock.resolveDataSourceProfile({});
     const profiles = mocks.profilesManagerMock.getProfiles();
-    expect(profiles).toEqual([{}, mocks.dataSourceProfileProviderMock.profile, {}]);
+    expect(profiles).toEqual([
+      {},
+      toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
+      {},
+    ]);
   });
 
   it('should resolve document profile', async () => {
@@ -44,7 +54,7 @@ describe('ProfilesManager', () => {
       record: mocks.contextRecordMock,
     });
     const profiles = mocks.profilesManagerMock.getProfiles({ record });
-    expect(profiles).toEqual([{}, {}, mocks.documentProfileProviderMock.profile]);
+    expect(profiles).toEqual([{}, {}, toAppliedProfile(mocks.documentProfileProviderMock.profile)]);
   });
 
   it('should resolve multiple profiles', async () => {
@@ -55,9 +65,14 @@ describe('ProfilesManager', () => {
     });
     const profiles = mocks.profilesManagerMock.getProfiles({ record });
     expect(profiles).toEqual([
-      mocks.rootProfileProviderMock.profile,
-      mocks.dataSourceProfileProviderMock.profile,
-      mocks.documentProfileProviderMock.profile,
+      toAppliedProfile(mocks.rootProfileProviderMock.profile),
+      toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
+      toAppliedProfile(mocks.documentProfileProviderMock.profile),
+    ]);
+
+    expect(mocks.ebtManagerMock.updateProfilesContextWith).toHaveBeenCalledWith([
+      'root-profile',
+      'data-source-profile',
     ]);
   });
 
@@ -70,20 +85,24 @@ describe('ProfilesManager', () => {
     const next = jest.fn();
     profiles$.subscribe(next);
     expect(getProfilesSpy).toHaveBeenCalledTimes(1);
-    expect(next).toHaveBeenCalledWith([{}, {}, mocks.documentProfileProviderMock.profile]);
+    expect(next).toHaveBeenCalledWith([
+      {},
+      {},
+      toAppliedProfile(mocks.documentProfileProviderMock.profile),
+    ]);
     await mocks.profilesManagerMock.resolveRootProfile({});
     expect(getProfilesSpy).toHaveBeenCalledTimes(2);
     expect(next).toHaveBeenCalledWith([
-      mocks.rootProfileProviderMock.profile,
+      toAppliedProfile(mocks.rootProfileProviderMock.profile),
       {},
-      mocks.documentProfileProviderMock.profile,
+      toAppliedProfile(mocks.documentProfileProviderMock.profile),
     ]);
     await mocks.profilesManagerMock.resolveDataSourceProfile({});
     expect(getProfilesSpy).toHaveBeenCalledTimes(3);
     expect(next).toHaveBeenCalledWith([
-      mocks.rootProfileProviderMock.profile,
-      mocks.dataSourceProfileProviderMock.profile,
-      mocks.documentProfileProviderMock.profile,
+      toAppliedProfile(mocks.rootProfileProviderMock.profile),
+      toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
+      toAppliedProfile(mocks.documentProfileProviderMock.profile),
     ]);
   });
 
@@ -128,7 +147,7 @@ describe('ProfilesManager', () => {
   it('should log an error and fall back to the default profile if root profile resolution fails', async () => {
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'solutionNavId' });
     let profiles = mocks.profilesManagerMock.getProfiles();
-    expect(profiles).toEqual([mocks.rootProfileProviderMock.profile, {}, {}]);
+    expect(profiles).toEqual([toAppliedProfile(mocks.rootProfileProviderMock.profile), {}, {}]);
     const resolveSpy = jest.spyOn(mocks.rootProfileProviderMock, 'resolve');
     resolveSpy.mockRejectedValue(new Error('Failed to resolve'));
     await mocks.profilesManagerMock.resolveRootProfile({ solutionNavId: 'newSolutionNavId' });
@@ -146,7 +165,11 @@ describe('ProfilesManager', () => {
       query: { esql: 'from *' },
     });
     let profiles = mocks.profilesManagerMock.getProfiles();
-    expect(profiles).toEqual([{}, mocks.dataSourceProfileProviderMock.profile, {}]);
+    expect(profiles).toEqual([
+      {},
+      toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
+      {},
+    ]);
     const resolveSpy = jest.spyOn(mocks.dataSourceProfileProviderMock, 'resolve');
     resolveSpy.mockRejectedValue(new Error('Failed to resolve'));
     await mocks.profilesManagerMock.resolveDataSourceProfile({
@@ -166,7 +189,7 @@ describe('ProfilesManager', () => {
       record: mocks.contextRecordMock,
     });
     let profiles = mocks.profilesManagerMock.getProfiles({ record });
-    expect(profiles).toEqual([{}, {}, mocks.documentProfileProviderMock.profile]);
+    expect(profiles).toEqual([{}, {}, toAppliedProfile(mocks.documentProfileProviderMock.profile)]);
     const resolveSpy = jest.spyOn(mocks.documentProfileProviderMock, 'resolve');
     resolveSpy.mockImplementation(() => {
       throw new Error('Failed to resolve');
@@ -213,7 +236,7 @@ describe('ProfilesManager', () => {
     resolvedDeferredResult2$.next(undefined);
     await promise2;
     expect(mocks.profilesManagerMock.getProfiles()).toEqual([
-      mocks.rootProfileProviderMock.profile,
+      toAppliedProfile(mocks.rootProfileProviderMock.profile),
       {},
       {},
     ]);
@@ -221,12 +244,12 @@ describe('ProfilesManager', () => {
 
   it('should cancel existing data source profile resolution when another is triggered', async () => {
     const context = await mocks.dataSourceProfileProviderMock.resolve({
-      rootContext: { solutionType: SolutionType.Default },
+      rootContext: { profileId: 'root-profile', solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from *' },
     });
     const newContext = await mocks.dataSourceProfileProviderMock.resolve({
-      rootContext: { solutionType: SolutionType.Default },
+      rootContext: { profileId: 'other-root-profile', solutionType: SolutionType.Default },
       dataSource: createEsqlDataSource(),
       query: { esql: 'from logs-*' },
     });
@@ -259,7 +282,7 @@ describe('ProfilesManager', () => {
     await promise2;
     expect(mocks.profilesManagerMock.getProfiles()).toEqual([
       {},
-      mocks.dataSourceProfileProviderMock.profile,
+      toAppliedProfile(mocks.dataSourceProfileProviderMock.profile),
       {},
     ]);
   });

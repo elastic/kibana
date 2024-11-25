@@ -534,21 +534,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID",
-        "type": "string",
-        "tags": [],
-        "label": "DISCOVER_SHOW_LEGACY_FIELD_TOP_VALUES_ID",
-        "description": [],
-        "signature": [
-          "\"discover:showLegacyFieldTopValues\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.DISCOVER_SHOW_MULTI_FIELDS_ID",
         "type": "string",
         "tags": [],
@@ -924,21 +909,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "METRICS_ALLOW_CHECKING_FOR_FAILED_SHARDS_ID",
-        "description": [],
-        "signature": [
-          "\"metrics:allowCheckingForFailedShards\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.METRICS_ALLOW_STRING_INDICES_ID",
         "type": "string",
         "tags": [],
@@ -1066,21 +1036,6 @@
         "description": [],
         "signature": [
           "\"notifications:lifetime:warning\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_AI_ASSISTANT_LOGS_INDEX_PATTERN_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_AI_ASSISTANT_LOGS_INDEX_PATTERN_ID",
-        "description": [],
-        "signature": [
-          "\"observability:aiAssistantLogsIndexPattern\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1389,36 +1344,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureContainerAssetView\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
-        "description": [],
-        "signature": [
-          "\"observability:enableInfrastructureHostsView\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID",
         "type": "string",
         "tags": [],
@@ -1426,6 +1351,21 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_LOGS_STREAM",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_LOGS_STREAM",
+        "description": [],
+        "signature": [
+          "\"observability:enableLogsStream\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1479,6 +1419,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID",
+        "description": [],
+        "signature": [
+          "\"observability:newLogsOverview\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_MAX_SUGGESTIONS_ID",
         "type": "string",
         "tags": [],
@@ -1501,6 +1456,21 @@
         "description": [],
         "signature": [
           "\"observability:profilingElasticsearchPlugin\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_SEARCH_EXCLUDED_DATA_TIERS",
+        "description": [],
+        "signature": [
+          "\"observability:searchExcludedDataTiers\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1706,21 +1676,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID",
-        "description": [],
-        "signature": [
-          "\"securitySolution:enableCcsWarning\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_ENABLE_GROUPED_NAV_ID",
         "type": "string",
         "tags": [],
@@ -1751,15 +1706,13 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING",
         "type": "string",
         "tags": [],
-        "label": "SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
-        "description": [
-          "This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer"
-        ],
+        "label": "SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING",
+        "description": [],
         "signature": [
-          "\"securitySolution:excludeColdAndFrozenTiersInAnalyzer\""
+          "\"securitySolution:enableVisualizationsInFlyout\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1910,6 +1863,21 @@
         "description": [],
         "signature": [
           "\"theme:darkMode\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.THEME_NAME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "THEME_NAME_ID",
+        "description": [],
+        "signature": [
+          "\"theme:name\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

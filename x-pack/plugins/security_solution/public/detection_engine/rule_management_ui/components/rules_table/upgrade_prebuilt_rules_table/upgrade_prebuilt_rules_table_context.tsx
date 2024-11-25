@@ -8,42 +8,50 @@
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
-import type { EuiTabbedContentTab } from '@elastic/eui';
+import { isNonUpgradeableFieldName } from '../../../../rule_management/model/prebuilt_rule_upgrade/fields';
+import type {
+  RuleFieldsToUpgrade,
+  RuleUpgradeSpecifier,
+  RuleUpgradeInfoForReview,
+} from '../../../../../../common/api/detection_engine';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import type {
+  RuleUpgradeState,
+  RulesUpgradeState,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useBoolState } from '../../../../../common/hooks/use_bool_state';
-import { affectedJobIds } from '../../../../../detections/components/callouts/ml_job_compatibility_callout/affected_job_ids';
-import type { RuleUpgradeInfoForReview } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type {
+  RuleResponse,
+  RuleSignatureId,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
-import {
-  usePerformUpgradeAllRules,
-  usePerformUpgradeSpecificRules,
-} from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
+import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import type { UpgradePrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_upgrade';
 import { useFilterPrebuiltRulesToUpgrade } from './use_filter_prebuilt_rules_to_upgrade';
-import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
-import { useRuleDetailsFlyout } from '../../../../rule_management/components/rule_details/use_rule_details_flyout';
-import {
-  RuleDetailsFlyout,
-  TabContentPadding,
-} from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import { TabContentPadding } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
+import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state';
+import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
+import { MlJobUpgradeModal } from './modals/ml_job_upgrade_modal';
+import { UpgradeConflictsModal } from './modals/upgrade_conflicts_modal';
+import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
+import { useMlJobUpgradeModal, useUpgradeConflictsModal } from './use_upgrade_modals';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 
 export interface UpgradePrebuiltRulesTableState {
   /**
-   * Rules available to be updated
+   * Rule upgrade state (all rules available for upgrade)
    */
-  rules: RuleUpgradeInfoForReview[];
+  ruleUpgradeInfos: RuleUpgradeInfoForReview[];
   /**
-   * Rules to display in table after applying filters
+   * Rule upgrade state after applying `filterOptions`
    */
-  filteredRules: RuleUpgradeInfoForReview[];
+  rulesUpgradeState: RulesUpgradeState;
   /**
    * Currently selected table filter
    */
@@ -52,6 +60,10 @@ export interface UpgradePrebuiltRulesTableState {
    * All unique tags for all rules
    */
   tags: string[];
+  /**
+   * Indicates whether there are rules (without filters applied) to upgrade.
+   */
+  hasRulesToUpgrade: boolean;
   /**
    * Is true then there is no cached data and the query is currently fetching.
    */
@@ -74,25 +86,21 @@ export interface UpgradePrebuiltRulesTableState {
    */
   loadingRules: RuleSignatureId[];
   /**
-  /**
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
   /**
-   * Rule rows selected in EUI InMemory Table
+   * Feature Flag to enable prebuilt rules customization
    */
-  selectedRules: RuleUpgradeInfoForReview[];
+  isPrebuiltRulesCustomizationEnabled: boolean;
 }
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
-  upgradeOneRule: (ruleId: string) => void;
-  upgradeSelectedRules: () => void;
-  upgradeAllRules: () => void;
+  upgradeRules: (ruleIds: RuleSignatureId[]) => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
-  selectRules: (rules: RuleUpgradeInfoForReview[]) => void;
   openRulePreview: (ruleId: string) => void;
 }
 
@@ -112,17 +120,19 @@ interface UpgradePrebuiltRulesTableContextProviderProps {
 export const UpgradePrebuiltRulesTableContextProvider = ({
   children,
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
-  const [selectedRules, setSelectedRules] = useState<RuleUpgradeInfoForReview[]>([]);
   const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
     filter: '',
     tags: [],
+    ruleSource: [],
   });
+  const { addError } = useAppToasts();
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const {
-    data: { rules, stats: { tags } } = {
+    data: { rules: ruleUpgradeInfos, stats: { tags } } = {
       rules: [],
       stats: { tags: [] },
     },
@@ -135,158 +145,125 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     refetchInterval: false, // Disable automatic refetching since request is expensive
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
+  const filteredRuleUpgradeInfos = useFilterPrebuiltRulesToUpgrade({
+    filterOptions,
+    rules: ruleUpgradeInfos,
+  });
+  const { rulesUpgradeState, setRuleFieldResolvedValue } =
+    usePrebuiltRulesUpgradeState(filteredRuleUpgradeInfos);
 
-  const { mutateAsync: upgradeAllRulesRequest } = usePerformUpgradeAllRules();
-  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules();
+  const {
+    isVisible: isLegacyMLJobsModalVisible,
+    legacyJobsInstalled,
+    confirmLegacyMLJobs,
+    handleConfirm: handleLegacyMLJobsConfirm,
+    handleCancel: handleLegacyMLJobsCancel,
+    loadingJobs,
+  } = useMlJobUpgradeModal();
 
-  const filteredRules = useFilterPrebuiltRulesToUpgrade({ filterOptions, rules });
+  const {
+    isVisible: isConflictsModalVisible,
+    confirmConflictsUpgrade,
+    handleConfirm: handleConflictsConfirm,
+    handleCancel: handleConflictsCancel,
+  } = useUpgradeConflictsModal();
 
-  const { openRulePreview, closeRulePreview, previewedRule } = useRuleDetailsFlyout(
-    filteredRules.map((upgradeInfo) => upgradeInfo.target_rule)
-  );
-  const canPreviewedRuleBeUpgraded = Boolean(
-    (previewedRule?.rule_id && loadingRules.includes(previewedRule.rule_id)) ||
-      isRefetching ||
-      isUpgradingSecurityPackages
-  );
+  const shouldConfirmMLJobs = legacyJobsInstalled.length > 0;
 
-  // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
-  // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
-  const [isUpgradeModalVisible, showUpgradeModal, hideUpgradeModal] = useBoolState(false);
-  const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
-  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
-
-  const [confirmUpgrade, handleUpgradeConfirm, handleUpgradeCancel] = useAsyncConfirmation({
-    onInit: showUpgradeModal,
-    onFinish: hideUpgradeModal,
+  const { mutateAsync: upgradeSpecificRulesRequest } = usePerformUpgradeSpecificRules({
+    pickVersion: isPrebuiltRulesCustomizationEnabled ? 'MERGED' : 'TARGET',
   });
 
-  const shouldConfirmUpgrade = legacyJobsInstalled.length > 0;
+  const upgradeRules = useCallback(
+    async (ruleIds: RuleSignatureId[]) => {
+      const conflictRuleIdsSet = new Set(
+        isPrebuiltRulesCustomizationEnabled
+          ? ruleIds.filter(
+              (ruleId) =>
+                rulesUpgradeState[ruleId].diff.num_fields_with_conflicts > 0 &&
+                rulesUpgradeState[ruleId].hasUnresolvedConflicts
+            )
+          : []
+      );
+      const ruleUpgradeSpecifiers: RuleUpgradeSpecifier[] = ruleIds
+        .filter((ruleId) => !conflictRuleIdsSet.has(ruleId))
+        .map((ruleId) => ({
+          rule_id: ruleId,
+          version:
+            rulesUpgradeState[ruleId].diff.fields.version?.target_version ??
+            rulesUpgradeState[ruleId].current_rule.version,
+          revision: rulesUpgradeState[ruleId].revision,
+          fields: isPrebuiltRulesCustomizationEnabled
+            ? constructRuleFieldsToUpgrade(rulesUpgradeState[ruleId])
+            : undefined,
+        }));
 
-  const upgradeOneRule = useCallback(
-    async (ruleId: RuleSignatureId) => {
-      const rule = rules.find((r) => r.rule_id === ruleId);
-      invariant(rule, `Rule with id ${ruleId} not found`);
+      setLoadingRules((prev) => [...prev, ...ruleUpgradeSpecifiers.map((x) => x.rule_id)]);
 
-      setLoadingRules((prev) => [...prev, ruleId]);
       try {
-        if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
+        // Handle MLJobs modal
+        if (shouldConfirmMLJobs && !(await confirmLegacyMLJobs())) {
           return;
         }
-        await upgradeSpecificRulesRequest([
-          {
-            rule_id: ruleId,
-            version: rule.diff.fields.version?.target_version ?? rule.current_rule.version,
-            revision: rule.revision,
-          },
-        ]);
+
+        if (
+          isPrebuiltRulesCustomizationEnabled &&
+          conflictRuleIdsSet.size > 0 &&
+          !(await confirmConflictsUpgrade())
+        ) {
+          return;
+        }
+
+        await upgradeSpecificRulesRequest(ruleUpgradeSpecifiers);
+      } catch (err) {
+        addError(err, { title: i18n.UPDATE_ERROR });
       } finally {
-        setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
+        const upgradedRuleIdsSet = new Set(ruleUpgradeSpecifiers.map((x) => x.rule_id));
+
+        setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [confirmUpgrade, rules, shouldConfirmUpgrade, upgradeSpecificRulesRequest]
+    [
+      confirmLegacyMLJobs,
+      confirmConflictsUpgrade,
+      shouldConfirmMLJobs,
+      rulesUpgradeState,
+      upgradeSpecificRulesRequest,
+      isPrebuiltRulesCustomizationEnabled,
+      addError,
+    ]
   );
 
-  const upgradeSelectedRules = useCallback(async () => {
-    const rulesToUpgrade = selectedRules.map((rule) => ({
-      rule_id: rule.rule_id,
-      version: rule.diff.fields.version?.target_version ?? rule.current_rule.version,
-      revision: rule.revision,
-    }));
-    setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
-    try {
-      if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
-        return;
-      }
-      await upgradeSpecificRulesRequest(rulesToUpgrade);
-    } finally {
-      setLoadingRules((prev) => prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id)));
-      setSelectedRules([]);
-    }
-  }, [confirmUpgrade, selectedRules, shouldConfirmUpgrade, upgradeSpecificRulesRequest]);
-
-  const upgradeAllRules = useCallback(async () => {
-    // Unselect all rules so that the table doesn't show the "bulk actions" bar
-    setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
-    try {
-      if (shouldConfirmUpgrade && !(await confirmUpgrade())) {
-        return;
-      }
-      await upgradeAllRulesRequest();
-    } finally {
-      setLoadingRules([]);
-      setSelectedRules([]);
-    }
-  }, [confirmUpgrade, rules, shouldConfirmUpgrade, upgradeAllRulesRequest]);
-
-  const actions = useMemo<UpgradePrebuiltRulesTableActions>(
-    () => ({
-      reFetchRules: refetch,
-      upgradeOneRule,
-      upgradeSelectedRules,
-      upgradeAllRules,
-      setFilterOptions,
-      selectRules: setSelectedRules,
-      openRulePreview,
-    }),
-    [refetch, upgradeOneRule, upgradeSelectedRules, upgradeAllRules, openRulePreview]
+  const ruleActionsFactory = useCallback(
+    (rule: RuleResponse, closeRulePreview: () => void) => (
+      <EuiButton
+        disabled={
+          loadingRules.includes(rule.rule_id) ||
+          isRefetching ||
+          isUpgradingSecurityPackages ||
+          rulesUpgradeState[rule.rule_id]?.hasUnresolvedConflicts
+        }
+        onClick={() => {
+          upgradeRules([rule.rule_id]);
+          closeRulePreview();
+        }}
+        fill
+        data-test-subj="updatePrebuiltRuleFromFlyoutButton"
+      >
+        {i18n.UPDATE_BUTTON_LABEL}
+      </EuiButton>
+    ),
+    [rulesUpgradeState, loadingRules, isRefetching, isUpgradingSecurityPackages, upgradeRules]
   );
+  const extraTabsFactory = useCallback(
+    (rule: RuleResponse) => {
+      const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
 
-  const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
-    return {
-      state: {
-        rules,
-        filteredRules,
-        filterOptions,
-        tags,
-        isFetched,
-        isLoading: isLoading && loadingJobs,
-        isRefetching,
-        isUpgradingSecurityPackages,
-        selectedRules,
-        loadingRules,
-        lastUpdated: dataUpdatedAt,
-      },
-      actions,
-    };
-  }, [
-    rules,
-    filteredRules,
-    filterOptions,
-    tags,
-    isFetched,
-    isLoading,
-    loadingJobs,
-    isRefetching,
-    isUpgradingSecurityPackages,
-    selectedRules,
-    loadingRules,
-    dataUpdatedAt,
-    actions,
-  ]);
+      if (!ruleUpgradeState) {
+        return [];
+      }
 
-  const extraTabs = useMemo<EuiTabbedContentTab[]>(() => {
-    const activeRule = previewedRule && filteredRules.find(({ id }) => id === previewedRule.id);
-
-    if (!activeRule) {
-      return [];
-    }
-
-    return [
-      {
-        id: 'updates',
-        name: (
-          <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}>
-            <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
-          </EuiToolTip>
-        ),
-        content: (
-          <TabContentPadding>
-            <PerFieldRuleDiffTab ruleDiff={activeRule.diff} />
-          </TabContentPadding>
-        ),
-      },
-      {
+      const jsonViewUpdates = {
         id: 'jsonViewUpdates',
         name: (
           <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION}>
@@ -295,47 +272,131 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         ),
         content: (
           <TabContentPadding>
-            <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
+            <RuleDiffTab
+              oldRule={ruleUpgradeState.current_rule}
+              newRule={ruleUpgradeState.target_rule}
+            />
           </TabContentPadding>
         ),
+      };
+
+      if (isPrebuiltRulesCustomizationEnabled) {
+        return [
+          {
+            id: 'updates',
+            name: (
+              <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}>
+                <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
+              </EuiToolTip>
+            ),
+            content: (
+              <TabContentPadding>
+                <RuleUpgradeConflictsResolverTab
+                  ruleUpgradeState={ruleUpgradeState}
+                  setRuleFieldResolvedValue={setRuleFieldResolvedValue}
+                />
+              </TabContentPadding>
+            ),
+          },
+          jsonViewUpdates,
+        ];
+      }
+
+      return [
+        {
+          id: 'updates',
+          name: (
+            <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}>
+              <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
+            </EuiToolTip>
+          ),
+          content: (
+            <TabContentPadding>
+              <PerFieldRuleDiffTab ruleDiff={ruleUpgradeState.diff} />
+            </TabContentPadding>
+          ),
+        },
+        jsonViewUpdates,
+      ];
+    },
+    [rulesUpgradeState, setRuleFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
+  );
+  const filteredRules = useMemo(
+    () => filteredRuleUpgradeInfos.map((rule) => rule.target_rule),
+    [filteredRuleUpgradeInfos]
+  );
+  const { rulePreviewFlyout, openRulePreview } = useRulePreviewFlyout({
+    rules: filteredRules,
+    ruleActionsFactory,
+    extraTabsFactory,
+    flyoutProps: {
+      id: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
+      dataTestSubj: PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR,
+    },
+  });
+
+  const actions = useMemo<UpgradePrebuiltRulesTableActions>(
+    () => ({
+      reFetchRules: refetch,
+      upgradeRules,
+      setFilterOptions,
+      openRulePreview,
+    }),
+    [refetch, upgradeRules, openRulePreview]
+  );
+
+  const providerValue = useMemo<UpgradePrebuiltRulesContextType>(() => {
+    return {
+      state: {
+        ruleUpgradeInfos,
+        rulesUpgradeState,
+        hasRulesToUpgrade: isFetched && ruleUpgradeInfos.length > 0,
+        filterOptions,
+        tags,
+        isFetched,
+        isLoading: isLoading || loadingJobs,
+        isRefetching,
+        isUpgradingSecurityPackages,
+        loadingRules,
+        lastUpdated: dataUpdatedAt,
+        isPrebuiltRulesCustomizationEnabled,
       },
-    ];
-  }, [previewedRule, filteredRules]);
+      actions,
+    };
+  }, [
+    ruleUpgradeInfos,
+    rulesUpgradeState,
+    filterOptions,
+    tags,
+    isFetched,
+    isLoading,
+    loadingJobs,
+    isRefetching,
+    isUpgradingSecurityPackages,
+    loadingRules,
+    dataUpdatedAt,
+    actions,
+    isPrebuiltRulesCustomizationEnabled,
+  ]);
 
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
       <>
-        {isUpgradeModalVisible && (
+        {isLegacyMLJobsModalVisible && (
           <MlJobUpgradeModal
             jobs={legacyJobsInstalled}
-            onCancel={handleUpgradeCancel}
-            onConfirm={handleUpgradeConfirm}
+            onCancel={handleLegacyMLJobsCancel}
+            onConfirm={handleLegacyMLJobsConfirm}
+          />
+        )}
+        {isConflictsModalVisible && (
+          <UpgradeConflictsModal
+            onCancel={handleConflictsCancel}
+            onConfirm={handleConflictsConfirm}
           />
         )}
         {children}
-        {previewedRule && (
-          <RuleDetailsFlyout
-            rule={previewedRule}
-            size="l"
-            id={PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR}
-            dataTestSubj="updatePrebuiltRulePreview"
-            closeFlyout={closeRulePreview}
-            ruleActions={
-              <EuiButton
-                disabled={canPreviewedRuleBeUpgraded}
-                onClick={() => {
-                  upgradeOneRule(previewedRule.rule_id ?? '');
-                  closeRulePreview();
-                }}
-                fill
-                data-test-subj="updatePrebuiltRuleFromFlyoutButton"
-              >
-                {i18n.UPDATE_BUTTON_LABEL}
-              </EuiButton>
-            }
-            extraTabs={extraTabs}
-          />
-        )}
+        {rulePreviewFlyout}
       </>
     </UpgradePrebuiltRulesTableContext.Provider>
   );
@@ -350,3 +411,26 @@ export const useUpgradePrebuiltRulesTableContext = (): UpgradePrebuiltRulesConte
 
   return rulesTableContext;
 };
+
+function constructRuleFieldsToUpgrade(ruleUpgradeState: RuleUpgradeState): RuleFieldsToUpgrade {
+  const finalRule = ruleUpgradeState.finalRule as Record<string, unknown>;
+  const ruleFieldsToUpgrade: Record<string, unknown> = {};
+
+  for (const fieldName of Object.keys(ruleUpgradeState.fieldsUpgradeState)) {
+    const fieldUpgradeState = ruleUpgradeState.fieldsUpgradeState[fieldName];
+
+    if (!isNonUpgradeableFieldName(fieldName) && fieldUpgradeState === FieldUpgradeState.Accepted) {
+      invariant(
+        fieldName in finalRule,
+        `Ready to upgrade field "${fieldName}" is not found in final rule`
+      );
+
+      ruleFieldsToUpgrade[fieldName] = {
+        pick_version: 'RESOLVED',
+        resolved_value: finalRule[fieldName],
+      };
+    }
+  }
+
+  return ruleFieldsToUpgrade;
+}

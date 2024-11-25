@@ -1,0 +1,48 @@
+# SUBSTRING
+
+The SUBSTRING function extracts a portion of a string, as specified by a starting position and an optional length.
+
+## Syntax
+
+`SUBSTRING(string, start, [length])`
+
+### Parameters
+
+#### string
+
+The string expression from which to extract the substring.
+
+#### start
+
+The starting position for the substring extraction.
+
+#### length
+
+The length of the substring to be extracted from the starting position.
+This parameter is optional. If it's omitted, the function will return all positions following the start position.
+
+## Examples
+
+The following example returns the first three characters of every last name:
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_sub = SUBSTRING(last_name, 1, 3)
+```
+
+A negative start position is interpreted as being relative to the end of the string. This example returns the last three characters of every last name:
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_sub = SUBSTRING(last_name, -3, 3)
+```
+
+If the length parameter is omitted, the SUBSTRING function returns the remainder of the string. This example returns all characters except for the first:
+
+```esql
+FROM employees
+| KEEP last_name
+| EVAL ln_sub = SUBSTRING(last_name, 2)
+```

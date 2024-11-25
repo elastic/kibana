@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { createResultsUrl } from '../../../../../util/results_url';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import type { JobRunner } from '../../../common/job_runner';
-import { useMlJobService } from '../../../../../services/job_service';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { isSingleMetricJobCreator, isAdvancedJobCreator } from '../../../common/job_creator';
 import { JobDetails } from './components/job_details';
@@ -49,7 +49,6 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
       http: { basePath },
     },
   } = useMlKibana();
-  const mlJobService = useMlJobService();
 
   const navigateToPath = useNavigateToPath();
 
@@ -108,7 +107,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
     try {
       await jobCreator.createJob();
       await jobCreator.createDatafeed();
-      advancedStartDatafeed(mlJobService, showStartModal ? jobCreator : null, navigateToPath);
+      advancedStartDatafeed(showStartModal ? jobCreator : null, navigateToPath);
     } catch (error) {
       handleJobCreationError(error);
     }
@@ -126,7 +125,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function viewResults() {
-    const url = mlJobService.createResultsUrl(
+    const url = createResultsUrl(
       [jobCreator.jobId],
       jobCreator.start,
       jobCreator.end,
@@ -136,11 +135,11 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
   }
 
   function clickResetJob() {
-    resetJob(mlJobService, jobCreator, navigateToPath);
+    resetJob(jobCreator, navigateToPath);
   }
 
   const convertToAdvanced = () => {
-    convertToAdvancedJob(mlJobService, jobCreator, navigateToPath);
+    convertToAdvancedJob(jobCreator, navigateToPath);
   };
 
   useEffect(() => {

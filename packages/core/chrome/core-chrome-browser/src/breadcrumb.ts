@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { EuiBreadcrumb } from '@elastic/eui';
@@ -22,4 +23,23 @@ export interface ChromeBreadcrumb extends EuiBreadcrumb {
 /** @public */
 export interface ChromeBreadcrumbsAppendExtension {
   content: MountPoint<HTMLDivElement>;
+}
+
+/** @public */
+export interface ChromeSetBreadcrumbsParams {
+  /**
+   * Declare the breadcrumbs for the project/solution type navigation in stateful.
+   * Those breadcrumbs correspond to the serverless breadcrumbs declaration.
+   */
+  project?: {
+    /**
+     * The breadcrumb value to set. Can be a single breadcrumb or an array of breadcrumbs.
+     */
+    value: ChromeBreadcrumb | ChromeBreadcrumb[];
+    /**
+     * Indicates whether the breadcrumb should be absolute (replaces the full path) or relative.
+     * @default false
+     */
+    absolute?: boolean;
+  };
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -1050,4 +1051,39 @@ export const hasWrongOperatorWithWildcard = (
       });
     }
   });
+};
+
+/**
+ * Event filters helper where given an exceptions list,
+ * determine if both 'subject_name' and 'trusted' are
+ * included in an entry with 'code_signature'
+ */
+export const hasPartialCodeSignatureEntry = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  const { os_types: os = ['windows'], entries = [] } = items[0] || {};
+  let name = false;
+  let trusted = false;
+
+  for (const e of entries) {
+    if (e.type === 'nested' && e.field === 'process.Ext.code_signature') {
+      const includesNestedName = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'subject_name'
+      );
+      const includesNestedTrusted = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'trusted'
+      );
+      if (includesNestedName !== includesNestedTrusted) {
+        return true;
+      }
+    } else if (
+      e.field === 'process.code_signature.subject_name' ||
+      (os.includes('macos') && e.field === 'process.code_signature.team_id')
+    ) {
+      name = true;
+    } else if (e.field === 'process.code_signature.trusted') {
+      trusted = true;
+    }
+  }
+  return name !== trusted;
 };

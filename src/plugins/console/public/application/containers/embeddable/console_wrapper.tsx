@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -117,7 +118,7 @@ interface ConsoleWrapperProps
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isMonacoEnabled, isDevMode, isOpen } = props;
+  const { core, usageCollection, onKeyDown, isDevMode, isOpen } = props;
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -168,7 +169,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             autocompleteInfo,
           },
           config: {
-            isMonacoEnabled,
             isDevMode,
           },
         }}
@@ -178,7 +178,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             {isOpen ? (
               <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
                 <EuiWindowEvent event="keydown" handler={onKeyDown} />
-                <Main hideWelcome />
+                <Main isEmbeddable={true} />
               </div>
             ) : (
               <span />

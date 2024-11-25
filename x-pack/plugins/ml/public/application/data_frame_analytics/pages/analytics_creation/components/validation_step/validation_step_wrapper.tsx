@@ -13,6 +13,8 @@ import { EuiForm } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { CalloutMessage, ValidateAnalyticsJobResponse } from '@kbn/ml-validators';
+import { VALIDATION_STATUS } from '@kbn/ml-validators';
 
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ValidationStep } from './validation_step';
@@ -20,11 +22,6 @@ import { ValidationStepDetails } from './validation_step_details';
 import { ANALYTICS_STEPS } from '../../page';
 import { useMlApi } from '../../../../../contexts/kibana';
 import { getJobConfigFromFormState } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import type {
-  CalloutMessage,
-  ValidateAnalyticsJobResponse,
-} from '../../../../../../../common/constants/validation';
-import { VALIDATION_STATUS } from '../../../../../../../common/constants/validation';
 
 export interface ValidationSummary {
   warning: number;

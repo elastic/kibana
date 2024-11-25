@@ -17,7 +17,7 @@ interface FormEditingDescription {
   }>;
 }
 
-interface ArtifactsFixtureType {
+export interface ArtifactsFixtureType {
   title: string;
   pagePrefix: string;
   tabId: string;
@@ -275,10 +275,10 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       entries: [
         {
-          field: 'agent.id',
+          field: 'process.name',
           operator: 'included',
           type: 'match',
-          value: 'mr agent',
+          value: 'notepad.exe',
         },
       ],
       os_types: ['windows'],

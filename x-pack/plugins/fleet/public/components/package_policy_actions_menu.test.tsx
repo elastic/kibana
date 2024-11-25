@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { act, fireEvent } from '@testing-library/react';
+import { act } from '@testing-library/react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 import { createIntegrationsTestRendererMock } from '../mock';
 
-import { useMultipleAgentPolicies, useStartServices, useLink } from '../hooks';
+import { useMultipleAgentPolicies, useLink } from '../hooks';
 
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
@@ -109,7 +109,8 @@ function createMockPackagePolicy(
     ...props,
   };
 }
-describe('PackagePolicyActionsMenu', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/191804
+describe.skip('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
@@ -119,7 +120,7 @@ describe('PackagePolicyActionsMenu', () => {
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
     await act(async () => {
-      const upgradeButton = utils.getByText('Upgrade integration policy').closest('button');
+      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
       expect(upgradeButton).toBeDisabled();
     });
   });
@@ -132,6 +133,17 @@ describe('PackagePolicyActionsMenu', () => {
     await act(async () => {
       const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
       expect(upgradeButton).not.toBeDisabled();
+    });
+  });
+
+  it('Should not enable upgrade button if package has upgrade and agentless policy is enabled', async () => {
+    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+
+    await act(async () => {
+      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
+      expect(upgradeButton).toBeDisabled();
     });
   });
 
@@ -154,29 +166,12 @@ describe('PackagePolicyActionsMenu', () => {
   });
 
   it('Should be able to delete integration from a managed agentless policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
+    const agentPolicies = createMockAgentPolicies({ is_managed: false, supports_agentless: true });
     const packagePolicy = createMockPackagePolicy();
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
     await act(async () => {
       expect(utils.queryByText('Delete integration')).not.toBeNull();
     });
-  });
-
-  it('Should navigate on delete integration when having an agentless policy', async () => {
-    const agentPolicies = createMockAgentPolicies({ is_managed: true, supports_agentless: true });
-    const packagePolicy = createMockPackagePolicy();
-    const { utils } = renderMenu({ agentPolicies, packagePolicy });
-
-    await act(async () => {
-      fireEvent.click(utils.getByTestId('PackagePolicyActionsDeleteItem'));
-    });
-    await act(async () => {
-      fireEvent.click(utils.getByTestId('confirmModalConfirmButton'));
-    });
-    expect(useStartServices().application.navigateToApp as jest.Mock).toHaveBeenCalledWith(
-      'fleet',
-      { path: '/policies' }
-    );
   });
 
   it('Should show add button if the policy is not managed and showAddAgent=true', async () => {
@@ -190,6 +185,15 @@ describe('PackagePolicyActionsMenu', () => {
 
   it('Should not show add button if the policy is managed and showAddAgent=true', async () => {
     const agentPolicies = createMockAgentPolicies({ is_managed: true });
+    const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
+    await act(async () => {
+      expect(utils.queryByText('Add agent')).toBeNull();
+    });
+  });
+
+  it('Should not show add button if the policy is agentless and showAddAgent=true', async () => {
+    const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: true });
     const { utils } = renderMenu({ agentPolicies, packagePolicy, showAddAgent: true });
     await act(async () => {

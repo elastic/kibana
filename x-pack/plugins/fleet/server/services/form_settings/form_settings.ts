@@ -24,39 +24,19 @@ export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
     if (!setting.api_field) {
       return;
     }
-    const defaultValueRes = setting.schema.safeParse(undefined);
-    const defaultValue = defaultValueRes.success ? defaultValueRes.data : undefined;
-    if (defaultValue) {
-      validations[setting.api_field.name] = schema.oneOf(
-        [
-          schema.any({
-            validate: (val: any) => {
-              const res = setting.schema.safeParse(val);
-              if (!res.success) {
-                return stringifyZodError(res.error);
-              }
-            },
-          }),
-          schema.literal(null),
-        ],
-        {
-          defaultValue,
-        }
-      );
-    } else {
-      validations[setting.api_field.name] = schema.maybe(
-        schema.nullable(
-          schema.any({
-            validate: (val: any) => {
-              const res = setting.schema.safeParse(val);
-              if (!res.success) {
-                return stringifyZodError(res.error);
-              }
-            },
-          })
-        )
-      );
-    }
+    validations[setting.api_field.name] = schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.any({
+          validate: (val: any) => {
+            const res = setting.schema.safeParse(val);
+            if (!res.success) {
+              return stringifyZodError(res.error);
+            }
+          },
+        }),
+      ])
+    );
   });
 
   const advancedSettingsValidations: Props = {
@@ -89,7 +69,7 @@ export function _getSettingsValuesForAgentPolicy(
     }
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
-    if (val) {
+    if (val !== undefined) {
       settingsValues[setting.name] = val;
     }
   });

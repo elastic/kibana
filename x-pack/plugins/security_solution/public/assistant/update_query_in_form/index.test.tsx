@@ -21,11 +21,11 @@ describe('UpdateQueryInFormButton', () => {
     jest.clearAllMocks();
   });
 
-  it('calls codeBlockRef callback on click', () => {
+  it('calls codeBlockRef callback on click', async () => {
     const testQuery = 'from auditbeat* | limit 10';
     render(<UpdateQueryInFormButton query={testQuery} />);
 
-    userEvent.click(screen.getByTestId('update-query-in-form-button'));
+    await userEvent.click(screen.getByTestId('update-query-in-form-button'));
 
     expect(mockUseAssistantContext.codeBlockRef.current).toHaveBeenCalledWith(testQuery);
   });

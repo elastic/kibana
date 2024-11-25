@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { omit } from 'lodash';
@@ -27,6 +28,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
@@ -40,6 +42,7 @@ import {
   SearchEmbeddableSerializedState,
 } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
+import { BaseAppWrapper } from '../context_awareness';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -67,7 +70,10 @@ export const getSearchEmbeddableFactory = ({
       const solutionNavId = await firstValueFrom(
         discoverServices.core.chrome.getActiveSolutionNavId$()
       );
-      await discoverServices.profilesManager.resolveRootProfile({ solutionNavId });
+      const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
+        solutionNavId,
+      });
+      const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
@@ -242,9 +248,9 @@ export const getSearchEmbeddableFactory = ({
             return dataViews![0];
           }, [dataViews]);
 
-          const onAddFilter = useCallback(
+          const onAddFilter = useCallback<DocViewFilterFn>(
             async (field, value, operator) => {
-              if (!dataView) return;
+              if (!dataView || !field) return;
 
               let newFilters = generateFilters(
                 discoverServices.filterManager,
@@ -278,30 +284,32 @@ export const getSearchEmbeddableFactory = ({
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
-                {renderAsFieldStatsTable ? (
-                  <SearchEmbeddablFieldStatsTableComponent
-                    api={{
-                      ...api,
-                      fetchContext$,
-                    }}
-                    dataView={dataView!}
-                    onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                    stateManager={searchEmbeddable.stateManager}
-                  />
-                ) : (
-                  <CellActionsProvider
-                    getTriggerCompatibleActions={
-                      discoverServices.uiActions.getTriggerCompatibleActions
-                    }
-                  >
-                    <SearchEmbeddableGridComponent
-                      api={{ ...api, fetchWarnings$ }}
+                <AppWrapper>
+                  {renderAsFieldStatsTable ? (
+                    <SearchEmbeddablFieldStatsTableComponent
+                      api={{
+                        ...api,
+                        fetchContext$,
+                      }}
                       dataView={dataView!}
                       onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                       stateManager={searchEmbeddable.stateManager}
                     />
-                  </CellActionsProvider>
-                )}
+                  ) : (
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={
+                        discoverServices.uiActions.getTriggerCompatibleActions
+                      }
+                    >
+                      <SearchEmbeddableGridComponent
+                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                        dataView={dataView!}
+                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                        stateManager={searchEmbeddable.stateManager}
+                      />
+                    </CellActionsProvider>
+                  )}
+                </AppWrapper>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -38,7 +39,12 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import {
+  RowControlColumn,
+  getShouldShowFieldHandler,
+  canPrependTimeFieldColumn,
+  getVisibleColumns,
+} from '@kbn/discover-utils';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
@@ -52,7 +58,6 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
-  RowControlColumn,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -61,12 +66,10 @@ import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
   getEuiGridColumns,
   getLeadControlColumns,
-  getVisibleColumns,
-  canPrependTimeFieldColumn,
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
-import { UnifiedDataTableContext } from '../table_context';
+import { DataTableContext, UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
@@ -134,6 +137,10 @@ export interface UnifiedDataTableProps {
    * Field tokens could be rendered in column header next to the field name.
    */
   showColumnTokens?: boolean;
+  /**
+   * Set to true to allow users to drag and drop columns for reordering
+   */
+  canDragAndDropColumns?: boolean;
   /**
    * Optional value for providing configuration setting for UnifiedDataTable header row height
    */
@@ -271,10 +278,6 @@ export interface UnifiedDataTableProps {
    */
   onFieldEdited?: () => void;
   /**
-   * Optional triggerId to retrieve the column cell actions that will override the default ones
-   */
-  cellActionsTriggerId?: string;
-  /**
    * Service dependencies
    */
   services: {
@@ -353,6 +356,20 @@ export interface UnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
+   * Optional triggerId to retrieve the column cell actions that will override the default ones
+   */
+  cellActionsTriggerId?: string;
+  /**
+   * Custom set of properties used by some actions.
+   * An action might require a specific set of metadata properties to render.
+   * This data is sent directly to actions.
+   */
+  cellActionsMetadata?: Record<string, unknown>;
+  /**
+   * Controls whether the cell actions should replace the default cell actions or be appended to them
+   */
+  cellActionsHandling?: 'replace' | 'append';
+  /**
    * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
    **/
   visibleCellActions?: number;
@@ -389,12 +406,6 @@ export interface UnifiedDataTableProps {
    */
   enableComparisonMode?: boolean;
   /**
-   * Custom set of properties used by some actions.
-   * An action might require a specific set of metadata properties to render.
-   * This data is sent directly to actions.
-   */
-  cellActionsMetadata?: Record<string, unknown>;
-  /**
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
@@ -418,6 +429,7 @@ export const UnifiedDataTable = ({
   columns,
   columnsMeta,
   showColumnTokens,
+  canDragAndDropColumns,
   configHeaderRowHeight,
   headerRowHeightState,
   onUpdateHeaderRowHeight,
@@ -440,6 +452,9 @@ export const UnifiedDataTable = ({
   isSortEnabled = true,
   isPaginationEnabled = true,
   cellActionsTriggerId,
+  cellActionsMetadata,
+  cellActionsHandling = 'replace',
+  visibleCellActions,
   className,
   rowHeightState,
   onUpdateRowHeight,
@@ -465,14 +480,12 @@ export const UnifiedDataTable = ({
   maxDocFieldsDisplayed = 50,
   externalAdditionalControls,
   rowsPerPageOptions,
-  visibleCellActions,
   externalCustomRenderers,
   additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
-  cellActionsMetadata,
   customGridColumnsConfiguration,
   enableComparisonMode,
   cellContext,
@@ -489,8 +502,14 @@ export const UnifiedDataTable = ({
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
-  const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
-  const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
+  const docMap = useMemo(
+    () =>
+      new Map<string, { doc: DataTableRecord; docIndex: number }>(
+        rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
+      ),
+    [rows]
+  );
+  const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
   const {
     isDocSelected,
@@ -621,11 +640,11 @@ export const UnifiedDataTable = ({
     );
   }, [currentPageSize, setPagination]);
 
-  const unifiedDataTableContextValue = useMemo(
+  const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
       expanded: expandedDoc,
       setExpanded: setExpandedDoc,
-      rows: displayedRows,
+      getRowByIndex: (index: number) => displayedRows[index],
       onFilter,
       dataView,
       isDarkMode: darkMode,
@@ -751,7 +770,7 @@ export const UnifiedDataTable = ({
 
   const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
     () =>
-      cellActionsTriggerId && !isPlainRecord
+      cellActionsTriggerId
         ? visibleColumns.map(
             (columnName) =>
               dataView.getFieldByName(columnName)?.toSpec() ?? {
@@ -762,7 +781,7 @@ export const UnifiedDataTable = ({
               }
           )
         : undefined,
-    [cellActionsTriggerId, isPlainRecord, visibleColumns, dataView]
+    [cellActionsTriggerId, visibleColumns, dataView]
   );
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
@@ -805,6 +824,7 @@ export const UnifiedDataTable = ({
       getEuiGridColumns({
         columns: visibleColumns,
         columnsCellActions,
+        cellActionsHandling,
         rowsCount: displayedRows.length,
         settings,
         dataView,
@@ -828,6 +848,7 @@ export const UnifiedDataTable = ({
         onResize,
       }),
     [
+      cellActionsHandling,
       columnsMeta,
       columnsCellActions,
       customGridColumnsConfiguration,
@@ -854,19 +875,26 @@ export const UnifiedDataTable = ({
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
   const columnsVisibility = useMemo(
     () => ({
+      canDragAndDropColumns: defaultColumns ? false : canDragAndDropColumns,
       visibleColumns,
       setVisibleColumns: (newColumns: string[]) => {
         const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
         onSetColumns(newColumns, dontModifyColumns);
       },
     }),
-    [visibleColumns, onSetColumns, shouldPrependTimeFieldColumn]
+    [
+      visibleColumns,
+      onSetColumns,
+      shouldPrependTimeFieldColumn,
+      canDragAndDropColumns,
+      defaultColumns,
+    ]
   );
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const defaultControlColumns = getLeadControlColumns(canSetExpandedDoc);
+    const defaultControlColumns = getLeadControlColumns({ rows: displayedRows, canSetExpandedDoc });
     const internalControlColumns = controlColumnIds
       ? // reorder the default controls as per controlColumnIds
         controlColumnIds.reduce((acc, id) => {
@@ -897,6 +925,7 @@ export const UnifiedDataTable = ({
   }, [
     canSetExpandedDoc,
     controlColumnIds,
+    displayedRows,
     externalControlColumns,
     getRowIndicator,
     rowAdditionalLeadingControls,
@@ -1135,7 +1164,9 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContext}
               renderCellPopover={renderCustomPopover}
-              virtualizationOptions={VIRTUALIZATION_OPTIONS}
+              // Don't use row overscan when showing Document column since
+              // rendering so much DOM content in each cell impacts performance
+              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
             />
           )}
         </div>

@@ -29,6 +29,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.REVISION]: null,
   [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
+  [ConfigKey.LABELS]: null,
   [ConfigKey.JOURNEY_ID]: stringToJsonFormatter,
   [ConfigKey.PROJECT_ID]: stringToJsonFormatter,
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: stringToJsonFormatter,

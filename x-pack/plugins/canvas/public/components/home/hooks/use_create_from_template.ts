@@ -9,15 +9,16 @@ import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { CanvasTemplate } from '../../../../types';
-import { useNotifyService, useWorkpadService } from '../../../services';
+import { useNotifyService } from '../../../services';
+import { getCanvasWorkpadService } from '../../../services/canvas_workpad_service';
 
 export const useCreateFromTemplate = () => {
-  const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
   const history = useHistory();
 
   return useCallback(
     async (template: CanvasTemplate) => {
+      const workpadService = getCanvasWorkpadService();
       try {
         const result = await workpadService.createFromTemplate(template.id);
         history.push(`/workpad/${result.id}/page/1`);
@@ -27,6 +28,6 @@ export const useCreateFromTemplate = () => {
         });
       }
     },
-    [workpadService, notifyService, history]
+    [notifyService, history]
   );
 };

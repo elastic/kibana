@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { Table } from '.';
+import { TableWithoutPersist as Table } from './table';
 import { ScriptedFieldItem } from '../../types';
 import { DataView } from '@kbn/data-views-plugin/public';
 
@@ -19,6 +20,14 @@ const items: ScriptedFieldItem[] = [
   { name: '1', lang: 'painless', script: '', isUserEditable: true },
   { name: '2', lang: 'painless', script: '', isUserEditable: false },
 ];
+
+const baseProps = {
+  euiTablePersist: {
+    pageSize: 10,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'name' as const } },
+  },
+};
 
 describe('Table', () => {
   let indexPattern: DataView;
@@ -36,8 +45,9 @@ describe('Table', () => {
   });
 
   test('should render normally', () => {
-    const component = shallow<Table>(
+    const component = shallow<typeof Table>(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -51,6 +61,7 @@ describe('Table', () => {
   test('should render the format', () => {
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -67,6 +78,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         editField={editField}
@@ -84,6 +96,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -99,6 +112,7 @@ describe('Table', () => {
   test('should not allow edit or deletion for user with only read access', () => {
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}

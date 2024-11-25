@@ -96,6 +96,10 @@ export const MonitorType = t.intersection([
     status: t.string,
     type: t.string,
     check_group: t.string,
+    timespan: t.type({
+      gte: t.string,
+      lt: t.string,
+    }),
   }),
   t.partial({
     duration: t.type({
@@ -103,10 +107,7 @@ export const MonitorType = t.intersection([
     }),
     ip: t.string,
     name: t.string,
-    timespan: t.type({
-      gte: t.string,
-      lt: t.string,
-    }),
+
     fleet_managed: t.boolean,
     project: t.type({
       id: t.string,
@@ -241,6 +242,7 @@ export const PingType = t.intersection([
       type: t.string,
       dataset: t.string,
     }),
+    labels: t.record(t.string, t.string),
   }),
 ]);
 
@@ -255,39 +257,12 @@ export const PingStateType = t.type({
 export type Ping = t.TypeOf<typeof PingType>;
 export type PingState = t.TypeOf<typeof PingStateType>;
 
-export const PingStatusType = t.intersection([
-  t.type({
-    timestamp: t.string,
-    docId: t.string,
-    config_id: t.string,
-    locationId: t.string,
-    summary: t.partial({
-      down: t.number,
-      up: t.number,
-    }),
-  }),
-  t.partial({
-    error: PingErrorType,
-  }),
-]);
-
-export type PingStatus = t.TypeOf<typeof PingStatusType>;
-
 export const PingsResponseType = t.type({
   total: t.number,
   pings: t.array(PingType),
 });
 
 export type PingsResponse = t.TypeOf<typeof PingsResponseType>;
-
-export const PingStatusesResponseType = t.type({
-  total: t.number,
-  pings: t.array(PingStatusType),
-  from: t.string,
-  to: t.string,
-});
-
-export type PingStatusesResponse = t.TypeOf<typeof PingStatusesResponseType>;
 
 export const GetPingsParamsType = t.intersection([
   t.type({
@@ -306,3 +281,17 @@ export const GetPingsParamsType = t.intersection([
 ]);
 
 export type GetPingsParams = t.TypeOf<typeof GetPingsParamsType>;
+
+export const MonitorStatusHeatmapBucketType = t.type({
+  doc_count: t.number,
+  down: t.type({
+    value: t.number,
+  }),
+  up: t.type({
+    value: t.number,
+  }),
+  key: t.number,
+  key_as_string: t.string,
+});
+
+export type MonitorStatusHeatmapBucket = t.TypeOf<typeof MonitorStatusHeatmapBucketType>;

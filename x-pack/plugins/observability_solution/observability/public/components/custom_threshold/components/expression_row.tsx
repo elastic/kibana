@@ -166,7 +166,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={LABEL_LABEL} fullWidth helpText={LABEL_HELP_MESSAGE}>
                   <EuiFieldText
-                    data-test-subj="thresholdRuleCustomEquationEditorFieldText"
+                    data-test-subj="thresholdRuleCustomEquationEditorFieldTextLabel"
                     compressed
                     fullWidth
                     value={label}

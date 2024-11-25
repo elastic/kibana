@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiTab } from '@elastic/eui';
@@ -93,6 +94,7 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(true);
     expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(true);
     expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(true);
+    expect(findTestSubject(component, 'dscViewModeDocumentButton').text()).toBe('Documents (10)');
   });
 
   it('should not render if SHOW_FIELD_STATISTICS is false', async () => {
@@ -105,14 +107,15 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(false);
   });
 
-  it('should show document and field stats view if ES|QL', async () => {
+  it('should not show document and field stats view if ES|QL', async () => {
     const component = await mountComponent({ isEsqlMode: true });
-    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(true);
+    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
 
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(true);
+    expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(false);
     expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(false);
-    expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(true);
+    expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(false);
+    expect(findTestSubject(component, 'discoverQueryHits').text()).toBe('10');
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when dscViewModeDocumentButton is clicked', async () => {

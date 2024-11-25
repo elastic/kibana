@@ -29,12 +29,14 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import {
-  EuiComboBoxWithFieldStats,
+  OptionListWithFieldStats,
   FieldStatsFlyoutProvider,
-} from '../../../../../components/field_stats_flyout';
-import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
+  type FieldForStats,
+} from '@kbn/ml-field-stats-flyout';
+
+import type { DropDownLabel } from '../../../../../jobs/new_job/pages/components/pick_fields_step/components/agg_select';
+import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import { useNewJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
 
@@ -574,6 +576,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fieldStatsServices={fieldStatsServices}
       timeRangeMs={indexData.timeRangeMs}
       dslQuery={jobConfigQuery}
+      theme={services.theme}
     >
       <Fragment>
         <Messages messages={requestMessages} />
@@ -664,7 +667,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                   : []),
               ]}
             >
-              <EuiComboBoxWithFieldStats
+              <OptionListWithFieldStats
                 fullWidth
                 aria-label={i18n.translate(
                   'xpack.ml.dataframe.analytics.create.dependentVariableInputAriaLabel',
@@ -693,7 +696,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
                 singleSelection={true}
                 options={dependentVariableOptions}
                 selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-                onChange={(selectedOptions) => {
+                onChange={(selectedOptions: DropDownLabel[]) => {
                   setFormState({
                     dependentVariable: selectedOptions[0].label || '',
                   });

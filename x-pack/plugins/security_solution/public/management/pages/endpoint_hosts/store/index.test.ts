@@ -40,7 +40,7 @@ describe('EndpointList store concerns', () => {
     });
 
     test('it creates default state', () => {
-      expect(store.getState()).toEqual({
+      const expectedDefaultState: EndpointState = {
         hosts: [],
         isInitialized: false,
         pageSize: 10,
@@ -57,8 +57,7 @@ describe('EndpointList store concerns', () => {
         endpointPackageInfo: {
           type: 'UninitialisedResourceState',
         },
-        nonExistingPolicies: {},
-        agentPolicies: {},
+        nonExistingPolicies: new Set(),
         endpointsExist: true,
         patterns: [],
         patternsError: undefined,
@@ -68,12 +67,13 @@ describe('EndpointList store concerns', () => {
         endpointsTotal: 0,
         agentsWithEndpointsTotalError: undefined,
         endpointsTotalError: undefined,
-        queryStrategyVersion: undefined,
         isolationRequestState: {
           type: 'UninitialisedResourceState',
         },
         metadataTransformStats: createUninitialisedResourceState(),
-      });
+      };
+
+      expect(store.getState()).toEqual(expectedDefaultState);
     });
 
     test('it handles `serverReturnedEndpointList', () => {

@@ -35,7 +35,7 @@
         "label": "getProgressRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
@@ -103,7 +103,7 @@
         "label": "getShapeRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
@@ -171,7 +171,7 @@
         "label": "ProgressDrawerComponent",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<Pick<",
+          "React.ForwardRefExoticComponent<Omit<React.PropsWithChildren<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -179,7 +179,7 @@
             "section": "def-public.ShapeDrawerComponentProps",
             "text": "ShapeDrawerComponentProps"
           },
-          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          ">, \"ref\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -204,7 +204,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -283,7 +283,7 @@
         "label": "ShapeDrawerComponent",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<Pick<",
+          "React.ForwardRefExoticComponent<Omit<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -291,7 +291,7 @@
             "section": "def-public.ShapeDrawerComponentProps",
             "text": "ShapeDrawerComponentProps"
           },
-          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          ", \"ref\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -316,7 +316,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1333,7 +1333,7 @@
                 "section": "def-public.SpecificShapeContentAttributes",
                 "text": "SpecificShapeContentAttributes"
               },
-              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }"
+              " & Readonly<{}> & { ref?: React.RefObject<any> | undefined; }"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
@@ -1642,7 +1642,7 @@
         "label": "ShapeDrawerComponentProps",
         "description": [],
         "signature": [
-          "{ readonly children?: React.ReactNode; ref: React.Ref<",
+          "{ ref: React.Ref<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1697,7 +1697,7 @@
         "label": "ShapeDrawerProps",
         "description": [],
         "signature": [
-          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
+          "{ shapeType: string; getShape: (shapeType: string) => { Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: React.PropsWithChildren<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1705,7 +1705,7 @@
             "section": "def-public.ShapeProps",
             "text": "ShapeProps"
           },
-          ") => JSX.Element; data: ",
+          ">) => React.JSX.Element; data: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1753,7 +1753,7 @@
             "section": "def-public.SvgTextAttributes",
             "text": "SvgTextAttributes"
           },
-          " | undefined; } & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }"
+          " | undefined; } & Readonly<{}> & { ref?: React.RefObject<any> | undefined; }"
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
@@ -1800,7 +1800,7 @@
             "section": "def-public.SvgTextAttributes",
             "text": "SvgTextAttributes"
           },
-          " | undefined; } & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }"
+          " | undefined; } & Readonly<{}> & { ref?: React.RefObject<any> | undefined; }"
         ],
         "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
         "deprecated": false,
@@ -1815,7 +1815,7 @@
         "label": "ShapeType",
         "description": [],
         "signature": [
-          "{ Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: ",
+          "{ Component: ({ shapeAttributes, shapeContentAttributes, children, textAttributes, }: React.PropsWithChildren<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1823,7 +1823,7 @@
             "section": "def-public.ShapeProps",
             "text": "ShapeProps"
           },
-          ") => JSX.Element; data: ",
+          ">) => React.JSX.Element; data: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",

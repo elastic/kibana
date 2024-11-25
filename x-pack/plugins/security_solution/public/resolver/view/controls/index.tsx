@@ -28,6 +28,7 @@ import { DateSelectionButton } from './date_picker';
 import { StyledGraphControls, StyledGraphControlsColumn, StyledEuiRange } from './styles';
 import { NodeLegend } from './legend';
 import { SchemaInformation } from './schema';
+import { ShowPanelButton } from './show_panel';
 
 type PopoverType = null | 'schemaInfo' | 'nodeLegend' | 'sourcererSelection' | 'datePicker';
 
@@ -35,6 +36,8 @@ export const GraphControls = React.memo(
   ({
     id,
     className,
+    isSplitPanel,
+    showPanelOnClick,
   }: {
     /**
      * Id that identify the scope of analyzer
@@ -44,6 +47,14 @@ export const GraphControls = React.memo(
      * A className string provided by `styled`
      */
     className?: string;
+    /**
+     * Indicate if the panel is displayed separately
+     */
+    isSplitPanel?: boolean;
+    /**
+     * Callback for showing the panel when isSplitPanel is true
+     */
+    showPanelOnClick?: () => void;
   }) => {
     const dispatch = useDispatch();
     const scalingFactor = useSelector((state: State) =>
@@ -69,7 +80,7 @@ export const GraphControls = React.memo(
 
     const closePopover = useCallback(() => setPopover(null), []);
 
-    const handleZoomAmountChange: EuiRangeProps['onChange'] = useCallback(
+    const handleZoomAmountChange = useCallback<NonNullable<EuiRangeProps['onChange']>>(
       (event) => {
         const valueAsNumber = parseFloat(
           (event as React.ChangeEvent<HTMLInputElement>).target.value
@@ -148,6 +159,9 @@ export const GraphControls = React.memo(
               />
             </>
           ) : null}
+          {isSplitPanel && showPanelOnClick && (
+            <ShowPanelButton showPanelOnClick={showPanelOnClick} />
+          )}
         </StyledGraphControlsColumn>
         <StyledGraphControlsColumn>
           <EuiPanel className="panning-controls" paddingSize="none" hasBorder>

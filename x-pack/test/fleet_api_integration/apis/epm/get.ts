@@ -18,6 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
 
   const supertest = getService('supertest');
+  const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const fleetAndAgents = getService('fleetAndAgents');
 
@@ -117,12 +118,22 @@ export default function (providerContext: FtrProviderContext) {
         await installPackage('experimental', '0.1.0');
         await bundlePackage('endpoint-8.6.1');
         await installPackage('endpoint', '8.6.1');
+        await es.index({
+          index: 'logs-apache.access-default',
+          document: {
+            '@timestamp': new Date().toISOString(),
+          },
+          refresh: 'wait_for',
+        });
       });
       after(async () => {
         await uninstallPackage(testPkgName, testPkgVersion);
         await uninstallPackage('experimental', '0.1.0');
         await uninstallPackage('endpoint', '8.6.1');
         await removeBundledPackages(log);
+        await es.indices.deleteDataStream({
+          name: 'logs-apache.access-default',
+        });
       });
       it('Allows the fetching of installed packages', async () => {
         const res = await supertest.get(`/api/fleet/epm/packages/installed`).expect(200);
@@ -172,6 +183,16 @@ export default function (providerContext: FtrProviderContext) {
         const packages = res.body.items;
         expect(packages.length).to.be(1);
         expect(packages[0].name).to.be('experimental');
+      });
+      it('Can be to only return active datastreams', async () => {
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/installed?nameQuery=apache&showOnlyActiveDataStreams=true`)
+          .expect(200);
+        const packages = res.body.items;
+        expect(packages.length).to.be(1);
+        expect(packages[0].name).to.be('apache');
+        expect(packages[0].dataStreams.length).to.be(1);
+        expect(packages[0].dataStreams[0].name).to.be('logs-apache.access-*');
       });
     });
     it('returns a 404 for a package that do not exists', async function () {

@@ -12,13 +12,18 @@ import { EuiPopoverTitle, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elas
 interface ClosablePopoverTitleProps {
   children: JSX.Element;
   onClose: () => void;
+  dataTestSubj?: string;
 }
 
-export const ClosablePopoverTitle = ({ children, onClose }: ClosablePopoverTitleProps) => {
+export const ClosablePopoverTitle = ({
+  children,
+  onClose,
+  dataTestSubj,
+}: ClosablePopoverTitleProps) => {
   return (
     <EuiPopoverTitle>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>{children}</EuiFlexItem>
+        <EuiFlexItem data-test-subj={dataTestSubj}>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="cross"

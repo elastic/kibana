@@ -9,6 +9,7 @@
   },
   "include": [
     "**/*.ts",
+    "../../typings/**/*"
   ],
   "exclude": [
     "**/__fixtures__/**",

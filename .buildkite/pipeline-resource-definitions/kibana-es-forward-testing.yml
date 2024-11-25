@@ -21,12 +21,12 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/es_forward.yml # Note: this file exists in 7.17 only
-      skip_intermediate_builds: false
       provider_settings:
         prefix_pull_request_fork_branch_names: false
         trigger_mode: none
@@ -39,3 +39,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: BUILD_AND_READ
+      tags:
+        - kibana

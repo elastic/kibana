@@ -39,14 +39,14 @@
           {
             "parentPluginId": "@kbn/ml-data-grid",
             "id": "def-common.DataGrid.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1930,7 +1930,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1971,7 +1971,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2004,7 +2004,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2037,7 +2037,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2072,7 +2072,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2088,7 +2088,7 @@
               "\nSetter function for the row count info."
             ],
             "signature": [
-              "(value: React.SetStateAction<",
+              "(info: ",
               {
                 "pluginId": "@kbn/ml-data-grid",
                 "scope": "common",
@@ -2096,28 +2096,35 @@
                 "section": "def-common.RowCountInfo",
                 "text": "RowCountInfo"
               },
-              ">) => void"
+              ") => void"
             ],
             "path": "x-pack/packages/ml/data_grid/lib/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/ml-data-grid",
                 "id": "def-common.UseDataGridReturnType.setRowCountInfo.$1",
-                "type": "Uncategorized",
+                "type": "Object",
                 "tags": [],
-                "label": "value",
+                "label": "info",
                 "description": [],
                 "signature": [
-                  "A"
+                  {
+                    "pluginId": "@kbn/ml-data-grid",
+                    "scope": "common",
+                    "docId": "kibKbnMlDataGridPluginApi",
+                    "section": "def-common.RowCountInfo",
+                    "text": "RowCountInfo"
+                  }
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "x-pack/packages/ml/data_grid/lib/types.ts",
                 "deprecated": false,
-                "trackAdoption": false
+                "trackAdoption": false,
+                "isRequired": true
               }
-            ]
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/ml-data-grid",
@@ -2148,7 +2155,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2189,7 +2196,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2230,7 +2237,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2263,7 +2270,7 @@
                 "signature": [
                   "A"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2448,7 +2455,7 @@
             "section": "def-common.UseDataGridReturnType",
             "text": "UseDataGridReturnType"
           },
-          ", \"status\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"ccsWarning\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
+          ", \"status\" | \"ccsWarning\" | \"rowCount\" | \"errorMessage\" | \"baseline\" | \"pagination\" | \"chartsVisible\" | \"chartsButtonVisible\" | \"columnsWithCharts\" | \"invalidSortingColumnns\" | \"noDataMessage\" | \"onChangeItemsPerPage\" | \"onChangePage\" | \"onSort\" | \"setPagination\" | \"setVisibleColumns\" | \"rowCountRelation\" | \"sortingColumns\" | \"tableItems\" | \"toggleChartVisibility\" | \"visibleColumns\" | \"predictionFieldName\" | \"resultsField\">"
         ],
         "path": "x-pack/packages/ml/data_grid/lib/types.ts",
         "deprecated": false,

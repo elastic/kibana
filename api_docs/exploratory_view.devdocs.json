@@ -104,7 +104,7 @@
         "signature": [
           "(props: ",
           "ExploratoryViewPageProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
@@ -139,7 +139,7 @@
         "signature": [
           "(props: ",
           "FilterValueLabelProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
@@ -207,7 +207,7 @@
         "signature": [
           "(props: ",
           "SelectableUrlListProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/index.tsx",
         "deprecated": false,
@@ -713,7 +713,7 @@
             "label": "align",
             "description": [],
             "signature": [
-              "\"right\" | \"left\" | \"center\" | undefined"
+              "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -798,6 +798,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "exploratoryView",
+            "id": "def-public.ExploratoryEmbeddableProps.dslFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "dslFilters",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1133,7 +1148,7 @@
             "signature": [
               "{ locators: ObservabilitySharedLocators; navigation: { PageTemplate: (pageTemplateProps: ",
               "WrappedPageTemplateProps",
-              ") => JSX.Element; registerSections: (sections$: ",
+              ") => React.JSX.Element; registerSections: (sections$: ",
               "Observable",
               "<",
               {
@@ -1449,7 +1464,7 @@
             "label": "defaultSeriesType",
             "description": [],
             "signature": [
-              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/plugins/observability_solution/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
@@ -2232,7 +2247,7 @@
           "section": "def-public.ExploratoryEmbeddableProps",
           "text": "ExploratoryEmbeddableProps"
         },
-        ") => JSX.Element | null; }"
+        ") => React.JSX.Element | null; }"
       ],
       "path": "x-pack/plugins/observability_solution/exploratory_view/public/plugin.ts",
       "deprecated": false,

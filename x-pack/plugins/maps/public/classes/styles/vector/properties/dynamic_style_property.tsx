@@ -301,9 +301,7 @@ export class DynamicStyleProperty<T extends object>
       return this.getDataMappingFunction() === DATA_MAPPING_FUNCTION.INTERPOLATE
         ? this._field.getExtendedStatsFieldMetaRequest()
         : this._field.getPercentilesFieldMetaRequest(
-            this.getFieldMetaOptions().percentiles !== undefined
-              ? this.getFieldMetaOptions().percentiles
-              : DEFAULT_PERCENTILES
+            this.getFieldMetaOptions().percentiles ?? DEFAULT_PERCENTILES
           );
     }
 
@@ -331,7 +329,7 @@ export class DynamicStyleProperty<T extends object>
     return this.usesFeatureState() ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
   }
 
-  getFieldMetaOptions() {
+  getFieldMetaOptions(): FieldMetaOptions {
     const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
 
     // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported

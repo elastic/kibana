@@ -42,8 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('forecasts', function () {
     this.tags(['ml']);
 
-    // FLAKY: https://github.com/elastic/kibana/issues/164381
-    describe.skip('with single metric job', function () {
+    describe('with single metric job', function () {
       before(async () => {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
@@ -88,6 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.forecast.assertForecastButtonExists();
         await ml.forecast.assertForecastButtonEnabled(true);
         await ml.forecast.openForecastModal();
+        await ml.forecast.assertForecastNeverExpireSwitchExists();
         await ml.forecast.assertForecastModalRunButtonEnabled(true);
 
         await ml.testExecution.logTestStep('should run the forecast and close the modal');

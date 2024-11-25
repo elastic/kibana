@@ -1,20 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
   ESQLAstCommand,
+  ESQLAstComment,
+  ESQLAstExpression,
   ESQLAstItem,
   ESQLAstNode,
+  ESQLAstNodeFormatting,
+  ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
@@ -33,15 +39,18 @@ export interface WalkerOptions {
   visitCommand?: (node: ESQLCommand) => void;
   visitCommandOption?: (node: ESQLCommandOption) => void;
   visitCommandMode?: (node: ESQLCommandMode) => void;
-  visitSingleAstItem?: (node: ESQLSingleAstItem) => void;
-  visitSource?: (node: ESQLSource) => void;
+  /** @todo Rename to `visitExpression`. */
+  visitSingleAstItem?: (node: ESQLAstExpression) => void;
+  visitQuery?: (node: ESQLAstQueryExpression) => void;
   visitFunction?: (node: ESQLFunction) => void;
+  visitSource?: (node: ESQLSource) => void;
   visitColumn?: (node: ESQLColumn) => void;
   visitLiteral?: (node: ESQLLiteral) => void;
   visitListLiteral?: (node: ESQLList) => void;
   visitTimeIntervalLiteral?: (node: ESQLTimeInterval) => void;
   visitInlineCast?: (node: ESQLInlineCast) => void;
   visitUnknown?: (node: ESQLUnknownItem) => void;
+  visitIdentifier?: (node: ESQLIdentifier) => void;
 
   /**
    * Called for any node type that does not have a specific visitor.
@@ -223,6 +232,58 @@ export class Walker {
     return !!Walker.findFunction(node, (fn) => fn.name === name);
   };
 
+  public static readonly visitComments = (
+    root: ESQLAstNode | ESQLAstNode[],
+    callback: (
+      comment: ESQLAstComment,
+      node: ESQLProperNode,
+      attachment: keyof ESQLAstNodeFormatting
+    ) => void
+  ): void => {
+    Walker.walk(root, {
+      visitAny: (node) => {
+        const formatting = node.formatting;
+        if (!formatting) return;
+
+        if (formatting.top) {
+          for (const decoration of formatting.top) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'top');
+            }
+          }
+        }
+
+        if (formatting.left) {
+          for (const decoration of formatting.left) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'left');
+            }
+          }
+        }
+
+        if (formatting.right) {
+          for (const decoration of formatting.right) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'right');
+            }
+          }
+        }
+
+        if (formatting.rightSingleLine) {
+          callback(formatting.rightSingleLine, node, 'rightSingleLine');
+        }
+
+        if (formatting.bottom) {
+          for (const decoration of formatting.bottom) {
+            if (decoration.type === 'comment') {
+              callback(decoration, node, 'bottom');
+            }
+          }
+        }
+      },
+    });
+  };
+
   constructor(protected readonly options: WalkerOptions) {}
 
   public walk(node: undefined | ESQLAstNode | ESQLAstNode[]): void {
@@ -287,10 +348,52 @@ export class Walker {
     }
   }
 
-  public walkSingleAstItem(node: ESQLSingleAstItem): void {
+  public walkColumn(node: ESQLColumn): void {
+    const { options } = this;
+    const { args } = node;
+
+    (options.visitColumn ?? options.visitAny)?.(node);
+
+    if (args) {
+      for (const value of args) {
+        this.walkAstItem(value);
+      }
+    }
+  }
+
+  public walkFunction(node: ESQLFunction): void {
+    const { options } = this;
+    (options.visitFunction ?? options.visitAny)?.(node);
+    const args = node.args;
+    const length = args.length;
+
+    if (node.operator) this.walkAstItem(node.operator);
+
+    for (let i = 0; i < length; i++) {
+      const arg = args[i];
+      this.walkAstItem(arg);
+    }
+  }
+
+  public walkQuery(node: ESQLAstQueryExpression): void {
+    const { options } = this;
+    (options.visitQuery ?? options.visitAny)?.(node);
+    const commands = node.commands;
+    const length = commands.length;
+    for (let i = 0; i < length; i++) {
+      const arg = commands[i];
+      this.walkCommand(arg);
+    }
+  }
+
+  public walkSingleAstItem(node: ESQLAstExpression): void {
     const { options } = this;
     options.visitSingleAstItem?.(node);
     switch (node.type) {
+      case 'query': {
+        this.walkQuery(node as ESQLAstQueryExpression);
+        break;
+      }
       case 'function': {
         this.walkFunction(node as ESQLFunction);
         break;
@@ -308,11 +411,11 @@ export class Walker {
         break;
       }
       case 'column': {
-        (options.visitColumn ?? options.visitAny)?.(node);
+        this.walkColumn(node);
         break;
       }
       case 'literal': {
-        options.visitLiteral?.(node);
+        (options.visitLiteral ?? options.visitAny)?.(node);
         break;
       }
       case 'list': {
@@ -327,21 +430,14 @@ export class Walker {
         (options.visitInlineCast ?? options.visitAny)?.(node);
         break;
       }
+      case 'identifier': {
+        (options.visitIdentifier ?? options.visitAny)?.(node);
+        break;
+      }
       case 'unknown': {
         (options.visitUnknown ?? options.visitAny)?.(node);
         break;
       }
-    }
-  }
-
-  public walkFunction(node: ESQLFunction): void {
-    const { options } = this;
-    (options.visitFunction ?? options.visitAny)?.(node);
-    const args = node.args;
-    const length = args.length;
-    for (let i = 0; i < length; i++) {
-      const arg = args[i];
-      this.walkAstItem(arg);
     }
   }
 }

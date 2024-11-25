@@ -14,6 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { createRule, CreateRuleBody } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '@kbn/alerts-ui-shared/src/common/constants/rule_flapping';
 import {
   Rule,
   RuleTypeParams,
@@ -37,7 +38,6 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import RuleAddFooter from './rule_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
-import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../../../common/constants';
 import { hasRuleChanged, haveRuleParamsChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { DEFAULT_RULE_INTERVAL, MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';

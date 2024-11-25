@@ -31,17 +31,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
 
   describe('Infrastructure Source Configuration', function () {
-    before(async () => kibanaServer.savedObjects.cleanStandardList());
-    after(async () => kibanaServer.savedObjects.cleanStandardList());
+    before(async () =>
+      Promise.all([
+        esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
+        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        kibanaServer.savedObjects.cleanStandardList(),
+      ])
+    );
+    after(async () =>
+      Promise.all([
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        kibanaServer.savedObjects.cleanStandardList(),
+      ])
+    );
 
     describe('with metrics present', () => {
-      before(async () =>
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs')
-      );
-      after(async () =>
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs')
-      );
-
       it('renders the waffle map', async () => {
         await pageObjects.common.navigateToApp('infraOps');
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);

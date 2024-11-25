@@ -21,6 +21,53 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.hasNonDefaultThemeTags",
+        "type": "Function",
+        "tags": [],
+        "label": "hasNonDefaultThemeTags",
+        "description": [],
+        "signature": [
+          "(tags: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.ThemeTags",
+            "text": "ThemeTags"
+          },
+          ") => boolean"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.hasNonDefaultThemeTags.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.ThemeTags",
+                "text": "ThemeTags"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.parseDarkModeValue",
         "type": "Function",
         "tags": [],
@@ -51,6 +98,79 @@
               "unknown"
             ],
             "path": "packages/core/ui-settings/core-ui-settings-common/src/dark_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.parseThemeNameValue",
+        "type": "Function",
+        "tags": [],
+        "label": "parseThemeNameValue",
+        "description": [],
+        "signature": [
+          "(value: unknown) => string"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.parseThemeNameValue.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.parseThemeTags",
+        "type": "Function",
+        "tags": [],
+        "label": "parseThemeTags",
+        "description": [],
+        "signature": [
+          "(input: unknown) => ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.ThemeTags",
+            "text": "ThemeTags"
+          }
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.parseThemeTags.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -600,6 +720,36 @@
       },
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.DEFAULT_THEME_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_THEME_NAME",
+        "description": [],
+        "signature": [
+          "\"amsterdam\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.FALLBACK_THEME_TAG",
+        "type": "CompoundType",
+        "tags": [],
+        "label": "FALLBACK_THEME_TAG",
+        "description": [],
+        "signature": [
+          "\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
         "id": "def-common.ReadonlyModeType",
         "type": "Type",
         "tags": [],
@@ -611,6 +761,66 @@
           "\"strict\" | \"ui\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.SUPPORTED_THEME_NAMES",
+        "type": "Array",
+        "tags": [],
+        "label": "SUPPORTED_THEME_NAMES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.ThemeName",
+        "type": "Type",
+        "tags": [],
+        "label": "ThemeName",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.ThemeTag",
+        "type": "Type",
+        "tags": [],
+        "label": "ThemeTag",
+        "description": [],
+        "signature": [
+          "\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.ThemeTags",
+        "type": "Type",
+        "tags": [],
+        "label": "ThemeTags",
+        "description": [],
+        "signature": [
+          "readonly (\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\")[]"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -657,7 +867,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"image\" | \"select\" | \"json\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"select\" | \"image\" | \"array\" | \"json\" | \"markdown\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
@@ -665,6 +875,41 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.DEFAULT_THEME_TAGS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_THEME_TAGS",
+        "description": [
+          "\nAn array of theme tags available in Kibana by default when not customized\nusing KBN_OPTIMIZER_THEMES environment variable."
+        ],
+        "signature": [
+          "readonly (\"v8light\" | \"v8dark\" | \"borealislight\" | \"borealisdark\")[]"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.SUPPORTED_THEME_TAGS",
+        "type": "Object",
+        "tags": [],
+        "label": "SUPPORTED_THEME_TAGS",
+        "description": [
+          "\nAn array of all theme tags supported by Kibana. Note that this list doesn't\nreflect what theme tags are available in a Kibana build."
+        ],
+        "signature": [
+          "readonly [\"v8light\", \"v8dark\", \"borealislight\", \"borealisdark\"]"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/theme.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

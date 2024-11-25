@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -17,3 +18,4 @@ export const META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES =
   'x-oas-get-additional-properties' as const;
 export const META_FIELD_X_OAS_DEPRECATED = 'x-oas-deprecated' as const;
 export const META_FIELD_X_OAS_ANY = 'x-oas-any-type' as const;
+export const META_FIELD_X_OAS_DISCONTINUED = 'x-oas-discontinued' as const;

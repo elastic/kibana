@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useCreateTimeline } from './use_create_timeline';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { RowRendererCount, TimelineTypeEnum } from '../../../common/api/timeline';
@@ -18,7 +18,7 @@ import { appActions } from '../../common/store/app';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TestProviders, mockGlobalState } from '../../common/mock';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/containers/use_global_time', () => {
@@ -44,7 +44,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -61,7 +63,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -105,7 +109,9 @@ describe('useCreateTimeline', () => {
           onClick,
         }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -123,7 +129,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 
@@ -144,7 +152,9 @@ describe('useCreateTimeline', () => {
       () =>
         useCreateTimeline({ timelineId: TimelineId.test, timelineType: TimelineTypeEnum.default }),
       {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
       }
     );
 

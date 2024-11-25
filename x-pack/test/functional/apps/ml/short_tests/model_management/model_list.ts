@@ -129,6 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.securityUI.loginAsMlViewer();
         await ml.navigation.navigateToTrainedModels();
         await ml.commonUI.waitForRefreshButtonEnabled();
+        await ml.trainedModels.showAllModels();
       });
 
       after(async () => {
@@ -165,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.securityUI.loginAsMlPowerUser();
         await ml.navigation.navigateToTrainedModels();
         await ml.commonUI.waitForRefreshButtonEnabled();
+        await ml.trainedModels.showAllModels();
       });
 
       after(async () => {
@@ -414,7 +416,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('displays a model without an ingest pipeline and model can be deleted', async () => {
         await ml.testExecution.logTestStep('should display the model in the table');
-        await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
+        await ml.testExecution.logTestStep('expands the row to show the model details');
+        await ml.trainedModelsTable.ensureRowIsExpanded(modelWithoutPipelineData.modelId);
 
         await ml.testExecution.logTestStep(
           'displays expected row values for the model in the table'
@@ -477,8 +480,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToTrainedModels();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/175443
-      describe.skip('with imported models', function () {
+      describe('with imported models', function () {
         before(async () => {
           await ml.navigation.navigateToTrainedModels();
         });
@@ -494,9 +496,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           it(`starts deployment of the imported model ${model.id}`, async () => {
             await ml.trainedModelsTable.startDeploymentWithParams(model.id, {
-              priority: 'normal',
-              numOfAllocations: 1,
-              threadsPerAllocation: 2,
+              vCPULevel: 'medium',
+              optimized: 'optimizedForSearch',
+              adaptiveResources: false,
             });
             await ml.trainedModelsTable.assertModelDeleteActionButtonEnabled(model.id, false);
           });

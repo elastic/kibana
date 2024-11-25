@@ -14,6 +14,7 @@ import {
   moduleIdParamSchema,
   moduleFilterSchema,
   optionalModuleIdParamSchema,
+  optionalSizeQuerySchema,
   recognizeModulesSchema,
   setupModuleBodySchema,
   recognizeModulesSchemaResponse,
@@ -34,8 +35,10 @@ export function dataRecognizer(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/recognize/{indexPatternTitle}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Recognize index pattern',
       description:
@@ -93,10 +96,70 @@ export function dataRecognizer(
 
   router.versioned
     .get({
+      path: `${ML_INTERNAL_BASE_PATH}/modules/recognize_by_module/{moduleId}`,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
+      },
+      summary: 'Recognize module',
+      description:
+        'By supplying a module id, discover if any of the data views contain data that is a match for that module.',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: moduleIdParamSchema,
+            query: optionalSizeQuerySchema,
+          },
+        },
+      },
+      routeGuard.fullLicenseAPIGuard(
+        async ({
+          client,
+          mlClient,
+          request,
+          response,
+          context,
+          mlSavedObjectService,
+          getDataViewsService,
+        }) => {
+          try {
+            const { moduleId } = request.params;
+            const { size } = request.query;
+            const soClient = (await context.core).savedObjects.client;
+            const dataViewsService = await getDataViewsService();
+
+            const dr = dataRecognizerFactory(
+              client,
+              mlClient,
+              soClient,
+              dataViewsService,
+              mlSavedObjectService,
+              request,
+              compatibleModuleType
+            );
+            const results = await dr.findIndexMatches(moduleId, size);
+
+            return response.ok({ body: results });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
+        }
+      )
+    );
+
+  router.versioned
+    .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/get_module/{moduleId?}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Get module',
       description:
@@ -167,8 +230,10 @@ export function dataRecognizer(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/modules/setup/{moduleId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Setup module',
       description:
@@ -266,8 +331,10 @@ export function dataRecognizer(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/modules/jobs_exist/{moduleId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Check if module jobs exist',
       description: `Check whether the jobs in the module with the specified ID exist in the current list of jobs. The check runs a test to see if any of the jobs in existence have an ID which ends with the ID of each job in the module. This is done as a prefix may be supplied in the setup endpoint which is added to the start of the ID of every job in the module.`,

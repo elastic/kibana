@@ -1,32 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
-  ControlGroupInput,
+  ControlGroupRuntimeState,
+  OptionsListControlState,
   ControlPanelState,
-  OptionsListEmbeddableInput,
-} from '@kbn/controls-plugin/common';
+} from '@kbn/controls-plugin/public';
 
 import { isEmpty, isEqual, pick } from 'lodash';
 import type { FilterControlConfig } from './types';
 
-export const getPanelsInOrderFromControlsInput = (controlInput: ControlGroupInput) => {
-  const panels = controlInput.panels;
-
+export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {
+  const panels = controlState.initialChildControlState;
   return Object.values(panels).sort((a, b) => a.order - b.order);
 };
 
-export const getFilterItemObjListFromControlInput = (controlInput: ControlGroupInput) => {
-  const panels = getPanelsInOrderFromControlsInput(controlInput);
+export const getFilterItemObjListFromControlState = (controlState: ControlGroupRuntimeState) => {
+  const panels = getPanelsInOrderFromControlsState(controlState);
   return panels.map((panel) => {
-    const {
-      explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar },
-    } = panel as ControlPanelState<OptionsListEmbeddableInput>;
+    const { fieldName, selectedOptions, title, existsSelected, exclude, hideActionBar } =
+      panel as ControlPanelState<OptionsListControlState>;
 
     return {
       fieldName: fieldName as string,

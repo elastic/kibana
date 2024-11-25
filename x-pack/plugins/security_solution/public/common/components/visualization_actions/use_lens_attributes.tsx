@@ -72,7 +72,7 @@ export const useLensAttributes = ({
     () =>
       lensAttributes ??
       ((getLensAttributes &&
-        stackByField &&
+        stackByField !== null &&
         getLensAttributes(stackByField, extraOptions)) as LensAttributes),
     [extraOptions, getLensAttributes, lensAttributes, stackByField]
   );
@@ -82,7 +82,7 @@ export const useLensAttributes = ({
   const lensAttrsWithInjectedData = useMemo(() => {
     if (
       lensAttributes == null &&
-      (getLensAttributes == null || stackByField == null || stackByField?.length === 0)
+      (getLensAttributes == null || stackByField === null || stackByField?.length === 0)
     ) {
       return null;
     }

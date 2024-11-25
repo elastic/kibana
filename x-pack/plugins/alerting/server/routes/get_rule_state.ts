@@ -38,6 +38,9 @@ export const getRuleStateRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/state`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: paramSchema,
       },

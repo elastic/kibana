@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
 import { Capabilities as UICapabilities } from '@kbn/core/server';
-import { KibanaFeatureConfig } from '../common';
+import { KibanaFeatureConfig, KibanaFeatureScope } from '../common';
 import { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 
 // Each feature gets its own property on the UICapabilities object,
@@ -83,6 +83,8 @@ const casesSchemaObject = schema.maybe(
     delete: schema.maybe(casesSchema),
     push: schema.maybe(casesSchema),
     settings: schema.maybe(casesSchema),
+    createComment: schema.maybe(casesSchema),
+    reopenCase: schema.maybe(casesSchema),
   })
 );
 
@@ -116,6 +118,21 @@ const kibanaPrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.oneOf([
+      schema.arrayOf(
+        schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+      ),
+      schema.object({
+        minimal: schema.arrayOf(
+          schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+        ),
+        default: schema.arrayOf(
+          schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+        ),
+      }),
+    ])
+  ),
 });
 
 const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
@@ -155,6 +172,11 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     read: schema.arrayOf(schema.string()),
   }),
   ui: listOfCapabilitiesSchema,
+  replacedBy: schema.maybe(
+    schema.arrayOf(
+      schema.object({ feature: schema.string(), privileges: schema.arrayOf(schema.string()) })
+    )
+  ),
 });
 
 const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
@@ -202,6 +224,7 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
+  scope: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
   description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
@@ -211,13 +234,23 @@ const kibanaFeatureSchema = schema.object({
   catalogue: schema.maybe(catalogueSchema),
   alerting: schema.maybe(alertingSchema),
   cases: schema.maybe(casesSchema),
-  privileges: schema.oneOf([
-    schema.literal(null),
-    schema.object({
-      all: schema.maybe(kibanaPrivilegeSchema),
-      read: schema.maybe(kibanaPrivilegeSchema),
+  // Features registered only for the spaces scope should not have a `privileges` property.
+  // Such features are applicable only to the Spaces Visibility Toggles
+  privileges: schema.conditional(
+    schema.siblingRef('scope'),
+    schema.arrayOf(schema.literal('spaces'), {
+      minSize: 1,
+      maxSize: 1,
     }),
-  ]),
+    schema.literal(null),
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        all: schema.maybe(kibanaPrivilegeSchema),
+        read: schema.maybe(kibanaPrivilegeSchema),
+      }),
+    ])
+  ),
   subFeatures: schema.maybe(
     schema.conditional(
       schema.siblingRef('privileges'),
@@ -245,6 +278,7 @@ const kibanaFeatureSchema = schema.object({
       ),
     })
   ),
+  deprecated: schema.maybe(schema.object({ notice: schema.string() })),
 });
 
 const elasticsearchPrivilegeSchema = schema.object({
@@ -274,6 +308,14 @@ const elasticsearchFeatureSchema = schema.object({
 
 export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   kibanaFeatureSchema.validate(feature);
+
+  const unknownScopesEntries = difference(feature.scope ?? [], Object.values(KibanaFeatureScope));
+
+  if (unknownScopesEntries.length) {
+    throw new Error(
+      `Feature ${feature.id} has unknown scope entries: ${unknownScopesEntries.join(', ')}`
+    );
+  }
 
   // the following validation can't be enforced by the Joi schema, since it'd require us looking "up" the object graph for the list of valid value, which they explicitly forbid.
   const { app = [], management = {}, catalogue = [], alerting = [], cases = [] } = feature;

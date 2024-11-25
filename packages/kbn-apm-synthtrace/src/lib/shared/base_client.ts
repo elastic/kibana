@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -47,22 +48,21 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async clean() {
-    this.logger.info(
-      `Cleaning data streams "${this.dataStreams.join(',')}" and indices "${this.indices.join(
-        ','
-      )}"`
-    );
+    this.logger.info(`Cleaning data streams: "${this.dataStreams.join(',')}"`);
 
     const resolvedIndices = this.indices.length
       ? (
           await this.client.indices.resolveIndex({
             name: this.indices.join(','),
             expand_wildcards: ['open', 'hidden'],
-            // @ts-expect-error ignore_unavailable is not in the type definition, but it is accepted by es
             ignore_unavailable: true,
           })
         ).indices.map((index: { name: string }) => index.name)
       : [];
+
+    if (resolvedIndices.length) {
+      this.logger.info(`Cleaning indices: "${resolvedIndices.join(',')}"`);
+    }
 
     await Promise.all([
       ...(this.dataStreams.length

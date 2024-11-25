@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { getInstallationInfo } from './helper';
 const PACKAGE_NAME = 'input_package_upgrade';
 const START_VERSION = '1.0.0';
 const UPGRADE_VERSION = '1.1.0';
@@ -31,11 +32,6 @@ export default function (providerContext: FtrProviderContext) {
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
-  };
-
-  const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
-    return res.body.item.savedObject.attributes;
   };
 
   const createPackagePolicyWithDataset = async (
@@ -195,18 +191,19 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should not have created any ES assets on install', async () => {
-      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
       expect(installation.installed_es).to.eql([]);
     });
 
     it('should create index templates and update installed_es on package policy creation', async () => {
       await createPackagePolicyWithDataset(agentPolicyId, 'dataset1');
-      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
       expectIdArraysEqual(installation.installed_es, [
         { id: 'logs-dataset1-1.0.0', type: 'ingest_pipeline' },
         { id: 'logs-dataset1', type: 'index_template' },
         { id: 'logs-dataset1@package', type: 'component_template' },
         { id: 'logs-dataset1@custom', type: 'component_template' },
+        { id: 'logs@custom', type: 'component_template' },
       ]);
 
       // now check the package component template was created correctly
@@ -248,7 +245,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should create index templates and update installed_es on second package policy creation', async () => {
       await createPackagePolicyWithDataset(agentPolicyId, 'dataset2');
-      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
       let found = 0;
       [
         { id: 'logs-dataset2-1.0.0', type: 'ingest_pipeline' },
@@ -267,7 +264,7 @@ export default function (providerContext: FtrProviderContext) {
       await createFakeFleetDataStream('dataset3');
 
       await createPackagePolicyWithDataset(agentPolicyId, 'dataset3');
-      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
       let found = 0;
       [
         { id: 'logs-dataset3-1.0.0', type: 'ingest_pipeline' },

@@ -11,7 +11,6 @@ export const defaultIndexPriority = {
   hot: '100',
   warm: '50',
   cold: '0',
-  frozen: '0',
 };
 
 export const defaultRolloverAction: RolloverAction = {

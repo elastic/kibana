@@ -8,10 +8,15 @@
 import * as Gemini from '@google/generative-ai';
 import { from, map, switchMap } from 'rxjs';
 import { Readable } from 'stream';
+import {
+  Message,
+  MessageRole,
+  ToolChoiceType,
+  ToolOptions,
+  ToolSchema,
+  ToolSchemaType,
+} from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { Message, MessageRole } from '../../../../common/chat_complete';
-import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/tools';
-import type { ToolSchema, ToolSchemaType } from '../../../../common/chat_complete/tool_schema';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
@@ -106,12 +111,16 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           type: Gemini.FunctionDeclarationSchemaType.OBJECT,
           description: def.description,
           required: def.required as string[],
-          properties: Object.entries(def.properties).reduce<
-            Record<string, Gemini.FunctionDeclarationSchema>
-          >((properties, [key, prop]) => {
-            properties[key] = convertSchemaType({ def: prop }) as Gemini.FunctionDeclarationSchema;
-            return properties;
-          }, {}),
+          properties: def.properties
+            ? Object.entries(def.properties).reduce<
+                Record<string, Gemini.FunctionDeclarationSchema>
+              >((properties, [key, prop]) => {
+                properties[key] = convertSchemaType({
+                  def: prop,
+                }) as Gemini.FunctionDeclarationSchema;
+                return properties;
+              }, {})
+            : undefined,
         };
       case 'string':
         return {
@@ -137,7 +146,7 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
   return {
     type: Gemini.FunctionDeclarationSchemaType.OBJECT,
     required: schema.required as string[],
-    properties: Object.entries(schema.properties).reduce<
+    properties: Object.entries(schema.properties ?? {}).reduce<
       Record<string, Gemini.FunctionDeclarationSchemaProperty>
     >((properties, [key, def]) => {
       properties[key] = convertSchemaType({ def });

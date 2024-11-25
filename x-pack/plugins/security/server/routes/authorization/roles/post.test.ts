@@ -7,12 +7,14 @@
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { BulkCreateOrUpdateRolesPayloadSchemaType } from './model/bulk_create_or_update_payload';
 import { defineBulkCreateOrUpdateRolesRoutes } from './post';
+import { API_VERSIONS } from '../../../../common/constants';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';
 
@@ -89,6 +91,7 @@ const postRolesTest = (
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
+    const versionedRouterMock = mockRouteDefinitionParams.router.versioned as MockedVersionedRouter;
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
@@ -158,13 +161,15 @@ const postRolesTest = (
     );
 
     defineBulkCreateOrUpdateRolesRoutes(mockRouteDefinitionParams);
-    const [[{ validate }, handler]] = mockRouteDefinitionParams.router.post.mock.calls;
+    const { handler, config } = versionedRouterMock.getRoute('post', '/api/security/roles')
+      .versions[API_VERSIONS.roles.public.v1];
 
     const headers = { authorization: 'foo' };
     const mockRequest = httpServerMock.createKibanaRequest({
       method: 'post',
       path: '/api/security/roles',
-      body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
+      body:
+        payload !== undefined ? (config.validate as any).request.body.validate(payload) : undefined,
       headers,
     });
 

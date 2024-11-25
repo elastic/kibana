@@ -284,7 +284,7 @@ export const BulkActionEditPayloadTimeline = z.object({
   }),
 });
 
-const BulkActionEditPayloadInternal = z.union([
+export const BulkActionEditPayloadInternal = z.union([
   BulkActionEditPayloadTags,
   BulkActionEditPayloadIndexPatterns,
   BulkActionEditPayloadInvestigationFields,

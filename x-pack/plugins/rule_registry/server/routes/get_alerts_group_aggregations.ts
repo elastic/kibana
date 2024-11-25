@@ -35,8 +35,13 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
           )
         ),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['rac'],
+        },
+      },
       options: {
-        tags: ['access:rac'],
+        access: 'internal',
       },
     },
     async (context, request, response) => {

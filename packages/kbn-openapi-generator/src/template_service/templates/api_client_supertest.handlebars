@@ -11,6 +11,8 @@ import { ELASTIC_HTTP_VERSION_HEADER, X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { FtrProviderContext } from 'x-pack/test/api_integration/ftr_provider_context';
 
+import { routeWithNamespace } from 'x-pack/test/common/utils/security_solution';
+
 {{#each operations}}
 import { 
   {{operationId}}RequestQueryInput,
@@ -29,9 +31,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
       * {{{description}}}
       */
     {{/if}}
-    {{camelCase operationId}}({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props{{/if}}) {
+    {{camelCase operationId}}({{#if (or requestQuery requestParams requestBody)}}props: {{operationId}}Props, {{/if}}kibanaSpace: string = 'default') {
       return supertest
-        .{{method}}({{#if requestParams}}replaceParams('{{path}}', props.params){{else}}'{{path}}'{{/if}})
+        .{{method}}(routeWithNamespace({{#if requestParams}}replaceParams('{{path}}', props.params){{else}}'{{path}}'{{/if}}, kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '{{version}}')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

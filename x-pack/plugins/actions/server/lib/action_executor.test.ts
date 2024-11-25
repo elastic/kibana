@@ -851,7 +851,7 @@ describe('Action Executor', () => {
         status: 'error',
         retry: false,
         message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
-        errorSource: TaskErrorSource.FRAMEWORK,
+        errorSource: TaskErrorSource.USER,
       });
     });
 
@@ -1245,7 +1245,7 @@ describe('Action Executor', () => {
       );
       expect(loggerMock.error).toBeCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed'],
+        tags: ['test', '1', 'action-run-failed', 'framework-error'],
       });
     });
 
@@ -1274,7 +1274,7 @@ describe('Action Executor', () => {
       );
       expect(loggerMock.error).toBeCalledWith(err, {
         error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
-        tags: ['test', '1', 'action-run-failed'],
+        tags: ['test', '1', 'action-run-failed', 'user-error'],
       });
     });
 

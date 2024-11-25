@@ -29,7 +29,7 @@
           "\nThe `KibanaRenderContextProvider` provides the necessary context for an out-of-current\nReact render, such as using `ReactDOM.render()`."
         ],
         "signature": [
-          "({ children, ...props }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...props }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-context-render",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-common.KibanaRenderContextProviderProps",
             "text": "KibanaRenderContextProviderProps"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
@@ -51,7 +51,7 @@
             "label": "{ children, ...props }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-context-render",
                 "scope": "common",
@@ -59,7 +59,7 @@
                 "section": "def-common.KibanaRenderContextProviderProps",
                 "text": "KibanaRenderContextProviderProps"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/react/kibana_context/render/render_provider.tsx",
             "deprecated": false,
@@ -103,9 +103,9 @@
           ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.ThemeServiceStart",
+            "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
           "; modify?: ",

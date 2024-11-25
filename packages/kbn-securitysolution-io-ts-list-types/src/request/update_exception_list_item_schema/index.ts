@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as t from 'io-ts';
@@ -20,6 +21,7 @@ import { description } from '../../common/description';
 import { name } from '../../common/name';
 import { _version } from '../../common/underscore_version';
 import { id } from '../../common/id';
+import { item_id } from '../../common/item_id';
 import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
 import { ExpireTimeOrUndefined, expireTimeOrUndefined } from '../../common';
@@ -39,7 +41,7 @@ export const updateExceptionListItemSchema = t.intersection([
       comments: DefaultUpdateCommentsArray, // defaults to empty array if not set during decode
       expire_time: expireTimeOrUndefined,
       id, // defaults to undefined if not set during decode
-      item_id: t.union([t.string, t.undefined]),
+      item_id,
       meta, // defaults to undefined if not set during decode
       namespace_type, // defaults to 'single' if not set during decode
       os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode

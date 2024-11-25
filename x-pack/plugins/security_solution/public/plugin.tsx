@@ -17,9 +17,10 @@ import type {
   PluginInitializerContext,
   Plugin as IPlugin,
 } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -106,6 +107,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const services = await this.services.generateServices(coreStart, startPlugins, params);
       return { renderApp, subPlugins, store, services };
     };
+
+    // register cloud security ui metrics
+    if (plugins.usageCollection) uiMetricService.setup(plugins.usageCollection);
 
     // Register main Security Solution plugin
     core.application.register({
@@ -204,81 +208,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public start(core: CoreStart, plugins: StartPlugins): PluginStart {
     this.services.start(core, plugins);
-
-    if (plugins.fleet) {
-      const { registerExtension } = plugins.fleet;
-      const registerOptions: FleetUiExtensionGetterOptions = {
-        coreStart: core,
-        depsStart: plugins,
-        services: {
-          upsellingService: this.contract.upsellingService,
-        },
-      };
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-edit',
-        Component: getLazyEndpointPolicyEditExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-response',
-        Component: getLazyEndpointPolicyResponseExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-generic-errors-list',
-        Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-create',
-        Component: getLazyEndpointPolicyCreateExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-policy-create-multi-step',
-        Component: LazyEndpointPolicyCreateMultiStepExtension,
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-detail-custom',
-        Component: getLazyEndpointPackageCustomExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'package-detail-assets',
-        Component: LazyEndpointCustomAssetsExtension,
-      });
-
-      registerExtension({
-        package: 'endpoint',
-        view: 'endpoint-agent-tamper-protection',
-        Component: getLazyEndpointAgentTamperProtectionExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'cloud_security_posture',
-        view: 'pli-auth-block',
-        Component: getLazyCloudSecurityPosturePliAuthBlockExtension(registerOptions),
-      });
-
-      registerExtension({
-        package: 'cribl',
-        view: 'package-policy-replace-define-step',
-        Component: LazyCustomCriblExtension,
-      });
-    }
-
-    // Not using await to prevent blocking start execution
-    this.registerAppLinks(core, plugins);
-
+    this.registerFleetExtensions(core, plugins);
+    this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
     return this.contract.getStartContract(core);
   }
 
@@ -286,6 +217,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.stop();
   }
 
+  /**
+   * SubPlugins are the individual building blocks of the Security Solution plugin.
+   * They are lazily instantiated to improve startup time.
+   * TODO: Move these functions to ./lazy_sub_plugins.ts
+   */
   private async createSubPlugins(): Promise<SubPlugins> {
     if (!this._subPlugins) {
       const { subPluginClasses } = await this.lazySubPlugins();
@@ -298,6 +234,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
         kubernetes: new subPluginClasses.Kubernetes(),
+        onboarding: new subPluginClasses.Onboarding(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -308,22 +245,21 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         assets: new subPluginClasses.Assets(),
         investigations: new subPluginClasses.Investigations(),
         machineLearning: new subPluginClasses.MachineLearning(),
+        siemMigrations: new subPluginClasses.SiemMigrations(),
       };
     }
     return this._subPlugins;
   }
 
-  /**
-   * All started subPlugins.
-   */
   private async startSubPlugins(
     storage: Storage,
     core: CoreStart,
     plugins: StartPlugins
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.createSubPlugins();
+    const alerts = await subPlugins.alerts.start(storage, plugins);
     return {
-      alerts: subPlugins.alerts.start(storage),
+      alerts,
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),
@@ -333,6 +269,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       explore: subPlugins.explore.start(storage),
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
+      onboarding: subPlugins.onboarding.start(),
       overview: subPlugins.overview.start(),
       rules: subPlugins.rules.start(storage),
       threatIntelligence: subPlugins.threatIntelligence.start(),
@@ -343,6 +280,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assets: subPlugins.assets.start(),
       investigations: subPlugins.investigations.start(),
       machineLearning: subPlugins.machineLearning.start(),
+      siemMigrations: subPlugins.siemMigrations.start(
+        this.experimentalFeatures.siemMigrationsEnabled
+      ),
     };
   }
 
@@ -385,7 +325,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Registers the alerts tables configurations.
+   * Registers the alerts tables configurations to the triggersActionsUi plugin.
    */
   private async registerAlertsTableConfiguration(
     triggersActionsUi: TriggersAndActionsUIPublicPluginSetup
@@ -402,30 +342,43 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   /**
-   * Registers deepLinks and appUpdater for appLinks using license.
+   * Registers the plugin updates including status, visibleIn, and deepLinks via the plugin updater$.
    */
-  async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
+  private async registerPluginUpdates(core: CoreStart, plugins: StartPlugins) {
+    const { license$ } = plugins.licensing;
+    const { capabilities } = core.application;
+    const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
+
+    // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
+    if (!capabilities.siem?.show && !capabilities.securitySolutionCasesV2?.read_cases) {
+      this.appUpdater$.next(() => ({
+        status: AppStatus.inaccessible,
+        visibleIn: [],
+      }));
+      // no need to register the links updater when the plugin is inaccessible
+      return;
+    }
+
+    // Configuration of AppLinks updater registration based on license and capabilities
     const {
       appLinks: initialAppLinks,
       getFilteredLinks,
       solutionAppLinksSwitcher,
     } = await this.lazyApplicationLinks();
-    const { license$ } = plugins.licensing;
-    const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$);
 
-    const appLinks$ = new Subject<AppLinkItems>();
-    appLinks$.next(initialAppLinks);
+    const appLinksToUpdate$ = new Subject<AppLinkItems>();
+    appLinksToUpdate$.next(initialAppLinks);
 
-    appLinks$
+    appLinksToUpdate$
       .pipe(combineLatestWith(license$, isSolutionNavigationEnabled$))
       .subscribe(([appLinks, license, isSolutionNavigationEnabled]) => {
         const links = isSolutionNavigationEnabled ? solutionAppLinksSwitcher(appLinks) : appLinks;
         const linksPermissions: LinksPermissions = {
           experimentalFeatures: this.experimentalFeatures,
           upselling: upsellingService,
-          capabilities: core.application.capabilities,
+          capabilities,
           uiSettingsClient: core.uiSettings,
           ...(license.type != null && { license }),
         };
@@ -433,7 +386,82 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
 
     const filteredLinks = await getFilteredLinks(core, plugins);
-    appLinks$.next(filteredLinks);
+    appLinksToUpdate$.next(filteredLinks);
+  }
+
+  private registerFleetExtensions(core: CoreStart, plugins: StartPlugins) {
+    if (!plugins.fleet) {
+      return;
+    }
+
+    const { registerExtension } = plugins.fleet;
+    const registerOptions: FleetUiExtensionGetterOptions = {
+      coreStart: core,
+      depsStart: plugins,
+      services: {
+        upsellingService: this.contract.upsellingService,
+      },
+    };
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-edit',
+      Component: getLazyEndpointPolicyEditExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-response',
+      Component: getLazyEndpointPolicyResponseExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-generic-errors-list',
+      Component: getLazyEndpointGenericErrorsListExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-create',
+      Component: getLazyEndpointPolicyCreateExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-policy-create-multi-step',
+      Component: LazyEndpointPolicyCreateMultiStepExtension,
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-detail-custom',
+      Component: getLazyEndpointPackageCustomExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'package-detail-assets',
+      Component: LazyEndpointCustomAssetsExtension,
+    });
+
+    registerExtension({
+      package: 'endpoint',
+      view: 'endpoint-agent-tamper-protection',
+      Component: getLazyEndpointAgentTamperProtectionExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'cloud_security_posture',
+      view: 'pli-auth-block',
+      Component: getLazyCloudSecurityPosturePliAuthBlockExtension(registerOptions),
+    });
+
+    registerExtension({
+      package: 'cribl',
+      view: 'package-policy-replace-define-step',
+      Component: LazyCustomCriblExtension,
+    });
   }
 
   // Lazy loaded dependencies

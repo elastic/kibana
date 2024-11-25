@@ -10,6 +10,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+
 import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
@@ -17,9 +18,11 @@ import type {
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
-import { assetCriticalityFieldMap } from './constants';
+import type { CriticalityValues } from './constants';
+import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
+import { getImplicitEntityFields } from './helpers';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -32,7 +35,17 @@ type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue
 
 type BulkUpsertFromStreamOptions = {
   recordsStream: NodeJS.ReadableStream;
+  /**
+   * The index number for the first stream element. By default the errors are zero-indexed.
+   */
+  streamIndexStart?: number;
 } & Pick<Parameters<ElasticsearchClient['helpers']['bulk']>[0], 'flushBytes' | 'retries'>;
+
+type StoredAssetCriticalityRecord = {
+  [K in keyof AssetCriticalityRecord]: K extends 'criticality_level'
+    ? CriticalityValues
+    : AssetCriticalityRecord[K];
+};
 
 const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
 const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
@@ -41,19 +54,12 @@ const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:
 
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
+
   /**
-   * It will create idex for asset criticality,
-   * or update mappings if index exists
+   * Initialize asset criticality resources.
    */
   public async init() {
-    await createOrUpdateIndex({
-      esClient: this.options.esClient,
-      logger: this.options.logger,
-      options: {
-        index: this.getIndex(),
-        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
-      },
-    });
+    await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
       message: 'User installed asset criticality Elasticsearch resources',
@@ -62,6 +68,20 @@ export class AssetCriticalityDataClient {
         category: AUDIT_CATEGORY.DATABASE,
         type: AUDIT_TYPE.CREATION,
         outcome: AUDIT_OUTCOME.SUCCESS,
+      },
+    });
+  }
+
+  /**
+   * It will create idex for asset criticality or update mappings if index exists
+   */
+  public async createOrUpdateIndex() {
+    await createOrUpdateIndex({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      options: {
+        index: this.getIndex(),
+        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
   }
@@ -77,7 +97,7 @@ export class AssetCriticalityDataClient {
     query,
     size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
-    sort,
+    sort = ['@timestamp'], // without a default sort order the results are not deterministic which makes testing hard
   }: {
     query: ESFilter;
     size?: number;
@@ -91,6 +111,13 @@ export class AssetCriticalityDataClient {
       size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
+      post_filter: {
+        bool: {
+          must_not: {
+            term: { criticality_level: CRITICALITY_VALUES.DELETED },
+          },
+        },
+      },
     });
     return response;
   }
@@ -116,7 +143,7 @@ export class AssetCriticalityDataClient {
     });
   }
 
-  private getIndex() {
+  public getIndex() {
     return getAssetCriticalityIndex(this.options.namespace);
   }
 
@@ -150,16 +177,26 @@ export class AssetCriticalityDataClient {
     };
   }
 
+  public getIndexMappings() {
+    return this.options.esClient.indices.getMapping({
+      index: this.getIndex(),
+    });
+  }
+
   public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {
     const id = createId(idParts);
 
     try {
-      const body = await this.options.esClient.get<AssetCriticalityRecord>({
+      const { _source: doc } = await this.options.esClient.get<StoredAssetCriticalityRecord>({
         id,
         index: this.getIndex(),
       });
 
-      return body._source;
+      if (doc?.criticality_level === CRITICALITY_VALUES.DELETED) {
+        return undefined;
+      }
+
+      return doc as AssetCriticalityRecord;
     } catch (err) {
       if (err.statusCode === 404) {
         return undefined;
@@ -174,11 +211,15 @@ export class AssetCriticalityDataClient {
     refresh = 'wait_for' as const
   ): Promise<AssetCriticalityRecord> {
     const id = createId(record);
-    const doc = {
+    const doc: AssetCriticalityRecord = {
       id_field: record.idField,
       id_value: record.idValue,
       criticality_level: record.criticalityLevel,
       '@timestamp': new Date().toISOString(),
+      asset: {
+        criticality: record.criticalityLevel,
+      },
+      ...getImplicitEntityFields(record),
     };
 
     await this.options.esClient.update({
@@ -199,6 +240,7 @@ export class AssetCriticalityDataClient {
    * @param recordsStream a stream of records to upsert, records may also be an error e.g if there was an error parsing
    * @param flushBytes how big elasticsearch bulk requests should be before they are sent
    * @param retries the number of times to retry a failed bulk request
+   * @param streamIndexStart By default the errors are zero-indexed. You can change it by setting this param to a value like `1`. It could be useful for file upload.
    * @returns an object containing the number of records updated, created, errored, and the total number of records processed
    * @throws an error if the stream emits an error
    * @remarks
@@ -211,6 +253,7 @@ export class AssetCriticalityDataClient {
     recordsStream,
     flushBytes,
     retries,
+    streamIndexStart = 0,
   }: BulkUpsertFromStreamOptions): Promise<BulkUpsertAssetCriticalityRecordsResponse> => {
     const errors: BulkUpsertAssetCriticalityRecordsResponse['errors'] = [];
     const stats: BulkUpsertAssetCriticalityRecordsResponse['stats'] = {
@@ -219,10 +262,13 @@ export class AssetCriticalityDataClient {
       total: 0,
     };
 
-    let streamIndex = 0;
+    let streamIndex = streamIndexStart;
     const recordGenerator = async function* () {
+      const processedEntities = new Set<string>();
+
       for await (const untypedRecord of recordsStream) {
         const record = untypedRecord as unknown as AssetCriticalityUpsert | Error;
+
         stats.total++;
         if (record instanceof Error) {
           stats.failed++;
@@ -231,10 +277,20 @@ export class AssetCriticalityDataClient {
             index: streamIndex,
           });
         } else {
-          yield {
-            record,
-            index: streamIndex,
-          };
+          const entityKey = `${record.idField}-${record.idValue}`;
+          if (processedEntities.has(entityKey)) {
+            errors.push({
+              message: 'Duplicated entity',
+              index: streamIndex,
+            });
+            stats.failed++;
+          } else {
+            processedEntities.add(entityKey);
+            yield {
+              record,
+              index: streamIndex,
+            };
+          }
         }
         streamIndex++;
       }
@@ -245,7 +301,7 @@ export class AssetCriticalityDataClient {
       index: this.getIndex(),
       flushBytes,
       retries,
-      refreshOnCompletion: true, // refresh the index after all records are processed
+      refreshOnCompletion: this.getIndex(),
       onDocument: ({ record }) => [
         { update: { _id: createId(record) } },
         {
@@ -253,6 +309,10 @@ export class AssetCriticalityDataClient {
             id_field: record.idField,
             id_value: record.idValue,
             criticality_level: record.criticalityLevel,
+            asset: {
+              criticality: record.criticalityLevel,
+            },
+            ...getImplicitEntityFields(record),
             '@timestamp': new Date().toISOString(),
           },
           doc_as_upsert: true,
@@ -292,10 +352,21 @@ export class AssetCriticalityDataClient {
     }
 
     try {
-      await this.options.esClient.delete({
+      await this.options.esClient.update({
         id: createId(idParts),
         index: this.getIndex(),
         refresh: refresh ?? false,
+        doc: {
+          criticality_level: CRITICALITY_VALUES.DELETED,
+          asset: {
+            criticality: CRITICALITY_VALUES.DELETED,
+          },
+          '@timestamp': new Date().toISOString(),
+          ...getImplicitEntityFields({
+            ...idParts,
+            criticalityLevel: CRITICALITY_VALUES.DELETED,
+          }),
+        },
       });
     } catch (err) {
       this.options.logger.error(`Failed to delete asset criticality record: ${err.message}`);

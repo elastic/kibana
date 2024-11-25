@@ -38,7 +38,7 @@ import { ChatSend } from './chat_send';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import { getDefaultConnector } from './helpers';
 
-import { useAssistantContext, UserAvatar } from '../assistant_context';
+import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
@@ -61,7 +61,6 @@ const CommentContainer = styled('span')`
 export interface Props {
   chatHistoryVisible?: boolean;
   conversationTitle?: string;
-  currentUserAvatar?: UserAvatar;
   onCloseFlyout?: () => void;
   promptContextId?: string;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
@@ -75,7 +74,6 @@ export interface Props {
 const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
   conversationTitle,
-  currentUserAvatar,
   onCloseFlyout,
   promptContextId = '',
   setChatHistoryVisible,
@@ -90,6 +88,7 @@ const AssistantComponent: React.FC<Props> = ({
     getLastConversationId,
     http,
     promptContexts,
+    currentUserAvatar,
     setLastConversationId,
   } = useAssistantContext();
 
@@ -125,7 +124,7 @@ const AssistantComponent: React.FC<Props> = ({
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const {
     currentConversation,
-    currentSystemPromptId,
+    currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
@@ -272,34 +271,20 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleOnChatCleared: onChatCleared,
+    handleOnChatCleared,
     handleChatSend,
     handleRegenerateResponse,
     isLoading: isLoadingChatSend,
     setUserPrompt,
     userPrompt,
   } = useChatSend({
-    allSystemPrompts,
     currentConversation,
-    currentSystemPromptId,
     http,
     refetchCurrentUserConversations,
     selectedPromptContexts,
     setSelectedPromptContexts,
     setCurrentConversation,
   });
-
-  const handleOnChatCleared = useCallback(() => {
-    onChatCleared();
-    if (!currentSystemPromptId) {
-      setCurrentSystemPromptId(currentConversation?.apiConfig?.defaultSystemPromptId);
-    }
-  }, [
-    currentConversation?.apiConfig?.defaultSystemPromptId,
-    currentSystemPromptId,
-    onChatCleared,
-    setCurrentSystemPromptId,
-  ]);
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
@@ -389,6 +374,7 @@ const AssistantComponent: React.FC<Props> = ({
             isFetchingResponse: isLoadingChatSend,
             setIsStreaming,
             currentUserAvatar,
+            systemPromptContent: currentSystemPrompt?.content,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -415,6 +401,7 @@ const AssistantComponent: React.FC<Props> = ({
       isLoadingChatSend,
       setIsStreaming,
       currentUserAvatar,
+      currentSystemPrompt?.content,
       selectedPromptContextsCount,
     ]
   );
@@ -530,14 +517,13 @@ const AssistantComponent: React.FC<Props> = ({
                   allSystemPrompts={allSystemPrompts}
                   comments={comments}
                   currentConversation={currentConversation}
-                  currentSystemPromptId={currentSystemPromptId}
+                  currentSystemPromptId={currentSystemPrompt?.id}
                   handleOnConversationSelected={handleOnConversationSelected}
                   http={http}
                   isAssistantEnabled={isAssistantEnabled}
                   isLoading={isInitialLoad}
                   isSettingsModalVisible={isSettingsModalVisible}
                   isWelcomeSetup={isWelcomeSetup}
-                  refetchCurrentUserConversations={refetchCurrentUserConversations}
                   setCurrentSystemPromptId={setCurrentSystemPromptId}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                 />

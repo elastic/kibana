@@ -1,19 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import type { Action } from '@kbn/ui-actions-plugin/public';
-import { type BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import type { Action, UiActionsService } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  VisGroups,
+  VisTypeAlias,
+  VisualizationsStart,
+  type BaseVisType,
+} from '@kbn/visualizations-plugin/public';
+import { renderHook } from '@testing-library/react';
+
+import { uiActionsService, visualizationsService } from '../../../services/kibana_services';
 import { useGetDashboardPanels } from './use_get_dashboard_panels';
-import { pluginServices } from '../../../services/plugin_services';
 
 const mockApi = { addNewPanel: jest.fn() } as unknown as jest.Mocked<PresentationContainer>;
 
@@ -23,34 +30,25 @@ describe('Get dashboard panels hook', () => {
     createNewVisType: jest.fn(),
   };
 
-  type PluginServices = ReturnType<typeof pluginServices.getServices>;
-
   let compatibleTriggerActionsRequestSpy: jest.SpyInstance<
-    ReturnType<NonNullable<PluginServices['uiActions']['getTriggerCompatibleActions']>>
+    ReturnType<NonNullable<UiActionsService['getTriggerCompatibleActions']>>
   >;
 
   let dashboardVisualizationGroupGetterSpy: jest.SpyInstance<
-    ReturnType<PluginServices['visualizations']['getByGroup']>
+    ReturnType<VisualizationsStart['getByGroup']>
   >;
 
   let dashboardVisualizationAliasesGetterSpy: jest.SpyInstance<
-    ReturnType<PluginServices['visualizations']['getAliases']>
+    ReturnType<VisualizationsStart['getAliases']>
   >;
 
   beforeAll(() => {
-    const _pluginServices = pluginServices.getServices();
-
     compatibleTriggerActionsRequestSpy = jest.spyOn(
-      _pluginServices.uiActions,
+      uiActionsService,
       'getTriggerCompatibleActions'
     );
-
-    dashboardVisualizationGroupGetterSpy = jest.spyOn(_pluginServices.visualizations, 'getByGroup');
-
-    dashboardVisualizationAliasesGetterSpy = jest.spyOn(
-      _pluginServices.visualizations,
-      'getAliases'
-    );
+    dashboardVisualizationGroupGetterSpy = jest.spyOn(visualizationsService, 'getByGroup');
+    dashboardVisualizationAliasesGetterSpy = jest.spyOn(visualizationsService, 'getAliases');
   });
 
   beforeEach(() => {

@@ -600,11 +600,19 @@ const expectAssetsInstalled = ({
           type: 'component_template',
         },
         {
+          id: 'logs@custom',
+          type: 'component_template',
+        },
+        {
           id: 'logs-all_assets.test_logs@custom',
           type: 'component_template',
         },
         {
           id: 'metrics-all_assets.test_metrics@package',
+          type: 'component_template',
+        },
+        {
+          id: 'metrics@custom',
           type: 'component_template',
         },
         {

@@ -6,35 +6,58 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { AddToDashboard } from './add_to_dashboard';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
 
-export const EmbeddablePanelWrapper: FC<{
-  title: string;
+interface Props {
+  title?: string;
   loading?: boolean;
+  hideTitle?: boolean;
   titleAppend?: React.ReactNode;
-}> = ({ children, title, loading, titleAppend }) => {
+}
+
+export const EmbeddablePanelWrapper: FC<React.PropsWithChildren<Props>> = ({
+  children,
+  title,
+  loading,
+  titleAppend,
+  hideTitle,
+}) => {
   const isSyntheticsApp = window.location.pathname.includes('/app/synthetics');
 
+  const noTitle = !title && !titleAppend;
   return (
     <>
-      <EuiPanel hasShadow={false} hasBorder>
+      <EuiPanel hasShadow={false} hasBorder={isSyntheticsApp}>
+        {!noTitle && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={true}>
+                {(!hideTitle || !title) && (
+                  <EuiTitle size="xs">
+                    <h3>{title}</h3>
+                  </EuiTitle>
+                )}
+              </EuiFlexItem>
+              {isSyntheticsApp && (
+                <EuiFlexItem grow={false}>
+                  <AddToDashboard type={SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE} />
+                </EuiFlexItem>
+              )}
+              {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        )}
         {loading && <EuiProgress size="xs" color="accent" />}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={true}>
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          {isSyntheticsApp && (
-            <EuiFlexItem grow={false}>
-              <AddToDashboard type={SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE} />
-            </EuiFlexItem>
-          )}
-          {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
-        </EuiFlexGroup>
-
         {children}
       </EuiPanel>
     </>

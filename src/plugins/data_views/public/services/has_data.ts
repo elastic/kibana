@@ -1,15 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
+import { IHttpFetchError, ResponseErrorBody, isHttpFetchError } from '@kbn/core-http-browser';
+import { isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { IndicesResponse, IndicesResponseModified } from '../types';
+
+export interface HasEsDataParams {
+  /**
+   * Callback to handle the case where checking for remote data times out.
+   * If not provided, the default behavior is to show a toast notification.
+   * @param body The error response body
+   */
+  onRemoteDataTimeout?: (body: ResponseErrorBody) => void;
+}
 
 export class HasData {
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;
@@ -24,19 +37,70 @@ export class HasData {
     return true;
   };
 
-  start(core: CoreStart) {
+  start(core: CoreStart, callResolveCluster: boolean) {
     const { http } = core;
+
+    const hasESDataViaResolveIndex = async () => {
+      // fallback to previous implementation
+      const hasLocalESData = await this.checkLocalESData(http);
+      if (!hasLocalESData) {
+        const hasRemoteESData = await this.checkRemoteESData(http);
+        return hasRemoteESData;
+      }
+      return hasLocalESData;
+    };
+
+    const hasESDataViaResolveCluster = async (
+      onRemoteDataTimeout: (body: ResponseErrorBody) => void
+    ) => {
+      try {
+        const { hasEsData } = await http.get<{ hasEsData: boolean }>(
+          '/internal/data_views/has_es_data',
+          { version: '1' }
+        );
+
+        return hasEsData;
+      } catch (e) {
+        if (
+          this.isResponseError(e) &&
+          e.body?.statusCode === 504 &&
+          e.body?.attributes?.failureReason === HasEsDataFailureReason.remoteDataTimeout
+        ) {
+          onRemoteDataTimeout(e.body);
+
+          // In the case of a remote cluster timeout,
+          // we can't be sure if there is data or not,
+          // so just assume there is
+          return true;
+        }
+
+        // fallback to previous implementation
+        return hasESDataViaResolveIndex();
+      }
+    };
+
+    const showRemoteDataTimeoutToast = () =>
+      core.notifications.toasts.addDanger({
+        title: i18n.translate('dataViews.hasData.remoteDataTimeoutTitle', {
+          defaultMessage: 'Remote cluster timeout',
+        }),
+        text: i18n.translate('dataViews.hasData.remoteDataTimeoutText', {
+          defaultMessage:
+            'Checking for data on remote clusters timed out. One or more remote clusters may be unavailable.',
+        }),
+      });
+
     return {
       /**
        * Check to see if ES data exists
        */
-      hasESData: async (): Promise<boolean> => {
-        const hasLocalESData = await this.checkLocalESData(http);
-        if (!hasLocalESData) {
-          const hasRemoteESData = await this.checkRemoteESData(http);
-          return hasRemoteESData;
+      hasESData: async ({
+        onRemoteDataTimeout = showRemoteDataTimeoutToast,
+      }: HasEsDataParams = {}): Promise<boolean> => {
+        if (callResolveCluster) {
+          return hasESDataViaResolveCluster(onRemoteDataTimeout);
         }
-        return hasLocalESData;
+        return hasESDataViaResolveIndex();
       },
       /**
        * Check to see if a data view exists
@@ -56,6 +120,9 @@ export class HasData {
   }
 
   // ES Data
+
+  private isResponseError = (e: Error): e is IHttpFetchError<ResponseErrorBody> =>
+    isHttpFetchError(e) && isObject(e.body) && 'message' in e.body && 'statusCode' in e.body;
 
   private responseToItemArray = (response: IndicesResponse): IndicesResponseModified[] => {
     const { indices = [], aliases = [] } = response;

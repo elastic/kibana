@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useState, useMemo, useEffect } from 'react';
-import compareVersions from 'compare-versions';
 import { EuiSpacer } from '@elastic/eui';
 import { useParams, useHistory, generatePath } from 'react-router-dom';
 import type {
@@ -14,6 +13,8 @@ import type {
   RuleStateAttributes,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
+import semVerCompare from 'semver/functions/compare';
+import semVerCoerce from 'semver/functions/coerce';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 import { buildRuleKey } from '../../../common/utils/rules_states';
 import { RulesTable } from './rules_table';
@@ -197,7 +198,9 @@ export const RulesContainer = () => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
   });
 
-  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort((a, b) =>
+    semVerCompare(semVerCoerce(a) ?? '', semVerCoerce(b) ?? '')
+  );
 
   const rulesPageData = useMemo(
     () => getRulesPageData(filteredRulesWithStates, status, error, rulesQuery),

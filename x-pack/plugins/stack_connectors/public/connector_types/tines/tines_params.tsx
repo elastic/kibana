@@ -230,7 +230,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       <EuiFlexItem>
         <EuiFormRow
           fullWidth
-          error={errors.story}
+          error={errors.story as string[]}
           isInvalid={!!errors.story?.length && selectedStoryOption !== undefined}
           label={i18n.STORY_LABEL}
           helpText={i18n.STORY_HELP}
@@ -253,7 +253,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         </EuiFormRow>
         <EuiFormRow
           fullWidth
-          error={errors.webhook}
+          error={errors.webhook as string[]}
           isInvalid={!!errors.webhook?.length && selectedWebhookOption !== undefined}
           label={i18n.WEBHOOK_LABEL}
           helpText={i18n.WEBHOOK_HELP}
@@ -307,7 +307,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
           )}
           <EuiFormRow
             fullWidth
-            error={errors.webhookUrl}
+            error={errors.webhookUrl as string[]}
             isInvalid={!!errors.webhookUrl?.length}
             label={i18n.WEBHOOK_URL_LABEL}
             helpText={i18n.WEBHOOK_URL_HELP}

@@ -26,6 +26,7 @@ export const getCasesSystemActionData = async ({
         cardinality: { field: `${CASE_RULES_SAVED_OBJECT}.attributes.rules.id` },
       },
     },
+    namespaces: ['*'],
   });
 
   return {

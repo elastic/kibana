@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, Logger, IScopedClusterClient } from '@kbn/core/server';
+import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
-  getSLOPipelineId,
-  getSLOSummaryPipelineId,
-  getSLOSummaryTransformId,
-  getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
+  getSLOPipelineId,
+  getSLOSummaryPipelineId,
+  getSLOSummaryTransformId,
+  getSLOTransformId,
 } from '../../common/constants';
 import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
@@ -23,6 +23,7 @@ import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { TransformManager } from './transform_manager';
+import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class ResetSLO {
   constructor(
@@ -38,6 +39,8 @@ export class ResetSLO {
 
   public async execute(sloId: string) {
     const slo = await this.repository.findById(sloId);
+
+    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient);
 
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     await this.summaryTransformManager.stop(summaryTransformId);
@@ -104,7 +107,7 @@ export class ResetSLO {
       throw err;
     }
 
-    const updatedSlo = await this.repository.save({
+    const updatedSlo = await this.repository.update({
       ...slo,
       version: SLO_MODEL_VERSION,
       updatedAt: new Date(),

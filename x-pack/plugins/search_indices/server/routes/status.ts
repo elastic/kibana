@@ -8,12 +8,14 @@
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
+import { schema } from '@kbn/config-schema';
+import { GET_STATUS_ROUTE, GET_USER_PRIVILEGES_ROUTE } from '../../common/routes';
 import { fetchIndicesStatus, fetchUserStartPrivileges } from '../lib/status';
 
 export function registerStatusRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
-      path: '/internal/search_indices/status',
+      path: GET_STATUS_ROUTE,
       validate: {},
       options: {
         access: 'internal',
@@ -33,16 +35,23 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
 
   router.get(
     {
-      path: '/internal/search_indices/start_privileges',
-      validate: {},
+      path: GET_USER_PRIVILEGES_ROUTE,
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
       options: {
         access: 'internal',
       },
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       const core = await context.core;
       const client = core.elasticsearch.client.asCurrentUser;
-      const body = await fetchUserStartPrivileges(client, logger);
+
+      const { indexName } = request.params;
+
+      const body = await fetchUserStartPrivileges(client, logger, indexName);
 
       return response.ok({
         body,

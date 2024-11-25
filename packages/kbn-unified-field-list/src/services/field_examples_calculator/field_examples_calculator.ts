@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 // Adapted from src/plugins/discover/public/application/main/components/sidebar/lib/field_calculator.js
@@ -22,7 +23,7 @@ export interface FieldValueCountsParams {
   values: FieldHitValue[];
   field: DataViewField;
   count?: number;
-  isTextBased: boolean;
+  isEsqlQuery: boolean;
 }
 
 export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter?: FieldFormat) {
@@ -30,7 +31,7 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter
     count: DEFAULT_SIMPLE_EXAMPLES_SIZE,
   });
 
-  if (!canProvideExamplesForField(params.field, params.isTextBased)) {
+  if (!canProvideExamplesForField(params.field, params.isEsqlQuery)) {
     throw new Error(
       `Analysis is not available this field type: "${params.field.type}". Field name: "${params.field.name}"`
     );

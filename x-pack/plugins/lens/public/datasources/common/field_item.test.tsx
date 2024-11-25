@@ -171,7 +171,7 @@ describe('Lens Field Item', () => {
   };
 
   const clickField = async (fieldname: string) => {
-    userEvent.click(screen.getByTestId(`field-${fieldname}-showDetails`));
+    await userEvent.click(screen.getByTestId(`field-${fieldname}-showDetails`));
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   };
 
@@ -227,7 +227,7 @@ describe('Lens Field Item', () => {
     };
     renderFieldItem({ field });
     await clickField('test');
-    userEvent.click(screen.getByRole('button', { name: 'Filter for test: ""abc""' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Filter for test: ""abc""' }));
 
     expect(mockedServices.data.query.filterManager.addFilters).toHaveBeenCalledWith([
       expect.objectContaining({ query: { match_phrase: { test: 'abc' } } }),

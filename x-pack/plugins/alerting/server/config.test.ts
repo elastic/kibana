@@ -37,6 +37,9 @@ describe('config validation', () => {
             },
           },
         },
+        "rulesSettings": Object {
+          "cacheInterval": 60000,
+        },
       }
     `);
   });
@@ -110,5 +113,14 @@ describe('config validation', () => {
         `"[rules.run.actions.max]: Value must be equal to or lower than [100000]."`
       );
     });
+  });
+
+  test('maxScheduledPerMinute allows more than 32000', () => {
+    const config: Record<string, unknown> = {
+      rules: {
+        maxScheduledPerMinute: 50000,
+      },
+    };
+    expect(() => configSchema.validate(config)).not.toThrow();
   });
 });

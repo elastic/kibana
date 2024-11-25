@@ -40,8 +40,22 @@ describe('getDataStreams', () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     const result = await getDataStreams({
       esClient: esClientMock,
-      types: ['logs'],
-      datasetQuery: 'nginx-*',
+      types: ['logs', 'metrics'],
+      uncategorisedOnly: true,
+    });
+    expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
+      expect.anything(),
+      'logs-*-*,metrics-*-*'
+    );
+
+    expect(result.datasetUserPrivileges.canMonitor).toBe(true);
+  });
+
+  it('Passes datasetQuery parameter to the DataStreamService', async () => {
+    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    const result = await getDataStreams({
+      esClient: esClientMock,
+      datasetQuery: 'logs-nginx-*',
       uncategorisedOnly: true,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(
@@ -58,20 +72,18 @@ describe('getDataStreams', () => {
       const results = await getDataStreams({
         esClient: esClientMock,
         types: ['logs'],
-        datasetQuery: 'nginx-*',
         uncategorisedOnly: true,
       });
-      expect(results.items.length).toBe(1);
+      expect(results.dataStreams.length).toBe(1);
     });
     it('Returns the correct number of results when false', async () => {
       const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       const results = await getDataStreams({
         esClient: esClientMock,
         types: ['logs'],
-        datasetQuery: 'nginx-*',
         uncategorisedOnly: false,
       });
-      expect(results.items.length).toBe(5);
+      expect(results.dataStreams.length).toBe(5);
     });
   });
 });

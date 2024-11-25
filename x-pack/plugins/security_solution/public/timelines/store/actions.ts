@@ -188,13 +188,8 @@ export const toggleModalSaveTimeline = actionCreator<{
 export const updateEqlOptions = actionCreator<{
   id: string;
   field: FieldsEqlOptions;
-  value: string | undefined;
+  value: string | number | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');
-
-export const updateIsLoading = actionCreator<{
-  id: string;
-  isLoading: boolean;
-}>('UPDATE_LOADING');
 
 export const setEventsLoading = actionCreator<{
   id: string;

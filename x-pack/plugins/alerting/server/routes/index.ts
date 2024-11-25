@@ -20,7 +20,8 @@ import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
 import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
-import { findRulesRoute, findInternalRulesRoute } from './rule/apis/find/find_rules_route';
+import { findRulesRoute } from './rule/apis/find/find_rules_route';
+import { findInternalRulesRoute } from './rule/apis/find/find_internal_rules_route';
 import { getRuleAlertSummaryRoute } from './get_rule_alert_summary';
 import { getRuleExecutionLogRoute } from './get_rule_execution_log';
 import { getGlobalExecutionLogRoute } from './get_global_execution_logs';
@@ -28,12 +29,12 @@ import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 import { getActionErrorLogRoute } from './get_action_error_log';
 import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
-import { healthRoute } from './health';
+import { healthRoute } from './framework/apis/health';
 import { resolveRuleRoute } from './rule/apis/resolve';
-import { ruleTypesRoute } from './rule_types';
-import { muteAllRuleRoute } from './mute_all_rule';
+import { ruleTypesRoute } from './rule/apis/list_types/rule_types';
+import { muteAllRuleRoute } from './rule/apis/mute_all/mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
-import { unmuteAllRuleRoute } from './unmute_all_rule';
+import { unmuteAllRuleRoute } from './rule/apis/unmute_all';
 import { unmuteAlertRoute } from './rule/apis/unmute_alert/unmute_alert_route';
 import { updateRuleApiKeyRoute } from './rule/apis/update_api_key/update_rule_api_key_route';
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
@@ -79,6 +80,7 @@ export interface RouteOptions {
   getAlertIndicesAlias?: GetAlertIndicesAlias;
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
+  isServerless?: boolean;
 }
 
 export function defineRoutes(opts: RouteOptions) {

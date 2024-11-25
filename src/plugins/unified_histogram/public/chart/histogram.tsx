@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type {
+import {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
@@ -57,6 +58,32 @@ export interface HistogramProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
+
+/**
+ * To prevent flakiness in the chart, we need to ensure that the data view config is valid.
+ * This requires that there are not multiple different data view ids in the given configuration.
+ * @param dataView
+ * @param visContext
+ * @param adHocDataViews
+ */
+const checkValidDataViewConfig = (
+  dataView: DataView,
+  visContext: UnifiedHistogramVisContext,
+  adHocDataViews: { [key: string]: DataViewSpec } | undefined
+) => {
+  if (!dataView.id) {
+    return false;
+  }
+
+  if (!dataView.isPersisted() && !adHocDataViews?.[dataView.id]) {
+    return false;
+  }
+
+  if (dataView.id !== visContext.requestData.dataViewId) {
+    return false;
+  }
+  return true;
+};
 
 const computeTotalHits = (
   hasLensSuggestions: boolean,
@@ -129,9 +156,6 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
-      // The response can have `response?._shards.failed` but we should still be able to show hits number
-      // TODO: show shards warnings as a badge next to the total hits number
-
       if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
@@ -141,10 +165,14 @@ export function Histogram({
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
-      onTotalHitsChange?.(
-        isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
-        totalHits ?? hits?.total
-      );
+      if (response?._shards?.failed || response?.timed_out) {
+        onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
+      } else {
+        onTotalHitsChange?.(
+          isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,
+          totalHits ?? hits?.total
+        );
+      }
 
       if (response) {
         const newBucketInterval = buildBucketInterval({
@@ -201,6 +229,10 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
+
+  if (!checkValidDataViewConfig(dataView, visContext, lensProps.attributes.state.adHocDataViews)) {
+    return <></>;
+  }
 
   return (
     <>

@@ -6,19 +6,25 @@
  */
 
 import { last, map, merge, OperatorFunction, scan, share } from 'rxjs';
-import type { UnvalidatedToolCall, ToolOptions } from '../../../common/chat_complete/tools';
+import type { Logger } from '@kbn/logging';
 import {
+  UnvalidatedToolCall,
+  ToolOptions,
   ChatCompletionChunkEvent,
   ChatCompletionEventType,
   ChatCompletionMessageEvent,
   ChatCompletionTokenCountEvent,
-} from '../../../common/chat_complete';
-import { withoutTokenCountEvents } from '../../../common/chat_complete/without_token_count_events';
+  withoutTokenCountEvents,
+} from '@kbn/inference-common';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 
-export function chunksIntoMessage<TToolOptions extends ToolOptions>(
-  toolOptions: TToolOptions
-): OperatorFunction<
+export function chunksIntoMessage<TToolOptions extends ToolOptions>({
+  logger,
+  toolOptions,
+}: {
+  toolOptions: TToolOptions;
+  logger: Pick<Logger, 'debug'>;
+}): OperatorFunction<
   ChatCompletionChunkEvent | ChatCompletionTokenCountEvent,
   | ChatCompletionChunkEvent
   | ChatCompletionTokenCountEvent
@@ -63,6 +69,8 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>(
         ),
         last(),
         map((concatenatedChunk): ChatCompletionMessageEvent<TToolOptions> => {
+          logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
+
           const validatedToolCalls = validateToolCalls<TToolOptions>({
             ...toolOptions,
             toolCalls: concatenatedChunk.tool_calls,

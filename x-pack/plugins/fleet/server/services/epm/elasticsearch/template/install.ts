@@ -319,6 +319,7 @@ export function buildComponentTemplates(params: {
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
   lifecycle?: IndexTemplate['template']['lifecycle'];
   fieldCount?: number;
+  type?: string;
 }) {
   const {
     templateName,
@@ -330,6 +331,7 @@ export function buildComponentTemplates(params: {
     experimentalDataStreamFeature,
     lifecycle,
     fieldCount,
+    type,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -416,6 +418,17 @@ export function buildComponentTemplates(params: {
     },
     _meta,
   };
+
+  // Stub custom template
+  if (type) {
+    const customTemplateName = `${type}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
+    templatesMap[customTemplateName] = {
+      template: {
+        settings: {},
+      },
+      _meta,
+    };
+  }
 
   // return empty/stub template
   templatesMap[userSettingsTemplateName] = {
@@ -580,6 +593,7 @@ export function prepareTemplate({
     experimentalDataStreamFeature,
     lifecycle: lifecyle,
     fieldCount: countFields(validFields),
+    type: dataStream.type,
   });
 
   const template = getTemplate({

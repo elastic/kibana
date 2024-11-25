@@ -8,7 +8,12 @@ components:
       type: object
       properties:
         installOnly:
-          type: boolean
+          anyOf:
+            - type: string
+              enum:
+                - "true"
+                - "false"
+            - type: boolean
           default: false
       additionalProperties: false
     getEntityDefinitionQuerySchema:
@@ -39,7 +44,12 @@ components:
       type: object
       properties:
         deleteData:
-          type: boolean
+          anyOf:
+            - type: string
+              enum:
+                - "true"
+                - "false"
+            - type: boolean
           default: false
       additionalProperties: false
     entityDefinitionSchema:
@@ -393,6 +403,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: enabled
                 properties:
                   enabled:
                     type: boolean
@@ -422,6 +433,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: success
                 properties:
                   success:
                     type: boolean
@@ -447,6 +459,7 @@ paths:
             application/json:
               schema:
                 type: object
+                required: success
                 properties:
                   success:
                     type: boolean
@@ -491,7 +504,8 @@ paths:
                 $ref: "#/components/schemas/entityDefinitionSchema"
         "400":
           description: The entity definition cannot be installed; see the error for more
-            details
+            details but commonly due to validation failures of the definition ID
+            or metrics format
         "409":
           description: An entity definition with this ID already exists
     delete:
@@ -564,4 +578,39 @@ paths:
                                   type: boolean
                                 running:
                                   type: boolean
+    patch:
+      description: Update an entity definition.
+      tags:
+        - definitions
+      parameters:
+        - in: query
+          name: installOnly
+          description: If true, the definition transforms will not be started
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: The definition properties to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/entityDefinitionUpdateSchema"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/entityDefinitionSchema"
+        "400":
+          description: The entity definition cannot be installed; see the error for more
+            details
+        "403":
+          description: User is not allowed to update the entity definition
+        "404":
+          description: The entity definition does not exist
+        "409":
+          description: The entity definition is being updated by another request
 tags: []

@@ -11,9 +11,13 @@ import {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { syntheticsMonitorType, syntheticsParamType } from '../common/types/saved_objects';
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
-import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
+import {
+  legacyPrivateLocationsSavedObjectName,
+  privateLocationSavedObjectName,
+} from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
 import {
   syntheticsSettingsObjectType,
@@ -55,6 +59,7 @@ export const syntheticsFeature = {
   category: DEFAULT_APP_CATEGORIES.observability,
   app: ['uptime', 'kibana', 'synthetics'],
   catalogue: ['uptime'],
+  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -69,7 +74,8 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
-          privateLocationsSavedObjectName,
+          privateLocationSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
           syntheticsParamType,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
@@ -100,7 +106,8 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
-          privateLocationsSavedObjectName,
+          privateLocationSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
