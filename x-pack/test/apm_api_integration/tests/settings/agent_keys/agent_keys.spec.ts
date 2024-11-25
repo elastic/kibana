@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
+import { PrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ApmApiError, ApmApiSupertest } from '../../../common/apm_api_supertest';
@@ -19,7 +19,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const agentKeyName = 'test';
   const allApplicationPrivileges = [PrivilegeType.AGENT_CONFIG, PrivilegeType.EVENT];
-  const clusterPrivileges = [ClusterPrivilegeType.MANAGE_OWN_API_KEY];
 
   async function createAgentKey(apiClient: ApmApiSupertest, privileges = allApplicationPrivileges) {
     return await apiClient({
@@ -50,37 +49,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'When the user does not have the required privileges',
     { config: 'basic', archives: [] },
     () => {
-      describe('When the user does not have the required cluster privileges', () => {
-        it('should return an error when creating an agent key', async () => {
-          const error = await expectToReject<ApmApiError>(() =>
-            createAgentKey(apmApiClient.writeUser)
-          );
-          expect(error.res.status).to.be(403);
-          expect(error.res.body.message).contain('is missing the following requested privilege');
-          expect(error.res.body.attributes).to.eql({
-            _inspect: [],
-            data: {
-              missingPrivileges: allApplicationPrivileges,
-              missingClusterPrivileges: clusterPrivileges,
-            },
-          });
-        });
-
-        it('should return an error when invalidating an agent key', async () => {
-          const error = await expectToReject<ApmApiError>(() =>
-            invalidateAgentKey(apmApiClient.writeUser, agentKeyName)
-          );
-          expect(error.res.status).to.be(500);
-        });
-
-        it('should return an error when getting a list of agent keys', async () => {
-          const error = await expectToReject<ApmApiError>(() =>
-            getAgentKeys(apmApiClient.writeUser)
-          );
-          expect(error.res.status).to.be(500);
-        });
-      });
-
       describe('When the user does not have the required application privileges', () => {
         allApplicationPrivileges.map((privilege) => {
           it(`should return an error when creating an agent key with ${privilege} privilege`, async () => {

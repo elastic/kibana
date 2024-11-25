@@ -94,7 +94,7 @@ export function ExplorerChartLabel({
 }
 ExplorerChartLabel.propTypes = {
   detectorLabel: PropTypes.object.isRequired,
-  isEmbeddable: PropTypes.boolean,
+  isEmbeddable: PropTypes.bool,
   entityFields: PropTypes.arrayOf(ExplorerChartLabelBadge.propTypes.entity),
   infoTooltip: PropTypes.object.isRequired,
   wrapLabel: PropTypes.bool,
