@@ -40,23 +40,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await es.transport.request({
-        path: '/my-index-000001',
+        path: '/data-view-index-000001',
         method: 'DELETE',
       });
       await es.transport.request({
-        path: '/my-index-000002',
+        path: '/data-view-index-000002',
         method: 'DELETE',
       });
       await es.transport.request({
-        path: '/my-index-000003',
+        path: '/data-view-index-000003',
         method: 'DELETE',
       });
     });
 
     it('create ad hoc data view', async function () {
-      const initialPattern = 'my-index-';
+      const initialPattern = 'data-view-index-';
       await es.transport.request({
-        path: '/my-index-000001/_doc',
+        path: '/data-view-index-000001/_doc',
         method: 'POST',
         body: {
           '@timestamp': new Date().toISOString(),
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await es.transport.request({
-        path: '/my-index-000002/_doc',
+        path: '/data-view-index-000002/_doc',
         method: 'POST',
         body: {
           '@timestamp': new Date().toISOString(),
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('create saved data view', async function () {
-      const updatedPattern = 'my-index-000001';
+      const updatedPattern = 'data-view-index-000001';
       await dataViews.createFromSearchBar({
         name: updatedPattern,
         adHoc: false,
@@ -104,9 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('update data view with a different time field', async function () {
-      const updatedPattern = 'my-index-000003';
+      const updatedPattern = 'data-view-index-000003';
       await es.transport.request({
-        path: '/my-index-000003/_doc',
+        path: '/data-view-index-000003/_doc',
         method: 'POST',
         body: {
           timestamp: new Date('1970-01-01').toISOString(),
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       for (let i = 0; i < 3; i++) {
         await es.transport.request({
-          path: '/my-index-000003/_doc',
+          path: '/data-view-index-000003/_doc',
           method: 'POST',
           body: {
             timestamp: new Date().toISOString(),
