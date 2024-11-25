@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useSelectedDocs } from './use_selected_docs';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';

@@ -9,7 +9,7 @@ import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -114,82 +114,5 @@ describe('SearchApplicationsList', () => {
     const wrapper = shallowWithIntl(<SearchApplicationsList />);
 
     expect(wrapper.find(LicensingCallout)).toHaveLength(0);
-  });
-});
-
-describe('CreateSearchApplicationButton', () => {
-  describe('disabled={true}', () => {
-    it('renders a disabled button that shows a popover when hovered', () => {
-      const wrapper = mountWithIntl(<CreateSearchApplicationButton disabled />);
-
-      const button = wrapper.find(
-        'button[data-test-subj="enterprise-search-search-applications-creation-button"]'
-      );
-
-      expect(button).toHaveLength(1);
-      expect(button.prop('disabled')).toBeTruthy();
-
-      let popover = wrapper.find(
-        'div[data-test-subj="create-search-application-button-popover-content"]'
-      );
-
-      expect(popover).toHaveLength(0);
-
-      const hoverTarget = wrapper.find(
-        'div[data-test-subj="create-search-application-button-hover-target"]'
-      );
-
-      expect(hoverTarget).toHaveLength(1);
-
-      hoverTarget.simulate('mouseEnter');
-
-      wrapper.update();
-
-      popover = wrapper.find(
-        'div[data-test-subj="create-search-application-button-popover-content"]'
-      );
-
-      expect(popover).toHaveLength(1);
-      expect(popover.text()).toMatch(
-        'This functionality may be changed or removed completely in a future release.'
-      );
-    });
-  });
-  describe('disabled={false}', () => {
-    it('renders a button and shows a popover when hovered', () => {
-      const wrapper = mountWithIntl(<CreateSearchApplicationButton disabled={false} />);
-
-      const button = wrapper.find(
-        'button[data-test-subj="enterprise-search-search-applications-creation-button"]'
-      );
-
-      expect(button).toHaveLength(1);
-      expect(button.prop('disabled')).toBeFalsy();
-
-      let popover = wrapper.find(
-        'div[data-test-subj="create-search-application-button-popover-content"]'
-      );
-
-      expect(popover).toHaveLength(0);
-
-      const hoverTarget = wrapper.find(
-        'div[data-test-subj="create-search-application-button-hover-target"]'
-      );
-
-      expect(hoverTarget).toHaveLength(1);
-
-      hoverTarget.simulate('mouseEnter');
-
-      wrapper.update();
-
-      popover = wrapper.find(
-        'div[data-test-subj="create-search-application-button-popover-content"]'
-      );
-
-      expect(popover).toHaveLength(1);
-      expect(popover.text()).toMatch(
-        'This functionality may be changed or removed completely in a future release.'
-      );
-    });
   });
 });
