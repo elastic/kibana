@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Synthetics Availability Transform Generator returns the expected transform params 1`] = `
+exports[`Synthetics Availability Transform Generator when serverless is disabled returns the expected transform params 1`] = `
 Object {
   "_meta": Object {
     "managed": true,
