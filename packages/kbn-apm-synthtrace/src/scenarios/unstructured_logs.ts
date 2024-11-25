@@ -12,7 +12,7 @@ import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { getJavaLog, getWebLog } from './helpers/logs_mock_data';
+import { getJavaLogs, getWebLogs } from './helpers/logs_mock_data';
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
@@ -23,19 +23,18 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
 
-      const datasetJavaLogs = (timestamp: number) =>
-        log.create({ isLogsDb }).dataset('java').message(getJavaLog()).timestamp(timestamp);
-
-      const datasetWebLogs = (timestamp: number) =>
-        log.create({ isLogsDb }).dataset('web').message(getWebLog()).timestamp(timestamp);
-
       const logs = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(200)
-            .fill(0)
-            .flatMap((_, index) => [datasetJavaLogs(timestamp), datasetWebLogs(timestamp)]);
+          return [
+            ...getJavaLogs().map((message) =>
+              log.create({ isLogsDb }).dataset('java').message(message).timestamp(timestamp)
+            ),
+            ...getWebLogs().map((message) =>
+              log.create({ isLogsDb }).dataset('web').message(message).timestamp(timestamp)
+            ),
+          ];
         });
 
       return withClient(
