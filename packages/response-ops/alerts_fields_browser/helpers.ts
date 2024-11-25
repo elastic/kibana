@@ -13,7 +13,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   DefaultAlertFieldName,
 } from '@kbn/rule-data-utils';
-import { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
 import { CASES, MAINTENANCE_WINDOWS } from './translations';
 

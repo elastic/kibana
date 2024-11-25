@@ -25,7 +25,6 @@
     "@kbn/core-http-browser",
     "@kbn/alerting-plugin",
     "@kbn/actions-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/alerts-ui-shared",
@@ -43,5 +42,7 @@
     "@kbn/core-notifications-browser-mocks",
     "@kbn/licensing-plugin",
     "@kbn/core-application-browser",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
   ]
 }

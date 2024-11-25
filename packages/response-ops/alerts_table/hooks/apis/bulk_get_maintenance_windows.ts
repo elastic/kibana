@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpStart } from '@kbn/core-http-browser';
-import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
-import { AsApiContract } from '@kbn/actions-plugin/common';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../constants';
 
 export interface BulkGetMaintenanceWindowsParams {
