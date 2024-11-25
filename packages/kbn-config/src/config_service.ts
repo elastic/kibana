@@ -209,7 +209,7 @@ export class ConfigService {
       throw new Error(`No validation schema has been defined for [${namespace}]`);
     }
 
-    const validatedConfig = hasSchema
+    let validatedConfig = hasSchema
       ? await firstValueFrom(
           this.getValidatedConfigAtPath$(
             path,
@@ -219,6 +219,20 @@ export class ConfigService {
           { defaultValue: undefined }
         )
       : undefined;
+
+    // Special use case: when the provided config includes `enabled` and the validated config doesn't,
+    // it's quite likely that's not an allowed config and it should fail.
+    // Applying "normal" validation (not stripping unknowns) in that case.
+    if (
+      hasSchema &&
+      typeof config.get(path)?.enabled !== 'undefined' &&
+      typeof validatedConfig?.enabled === 'undefined'
+    ) {
+      validatedConfig = await firstValueFrom(
+        this.getValidatedConfigAtPath$(path) as Observable<{ enabled?: boolean }>,
+        { defaultValue: undefined }
+      );
+    }
 
     const isDisabled = validatedConfig?.enabled === false;
     if (isDisabled) {
