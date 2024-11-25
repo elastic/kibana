@@ -54,7 +54,9 @@ const filterCommands = ({
   const conditions = [
     'entity.id IS NOT NULL',
     'entity.timestamp IS NOT NULL',
-    `(entity.timestamp >= "${start}" AND entity.timestamp <= "${end}")`,
+    uniq(sources.map((source) => source.timestamp_field))
+      .map((field) => `(${field} >= "${start}" AND ${field} <= "${end}")`)
+      .join(' OR '),
   ];
 
   return conditions.map((condition) => `WHERE ${condition}`).join(' | ');

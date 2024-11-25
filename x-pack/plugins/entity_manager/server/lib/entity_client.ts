@@ -9,7 +9,7 @@ import { EntityV2, EntityDefinition, EntityDefinitionUpdate } from '@kbn/entitie
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { omit, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import {
   installEntityDefinition,
   installationInProgress,
