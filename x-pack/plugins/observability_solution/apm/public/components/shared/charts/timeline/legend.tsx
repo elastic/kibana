@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTheme } from '../../../../hooks/use_theme';
+import { useEuiTheme } from '@elastic/eui';
 
 export enum Shape {
   circle = 'circle',
@@ -68,8 +68,8 @@ export function Legend({
   indicator,
   ...rest
 }: Props) {
-  const theme = useTheme();
-  const indicatorColor = color || theme.eui.euiColorVis1;
+  const { euiTheme } = useEuiTheme();
+  const indicatorColor = color || euiTheme.colors.vis.euiColorVis1;
 
   return (
     <Container

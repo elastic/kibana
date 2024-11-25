@@ -8,46 +8,44 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { unit } from '../../../../utils/style';
-import { tint } from 'polished';
+import { transparentize } from 'polished';
 
-function getIconColor(type, theme) {
+function getIconColor(type, euiTheme) {
   switch (type) {
     case 'field':
-      return theme.eui.euiColorVis7;
+      return euiTheme.colors.vis.euiColorVis7;
     case 'value':
-      return theme.eui.euiColorVis0;
+      return euiTheme.colors.vis.euiColorVis0;
     case 'operator':
-      return theme.eui.euiColorVis1;
+      return euiTheme.colors.vis.euiColorVis1;
     case 'conjunction':
-      return theme.eui.euiColorVis3;
+      return euiTheme.colors.vis.euiColorVis2;
     case 'recentSearch':
-      return theme.eui.euiColorMediumShade;
+      return euiTheme.colors.textSubdued;
   }
 }
 
 const Description = euiStyled.div`
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
-
   p {
     display: inline;
 
     span {
       font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-      color: ${({ theme }) => theme.eui.euiColorFullShade};
       padding: 0 ${({ theme }) => theme.eui.euiSizeXS};
       display: inline-block;
     }
   }
 `;
 
-const ListItem = euiStyled.li`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+const SuggestionItemContainer = euiStyled.div`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
   height: ${({ theme }) => theme.eui.euiSizeXL};
   align-items: center;
   display: flex;
-  background: ${({ selected, theme }) => (selected ? theme.eui.euiColorLightestShade : 'initial')};
+  background: ${({ selected, theme }) =>
+    selected ? theme.eui.euiColorLightestShade : 'transparent'};
   cursor: pointer;
   border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
 
@@ -61,8 +59,8 @@ const ListItem = euiStyled.li`
 
 const Icon = euiStyled.div`
   flex: 0 0 ${({ theme }) => theme.eui.euiSizeXL};
-  background: ${({ type, theme }) => tint(0.9, getIconColor(type, theme))};
-  color: ${({ type, theme }) => getIconColor(type, theme)};
+  background: ${({ type, euiTheme }) => transparentize(0.9, getIconColor(type, euiTheme))};
+  color: ${({ type, euiTheme }) => getIconColor(type, euiTheme)};
   width: 100%;
   height: 100%;
   text-align: center;
@@ -71,7 +69,6 @@ const Icon = euiStyled.div`
 
 const TextValue = euiStyled.div`
   flex: 0 0 ${unit * 16}px;
-  color: ${({ theme }) => theme.eui.euiColorDarkestShade};
   padding: 0 ${({ theme }) => theme.eui.euiSizeS};
 `;
 
@@ -93,19 +90,19 @@ function getEuiIconType(type) {
 }
 
 function Suggestion(props) {
+  const { euiTheme } = useEuiTheme();
   return (
-    <ListItem
-      innerRef={props.innerRef}
+    <SuggestionItemContainer
       selected={props.selected}
       onClick={() => props.onClick(props.suggestion)}
       onMouseEnter={props.onMouseEnter}
     >
-      <Icon type={props.suggestion.type}>
+      <Icon type={props.suggestion.type} euiTheme={euiTheme}>
         <EuiIcon type={getEuiIconType(props.suggestion.type)} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
       <Description>{props.suggestion.description}</Description>
-    </ListItem>
+    </SuggestionItemContainer>
   );
 }
 

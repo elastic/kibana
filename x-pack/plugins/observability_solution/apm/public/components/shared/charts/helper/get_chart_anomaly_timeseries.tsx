@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { getSeverity } from '@kbn/ml-anomaly-utils/get_severity';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { getSeverityColor } from '../../../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
@@ -21,11 +21,11 @@ export const expectedBoundsTitle = i18n.translate('xpack.apm.comparison.expected
 });
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
-  theme,
+  euiTheme,
   anomalyTimeseriesColor,
 }: {
   anomalyTimeseries?: ServiceAnomalyTimeseries;
-  theme: EuiTheme;
+  euiTheme: EuiThemeComputed<{}>;
   anomalyTimeseriesColor?: string;
 }):
   | {
@@ -48,7 +48,7 @@ export function getChartAnomalyTimeseries({
           opacity: 0,
         },
       },
-      color: anomalyTimeseriesColor ?? rgba(theme.eui.euiColorVis1, 0.5),
+      color: anomalyTimeseriesColor ?? rgba(euiTheme.colors.vis.euiColorVis1, 0.5),
       yAccessors: ['y1'],
       y0Accessors: ['y0'],
       data: anomalyTimeseries.bounds,

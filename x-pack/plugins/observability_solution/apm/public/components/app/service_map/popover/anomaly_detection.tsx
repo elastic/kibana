@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIconTip, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiIconTip,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -16,7 +23,6 @@ import {
 } from '../../../../../common/service_health_status';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import { asDuration, asInteger } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/use_theme';
 import { MLSingleMetricLink } from '../../../shared/links/machine_learning_links/mlsingle_metric_link';
 import { popoverWidth } from '../cytoscape_options';
 
@@ -50,7 +56,7 @@ interface Props {
   serviceAnomalyStats: ServiceAnomalyStats | undefined;
 }
 export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const anomalyScore = serviceAnomalyStats?.anomalyScore;
   const severity = getSeverity(anomalyScore);
@@ -76,7 +82,7 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth color={getServiceHealthStatusColor(theme, healthStatus)} />
+                <EuiHealth color={getServiceHealthStatusColor(euiTheme, healthStatus)} />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>

@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
-import { EuiPanel } from '@elastic/eui';
-import type { LayoutPropsWithTheme } from '../../types';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import type { LayoutPropsWithChildren } from '../../types';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 import { ChartSectionVis } from '../chart_section_vis';
 
-export const AwsS3Layout = withTheme(
-  ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
+export function AwsS3Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
+  const { euiTheme } = useEuiTheme();
+  return (
     <EuiPanel>
       <Section
         navLabel="AWS S3"
@@ -42,7 +42,7 @@ export const AwsS3Layout = withTheme(
             formatter="bytes"
             seriesOverrides={{
               bytes: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.s3MetricsLayout.bucketSize.chartLabel',
                   { defaultMessage: 'Total Bytes' }
@@ -65,7 +65,7 @@ export const AwsS3Layout = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               objects: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.s3MetricsLayout.numberOfObjects.chartLabel',
                   { defaultMessage: 'Objects' }
@@ -88,7 +88,7 @@ export const AwsS3Layout = withTheme(
             formatter="abbreviatedNumber"
             seriesOverrides={{
               total: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.s3MetricsLayout.totalRequests.chartLabel',
                   { defaultMessage: 'Requests' }
@@ -111,7 +111,7 @@ export const AwsS3Layout = withTheme(
             formatter="bytes"
             seriesOverrides={{
               bytes: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.s3MetricsLayout.downloadBytes.chartLabel',
                   { defaultMessage: 'Bytes' }
@@ -134,7 +134,7 @@ export const AwsS3Layout = withTheme(
             formatter="bytes"
             seriesOverrides={{
               bytes: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.s3MetricsLayout.uploadBytes.chartLabel',
                   { defaultMessage: 'Bytes' }
@@ -145,5 +145,5 @@ export const AwsS3Layout = withTheme(
         </SubSection>
       </Section>
     </EuiPanel>
-  )
-);
+  );
+}

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
-import type { LayoutPropsWithTheme } from '../../types';
+import type { LayoutPropsWithChildren } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { GaugesSectionVis } from '../gauges_section_vis';
 import { MetadataDetails } from '../metadata_details';
@@ -17,8 +16,9 @@ import { Section } from '../section';
 import { SubSection } from '../sub_section';
 import { NginxLayoutSection } from './nginx_layout_sections';
 
-export const PodLayout = withTheme(
-  ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
+export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
+  const { euiTheme } = useEuiTheme();
+  return (
     <React.Fragment>
       <MetadataDetails />
       <EuiPanel>
@@ -45,7 +45,7 @@ export const PodLayout = withTheme(
                       defaultMessage: 'CPU Usage',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -56,7 +56,7 @@ export const PodLayout = withTheme(
                       defaultMessage: 'Memory Usage',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -67,7 +67,7 @@ export const PodLayout = withTheme(
                       defaultMessage: 'Inbound (RX)',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: euiTheme.colors.fullShade,
                   formatter: 'bits',
                   formatterTemplate: '{{value}}/s',
                 },
@@ -78,7 +78,7 @@ export const PodLayout = withTheme(
                       defaultMessage: 'Outbound (TX)',
                     }
                   ),
-                  color: theme.eui.euiColorFullShade,
+                  color: euiTheme.colors.fullShade,
                   formatter: 'bits',
                   formatterTemplate: '{{value}}/s',
                 },
@@ -98,7 +98,7 @@ export const PodLayout = withTheme(
               formatter="percent"
               type="area"
               seriesOverrides={{
-                cpu: { color: theme.eui.euiColorVis1 },
+                cpu: { color: euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -116,7 +116,7 @@ export const PodLayout = withTheme(
               formatter="percent"
               seriesOverrides={{
                 memory: {
-                  color: theme.eui.euiColorVis1,
+                  color: euiTheme.colors.vis.euiColorVis1,
                 },
               }}
             />
@@ -136,7 +136,7 @@ export const PodLayout = withTheme(
               type="area"
               seriesOverrides={{
                 rx: {
-                  color: theme.eui.euiColorVis1,
+                  color: euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.networkRxRateSeriesLabel',
                     {
@@ -145,7 +145,7 @@ export const PodLayout = withTheme(
                   ),
                 },
                 tx: {
-                  color: theme.eui.euiColorVis2,
+                  color: euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.networkTxRateSeriesLabel',
                     {
@@ -160,5 +160,5 @@ export const PodLayout = withTheme(
         <NginxLayoutSection metrics={metrics} onChangeRangeTime={onChangeRangeTime} />
       </EuiPanel>
     </React.Fragment>
-  )
-);
+  );
+}

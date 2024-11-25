@@ -19,7 +19,7 @@ import {
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -55,6 +55,7 @@ export function InstancesLatencyDistributionChart({
   const hasData = items.length > 0;
 
   const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const chartThemes = useChartThemes();
 
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
@@ -130,7 +131,7 @@ export function InstancesLatencyDistributionChart({
             locale={i18n.getLocale()}
           />
           <BubbleSeries
-            color={theme.eui.euiColorVis0}
+            color={euiTheme.colors.vis.euiColorVis0}
             data={items}
             id={i18n.translate('xpack.apm.instancesLatencyDistributionChartLegend', {
               defaultMessage: 'Instances',
@@ -143,7 +144,7 @@ export function InstancesLatencyDistributionChart({
               point: {
                 strokeWidth: 0,
                 radius: 4,
-                fill: theme.eui.euiColorVis0,
+                fill: euiTheme.colors.vis.euiColorVis0,
               },
             }}
           />

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
-import type { LayoutPropsWithTheme } from '../../types';
+import type { LayoutPropsWithChildren } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { MetadataDetails } from '../metadata_details';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 
-export const AwsEC2Layout = withTheme(
-  ({ metrics, theme, onChangeRangeTime }: LayoutPropsWithTheme) => (
+export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
+  const { euiTheme } = useEuiTheme();
+  return (
     <React.Fragment>
       <MetadataDetails
         fields={[
@@ -54,7 +54,7 @@ export const AwsEC2Layout = withTheme(
               type="area"
               formatter="percent"
               seriesOverrides={{
-                total: { color: theme.eui.euiColorVis1 },
+                total: { color: euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -73,7 +73,7 @@ export const AwsEC2Layout = withTheme(
               type="area"
               seriesOverrides={{
                 rx: {
-                  color: theme.eui.euiColorVis1,
+                  color: euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.networkRxRateSeriesLabel',
                     {
@@ -82,7 +82,7 @@ export const AwsEC2Layout = withTheme(
                   ),
                 },
                 tx: {
-                  color: theme.eui.euiColorVis2,
+                  color: euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.networkTxRateSeriesLabel',
                     {
@@ -108,7 +108,7 @@ export const AwsEC2Layout = withTheme(
               type="area"
               seriesOverrides={{
                 write: {
-                  color: theme.eui.euiColorVis2,
+                  color: euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.ec2MetricsLayout.diskIOBytesSection.writeLabel',
                     {
@@ -117,7 +117,7 @@ export const AwsEC2Layout = withTheme(
                   ),
                 },
                 read: {
-                  color: theme.eui.euiColorVis1,
+                  color: euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.ec2MetricsLayout.diskIOBytesSection.readLabel',
                     {
@@ -131,5 +131,5 @@ export const AwsEC2Layout = withTheme(
         </Section>
       </EuiPanel>
     </React.Fragment>
-  )
-);
+  );
+}

@@ -4,17 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText, EuiSpacer, EuiCodeBlock } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiCodeBlock, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
-const Label = euiStyled.div`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  color: ${({ theme }) => theme.eui.euiColorDarkestShade};
+const Label = euiStyled.div<{
+  euiTheme: EuiThemeComputed<{}>;
+}>`
+  margin-bottom: ${({ euiTheme }) => euiTheme.size.xs};
+  font-size: ${({ euiTheme }) => euiTheme.size.s};
+  color: ${({ euiTheme }) => euiTheme.colors.darkestShade};
 `;
 
 interface Props {
@@ -23,6 +25,7 @@ interface Props {
   };
 }
 export function SampleSummary({ error }: Props) {
+  const { euiTheme } = useEuiTheme();
   const logMessage = error.error.log?.message;
   const excMessage = error.error.exception?.[0].message;
   const culprit = error.error.culprit;
@@ -32,7 +35,7 @@ export function SampleSummary({ error }: Props) {
       {logMessage && (
         <>
           <EuiText size="s">
-            <Label>
+            <Label euiTheme={euiTheme}>
               {i18n.translate('xpack.apm.errorGroupDetails.logMessageLabel', {
                 defaultMessage: 'Log message',
               })}
@@ -44,7 +47,7 @@ export function SampleSummary({ error }: Props) {
         </>
       )}
       <EuiText size="s">
-        <Label>
+        <Label euiTheme={euiTheme}>
           {i18n.translate('xpack.apm.errorGroupDetails.exceptionMessageLabel', {
             defaultMessage: 'Exception message',
           })}
@@ -54,7 +57,7 @@ export function SampleSummary({ error }: Props) {
       <EuiCodeBlock isCopyable>{excMessage || NOT_AVAILABLE_LABEL}</EuiCodeBlock>
       <EuiSpacer />
       <EuiText size="s">
-        <Label>
+        <Label euiTheme={euiTheme}>
           {i18n.translate('xpack.apm.errorGroupDetails.culpritLabel', {
             defaultMessage: 'Culprit',
           })}

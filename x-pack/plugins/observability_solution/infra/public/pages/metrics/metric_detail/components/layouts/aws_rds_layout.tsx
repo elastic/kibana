@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { withTheme } from '@kbn/kibana-react-plugin/common';
 import React from 'react';
-import type { LayoutPropsWithTheme } from '../../types';
+import type { LayoutPropsWithChildren } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 
-export const AwsRDSLayout = withTheme(
-  ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
+export function AwsRDSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
+  const { euiTheme } = useEuiTheme();
+  return (
     <EuiPanel>
       <Section
         navLabel="AWS RDS"
@@ -42,7 +42,7 @@ export const AwsRDSLayout = withTheme(
             formatter="percent"
             seriesOverrides={{
               cpu: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.cpuTotal.chartLabel',
                   { defaultMessage: 'Total' }
@@ -65,7 +65,7 @@ export const AwsRDSLayout = withTheme(
             formatter="number"
             seriesOverrides={{
               connections: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.connections.chartLabel',
                   { defaultMessage: 'Connections' }
@@ -88,7 +88,7 @@ export const AwsRDSLayout = withTheme(
             formatter="number"
             seriesOverrides={{
               queries: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.queriesExecuted.chartLabel',
                   { defaultMessage: 'Queries' }
@@ -111,14 +111,14 @@ export const AwsRDSLayout = withTheme(
             formatter="number"
             seriesOverrides={{
               active: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.active.chartLabel',
                   { defaultMessage: 'Active' }
                 ),
               },
               blocked: {
-                color: theme.eui.euiColorVis2,
+                color: euiTheme.colors.vis.euiColorVis2,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.blocked.chartLabel',
                   { defaultMessage: 'Blocked' }
@@ -143,35 +143,35 @@ export const AwsRDSLayout = withTheme(
             formatterTemplate={'{{value}} ms'}
             seriesOverrides={{
               read: {
-                color: theme.eui.euiColorVis1,
+                color: euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.read.chartLabel',
                   { defaultMessage: 'Read' }
                 ),
               },
               write: {
-                color: theme.eui.euiColorVis2,
+                color: euiTheme.colors.vis.euiColorVis2,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.write.chartLabel',
                   { defaultMessage: 'Write' }
                 ),
               },
               insert: {
-                color: theme.eui.euiColorVis0,
+                color: euiTheme.colors.vis.euiColorVis0,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.insert.chartLabel',
                   { defaultMessage: 'Insert' }
                 ),
               },
               update: {
-                color: theme.eui.euiColorVis7,
+                color: euiTheme.colors.vis.euiColorVis7,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.update.chartLabel',
                   { defaultMessage: 'Update' }
                 ),
               },
               commit: {
-                color: theme.eui.euiColorVis3,
+                color: euiTheme.colors.vis.euiColorVis3,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.rdsMetricsLayout.latency.commit.chartLabel',
                   { defaultMessage: 'Commit' }
@@ -182,5 +182,5 @@ export const AwsRDSLayout = withTheme(
         </SubSection>
       </Section>
     </EuiPanel>
-  )
-);
+  );
+}

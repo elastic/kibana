@@ -119,6 +119,6 @@ const getEuiIconColor = (
       return theme?.colors.vis.euiColorVis2;
     case QuerySuggestionTypes.RecentSearch:
     default:
-      return theme?.colors.warning;
+      return theme?.colors.mediumShade;
   }
 };

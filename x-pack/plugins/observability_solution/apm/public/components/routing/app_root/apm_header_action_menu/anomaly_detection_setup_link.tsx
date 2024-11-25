@@ -34,7 +34,7 @@ export function AnomalyDetectionSetupLink() {
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
 
   let tooltipText: string = '';
-  let color: 'warning' | 'text' | 'success' | 'danger' = 'text';
+  let color: 'warning' | 'text' | 'accentSecondary' | 'danger' = 'text';
   let icon: IconType | undefined;
 
   if (anomalyDetectionSetupState === AnomalyDetectionSetupState.Failure) {
@@ -51,7 +51,7 @@ export function AnomalyDetectionSetupLink() {
     tooltipText = getNoJobsMessage(anomalyDetectionSetupState, environment);
     icon = 'machineLearningApp';
   } else if (anomalyDetectionSetupState === AnomalyDetectionSetupState.UpgradeableJobs) {
-    color = 'success';
+    color = 'accentSecondary';
     tooltipText = i18n.translate('xpack.apm.anomalyDetectionSetup.upgradeableJobsText', {
       defaultMessage: 'Updates available for existing anomaly detection jobs.',
     });
