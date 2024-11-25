@@ -8,8 +8,8 @@
 import { lastValueFrom, toArray } from 'rxjs';
 import expect from '@kbn/expect';
 import { supertestToObservable } from '@kbn/sse-utils-server';
-import { FtrProviderContext } from '../ftr_provider_context';
-import type { AvailableConnectorWithId } from '../../common/connectors';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export const chatCompleteSuite = (
   { id: connectorId, actionTypeId: connectorType }: AvailableConnectorWithId,
