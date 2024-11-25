@@ -29,7 +29,6 @@ import {
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import type { IndicatorTypes } from '../../domain/models';
 import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
@@ -60,28 +59,9 @@ import { SloDefinitionClient } from '../../services/slo_definition_client';
 import { getSloSettings, storeSloSettings } from '../../services/slo_settings';
 import { DefaultSummarySearchClient } from '../../services/summary_search_client';
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
-import {
-  ApmTransactionDurationTransformGenerator,
-  ApmTransactionErrorRateTransformGenerator,
-  HistogramTransformGenerator,
-  KQLCustomTransformGenerator,
-  MetricCustomTransformGenerator,
-  SyntheticsAvailabilityTransformGenerator,
-  TimesliceMetricTransformGenerator,
-  TransformGenerator,
-} from '../../services/transform_generators';
+import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { SLORoutesDependencies } from '../types';
-
-const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
-  'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
-  'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
-  'sli.synthetics.availability': new SyntheticsAvailabilityTransformGenerator(),
-  'sli.kql.custom': new KQLCustomTransformGenerator(),
-  'sli.metric.custom': new MetricCustomTransformGenerator(),
-  'sli.histogram.custom': new HistogramTransformGenerator(),
-  'sli.metric.timeslice': new TimesliceMetricTransformGenerator(),
-};
 
 const assertPlatinumLicense = async (plugins: SLORoutesDependencies['plugins']) => {
   const licensing = await plugins.licensing.start();
@@ -107,6 +87,7 @@ const createSLORoute = createSloServerRoute({
   handler: async ({ context, response, params, logger, request, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
+    const sloContext = await context.slo;
     const dataViews = await plugins.dataViews.start();
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -119,12 +100,17 @@ const createSLORoute = createSloServerRoute({
       getSpaceId(plugins, request),
       dataViews.dataViewsServiceFactory(soClient, esClient),
     ]);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
+
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -156,6 +142,7 @@ const inspectSLORoute = createSloServerRoute({
   handler: async ({ context, params, logger, request, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
+    const sloContext = await context.slo;
     const dataViews = await plugins.dataViews.start();
     const spaceId = await getSpaceId(plugins, request);
     const basePath = corePlugins.http.basePath;
@@ -165,12 +152,16 @@ const inspectSLORoute = createSloServerRoute({
     const soClient = core.savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -206,6 +197,7 @@ const updateSLORoute = createSloServerRoute({
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
 
+    const sloContext = await context.slo;
     const basePath = corePlugins.http.basePath;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
@@ -213,12 +205,16 @@ const updateSLORoute = createSloServerRoute({
     const soClient = core.savedObjects.client;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -254,6 +250,7 @@ const deleteSLORoute = createSloServerRoute({
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
 
+    const sloContext = await context.slo;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
@@ -264,13 +261,16 @@ const deleteSLORoute = createSloServerRoute({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
 
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService
+      logger
     );
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
@@ -331,19 +331,24 @@ const enableSLORoute = createSloServerRoute({
 
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
-
+    const sloContext = await context.slo;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const soClient = core.savedObjects.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
+
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -372,18 +377,23 @@ const disableSLORoute = createSloServerRoute({
     const spaceId = await getSpaceId(plugins, request);
     const dataViews = await plugins.dataViews.start();
 
+    const sloContext = await context.slo;
     const core = await context.core;
     const scopedClusterClient = core.elasticsearch.client;
     const soClient = core.savedObjects.client;
     const esClient = core.elasticsearch.client.asCurrentUser;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -408,6 +418,7 @@ const resetSLORoute = createSloServerRoute({
   handler: async ({ context, request, params, logger, plugins, corePlugins }) => {
     await assertPlatinumLicense(plugins);
 
+    const sloContext = await context.slo;
     const dataViews = await plugins.dataViews.start();
     const spaceId = await getSpaceId(plugins, request);
     const core = await context.core;
@@ -418,12 +429,16 @@ const resetSLORoute = createSloServerRoute({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+    const transformGenerators = createTransformGenerators(
+      spaceId,
+      dataViewsService,
+      sloContext.isServerless
+    );
     const transformManager = new DefaultTransformManager(
       transformGenerators,
       scopedClusterClient,
-      logger,
-      spaceId,
-      dataViewsService
+      logger
     );
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
