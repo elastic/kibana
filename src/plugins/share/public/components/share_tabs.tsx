@@ -8,16 +8,16 @@
  */
 
 import React, { type FC } from 'react';
-import { TabbedModal } from '@kbn/shared-ux-tabbed-modal';
+import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
 
-import { ShareTabsContext, useShareTabsContext, type IShareContext } from './context';
+import { ShareMenuProvider, useShareTabsContext, type IShareContext } from './context';
 import { linkTab, embedTab, exportTab } from './tabs';
 
 export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
-    <ShareTabsContext.Provider value={shareContext}>
+    <ShareMenuProvider {...{ shareContext }}>
       <ShareMenuTabs />
-    </ShareTabsContext.Provider>
+    </ShareMenuProvider>
   );
 };
 
@@ -25,15 +25,9 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareTabsContext();
 
-  if (!shareContext) {
-    return null;
-  }
-
   const { allowEmbed, objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
 
-  const tabs = [];
-
-  tabs.push(linkTab);
+  const tabs: Array<IModalTabDeclaration<any>> = [linkTab];
 
   const enabledItems = shareMenuItems.filter(({ shareMenuItem }) => !shareMenuItem?.disabled);
 

@@ -6,32 +6,36 @@
  */
 
 import type {
+  CoreSetup,
   CoreStart,
   CustomRequestHandlerContext,
   IScopedClusterClient,
   IUiSettingsClient,
-  KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { DefaultRouteHandlerResources } from '@kbn/server-route-repository-utils';
 import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from '../types';
 
+type ObservabilityAIAssistantRequestHandlerContextBase = CustomRequestHandlerContext<{
+  licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
+  // these two are here for compatibility with APM functions
+  rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
+  alerting: {
+    getRulesClient: () => RulesClientApi;
+  };
+}>;
+
+// this is the type used across methods, it's stripped down for compatibility
+// with the context that's available when executing as an action
 export type ObservabilityAIAssistantRequestHandlerContext = Omit<
-  CustomRequestHandlerContext<{
-    licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
-    // these two are here for compatibility with APM functions
-    rac: Pick<RacApiRequestHandlerContext, 'getAlertsClient'>;
-    alerting: {
-      getRulesClient: () => RulesClientApi;
-    };
-  }>,
+  ObservabilityAIAssistantRequestHandlerContextBase,
   'core' | 'resolve'
 > & {
   core: Promise<{
@@ -45,32 +49,41 @@ export type ObservabilityAIAssistantRequestHandlerContext = Omit<
     savedObjects: {
       client: SavedObjectsClientContract;
     };
-    coreStart: CoreStart;
   }>;
 };
 
-export interface ObservabilityAIAssistantRouteHandlerResources {
-  request: KibanaRequest;
-  context: ObservabilityAIAssistantRequestHandlerContext;
-  logger: Logger;
-  service: ObservabilityAIAssistantService;
-  plugins: {
-    [key in keyof ObservabilityAIAssistantPluginSetupDependencies]: {
-      setup: Required<ObservabilityAIAssistantPluginSetupDependencies>[key];
-    };
-  } & {
-    [key in keyof ObservabilityAIAssistantPluginStartDependencies]: {
-      start: () => Promise<Required<ObservabilityAIAssistantPluginStartDependencies>[key]>;
-    };
+interface PluginContractResolveCore {
+  core: {
+    setup: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+    start: () => Promise<CoreStart>;
   };
 }
 
-export interface ObservabilityAIAssistantRouteCreateOptions {
-  options: {
-    timeout?: {
-      payload?: number;
-      idleSocket?: number;
-    };
-    tags: Array<'access:ai_assistant'>;
+type PluginContractResolveDependenciesStart = {
+  [key in keyof ObservabilityAIAssistantPluginStartDependencies]: {
+    start: () => Promise<Required<ObservabilityAIAssistantPluginStartDependencies>[key]>;
   };
+};
+
+type PluginContractResolveDependenciesSetup = {
+  [key in keyof ObservabilityAIAssistantPluginSetupDependencies]: {
+    setup: Required<ObservabilityAIAssistantPluginSetupDependencies>[key];
+  };
+};
+
+export interface ObservabilityAIAssistantRouteHandlerResources
+  extends Omit<DefaultRouteHandlerResources, 'context' | 'response'> {
+  context: ObservabilityAIAssistantRequestHandlerContext;
+  service: ObservabilityAIAssistantService;
+  plugins: PluginContractResolveCore &
+    PluginContractResolveDependenciesSetup &
+    PluginContractResolveDependenciesStart;
+}
+
+export interface ObservabilityAIAssistantRouteCreateOptions {
+  timeout?: {
+    payload?: number;
+    idleSocket?: number;
+  };
+  tags: Array<'access:ai_assistant'>;
 }
