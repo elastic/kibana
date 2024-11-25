@@ -256,8 +256,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins: StartPlugins
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.createSubPlugins();
+    const alerts = await subPlugins.alerts.start(storage, plugins);
     return {
-      alerts: subPlugins.alerts.start(storage),
+      alerts,
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
       cloudDefend: subPlugins.cloudDefend.start(),

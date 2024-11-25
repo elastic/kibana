@@ -10,7 +10,9 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.16.1>>
 * <<release-notes-8.16.0>>
+* <<release-notes-8.15.5>>
 * <<release-notes-8.15.4>>
 * <<release-notes-8.15.3>>
 * <<release-notes-8.15.2>>
@@ -80,10 +82,89 @@ Review important information about the {kib} 8.x releases.
 include::upgrade-notes.asciidoc[]
 
 
+[[release-notes-8.16.1]]
+== {kib} 8.16.1
+
+The 8.16.1 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.16.1]]
+=== Bug fixes
+Dashboards & Visualizations::
+* Fixes an issue preventing a custom panel title from being saved correctly ({kibana-pull}200548[#200548]).
+Elastic Observability solution::
+* Changes the order of the errors shown on Infrastructure applications to be more relevant ({kibana-pull}200531[#200531]).
+* Fixes the summary calculation for a calendar-aligned and occurrences-based SLO ({kibana-pull}199873[#199873]).
+* Fixes the `kustomize` command ({kibana-pull}199758[#199758]).
+* Fixes the issue with Stack Monitoring showing an "Unable to load page" error ({kibana-pull}200043[#200043]). 
+* Fixes the issue with the APM and OpenTelemetry tutorial showing an "Unable to load page" error ({kibana-pull}199301[#199301]).
+Elastic Security solution::
+For the Elastic Security 8.16.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Platform::
+* Fixes an issue with duplicate references to objects when copying saved objects to other spaces ({kibana-pull}200053[#200053]).
+* Fixes button colors in the "Share data view to spaces" flyout ({kibana-pull}196004[#196004]).
+
+
 [[release-notes-8.16.0]]
 == {kib} 8.16.0
 
 For information about the {kib} 8.16.0 release, review the following information.
+
+The 8.16.0 release includes the following known issues.
+
+[float]
+[[known-issues-8.16.0]]
+=== Known issues
+
+[discrete]
+[[known-199902]]
+.Stack Monitoring shows "Unable to load page" error
+[%collapsible]
+====
+*Details* +
+The Overview, Nodes, and Logs pages in Stack Monitoring show an "Unable to load page" error. The Stack trace mentions `TypeError: Cannot read properties of undefined (reading 'logsLocator')`.
+
+*Workaround* +
+Disabling the `Set feature visibility > Logs` feature at the Kibana Space settings level will prevent the error from occurring. Please note the `Logs` feature will not be available on those spaces.
+
+It's also possible to set the `Observability > Logs` feature privilege to `None` at the role level. This will hide the `Logs` feature from individual users and prevent the error for these users as well.
+
+For more information, refer to {kibana-issue}199902[#199902].
+====
+
+[discrete]
+[[known-199891-199892]]
+.Onboarding, tutorial of APM and OpenTelemetry and some "Beats Only" integrations shows "Unable to load page" error
+[%collapsible]
+====
+*Details* +
+Tutorials linked from the {kib} home page show an "Unable to load page" error. The Stack trace mentions `The above error occurred in tutorial_TutorialUi`.
+
+*Workaround* +
+The APM / OpenTelemetry tutorials represented a shortcut to quickly add important parameters to the configuration files.
+It is still possible to obtain the same parameters following the tutorials in the APM documentation.
+
+More information can be found in the {observability-guide}/apm-collect-application-data.html[APM documentation] and the {observability-guide}/get-started-with-fleet-apm-server.html[Fleet documentation].
+
+For information about how to create APM API keys, please check the {observability-guide}/apm-api-key.html#apm-create-an-api-key[API key documentation].
+
+For more information, refer to {kibana-issue}199891[#199891] and {kibana-issue}199892[#199892].
+====
+
+[float]
+[[breaking-changes-8.16.0]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 8.16.0, review the breaking changes, then mitigate the impact to your application.
+
+[discrete]
+.Updated request processing during shutdown.
+[%collapsible]
+====
+*Details* +
+During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. For more information, refer to {kibana-pull}180986[#180986].
+==== 
 
 [float]
 [[deprecations-8.16.0]]
@@ -92,6 +173,16 @@ For information about the {kib} 8.16.0 release, review the following information
 The following functionality is deprecated in 8.16.0, and will be removed in 9.0.0.
 Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
 you make the necessary updates after you upgrade to 8.16.0.
+
+[discrete]
+.New versions of Kibana for macOS x86_64 will end after 8.17.
+[%collapsible]
+====
+*Details* +
+New versions of Kibana builds for macOS x86_64 are deprecated and will no longer be released after 8.17.  Kibana for macOS AArch64 is unaffected. 
+
+Use Docker to run new versions of Kibana on macOS 86x_64.
+====
 
 [discrete]
 .The Logs Stream is now hidden by default in favor of the Logs Explorer app.
@@ -114,9 +205,8 @@ The Observability AI Assistant specific advanced setting for Logs index patterns
 //*Impact* +
 //!!TODO!!
 ====
-    
 
-      
+  
 [float]
 [[features-8.16.0]]
 === Features
@@ -154,7 +244,6 @@ Discover::
 * Adds density settings to allow further customization of the Documents table layout ({kibana-pull}188495[#188495]).
 * Enables the time picker for indices without the @timestamp field when editing ES|QL queries ({kibana-pull}184361[#184361]).
 Elastic Observability solution::
-* Show monitors from all permitted spaces !! ({kibana-pull}196109[#196109]).
 * Adds experimental logs overview to the observability hosts and service overviews ({kibana-pull}195673[#195673]).
 * Show alerts for entities ({kibana-pull}195250[#195250]).
 * Create sub-feature role to manage APM settings write permissions ({kibana-pull}194419[#194419]).
@@ -430,6 +519,27 @@ Machine Learning::
 Management::
 * Fixes the pagination of the source documents data grid in Transforms ({kibana-pull}196119[#196119]).
 * Fixes autocomplete suggestions after a comma in Console ({kibana-pull}189656[#189656]).
+
+[[release-notes-8.15.5]]
+== {kib} 8.15.5
+
+The 8.15.5 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.15.5]]
+=== Bug fixes
+Canvas::
+* Fixes an issue with Canvas not rendering maps with queries or filters ({kibana-pull}199339[#199339]).
+Discover::
+* Fixes an issue where the `has_es_data` check was causing {kib} to hang ({kibana-pull}200476[#200476]).
+Elastic Observability solution::
+* Changes the order of the errors shown on Infrastructure applications to be more relevant ({kibana-pull}200531[#200531]).
+* Fixes the summary calculation for a calendar-aligned and occurrences-based SLO ({kibana-pull}199873[#199873]).
+Elastic Security solution::
+For the Elastic Security 8.15.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Platform::
+* Fixes an issue with duplicate references to objects when copying saved objects to other spaces ({kibana-pull}200053[#200053]).
+* Fixes button colors in the "Share data view to spaces" flyout ({kibana-pull}196004[#196004]).
 
 [[release-notes-8.15.4]]
 == {kib} 8.15.4

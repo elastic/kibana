@@ -15,7 +15,8 @@
       "observability",
       "observabilityShared",
       "dataViews",
-      "unifiedSearch"
+      "unifiedSearch",
+      "share"
     ],
     "optionalPlugins": [
       "infra",
@@ -30,6 +31,11 @@
       "dashboard",
       "fleet"
     ],
-    "requiredBundles": ["kibanaUtils", "alerting", "kibanaReact"]
+    "requiredBundles": [
+      "kibanaUtils",
+      "alerting",
+      "kibanaReact",
+      "logsShared"
+    ]
   }
 }

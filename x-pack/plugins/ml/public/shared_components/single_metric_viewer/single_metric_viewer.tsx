@@ -20,6 +20,7 @@ import type { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import usePrevious from 'react-use/lib/usePrevious';
+import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { tz } from 'moment';
 import { pick, throttle } from 'lodash';
 import type { MlDependencies } from '../../application/app';
@@ -39,9 +40,16 @@ interface AppStateZoom {
   to?: string;
 }
 
-const errorMessage = i18n.translate('xpack.ml.singleMetricViewerEmbeddable.errorMessage"', {
+const basicErrorMessage = i18n.translate('xpack.ml.singleMetricViewerEmbeddable.errorMessage"', {
   defaultMessage: 'Unable to load the ML single metric viewer data',
 });
+
+const jobNotFoundErrorMessage = i18n.translate(
+  'xpack.ml.singleMetricViewerEmbeddable.jobNotFoundErrorMessage"',
+  {
+    defaultMessage: 'No known job with the selected id',
+  }
+);
 
 export type SingleMetricViewerSharedComponent = FC<SingleMetricViewerProps>;
 
@@ -67,7 +75,7 @@ export interface SingleMetricViewerProps {
    */
   lastRefresh?: number;
   onRenderComplete?: () => void;
-  onError?: (error: Error) => void;
+  onError?: (error?: Error) => void;
   onForecastIdChange?: (forecastId: string | undefined) => void;
   uuid: string;
 }
@@ -106,6 +114,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   const [selectedJobWrapper, setSelectedJobWrapper] = useState<
     { job: MlJob; stats: MlJobStats } | undefined
   >();
+  const [errorEncountered, setErrorEncountered] = useState<number | undefined>();
 
   const isMounted = useMountedState();
   const { mlApi, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
@@ -120,6 +129,16 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   const previousRefresh = usePrevious(lastRefresh ?? 0);
 
   useEffect(
+    function resetErrorOnJobChange() {
+      // Calling onError to clear any previous error
+      setErrorEncountered(undefined);
+      onError?.();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedJobId]
+  );
+
+  useEffect(
     function setUpSelectedJob() {
       async function fetchSelectedJob() {
         if (mlApi && selectedJobId !== undefined) {
@@ -130,19 +149,26 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
             ]);
             setSelectedJobWrapper({ job: jobs[0], stats: jobStats[0] });
           } catch (e) {
+            const error = extractErrorProperties(e);
+            // Could get 404 because job has been deleted and also avoid infinite refetches on any error
+            setErrorEncountered(error.statusCode);
             if (onError) {
-              onError(new Error(errorMessage));
+              onError(
+                new Error(errorEncountered === 404 ? jobNotFoundErrorMessage : basicErrorMessage)
+              );
             }
           }
         }
       }
-      if (isMounted() === false) {
+      if (isMounted() === false || errorEncountered !== undefined) {
         return;
       }
       fetchSelectedJob();
     },
-    [selectedJobId, mlApi, isMounted, onError]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedJobId, isMounted, errorEncountered]
   );
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {

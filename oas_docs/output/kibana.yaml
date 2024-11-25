@@ -55,7 +55,7 @@ info:
     ## Documentation source and versions
 
 
-    This documentation is derived from the `main` branch of the
+    This documentation is derived from the `8.16` branch of the
     [kibana](https://github.com/elastic/kibana) repository.
 
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0
@@ -1652,14 +1652,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -2425,14 +2435,24 @@ paths:
                   type: boolean
                 flapping:
                   additionalProperties: false
+                  description: >-
+                    When flapping detection is turned on, alerts that switch
+                    quickly between active and recovered states are identified
+                    as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: >-
+                        The minimum number of runs in which the threshold must
+                        be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: >-
+                        The minimum number of times an alert must switch states
+                        in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -2825,14 +2845,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -3577,14 +3607,24 @@ paths:
                     - active
                 flapping:
                   additionalProperties: false
+                  description: >-
+                    When flapping detection is turned on, alerts that switch
+                    quickly between active and recovered states are identified
+                    as “flapping” and notifications are reduced.
                   nullable: true
                   type: object
                   properties:
                     look_back_window:
+                      description: >-
+                        The minimum number of runs in which the threshold must
+                        be met.
                       maximum: 20
                       minimum: 2
                       type: number
                     status_change_threshold:
+                      description: >-
+                        The minimum number of times an alert must switch states
+                        in the look back window.
                       maximum: 20
                       minimum: 2
                       type: number
@@ -3969,14 +4009,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -5205,14 +5255,24 @@ paths:
                       - last_execution_date
                   flapping:
                     additionalProperties: false
+                    description: >-
+                      When flapping detection is turned on, alerts that switch
+                      quickly between active and recovered states are identified
+                      as “flapping” and notifications are reduced.
                     nullable: true
                     type: object
                     properties:
                       look_back_window:
+                        description: >-
+                          The minimum number of runs in which the threshold must
+                          be met.
                         maximum: 20
                         minimum: 2
                         type: number
                       status_change_threshold:
+                        description: >-
+                          The minimum number of times an alert must switch
+                          states in the look back window.
                         maximum: 20
                         minimum: 2
                         type: number
@@ -7157,7 +7217,7 @@ paths:
       summary: Get all alerts for a case
       tags:
         - cases
-      x-technical-preview: true
+      x-state: Technical preview
   '/api/cases/{caseId}/comments':
     delete:
       description: >
@@ -7525,7 +7585,7 @@ paths:
       summary: Get cases for an alert
       tags:
         - cases
-      x-technical-preview: true
+      x-state: Technical preview
   /api/cases/configure:
     get:
       description: >
@@ -26495,7 +26555,7 @@ components:
           maxItems: 1000
           type: array
       title: Alert identifiers
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_alert_indices:
       description: >
         The alert indices. It is required only when `type` is `alert`. If you
@@ -26513,7 +26573,7 @@ components:
           maxItems: 1000
           type: array
       title: Alert indices
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_alert_response_properties:
       type: object
       properties:
@@ -27651,7 +27711,7 @@ components:
           description: The rule name.
           example: security_rule
           type: string
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_searchFieldsType:
       description: The fields to perform the `simple_query_string` parsed query against.
       enum:
@@ -27844,7 +27904,7 @@ components:
                         - type: string
                         - type: boolean
                 type: array
-                x-technical-preview: true
+                x-state: Technical preview
               description:
                 $ref: '#/components/schemas/Cases_case_description'
               settings:
@@ -27870,7 +27930,7 @@ components:
           tags:
             $ref: '#/components/schemas/Cases_template_tags'
       type: array
-      x-technical-preview: true
+      x-state: Technical preview
     Cases_update_alert_comment_request_properties:
       description: Defines properties for case comment requests when type is alert.
       type: object

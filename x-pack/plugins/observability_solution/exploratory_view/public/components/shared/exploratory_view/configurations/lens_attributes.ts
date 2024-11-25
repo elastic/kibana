@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
+import { ExistsFilter, Filter, isExistsFilter } from '@kbn/es-query';
 import {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
@@ -41,6 +41,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -169,17 +170,20 @@ export class LensAttributes {
   globalFilter?: { query: string; language: string };
   reportType: string;
   lensFormulaHelper?: FormulaPublicApi;
+  dslFilters?: QueryDslQueryContainer[];
 
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper?: FormulaPublicApi
+    lensFormulaHelper?: FormulaPublicApi,
+    dslFilters?: QueryDslQueryContainer[]
   ) {
     this.layers = {};
     this.seriesReferenceLines = {};
     this.reportType = reportType;
     this.lensFormulaHelper = lensFormulaHelper;
     this.isMultiSeries = layerConfigs.length > 1;
+    this.dslFilters = dslFilters;
 
     layerConfigs.forEach(({ seriesConfig, operationType }) => {
       if (operationType && reportType !== ReportTypes.SINGLE_METRIC) {
@@ -1267,6 +1271,31 @@ export class LensAttributes {
     return { internalReferences, adHocDataViews };
   }
 
+  getFilters(): Filter[] {
+    const { internalReferences } = this.getReferences();
+
+    const dslFilters = this.dslFilters;
+    if (!dslFilters) {
+      return [];
+    }
+    return dslFilters.map((filter) => {
+      return {
+        meta: {
+          index: internalReferences?.[0].id,
+          type: 'query_string',
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'query',
+        },
+        $state: {
+          store: 'appState',
+        },
+        query: filter,
+      } as Filter;
+    });
+  }
+
   getJSON(
     visualizationType: 'lnsXY' | 'lnsLegacyMetric' | 'lnsHeatmap' = 'lnsXY',
     lastRefresh?: number
@@ -1290,7 +1319,7 @@ export class LensAttributes {
         },
         visualization: this.visualization,
         query: query || { query: '', language: 'kuery' },
-        filters: [],
+        filters: this.getFilters(),
       },
     };
   }

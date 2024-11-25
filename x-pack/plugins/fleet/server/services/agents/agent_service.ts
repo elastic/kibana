@@ -97,6 +97,14 @@ export interface AgentClient {
    * Return the latest agent available version
    */
   getLatestAgentAvailableVersion(includeCurrentVersion?: boolean): Promise<string>;
+  /**
+   * Return the latest agent available version, not taking into account IAR versions
+   */
+  getLatestAgentAvailableBaseVersion(includeCurrentVersion?: boolean): Promise<string>;
+  /**
+   * Return the latest agent available version formatted for the docker image
+   */
+  getLatestAgentAvailableDockerImageVersion(includeCurrentVersion?: boolean): Promise<string>;
 }
 
 /**
@@ -142,6 +150,16 @@ class AgentClientImpl implements AgentClient {
       filterKuery,
       this.spaceId
     );
+  }
+
+  public async getLatestAgentAvailableBaseVersion(includeCurrentVersion?: boolean) {
+    const fullVersion = await this.getLatestAgentAvailableVersion(includeCurrentVersion);
+    return fullVersion.split('+')[0];
+  }
+
+  public async getLatestAgentAvailableDockerImageVersion(includeCurrentVersion?: boolean) {
+    const fullVersion = await this.getLatestAgentAvailableVersion(includeCurrentVersion);
+    return fullVersion.replace('+', '.');
   }
 
   public async getLatestAgentAvailableVersion(includeCurrentVersion?: boolean) {

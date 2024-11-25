@@ -29,7 +29,7 @@ info:
 
     ## Documentation source and versions
 
-    This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
+    This documentation is derived from the `8.16` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
   version: '1.0.2'
   x-doc-license:

@@ -228,7 +228,7 @@ OK response oas-test-version-2",
         "x-discontinued": "route discontinued version or date",
       },
     },
-    "/foo/{id}/{path*}": Object {
+    "/foo/{id}/{path}": Object {
       "delete": Object {
         "description": "route description",
         "operationId": "delete-foo-id-path",
@@ -570,7 +570,7 @@ OK response oas-test-version-2",
         ],
       },
     },
-    "/no-xsrf/{id}/{path*}": Object {
+    "/no-xsrf/{id}/{path}": Object {
       "post": Object {
         "operationId": "post-no-xsrf-id-path-2",
         "parameters": Array [
