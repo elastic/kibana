@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDetailViewRedirect } from './use_detail_view_redirect';
 import { useKibana } from './use_kibana';
 import {

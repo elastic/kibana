@@ -7,21 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-type Method = 'get' | 'post' | 'put' | 'patch' | 'delete';
+import type { RouteMethod } from '@kbn/core-http-server';
+
+const validMethods: RouteMethod[] = ['delete', 'get', 'patch', 'post', 'put'];
 
 export function parseEndpoint(endpoint: string) {
   const parts = endpoint.split(' ');
 
-  const method = parts[0].trim().toLowerCase() as Method;
+  const method = parts[0].trim().toLowerCase() as Exclude<RouteMethod, 'options'>;
   const pathname = parts[1].trim();
   const version = parts[2]?.trim();
 
-  if (!['get', 'post', 'put', 'patch', 'delete'].includes(method)) {
+  if (!validMethods.includes(method)) {
     throw new Error(`Endpoint ${endpoint} was not prefixed with a valid HTTP method`);
-  }
-
-  if (!version && pathname.startsWith('/api')) {
-    throw new Error(`Missing version for public endpoint ${endpoint}`);
   }
 
   return { method, pathname, version };
