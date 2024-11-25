@@ -572,7 +572,9 @@ function RoutingStreamEntry({
         <EuiButtonIcon
           data-test-subj="streamsAppRoutingStreamEntryButton"
           iconType="popout"
-          href={router.link('/{key}/{tab}', { path: { key: child.id, tab: 'routing' } })}
+          href={router.link('/{key}/{tab}/{subtab}', {
+            path: { key: child.id, tab: 'management', subtab: 'route' },
+          })}
           aria-label={i18n.translate('xpack.streams.streamDetailRouting.goto', {
             defaultMessage: 'Go to stream',
           })}
