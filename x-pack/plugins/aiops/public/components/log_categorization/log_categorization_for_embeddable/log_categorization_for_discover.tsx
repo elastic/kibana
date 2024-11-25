@@ -401,9 +401,6 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
   );
   const style = css({
     overflowY: 'auto',
-    '.kbnDocTableWrapper': {
-      overflowX: 'hidden',
-    },
   });
 
   const actions = getActions(false);
