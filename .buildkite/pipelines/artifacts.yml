@@ -6,6 +6,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
+      localSsds: 1
     timeout_in_minutes: 120
     retry:
       automatic:
