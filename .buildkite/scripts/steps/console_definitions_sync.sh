@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+GENERATED_DEFINITIONS="src/plugins/console/server/lib/spec_definitions/json/generated"
+GIT_SCOPE="$GENERATED_DEFINITIONS/**/*"
+
 report_main_step () {
   echo "--- $1"
 }
@@ -25,7 +28,7 @@ main () {
 
   # Check if there are any differences
   set +e
-  git diff --exit-code --quiet "$destination_file"
+  git diff --exit-code --quiet "$GIT_SCOPE"
   if [ $? -eq 0 ]; then
     echo "No differences found. Exiting.."
     exit
@@ -56,7 +59,7 @@ main () {
 
   git checkout -b "$BRANCH_NAME"
 
-  git add src/plugins/console/server/lib/spec_definitions/json/generated/*
+  git add $GIT_SCOPE
   git commit -m "Update console definitions"
 
   report_main_step "Changes committed. Creating pull request."
