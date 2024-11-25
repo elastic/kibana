@@ -26,7 +26,8 @@
     ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact"

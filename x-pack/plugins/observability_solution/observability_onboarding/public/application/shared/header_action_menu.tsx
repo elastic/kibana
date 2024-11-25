@@ -22,13 +22,13 @@ interface Props {
 
 export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, theme$ }: Props) {
   const {
-    services: { config },
+    services: { serverless },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const location = useLocation();
   const normalizedPathname = location.pathname.replace(/\/$/, '');
 
   const isRootPage = normalizedPathname === '';
-  const isServerless = config.serverless.enabled;
+  const isServerless = Boolean(serverless);
 
   if (!isServerless && !isRootPage) {
     return (

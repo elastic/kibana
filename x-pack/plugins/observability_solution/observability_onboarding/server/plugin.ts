@@ -23,9 +23,9 @@ import {
   ObservabilityOnboardingPluginStart,
   ObservabilityOnboardingPluginStartDependencies,
 } from './types';
-import { ObservabilityOnboardingConfig } from '.';
 import { observabilityOnboardingFlow } from './saved_objects/observability_onboarding_status';
 import { EsLegacyConfigService } from './services/es_legacy_config_service';
+import { ObservabilityOnboardingConfig } from './config';
 
 export class ObservabilityOnboardingPlugin
   implements
