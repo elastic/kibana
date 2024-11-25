@@ -9,7 +9,7 @@
 
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { I18nStart } from '@kbn/core/public';
-import { createContext, useContext } from 'react';
+import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
 import type {
@@ -35,6 +35,23 @@ export interface IShareContext extends ShareContext {
   anchorElement?: HTMLElement;
 }
 
-export const ShareTabsContext = createContext<IShareContext | null>(null);
+const ShareTabsContext = createContext<IShareContext | null>(null);
 
-export const useShareTabsContext = () => useContext(ShareTabsContext);
+export const ShareMenuProvider = ({
+  shareContext,
+  children,
+}: PropsWithChildren<{ shareContext: IShareContext }>) => {
+  return <ShareTabsContext.Provider value={shareContext}>{children}</ShareTabsContext.Provider>;
+};
+
+export const useShareTabsContext = () => {
+  const context = useContext(ShareTabsContext);
+
+  if (!context) {
+    throw new Error(
+      'Failed to call `useShareTabsContext` because the context from ShareMenuProvider is missing. Ensure the component or React root is wrapped with ShareMenuProvider'
+    );
+  }
+
+  return context;
+};
