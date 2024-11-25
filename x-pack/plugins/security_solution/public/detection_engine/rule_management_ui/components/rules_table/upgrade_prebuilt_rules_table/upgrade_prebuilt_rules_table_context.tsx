@@ -360,10 +360,12 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           </EuiToolTip>
         ),
         content: (
-          <RuleDiffTab
-            oldRule={ruleUpgradeState.current_rule}
-            newRule={ruleUpgradeState.target_rule}
-          />
+          <div>
+            <RuleDiffTab
+              oldRule={ruleUpgradeState.current_rule}
+              newRule={ruleUpgradeState.target_rule}
+            />
+          </div>
         ),
       };
 
