@@ -89,13 +89,13 @@ export const processMonitors = (
 
     monitorQueryIdToConfigIdMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = attrs[ConfigKey.CONFIG_ID];
 
-    const monitorLocations = attrs[ConfigKey.LOCATIONS].map((location) => location.id);
+    const monitorLocIds = attrs[ConfigKey.LOCATIONS].map((location) => location.id);
 
     if (attrs[ConfigKey.ENABLED] === false) {
       const queriedLocations = Array.isArray(queryLocations) ? queryLocations : [queryLocations];
       const intersectingLocations = intersection(
-        monitorLocations,
-        queryLocations ? queriedLocations : monitorLocations
+        monitorLocIds,
+        queryLocations ? queriedLocations : monitorLocIds
       );
       disabledCount += intersectingLocations.length;
       disabledMonitorsCount += 1;
@@ -104,9 +104,9 @@ export const processMonitors = (
       enabledMonitorQueryIds.push(attrs[ConfigKey.MONITOR_QUERY_ID]);
 
       monitorLocationsMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = queryLocations
-        ? intersection(monitorLocations, queryLocations)
-        : monitorLocations;
-      listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocations]);
+        ? intersection(monitorLocIds, queryLocations)
+        : monitorLocIds;
+      listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocIds]);
 
       maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
     }

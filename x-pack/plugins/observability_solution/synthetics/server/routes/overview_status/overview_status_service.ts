@@ -35,6 +35,8 @@ type LocationStatus = Array<{
   timestamp: string;
 }>;
 
+export const SUMMARIES_PAGE_SIZE = 5000;
+
 export class OverviewStatusService {
   routeContext: RouteContext<Record<string, any>, OverviewStatusQuery>;
   filterData: {
@@ -47,10 +49,10 @@ export class OverviewStatusService {
 
   async getOverviewStatus() {
     const { request } = this.routeContext;
-    const params = request.query as OverviewStatusQuery;
+    const queryParams = request.query as OverviewStatusQuery;
 
     this.filterData = await getMonitorFilters({
-      ...params,
+      ...queryParams,
       context: this.routeContext,
     });
 
@@ -69,7 +71,7 @@ export class OverviewStatusService {
       disabledCount,
       disabledMonitorsCount,
       projectMonitorsCount,
-    } = processMonitors(allConfigs);
+    } = processMonitors(allConfigs, this.filterData?.locationFilter);
 
     return {
       allIds,
@@ -114,7 +116,6 @@ export class OverviewStatusService {
 
       let hasMoreData = true;
       const monitorByIds = new Map<string, LocationStatus>();
-      const pageSize = 5000;
       let afterKey: any;
       let count = 0;
 
@@ -136,7 +137,7 @@ export class OverviewStatusService {
               aggs: {
                 monitors: {
                   composite: {
-                    size: pageSize,
+                    size: SUMMARIES_PAGE_SIZE,
                     sources: asMutableArray([
                       {
                         monitorId: {
@@ -176,7 +177,7 @@ export class OverviewStatusService {
         count += 1;
         const data = result.body.aggregations?.monitors;
 
-        hasMoreData = data?.buckets.length === pageSize;
+        hasMoreData = (data?.buckets ?? []).length >= SUMMARIES_PAGE_SIZE;
         afterKey = data?.after_key;
 
         data?.buckets.forEach(({ status: statusAgg, key: bKey }) => {
@@ -189,7 +190,7 @@ export class OverviewStatusService {
           }
           monitorByIds.get(monitorId)?.push({ status, locationId, timestamp });
         });
-      } while (hasMoreData);
+      } while (hasMoreData && afterKey);
       return monitorByIds;
     });
   }
@@ -207,6 +208,8 @@ export class OverviewStatusService {
 
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
     const disabledMonitors = monitors.filter((monitor) => !monitor.attributes[ConfigKey.ENABLED]);
+
+    const queryLocIds = this.filterData?.locationFilter;
 
     disabledMonitors.forEach((monitor) => {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
@@ -231,6 +234,10 @@ export class OverviewStatusService {
       const monLocations = monitor.attributes[ConfigKey.LOCATIONS];
       // const monQueriedLocations = intersection(monLocations, monitorLocationIds);
       monLocations?.forEach((monLocation) => {
+        if (!isEmpty(queryLocIds) && !queryLocIds?.includes(monLocation.id)) {
+          // filter out location provided via query
+          return;
+        }
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
         const meta = {
           monitorQueryId: monitorId,
