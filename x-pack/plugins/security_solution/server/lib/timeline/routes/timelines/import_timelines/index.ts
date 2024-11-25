@@ -83,7 +83,7 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           if (res instanceof Error || typeof res === 'string') {
             throw res;
           } else {
-            return response.ok({ body: res ?? {} });
+            return response.ok({ body: res });
           }
         } catch (err) {
           const error = transformError(err);

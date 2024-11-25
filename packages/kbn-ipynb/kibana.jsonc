@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/ipynb",
-  "owner": "@elastic/search-kibana"
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "search",
+  "visibility": "private"
 }

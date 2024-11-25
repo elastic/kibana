@@ -20,6 +20,11 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
 const createInferenceEndpointMock = jest.fn();
 const mockDispatch = jest.fn();
+const INFERENCE_LOCATOR = 'SEARCH_INFERENCE_ENDPOINTS';
+const createMockLocator = (id: string) => ({
+  useUrl: jest.fn().mockReturnValue('https://redirect.me/to/inference_endpoints'),
+});
+const mockInferenceManagementLocator = createMockLocator(INFERENCE_LOCATOR);
 
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
@@ -33,8 +38,8 @@ jest.mock('../../../public/application/app_context', () => ({
     },
     docLinks: {
       links: {
-        enterpriseSearch: {
-          inferenceApiCreate: 'https://abc.com/inference-api-create',
+        inferenceManagement: {
+          inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
         },
       },
     },
@@ -44,6 +49,20 @@ jest.mock('../../../public/application/app_context', () => ({
           trainedModels: {
             getTrainedModels: jest.fn().mockResolvedValue([]),
             getTrainedModelStats: jest.fn().mockResolvedValue([]),
+          },
+        },
+      },
+      share: {
+        url: {
+          locators: {
+            get: jest.fn((id) => {
+              switch (id) {
+                case INFERENCE_LOCATOR:
+                  return mockInferenceManagementLocator;
+                default:
+                  throw new Error(`Unknown locator id: ${id}`);
+              }
+            }),
           },
         },
       },
