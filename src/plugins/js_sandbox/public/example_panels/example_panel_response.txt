@@ -79,7 +79,7 @@ function(props) {
         // https://vega.github.io/vega-lite/docs/timeunit.html
         vl.x().sum("count"),
         vl.y().fieldN('response').sort('-x'),
-        vl.color().fieldN('type').scale({ range: ['#00a69b', '#ddd'] }).legend({disable: true}),
+        vl.color().fieldN('type').scale({ range: ['#00a69b', '#ccc'] }).legend({disable: true}),
         vl.opacity().condition({test:"datum['type'] == '02_context'",value:0.3}).value(1),
         vl.tooltip([vl.fieldN("response"), vl.fieldQ("count")])
       )

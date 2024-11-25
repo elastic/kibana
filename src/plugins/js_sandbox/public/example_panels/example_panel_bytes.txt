@@ -83,7 +83,7 @@ function(props) {
         // https://vega.github.io/vega-lite/docs/timeunit.html
         vl.y().sum("count"),
         vl.x().fieldQ('bytes').bin(true),
-        vl.color().fieldN('type').scale({ range: ['#ddd','#00a69b'] }).legend({disable: true}),
+        vl.color().fieldN('type').scale({ range: ['#ccc','#00a69b'] }).legend({disable: true}),
         vl.opacity().condition({test:"datum['type'] == 'context'",value:0.3}).value(1),
         vl.order().field('typeOrder'),
         vl.tooltip([vl.fieldN("bytes"), vl.fieldQ("count")])
