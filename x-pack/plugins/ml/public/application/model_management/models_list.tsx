@@ -17,12 +17,12 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiProgress,
+  type EuiSearchBarProps,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
-  type EuiSearchBarProps,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
@@ -32,16 +32,12 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import type { ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
 import {
-  BUILT_IN_MODEL_TAG,
   BUILT_IN_MODEL_TYPE,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,
   ELSER_ID_V1,
   MODEL_STATE,
-  TRAINED_MODEL_TYPE,
-  type ModelState,
 } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
@@ -53,10 +49,19 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
-  ModelDownloadState,
-  TrainedModelConfigResponse,
-  TrainedModelDeploymentStatsResponse,
-  TrainedModelStat,
+  DFAModelItem,
+  ModelDownloadItem,
+  NLPModelItem,
+  TrainedModelItem,
+  TrainedModelUIItem,
+  ExistingModelBase,
+} from '../../../common/types/trained_models';
+import {
+  isBuiltInModel,
+  isDFAModelItem,
+  isModelDownloadItem,
+  isNLPModelItem,
+  isBaseNLPModelItem,
 } from '../../../common/types/trained_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
@@ -75,91 +80,6 @@ import { getModelDeploymentState, getModelStateColor } from './get_model_state';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
-
-type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
-
-/** Common properties for all items in the Trained models table */
-interface BaseModelItem {
-  type?: string[];
-  tags: string[];
-}
-
-/** Common properties for existing NLP models and NLP model download configs */
-interface BaseNLPModelItem extends BaseModelItem {
-  disclaimer?: string;
-  recommended?: boolean;
-  supported?: boolean;
-  state: ModelState | undefined;
-  downloadState?: ModelDownloadState;
-}
-
-/** Model available for download */
-export type ModelDownloadItem = BaseNLPModelItem &
-  Omit<ModelDefinitionResponse, 'version' | 'config'> & {
-    putModelConfig?: object;
-    softwareLicense?: string;
-  };
-
-/** Trained NLP model, i.e. pytorch model returned by the trained_models API */
-export type NLPModelItem = BaseNLPModelItem &
-  TrainedModelItem & {
-    stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
-    /**
-     * Description of the current model state
-     */
-    stateDescription?: string;
-    /**
-     * Deployment ids extracted from the deployment stats
-     */
-    deployment_ids: string[];
-  };
-
-/** Trained DFA model */
-export type DFAModelItem = TrainedModelItem & {
-  origin_job_exists?: boolean;
-};
-
-function isBaseNLPModelItem(item: unknown): item is BaseNLPModelItem {
-  return typeof item === 'object' && item !== null && 'state' in item;
-}
-
-export function isNLPModelItem(item: unknown): item is NLPModelItem {
-  return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.PYTORCH;
-}
-
-type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
-
-/** Any model returned by the trained_models API, e.g. lang_ident, elser, dfa model */
-export type TrainedModelItem = ExistingModelBase & { stats: Stats };
-
-export function isExistingModel(item: unknown): item is TrainedModelItem {
-  return (
-    typeof item === 'object' &&
-    item !== null &&
-    'model_type' in item &&
-    'create_time' in item &&
-    !!item.create_time
-  );
-}
-
-export function isDFAModelItem(item: unknown): item is DFAModelItem {
-  return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.TREE_ENSEMBLE;
-}
-
-export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDownloadItem {
-  return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
-}
-
-export const isBuiltInModel = (item: TrainedModelUIItem) => item.tags.includes(BUILT_IN_MODEL_TAG);
-
-/**
- * This type represents a union of different model entities:
- * - Any existing trained model returned by the API, e.g., lang_ident_model_1, DFA models, etc.
- * - Hosted model configurations available for download, e.g., ELSER or E5
- * - NLP models already downloaded into Elasticsearch
- * - DFA models
- */
-export type TrainedModelUIItem = TrainedModelItem | ModelDownloadItem | NLPModelItem | DFAModelItem;
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;

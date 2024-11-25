@@ -6,8 +6,8 @@
  */
 
 import { getAnalysisType } from '@kbn/ml-data-frame-analytics-utils';
+import type { DFAModelItem } from '../../../../common/types/trained_models';
 import type { MlInferenceState } from './types';
-import type { DFAModelItem } from '../../model_management/models_list';
 
 export const getModelType = (model: DFAModelItem): string | undefined => {
   const analysisConfig = model.metadata?.analytics_config?.analysis;

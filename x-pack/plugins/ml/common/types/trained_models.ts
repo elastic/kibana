@@ -5,14 +5,19 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TrainedModelType } from '@kbn/ml-trained-models-utils';
+import type {
+  InferenceAPIConfigResponse,
+  ModelDefinitionResponse,
+  ModelState,
+  TrainedModelType,
+} from '@kbn/ml-trained-models-utils';
+import { BUILT_IN_MODEL_TAG, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -311,3 +316,84 @@ export interface ModelDownloadState {
   total_parts: number;
   downloaded_parts: number;
 }
+
+export type Stats = Omit<TrainedModelStat, 'model_id' | 'deployment_stats'>;
+
+/** Common properties for all items in the Trained models table */
+interface BaseModelItem {
+  type?: string[];
+  tags: string[];
+}
+
+/** Common properties for existing NLP models and NLP model download configs */
+interface BaseNLPModelItem extends BaseModelItem {
+  disclaimer?: string;
+  recommended?: boolean;
+  supported?: boolean;
+  state: ModelState | undefined;
+  downloadState?: ModelDownloadState;
+}
+
+/** Model available for download */
+export type ModelDownloadItem = BaseNLPModelItem &
+  Omit<ModelDefinitionResponse, 'version' | 'config'> & {
+    putModelConfig?: object;
+    softwareLicense?: string;
+  };
+/** Trained NLP model, i.e. pytorch model returned by the trained_models API */
+export type NLPModelItem = BaseNLPModelItem &
+  TrainedModelItem & {
+    stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
+    /**
+     * Description of the current model state
+     */
+    stateDescription?: string;
+    /**
+     * Deployment ids extracted from the deployment stats
+     */
+    deployment_ids: string[];
+  };
+/** Trained DFA model */
+export type DFAModelItem = TrainedModelItem & {
+  origin_job_exists?: boolean;
+};
+
+export function isBaseNLPModelItem(item: unknown): item is BaseNLPModelItem {
+  return typeof item === 'object' && item !== null && 'state' in item;
+}
+
+export function isNLPModelItem(item: unknown): item is NLPModelItem {
+  return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.PYTORCH;
+}
+
+export type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
+/** Any model returned by the trained_models API, e.g. lang_ident, elser, dfa model */
+export type TrainedModelItem = ExistingModelBase & { stats: Stats };
+
+export function isExistingModel(item: unknown): item is TrainedModelItem {
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'model_type' in item &&
+    'create_time' in item &&
+    !!item.create_time
+  );
+}
+
+export function isDFAModelItem(item: unknown): item is DFAModelItem {
+  return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.TREE_ENSEMBLE;
+}
+
+export function isModelDownloadItem(item: TrainedModelUIItem): item is ModelDownloadItem {
+  return 'putModelConfig' in item && !!item.type?.includes(TRAINED_MODEL_TYPE.PYTORCH);
+}
+
+export const isBuiltInModel = (item: TrainedModelUIItem) => item.tags.includes(BUILT_IN_MODEL_TAG);
+/**
+ * This type represents a union of different model entities:
+ * - Any existing trained model returned by the API, e.g., lang_ident_model_1, DFA models, etc.
+ * - Hosted model configurations available for download, e.g., ELSER or E5
+ * - NLP models already downloaded into Elasticsearch
+ * - DFA models
+ */
+export type TrainedModelUIItem = TrainedModelItem | ModelDownloadItem | NLPModelItem | DFAModelItem;

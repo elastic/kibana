@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
-import type { DFAModelItem } from '../../../model_management/models_list';
+import type { DFAModelItem } from '../../../../../common/types/trained_models';
 import {
   EDIT_MESSAGE,
   CANCEL_EDIT_MESSAGE,

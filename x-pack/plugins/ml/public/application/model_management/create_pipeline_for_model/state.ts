@@ -7,8 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IngestInferenceProcessor } from '@elastic/elasticsearch/lib/api/types';
+import type { DFAModelItem } from '../../../../common/types/trained_models';
 import { getDefaultOnFailureConfiguration } from '../../components/ml_inference/state';
-import type { DFAModelItem } from '../models_list';
 
 export interface InferecePipelineCreationState {
   creatingPipeline: boolean;

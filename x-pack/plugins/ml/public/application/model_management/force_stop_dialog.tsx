@@ -14,7 +14,7 @@ import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { NLPModelItem } from './models_list';
+import type { NLPModelItem } from '../../../common/types/trained_models';
 
 interface ForceStopModelConfirmDialogProps {
   model: NLPModelItem;

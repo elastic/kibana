@@ -7,7 +7,7 @@
 
 import { getModelDeploymentState } from './get_model_state';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
-import type { NLPModelItem } from './models_list';
+import type { NLPModelItem } from '../../../common/types/trained_models';
 
 describe('getModelDeploymentState', () => {
   it('returns STARTED if any deployment is in STARTED state', () => {

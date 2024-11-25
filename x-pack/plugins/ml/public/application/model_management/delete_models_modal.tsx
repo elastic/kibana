@@ -22,11 +22,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { TrainedModelItem, TrainedModelUIItem } from '../../../common/types/trained_models';
+import { isExistingModel } from '../../../common/types/trained_models';
 import { type WithRequired } from '../../../common/types/common';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
-import { type TrainedModelItem, type TrainedModelUIItem, isExistingModel } from './models_list';
 
 interface DeleteModelsModalProps {
   models: TrainedModelUIItem[];

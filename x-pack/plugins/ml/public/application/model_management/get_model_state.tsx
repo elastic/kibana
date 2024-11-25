@@ -17,7 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { NLPModelItem } from './models_list';
+import type { NLPModelItem } from '../../../common/types/trained_models';
 
 /**
  * Resolves result model state based on the state of each deployment.

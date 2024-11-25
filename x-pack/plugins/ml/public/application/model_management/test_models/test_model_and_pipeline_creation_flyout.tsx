@@ -7,12 +7,11 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-
+import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import {
   type TestTrainedModelsContextType,
   TestTrainedModelsContext,
 } from './test_trained_models_context';
-import type { TrainedModelItem } from '../models_list';
 import { TestTrainedModelFlyout } from './test_flyout';
 import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/create_pipeline_for_model_flyout';
 

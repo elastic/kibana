@@ -17,8 +17,8 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { TrainedModelItem } from '../../../../common/types/trained_models';
 import { useMlKibana } from '../../contexts/kibana';
-import type { TrainedModelItem } from '../models_list';
 import { ProcessorsStats } from './expanded_row';
 
 export type IngestStatsResponse = Exclude<TrainedModelItem['stats'], undefined>['ingest'];
