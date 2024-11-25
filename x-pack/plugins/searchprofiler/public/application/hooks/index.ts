@@ -6,3 +6,4 @@
  */
 
 export { useRequestProfile } from './use_request_profile';
+export { useIndices } from './use_indices';

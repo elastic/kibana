@@ -68,4 +68,47 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
       }
     }
   );
+  router.get(
+    {
+      path: '/api/searchprofiler/getIndices',
+      validate: false,
+    },
+    async (ctx, _request, response) => {
+      const currentLicenseStatus = getLicenseStatus();
+      if (!currentLicenseStatus.valid) {
+        return response.forbidden({
+          body: {
+            message: currentLicenseStatus.message!,
+          },
+        });
+      }
+
+      try {
+        const client = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const resp = await client.cat.indices({ format: 'json' });
+
+        const hasIndices = resp.length > 0;
+
+        return response.ok({
+          body: {
+            ok: true,
+            hasIndices,
+          },
+        });
+      } catch (err) {
+        log.error(err);
+        const { statusCode, body: errorBody } = err;
+
+        return response.customError({
+          statusCode: statusCode || 500,
+          body: errorBody
+            ? {
+                message: errorBody.error?.reason,
+                attributes: errorBody,
+              }
+            : err,
+        });
+      }
+    }
+  );
 };
