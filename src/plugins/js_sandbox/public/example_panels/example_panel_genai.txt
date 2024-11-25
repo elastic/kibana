@@ -75,7 +75,7 @@ function(props) {
   }, [logs]); // Empty dependency array to run once on mount
 
   return (
-    <div>
+    <div style={{fontSize:'12px'}}>
       <button onClick={() => getOpenAIResponse()}>Analyse</button>
       {error ? <p style={{ color: 'red' }}>{error}</p> : <div style={{ fontFamily: 'sans-serif' }}
       dangerouslySetInnerHTML={{__html: marked.parse(response)}}
