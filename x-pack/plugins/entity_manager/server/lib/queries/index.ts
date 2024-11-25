@@ -19,8 +19,21 @@ export const entitySourceSchema = z.object({
 
 export type EntitySource = z.infer<typeof entitySourceSchema>;
 
-const sourceCommand = ({ sources }: { sources: EntitySource[] }) => {
-  return `FROM ${sources.flatMap((source) => source.index_patterns).join(', ')}`;
+const sourceCommand = ({
+  sources,
+  metadataFields,
+}: {
+  sources: EntitySource[];
+  metadataFields: string[];
+}) => {
+  let command = `FROM ${sources.flatMap((source) => source.index_patterns).join(', ')}`;
+
+  const esMetadataFields = metadataFields.filter((field) => ['_index', '_id'].includes(field));
+  if (esMetadataFields.length) {
+    command += ` METADATA ${esMetadataFields.join(',')}`;
+  }
+
+  return command;
 };
 
 const idEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
@@ -52,8 +65,7 @@ const filterCommands = ({
   end: string;
 }) => {
   const conditions = [
-    'entity.id IS NOT NULL',
-    'entity.timestamp IS NOT NULL',
+    'entity.id IS NOT NULL AND entity.timestamp IS NOT NULL',
     uniq(sources.map((source) => source.timestamp_field))
       .map((field) => `(${field} >= "${start}" AND ${field} <= "${end}")`)
       .join(' OR '),
@@ -78,7 +90,7 @@ const statsCommand = ({
     ...metadataFields.map((field) => `metadata.${field}=VALUES(${field})`),
   ];
 
-  return `STATS ${aggs.join(',')} BY entity.id`;
+  return `STATS ${aggs.join(', ')} BY entity.id`;
 };
 
 export function getEntityInstancesQuery({
@@ -95,7 +107,7 @@ export function getEntityInstancesQuery({
   metadataFields?: string[];
 }): string {
   const commands = [
-    sourceCommand({ sources }),
+    sourceCommand({ sources, metadataFields }),
     idEvalCommand({ sources }),
     timestampEvalCommand({ sources }),
     filterCommands({ sources, start, end }),
