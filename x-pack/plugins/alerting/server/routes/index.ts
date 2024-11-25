@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
@@ -81,6 +81,7 @@ export interface RouteOptions {
   usageCounter?: UsageCounter;
   config$?: Observable<ConfigSchema>;
   isServerless?: boolean;
+  docLinks: DocLinksServiceSetup;
 }
 
 export function defineRoutes(opts: RouteOptions) {
