@@ -11,7 +11,7 @@ import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 
 interface UseLicenseReturnValue {
   isAtLeastPlatinum: () => boolean;

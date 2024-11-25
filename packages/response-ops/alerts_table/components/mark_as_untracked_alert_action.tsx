@@ -18,7 +18,7 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
  * Alerts table row action to mark the selected alert as untracked
  */
 export const MarkAsUntrackedAlertAction = memo(
-  ({ alert, refresh, onActionExecuted, http, notifications }: AlertActionsProps) => {
+  ({ alert, refresh, onActionExecuted, services: { http, notifications } }: AlertActionsProps) => {
     const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts({ http, notifications });
     const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 

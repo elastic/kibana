@@ -163,7 +163,7 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
-  const { data, http, notifications, fieldFormats, application, licensing, uiSettings } =
+  const { data, http, notifications, fieldFormats, application, licensing, uiSettings, settings } =
     useKibana().services;
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
@@ -465,6 +465,7 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
                 fieldFormats,
                 application,
                 licensing,
+                settings,
               }}
               {...tablePropsOverrides}
             />

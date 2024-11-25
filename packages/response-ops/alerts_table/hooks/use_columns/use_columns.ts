@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { BrowserField, BrowserFields } from '@kbn/alerting-types';
-import { MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import { HttpStart } from '@kbn/core-http-browser';
-import { AlertsTableStorage } from '../../components/alerts_table';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { AlertsTableStorage } from '../../components/alerts_table';
 import { toggleColumn } from './toggle_column';
 
 export interface UseColumnsArgs {

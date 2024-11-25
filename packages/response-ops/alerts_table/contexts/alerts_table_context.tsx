@@ -8,7 +8,7 @@
  */
 
 import React, { PropsWithChildren, createContext, useContext } from 'react';
-import { typedMemo } from '../utils';
+import { typedMemo } from '../utils/react';
 import { AdditionalContext, RenderContext } from '../types';
 
 const AlertsTableContext = createContext({});

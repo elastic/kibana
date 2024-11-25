@@ -34,7 +34,9 @@ const props = {
   maintenanceWindows: maintenanceWindowsMap,
   columnId: 'kibana.alert.status',
   showAlertStatusWithFlapping: true,
-  application: applicationServiceMock.createStartContract(),
+  services: {
+    application: applicationServiceMock.createStartContract(),
+  },
 } as CellComponentProps;
 
 describe('SystemCellFactory', () => {

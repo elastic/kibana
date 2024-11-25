@@ -25,7 +25,8 @@ interface CaseViewAlertsProps {
 }
 
 export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlertsProps) => {
-  const { data, http, notifications, fieldFormats, application, licensing } = useKibana().services;
+  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+    useKibana().services;
   const alertIds = getManualAlertIds(caseData.comments);
   const alertIdsQuery = useMemo(
     () => ({
@@ -78,6 +79,7 @@ export const CaseViewAlerts = ({ caseData, onAlertsTableLoaded }: CaseViewAlerts
           notifications,
           fieldFormats,
           application,
+          settings,
           // In the Cases UI the licensing service is defined
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           licensing: licensing!,

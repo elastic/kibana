@@ -53,6 +53,7 @@ import type { MutedAlerts } from '@kbn/response-ops-alerts-apis/types';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { Case } from './hooks/apis/bulk_get_cases';
 
 export interface Consumer {
@@ -179,6 +180,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     fieldFormats: FieldFormatsStart;
     application: ApplicationStart;
     licensing: LicensingPluginStart;
+    settings: SettingsStart;
   };
 }
 
@@ -251,11 +253,6 @@ export type RenderContext<AC extends AdditionalContext> = {
   pageIndex: number;
   pageSize: number;
 
-  http: HttpStart;
-  fieldFormats: FieldFormatsStart;
-  notifications: NotificationsStart;
-  application: ApplicationStart;
-  casesService?: CasesService;
   openAlertInFlyout: (alertId: string) => void;
 
   showAlertStatusWithFlapping?: boolean;
@@ -271,6 +268,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'renderFlyoutHeader'
     | 'renderFlyoutBody'
     | 'renderFlyoutFooter'
+    | 'services'
   >,
   'columns'
 > &

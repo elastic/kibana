@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
   ALERT_CASE_IDS,
   ALERT_RULE_NAME,
@@ -19,6 +18,8 @@ import {
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 import { Alert } from '@kbn/alerting-types';
+import useObservable from 'react-use/lib/useObservable';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { BulkActionsPanelConfig, BulkActionsVerbs, RowSelection, TimelineItem } from '../types';
 import * as i18n from '../translations';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
@@ -30,6 +31,7 @@ interface BulkActionsProps {
   setIsBulkActionsLoading: (loading: boolean) => void;
   clearSelection: () => void;
   refresh: () => void;
+  settings: SettingsStart;
 }
 
 const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
@@ -137,16 +139,20 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   setIsBulkActionsLoading,
   clearSelection,
   refresh,
+  settings,
 }) => {
   const {
     bulkActionsStore: [{ rowSelection, isAllSelected }, updateSelectedRows],
   } = useAlertsTableContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const [showClearSelection, setShowClearSelectiong] = useState(false);
+  const defaultNumberFormat = useObservable<string>(
+    useMemo(() => settings.client.get$(DEFAULT_NUMBER_FORMAT), [settings.client]),
+    settings.client.get(DEFAULT_NUMBER_FORMAT)
+  );
+  const [showClearSelection, setShowClearSelection] = useState(false);
 
   useEffect(() => {
-    setShowClearSelectiong(isAllSelected);
+    setShowClearSelection(isAllSelected);
   }, [isAllSelected]);
 
   const selectedCount = rowSelection.size;

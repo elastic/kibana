@@ -39,7 +39,6 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
@@ -49,6 +48,7 @@ import deepEqual from 'fast-deep-equal';
 import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/constants';
+import { Storage } from '../utils/storage';
 import { queryKeys } from '../constants';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { EmptyState } from './empty_state';
@@ -73,7 +73,7 @@ import { useBulkGetMaintenanceWindowsQuery } from '../hooks/use_bulk_get_mainten
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { ErrorBoundary, FallbackComponent } from './error_boundary';
 import { usePagination } from '../hooks/use_pagination';
-import { typedForwardRef } from '../utils';
+import { typedForwardRef } from '../utils/react';
 
 export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
@@ -204,20 +204,13 @@ const AlertsTableContent = typedForwardRef(
       renderFlyoutFooter,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
-      services: {
-        data,
-        cases: casesService,
-        fieldFormats,
-        http,
-        notifications,
-        application,
-        licensing,
-      },
+      services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
     ref: Ref<AlertsTableImperativeApi>
   ) => {
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
+    const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
     const storage = useRef(new Storage(window.localStorage));
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
@@ -472,11 +465,6 @@ const AlertsTableContent = typedForwardRef(
           pageSize: pagination.pageSize,
 
           showAlertStatusWithFlapping,
-          fieldFormats,
-          http,
-          application,
-          notifications,
-          casesService,
           openAlertInFlyout,
 
           bulkActionsStore,
@@ -487,6 +475,8 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
+
+          services,
         } as RenderContext<AC>),
       [
         additionalContext,
@@ -508,11 +498,6 @@ const AlertsTableContent = typedForwardRef(
         pagination.pageIndex,
         pagination.pageSize,
         showAlertStatusWithFlapping,
-        fieldFormats,
-        http,
-        application,
-        notifications,
-        casesService,
         openAlertInFlyout,
         bulkActionsStore,
         renderCellValue,
@@ -521,6 +506,7 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutHeader,
         renderFlyoutBody,
         renderFlyoutFooter,
+        services,
       ]
     );
 

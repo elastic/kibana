@@ -130,7 +130,7 @@ const sort: SortCombinations[] = [
 ];
 
 export const AlertsPanel: FC = () => {
-  const { data, http, notifications, fieldFormats, application, licensing } =
+  const { data, http, notifications, fieldFormats, application, licensing, settings } =
     useMlKibana().services;
 
   const [isOpen, setIsOpen] = useState(true);
@@ -228,6 +228,7 @@ export const AlertsPanel: FC = () => {
               fieldFormats,
               application,
               licensing,
+              settings,
             }}
           />
         ) : (

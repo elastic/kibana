@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { getOr } from 'lodash/fp';
 
 interface StyledDivProps {
   targetClassNames: string[];
 }
 
-const StyledDiv = euiStyled.div<StyledDivProps>`
+const StyledDiv = styled.div<StyledDivProps>`
   width: 100%;
   display: flex;
   flex-grow: 1;

@@ -80,6 +80,7 @@ export function RuleComponent({
     fieldFormats,
     application,
     licensing,
+    settings,
   } = useKibana().services;
   // The lastReloadRequestTime should be updated when the refreshToken changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -124,6 +125,7 @@ export function RuleComponent({
             fieldFormats,
             application,
             licensing,
+            settings,
           }}
         />
       );
@@ -136,7 +138,22 @@ export function RuleComponent({
       readOnly,
       onMuteAction,
     });
-  }, []);
+  }, [
+    alerts,
+    application,
+    data,
+    fieldFormats,
+    http,
+    lastReloadRequestTime,
+    licensing,
+    notifications,
+    onMuteAction,
+    readOnly,
+    rule.id,
+    ruleType.hasAlertsMappings,
+    ruleType.hasFieldsForAAD,
+    ruleType.id,
+  ]);
 
   const tabs = [
     {

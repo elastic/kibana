@@ -24,8 +24,10 @@ export const ViewAlertDetailsAlertAction = memo(
     isAlertDetailsEnabled,
     resolveAlertPagePath,
     tableId,
-    http: {
-      basePath: { prepend },
+    services: {
+      http: {
+        basePath: { prepend },
+      },
     },
   }: AlertActionsProps) => {
     const alertId = alert[ALERT_UUID]?.[0] ?? null;
