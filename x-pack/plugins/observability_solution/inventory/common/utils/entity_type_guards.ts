@@ -13,7 +13,7 @@ interface BuiltinEntityMap {
   container: InventoryEntity & { cloud?: { provider?: string[] } };
   service: InventoryEntity & {
     agent?: { name: AgentName[] };
-    service?: { environment?: string };
+    service?: { environment?: string | string[] | null };
   };
 }
 
