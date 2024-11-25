@@ -8,10 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { LogColumn, LogEntry } from '../../../../common/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import {
   LogColumnRenderConfiguration,
   isFieldColumnRenderConfiguration,
@@ -20,7 +18,6 @@ import {
 } from '../../../utils/log_column_render_configuration';
 import { isTimestampColumn } from '../../../utils/log_entry';
 import { useUiTracker } from '../../../utils/use_ui_tracker';
-import { getExternalContextMenuItemsFromActions } from './external_context_menu_items';
 import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryContextMenu } from './log_entry_context_menu';
 import { LogEntryFieldColumn } from './log_entry_field_column';
@@ -95,15 +92,6 @@ export const LogEntryRow = memo(
     const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;
     const hasActionViewLogInContext = hasContext && openViewLogInContext !== undefined;
     const hasActionsMenu = hasActionFlyoutWithItem || hasActionViewLogInContext;
-
-    const uiActions = useKibanaContextForPlugin().services.uiActions;
-
-    const externalContextMenuItems = useAsync(() => {
-      return getExternalContextMenuItemsFromActions({
-        uiActions,
-        context: logEntry,
-      });
-    }, [uiActions, logEntry]);
 
     const menuItems = useMemo(() => {
       const items = [];
@@ -247,7 +235,6 @@ export const LogEntryRow = memo(
                 onOpen={openMenu}
                 onClose={closeMenu}
                 items={menuItems}
-                externalItems={externalContextMenuItems.value}
               />
             ) : null}
           </LogEntryColumn>

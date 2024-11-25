@@ -8,5 +8,3 @@
 export const TIMESTAMP_FIELD = '@timestamp';
 export const MESSAGE_FIELD = 'message';
 export const TIEBREAKER_FIELD = '_doc';
-
-export const logEntryContextMenuTriggerId = 'logEntryContextMenu';
