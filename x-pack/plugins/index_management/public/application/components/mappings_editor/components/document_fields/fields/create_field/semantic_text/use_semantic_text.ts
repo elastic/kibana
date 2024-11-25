@@ -19,6 +19,8 @@ import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_
 
 import { getInferenceEndpoints } from '../../../../../../../services/api';
 import { getFieldByPathName } from '../../../../../lib/utils';
+import { ELSER_PRECONFIGURED_ENDPOINTS } from '../../../../../constants';
+
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
@@ -62,7 +64,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
         form.setFieldValue('reference_field', referenceField);
       }
       if (!form.getFormData().inference_id) {
-        form.setFieldValue('inference_id', 'elser_model_2');
+        form.setFieldValue('inference_id', ELSER_PRECONFIGURED_ENDPOINTS);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
