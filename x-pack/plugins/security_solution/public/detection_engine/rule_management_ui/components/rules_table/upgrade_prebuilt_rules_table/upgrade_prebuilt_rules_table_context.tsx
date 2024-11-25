@@ -21,12 +21,12 @@ import { invariant } from '../../../../../../common/utils/invariant';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { TabContentPadding } from '../../../../rule_management/components/rule_details/rule_details_flyout';
+import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
+import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
-import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
-import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type {
   RuleUpgradeState,
@@ -352,12 +352,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           </EuiToolTip>
         ),
         content: (
-          <TabContentPadding>
-            <RuleDiffTab
-              oldRule={ruleUpgradeState.current_rule}
-              newRule={ruleUpgradeState.target_rule}
-            />
-          </TabContentPadding>
+          <RuleDiffTab
+            oldRule={ruleUpgradeState.current_rule}
+            newRule={ruleUpgradeState.target_rule}
+          />
         ),
       };
 
