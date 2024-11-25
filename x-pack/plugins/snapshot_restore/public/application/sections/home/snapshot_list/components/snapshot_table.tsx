@@ -101,9 +101,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
       }),
       truncateText: false,
       sortable: false,
-      description: i18n.translate('xpack.snapshotRestore.snapshotList.table.statePartialTooltip', {
-        defaultMessage: 'This is partial.',
-      }),
       render: (state: string) => <SnapshotState state={state} tooltipIcon={false} />,
     },
     {
