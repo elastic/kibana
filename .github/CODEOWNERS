@@ -1938,6 +1938,12 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Enterprise Search
 # search
+/x-pack/test/functional/es_archives/data/search_sessions @elastic/search-kibana
+/x-pack/test/common/services/search_secure.ts @elastic/search-kibana
+/test/functional/page_objects/unified_search_page.ts @elastic/search-kibana
+/test/functional/fixtures/kbn_archiver/ccs @elastic/search-kibana
+/test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
+/test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
 /x-pack/test/functional_solution_sidenav/tests/search_sidenav.ts @elastic/search-kibana
 /x-pack/test/functional/services/search_sessions.ts @elastic/search-kibana
 /x-pack/test/functional/page_objects/search_* @elastic/search-kibana
