@@ -109,7 +109,8 @@ function createMockPackagePolicy(
     ...props,
   };
 }
-describe('PackagePolicyActionsMenu', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/191804
+describe.skip('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });

@@ -30,7 +30,6 @@ import { SendEnterpriseSearchTelemetry as SendTelemetry } from '../../../shared/
 import headerImage from '../../assets/search_header.png';
 
 import { EnterpriseSearchOverviewPageTemplate } from '../layout';
-import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
@@ -121,11 +120,6 @@ export const ProductSelector: React.FC = () => {
             <EuiFlexItem>
               <SearchLabsBanner />
             </EuiFlexItem>
-            {!config.host && config.canDeployEntSearch && (
-              <EuiFlexItem>
-                <SetupGuideCta />
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         </EuiPageTemplate.Section>
       </EnterpriseSearchOverviewPageTemplate>
