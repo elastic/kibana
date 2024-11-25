@@ -8,8 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, screen, fireEvent, renderHook } from '@testing-library/react';
 import { usePresentationPanelTitleClickHandler } from './presentation_panel_title';
 
 describe('usePresentationPanelTitleClickHandler', () => {

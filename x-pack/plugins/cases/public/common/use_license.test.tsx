@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from './mock';
 import { useLicense } from './use_license';
 
