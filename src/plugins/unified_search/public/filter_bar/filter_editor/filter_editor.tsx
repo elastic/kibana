@@ -408,18 +408,21 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             hasEmptyLabelSpace={true}
             className={cx(filterBadgeStyle, filterPreviewLabelStyle)}
             label={
-              <strong>
-                <FormattedMessage
-                  id="unifiedSearch.filter.filterBar.preview"
-                  defaultMessage="{icon} Preview"
-                  values={{
-                    icon: <EuiIcon type="inspect" size="s" />,
-                  }}
-                />
-              </strong>
+              <>
+                <EuiSpacer size="m" />
+                <strong>
+                  <FormattedMessage
+                    id="unifiedSearch.filter.filterBar.preview"
+                    defaultMessage="{icon} Preview"
+                    values={{
+                      icon: <EuiIcon type="inspect" size="s" />,
+                    }}
+                  />
+                </strong>
+              </>
             }
           >
-            <EuiText size="xs" data-test-subj="filter-preview" css={{ overflowWrap: 'break-word' }}>
+            <EuiText size="s" data-test-subj="filter-preview" css={{ overflowWrap: 'break-word' }}>
               <FilterBadgeGroup
                 filters={[localFilter]}
                 dataViews={this.state.indexPatterns}
