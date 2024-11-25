@@ -85,6 +85,12 @@ export const ResultField: React.FC<ResultFieldProps> = ({
             <EuiPopover
               button={
                 <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'searchIndexDocuments.result.fieldTypeButtonAriaLabel',
+                    {
+                      defaultMessage: "Show this field's type",
+                    }
+                  )}
                   onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                   iconType={iconType || (fieldType ? iconMap[fieldType] : defaultToken)}
                 />
