@@ -499,14 +499,6 @@ export class DataGridService extends FtrService {
     return await detailsRow.findAllByTestSubject('~docTableRowAction');
   }
 
-  public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
-    const table = await this.getTable();
-
-    return await table.findByCssSelector(
-      '[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]'
-    );
-  }
-
   public async openColMenuByField(field: string) {
     await this.retry.waitFor('header cell action being displayed', async () => {
       // to prevent flakiness

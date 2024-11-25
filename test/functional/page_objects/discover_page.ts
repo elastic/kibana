@@ -40,10 +40,6 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
 
-  public async getDocTable() {
-    return this.dataGrid;
-  }
-
   public async saveSearch(
     searchName: string,
     saveAsNew?: boolean,
@@ -110,8 +106,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getColumnHeaders() {
-    const table = await this.getDocTable();
-    return await table.getHeaderFields();
+    return await this.dataGrid.getHeaderFields();
   }
 
   public async openLoadSavedSearchPanel() {
@@ -344,15 +339,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async getDocHeader() {
-    const table = await this.getDocTable();
-    const docHeader = await table.getHeaders();
+    const docHeader = await this.dataGrid.getHeaders();
     return docHeader.join();
   }
 
   public async getDocTableRows() {
     await this.header.waitUntilLoadingHasFinished();
-    const table = await this.getDocTable();
-    return await table.getBodyRows();
+    return await this.dataGrid.getBodyRows();
   }
 
   public async getDocTableIndex(index: number, visibleText = false) {
