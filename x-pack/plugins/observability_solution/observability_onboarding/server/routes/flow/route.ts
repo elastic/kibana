@@ -13,7 +13,8 @@ import {
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
 import { dump } from 'js-yaml';
-import { PackageDataStreamTypes } from '@kbn/fleet-plugin/common/types';
+import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
+import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
@@ -21,7 +22,6 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
-import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
@@ -329,6 +329,13 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       throw Boom.notFound(`Onboarding session '${params.path.onboardingId}' not found.`);
     }
 
+    const outputClient = await fleetStart.createOutputClient(request);
+    const defaultOutputId = await outputClient.getDefaultDataOutputId();
+    if (!defaultOutputId) {
+      throw Boom.notFound('Default data output not found');
+    }
+    const output = await outputClient.get(defaultOutputId);
+
     const integrationsToInstall = parseIntegrationsTSV(params.body);
     if (!integrationsToInstall.length) {
       return response.badRequest({
@@ -381,15 +388,11 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
     });
 
-    const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
-      ? [plugins.cloud?.setup?.elasticsearchUrl]
-      : await getFallbackESUrl(services.esLegacyConfigService);
-
     return response.ok({
       headers: {
         'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigTar({ elasticsearchUrl, installedIntegrations }),
+      body: generateAgentConfigTar(output, installedIntegrations),
     });
   },
 });
@@ -565,14 +568,9 @@ function parseRegistryIntegrationMetadata(
   }
 }
 
-const generateAgentConfigTar = ({
-  elasticsearchUrl,
-  installedIntegrations,
-}: {
-  elasticsearchUrl: string[];
-  installedIntegrations: InstalledIntegration[];
-}) => {
+function generateAgentConfigTar(output: Output, installedIntegrations: InstalledIntegration[]) {
   const now = new Date();
+
   return makeTar([
     {
       type: 'File',
@@ -581,11 +579,7 @@ const generateAgentConfigTar = ({
       mtime: now,
       data: dump({
         outputs: {
-          default: {
-            type: 'elasticsearch',
-            hosts: elasticsearchUrl,
-            api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
-          },
+          default: transformOutputToFullPolicyOutput(output, undefined, true),
         },
       }),
     },
@@ -603,7 +597,7 @@ const generateAgentConfigTar = ({
       data: integration.config,
     })),
   ]);
-};
+}
 
 export const flowRouteRepository = {
   ...createFlowRoute,
