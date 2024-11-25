@@ -66,7 +66,6 @@
     "@kbn/discover-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/lens-plugin",
-    "@kbn/osquery-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/lens-embeddable-utils",
@@ -112,6 +111,7 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/es-types",
     "@kbn/logging-mocks",
+    "@kbn/streams-plugin",
   ],
   "exclude": ["target/**/*"]
 }
