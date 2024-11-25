@@ -43,6 +43,19 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('init error handling', () => {
+      afterEach(async () => {
+        await dataView.create('security-solution');
+        await utils.cleanEngines();
+      });
+
+      it('should return "error" when the security data view does not exist', async () => {
+        await dataView.delete('security-solution');
+        await utils.initEntityEngineForEntityType('host');
+        await utils.waitForEngineStatus('host', 'error');
+      });
+    });
+
     describe('enablement', () => {
       afterEach(async () => {
         await utils.cleanEngines();
