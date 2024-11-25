@@ -16,7 +16,7 @@ const getObservabilityAlertDetailsContextRoute = createObservabilityServerRoute(
   },
   security: {
     authz: {
-      requiredPrivileges: ['ai_assistant', 'rac'],
+      requiredPrivileges: ['ai_assistant'],
     },
   },
   params: t.type({
