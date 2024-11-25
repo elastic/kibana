@@ -28,8 +28,10 @@ export const ViewRuleDetailsAlertAction = memo(
     alert,
     resolveRulePagePath,
     tableId,
-    http: {
-      basePath: { prepend },
+    services: {
+      http: {
+        basePath: { prepend },
+      },
     },
   }: AlertActionsProps) => {
     const ruleId = alert[ALERT_RULE_UUID]?.[0] ?? null;

@@ -20,8 +20,10 @@ import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
  */
 export const DefaultAlertActions = (props: AlertActionsProps) => {
   const {
-    http,
-    notifications: { toasts },
+    services: {
+      http,
+      notifications: { toasts },
+    },
   } = props;
   const { authorizedToCreateAnyRules } = useLoadRuleTypesQuery({
     filteredRuleTypes: [],

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEmpty } from 'lodash';
 import React from 'react';
+import { isEmpty } from 'lodash';
 import {
   ALERT_DURATION,
   ALERT_RULE_NAME,
@@ -18,11 +18,11 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
-import { FIELD_FORMAT_IDS, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { HttpStart } from '@kbn/core-http-browser';
-import { AlertsTableProps } from '../types';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { AlertsTableProps } from '../types';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { AlertsTableSupportedConsumers } from '../types';
 
@@ -62,18 +62,17 @@ export const renderCellValue: AlertsTableProps['renderCellValue'] = (props) => {
 };
 
 const defaultParam: Record<string, FieldFormatParams> = {
-  [FIELD_FORMAT_IDS.DURATION]: {
+  duration: {
     inputFormat: 'milliseconds',
     outputFormat: 'humanizePrecise',
   },
-  [FIELD_FORMAT_IDS.NUMBER]: {
+  number: {
     pattern: '00.00',
   },
 };
 
 export const getFieldFormatterProvider =
-  (fieldFormats: FieldFormatsStart) =>
-  (fieldType: FIELD_FORMAT_IDS, params?: FieldFormatParams) => {
+  (fieldFormats: FieldFormatsStart) => (fieldType: string, params?: FieldFormatParams) => {
     const fieldFormatter = fieldFormats.deserialize({
       id: fieldType,
       params: params ?? defaultParam[fieldType],
@@ -117,13 +116,13 @@ export function getAlertFormatters(fieldFormats: FieldFormatsStart, http: HttpSt
     switch (columnId) {
       case TIMESTAMP:
       case ALERT_START:
-        return <>{getFormatter(FIELD_FORMAT_IDS.DATE)(value)}</>;
+        return <>{getFormatter('date')(value)}</>;
       case ALERT_RULE_NAME:
         return rowData ? <AlertRuleLink alertFields={rowData} http={http} /> : <>{value}</>;
       case ALERT_DURATION:
         return (
           <>
-            {getFormatter(FIELD_FORMAT_IDS.DURATION, {
+            {getFormatter('duration', {
               inputFormat: 'microseconds',
               outputFormat: 'humanizePrecise',
             })(value) || '--'}

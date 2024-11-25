@@ -32,10 +32,12 @@ const props = {
   isLoading: false,
   alert,
   cases: casesMap,
-  casesService: createCasesServiceMock(),
   maintenanceWindows: maintenanceWindowsMap,
   columnId: 'kibana.alert.case_ids',
   showAlertStatusWithFlapping: false,
+  services: {
+    casesService: createCasesServiceMock(),
+  },
   // Assertion used to avoid defining all the (numerous) context properties
 } as CellComponentProps;
 
