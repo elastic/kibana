@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { ALERT_PREVALENCE_AGG, useAlertPrevalence } from './use_alert_prevalence';
 import type { UseAlertPrevalenceParams, UserAlertPrevalenceResult } from './use_alert_prevalence';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -18,7 +18,7 @@ jest.mock('../../../../common/hooks/use_selector');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_query');
 
 describe('useAlertPrevalence', () => {
-  let hookResult: RenderHookResult<UseAlertPrevalenceParams, UserAlertPrevalenceResult>;
+  let hookResult: RenderHookResult<UserAlertPrevalenceResult, UseAlertPrevalenceParams>;
 
   beforeEach(() => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({

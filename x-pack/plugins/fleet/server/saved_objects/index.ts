@@ -620,6 +620,7 @@ export const getSavedObjectTypes = (
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
+          bump_agent_policy_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -769,6 +770,16 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
+                bump_agent_policy_revision: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        '16': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
                 supports_agentless: { type: 'boolean' },
               },
             },
@@ -835,10 +846,21 @@ export const getSavedObjectTypes = (
           updated_by: { type: 'keyword' },
           created_at: { type: 'date' },
           created_by: { type: 'keyword' },
+          bump_agent_policy_revision: { type: 'boolean' },
         },
       },
       modelVersions: {
         '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                bump_agent_policy_revision: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        '2': {
           changes: [
             {
               type: 'mappings_addition',

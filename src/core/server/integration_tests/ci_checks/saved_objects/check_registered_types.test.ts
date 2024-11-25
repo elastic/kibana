@@ -108,7 +108,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "fleet-agent-policies": "f57d3b70e4175a19a18f18ee72a379ceec82e1fc",
         "fleet-fleet-server-host": "69be15f6b6f2a2875ad3c7050ddea7a87f505417",
         "fleet-message-signing-keys": "93421f43fed2526b59092a4e3c65d64bc2266c0f",
+<<<<<<< HEAD
         "fleet-package-policies": "0fd83d8df64bddd74d402f453bbb26f3de9810e5",
+=======
+        "fleet-package-policies": "8be2cabfed89e103e0d413f2900e9cf6cd31bc68",
+>>>>>>> upstream/main
         "fleet-preconfiguration-deletion-record": "c52ea1e13c919afe8a5e8e3adbb7080980ecc08e",
         "fleet-proxy": "6cb688f0d2dd856400c1dbc998b28704ff70363d",
         "fleet-setup-lock": "0dc784792c79b5af5a6e6b5dcac06b0dbaa90bde",
@@ -124,7 +128,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ingest-agent-policies": "5e95e539826a40ad08fd0c1d161da0a4d86ffc6d",
         "ingest-download-sources": "279a68147e62e4d8858c09ad1cf03bd5551ce58d",
         "ingest-outputs": "55988d5f778bbe0e76caa7e6468707a0a056bdd8",
-        "ingest-package-policies": "542920b5a62e3a2b78044f9b59cb03ad6f6d8f22",
+        "ingest-package-policies": "dfa7b1045a2667a822181f40f012786724492439",
         "ingest_manager_settings": "111a616eb72627c002029c19feb9e6c439a10505",
         "inventory-view": "b8683c8e352a286b4aca1ab21003115a4800af83",
         "kql-telemetry": "93c1d16c1a0dfca9c8842062cf5ef8f62ae401ad",
