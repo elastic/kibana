@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AddEmptyPrompt } from './add_empty_prompt';
+export { getDataFromFieldsHits, isGeoField } from './field_formatters';
+export { toArray, toObjectArrayOfStrings } from './to_array';
