@@ -222,6 +222,12 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               )}
               isLoading={isLoading}
               options={groupedOptions}
+              onKeyDown={(event) => {
+                // Index name should not contain spaces
+                if (event.key === ' ') {
+                  event.preventDefault();
+                }
+              }}
               onSearchChange={(searchValue) => {
                 setQuery({
                   isFullMatch: options.some((option) => option.label === searchValue),
