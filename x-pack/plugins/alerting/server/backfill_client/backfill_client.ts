@@ -234,7 +234,7 @@ export class BackfillClient {
             ],
           };
         }
-        return transformedResponse[indexOrError];
+        return response;
       } else {
         // Return the error we encountered
         return indexOrError as ScheduleBackfillError;
