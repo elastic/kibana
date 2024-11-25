@@ -153,6 +153,8 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const tasksToRun: ConcreteTaskInstance[] = [];
   const leftOverTasks: ConcreteTaskInstance[] = [];
 
+  console.log(`tasksToRun ${JSON.stringify(tasksToRun)}`);
+
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
     const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
