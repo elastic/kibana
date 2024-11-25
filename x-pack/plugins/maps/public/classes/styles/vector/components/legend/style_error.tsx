@@ -21,16 +21,27 @@ export const StyleError = ({ error, style }: Props) => {
   const styleName = style.getDisplayStyleName();
 
   useEffect(() => {
+    let canceled = false;
     const getLabel = async () => {
       const field = style.getField();
       if (!field) {
         return;
       }
+
       const fieldLabel = await field.getLabel();
+
+      if (canceled) {
+        return;
+      }
+
       setLabel(fieldLabel);
     };
 
     getLabel();
+
+    return () => {
+      canceled = true;
+    };
   }, [style]);
 
   return (
