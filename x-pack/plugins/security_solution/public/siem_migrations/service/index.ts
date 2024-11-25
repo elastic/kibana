@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { SiemMigrationsService } from './siem_migrations_service';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
+
+export const createSiemMigrationsService = async (coreStart: CoreStart) => {
+  const { SiemMigrationsService } = await import(
+    /* webpackChunkName: "lazySiemMigrationsService" */
+    './siem_migrations_service'
+  );
+  return new SiemMigrationsService(coreStart);
+};

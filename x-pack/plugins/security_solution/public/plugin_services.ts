@@ -19,6 +19,7 @@ import type { ConfigSettings } from '../common/config_settings';
 import { parseConfigSettings } from '../common/config_settings';
 import { APP_UI_ID } from '../common/constants';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import { createSiemMigrationsService } from './siem_migrations/service';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import type {
   PluginStart,
@@ -27,7 +28,6 @@ import type {
   StartPluginsDependencies,
   StartServices,
 } from './types';
-import { SiemMigrationsService } from './siem_migrations/service';
 
 export class PluginServices {
   private readonly telemetry: TelemetryService = new TelemetryService();
@@ -153,7 +153,7 @@ export class PluginServices {
       customDataService,
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
-      siemMigrations: new SiemMigrationsService(coreStart),
+      siemMigrations: await createSiemMigrationsService(coreStart),
       ...(params && {
         onAppLeave: params.onAppLeave,
         setHeaderActionMenu: params.setHeaderActionMenu,
