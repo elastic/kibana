@@ -11,7 +11,7 @@ describe('AddObservableRequestRT', () => {
   it('has expected attributes in request', () => {
     const defaultRequest = {
       observable: {
-        description: undefined,
+        description: null,
         typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
         value: 'email@example.com',
       },
@@ -30,8 +30,7 @@ describe('UpdateObservableRequestRT', () => {
   it('has expected attributes in request', () => {
     const defaultRequest = {
       observable: {
-        description: undefined,
-        typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
+        description: null,
         value: 'email@example.com',
       },
     };
