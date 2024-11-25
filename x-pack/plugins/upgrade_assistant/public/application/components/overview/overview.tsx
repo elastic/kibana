@@ -97,7 +97,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               'xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajor',
               {
                 defaultMessage:
-                  'You need to upgrade to the last minor version before you can safely proceed to the next major.',
+                  'You need to upgrade to the last minor version before you can safely proceed to the next major',
               }
             )}
           >
