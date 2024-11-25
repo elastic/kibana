@@ -142,6 +142,7 @@ export const GridLayout = ({
 
   const gridClassNames = classNames('kbnGrid', {
     'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
+    'kbnGrid--hasExpandedPanel': Boolean(expandedPanelId),
   });
 
   return (
@@ -152,7 +153,9 @@ export const GridLayout = ({
         }}
         className={gridClassNames}
         css={css`
-          height: 100%;
+          &.kbnGrid--hasExpandedPanel {
+            height: 100%;
+          }
         `}
       >
         {children}

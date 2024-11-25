@@ -32,7 +32,8 @@ export const GridHeightSmoother = ({
 
       if (expandedPanelId) {
         const viewPortHeight = getViewportHeight();
-        const smoothHeightRefY = smoothHeightRef.current.getBoundingClientRect().y;
+        const smoothHeightRefY =
+          smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
 
         // When panel is expanded, ensure the page occupies the full viewport height, no more, no less, so
         // smoothHeight height = viewport height - smoothHeight position - EuiPanel padding.
