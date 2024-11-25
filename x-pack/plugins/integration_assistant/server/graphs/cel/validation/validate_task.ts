@@ -39,7 +39,6 @@ export class ValidateCelTask {
   }
 
   private runTask = async (taskInstance: ConcreteTaskInstance) => {
-    console.log('**************************************************************** runTask');
     const { params, state } = taskInstance;
     if (params.celProgram) {
       const formattedProgram = await validate(params.celProgram);
@@ -70,18 +69,11 @@ export class ValidateCelTask {
     taskManager?: TaskManagerStartContract,
     esClient?: ElasticsearchClient
   ) => {
-    console.log(
-      '**************************************************************** startTaskManager'
-    );
     this.taskManagerStart = taskManager;
     this.esClient = esClient;
   };
 
   public validateCelProgram = async (celProgram: string): Promise<ConcreteTaskInstance> => {
-    console.log(
-      '**************************************************************** validateCelProgram'
-    );
-
     if (!this.taskManagerStart) {
       throw new Error('Task manager service is missing');
     }
@@ -99,7 +91,6 @@ export class ValidateCelTask {
   };
 
   public pollTaskManager = (taskInstance: ConcreteTaskInstance): Promise<string> => {
-    console.log('**************************************************************** pollTaskManager');
     return new Promise((resolve) => {
       const interval = setInterval(async () => {
         if (!this.esClient) {
@@ -118,7 +109,6 @@ export class ValidateCelTask {
 
           if (document !== undefined && document._source !== undefined) {
             const formattedProgram = document._source.formattedProgram;
-            console.log(`**************************************formattedProgram`, formattedProgram);
             if (formattedProgram) {
               clearInterval(interval);
               resolve(formattedProgram);

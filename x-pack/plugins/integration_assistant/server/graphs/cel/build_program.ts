@@ -27,8 +27,13 @@ export async function handleBuildProgram({
   });
   const validateCelTask = state.validateCelTask;
 
+  console.log("Start time: " + Date.now());
+  console.log("Before validate run Task: ", process.memoryUsage());
   const taskInstance = await validateCelTask.validateCelProgram(program.trim());
   const formattedProgram = await validateCelTask.pollTaskManager(taskInstance);
+  console.log("After validate run Task: ", process.memoryUsage());
+  console.log("End time: " + Date.now());
+
 
   return {
     currentProgram: formattedProgram,
