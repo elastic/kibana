@@ -65,7 +65,6 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-execution-context-server-mocks",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
@@ -74,7 +73,8 @@
     "@kbn/core-http-server",
     "@kbn/zod",
     "@kbn/core-saved-objects-base-server-internal",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": [
     "target/**/*"
