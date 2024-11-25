@@ -12,7 +12,7 @@ import { getFips } from 'crypto';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { PKCS12ConfigType, SecurityServiceConfigType } from '../utils';
 export function isFipsEnabled(config: SecurityServiceConfigType): boolean {
-  return config?.experimental?.fipsMode?.enabled ?? false;
+  return config?.fipsMode?.enabled ?? false;
 }
 
 export function checkFipsConfig(
@@ -33,7 +33,7 @@ export function checkFipsConfig(
     // FIPS must be enabled on both, or, log/error an exit Kibana
     if (isFipsConfigEnabled !== isNodeRunningWithFipsEnabled) {
       throw new CriticalError(
-        `Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to ${isFipsConfigEnabled} and the configured Node.js environment has FIPS ${
+        `Configuration mismatch error. xpack.security.fipsMode.enabled is set to ${isFipsConfigEnabled} and the configured Node.js environment has FIPS ${
           isNodeRunningWithFipsEnabled ? 'enabled' : 'disabled'
         }`,
         'invalidConfig',

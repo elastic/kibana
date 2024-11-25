@@ -9,9 +9,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
-import { setTimeout } from 'timers/promises';
+import { waitFor, renderHook } from '@testing-library/react';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
@@ -44,8 +42,7 @@ describe('useEditVisualization', () => {
         lensAttributes,
       })
     );
-    await act(() => setTimeout(0));
-    expect(hook.result.current).toBeDefined();
+    await waitFor(() => expect(hook.result.current).toBeDefined());
     hook.result.current!();
     expect(navigateToPrefilledEditor).toHaveBeenCalledWith({
       id: '',
@@ -64,8 +61,7 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await act(() => setTimeout(0));
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if the data view is not time based', async () => {
@@ -78,8 +74,7 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await act(() => setTimeout(0));
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if is on text based mode', async () => {
@@ -93,8 +88,7 @@ describe('useEditVisualization', () => {
         isPlainRecord: true,
       })
     );
-    await act(() => setTimeout(0));
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if the time field is not visualizable', async () => {
@@ -113,8 +107,7 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await act(() => setTimeout(0));
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 
   it('should return undefined if there are no compatible actions', async () => {
@@ -127,7 +120,6 @@ describe('useEditVisualization', () => {
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
-    await act(() => setTimeout(0));
-    expect(hook.result.current).toBeUndefined();
+    await waitFor(() => expect(hook.result.current).toBeUndefined());
   });
 });

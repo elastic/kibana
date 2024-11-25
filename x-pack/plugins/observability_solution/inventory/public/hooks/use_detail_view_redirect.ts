@@ -61,7 +61,9 @@ export const useDetailViewRedirect = () => {
       if (isBuiltinEntityOfType('service', entity)) {
         return serviceOverviewLocator?.getRedirectUrl({
           serviceName: identityFieldsValue[identityFields[0]],
-          environment: entity.service?.environment,
+          environment: entity.service?.environment
+            ? castArray(entity.service?.environment)[0]
+            : undefined,
         });
       }
 

@@ -10,11 +10,11 @@ import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import React from 'react';
 
-import { AttackDiscoveryPanel } from '../../attack_discovery_panel';
-import { EmptyStates } from '../empty_states';
-import { showEmptyStates } from '../empty_states/helpers/show_empty_states';
+import { AttackDiscoveryPanel } from './attack_discovery_panel';
+import { EmptyStates } from './empty_states';
+import { showEmptyStates } from './empty_states/helpers/show_empty_states';
 import { getInitialIsOpen, showSummary } from '../helpers';
-import { Summary } from '../summary';
+import { Summary } from './summary';
 
 interface Props {
   aiConnectorsCount: number | null; // null when connectors are not configured

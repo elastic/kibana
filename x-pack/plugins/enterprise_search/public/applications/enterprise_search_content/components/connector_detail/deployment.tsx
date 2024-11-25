@@ -193,6 +193,7 @@ export const ConnectorDeployment: React.FC = () => {
                           serviceType={connector.service_type ?? ''}
                           apiKeyData={apiKey}
                           isWaitingForConnector={isWaitingForConnector}
+                          connectorVersion={kibanaVersion ? `v${kibanaVersion}` : 'main'}
                         />
                       ) : (
                         <DockerInstructionsStep

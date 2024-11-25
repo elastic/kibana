@@ -110,7 +110,7 @@ export const AttachmentsMenu = ({
     ]
   );
 
-  const panels = useMemo<EuiContextMenuProps['panels']>(() => {
+  const panels = useMemo<Exclude<EuiContextMenuProps['panels'], undefined>>(() => {
     return [
       {
         id: 'attachMainPanel',
@@ -205,26 +205,33 @@ export const AttachmentsMenu = ({
   ]);
 
   return (
-    <EuiFlexItem>
-      <EuiPopover
-        button={
-          <EuiButtonIcon
-            data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
-            aria-label={i18n.translate('xpack.aiops.logCategorization.attachmentsMenuAriaLabel', {
-              defaultMessage: 'Attachments',
-            })}
-            iconType="boxesHorizontal"
-            color="text"
-            onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-          />
-        }
-        isOpen={isActionMenuOpen}
-        closePopover={() => setIsActionMenuOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downRight"
-      >
-        <EuiContextMenu panels={panels} initialPanelId="attachMainPanel" />
-      </EuiPopover>
+    <>
+      {!!panels[0]?.items?.length && (
+        <EuiFlexItem>
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                data-test-subj="aiopsLogPatternAnalysisAttachmentsMenuButton"
+                aria-label={i18n.translate(
+                  'xpack.aiops.logCategorization.attachmentsMenuAriaLabel',
+                  {
+                    defaultMessage: 'Attachments',
+                  }
+                )}
+                iconType="boxesHorizontal"
+                color="text"
+                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+              />
+            }
+            isOpen={isActionMenuOpen}
+            closePopover={() => setIsActionMenuOpen(false)}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+          >
+            <EuiContextMenu panels={panels} initialPanelId="attachMainPanel" />
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
       {dashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
           canSaveByReference={false}
@@ -238,6 +245,6 @@ export const AttachmentsMenu = ({
           onSave={onSave}
         />
       ) : null}
-    </EuiFlexItem>
+    </>
   );
 };

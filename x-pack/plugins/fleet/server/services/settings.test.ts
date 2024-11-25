@@ -143,6 +143,42 @@ describe('getSettings', () => {
 
     await getSettings(soClient);
   });
+
+  it('should handle null values for space awareness migration fields', async () => {
+    const soClient = savedObjectsClientMock.create();
+
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {
+            use_space_awareness_migration_status: null,
+            use_space_awareness_migration_started_at: null,
+          },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+      page: 1,
+      per_page: 10,
+      total: 1,
+    });
+
+    const settings = await getSettings(soClient);
+    expect(settings).toEqual({
+      delete_unenrolled_agents: undefined,
+      has_seen_add_data_notice: undefined,
+      id: 'fleet-default-settings',
+      output_secret_storage_requirements_met: undefined,
+      preconfigured_fields: [],
+      prerelease_integrations_enabled: undefined,
+      secret_storage_requirements_met: undefined,
+      use_space_awareness_migration_started_at: undefined,
+      use_space_awareness_migration_status: undefined,
+      version: undefined,
+    });
+  });
 });
 
 describe('saveSettings', () => {

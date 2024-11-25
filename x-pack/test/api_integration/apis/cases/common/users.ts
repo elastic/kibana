@@ -8,16 +8,19 @@
 import { User } from '../../../../cases_api_integration/common/lib/authentication/types';
 import {
   casesAll,
+  casesV2All,
   casesNoDelete,
   casesOnlyDelete,
   casesOnlyReadDelete,
   casesRead,
   obsCasesAll,
+  obsCasesV2All,
   obsCasesNoDelete,
   obsCasesOnlyDelete,
   obsCasesOnlyReadDelete,
   obsCasesRead,
   secAll,
+  secCasesV2All,
   secAllCasesNoDelete,
   secAllCasesNone,
   secAllCasesOnlyDelete,
@@ -28,6 +31,12 @@ import {
   secReadCasesAll,
   secReadCasesNone,
   secReadCasesRead,
+  casesV2NoReopenWithCreateComment,
+  obsCasesV2NoReopenWithCreateComment,
+  secCasesV2NoReopenWithCreateComment,
+  secCasesV2NoCreateCommentWithReopen,
+  casesV2NoCreateCommentWithReopen,
+  obsCasesV2NoCreateCommentWithReopen,
 } from './roles';
 
 /**
@@ -56,6 +65,24 @@ export const secAllUser: User = {
   username: 'sec_all_user_api_int',
   password: 'password',
   roles: [secAll.name],
+};
+
+export const secCasesV2AllUser: User = {
+  username: 'sec_cases_v2_all_user_api_int',
+  password: 'password',
+  roles: [secCasesV2All.name],
+};
+
+export const secCasesV2NoReopenWithCreateCommentUser: User = {
+  username: 'sec_cases_v2_no_reopen_with_create_comment_user_api_int',
+  password: 'password',
+  roles: [secCasesV2NoReopenWithCreateComment.name],
+};
+
+export const secCasesV2NoCreateCommentWithReopenUser: User = {
+  username: 'sec_cases_v2_no_create_comment_with_reopen_user_api_int',
+  password: 'password',
+  roles: [secCasesV2NoCreateCommentWithReopen.name],
 };
 
 export const secAllSpace1User: User = {
@@ -128,6 +155,24 @@ export const casesAllUser: User = {
   roles: [casesAll.name],
 };
 
+export const casesV2AllUser: User = {
+  username: 'cases_v2_all_user_api_int',
+  password: 'password',
+  roles: [casesV2All.name],
+};
+
+export const casesV2NoReopenWithCreateCommentUser: User = {
+  username: 'cases_v2_no_reopen_with_create_comment_user_api_int',
+  password: 'password',
+  roles: [casesV2NoReopenWithCreateComment.name],
+};
+
+export const casesV2NoCreateCommentWithReopenUser: User = {
+  username: 'cases_v2_no_create_comment_with_reopen_user_api_int',
+  password: 'password',
+  roles: [casesV2NoCreateCommentWithReopen.name],
+};
+
 export const casesReadUser: User = {
   username: 'cases_read_user_api_int',
   password: 'password',
@@ -162,6 +207,24 @@ export const obsCasesAllUser: User = {
   roles: [obsCasesAll.name],
 };
 
+export const obsCasesV2AllUser: User = {
+  username: 'obs_cases_v2_all_user_api_int',
+  password: 'password',
+  roles: [obsCasesV2All.name],
+};
+
+export const obsCasesV2NoReopenWithCreateCommentUser: User = {
+  username: 'obs_cases_v2_no_reopen_with_create_comment_user_api_int',
+  password: 'password',
+  roles: [obsCasesV2NoReopenWithCreateComment.name],
+};
+
+export const obsCasesV2NoCreateCommentWithReopenUser: User = {
+  username: 'obs_cases_v2_no_create_comment_with_reopen_user_api_int',
+  password: 'password',
+  roles: [obsCasesV2NoCreateCommentWithReopen.name],
+};
+
 export const obsCasesReadUser: User = {
   username: 'obs_cases_read_user_api_int',
   password: 'password',
@@ -189,6 +252,9 @@ export const users = [
   secAllCasesOnlyReadDeleteUser,
   secAllCasesNoDeleteUser,
   secAllUser,
+  secCasesV2AllUser,
+  secCasesV2NoReopenWithCreateCommentUser,
+  secCasesV2NoCreateCommentWithReopenUser,
   secAllSpace1User,
   secAllCasesReadUser,
   secAllCasesNoneUser,
@@ -200,11 +266,17 @@ export const users = [
   casesOnlyReadDeleteUser,
   casesNoDeleteUser,
   casesAllUser,
+  casesV2AllUser,
+  casesV2NoReopenWithCreateCommentUser,
+  casesV2NoCreateCommentWithReopenUser,
   casesReadUser,
   obsCasesOnlyDeleteUser,
   obsCasesOnlyReadDeleteUser,
   obsCasesNoDeleteUser,
   obsCasesAllUser,
+  obsCasesV2AllUser,
+  obsCasesV2NoReopenWithCreateCommentUser,
+  obsCasesV2NoCreateCommentWithReopenUser,
   obsCasesReadUser,
   obsSecCasesAllUser,
   obsSecCasesReadUser,

@@ -53,7 +53,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
           )
           .default(false),
       }),
-      func: async (input, _, cbManager) => {
+      func: async (input) => {
         logger.debug(
           () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );

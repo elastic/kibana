@@ -6197,7 +6197,7 @@
             "section": "def-server.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
-          ", pathPrefix: string | undefined) => Promise<",
+          " | undefined, pathPrefix: string | undefined) => Promise<",
           "MappingRuntimeFields",
           ">"
         ],
@@ -6219,12 +6219,13 @@
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
                 "section": "def-server.SavedObjectsClientContract",
                 "text": "SavedObjectsClientContract"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "fleet",
@@ -20244,6 +20245,54 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.getSortConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "getSortConfig",
+        "description": [],
+        "signature": [
+          "(sortField: string, sortOrder: \"asc\" | \"desc\") => Record<string, { order: \"asc\" | \"desc\"; }>[]"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/agent_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getSortConfig.$1",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/agent_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.getSortConfig.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sortOrder",
+            "description": [],
+            "signature": [
+              "\"asc\" | \"desc\""
+            ],
+            "path": "x-pack/plugins/fleet/common/services/agent_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.isValidDataset",
         "type": "Function",
         "tags": [],
@@ -20348,6 +20397,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.removeSOAttributes",
+        "type": "Function",
+        "tags": [],
+        "label": "removeSOAttributes",
+        "description": [],
+        "signature": [
+          "(kuery: string) => string"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/agent_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.removeSOAttributes.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/agent_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -22390,7 +22472,7 @@
             "signature": [
               "{ monitoring: ",
               "FullAgentPolicyMonitoring",
-              "; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; } | undefined"
+              "; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; logging?: { level?: string | undefined; to_files?: boolean | undefined; files?: { rotateeverybytes?: number | undefined; keepfiles?: number | undefined; interval?: string | undefined; } | undefined; } | undefined; limits?: { go_max_procs?: number | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -25604,6 +25686,20 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecManifest.policy_templates_behavior",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "policy_templates_behavior",
+            "description": [],
+            "signature": [
+              "\"all\" | \"combined_policy\" | \"individual_policies\" | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.PackageSpecManifest.policy_templates",
             "type": "Array",
             "tags": [],
@@ -28636,7 +28732,7 @@
             "section": "def-common.RegistryDataStream",
             "text": "RegistryDataStream"
           },
-          "[] | undefined; policy_templates?: ",
+          "[] | undefined; policy_templates_behavior?: \"all\" | \"combined_policy\" | \"individual_policies\" | undefined; policy_templates?: ",
           {
             "pluginId": "fleet",
             "scope": "common",
