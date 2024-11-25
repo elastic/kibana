@@ -148,3 +148,12 @@ export const DashboardActionParamsSchema = schema.object({
 export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });
+
+export const BedrockClientSendParamsSchema = schema.object({
+  // ConverseCommand | ConverseStreamCommand from @aws-sdk/client-bedrock-runtime
+  command: schema.any(),
+  // Kibana related properties
+  signal: schema.maybe(schema.any()),
+});
+
+export const BedrockClientSendResponseSchema = schema.object({}, { unknowns: 'allow' });

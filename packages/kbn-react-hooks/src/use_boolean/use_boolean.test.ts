@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, cleanup, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act, cleanup } from '@testing-library/react';
 
 import { useBoolean } from './use_boolean';
 
