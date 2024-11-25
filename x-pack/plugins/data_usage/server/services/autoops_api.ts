@@ -19,7 +19,6 @@ import {
   type UsageMetricsAutoOpsResponseSchemaBody,
   type UsageMetricsRequestBody,
 } from '../../common/rest_types';
-import { dateParser } from '../../common/utils';
 import { AutoOpsConfig } from '../types';
 import { AutoOpsError } from './errors';
 import { appContextService } from './app_context';
@@ -76,8 +75,8 @@ export class AutoOpsAPIService {
     const requestConfig: AxiosRequestConfig = {
       url: getAutoOpsAPIRequestUrl(autoopsConfig.api?.url, cloudSetup?.serverless.projectId),
       data: {
-        from: dateParser(requestBody.from),
-        to: dateParser(requestBody.to),
+        from: requestBody.from,
+        to: requestBody.to,
         size: requestBody.dataStreams.length,
         level: 'datastream',
         metric_types: requestBody.metricTypes,
