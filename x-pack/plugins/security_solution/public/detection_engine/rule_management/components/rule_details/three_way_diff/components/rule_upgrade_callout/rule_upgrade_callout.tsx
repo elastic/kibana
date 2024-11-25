@@ -9,6 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import type { RuleUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
+import { ActionRequiredBadge } from '../badges/action_required';
+import { ReviewRequiredBadge } from '../badges/review_required_badge';
+import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
 import * as i18n from './translations';
 
 interface RuleUpgradeCalloutProps {
@@ -40,8 +43,15 @@ export function RuleUpgradeCallout({ ruleUpgradeState }: RuleUpgradeCalloutProps
   if (numOfNonSolvableConflicts > 0) {
     return (
       <EuiCallOut
-        title={i18n.RULE_HAS_NON_SOLVABLE_CONFLICTS(numOfNonSolvableConflicts)}
-        iconType="warning"
+        title={
+          <>
+            <strong>{i18n.UPGRADE_STATUS}</strong>
+            &nbsp;
+            <ActionRequiredBadge />
+            &nbsp;
+            {i18n.RULE_HAS_NON_SOLVABLE_CONFLICTS(numOfNonSolvableConflicts)}
+          </>
+        }
         color="danger"
         size="s"
       >
@@ -53,8 +63,15 @@ export function RuleUpgradeCallout({ ruleUpgradeState }: RuleUpgradeCalloutProps
   if (numOfSolvableConflicts > 0) {
     return (
       <EuiCallOut
-        title={i18n.RULE_HAS_SOLVABLE_CONFLICTS(numOfSolvableConflicts)}
-        iconType="warning"
+        title={
+          <>
+            <strong>{i18n.UPGRADE_STATUS}</strong>
+            &nbsp;
+            <ReviewRequiredBadge />
+            &nbsp;
+            {i18n.RULE_HAS_SOLVABLE_CONFLICTS(numOfSolvableConflicts)}
+          </>
+        }
         color="warning"
         size="s"
       >
@@ -65,8 +82,13 @@ export function RuleUpgradeCallout({ ruleUpgradeState }: RuleUpgradeCalloutProps
 
   return (
     <EuiCallOut
-      title={i18n.RULE_IS_READY_FOR_UPGRADE}
-      iconType="checkInCircleFilled"
+      title={
+        <>
+          <strong>{i18n.UPGRADE_STATUS}</strong>
+          &nbsp;
+          <ReadyForUpgradeBadge />
+        </>
+      }
       color="success"
       size="s"
     >
