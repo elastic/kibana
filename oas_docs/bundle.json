@@ -1304,14 +1304,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -2083,14 +2086,17 @@
                   },
                   "flapping": {
                     "additionalProperties": false,
+                    "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                     "nullable": true,
                     "properties": {
                       "look_back_window": {
+                        "description": "The minimum number of runs in which the threshold must be met.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
                       },
                       "status_change_threshold": {
+                        "description": "The minimum number of times an alert must switch states in the look back window.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
@@ -2484,14 +2490,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -3253,14 +3262,17 @@
                   },
                   "flapping": {
                     "additionalProperties": false,
+                    "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                     "nullable": true,
                     "properties": {
                       "look_back_window": {
+                        "description": "The minimum number of runs in which the threshold must be met.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
                       },
                       "status_change_threshold": {
+                        "description": "The minimum number of times an alert must switch states in the look back window.",
                         "maximum": 20,
                         "minimum": 2,
                         "type": "number"
@@ -3647,14 +3659,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -5094,14 +5109,17 @@
                     },
                     "flapping": {
                       "additionalProperties": false,
+                      "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
                       "nullable": true,
                       "properties": {
                         "look_back_window": {
+                          "description": "The minimum number of runs in which the threshold must be met.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
                         },
                         "status_change_threshold": {
+                          "description": "The minimum number of times an alert must switch states in the look back window.",
                           "maximum": 20,
                           "minimum": 2,
                           "type": "number"
@@ -6337,18 +6355,27 @@
                                 "nullable": true
                               },
                               "agent_download_timeout": {
-                                "default": "2h",
                                 "nullable": true
                               },
                               "agent_limits_go_max_procs": {
                                 "nullable": true
                               },
+                              "agent_logging_files_interval": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_keepfiles": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_rotateeverybytes": {
+                                "nullable": true
+                              },
                               "agent_logging_level": {
-                                "default": "info",
                                 "nullable": true
                               },
                               "agent_logging_metrics_period": {
-                                "default": "30s",
+                                "nullable": true
+                              },
+                              "agent_logging_to_files": {
                                 "nullable": true
                               }
                             },
@@ -7095,18 +7122,27 @@
                         "nullable": true
                       },
                       "agent_download_timeout": {
-                        "default": "2h",
                         "nullable": true
                       },
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
+                      "agent_logging_files_interval": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_keepfiles": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_rotateeverybytes": {
+                        "nullable": true
+                      },
                       "agent_logging_level": {
-                        "default": "info",
                         "nullable": true
                       },
                       "agent_logging_metrics_period": {
-                        "default": "30s",
+                        "nullable": true
+                      },
+                      "agent_logging_to_files": {
                         "nullable": true
                       }
                     },
@@ -7343,18 +7379,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -8127,18 +8172,27 @@
                                 "nullable": true
                               },
                               "agent_download_timeout": {
-                                "default": "2h",
                                 "nullable": true
                               },
                               "agent_limits_go_max_procs": {
                                 "nullable": true
                               },
+                              "agent_logging_files_interval": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_keepfiles": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_rotateeverybytes": {
+                                "nullable": true
+                              },
                               "agent_logging_level": {
-                                "default": "info",
                                 "nullable": true
                               },
                               "agent_logging_metrics_period": {
-                                "default": "30s",
+                                "nullable": true
+                              },
+                              "agent_logging_to_files": {
                                 "nullable": true
                               }
                             },
@@ -9172,18 +9226,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -9929,18 +9992,27 @@
                         "nullable": true
                       },
                       "agent_download_timeout": {
-                        "default": "2h",
                         "nullable": true
                       },
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
+                      "agent_logging_files_interval": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_keepfiles": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_rotateeverybytes": {
+                        "nullable": true
+                      },
                       "agent_logging_level": {
-                        "default": "info",
                         "nullable": true
                       },
                       "agent_logging_metrics_period": {
-                        "default": "30s",
+                        "nullable": true
+                      },
+                      "agent_logging_to_files": {
                         "nullable": true
                       }
                     },
@@ -10177,18 +10249,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -10962,18 +11043,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -11869,6 +11959,42 @@
                                       "enabled"
                                     ],
                                     "type": "object"
+                                  },
+                                  "type": "object"
+                                },
+                                "limits": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "go_max_procs": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "logging": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "files": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "interval": {
+                                          "type": "string"
+                                        },
+                                        "keepfiles": {
+                                          "type": "number"
+                                        },
+                                        "rotateeverybytes": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "level": {
+                                      "type": "string"
+                                    },
+                                    "to_files": {
+                                      "type": "boolean"
+                                    }
                                   },
                                   "type": "object"
                                 },
@@ -16951,6 +17077,49 @@
                       },
                       "type": "array"
                     },
+                    "list": {
+                      "deprecated": true,
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "active": {
+                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
+                            "type": "boolean"
+                          },
+                          "api_key": {
+                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
+                            "type": "string"
+                          },
+                          "api_key_id": {
+                            "description": "The ID of the API key in the Security API.",
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "description": "The name of the enrollment API key.",
+                            "type": "string"
+                          },
+                          "policy_id": {
+                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "api_key_id",
+                          "api_key",
+                          "active",
+                          "created_at"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
                     "page": {
                       "type": "number"
                     },
@@ -16965,7 +17134,8 @@
                     "items",
                     "total",
                     "page",
-                    "perPage"
+                    "perPage",
+                    "list"
                   ],
                   "type": "object"
                 }
@@ -21273,7 +21443,7 @@
         ]
       }
     },
-    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath*}": {
+    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "operationId": "get-fleet-epm-packages-pkgname-pkgversion-filepath",
         "parameters": [
@@ -36453,6 +36623,7 @@
                           "type": "boolean"
                         },
                         "use_space_awareness_migration_started_at": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "use_space_awareness_migration_status": {
@@ -36654,6 +36825,7 @@
                           "type": "boolean"
                         },
                         "use_space_awareness_migration_started_at": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "use_space_awareness_migration_status": {

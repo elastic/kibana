@@ -6,25 +6,34 @@
  */
 
 import { END, START, StateGraph } from '@langchain/langgraph';
-import { migrateRuleState } from './state';
-import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
-import { getTranslateQueryNode } from './nodes/translate_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
+import { migrateRuleState } from './state';
+import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
+import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
 
 export function getRuleMigrationAgent({
   model,
   inferenceClient,
   prebuiltRulesMap,
+  resourceRetriever,
+  integrationRetriever,
   connectorId,
   logger,
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap, logger });
-  const translationNode = getTranslateQueryNode({ inferenceClient, connectorId, logger });
+  const translationSubGraph = getTranslateRuleGraph({
+    model,
+    inferenceClient,
+    resourceRetriever,
+    integrationRetriever,
+    connectorId,
+    logger,
+  });
 
   const translateRuleGraph = new StateGraph(migrateRuleState)
     // Nodes
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
-    .addNode('translation', translationNode)
+    .addNode('translation', translationSubGraph)
     // Edges
     .addEdge(START, 'matchPrebuiltRule')
     .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)

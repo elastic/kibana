@@ -20,17 +20,22 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
 import moment from 'moment';
+import type {
+  GetEntityStoreStatusResponse,
+  InitEntityStoreRequestBody,
+  InitEntityStoreResponse,
+} from '../../../../common/api/entity_analytics/entity_store/enablement.gen';
 import type { AppClient } from '../../..';
+import { EntityType } from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
-  EntityType,
   InspectQuery,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { ENGINE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
+import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
 import { AssetCriticalityEcsMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import { getUnitedEntityDefinition } from './united_entity_definitions';
 import {
@@ -101,7 +106,7 @@ export class EntityStoreDataClient {
     this.esClient = clusterClient.asCurrentUser;
 
     this.entityClient = new EntityClient({
-      clusterClient,
+      esClient: this.esClient,
       soClient,
       logger,
     });
@@ -126,6 +131,44 @@ export class EntityStoreDataClient {
     });
   }
 
+  public async enable(
+    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
+  ): Promise<InitEntityStoreResponse> {
+    if (!this.options.taskManager) {
+      throw new Error('Task Manager is not available');
+    }
+
+    // Immediately defer the initialization to the next tick. This way we don't block on the init preflight checks
+    const run = <T>(fn: () => Promise<T>) =>
+      new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
+    const promises = Object.values(EntityType.Values).map((entity) =>
+      run(() =>
+        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+      )
+    );
+
+    const engines = await Promise.all(promises);
+    return { engines, succeeded: true };
+  }
+
+  public async status(): Promise<GetEntityStoreStatusResponse> {
+    const { engines, count } = await this.engineClient.list();
+
+    let status = ENTITY_STORE_STATUS.RUNNING;
+    if (count === 0) {
+      status = ENTITY_STORE_STATUS.NOT_INSTALLED;
+    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
+      status = ENTITY_STORE_STATUS.ERROR;
+    } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
+      status = ENTITY_STORE_STATUS.STOPPED;
+    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
+      status = ENTITY_STORE_STATUS.INSTALLING;
+    }
+
+    return { engines, status };
+  }
+
   public async init(
     entityType: EntityType,
     { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
@@ -137,7 +180,16 @@ export class EntityStoreDataClient {
 
     const { config } = this.options;
 
-    await this.riskScoreDataClient.createRiskScoreLatestIndex();
+    await this.riskScoreDataClient.createRiskScoreLatestIndex().catch((e) => {
+      if (e.meta.body.error.type === 'resource_already_exists_exception') {
+        this.options.logger.debug(
+          `Risk score index for ${entityType} already exists, skipping creation.`
+        );
+        return;
+      }
+
+      throw e;
+    });
 
     const requiresMigration =
       await this.assetCriticalityMigrationClient.isEcsDataMigrationRequired();
@@ -189,19 +241,19 @@ export class EntityStoreDataClient {
   ) {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
-    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
-
-    const unitedDefinition = getUnitedEntityDefinition({
-      indexPatterns,
-      entityType,
-      namespace,
-      fieldHistoryLength,
-      syncDelay: `${config.syncDelay.asSeconds()}s`,
-      frequency: `${config.frequency.asSeconds()}s`,
-    });
-    const { entityManagerDefinition } = unitedDefinition;
-
     try {
+      const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+
+      const unitedDefinition = getUnitedEntityDefinition({
+        indexPatterns,
+        entityType,
+        namespace,
+        fieldHistoryLength,
+        syncDelay: `${config.syncDelay.asSeconds()}s`,
+        frequency: `${config.frequency.asSeconds()}s`,
+      });
+      const { entityManagerDefinition } = unitedDefinition;
+
       // clean up any existing entity store
       await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
 

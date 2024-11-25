@@ -15,7 +15,9 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { momentDateParser } from '../../../../common/utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { DEFAULT_DATE_RANGE_OPTIONS } from '../../hooks/use_date_picker';
 
 export interface DateRangePickerValues {
   autoRefreshOptions: {
@@ -49,16 +51,23 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
     const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {
-      return (
-        uiSettings
-          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
-            return {
+      const _commonlyUsedRanges: Array<{ from: string; to: string; display: string }> =
+        uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
+      if (!_commonlyUsedRanges) {
+        return [];
+      }
+      return _commonlyUsedRanges.reduce<DurationRange[]>(
+        (acc, { from, to, display }: { from: string; to: string; display: string }) => {
+          if (!['now-30d/d', 'now-90d/d', 'now-1y/d'].includes(from)) {
+            acc.push({
               start: from,
               end: to,
               label: display,
-            };
-          }) ?? []
+            });
+          }
+          return acc;
+        },
+        []
       );
     });
 
@@ -66,7 +75,7 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
       <EuiSuperDatePicker
         data-test-subj={getTestId('date-range')}
         isLoading={isDataLoading}
-        dateFormat={uiSettings.get('dateFormat')}
+        dateFormat={'MMM D, YYYY @ HH:mm'}
         commonlyUsedRanges={commonlyUsedRanges}
         end={dateRangePickerState.endDate}
         isPaused={!dateRangePickerState.autoRefreshOptions.enabled}
@@ -77,7 +86,11 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
         recentlyUsedRanges={dateRangePickerState.recentlyUsedDateRanges}
         start={dateRangePickerState.startDate}
         showUpdateButton={false}
+        timeFormat={'HH:mm'}
         updateButtonProps={{ iconOnly: false, fill: false }}
+        utcOffset={0}
+        maxDate={momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.maxDate)}
+        minDate={momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.minDate)}
         width="auto"
       />
     );

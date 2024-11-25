@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { createFindAlerts } from '../services/find_alerts';
 import { useFetchAlerts, type UseAlertsQueryParams } from './use_fetch_alerts';
@@ -41,15 +41,14 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), {
+    const { result } = renderHook(() => useFetchAlerts(params), {
       wrapper: createReactQueryWrapper(),
     });
 
     expect(result.current.loading).toBe(true);
 
-    await waitFor(() => !result.current.loading);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(false);
     expect(result.current.totalItemCount).toBe(10);
     expect(result.current.data).toEqual(['alert1', 'alert2', 'alert3']);
@@ -70,13 +69,13 @@ describe('useFetchAlerts', () => {
       sort: [{ '@timestamp': 'desc' }],
     };
 
-    const { result, waitFor } = renderHook(() => useFetchAlerts(params), {
+    const { result } = renderHook(() => useFetchAlerts(params), {
       wrapper: createReactQueryWrapper(),
     });
 
     expect(result.current.loading).toBe(true);
 
-    await waitFor(() => !result.current.loading);
+    await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(true);

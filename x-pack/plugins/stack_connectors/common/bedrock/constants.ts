@@ -21,6 +21,7 @@ export enum SUB_ACTION {
   INVOKE_STREAM = 'invokeStream',
   DASHBOARD = 'getDashboard',
   TEST = 'test',
+  BEDROCK_CLIENT_SEND = 'bedrockClientSend',
 }
 
 export const DEFAULT_TIMEOUT_MS = 120000;
