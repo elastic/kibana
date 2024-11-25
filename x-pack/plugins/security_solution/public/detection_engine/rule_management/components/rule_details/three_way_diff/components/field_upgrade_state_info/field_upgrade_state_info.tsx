@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
+import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
+import { ReviewRequiredBadge } from '../badges/review_required_badge';
+import { ActionRequiredBadge } from '../badges/action_required';
 import * as i18n from './translations';
 
 interface FieldUpgradeStateInfoProps {
@@ -20,7 +23,7 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
       return (
         <>
           <EuiText color="success" size="xs">
-            <EuiBadge color="success">{i18n.READY_FOR_UPDATE}</EuiBadge>
+            <ReadyForUpgradeBadge />
             &nbsp;&nbsp;
             <strong>{i18n.NO_CONFLICT}</strong>
             {i18n.SEPARATOR}
@@ -33,7 +36,7 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
       return (
         <>
           <EuiText color="success" size="xs">
-            <EuiBadge color="success">{i18n.READY_FOR_UPDATE}</EuiBadge>
+            <ReadyForUpgradeBadge />
             &nbsp;&nbsp;
             {i18n.REVIEWED_AND_ACCEPTED}
           </EuiText>
@@ -44,7 +47,7 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
       return (
         <>
           <EuiText color="warning" size="xs">
-            <EuiBadge color="warning">{i18n.REVIEW_REQUIRED}</EuiBadge>
+            <ReviewRequiredBadge />
             &nbsp;&nbsp;
             <strong>{i18n.SOLVABLE_CONFLICT}</strong>
             {i18n.SEPARATOR}
@@ -57,7 +60,7 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
       return (
         <>
           <EuiText color="danger" size="xs">
-            <EuiBadge color="danger">{i18n.ACTION_REQUIRED}</EuiBadge>
+            <ActionRequiredBadge />
             &nbsp;&nbsp;
             <strong>{i18n.NON_SOLVABLE_CONFLICT}</strong>
             {i18n.SEPARATOR}

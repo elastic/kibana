@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const READY_FOR_UPDATE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.badge.readyForUpdate',
-  {
-    defaultMessage: 'Ready for update',
-  }
-);
-
-export const REVIEW_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.badge.reviewRequired',
-  {
-    defaultMessage: 'Review required',
-  }
-);
-
-export const ACTION_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.badge.actionRequired',
-  {
-    defaultMessage: 'Action required',
-  }
-);
-
 export const NO_CONFLICT = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.noConflict',
   {
