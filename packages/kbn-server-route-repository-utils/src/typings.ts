@@ -15,6 +15,7 @@ import type {
   Logger,
   RequestHandlerContext,
   RouteConfigOptions,
+  RouteSecurity,
   RouteMethod,
 } from '@kbn/core/server';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -277,5 +278,5 @@ export interface DefaultRouteHandlerResources extends CoreRouteHandlerResources 
 }
 
 export interface DefaultRouteCreateOptions {
-  options?: RouteConfigOptions<RouteMethod>;
+  options?: RouteConfigOptions<RouteMethod> & { security?: RouteSecurity };
 }
