@@ -569,7 +569,7 @@ describe('BackfillClient', () => {
       );
     });
 
-    test('should ignore actions for rule with actions when runActions=true', async () => {
+    test('should ignore actions for rule with actions when runActions=false', async () => {
       const mockData = [
         getMockData({ runActions: false }),
         getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z', runActions: false }),

@@ -400,7 +400,10 @@ async function extractRuleActions({
   rule,
   runActions,
 }: ExtractRuleActions): Promise<ExtractRuleActionsResult> {
-  if (!runActions) {
+  // defauts to true if not specified
+  const shouldRunActions = runActions !== undefined ? runActions : true;
+
+  if (!shouldRunActions) {
     return { hasUnsupportedActions: false, actions: [], references: [] };
   }
 
