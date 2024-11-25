@@ -11,6 +11,7 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { HostVmExecResponse } from '../../../../scripts/endpoint/common/types';
 import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import {
   deleteIndexedEndpointHeartbeats,
@@ -462,6 +463,17 @@ ${s1Info.status}
     ): Promise<null> => {
       const { kbnClient } = await stackServicesPromise;
       return destroyEndpointHost(kbnClient, createdHost).then(() => null);
+    },
+
+    execCommandOnHost: async ({
+      hostname,
+      command,
+    }: {
+      hostname: string;
+      command: string;
+    }): Promise<HostVmExecResponse> => {
+      const { log } = await stackServicesPromise;
+      return getHostVmClient(hostname, undefined, undefined, log).exec(command);
     },
 
     createFileOnEndpoint: async ({
