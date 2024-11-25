@@ -6,7 +6,6 @@
  */
 
 import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { pick } from 'lodash';
 import type { NLPSettings } from '../../../common/constants/app';
 import type { TrainedModelDeploymentStatsResponse } from '../../../common/types/trained_models';
 import type { CloudInfo } from '../services/ml_server_info';
@@ -241,18 +240,16 @@ export class DeploymentParamsMapper {
     // The deployment can be created via API with a number of allocations that do not exactly match our vCPU ranges.
     // In this case, we should find the closest vCPU range that does not exceed the max or static value of the range.
     const [vCPUUsage] = Object.entries(this.vCpuBreakpoints)
-      .filter((range) => {
-        const comparedRange = (adaptiveResources ? range[1].max : range[1].static) as number;
-        return vCPUs <= comparedRange;
-      })
-      .reduce((curr, prev) => {
-        const comparedRangePrev = (adaptiveResources ? prev[1].max : prev[1].static) as number;
-        const comparedRangeCurr = (adaptiveResources ? curr[1].max : curr[1].static) as number;
-
-        return Math.abs(vCPUs - comparedRangePrev) <= Math.abs(vCPUs - comparedRangeCurr)
-          ? prev
-          : curr;
-      }, Object.entries(pick(this.vCpuBreakpoints, 'high'))[0]);
+      .filter(([, range]) => vCPUs <= (adaptiveResources ? range.max : range.static!))
+      .reduce(
+        (prev, curr) => {
+          const prevValue = adaptiveResources ? prev[1].max : prev[1].static!;
+          const currValue = adaptiveResources ? curr[1].max : curr[1].static!;
+          return Math.abs(vCPUs - prevValue) <= Math.abs(vCPUs - currValue) ? prev : curr;
+        },
+        // in case allocation params exceed the max value of the high range
+        ['high', this.vCpuBreakpoints.high]
+      );
 
     return {
       deploymentId: input.deployment_id,
