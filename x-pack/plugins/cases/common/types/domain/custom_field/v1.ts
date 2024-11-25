@@ -50,8 +50,18 @@ export const CaseCustomFieldRt = rt.union([
 ]);
 export const CaseCustomFieldsRt = rt.array(CaseCustomFieldRt);
 
+export const CustomFieldValueRt = rt.union([
+  rt.string,
+  rt.number,
+  rt.boolean,
+  rt.record(rt.string, rt.string),
+  rt.null,
+]);
+export type CustomFieldValue = rt.TypeOf<typeof CustomFieldValueRt>;
+
 export type CaseCustomFields = rt.TypeOf<typeof CaseCustomFieldsRt>;
 export type CaseCustomField = rt.TypeOf<typeof CaseCustomFieldRt>;
+
 export type CaseCustomFieldToggle = rt.TypeOf<typeof CaseCustomFieldToggleRt>;
 export type CaseCustomFieldText = rt.TypeOf<typeof CaseCustomFieldTextRt>;
 export type CaseCustomFieldList = rt.TypeOf<typeof CaseCustomFieldListRt>;

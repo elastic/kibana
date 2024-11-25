@@ -32,6 +32,7 @@ import {
   removeEmptyFields,
   customFieldsFormSerializer,
 } from './utils';
+import type { CustomFieldConfiguration } from '../../common/types/domain';
 
 describe('Utils', () => {
   const connector = {
@@ -522,47 +523,65 @@ describe('Utils', () => {
       jest.clearAllMocks();
     });
 
+    const createMockConfig = (type: CustomFieldTypes) =>
+      ({
+        key: 'test_key',
+        label: 'Test label',
+        required: false,
+        type,
+      } as CustomFieldConfiguration);
+
     it('returns the string when the value is a non-empty string', async () => {
       expect(
-        convertCustomFieldValue({ value: 'my text value', type: CustomFieldTypes.TEXT })
+        convertCustomFieldValue({
+          value: 'my text value',
+          config: createMockConfig(CustomFieldTypes.TEXT),
+        })
       ).toMatchInlineSnapshot(`"my text value"`);
     });
 
     it('returns null when value is empty string', async () => {
       expect(
-        convertCustomFieldValue({ value: '', type: CustomFieldTypes.TEXT })
+        convertCustomFieldValue({ value: '', config: createMockConfig(CustomFieldTypes.TEXT) })
       ).toMatchInlineSnapshot('null');
     });
 
     it('returns value as it is when value is true', async () => {
       expect(
-        convertCustomFieldValue({ value: true, type: CustomFieldTypes.TOGGLE })
+        convertCustomFieldValue({ value: true, config: createMockConfig(CustomFieldTypes.TOGGLE) })
       ).toMatchInlineSnapshot('true');
     });
 
     it('returns value as it is when value is false', async () => {
       expect(
-        convertCustomFieldValue({ value: false, type: CustomFieldTypes.TOGGLE })
+        convertCustomFieldValue({ value: false, config: createMockConfig(CustomFieldTypes.TOGGLE) })
       ).toMatchInlineSnapshot('false');
     });
     it('returns value as integer number when value is integer string and type is number', () => {
-      expect(convertCustomFieldValue({ value: '123', type: CustomFieldTypes.NUMBER })).toEqual(123);
+      expect(
+        convertCustomFieldValue({ value: '123', config: createMockConfig(CustomFieldTypes.NUMBER) })
+      ).toEqual(123);
     });
 
     it('returns value as null when value is float string and type is number', () => {
-      expect(convertCustomFieldValue({ value: '0.5', type: CustomFieldTypes.NUMBER })).toEqual(
-        null
-      );
+      expect(
+        convertCustomFieldValue({ value: '0.5', config: createMockConfig(CustomFieldTypes.NUMBER) })
+      ).toEqual(null);
     });
 
     it('returns value as null when value is null and type is number', () => {
-      expect(convertCustomFieldValue({ value: null, type: CustomFieldTypes.NUMBER })).toEqual(null);
+      expect(
+        convertCustomFieldValue({ value: null, config: createMockConfig(CustomFieldTypes.NUMBER) })
+      ).toEqual(null);
     });
 
     it('returns value as null when value is characters string and type is number', () => {
-      expect(convertCustomFieldValue({ value: 'fdgdg', type: CustomFieldTypes.NUMBER })).toEqual(
-        null
-      );
+      expect(
+        convertCustomFieldValue({
+          value: 'fdgdg',
+          config: createMockConfig(CustomFieldTypes.NUMBER),
+        })
+      ).toEqual(null);
     });
   });
 

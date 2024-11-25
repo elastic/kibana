@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type { CustomFieldTypes } from '../../common/types/domain';
-
-type FilteringValue = string[] | string | number | boolean | null | number;
-export type FilteringValues = FilteringValue[];
+import type { CustomFieldTypes, CustomFieldValue } from '../../common/types/domain';
 
 export interface ICasesCustomField {
   isFilterable: boolean;
   isSortable: boolean;
   savedObjectMappingType: string;
-  validateFilteringValues: (values: FilteringValues) => void;
-  getDefaultValue?: () => FilteringValue;
+  validateFilteringValues: (values: CustomFieldValue[]) => void;
+  getDefaultValue?: () => CustomFieldValue[];
 }
 
 export interface CasesCustomFieldsMap {

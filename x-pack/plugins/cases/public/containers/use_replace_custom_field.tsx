@@ -6,6 +6,7 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
+import type { CustomFieldValue } from '../../common/types/domain';
 import { useCasesToast } from '../common/use_cases_toast';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import type { ServerError } from '../types';
@@ -16,7 +17,7 @@ import * as i18n from './translations';
 interface ReplaceCustomField {
   caseId: string;
   customFieldId: string;
-  customFieldValue: string | number | boolean | null;
+  customFieldValue: CustomFieldValue;
   caseVersion: string;
 }
 

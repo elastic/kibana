@@ -191,3 +191,4 @@ export type ListCustomFieldOption = rt.TypeOf<typeof ListCustomFieldOptionRt>;
 export type TextCustomFieldConfiguration = rt.TypeOf<typeof TextCustomFieldConfigurationRt>;
 export type ListCustomFieldConfiguration = rt.TypeOf<typeof ListCustomFieldConfigurationRt>;
 export type ToggleCustomFieldConfiguration = rt.TypeOf<typeof ToggleCustomFieldConfigurationRt>;
+export type NumberCustomFieldConfiguration = rt.TypeOf<typeof NumberCustomFieldConfigurationRt>;

@@ -7,13 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { isString } from 'lodash';
-import type { FilteringValues } from './types';
+import type { CustomFieldValue } from '../../common/types/domain';
 
 export const getCasesListCustomField = () => ({
   isFilterable: true,
   isSortable: false,
   savedObjectMappingType: 'string',
-  validateFilteringValues: (values: FilteringValues) => {
+  validateFilteringValues: (values: CustomFieldValue[]) => {
     values.forEach((value) => {
       if (value !== null && !isString(value)) {
         throw Boom.badRequest(`Unsupported filtering value for custom field of type list.`);

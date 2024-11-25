@@ -7,13 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { isBoolean } from 'lodash';
-import type { FilteringValues } from './types';
+import type { CustomFieldValue } from '../../common/types/domain';
 
 export const getCasesToggleCustomField = () => ({
   isFilterable: true,
   isSortable: false,
   savedObjectMappingType: 'boolean',
-  validateFilteringValues: (values: FilteringValues) => {
+  validateFilteringValues: (values: CustomFieldValue[]) => {
     values.forEach((value) => {
       if (value !== null && !isBoolean(value)) {
         throw Boom.badRequest(`Unsupported filtering value for custom field of type toggle.`);

@@ -1199,7 +1199,7 @@ export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = 
     key: 'test_key_7',
     label: 'My test label 7',
     required: true,
-    defaultValue: { option_1: 'Option 1' },
+    defaultValue: 'option_1',
     options: [
       { key: 'option_1', label: 'Option 1' },
       { key: 'option_2', label: 'Option 2' },
