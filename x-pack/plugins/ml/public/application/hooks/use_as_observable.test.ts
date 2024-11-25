@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useAsObservable } from './use_as_observable';
 
 describe('useAsObservable', () => {
@@ -15,6 +15,8 @@ describe('useAsObservable', () => {
 
   test('provides and observable preserving a reference', () => {
     const { result, rerender } = renderHook(useAsObservable, { initialProps: 1 });
+
+    const initial = result.current;
 
     let observableValue;
     const subscriptionMock = jest.fn((v) => (observableValue = v));
@@ -27,7 +29,7 @@ describe('useAsObservable', () => {
 
     act(() => rerender(1));
 
-    expect(result.all[0]).toStrictEqual(result.all[1]);
+    expect(initial).toStrictEqual(result.current);
 
     expect(subscriptionMock).toHaveBeenCalledWith(1);
     expect(subscriptionMock).toHaveBeenCalledTimes(1);
@@ -35,7 +37,7 @@ describe('useAsObservable', () => {
   });
 
   test('updates the subject with a new value', async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(useAsObservable, {
+    const { result, rerender } = renderHook(useAsObservable, {
       initialProps: 'test',
     });
 
@@ -50,7 +52,6 @@ describe('useAsObservable', () => {
 
     await act(async () => {
       rerender('test update');
-      await waitForNextUpdate();
     });
 
     expect(subscriptionMock).toHaveBeenCalledTimes(2);
