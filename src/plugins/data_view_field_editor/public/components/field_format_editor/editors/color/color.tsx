@@ -9,7 +9,14 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiColorPicker,
+  EuiIcon,
+  EuiFieldText,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -156,6 +163,28 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   item.index
                 );
               }}
+              button={
+                <EuiButton
+                  minWidth="false"
+                  iconType="lettering"
+                  color="text"
+                  onClick={() => {}}
+                  aria-label={`Select a text color for item ${item.index}`}
+                >
+                  <EuiIcon
+                    aria-label={color}
+                    color={color}
+                    size="l"
+                    type="stopFilled"
+                    css={{
+                      stroke: 'var(--euiColorFullShade)',
+                      strokeWidth: 2,
+                    }}
+                    data-test-subj={'buttonColorSwatchIcon'}
+                  />
+                </EuiButton>
+              }
+              secondaryInputDisplay="bottom"
             />
           );
         },
@@ -181,6 +210,28 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   item.index
                 );
               }}
+              button={
+                <EuiButton
+                  minWidth="false"
+                  iconType="color"
+                  color="text"
+                  onClick={() => {}}
+                  aria-label={`Select a background color for item ${item.index}`}
+                >
+                  <EuiIcon
+                    aria-label={color}
+                    color={color}
+                    size="l"
+                    type="stopFilled"
+                    css={{
+                      stroke: 'var(--euiColorFullShade)',
+                      strokeWidth: 2,
+                    }}
+                    data-test-subj={'buttonColorSwatchIcon'}
+                  />
+                </EuiButton>
+              }
+              secondaryInputDisplay="bottom"
             />
           );
         },
