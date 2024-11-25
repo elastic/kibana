@@ -49,6 +49,7 @@ export const useData = (
     },
   } = useDataVisualizerKibana();
 
+  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     name: 'data_visualizer',
     type: 'application',

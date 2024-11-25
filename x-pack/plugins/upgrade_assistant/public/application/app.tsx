@@ -160,6 +160,7 @@ export const RootComponent = (dependencies: AppDependencies) => {
     core: { application, http, executionContext, ...startServices },
   } = dependencies.services;
 
+  // TODO: Remove this comment after testing
   executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (

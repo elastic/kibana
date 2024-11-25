@@ -44,6 +44,7 @@ const AppWithExecutionContext = ({
 }) => {
   const { executionContext } = core;
 
+  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     type: 'application',
     page: PLUGIN_ID,

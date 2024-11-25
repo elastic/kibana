@@ -16,6 +16,7 @@ export const useUpdateExecutionContext = () => {
   useEffect(() => {
     // setImmediate is required to ensure that EBT telemetry for the previous page is shipped before the new page is updated
     setImmediate(() => {
+      // TODO: Remove this comment after testing
       executionContext.set({ page: pathname });
     });
   }, [pathname, executionContext]);
