@@ -11,6 +11,7 @@ import React, {
   type PropsWithChildren,
   useState,
   useCallback,
+  useRef,
 } from 'react';
 import type { FormHook } from '../../../../../../../shared_imports';
 import { invariant } from '../../../../../../../../common/utils/invariant';
@@ -24,27 +25,39 @@ interface FieldEditFormContextType {
 
 const FieldEditFormContext = createContext<FieldEditFormContextType | null>(null);
 
+/**
+ * FieldEditFormContext helps to encapsulate form related logic in `field_final_side` folder.
+ *
+ * The only purpose is to obtain the recent form handler and provide it for consumers in
+ * in the `field_final_side` folder.
+ */
 export function FieldEditFormContextProvider({ children }: PropsWithChildren<{}>) {
-  const [form, setForm] = useState<FormHook | undefined>();
+  // Using reference reduces unnecessary re-renders though we need to re-render children
+  // whenever something in the form changes like validity state to be able to reflect that changes.
+  const formRef = useRef<FormHook | undefined>();
+  // Setting the state re-renders the component and its children. The state value is ignored since
+  // we use a ref here. In that case it doesn't re-render components upon form cleanup. In that case
+  // the edit component disappears and we aren't interested in the form's state anymore.
+  const [, setForm] = useState<FormHook | undefined>();
   const registerForm = useCallback(
     (formToRegister: FormHook) => {
-      setForm((prevForm) => {
-        if (prevForm) {
-          throw new Error(
-            'Unexpected new form registration while the old one was not cleaned. Do you properly cleanup form by returning registerForm result from useEffect.'
-          );
-        }
+      // Guard against subtle bugs. In attempt of using two forms throw an exception.
+      if (formRef.current) {
+        throw new Error(
+          'Unexpected new form registration while the old one was not cleaned. Do you properly cleanup form by returning registerForm result from useEffect.'
+        );
+      }
 
-        return formToRegister;
-      });
+      formRef.current = formToRegister;
+      setForm(formToRegister);
 
-      return () => setForm(undefined);
+      return () => (formRef.current = undefined);
     },
-    [setForm]
+    [formRef, setForm]
   );
 
   return (
-    <FieldEditFormContext.Provider value={{ form, registerForm }}>
+    <FieldEditFormContext.Provider value={{ form: formRef.current, registerForm }}>
       {children}
     </FieldEditFormContext.Provider>
   );
