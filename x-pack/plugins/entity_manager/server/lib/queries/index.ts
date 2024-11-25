@@ -82,7 +82,6 @@ const statsCommand = ({
   metadataFields: string[];
 }) => {
   const aggs = [
-    // default 'last_seen' attribute
     'entity.last_seen_timestamp=MAX(entity.timestamp)',
     ...uniq(sources.flatMap((source) => source.identity_fields)).map(
       (field) => `${field}=TOP(${field}, 1, "desc")`
@@ -91,6 +90,10 @@ const statsCommand = ({
   ];
 
   return `STATS ${aggs.join(', ')} BY entity.id`;
+};
+
+const sortCommand = () => {
+  return 'SORT entity.last_seen_timestamp DESC';
 };
 
 export function getEntityInstancesQuery({
@@ -112,7 +115,7 @@ export function getEntityInstancesQuery({
     timestampEvalCommand({ sources }),
     filterCommands({ sources, start, end }),
     statsCommand({ sources, metadataFields }),
-    'SORT entity.last_seen_timestamp DESC',
+    sortCommand(),
     `LIMIT ${limit}`,
   ];
 
