@@ -20,6 +20,8 @@ export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   },
   startDate: 'now-24h/h',
   endDate: 'now',
+  maxDate: 'now+1s',
+  minDate: 'now-9d',
   recentlyUsedDateRanges: [],
 });
 

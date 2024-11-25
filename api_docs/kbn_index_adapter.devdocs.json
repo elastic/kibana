@@ -1,0 +1,1466 @@
+{
+  "id": "@kbn/index-adapter",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.IndexAdapter",
+        "type": "Class",
+        "tags": [],
+        "label": "IndexAdapter",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.totalFieldsLimit",
+            "type": "number",
+            "tags": [],
+            "label": "totalFieldsLimit",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.componentTemplates",
+            "type": "Array",
+            "tags": [],
+            "label": "componentTemplates",
+            "description": [],
+            "signature": [
+              "ClusterPutComponentTemplateRequest",
+              "[]"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.indexTemplates",
+            "type": "Array",
+            "tags": [],
+            "label": "indexTemplates",
+            "description": [],
+            "signature": [
+              "IndicesPutIndexTemplateRequest",
+              "[]"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.installed",
+            "type": "boolean",
+            "tags": [],
+            "label": "installed",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexAdapter.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexAdapter.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.IndexAdapterParams",
+                    "text": "IndexAdapterParams"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.setComponentTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "setComponentTemplate",
+            "description": [],
+            "signature": [
+              "(params: ",
+              "GetComponentTemplateOpts",
+              ") => void"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexAdapter.setComponentTemplate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  "GetComponentTemplateOpts"
+                ],
+                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.setIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexTemplate",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.SetIndexTemplateParams",
+                "text": "SetIndexTemplateParams"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexAdapter.setIndexTemplate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.SetIndexTemplateParams",
+                    "text": "SetIndexTemplateParams"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.getInstallFn",
+            "type": "Function",
+            "tags": [],
+            "label": "getInstallFn",
+            "description": [],
+            "signature": [
+              "({ logger, pluginStop$, tasksTimeoutMs }: ",
+              "GetInstallFnParams",
+              ") => (promise: Promise<void>, description?: string | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexAdapter.getInstallFn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ logger, pluginStop$, tasksTimeoutMs }",
+                "description": [],
+                "signature": [
+                  "GetInstallFnParams"
+                ],
+                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.installTemplates",
+            "type": "Function",
+            "tags": [],
+            "label": "installTemplates",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallParams",
+                "text": "InstallParams"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexAdapter.installTemplates.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.InstallParams",
+                    "text": "InstallParams"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapter.install",
+            "type": "Function",
+            "tags": [],
+            "label": "install",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallParams",
+                "text": "InstallParams"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexAdapter.install.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.InstallParams",
+                    "text": "InstallParams"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.IndexPatternAdapter",
+        "type": "Class",
+        "tags": [],
+        "label": "IndexPatternAdapter",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.IndexPatternAdapter",
+            "text": "IndexPatternAdapter"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.IndexAdapter",
+            "text": "IndexAdapter"
+          }
+        ],
+        "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.installationPromises",
+            "type": "Object",
+            "tags": [],
+            "label": "installationPromises",
+            "description": [],
+            "signature": [
+              "Map<string, Promise<void>>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.installIndexPromise",
+            "type": "Object",
+            "tags": [],
+            "label": "installIndexPromise",
+            "description": [],
+            "signature": [
+              "Promise<",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallIndex",
+                "text": "InstallIndex"
+              },
+              "> | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexPatternAdapter.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "prefix",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexPatternAdapter.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.IndexAdapterParams",
+                    "text": "IndexAdapterParams"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.install",
+            "type": "Function",
+            "tags": [],
+            "label": "install",
+            "description": [
+              "Method to create/update the templates, update existing indices and setup internal state for the adapter."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallParams",
+                "text": "InstallParams"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexPatternAdapter.install.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.InstallParams",
+                    "text": "InstallParams"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter._install",
+            "type": "Function",
+            "tags": [],
+            "label": "_install",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallParams",
+                "text": "InstallParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.InstallIndex",
+                "text": "InstallIndex"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexPatternAdapter._install.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-adapter",
+                    "scope": "server",
+                    "docId": "kibKbnIndexAdapterPluginApi",
+                    "section": "def-server.InstallParams",
+                    "text": "InstallParams"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.createIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "createIndex",
+            "description": [
+              "\nMethod to create the index for a given index suffix.\nStores the installations promises to avoid concurrent installations for the same index.\nIndex creation will only be attempted once per index suffix and existence will be checked before creating."
+            ],
+            "signature": [
+              "(indexSuffix: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexPatternAdapter.createIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexSuffix",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.getIndexName",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexName",
+            "description": [
+              "Method to get the full index name for a given index suffix."
+            ],
+            "signature": [
+              "(indexSuffix: string) => string"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexPatternAdapter.getIndexName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexSuffix",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.getInstalledIndexName",
+            "type": "Function",
+            "tags": [],
+            "label": "getInstalledIndexName",
+            "description": [
+              "Method to get the full index name for a given index suffix. It returns undefined if the index does not exist."
+            ],
+            "signature": [
+              "(indexSuffix: string) => Promise<string | undefined>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.IndexPatternAdapter.getInstalledIndexName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexSuffix",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.createOrUpdateComponentTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "createOrUpdateComponentTemplate",
+        "description": [],
+        "signature": [
+          "({ logger, esClient, template, totalFieldsLimit, }: CreateOrUpdateComponentTemplateOpts) => Promise<void>"
+        ],
+        "path": "packages/kbn-index-adapter/src/create_or_update_component_template.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.createOrUpdateComponentTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  esClient,\n  template,\n  totalFieldsLimit,\n}",
+            "description": [],
+            "signature": [
+              "CreateOrUpdateComponentTemplateOpts"
+            ],
+            "path": "packages/kbn-index-adapter/src/create_or_update_component_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.createOrUpdateIndexTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "createOrUpdateIndexTemplate",
+        "description": [
+          "\nInstalls index template that uses installed component template\nPrior to installation, simulates the installation to check for possible\nconflicts. Simulate should return an empty mapping if a template\nconflicts with an already installed template."
+        ],
+        "signature": [
+          "({ logger, esClient, template, }: CreateOrUpdateIndexTemplateOpts) => Promise<void>"
+        ],
+        "path": "packages/kbn-index-adapter/src/create_or_update_index_template.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.createOrUpdateIndexTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  logger,\n  esClient,\n  template,\n}",
+            "description": [],
+            "signature": [
+              "CreateOrUpdateIndexTemplateOpts"
+            ],
+            "path": "packages/kbn-index-adapter/src/create_or_update_index_template.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.retryTransientEsErrors",
+        "type": "Function",
+        "tags": [],
+        "label": "retryTransientEsErrors",
+        "description": [],
+        "signature": [
+          "<T>(esCall: () => Promise<T>, { logger, attempt }: { logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          "; attempt?: number | undefined; }) => Promise<T>"
+        ],
+        "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.retryTransientEsErrors.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "esCall",
+            "description": [],
+            "signature": [
+              "() => Promise<T>"
+            ],
+            "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.retryTransientEsErrors.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ logger, attempt = 0 }",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.retryTransientEsErrors.$2.logger",
+                "type": "Object",
+                "tags": [],
+                "label": "logger",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/logging",
+                    "scope": "common",
+                    "docId": "kibKbnLoggingPluginApi",
+                    "section": "def-common.Logger",
+                    "text": "Logger"
+                  }
+                ],
+                "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/index-adapter",
+                "id": "def-server.retryTransientEsErrors.$2.attempt",
+                "type": "number",
+                "tags": [],
+                "label": "attempt",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-index-adapter/src/retry_transient_es_errors.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.AllowedValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "AllowedValue",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.AllowedValue.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.AllowedValue.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.EcsMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "EcsMetadata",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.allowed_values",
+            "type": "Array",
+            "tags": [],
+            "label": "allowed_values",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.AllowedValue",
+                "text": "AllowedValue"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.dashed_name",
+            "type": "string",
+            "tags": [],
+            "label": "dashed_name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.doc_values",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "doc_values",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.example",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "example",
+            "description": [],
+            "signature": [
+              "string | number | boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.flat_name",
+            "type": "string",
+            "tags": [],
+            "label": "flat_name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.ignore_above",
+            "type": "number",
+            "tags": [],
+            "label": "ignore_above",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.index",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.level",
+            "type": "string",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.multi_fields",
+            "type": "Array",
+            "tags": [],
+            "label": "multi_fields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-adapter",
+                "scope": "server",
+                "docId": "kibKbnIndexAdapterPluginApi",
+                "section": "def-server.MultiField",
+                "text": "MultiField"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.normalize",
+            "type": "Array",
+            "tags": [],
+            "label": "normalize",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.required",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "required",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.scaling_factor",
+            "type": "number",
+            "tags": [],
+            "label": "scaling_factor",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.short",
+            "type": "string",
+            "tags": [],
+            "label": "short",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.EcsMetadata.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [],
+            "signature": [
+              "Record<string, { type: string; }> | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.IndexAdapterParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexAdapterParams",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapterParams.kibanaVersion",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexAdapterParams.totalFieldsLimit",
+            "type": "number",
+            "tags": [],
+            "label": "totalFieldsLimit",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.InstallParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "InstallParams",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.InstallParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.InstallParams.esClient",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              " | Promise<",
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "server",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-server.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.InstallParams.pluginStop$",
+            "type": "Object",
+            "tags": [],
+            "label": "pluginStop$",
+            "description": [],
+            "signature": [
+              "Subject",
+              "<void>"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.InstallParams.tasksTimeoutMs",
+            "type": "number",
+            "tags": [],
+            "label": "tasksTimeoutMs",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.MultiField",
+        "type": "Interface",
+        "tags": [],
+        "label": "MultiField",
+        "description": [],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.MultiField.flat_name",
+            "type": "string",
+            "tags": [],
+            "label": "flat_name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.MultiField.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.MultiField.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.EcsFieldMap",
+        "type": "Type",
+        "tags": [],
+        "label": "EcsFieldMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.MultiField",
+            "text": "MultiField"
+          },
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/ecs_field_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.FieldMap",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldMap",
+        "description": [],
+        "signature": [
+          "{ [P in T]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.MultiField",
+            "text": "MultiField"
+          },
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.InstallIndex",
+        "type": "Type",
+        "tags": [],
+        "label": "InstallIndex",
+        "description": [],
+        "signature": [
+          "(indexSuffix: string) => Promise<void>"
+        ],
+        "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.InstallIndex.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexSuffix",
+            "description": [],
+            "path": "packages/kbn-index-adapter/src/index_pattern_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.SchemaFieldMapKeys",
+        "type": "Type",
+        "tags": [],
+        "label": "SchemaFieldMapKeys",
+        "description": [],
+        "signature": [
+          "Key extends string ? NonNullable<T[Key]> extends Record<string, unknown> ? `${Key}` | `${Key}.${",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.SchemaFieldMapKeys",
+            "text": "SchemaFieldMapKeys"
+          },
+          "<NonNullable<T[Key]>, keyof NonNullable<T[Key]>>}` : `${Key}` : never"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.SetComponentTemplateParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SetComponentTemplateParams",
+        "description": [],
+        "signature": [
+          "GetComponentTemplateOpts"
+        ],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.SetIndexTemplateParams",
+        "type": "Type",
+        "tags": [],
+        "label": "SetIndexTemplateParams",
+        "description": [],
+        "signature": [
+          "{ namespace?: string | undefined; name: string; hidden?: boolean | undefined; template?: ",
+          "IndicesPutIndexTemplateIndexTemplateMapping",
+          " | undefined; componentTemplateRefs?: string[] | undefined; isDataStream?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/index_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/index-adapter",
+        "id": "def-server.ecsFieldMap",
+        "type": "Object",
+        "tags": [],
+        "label": "ecsFieldMap",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { type: string; required: boolean; array?: boolean | undefined; doc_values?: boolean | undefined; enabled?: boolean | undefined; format?: string | undefined; ignore_above?: number | undefined; multi_fields?: ",
+          {
+            "pluginId": "@kbn/index-adapter",
+            "scope": "server",
+            "docId": "kibKbnIndexAdapterPluginApi",
+            "section": "def-server.MultiField",
+            "text": "MultiField"
+          },
+          "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; copy_to?: string | undefined; }; }"
+        ],
+        "path": "packages/kbn-index-adapter/src/field_maps/ecs_field_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

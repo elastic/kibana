@@ -24,7 +24,7 @@ export const useCaseDisabled = (indicatorName: string): boolean => {
   // disable the item if there is no indicator name or if the user doesn't have the right permission
   // in the case's attachment, the indicator name is the link to open the flyout
   const invalidIndicatorName: boolean = indicatorName === EMPTY_VALUE;
-  const hasPermission: boolean = permissions.create && permissions.update;
+  const hasPermission: boolean = permissions.createComment && permissions.update;
 
   return invalidIndicatorName || !hasPermission;
 };

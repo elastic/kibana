@@ -9,7 +9,7 @@ import { EuiButton, EuiDataGridSorting, EuiFlexGroup, EuiFlexItem } from '@elast
 import { Meta, Story } from '@storybook/react';
 import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
-import { ENTITY_LAST_SEEN, ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
+import { ENTITY_LAST_SEEN } from '@kbn/observability-shared-plugin/common';
 import { useArgs } from '@storybook/addons';
 import { EntitiesGrid } from '.';
 import { entitiesMock } from './mock/entities_mock';
@@ -45,7 +45,7 @@ export const Grid: Story<EntityGridStoriesArgs> = (args) => {
   const filteredAndSortedItems = useMemo(
     () =>
       orderBy(
-        entityType ? entitiesMock.filter((mock) => mock[ENTITY_TYPE] === entityType) : entitiesMock,
+        entityType ? entitiesMock.filter((mock) => mock.entityType === entityType) : entitiesMock,
         sort.id,
         sort.direction
       ),
