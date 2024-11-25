@@ -311,7 +311,7 @@ describe('formatHeartbeatRequest', () => {
       },
       '{"a":"param"}'
     );
-    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
+    expect(actual).toEqual({
       ...testBrowserConfig,
       id: heartbeatId,
       fields: {
@@ -339,7 +339,7 @@ describe('formatHeartbeatRequest', () => {
       },
       JSON.stringify({ key: 'value' })
     );
-    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
+    expect(actual).toEqual({
       ...testBrowserConfig,
       id: monitorId,
       fields: {
@@ -368,7 +368,7 @@ describe('formatHeartbeatRequest', () => {
       spaceId: 'test-space-id',
     });
 
-    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
+    expect(actual).toEqual({
       ...testBrowserConfig,
       id: monitorId,
       fields: {
@@ -396,7 +396,7 @@ describe('formatHeartbeatRequest', () => {
       spaceId: 'test-space-id',
     });
 
-    expect(omit(actual, [ConfigKey.SOURCE_PROJECT_CONTENT])).toEqual({
+    expect(actual).toEqual({
       ...testBrowserConfig,
       params: '',
       id: monitorId,
