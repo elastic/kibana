@@ -70,6 +70,7 @@ import type {
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -124,6 +125,7 @@ export interface ObservabilityPublicPluginsSetup {
   licensing: LicensingPluginSetup;
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
+  streams?: StreamsPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -162,6 +164,7 @@ export interface ObservabilityPublicPluginsStart {
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
   investigate?: InvestigatePublicStart;
+  streams?: StreamsPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
