@@ -8,12 +8,12 @@
 import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { useKibana } from './use_kibana';
 
-export const useEntityDefinition = (id: string) => {
+export const useFetchEntityDefinition = (id: string) => {
   const {
     services: { entityManager },
   } = useKibana();
 
-  const { value, loading, refresh } = useAbortableAsync(
+  const { value, loading } = useAbortableAsync(
     ({ signal }) => {
       return entityManager.entityClient.getEntityDefinition(id);
     },
@@ -22,7 +22,6 @@ export const useEntityDefinition = (id: string) => {
 
   return {
     entityDefinitions: value?.definitions,
-    isEnablementLoading: loading,
-    refresh,
+    isEntityDefinitionLoading: loading,
   };
 };
