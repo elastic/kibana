@@ -13,7 +13,6 @@ import { useDiscoverInTimelineContext } from '../../../common/components/discove
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type {
   TimelineResponse,
-  ResolvedTimeline,
   ColumnHeaderResult,
   FilterTimelineResult,
   DataProviderResult,
@@ -72,12 +71,6 @@ export const getNotesCount = ({ eventIdToNoteIds, noteIds }: OpenTimelineResult)
 /** Returns true if the timeline is untitlied */
 export const isUntitled = ({ title }: OpenTimelineResult): boolean =>
   title == null || title.trim().length === 0;
-
-const omitTypename = (key: string, value: keyof TimelineModel) =>
-  key === '__typename' ? undefined : value;
-
-export const omitTypenameInTimeline = (timeline: TimelineResponse): TimelineResponse =>
-  JSON.parse(JSON.stringify(timeline), omitTypename);
 
 const parseString = (params: string) => {
   try {
@@ -348,13 +341,10 @@ export const useQueryTimelineById = () => {
     } else {
       return Promise.resolve(resolveTimeline(timelineId))
         .then((result) => {
-          const data: ResolvedTimeline | null = getOr(null, 'data', result);
-          if (!data) return;
-
-          const timelineToOpen = omitTypenameInTimeline(data.timeline);
+          if (!result) return;
 
           const { timeline, notes } = formatTimelineResponseToModel(
-            timelineToOpen,
+            result.timeline,
             duplicate,
             timelineType
           );
@@ -372,9 +362,9 @@ export const useQueryTimelineById = () => {
               id: TimelineId.active,
               notes,
               resolveTimelineConfig: {
-                outcome: data.outcome,
-                alias_target_id: data.alias_target_id,
-                alias_purpose: data.alias_purpose,
+                outcome: result.outcome,
+                alias_target_id: result.alias_target_id,
+                alias_purpose: result.alias_purpose,
               },
               timeline: {
                 ...timeline,

@@ -79,6 +79,7 @@ export interface AppDependencies {
   docLinks: DocLinksStart;
   kibanaVersion: SemVer;
   overlays: OverlayStart;
+  canUseSyntheticSource: boolean;
 }
 
 export const AppContextProvider = ({

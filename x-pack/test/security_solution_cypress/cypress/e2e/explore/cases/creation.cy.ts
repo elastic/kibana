@@ -67,7 +67,7 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
           ...getCase1(),
           timeline: {
             ...getCase1().timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
+            id: response.body.savedObjectId,
           },
         })
         .as('mycase')

@@ -116,9 +116,7 @@ export const getColumns = ({
             id: 'actions' as const,
             // keep it for accessibility purposes
             displayAsText: entityActionsLabel,
-            display: (
-              <CustomHeaderCell title={entityActionsLabel} tooltipContent={entityActionsLabel} />
-            ),
+            display: <span>{entityActionsLabel}</span>,
             initialWidth: 100,
           },
         ]
