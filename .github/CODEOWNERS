@@ -106,6 +106,7 @@ packages/content-management/content_editor @elastic/appex-sharedux
 packages/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 packages/content-management/content_insights/content_insights_server @elastic/appex-sharedux
 examples/content_management_examples @elastic/appex-sharedux
+packages/content-management/favorites/favorites_common @elastic/appex-sharedux
 packages/content-management/favorites/favorites_public @elastic/appex-sharedux
 packages/content-management/favorites/favorites_server @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
@@ -274,6 +275,7 @@ packages/core/preboot/core-preboot-server @elastic/kibana-core
 packages/core/preboot/core-preboot-server-internal @elastic/kibana-core
 packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
 test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
+packages/core/rendering/core-rendering-browser @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-internal @elastic/kibana-core
 packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
 packages/core/rendering/core-rendering-server-internal @elastic/kibana-core
@@ -306,7 +308,6 @@ packages/core/security/core-security-server @elastic/kibana-core
 packages/core/security/core-security-server-internal @elastic/kibana-core
 packages/core/security/core-security-server-mocks @elastic/kibana-core
 packages/core/status/core-status-common @elastic/kibana-core
-packages/core/status/core-status-common-internal @elastic/kibana-core
 packages/core/status/core-status-server @elastic/kibana-core
 packages/core/status/core-status-server-internal @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
@@ -355,7 +356,7 @@ src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
-packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
+packages/kbn-data-stream-adapter @elastic/security-threat-hunting
 x-pack/plugins/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
@@ -474,7 +475,7 @@ src/plugins/field_formats @elastic/kibana-data-discovery
 packages/kbn-field-types @elastic/kibana-data-discovery
 packages/kbn-field-utils @elastic/kibana-data-discovery
 x-pack/plugins/fields_metadata @elastic/obs-ux-logs-team
-x-pack/plugins/file_upload @elastic/kibana-gis @elastic/ml-ui
+x-pack/plugins/file_upload @elastic/kibana-presentation @elastic/ml-ui
 examples/files_example @elastic/appex-sharedux
 src/plugins/files_management @elastic/appex-sharedux
 src/plugins/files @elastic/appex-sharedux
@@ -520,6 +521,8 @@ x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 src/plugins/image_embeddable @elastic/appex-sharedux
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
+packages/kbn-index-adapter @elastic/security-threat-hunting
+x-pack/packages/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/plugins/index_lifecycle_management @elastic/kibana-management
 x-pack/plugins/index_management @elastic/kibana-management
 x-pack/packages/index-management/index_management_shared_types @elastic/kibana-management
@@ -573,6 +576,7 @@ src/plugins/links @elastic/kibana-presentation
 packages/kbn-lint-packages-cli @elastic/kibana-operations
 packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
 x-pack/plugins/lists @elastic/security-detection-engine
+x-pack/plugins/ai_infra/llm_tasks @elastic/appex-ai-infra
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 packages/kbn-logging @elastic/kibana-core
@@ -601,8 +605,8 @@ test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mapbox-gl @elastic/kibana-gis
 x-pack/examples/third_party_maps_source_example @elastic/kibana-gis
-src/plugins/maps_ems @elastic/kibana-gis
-x-pack/plugins/maps @elastic/kibana-gis
+src/plugins/maps_ems @elastic/kibana-presentation
+x-pack/plugins/maps @elastic/kibana-presentation
 x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/plugins/observability_solution/metrics_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
@@ -665,7 +669,9 @@ x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-l
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/packages/observability/observability_utils @elastic/observability-ui
+x-pack/packages/observability/observability_utils/observability_utils_browser @elastic/observability-ui
+x-pack/packages/observability/observability_utils/observability_utils_common @elastic/observability-ui
+x-pack/packages/observability/observability_utils/observability_utils_server @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -692,6 +698,8 @@ src/plugins/presentation_panel @elastic/kibana-presentation
 packages/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
+x-pack/plugins/ai_infra/product_doc_base @elastic/appex-ai-infra
+x-pack/packages/ai-infra/product-doc-common @elastic/appex-ai-infra
 x-pack/plugins/observability_solution/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/profiling @elastic/obs-ux-infra_services-team
 packages/kbn-profiling-utils @elastic/obs-ux-infra_services-team
