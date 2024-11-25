@@ -192,6 +192,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
             multiConsumerSelection,
             validConsumers,
             ruleType,
+            ruleTypes,
           }),
         }}
       >

@@ -217,10 +217,9 @@ export const RulePage = (props: RulePageProps) => {
         <EuiConfirmModal
           onCancel={() => setIsCancelModalOpen(false)}
           onConfirm={onCancel}
-          data-test-subj="ruleFormCancelModal"
+          data-test-subj="confirmRuleCloseModal"
           buttonColor="danger"
           defaultFocusedButton="confirm"
-          data-test-subj="confirmRuleCloseModal"
           title={RULE_FORM_CANCEL_MODAL_TITLE}
           confirmButtonText={RULE_FORM_CANCEL_MODAL_CONFIRM}
           cancelButtonText={RULE_FORM_CANCEL_MODAL_CANCEL}
