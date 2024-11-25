@@ -157,6 +157,7 @@ export const LinkContent = ({
               fill
               data-test-subj="copyShareUrlButton"
               data-share-url={urlToCopy.current}
+              data-snapshot-url={snapshotUrl}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
