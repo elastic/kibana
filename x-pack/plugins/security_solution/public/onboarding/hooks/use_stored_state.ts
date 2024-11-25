@@ -16,9 +16,7 @@ export const LocalStorageKey = {
   completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
   expandedCard: 'ONBOARDING_HUB.EXPANDED_CARD',
   selectedIntegrationTabId: 'ONBOARDING_HUB.SELECTED_INTEGRATION_TAB_ID',
-  selectedRulesCardItemId: 'securitySolution.onboarding.rulesCardSelectedItemId',
-  selectedAlertsCardItemId: 'securitySolution.onboarding.alertsCardSelectedItemId',
-  selectedDashboardsCardItemId: 'securitySolution.onboarding.dashboardsCardSelectedItemId',
+  selectedCardItemId: 'securitySolution.onboarding.selectedCardItem',
   IntegrationSearchTerm: 'ONBOARDING_HUB.INTEGRATION_SEARCH_TERM',
   IntegrationScrollTop: 'ONBOARDING_HUB.INTEGRATION_SCROLL_TOP',
 } as const;
@@ -56,12 +54,12 @@ export const useStoredExpandedCardId = (spaceId: string) =>
  * Stores the selected selectable card ID per space
  */
 export const useStoredSelectedCardItemId = (
-  selectedCardKey: string,
+  cardType: 'alerts' | 'dashboards' | 'rules',
   spaceId: string,
   defaultSelectedCardItemId: CardSelectorListItem['id']
 ) =>
   useDefinedLocalStorage<CardSelectorListItem['id']>(
-    `${selectedCardKey}.${spaceId}`,
+    `${LocalStorageKey.selectedCardItemId}.${cardType}.${spaceId}`,
     defaultSelectedCardItemId
   );
 

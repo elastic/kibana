@@ -10,23 +10,12 @@ import type { RulesCardItemId } from '../rules/types';
 import type { AlertsCardItemId } from '../alerts/types';
 import type { DashboardsCardItemId } from '../dashboards/types';
 import { useCardSelectorListStyles } from './card_selector_list.styles';
+import { HEIGHT_ANIMATION_DURATION } from '../../onboarding_card_panel.styles';
 
-const INITIAL_SCROLL_ANIMATION_DURATION = 500;
-const SCROLL_ANIMATION_DURATION = 300;
-
-export enum CardSelectorListItemAssetType {
-  video = 'video',
-  image = 'image',
-}
 export interface CardSelectorListItem {
   id: RulesCardItemId | AlertsCardItemId | DashboardsCardItemId;
   title: string;
   description: string;
-  asset: {
-    type: CardSelectorListItemAssetType;
-    source: string;
-    alt: string;
-  };
 }
 
 interface CardSelectorListProps {
@@ -36,16 +25,13 @@ interface CardSelectorListProps {
   title?: string;
 }
 
-const scrollToSelectedItem = (
-  cardId: string,
-  animationDuration: number = SCROLL_ANIMATION_DURATION
-) => {
+const scrollToSelectedItem = (cardId: string) => {
   setTimeout(() => {
     const element = document.getElementById(`selector-${cardId}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  }, animationDuration);
+  }, HEIGHT_ANIMATION_DURATION + 250);
 };
 
 export const CardSelectorList = React.memo<CardSelectorListProps>(
@@ -53,8 +39,9 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
     const styles = useCardSelectorListStyles();
 
     useEffect(() => {
-      scrollToSelectedItem(selectedItem.id, INITIAL_SCROLL_ANIMATION_DURATION);
-    }, [selectedItem]);
+      scrollToSelectedItem(selectedItem.id);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
       <EuiFlexGroup
@@ -78,7 +65,7 @@ export const CardSelectorList = React.memo<CardSelectorListProps>(
             gutterSize="s"
           >
             {items.map((item) => (
-              <EuiFlexItem id={`selector-${item.id}`} grow={false}>
+              <EuiFlexItem key={`key-${item.id}`} id={`selector-${item.id}`} grow={false}>
                 <EuiPanel
                   hasBorder
                   data-test-subj={`cardSelectorItem-${item.id}`}

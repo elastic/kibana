@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OnboardingCardContentAssetPanel } from './card_content_asset_panel';
-import { CardSelectorListItemAssetType } from './card_selector_list';
+import { CardSelectorListItemAssetType } from '../types';
 
 describe('OnboardingCardContentAssetPanel', () => {
   const defaultProps = {

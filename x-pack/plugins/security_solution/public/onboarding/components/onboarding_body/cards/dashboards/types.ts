@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { CardSelectorListItem } from '../common/card_selector_list';
+import type { CardAssetType } from '../types';
+
 export enum DashboardsCardItemId {
   discover = 'discover',
 }
+
+export type DashboardsCardSelectorListItem = CardSelectorListItem & CardAssetType;

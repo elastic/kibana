@@ -70,7 +70,6 @@ export const OnboardingBody = React.memo(() => {
                     >
                       <Suspense fallback={<CenteredLoadingSpinner size="m" />}>
                         <LazyCardComponent
-                          isExpanded={expandedCardId === id}
                           setComplete={createSetCardComplete(id)}
                           checkComplete={createCheckCardComplete(id)}
                           isCardComplete={isCardComplete}

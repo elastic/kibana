@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { css } from '@emotion/css';
-import { LocalStorageKey, useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
+import { useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
@@ -18,21 +18,18 @@ import { CardCallOut } from '../common/card_callout';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
-import { ALERTS_CARD_ITEMS, ALERTS_CARD_ITEMS_BY_ID } from './alerts_card_config';
+import { ALERTS_CARD_ITEMS_BY_ID, ALERTS_CARD_SELECTOR_ITEMS } from './alerts_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
-import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
 import { DEFAULT_ALERTS_CARD_ITEM_SELECTED } from './constants';
 
 export const AlertsCard: OnboardingCardComponent = ({
   isCardComplete,
   setExpandedCardId,
   setComplete,
-  isExpanded,
 }) => {
   const { spaceId } = useOnboardingContext();
-  const isCardContentVisible = useDelayedVisibility({ isExpanded });
   const [toggleIdSelected, setStoredSelectedAlertsCardItemId] = useStoredSelectedCardItemId(
-    LocalStorageKey.selectedAlertsCardItemId,
+    'alerts',
     spaceId,
     DEFAULT_ALERTS_CARD_ITEM_SELECTED.id
   );
@@ -52,13 +49,11 @@ export const AlertsCard: OnboardingCardComponent = ({
 
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
-      setSelectedCardItem(item);
+      setSelectedCardItem(ALERTS_CARD_ITEMS_BY_ID[item.id]);
       setStoredSelectedAlertsCardItemId(item.id);
     },
     [setStoredSelectedAlertsCardItemId]
   );
-
-  if (!isCardContentVisible) return null;
 
   return (
     <OnboardingCardContentAssetPanel asset={selectedCardItem.asset}>
@@ -79,7 +74,7 @@ export const AlertsCard: OnboardingCardComponent = ({
           <EuiSpacer />
           <CardSelectorList
             title={i18n.ALERTS_CARD_STEP_SELECTOR_TITLE}
-            items={ALERTS_CARD_ITEMS}
+            items={ALERTS_CARD_SELECTOR_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />

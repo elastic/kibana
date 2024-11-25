@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { CardSelectorList, CardSelectorListItemAssetType } from './card_selector_list';
+import { CardSelectorList } from './card_selector_list';
 import type { CardSelectorListItem } from './card_selector_list';
 import { RulesCardItemId } from '../rules/types';
 
@@ -18,21 +18,11 @@ const items: CardSelectorListItem[] = [
     id: RulesCardItemId.install,
     title: 'Install Elastic rules',
     description: 'Quickly add and enable the rules you need with Elastic’s prebuilt rules',
-    asset: {
-      type: CardSelectorListItemAssetType.image,
-      source: 'installRulesImageSrc',
-      alt: 'install_image',
-    },
   },
   {
     id: RulesCardItemId.create,
     title: 'Create a custom rule',
     description: 'Create a custom detection rule for local or remote data',
-    asset: {
-      type: CardSelectorListItemAssetType.video,
-      source: 'videoSrc',
-      alt: 'create_video',
-    },
   },
 ];
 

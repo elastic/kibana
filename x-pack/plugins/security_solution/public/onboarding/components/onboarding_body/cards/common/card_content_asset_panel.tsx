@@ -8,11 +8,17 @@ import React, { useMemo, type PropsWithChildren } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { OnboardingCardContentPanel } from './card_content_panel';
 import { useCardContentAssetPanelStyles } from './card_content_asset_panel.styles';
-import { CardSelectorListItemAssetType } from './card_selector_list';
+import { CardSelectorListItemAssetType } from '../types';
+
+interface OnboardingCardContentAssetType {
+  type: CardSelectorListItemAssetType;
+  source: string;
+  alt: string;
+}
 
 export const OnboardingCardContentAssetPanel = React.memo<
   PropsWithChildren<{
-    asset: { type: CardSelectorListItemAssetType; source: string; alt: string };
+    asset: OnboardingCardContentAssetType;
   }>
 >(({ children, asset: { type, source, alt } }) => {
   const styles = useCardContentAssetPanelStyles();

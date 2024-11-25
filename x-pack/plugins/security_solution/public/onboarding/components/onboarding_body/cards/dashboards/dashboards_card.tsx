@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { LocalStorageKey, useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
+import { useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
 import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_panel';
@@ -17,21 +17,21 @@ import { CardLinkButton } from '../common/card_link_button';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
-import { DASHBOARDS_CARD_ITEMS, DASHBOARDS_CARD_ITEMS_BY_ID } from './dashboards_card_config';
+import {
+  DASHBOARDS_CARD_ITEMS_BY_ID,
+  DASHBOARDS_CARD_SELECTOR_ITEMS,
+} from './dashboards_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
-import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
 import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
 
 export const DashboardsCard: OnboardingCardComponent = ({
   isCardComplete,
   setComplete,
   setExpandedCardId,
-  isExpanded,
 }) => {
   const { spaceId } = useOnboardingContext();
-  const isCardContentVisible = useDelayedVisibility({ isExpanded });
   const [toggleIdSelected, setStoredSelectedDashboardsCardItemId] = useStoredSelectedCardItemId(
-    LocalStorageKey.selectedDashboardsCardItemId,
+    'dashboards',
     spaceId,
     DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED.id
   );
@@ -49,13 +49,11 @@ export const DashboardsCard: OnboardingCardComponent = ({
 
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
-      setSelectedCardItem(item);
+      setSelectedCardItem(DASHBOARDS_CARD_ITEMS_BY_ID[item.id]);
       setStoredSelectedDashboardsCardItemId(item.id);
     },
     [setStoredSelectedDashboardsCardItemId]
   );
-
-  if (!isCardContentVisible) return null;
 
   return (
     <OnboardingCardContentAssetPanel asset={selectedCardItem.asset}>
@@ -71,7 +69,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
           </EuiText>
           <EuiSpacer />
           <CardSelectorList
-            items={DASHBOARDS_CARD_ITEMS}
+            items={DASHBOARDS_CARD_SELECTOR_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />

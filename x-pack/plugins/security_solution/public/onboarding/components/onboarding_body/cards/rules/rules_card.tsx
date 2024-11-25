@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { LocalStorageKey, useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
+import { useStoredSelectedCardItemId } from '../../../../hooks/use_stored_state';
 import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
 import { OnboardingCardId } from '../../../../constants';
 import type { OnboardingCardComponent } from '../../../../types';
@@ -19,20 +19,14 @@ import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
 import { useOnboardingContext } from '../../../onboarding_context';
-import { RULES_CARD_ITEMS, RULES_CARD_ITEMS_BY_ID } from './rules_card_config';
-import { useDelayedVisibility } from '../../hooks/use_delayed_visibility';
+import { RULES_CARD_ITEMS_BY_ID, RULES_CARD_SELECTOR_ITEMS } from './rules_card_config';
 import { DEFAULT_RULES_CARD_ITEM_SELECTED } from './constants';
 
-export const RulesCard: OnboardingCardComponent = ({
-  isCardComplete,
-  setExpandedCardId,
-  isExpanded,
-}) => {
+export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
   const { spaceId } = useOnboardingContext();
-  const isCardContentVisible = useDelayedVisibility({ isExpanded });
 
   const [toggleIdSelected, setStoredSelectedRulesCardItemId] = useStoredSelectedCardItemId(
-    LocalStorageKey.selectedRulesCardItemId,
+    'rules',
     spaceId,
     DEFAULT_RULES_CARD_ITEM_SELECTED.id
   );
@@ -50,13 +44,11 @@ export const RulesCard: OnboardingCardComponent = ({
 
   const onSelectCard = useCallback(
     (item: CardSelectorListItem) => {
-      setSelectedCardItem(item);
+      setSelectedCardItem(RULES_CARD_ITEMS_BY_ID[item.id]);
       setStoredSelectedRulesCardItemId(item.id);
     },
     [setStoredSelectedRulesCardItemId]
   );
-
-  if (!isCardContentVisible) return null;
 
   return (
     <OnboardingCardContentAssetPanel asset={selectedCardItem.asset}>
@@ -73,7 +65,7 @@ export const RulesCard: OnboardingCardComponent = ({
           <EuiSpacer />
           <CardSelectorList
             title={i18n.RULES_CARD_STEP_SELECTOR_TITLE}
-            items={RULES_CARD_ITEMS}
+            items={RULES_CARD_SELECTOR_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />
