@@ -74,12 +74,17 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('Autocompletion works', async () => {
-          await retry.waitFor('wait for page to be loaded', async () => {
-            return testSubjects.exists('superDatePickerToggleQuickMenuButton');
-          });
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
-          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
-          await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
+
+          await retry.waitFor('wait for the suggestion to appear', async () => {
+            await observability.alerts.common.clickOnQueryBar();
+            return testSubjects.exists('autocompleteSuggestion-field-kibana.alert.start-');
+          });
+
+          await retry.waitFor('wait for the suggestion to appear', async () => {
+            await observability.alerts.common.clickOnQueryBar();
+            return testSubjects.exists('autocompleteSuggestion-field-kibana.alert.status-');
+          });
         });
 
         it('Invalid input should not break the page', async () => {
