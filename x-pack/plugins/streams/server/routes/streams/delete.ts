@@ -52,6 +52,7 @@ export const deleteStreamRoute = createServerRoute({
         throw new MalformedStreamId('Cannot delete root stream');
       }
 
+      // need to update parent first to cut off documents streaming down
       await updateParentStream(scopedClusterClient, params.path.id, parentId, logger);
 
       await deleteStream(scopedClusterClient, params.path.id, logger);
