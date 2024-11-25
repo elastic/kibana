@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useSetInitialValue } from './use_set_initial_value';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { decompressFromEncodedURIComponent } from 'lz-string';
