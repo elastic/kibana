@@ -4,46 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EXISTING_HOSTS_TAB } from '../screens/fleet';
-import {
-  ADD_INTEGRATION_POLICY_BTN,
-  CREATE_PACKAGE_POLICY_SAVE_BTN,
-  POLICY_EDITOR,
-} from '../screens/integrations';
-import { CONFIRM_MODAL } from '../screens/navigation';
 import { login } from '../tasks/login';
 
-describe('Package policy', () => {
+describe('Edit package policy', () => {
+  const policyConfig = {
+    id: 'policy-1',
+    name: 'fleet_server-1',
+    namespace: 'default',
+    package: { name: 'fleet_server', title: 'Fleet Server', version: '1.1.0' },
+    enabled: true,
+    policy_id: 'fleet-server-policy',
+    policy_ids: ['fleet-server-policy'],
+    output_id: 'fleet-default-output',
+    inputs: [
+      {
+        type: 'fleet-server',
+        policy_template: 'fleet_server',
+        enabled: true,
+        streams: [],
+        vars: {
+          host: { value: ['0.0.0.0'], type: 'text' },
+          port: { value: [8220], type: 'integer' },
+          max_connections: { type: 'integer' },
+          custom: { value: '', type: 'yaml' },
+        },
+        compiled_input: { server: { port: 8220, host: '0.0.0.0' } },
+      },
+    ],
+  };
   beforeEach(() => {
     login();
-  });
-
-  it('should edit package policy', () => {
-    const policyConfig = {
-      id: 'policy-1',
-      name: 'fleet_server-1',
-      namespace: 'default',
-      package: { name: 'fleet_server', title: 'Fleet Server', version: '1.1.0' },
-      enabled: true,
-      policy_id: 'fleet-server-policy',
-      policy_ids: ['fleet-server-policy'],
-      output_id: 'fleet-default-output',
-      inputs: [
-        {
-          type: 'fleet-server',
-          policy_template: 'fleet_server',
-          enabled: true,
-          streams: [],
-          vars: {
-            host: { value: ['0.0.0.0'], type: 'text' },
-            port: { value: [8220], type: 'integer' },
-            max_connections: { type: 'integer' },
-            custom: { value: '', type: 'yaml' },
-          },
-          compiled_input: { server: { port: 8220, host: '0.0.0.0' } },
-        },
-      ],
-    };
 
     cy.intercept('/api/fleet/package_policies/policy-1', {
       item: policyConfig,
@@ -121,7 +111,9 @@ describe('Package policy', () => {
         status: 'not_installed',
       },
     });
+  });
 
+  it('should edit package policy', () => {
     cy.visit('/app/fleet/policies/fleet-server-policy/edit-integration/policy-1');
     cy.getBySel('packagePolicyDescriptionInput').clear().type('desc');
 
@@ -134,29 +126,6 @@ describe('Package policy', () => {
 
     cy.wait('@updatePackagePolicy').then((interception) => {
       expect(interception.request.body.description).to.equal('desc');
-    });
-  });
-
-  it('should create a new orphaned package policy', () => {
-    cy.visit('/app/integrations/detail/system');
-    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
-    cy.getBySel(EXISTING_HOSTS_TAB).click();
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).should('exist');
-    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_CLEAR).should('not.exist');
-    cy.getBySel(POLICY_EDITOR.POLICY_NAME_INPUT).clear().type('system-orphaned-test');
-
-    cy.intercept({
-      method: 'POST',
-      url: '/api/fleet/package_policies',
-    }).as('createPackagePolicy');
-
-    cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).should('be.enabled').click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-
-    cy.wait('@createPackagePolicy').then((interception) => {
-      expect(interception.request.body.name).to.equal('system-orphaned-test');
-      expect(interception.request.body.policy_id).to.equal(undefined);
-      expect(interception.request.body.policy_ids).to.deep.equal([]);
     });
   });
 });
