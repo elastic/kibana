@@ -135,7 +135,9 @@ describe('Agent configuration', () => {
       cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
         'be.visible'
       );
-      cy.contains('button', 'production').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList')
+        .contains('button', 'production')
+        .click();
 
       cy.contains('Next step').click();
       cy.contains('Create configuration');
@@ -156,14 +158,18 @@ describe('Agent configuration', () => {
       cy.getByTestSubj('serviceNameComboBox').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList serviceNameComboBox-optionsList').should('be.visible');
 
-      cy.contains('button', 'All').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceNameComboBox-optionsList')
+        .contains('button', 'All')
+        .click();
       cy.wait('@serviceEnvironmentApi');
 
       cy.getByTestSubj('serviceEnviromentComboBox').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList').should(
         'be.visible'
       );
-      cy.contains('button', 'All').click();
+      cy.getByTestSubj('comboBoxOptionsList serviceEnviromentComboBox-optionsList')
+        .contains('button', 'All')
+        .click();
 
       cy.contains('Next step').click();
       cy.get('[data-test-subj="settingsPage_serviceName"]').contains('All');
