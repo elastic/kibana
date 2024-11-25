@@ -13,7 +13,7 @@ fi
 
 if [[ "${FTR_GEN_AI:-}" =~ ^(1|true)$ ]]; then
   echo "FTR_GEN_AI was set - exposing LLM connectors"
-  export KIBANA_TESTING_AI_CONNECTORS="$(vault_get ai-infra-ci ai-connectors)"
+  export KIBANA_TESTING_AI_CONNECTORS="$(vault_get ai-infra-ci-connectors connectors-config)"
 fi
 
 EXTRA_ARGS=${FTR_EXTRA_ARGS:-}
