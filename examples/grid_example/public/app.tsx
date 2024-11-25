@@ -49,7 +49,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [expandedPanelId, setExpandedPanelId] = useState<string | undefined>();
-  const [accessMode, setAccessMode] = useState<GridAccessMode>('VIEW');
+  const [accessMode, setAccessMode] = useState<GridAccessMode>('EDIT');
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
