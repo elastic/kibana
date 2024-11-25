@@ -16,7 +16,7 @@ import { BrowserFields } from '@kbn/alerting-types';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { useColumns } from './use_columns';
-import { AlertsTableStorage } from '../../components/alerts_table';
+import { AlertsTableStorage } from '../components/alerts_table';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 

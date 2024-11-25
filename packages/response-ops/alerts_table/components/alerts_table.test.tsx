@@ -38,8 +38,8 @@ import { AlertsDataGrid } from './alerts_data_grid';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getCasesMock, createCasesServiceMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMock } from '../mocks/maintenance_windows.mock';
-import { bulkGetCases } from '../hooks/apis/bulk_get_cases';
-import { bulkGetMaintenanceWindows } from '../hooks/apis/bulk_get_maintenance_windows';
+import { bulkGetCases } from '../hooks/bulk_get_cases';
+import { bulkGetMaintenanceWindows } from '../hooks/bulk_get_maintenance_windows';
 import { useLicense } from '../hooks/use_license';
 import { getJsDomPerformanceFix } from '../test_utils';
 
@@ -208,13 +208,13 @@ jest.mocked(getMutedAlertsInstancesByRule).mockResolvedValue({
 });
 
 // Cases mock
-jest.mock('../hooks/apis/bulk_get_cases');
+jest.mock('../hooks/bulk_get_cases');
 const mockBulkGetCases = jest.mocked(bulkGetCases);
 const mockCases = getCasesMock();
 mockBulkGetCases.mockResolvedValue({ cases: mockCases, errors: [] });
 
 // Maintenance windows mock
-jest.mock('../hooks/apis/bulk_get_maintenance_windows');
+jest.mock('../hooks/bulk_get_maintenance_windows');
 jest.mock('../hooks/use_license');
 const mockBulkGetMaintenanceWindows = jest.mocked(bulkGetMaintenanceWindows);
 jest.mocked(useLicense).mockReturnValue({ isAtLeastPlatinum: () => true });

@@ -15,7 +15,7 @@ import { ServerError } from '@kbn/response-ops-alerts-apis/types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { queryKeys } from '../constants';
-import { bulkGetCases, Case, CasesBulkGetResponse } from './apis/bulk_get_cases';
+import { bulkGetCases, Case, CasesBulkGetResponse } from './bulk_get_cases';
 
 const ERROR_TITLE = i18n.translate('xpack.triggersActionsUI.cases.api.bulkGet', {
   defaultMessage: 'Error fetching cases data',
