@@ -11,6 +11,7 @@ import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { OnboardingFlow } from '../../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../../components/shared/templates/infra_page_template';
 import { NodeDetailsMetricDataResponseRT } from '../../../../../common/http_api/node_details_api';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
@@ -91,6 +92,7 @@ export const NodeDetailsPage = (props: Props) => {
 
   return (
     <InfraPageTemplate
+      onboardingFlow={OnboardingFlow.Infra}
       pageHeader={{
         pageTitle: props.name,
         rightSideItems: [

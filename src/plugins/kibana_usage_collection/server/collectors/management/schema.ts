@@ -22,6 +22,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'securitySolution:maxUnassociatedNotes': {
+    type: 'integer',
+    _meta: { description: 'The maximum number of allowed unassociated notes' },
+  },
   'securitySolution:defaultThreatIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -56,10 +60,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'visualization:heatmap:maxBuckets': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'visualization:colorMapping': {
-    type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:useLegacyTimeAxis': {
@@ -266,6 +266,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'theme:darkMode': {
     type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'theme:name': {
+    type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
   'state:storeInSessionStorage': {
@@ -510,6 +514,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'observability:enableLogsStream': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -567,10 +575,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   isDefaultIndexMigrated: {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'metrics:allowCheckingForFailedShards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -634,14 +638,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableInfrastructureHostsView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureContainerAssetView': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:enableInfrastructureProfilingIntegration': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -699,6 +695,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     items: {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
+    },
+  },
+  'observability:newLogsOverview': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable the new logs overview component.',
     },
   },
 };

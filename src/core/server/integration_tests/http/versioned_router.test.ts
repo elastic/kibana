@@ -112,14 +112,12 @@ describe('Routing versioned requests', () => {
 
     await server.start();
 
-    await expect(supertest.get('/my-path').expect(200)).resolves.toEqual(
-      expect.objectContaining({
-        body: { v: '1' },
-        header: expect.objectContaining({
-          'elastic-api-version': '2020-02-02',
-        }),
-      })
-    );
+    await expect(supertest.get('/my-path').expect(200)).resolves.toMatchObject({
+      body: { v: '1' },
+      header: expect.objectContaining({
+        'elastic-api-version': '2020-02-02',
+      }),
+    });
   });
 
   it('returns the expected output for badly formatted versions', async () => {
@@ -137,11 +135,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', 'abc')
         .expect(400)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Invalid version/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Invalid version/),
+    });
   });
 
   it('returns the expected responses for failed validation', async () => {
@@ -163,18 +159,14 @@ describe('Routing versioned requests', () => {
     await server.start();
 
     await expect(
-      supertest
-        .post('/my-path')
-        .send({})
-        .set('Elastic-Api-Version', '1')
-        .expect(400)
-        .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
+      supertest.post('/my-path').send({}).set('Elastic-Api-Version', '1').expect(400)
+    ).resolves.toMatchObject({
+      body: {
         error: 'Bad Request',
         message: expect.stringMatching(/expected value of type/),
-      })
-    );
+      },
+      headers: { 'elastic-api-version': '1' }, // includes version if validation failed
+    });
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
@@ -193,7 +185,25 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2023-10-31')
         .expect(200)
         .then(({ header }) => header)
-    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2023-10-31' }));
+    ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+  });
+
+  it('returns the version in response headers, even for HTTP resources', async () => {
+    router.versioned
+      .get({ path: '/my-path', access: 'public', options: { httpResource: true } })
+      .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
+        return res.ok({ body: { foo: 'bar' } });
+      });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '2023-10-31')
+        .expect(200)
+        .then(({ header }) => header)
+    ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
   });
 
   it('runs response validation when in dev', async () => {
@@ -236,11 +246,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '1')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Failed output validation/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Failed output validation/),
+    });
 
     await expect(
       supertest
@@ -248,11 +256,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Failed output validation/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Failed output validation/),
+    });
 
     // This should pass response validation
     await expect(
@@ -261,11 +267,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '3')
         .expect(200)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        v: '3',
-      })
-    );
+    ).resolves.toMatchObject({
+      v: '3',
+    });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
@@ -367,9 +371,7 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2020-02-02')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({ message: expect.stringMatching(/No handlers registered/) })
-    );
+    ).resolves.toMatchObject({ message: expect.stringMatching(/No handlers registered/) });
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 

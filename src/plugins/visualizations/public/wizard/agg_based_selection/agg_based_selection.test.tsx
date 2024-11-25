@@ -70,18 +70,18 @@ describe('AggBasedSelection', () => {
     jest.clearAllMocks();
   });
 
-  it('should call the toggleGroups if the user clicks the goBack link', () => {
-    const toggleGroups = jest.fn();
+  it('should call the showMainDialog if the user clicks the goBack link', () => {
+    const showMainDialog = jest.fn();
     const wrapper = mountWithIntl(
       <AggBasedSelection
         visTypesRegistry={visTypes}
-        toggleGroups={toggleGroups}
+        showMainDialog={showMainDialog}
         onVisTypeSelected={jest.fn()}
       />
     );
     const aggBasedGroupCard = wrapper.find('[data-test-subj="goBackLink"]').last();
     aggBasedGroupCard.simulate('click');
-    expect(toggleGroups).toHaveBeenCalled();
+    expect(showMainDialog).toHaveBeenCalled();
   });
 
   describe('filter for visualization types', () => {
@@ -89,7 +89,7 @@ describe('AggBasedSelection', () => {
       const wrapper = mountWithIntl(
         <AggBasedSelection
           visTypesRegistry={visTypes}
-          toggleGroups={jest.fn()}
+          showMainDialog={jest.fn()}
           onVisTypeSelected={jest.fn()}
         />
       );

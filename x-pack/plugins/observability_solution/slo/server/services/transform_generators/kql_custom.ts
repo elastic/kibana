@@ -6,14 +6,13 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
+import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
+  SLO_DESTINATION_INDEX_NAME,
   getSLOPipelineId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { KQLCustomIndicator, SLODefinition } from '../../domain/models';
@@ -21,11 +20,11 @@ import { InvalidTransformError } from '../../errors';
 import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class KQLCustomTransformGenerator extends TransformGenerator {
-  public async getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -33,7 +32,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      await this.buildSource(slo, slo.indicator, dataViewService),
+      await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
       this.buildAggregations(slo, slo.indicator),
@@ -46,18 +45,11 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
     return getSLOTransformId(slo.id, slo.revision);
   }
 
-  private async buildSource(
-    slo: SLODefinition,
-    indicator: KQLCustomIndicator,
-    dataViewService: DataViewsService
-  ) {
-    const dataView = await this.getIndicatorDataView({
-      dataViewService,
-      dataViewId: indicator.params.dataViewId,
-    });
+  private async buildSource(slo: SLODefinition, indicator: KQLCustomIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: [
@@ -94,9 +86,9 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
               goodEvents: 'slo.numerator>_count',
               totalEvents: 'slo.denominator>_count',
             },
-            script: `params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
+            script: `if (params.totalEvents == 0) { return 1 } else { return params.goodEvents / params.totalEvents ${getTimesliceTargetComparator(
               slo.objective.timesliceTarget!
-            )} ${slo.objective.timesliceTarget} ? 1 : 0`,
+            )} ${slo.objective.timesliceTarget} ? 1 : 0 }`,
           },
         },
       }),

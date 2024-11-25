@@ -13,7 +13,7 @@ import { getSettings } from '../../settings';
 export async function getPrereleaseFromSettings(
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<boolean> {
-  let prerelease: boolean = false;
+  let prerelease: boolean | undefined = false;
   try {
     ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
   } catch (err) {
@@ -21,5 +21,5 @@ export async function getPrereleaseFromSettings(
       .getLogger()
       .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
   }
-  return prerelease;
+  return prerelease ?? false;
 }

@@ -18,12 +18,16 @@ export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}
 
   public getRoles = async () => {
-    return await this.http.get<Role[]>('/api/security/role', { version });
+    return await this.http.get<Role[]>('/api/security/role', {
+      version,
+      query: { replaceDeprecatedPrivileges: true },
+    });
   };
 
   public getRole = async (roleName: string) => {
     return await this.http.get<Role>(`/api/security/role/${encodeURIComponent(roleName)}`, {
       version,
+      query: { replaceDeprecatedPrivileges: true },
     });
   };
 

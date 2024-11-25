@@ -14,7 +14,6 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/inference-plugin",
     "@kbn/logging",
     "@kbn/kibana-utils-plugin",
     "@kbn/core-analytics-browser",
@@ -44,8 +43,11 @@
     "@kbn/serverless",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/inference-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-common",
+    "@kbn/inference-common",
+    "@kbn/core-lifecycle-server",
+    "@kbn/server-route-repository-utils",
   ],
   "exclude": ["target/**/*"]
 }

@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
-import { of } from 'rxjs';
+import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -18,7 +18,7 @@ const title = i18n.translate(
 );
 const icon = 'logoObservability';
 
-export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
+function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
   const navTree: NavigationTreeDefinition = {
     body: [
       {
@@ -34,12 +34,22 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'observability-overview',
           },
           {
-            link: 'discover',
+            title: i18n.translate('xpack.observability.obltNav.discover', {
+              defaultMessage: 'Discover',
+            }),
+            // 'last-used-logs-viewer' is wrapper app to handle the navigation between observability-log-explorer and discover
+            link: 'last-used-logs-viewer',
+            breadcrumbStatus: 'hidden', // avoid duplicate "Discover" breadcrumbs
             renderAs: 'item',
             children: [
               {
-                // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
-                link: 'observability-logs-explorer',
+                link: 'discover',
+                children: [
+                  {
+                    // This is to show "observability-log-explorer" breadcrumbs when navigating from "discover" to "log explorer"
+                    link: 'observability-logs-explorer',
+                  },
+                ],
               },
             ],
           },
@@ -77,6 +87,13 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             link: 'inventory',
             spaceBefore: 'm',
           },
+          ...(streamsAvailable
+            ? [
+                {
+                  link: 'streams' as const,
+                },
+              ]
+            : []),
           {
             id: 'apm',
             title: i18n.translate('xpack.observability.obltNav.applications', {
@@ -86,9 +103,25 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
             children: [
               {
                 children: [
-                  { link: 'apm:services' },
-                  { link: 'apm:traces' },
-                  { link: 'apm:dependencies' },
+                  {
+                    link: 'apm:services',
+                    getIsActive: ({ pathNameSerialized }) => {
+                      const regex = /app\/apm\/.*service.*/;
+                      return regex.test(pathNameSerialized);
+                    },
+                  },
+                  {
+                    link: 'apm:traces',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/traces'));
+                    },
+                  },
+                  {
+                    link: 'apm:dependencies',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                    },
+                  },
                   {
                     link: 'ux',
                     title: i18n.translate('xpack.observability.obltNav.apm.ux', {
@@ -136,8 +169,16 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
                       defaultMessage: 'Infrastructure inventory',
                     }),
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+                    },
                   },
-                  { link: 'metrics:hosts' },
+                  {
+                    link: 'metrics:hosts',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+                    },
+                  },
                   {
                     link: 'metrics:metrics-explorer',
                     title: i18n.translate(
@@ -292,6 +333,15 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                     ),
                   },
                   {
+                    link: 'ml:esqlDataVisualizer',
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.ml.data_visualizer.esql_data_visualizer',
+                      {
+                        defaultMessage: 'ES|QL data visualizer',
+                      }
+                    ),
+                  },
+                  {
                     link: 'ml:dataDrift',
                     title: i18n.translate(
                       'xpack.observability.obltNav.ml.data_visualizer.data_drift',
@@ -346,7 +396,6 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
               defaultMessage: 'Other tools',
             }),
             renderAs: 'panelOpener',
-            icon: 'editorCodeBlock',
             children: [
               {
                 link: 'logs:stream',
@@ -364,6 +413,12 @@ export function createNavTree(pluginsStart: ObservabilityPublicPluginsStart) {
                 link: 'logs:log-categories',
                 title: i18n.translate('xpack.observability.obltNav.otherTools.logsCategories', {
                   defaultMessage: 'Logs categories',
+                }),
+              },
+              {
+                link: 'logs:settings',
+                title: i18n.translate('xpack.observability.obltNav.otherTools.logsSettings', {
+                  defaultMessage: 'Logs settings',
                 }),
               },
               { link: 'maps' },
@@ -510,6 +565,8 @@ export const createDefinition = (
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: of(createNavTree(pluginsStart)),
+  navigationTree$: (pluginsStart.streams?.status$ || of({ status: 'disabled' as const })).pipe(
+    map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))
+  ),
   dataTestSubj: 'observabilitySideNav',
 });

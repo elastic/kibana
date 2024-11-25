@@ -13,7 +13,7 @@ import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
-import type { RouteMethod, RouteConfigOptions, RouteSecurity } from './route';
+import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationInfo } from './route';
 import type { Headers } from './headers';
 
 export type RouteSecurityGetter = (request: {
@@ -26,6 +26,7 @@ export type InternalRouteSecurity = RouteSecurity | RouteSecurityGetter;
  * @public
  */
 export interface KibanaRouteOptions extends RouteOptionsApp {
+  deprecated?: RouteDeprecationInfo;
   xsrfRequired: boolean;
   access: 'internal' | 'public';
   security?: InternalRouteSecurity;
@@ -47,9 +48,11 @@ export interface KibanaRequestState extends RequestApplicationState {
  * Route options: If 'GET' or 'OPTIONS' method, body options won't be returned.
  * @public
  */
-export type KibanaRequestRouteOptions<Method extends RouteMethod> = Method extends 'get' | 'options'
+export type KibanaRequestRouteOptions<Method extends RouteMethod> = (Method extends
+  | 'get'
+  | 'options'
   ? Required<Omit<RouteConfigOptions<Method>, 'body'>>
-  : Required<RouteConfigOptions<Method>>;
+  : Required<RouteConfigOptions<Method>>) & { security?: RouteSecurity };
 
 /**
  * Request specific route information exposed to a handler.
@@ -59,6 +62,7 @@ export interface KibanaRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: KibanaRequestRouteOptions<Method>;
+  routePath?: string;
 }
 
 /**
@@ -189,6 +193,11 @@ export interface KibanaRequest<
    * URL rewritten in onPreRouting request interceptor.
    */
   readonly rewrittenUrl?: URL;
+
+  /**
+   * The versioned route API version of this request.
+   */
+  readonly apiVersion: string | undefined;
 
   /**
    * The path parameter of this request.

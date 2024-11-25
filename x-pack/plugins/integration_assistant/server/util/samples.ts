@@ -48,17 +48,6 @@ export function prefixSamples(
   return modifiedSamples;
 }
 
-export function formatSamples(samples: string[]): string {
-  const formattedSamples: unknown[] = [];
-
-  for (const sample of samples) {
-    const sampleObj = JSON.parse(sample);
-    formattedSamples.push(sampleObj);
-  }
-
-  return JSON.stringify(formattedSamples, null, 2);
-}
-
 function determineType(value: unknown): string {
   if (typeof value === 'object' && value !== null) {
     if (Array.isArray(value)) {

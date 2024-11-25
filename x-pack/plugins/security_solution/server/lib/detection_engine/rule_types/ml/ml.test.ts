@@ -23,6 +23,7 @@ jest.mock('./bulk_create_ml_signals');
 
 describe('ml_executor', () => {
   let mockExperimentalFeatures: jest.Mocked<ExperimentalFeatures>;
+  let mockScheduledNotificationResponseAction: jest.Mock;
   let jobsSummaryMock: jest.Mock;
   let forceStartDatafeedsMock: jest.Mock;
   let stopDatafeedsMock: jest.Mock;
@@ -40,6 +41,7 @@ describe('ml_executor', () => {
 
   beforeEach(() => {
     mockExperimentalFeatures = {} as jest.Mocked<ExperimentalFeatures>;
+    mockScheduledNotificationResponseAction = jest.fn();
     jobsSummaryMock = jest.fn();
     mlMock = mlPluginServerMock.createSetupContract();
     mlMock.jobServiceProvider.mockReturnValue({
@@ -88,6 +90,7 @@ describe('ml_executor', () => {
         alertWithSuppression: jest.fn(),
         isAlertSuppressionActive: true,
         experimentalFeatures: mockExperimentalFeatures,
+        scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       })
     ).rejects.toThrow('ML plugin unavailable during rule execution');
   });
@@ -110,6 +113,7 @@ describe('ml_executor', () => {
       alertWithSuppression: jest.fn(),
       isAlertSuppressionActive: true,
       experimentalFeatures: mockExperimentalFeatures,
+      scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
@@ -143,6 +147,7 @@ describe('ml_executor', () => {
       alertWithSuppression: jest.fn(),
       isAlertSuppressionActive: true,
       experimentalFeatures: mockExperimentalFeatures,
+      scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     expect(ruleExecutionLogger.warn).toHaveBeenCalled();
     expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
@@ -172,6 +177,7 @@ describe('ml_executor', () => {
       alertWithSuppression: jest.fn(),
       isAlertSuppressionActive: true,
       experimentalFeatures: mockExperimentalFeatures,
+      scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
     expect(result.userError).toEqual(true);
     expect(result.success).toEqual(false);
@@ -204,6 +210,7 @@ describe('ml_executor', () => {
       alertWithSuppression: jest.fn(),
       isAlertSuppressionActive: true,
       experimentalFeatures: mockExperimentalFeatures,
+      scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
 
     expect(result).toEqual(
@@ -211,5 +218,30 @@ describe('ml_executor', () => {
         bulkCreateTimes: expect.arrayContaining([expect.any(Number)]),
       })
     );
+  });
+  it('should call scheduleNotificationResponseActionsService', async () => {
+    const result = await mlExecutor({
+      completeRule: mlCompleteRule,
+      tuple,
+      ml: mlMock,
+      services: alertServices,
+      ruleExecutionLogger,
+      listClient,
+      bulkCreate: jest.fn(),
+      wrapHits: jest.fn(),
+      exceptionFilter: undefined,
+      unprocessedExceptions: [],
+      wrapSuppressedHits: jest.fn(),
+      alertTimestampOverride: undefined,
+      alertWithSuppression: jest.fn(),
+      isAlertSuppressionActive: true,
+      experimentalFeatures: mockExperimentalFeatures,
+      scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
+    });
+    expect(mockScheduledNotificationResponseAction).toBeCalledWith({
+      signals: result.createdSignals,
+      signalsCount: result.createdSignalsCount,
+      responseActions: mlCompleteRule.ruleParams.responseActions,
+    });
   });
 });

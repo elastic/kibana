@@ -22,6 +22,7 @@ import {
   getIndexPatternDataStream,
   getTransformOptions,
   mappingComponentName,
+  nameSpaceAwareMappingsComponentName,
   riskScoreFieldMap,
   totalFieldsLimit,
 } from './configurations';
@@ -87,6 +88,17 @@ export class RiskScoreDataClient {
       soClient: this.options.soClient,
     });
 
+  public createRiskScoreLatestIndex = async () => {
+    await createOrUpdateIndex({
+      esClient: this.options.esClient,
+      logger: this.options.logger,
+      options: {
+        index: getRiskScoreLatestIndex(this.options.namespace),
+        mappings: mappingFromFieldMap(riskScoreFieldMap, false),
+      },
+    });
+  };
+
   public async init() {
     const namespace = this.options.namespace;
 
@@ -103,12 +115,22 @@ export class RiskScoreDataClient {
         namespace,
       };
 
+      // Check if there are any existing component templates with the namespace in the name
+
+      const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
+        name: mappingComponentName,
+      });
+      if (oldComponentTemplateExists) {
+        await this.updateComponentTemplateNamewithNamespace(namespace);
+      }
+
+      // Update the new component template with the required data
       await Promise.all([
         createOrUpdateComponentTemplate({
           logger: this.options.logger,
           esClient,
           template: {
-            name: mappingComponentName,
+            name: nameSpaceAwareMappingsComponentName(namespace),
             _meta: {
               managed: true,
             },
@@ -121,6 +143,7 @@ export class RiskScoreDataClient {
         }),
       ]);
 
+      // Reference the new component template in the index template
       await createOrUpdateIndexTemplate({
         logger: this.options.logger,
         esClient,
@@ -129,7 +152,7 @@ export class RiskScoreDataClient {
           body: {
             data_stream: { hidden: true },
             index_patterns: [indexPatterns.alias],
-            composed_of: [mappingComponentName],
+            composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
             template: {
               lifecycle: {},
               settings: {
@@ -145,6 +168,14 @@ export class RiskScoreDataClient {
         },
       });
 
+      // Delete the component template without the namespace in the name
+      await esClient.cluster.deleteComponentTemplate(
+        {
+          name: mappingComponentName,
+        },
+        { ignore: [404] }
+      );
+
       await createDataStream({
         logger: this.options.logger,
         esClient,
@@ -152,14 +183,7 @@ export class RiskScoreDataClient {
         indexPatterns,
       });
 
-      await createOrUpdateIndex({
-        esClient,
-        logger: this.options.logger,
-        options: {
-          index: getRiskScoreLatestIndex(namespace),
-          mappings: mappingFromFieldMap(riskScoreFieldMap, false),
-        },
-      });
+      await this.createRiskScoreLatestIndex();
 
       const transformId = getLatestTransformId(namespace);
       await createTransform({
@@ -234,6 +258,15 @@ export class RiskScoreDataClient {
     await esClient.cluster
       .deleteComponentTemplate(
         {
+          name: nameSpaceAwareMappingsComponentName(namespace),
+        },
+        { ignore: [404] }
+      )
+      .catch(addError);
+
+    await esClient.cluster
+      .deleteComponentTemplate(
+        {
           name: mappingComponentName,
         },
         { ignore: [404] }
@@ -281,5 +314,21 @@ export class RiskScoreDataClient {
         }),
       { logger: this.options.logger }
     );
+  }
+
+  private async updateComponentTemplateNamewithNamespace(namespace: string): Promise<void> {
+    const esClient = this.options.esClient;
+    const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate(
+      {
+        name: mappingComponentName,
+      },
+      { ignore: [404] }
+    );
+    const oldComponentTemplate = oldComponentTemplateResponse?.component_templates[0];
+    const newComponentTemplateName = nameSpaceAwareMappingsComponentName(namespace);
+    await esClient.cluster.putComponentTemplate({
+      name: newComponentTemplateName,
+      body: oldComponentTemplate.component_template,
+    });
   }
 }

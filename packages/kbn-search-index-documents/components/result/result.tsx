@@ -13,8 +13,8 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
+  EuiHorizontalRule,
+  EuiSplitPanel,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -37,6 +37,7 @@ export interface ResultProps {
   compactCard?: boolean;
   onDocumentClick?: () => void;
   onDocumentDelete?: () => void;
+  hasDeleteDocumentsPrivilege?: boolean;
 }
 
 export const Result: React.FC<ResultProps> = ({
@@ -47,6 +48,7 @@ export const Result: React.FC<ResultProps> = ({
   showScore = false,
   onDocumentClick,
   onDocumentDelete,
+  hasDeleteDocumentsPrivilege,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const tooltipText =
@@ -66,99 +68,67 @@ export const Result: React.FC<ResultProps> = ({
   const toolTipContent = <>{tooltipText}</>;
 
   return (
-    <EuiPanel
-      hasBorder
-      data-test-subj="search-index-documents-result"
-      paddingSize={compactCard ? 's' : 'l'}
-    >
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="none"
-            responsive={false}
-            justifyContent="spaceAround"
-          >
-            <EuiFlexItem grow={false}>
-              {compactCard && (
-                <ResultHeader
-                  title={
-                    metaData.title ??
-                    i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: 'Document id: {id}',
-                      values: { id: metaData.id },
-                    })
-                  }
-                  metaData={{
-                    ...metaData,
-                    onDocumentDelete,
-                  }}
-                />
-              )}
-              {!compactCard && (
-                <RichResultHeader
-                  showScore={showScore}
-                  title={
-                    metaData.title ??
-                    i18n.translate('searchIndexDocuments.result.title.id', {
-                      defaultMessage: 'Document id: {id}',
-                      values: { id: metaData.id },
-                    })
-                  }
-                  onTitleClick={onDocumentClick}
-                  metaData={{
-                    ...metaData,
-                    onDocumentDelete,
-                  }}
-                  rightSideActions={
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip position="left" content={toolTipContent}>
-                        <EuiButtonIcon
-                          iconType={isExpanded ? 'fold' : 'unfold'}
-                          color={isExpanded ? 'danger' : 'primary'}
-                          onClick={(e: React.MouseEvent<HTMLElement>) => {
-                            e.stopPropagation();
-                            setIsExpanded(!isExpanded);
-                          }}
-                          aria-label={tooltipText}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  }
-                />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {!compactCard &&
-                ((isExpanded && fields.length > 0) ||
-                  (!isExpanded && fields.slice(0, defaultVisibleFields).length > 0)) && (
-                  <EuiSpacer size="l" />
-                )}
-              <ResultFields
-                isExpanded={isExpanded}
-                fields={isExpanded ? fields : fields.slice(0, defaultVisibleFields)}
+    <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
+      <EuiSplitPanel.Inner paddingSize="m" color="plain" className="resultHeaderContainer">
+        <EuiFlexGroup gutterSize="none" alignItems="center">
+          <EuiFlexItem>
+            {compactCard && (
+              <ResultHeader
+                title={
+                  metaData.title ??
+                  i18n.translate('searchIndexDocuments.result.title.id', {
+                    defaultMessage: 'Document id: {id}',
+                    values: { id: metaData.id },
+                  })
+                }
+                metaData={metaData}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {compactCard && (
-          <EuiFlexItem grow={false}>
-            <div className="resultExpandColumn">
-              <EuiToolTip position="left" content={toolTipContent}>
-                <EuiButtonIcon
-                  iconType={isExpanded ? 'fold' : 'unfold'}
-                  color="text"
-                  onClick={(e: React.MouseEvent<HTMLElement>) => {
-                    e.stopPropagation();
-                    setIsExpanded(!isExpanded);
-                  }}
-                  aria-label={tooltipText}
-                />
-              </EuiToolTip>
-            </div>
+            )}
+
+            {!compactCard && (
+              <RichResultHeader
+                showScore={showScore}
+                title={
+                  metaData.title ??
+                  i18n.translate('searchIndexDocuments.result.title.id', {
+                    defaultMessage: 'Document id: {id}',
+                    values: { id: metaData.id },
+                  })
+                }
+                onTitleClick={onDocumentClick}
+                metaData={{
+                  ...metaData,
+                  onDocumentDelete,
+                  hasDeleteDocumentsPrivilege,
+                }}
+              />
+            )}
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </EuiPanel>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip position="left" content={toolTipContent}>
+              <EuiButtonIcon
+                size="xs"
+                iconType={isExpanded ? 'fold' : 'unfold'}
+                color={isExpanded ? 'danger' : 'primary'}
+                data-test-subj={isExpanded ? 'documentShowLessFields' : 'documentShowMoreFields'}
+                onClick={(e: React.MouseEvent<HTMLElement>) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+                aria-label={tooltipText}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiSplitPanel.Inner>
+      <EuiHorizontalRule margin="none" />
+      <EuiSplitPanel.Inner paddingSize="m">
+        <ResultFields
+          documentId={metaData.id}
+          isExpanded={isExpanded}
+          fields={isExpanded ? fields : fields.slice(0, defaultVisibleFields)}
+        />
+      </EuiSplitPanel.Inner>
+    </EuiSplitPanel.Outer>
   );
 };

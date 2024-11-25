@@ -43,7 +43,7 @@ function _formatMessages(messages: BaseMessage[]) {
   if (!messages.length) {
     throw new Error('No messages provided.');
   }
-  return messages.map((message, i) => {
+  return messages.map((message) => {
     if (typeof message.content !== 'string') {
       throw new Error('Multimodal messages are not supported.');
     }
@@ -127,9 +127,13 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     const actionResult = await this.#actionsClient.execute(requestBody);
 
     if (actionResult.status === 'error') {
-      throw new Error(
+      const error = new Error(
         `ActionsClientSimpleChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
       );
+      if (actionResult?.serviceMessage) {
+        error.name = actionResult?.serviceMessage;
+      }
+      throw error;
     }
 
     if (!this.streaming) {
@@ -217,9 +221,13 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     const actionResult = await this.#actionsClient.execute(requestBody);
 
     if (actionResult.status === 'error') {
-      throw new Error(
+      const error = new Error(
         `ActionsClientSimpleChatModel: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
       );
+      if (actionResult?.serviceMessage) {
+        error.name = actionResult?.serviceMessage;
+      }
+      throw error;
     }
 
     const readable = get('data', actionResult) as Readable;

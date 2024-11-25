@@ -238,8 +238,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       let count = 0;
       for (const policyId of agentPolicyIds) {
         const { data } = await sendGetAgentStatus({ policyId });
-        if (data?.results.total) {
-          count += data.results.total;
+        if (data?.results.active) {
+          count += data.results.active;
         }
       }
       setAgentCount(count);
@@ -350,7 +350,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
+  const { isAgentlessIntegration } = useAgentless();
   const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
     setNewAgentPolicy,
@@ -374,7 +374,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessEnabled}
+            isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
           />
         </ExtensionWrapper>
       )

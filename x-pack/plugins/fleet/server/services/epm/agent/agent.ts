@@ -131,6 +131,18 @@ function escapeStringHelper(str: string) {
 }
 handlebars.registerHelper('escape_string', escapeStringHelper);
 
+/**
+ * escapeMultilineStringHelper will escape a multiline string by doubling the newlines
+ * and escaping single quotes.
+ * This is useful when the string is multiline and needs to be escaped in a yaml file
+ * without wrapping it in single quotes.
+ */
+function escapeMultilineStringHelper(str: string) {
+  if (!str) return undefined;
+  return str.replace(/\'/g, "''").replace(/\n/g, '\n\n');
+}
+handlebars.registerHelper('escape_multiline_string', escapeMultilineStringHelper);
+
 // toJsonHelper will convert any object to a Json string.
 function toJsonHelper(value: any) {
   if (typeof value === 'string') {

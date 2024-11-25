@@ -84,6 +84,8 @@ import {
   MessageSigningService,
 } from './services/security';
 
+import { OutputClient, type OutputClientInterface } from './services/output_client';
+
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
@@ -139,9 +141,11 @@ import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
-import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
+import { registerFieldsMetadataExtractors } from './services/register_fields_metadata_extractors';
 import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
+import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
+import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -192,6 +196,7 @@ export interface FleetAppContext {
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
   unenrollInactiveAgentsTask: UnenrollInactiveAgentsTask;
+  deleteUnenrolledAgentsTask: DeleteUnenrolledAgentsTask;
   taskManagerStart?: TaskManagerStartContract;
 }
 
@@ -259,6 +264,12 @@ export interface FleetStartContract {
   Function exported to allow creating unique ids for saved object tags
    */
   getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
+
+  /**
+   * Create a Fleet Output Client instance
+   * @param packageName
+   */
+  createOutputClient: (request: KibanaRequest) => Promise<OutputClientInterface>;
 }
 
 export class FleetPlugin
@@ -284,6 +295,7 @@ export class FleetPlugin
   private checkDeletedFilesTask?: CheckDeletedFilesTask;
   private fleetMetricsTask?: FleetMetricsTask;
   private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
+  private deleteUnenrolledAgentsTask?: DeleteUnenrolledAgentsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -616,6 +628,7 @@ export class FleetPlugin
     // Register task
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
+    registerBumpAgentPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
@@ -628,9 +641,14 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+    this.deleteUnenrolledAgentsTask = new DeleteUnenrolledAgentsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
 
-    // Register fields metadata extractor
-    registerIntegrationFieldsExtractor({ core, fieldsMetadata: deps.fieldsMetadata });
+    // Register fields metadata extractors
+    registerFieldsMetadataExtractors({ core, fieldsMetadata: deps.fieldsMetadata });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -674,6 +692,7 @@ export class FleetPlugin
       messageSigningService,
       uninstallTokenService,
       unenrollInactiveAgentsTask: this.unenrollInactiveAgentsTask!,
+      deleteUnenrolledAgentsTask: this.deleteUnenrolledAgentsTask!,
       taskManagerStart: plugins.taskManager,
     });
     licenseService.start(plugins.licensing.license$);
@@ -682,6 +701,7 @@ export class FleetPlugin
     this.fleetUsageSender?.start(plugins.taskManager).catch(() => {});
     this.checkDeletedFilesTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     this.unenrollInactiveAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.deleteUnenrolledAgentsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
     startFleetUsageLogger(plugins.taskManager).catch(() => {});
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
@@ -825,6 +845,11 @@ export class FleetPlugin
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
       getPackageSpecTagId,
+      async createOutputClient(request: KibanaRequest) {
+        const soClient = appContextService.getSavedObjects().getScopedClient(request);
+        const authz = await getAuthzFromRequest(request);
+        return new OutputClient(soClient, authz);
+      },
     };
   }
 

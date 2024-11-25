@@ -137,6 +137,7 @@ export interface PackagePolicySOAttributes {
   };
   agents?: number;
   overrides?: any | null;
+  bump_agent_policy_revision?: boolean;
 }
 
 interface OutputSoBaseAttributes {
@@ -234,13 +235,17 @@ export type OutputSOAttributes =
   | OutputSoKafkaAttributes;
 
 export interface SettingsSOAttributes {
-  prerelease_integrations_enabled: boolean;
+  prerelease_integrations_enabled?: boolean;
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
+  delete_unenrolled_agents?: {
+    enabled: boolean;
+    is_preconfigured: boolean;
+  };
 }
 
 export interface SpaceSettingsSOAttributes {

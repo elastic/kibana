@@ -9,15 +9,25 @@
 
 import { ClusterDetailsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { TIMEOUT } from './constants';
+import { CLUSTER_STAT_TIMEOUT } from './constants';
 
 /**
  * Get the cluster stats from the connected cluster.
  *
- * This is the equivalent to GET /_cluster/stats?timeout=30s.
+ * This is the equivalent to GET /_cluster/stats?timeout=60s&include_remotes=true
  */
 export async function getClusterStats(esClient: ElasticsearchClient) {
-  return await esClient.cluster.stats({ timeout: TIMEOUT });
+  return await esClient.cluster.stats(
+    {
+      timeout: CLUSTER_STAT_TIMEOUT,
+
+      // @ts-expect-error
+      include_remotes: true,
+    },
+    {
+      requestTimeout: CLUSTER_STAT_TIMEOUT, // enforce that Kibana would wait at least as long for ES to complete.
+    }
+  );
 }
 
 /**

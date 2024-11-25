@@ -18,12 +18,13 @@ export interface PackageSpecManifest {
   source?: {
     license: string;
   };
-  type?: 'integration' | 'input';
+  type?: PackageSpecPackageType;
   release?: 'experimental' | 'beta' | 'ga';
   categories?: Array<PackageSpecCategory | undefined>;
   conditions?: PackageSpecConditions;
   icons?: PackageSpecIcon[];
   screenshots?: PackageSpecScreenshot[];
+  policy_templates_behavior?: 'all' | 'combined_policy' | 'individual_policies';
   policy_templates?: RegistryPolicyTemplate[];
   vars?: RegistryVarsEntry[];
   owner: { github?: string; type?: 'elastic' | 'partner' | 'community' };
@@ -35,6 +36,11 @@ export interface PackageSpecManifest {
     privileges?: { root?: boolean };
   };
   asset_tags?: PackageSpecTags[];
+  discovery?: {
+    fields?: Array<{
+      name: string;
+    }>;
+  };
 }
 export interface PackageSpecTags {
   text: string;
@@ -42,7 +48,7 @@ export interface PackageSpecTags {
   asset_ids?: string[];
 }
 
-export type PackageSpecPackageType = 'integration' | 'input';
+export type PackageSpecPackageType = 'integration' | 'input' | 'content';
 
 export type PackageSpecCategory =
   | 'advanced_analytics_ueba'

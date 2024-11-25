@@ -5,6 +5,52 @@
     "functions": [
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.AlertsRange",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertsRange",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<Props>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/knowledge_base/alerts_range.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AlertsRange.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AlertsRange.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.analyzeMarkdown",
         "type": "Function",
         "tags": [],
@@ -125,9 +171,7 @@
         "label": "AssistantOverlay",
         "description": [],
         "signature": [
-          "React.NamedExoticComponent<",
-          "Props",
-          ">"
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element | null; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/assistant_overlay/index.tsx",
         "deprecated": false,
@@ -159,7 +203,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, baseConversations, navigateToApp, nameSpace, title, toasts, currentAppId, }: ",
+          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, baseConversations, navigateToApp, nameSpace, title, toasts, currentAppId, userProfileService, }: ",
           "AssistantProviderProps",
           ") => React.JSX.Element"
         ],
@@ -172,7 +216,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  baseConversations,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n}",
+            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  baseConversations,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n}",
             "description": [],
             "signature": [
               "AssistantProviderProps"
@@ -324,7 +368,7 @@
             "section": "def-public.IToasts",
             "text": "IToasts"
           },
-          " | undefined) => Promise<{ attributes: { summary: { total: number; succeeded: number; failed: number; skipped: number; }; results: { created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; color?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; color?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | undefined>"
+          " | undefined) => Promise<{ attributes: { results: { created: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; updated: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; skipped: { id: string; skip_reason: \"PROMPT_FIELD_NOT_MODIFIED\"; name?: string | undefined; }[]; deleted: string[]; }; summary: { total: number; succeeded: number; failed: number; skipped: number; }; errors?: { message: string; status_code: number; prompts: { id: string; name?: string | undefined; }[]; err_code?: string | undefined; }[] | undefined; }; message?: string | undefined; success?: boolean | undefined; status_code?: number | undefined; prompts_count?: number | undefined; } | undefined>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/prompts/bulk_update_prompts.ts",
         "deprecated": false,
@@ -509,7 +553,7 @@
             "section": "def-public.IToasts",
             "text": "IToasts"
           },
-          "; signal?: AbortSignal | undefined; }) => Promise<{ page: number; perPage: number; total: number; data: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; color?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; }>"
+          "; signal?: AbortSignal | undefined; }) => Promise<{ page: number; data: { id: string; name: string; content: string; promptType: \"system\" | \"quick\"; namespace?: string | undefined; consumer?: string | undefined; timestamp?: string | undefined; color?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; categories?: string[] | undefined; isDefault?: boolean | undefined; isNewConversationDefault?: boolean | undefined; }[]; perPage: number; total: number; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/prompts/use_fetch_prompts.ts",
         "deprecated": false,
@@ -1198,6 +1242,17 @@
             "type": "boolean",
             "tags": [],
             "label": "hasUpdateAIAssistantAnonymization",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantAvailability.hasManageGlobalKnowledgeBase",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasManageGlobalKnowledgeBase",
             "description": [],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2048,7 +2103,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId: string; actionTypeId: string; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined"
+              "{ connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,
@@ -2335,7 +2390,7 @@
             "label": "apiConfig",
             "description": [],
             "signature": [
-              "{ connectorId: string; actionTypeId: string; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined"
+              "{ connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; } | undefined"
             ],
             "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/api/conversations/bulk_update_actions_conversations.ts",
             "deprecated": false,
@@ -2500,6 +2555,23 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS",
+        "description": [
+          "The default maximum number of alerts to be sent as context when generating Attack discoveries"
+        ],
+        "signature": [
+          "100"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.DEFAULT_LATEST_ALERTS",
         "type": "number",
         "tags": [],
@@ -2508,7 +2580,7 @@
           "The default `n` latest alerts, ordered by risk score, sent as context to the assistant"
         ],
         "signature": [
-          "20"
+          "100"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
         "deprecated": false,
@@ -2598,6 +2670,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.MAX_ALERTS_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "MAX_ALERTS_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"maxAlerts\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.PromptContextTemplate",
         "type": "Type",
         "tags": [],
@@ -2630,12 +2717,66 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.SELECT_FEWER_ALERTS",
+        "type": "string",
+        "tags": [],
+        "label": "SELECT_FEWER_ALERTS",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/knowledge_base/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"showSettingsTour\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant_context/constants.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.SingleRangeChangeEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "SingleRangeChangeEvent",
+        "description": [],
+        "signature": [
+          "React.ChangeEvent<HTMLInputElement> | React.KeyboardEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/knowledge_base/alerts_range.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
         "id": "def-public.WELCOME_CONVERSATION_TITLE",
         "type": "string",
         "tags": [],
         "label": "WELCOME_CONVERSATION_TITLE",
         "description": [],
         "path": "x-pack/packages/kbn-elastic-assistant/impl/assistant/use_conversation/translations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.YOUR_ANONYMIZATION_SETTINGS",
+        "type": "string",
+        "tags": [],
+        "label": "YOUR_ANONYMIZATION_SETTINGS",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant/impl/knowledge_base/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
+import type { Agent as SuperTestAgent } from 'supertest';
+
 import { AUTHENTICATION } from './authentication';
 
 export const createUsersAndRoles = async (es: Client, supertest: SuperTestAgent) => {
@@ -465,16 +466,6 @@ export const createUsersAndRoles = async (es: Client, supertest: SuperTestAgent)
       roles: ['kibana_rbac_space_1_saved_objects_read_user'],
       full_name: 'a kibana rbac space 1 saved objects management read user',
       email: 'a_kibana_rbac_space_1_saved_objects_read_user@elastic.co',
-    },
-  });
-
-  await es.security.putUser({
-    username: AUTHENTICATION.APM_USER.username,
-    body: {
-      password: AUTHENTICATION.APM_USER.password,
-      roles: ['apm_user'],
-      full_name: 'a apm user',
-      email: 'a_apm_user@elastic.co',
     },
   });
 

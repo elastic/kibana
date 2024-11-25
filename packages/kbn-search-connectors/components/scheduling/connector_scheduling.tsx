@@ -66,6 +66,7 @@ interface ConnectorContentSchedulingProps {
   hasPlatinumLicense: boolean;
   hasChanges: boolean;
   hasIngestionError: boolean;
+  isDisabled?: boolean;
   setHasChanges: (changes: boolean) => void;
   shouldShowAccessControlSync: boolean;
   shouldShowIncrementalSync: boolean;
@@ -81,6 +82,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
   hasChanges,
   hasIngestionError,
   hasPlatinumLicense,
+  isDisabled,
   setHasChanges,
   shouldShowAccessControlSync,
   shouldShowIncrementalSync,
@@ -140,6 +142,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                   updateConnectorStatus={updateConnectorStatus}
                   updateScheduling={updateScheduling}
                   dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                  isDisabled={isDisabled}
                 />
               </EuiFlexItem>
               {shouldShowIncrementalSync && (
@@ -153,6 +156,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                     updateConnectorStatus={updateConnectorStatus}
                     updateScheduling={updateScheduling}
                     dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                    isDisabled={isDisabled}
                   />
                 </EuiFlexItem>
               )}
@@ -186,6 +190,7 @@ export const ConnectorSchedulingComponent: React.FC<ConnectorContentSchedulingPr
                     updateConnectorStatus={updateConnectorStatus}
                     updateScheduling={updateScheduling}
                     dataTelemetryIdPrefix={dataTelemetryIdPrefix}
+                    isDisabled={isDisabled}
                   />
                 </SchedulePanel>
               </EuiFlexItem>

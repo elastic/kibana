@@ -51,4 +51,12 @@ export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
   'machine_learning',
 ];
 
-export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = ['saved_query', 'query'];
+export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = [
+  'threshold',
+  'esql',
+  'saved_query',
+  'query',
+  'new_terms',
+  'threat_match',
+  'machine_learning',
+];

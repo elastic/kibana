@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/inventory-plugin",
   "owner": "@elastic/obs-ux-infra_services-team",
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "inventory",
     "server": true,
@@ -16,10 +18,11 @@
       "features",
       "unifiedSearch",
       "data",
+      "ruleRegistry",
       "share"
     ],
-    "requiredBundles": ["kibanaReact"],
-    "optionalPlugins": [],
+    "requiredBundles": ["kibanaReact","controls"],
+    "optionalPlugins": ["spaces", "cloud"],
     "extraPublicDirs": []
   }
 }

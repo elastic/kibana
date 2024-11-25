@@ -13,6 +13,11 @@ import fs from 'fs';
 import path from 'path';
 import { functions } from '../src/sections/generated/scalar_functions';
 
+interface DocsSectionContent {
+  description: string;
+  preview?: boolean;
+}
+
 (function () {
   const pathToElasticsearch = process.argv[2];
   const { scalarFunctions, aggregationFunctions } = loadFunctionDocs(pathToElasticsearch);
@@ -41,8 +46,8 @@ function loadFunctionDocs(pathToElasticsearch: string) {
     .readdirSync(definitionsPath)
     .map((file) => JSON.parse(fs.readFileSync(`${definitionsPath}/${file}`, 'utf-8')));
 
-  const scalarFunctions = new Map<string, string>();
-  const aggregationFunctions = new Map<string, string>();
+  const scalarFunctions = new Map<string, DocsSectionContent>();
+  const aggregationFunctions = new Map<string, DocsSectionContent>();
 
   // Iterate over each file in the directory
   for (const file of docsFiles) {
@@ -52,7 +57,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
         (def) => def.name === path.basename(file, '.md')
       );
 
-      if (!functionDefinition) {
+      if (!functionDefinition || functionDefinition.snapshot_only) {
         continue;
       }
 
@@ -64,10 +69,16 @@ function loadFunctionDocs(pathToElasticsearch: string) {
 
       // Add the function name and content to the map
       if (functionDefinition.type === 'eval') {
-        scalarFunctions.set(functionName, content);
+        scalarFunctions.set(functionName, {
+          description: content,
+          preview: functionDefinition.preview,
+        });
       }
       if (functionDefinition.type === 'agg') {
-        aggregationFunctions.set(functionName, content);
+        aggregationFunctions.set(functionName, {
+          description: content,
+          preview: functionDefinition.preview,
+        });
       }
     }
   }
@@ -75,10 +86,10 @@ function loadFunctionDocs(pathToElasticsearch: string) {
   return { scalarFunctions, aggregationFunctions };
 }
 
-function writeFunctionDocs(functionDocs: Map<string, string>, pathToDocsFile: string) {
+function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathToDocsFile: string) {
   const codeStrings = Array.from(functionDocs.entries()).map(([name, doc]) => {
     const docWithoutLinks = removeAsciiDocInternalCrossReferences(
-      doc,
+      doc.description,
       Array.from(functionDocs.keys())
     );
     return `
@@ -91,6 +102,7 @@ function writeFunctionDocs(functionDocs: Map<string, string>, pathToDocsFile: st
         defaultMessage: '${name.toUpperCase()}',
       }
     ),
+    preview: ${doc.preview || false},
     description: (
       <Markdown
         openLinksInNewTab

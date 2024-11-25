@@ -533,33 +533,14 @@
               "\nUsed to create deep links to other plugins."
             ],
             "signature": [
-              "{ toggleShareContextMenu: (options: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShowShareMenuOptions",
-                "text": "ShowShareMenuOptions"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; }"
+              " | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,
@@ -634,20 +615,41 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.AiopsAppContextValue.presentationUtil",
+            "id": "def-public.AiopsAppContextValue.fieldStats",
             "type": "Object",
             "tags": [],
-            "label": "presentationUtil",
-            "description": [],
+            "label": "fieldStats",
+            "description": [
+              "\nDeps for unified fields stats."
+            ],
             "signature": [
+              "{ useFieldStatsTrigger: <T = ",
               {
-                "pluginId": "presentationUtil",
+                "pluginId": "@kbn/ml-field-stats-flyout",
                 "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.PresentationUtilPluginStart",
-                "text": "PresentationUtilPluginStart"
+                "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
+                "section": "def-public.DropDownLabel",
+                "text": "DropDownLabel"
               },
-              " | undefined"
+              "<string>>() => { renderOption: (option: T) => React.ReactNode; setIsFlyoutVisible: (v: boolean) => void; setFieldName: (v: string | undefined) => void; handleFieldStatsButtonClick: (field: ",
+              {
+                "pluginId": "@kbn/ml-field-stats-flyout",
+                "scope": "public",
+                "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
+                "section": "def-public.FieldForStats",
+                "text": "FieldForStats"
+              },
+              ") => void; closeFlyout: () => void; optionCss: ",
+              "SerializedStyles",
+              "; populatedFields: Set<string> | undefined; }; FieldStatsFlyoutProvider: React.FC<",
+              {
+                "pluginId": "@kbn/ml-field-stats-flyout",
+                "scope": "public",
+                "docId": "kibKbnMlFieldStatsFlyoutPluginApi",
+                "section": "def-public.FieldStatsFlyoutProviderProps",
+                "text": "FieldStatsFlyoutProviderProps"
+              },
+              ">; } | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/hooks/use_aiops_app_context.ts",
             "deprecated": false,

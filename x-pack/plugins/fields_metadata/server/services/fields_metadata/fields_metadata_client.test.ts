@@ -57,6 +57,18 @@ const integrationFields = {
         'The version of the browser or computer where the 1Password app is installed, or the CPU of the machine where the 1Password command-line tool is installed',
     },
   },
+  'mysql.slowlog': {
+    'mysql.slowlog.filesort': {
+      name: 'filesort',
+      type: 'boolean',
+      description: 'Whether filesort optimization was used.',
+      flat_name: 'mysql.slowlog.filesort',
+      source: 'integration',
+      dashed_name: 'mysql-slowlog-filesort',
+      normalize: [],
+      short: 'Whether filesort optimization was used.',
+    },
+  },
 };
 
 describe('FieldsMetadataClient class', () => {
@@ -64,7 +76,22 @@ describe('FieldsMetadataClient class', () => {
   const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
   const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
   const integrationFieldsExtractor = jest.fn();
+  const integrationListExtractor = jest.fn();
   integrationFieldsExtractor.mockImplementation(() => Promise.resolve(integrationFields));
+  integrationListExtractor.mockImplementation(() =>
+    Promise.resolve([
+      {
+        id: '1password',
+        name: '1password',
+        version: '1.0.0',
+      },
+      {
+        id: 'mysql',
+        name: 'mysql',
+        version: '1.0.0',
+      },
+    ])
+  );
 
   let integrationFieldsRepository: IntegrationFieldsRepository;
   let fieldsMetadataClient: FieldsMetadataClient;
@@ -73,12 +100,14 @@ describe('FieldsMetadataClient class', () => {
     integrationFieldsExtractor.mockClear();
     integrationFieldsRepository = IntegrationFieldsRepository.create({
       integrationFieldsExtractor,
+      integrationListExtractor,
     });
     fieldsMetadataClient = FieldsMetadataClient.create({
+      capabilities: { fleet: { read: true }, fleetv2: { read: true } },
+      logger,
       ecsFieldsRepository,
       integrationFieldsRepository,
       metadataFieldsRepository,
-      logger,
     });
   });
 
@@ -105,6 +134,26 @@ describe('FieldsMetadataClient class', () => {
       expect(Object.hasOwn(timestampField, 'type')).toBeTruthy();
     });
 
+    it('should attempt resolving the field from an integration if it does not exist in ECS/Metadata by inferring the integration from the field name', async () => {
+      const mysqlFieldInstance = await fieldsMetadataClient.getByName('mysql.slowlog.filesort');
+
+      expect(integrationFieldsExtractor).toHaveBeenCalled();
+
+      expectToBeDefined(mysqlFieldInstance);
+      expect(mysqlFieldInstance).toBeInstanceOf(FieldMetadata);
+
+      const mysqlField = mysqlFieldInstance.toPlain();
+
+      expect(Object.hasOwn(mysqlField, 'name')).toBeTruthy();
+      expect(Object.hasOwn(mysqlField, 'type')).toBeTruthy();
+      expect(Object.hasOwn(mysqlField, 'description')).toBeTruthy();
+      expect(Object.hasOwn(mysqlField, 'flat_name')).toBeTruthy();
+      expect(Object.hasOwn(mysqlField, 'source')).toBeTruthy();
+      expect(Object.hasOwn(mysqlField, 'dashed_name')).toBeTruthy();
+      expect(Object.hasOwn(mysqlField, 'normalize')).toBeTruthy();
+      expect(Object.hasOwn(mysqlField, 'short')).toBeTruthy();
+    });
+
     it('should attempt resolving the field from an integration if it does not exist in ECS/Metadata and the integration and dataset params are provided', async () => {
       const onePasswordFieldInstance = await fieldsMetadataClient.getByName(
         'onepassword.client.platform_version',
@@ -128,13 +177,28 @@ describe('FieldsMetadataClient class', () => {
       expect(Object.hasOwn(onePasswordField, 'short')).toBeTruthy();
     });
 
-    it('should not resolve the field from an integration if the integration and dataset params are not provided', async () => {
-      const onePasswordFieldInstance = await fieldsMetadataClient.getByName(
-        'onepassword.client.platform_version'
+    it('should not resolve the field from an integration if the integration name cannot be inferred from the field name and integration and dataset params are not provided', async () => {
+      const unknownFieldInstance = await fieldsMetadataClient.getByName(
+        'customField.duration.milliseconds'
       );
 
       expect(integrationFieldsExtractor).not.toHaveBeenCalled();
-      expect(onePasswordFieldInstance).toBeUndefined();
+      expect(unknownFieldInstance).toBeUndefined();
+    });
+
+    it('should not resolve the field from an integration if the user has not the fleet privileges to access it', async () => {
+      const clientWithouthPrivileges = FieldsMetadataClient.create({
+        capabilities: { fleet: { read: false }, fleetv2: { read: false } },
+        logger,
+        ecsFieldsRepository,
+        integrationFieldsRepository,
+        metadataFieldsRepository,
+      });
+
+      const fieldInstance = await clientWithouthPrivileges.getByName('mysql.slowlog.filesort');
+
+      expect(integrationFieldsExtractor).not.toHaveBeenCalled();
+      expect(fieldInstance).toBeUndefined();
     });
   });
 

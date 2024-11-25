@@ -6,7 +6,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { MetricTypes, isMetricType } from '../../../common/rest_types';
+import { type MetricTypes, isMetricType } from '../../../common/rest_types';
 import { useUrlParams } from '../../hooks/use_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS } from './use_date_picker';
 
@@ -53,9 +53,7 @@ export const getDataUsageMetricsFiltersFromUrlParams = (
         }, [])
     : [];
 
-  const urlDataStreams = urlParams.dataStreams
-    ? String(urlParams.dataStreams).split(',').sort()
-    : [];
+  const urlDataStreams = urlParams.dataStreams ? String(urlParams.dataStreams).split(',') : [];
 
   dataUsageMetricsFilters.metricTypes = urlMetricTypes.length ? urlMetricTypes : undefined;
   dataUsageMetricsFilters.dataStreams = urlDataStreams.length ? urlDataStreams : undefined;

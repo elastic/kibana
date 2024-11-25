@@ -115,6 +115,7 @@ const wrappedParams = {
   publicBaseUrl: 'public-url-mock',
   primaryTimestamp: '@timestamp',
   secondaryTimestamp: 'event.ingested',
+  intendedTimestamp: undefined,
 };
 
 describe('wrapSuppressedAlerts', () => {

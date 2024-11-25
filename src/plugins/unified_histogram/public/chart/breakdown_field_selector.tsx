@@ -9,14 +9,19 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiSelectableOption } from '@elastic/eui';
-import { FieldIcon, getFieldIconProps, comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import {
+  FieldIcon,
+  getFieldIconProps,
+  comboBoxFieldOptionMatcher,
+  fieldSupportsBreakdown,
+} from '@kbn/field-utils';
 import { css } from '@emotion/react';
+import { isESQLColumnGroupable } from '@kbn/esql-utils';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { i18n } from '@kbn/i18n';
 import { UnifiedHistogramBreakdownContext } from '../types';
-import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import {
   ToolbarSelector,
   ToolbarSelectorProps,
@@ -34,10 +39,10 @@ export interface BreakdownFieldSelectorProps {
 const mapToDropdownFields = (dataView: DataView, esqlColumns?: DatatableColumn[]) => {
   if (esqlColumns) {
     return (
+      // filter out unsupported field types and counter time series metrics
       esqlColumns
+        .filter(isESQLColumnGroupable)
         .map((column) => new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)))
-        // filter out unsupported field types
-        .filter((field) => field.type !== 'unknown')
     );
   }
 

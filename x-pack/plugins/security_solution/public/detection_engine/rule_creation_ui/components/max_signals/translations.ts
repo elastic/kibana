@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const GREATER_THAN_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldGreaterThanError',
-  {
-    defaultMessage: 'Max alerts must be greater than 0.',
-  }
-);
-
 export const LESS_THAN_WARNING = (maxNumber: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.maxAlertsFieldLessThanWarning',

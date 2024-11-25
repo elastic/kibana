@@ -24,10 +24,17 @@
     "@kbn/logging",
     "@kbn/deeplinks-observability",
     "@kbn/unified-search-plugin",
-    "@kbn/i18n-react",
     "@kbn/core-http-browser",
     "@kbn/core-chrome-browser",
     "@kbn/features-plugin",
+    "@kbn/index-management-shared-types",
+    "@kbn/repo-info",
+    "@kbn/cloud-plugin",
+    "@kbn/server-http-tools",
+    "@kbn/utility-types-jest",
+    "@kbn/datemath",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
   ],
   "exclude": ["target/**/*"]
 }

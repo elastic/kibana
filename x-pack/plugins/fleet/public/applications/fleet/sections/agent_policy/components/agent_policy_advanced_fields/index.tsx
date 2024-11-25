@@ -34,6 +34,7 @@ import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   dataTypes,
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
+  UNKNOWN_SPACE,
 } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import {
@@ -53,7 +54,7 @@ import { UninstallCommandFlyout } from '../../../../../../components';
 import type { ValidationResults } from '../agent_policy_validation';
 
 import { ExperimentalFeaturesService } from '../../../../services';
-
+import { useAgentPolicyFormContext } from '../agent_policy_form';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
@@ -126,6 +127,13 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
   const isManagedorAgentlessPolicy =
     agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
+
+  const userHasAccessToAllPolicySpaces = useMemo(
+    () => 'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes(UNKNOWN_SPACE),
+    [agentPolicy]
+  );
+
+  const agentPolicyFormContext = useAgentPolicyFormContext();
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -307,13 +315,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           description={
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.spaceDescription"
-              defaultMessage="Select one or more spaces for this policy or create a new one. {link}"
+              defaultMessage="Select one or more spaces for this policy or create a new one. {link}{tooltip}"
               values={{
-                link: (
+                link: userHasAccessToAllPolicySpaces && (
                   <EuiLink
                     target="_blank"
                     href={getAbsolutePath('/app/management/kibana/spaces/create')}
                     external
+                    data-test-subj="spaceSelectorInputLink"
                   >
                     <FormattedMessage
                       id="xpack.fleet.agentPolicyForm.createSpaceLink"
@@ -321,36 +330,39 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                     />
                   </EuiLink>
                 ),
+                tooltip: !userHasAccessToAllPolicySpaces && (
+                  <EuiIconTip
+                    type="iInCircle"
+                    color="subdued"
+                    content={i18n.translate('xpack.fleet.agentPolicyForm.spaceTooltip', {
+                      defaultMessage: 'Access to all policy spaces is required for edit.',
+                    })}
+                  />
+                ),
               }}
             />
           }
+          data-test-subj="spaceSelectorInput"
         >
-          <EuiFormRow
-            fullWidth
-            key="space"
-            error={
-              touchedFields.description && validation.description ? validation.description : null
+          <SpaceSelector
+            isDisabled={
+              disabled || agentPolicy.is_managed === true || !userHasAccessToAllPolicySpaces
             }
-            isDisabled={disabled}
-            isInvalid={Boolean(touchedFields.description && validation.description)}
-          >
-            <SpaceSelector
-              isDisabled={disabled}
-              value={
-                'space_ids' in agentPolicy && agentPolicy.space_ids
-                  ? agentPolicy.space_ids
-                  : [spaceId || 'default']
+            value={
+              'space_ids' in agentPolicy && agentPolicy.space_ids
+                ? agentPolicy.space_ids.filter((id) => id !== UNKNOWN_SPACE)
+                : [spaceId || 'default']
+            }
+            setInvalidSpaceError={agentPolicyFormContext?.setInvalidSpaceError}
+            onChange={(newValue) => {
+              if (newValue.length === 0) {
+                return;
               }
-              onChange={(newValue) => {
-                if (newValue.length === 0) {
-                  return;
-                }
-                updateAgentPolicy({
-                  space_ids: newValue,
-                });
-              }}
-            />
-          </EuiFormRow>
+              updateAgentPolicy({
+                space_ids: newValue,
+              });
+            }}
+          />
         </EuiDescribedFormGroup>
       ) : null}
       <EuiDescribedFormGroup
@@ -382,8 +394,8 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       >
         <EuiFormRow
           fullWidth
-          error={touchedFields.namespace && validation.namespace ? validation.namespace : null}
-          isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+          error={validation.namespace ? validation.namespace : null}
+          isInvalid={Boolean(validation.namespace)}
           isDisabled={disabled}
         >
           <EuiComboBox

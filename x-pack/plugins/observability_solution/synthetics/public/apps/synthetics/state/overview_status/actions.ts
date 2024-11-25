@@ -21,3 +21,4 @@ export const quietFetchOverviewStatusAction = createAsyncAction<
 >('quietFetchOverviewStatusAction');
 
 export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');
+export const clearOverviewStatusState = createAction<void>('clearOverviewStatusState');

@@ -18,6 +18,20 @@ import { z } from '@kbn/zod';
 
 import { Note } from '../model/components.gen';
 
+/**
+ * Filter notes based on their association with a document or saved object.
+ */
+export type AssociatedFilterType = z.infer<typeof AssociatedFilterType>;
+export const AssociatedFilterType = z.enum([
+  'all',
+  'document_only',
+  'saved_object_only',
+  'document_and_saved_object',
+  'orphan',
+]);
+export type AssociatedFilterTypeEnum = typeof AssociatedFilterType.enum;
+export const AssociatedFilterTypeEnum = AssociatedFilterType.enum;
+
 export type DocumentIds = z.infer<typeof DocumentIds>;
 export const DocumentIds = z.union([z.array(z.string()), z.string()]);
 
@@ -40,8 +54,10 @@ export const GetNotesRequestQuery = z.object({
   sortField: z.string().nullable().optional(),
   sortOrder: z.string().nullable().optional(),
   filter: z.string().nullable().optional(),
+  createdByFilter: z.string().nullable().optional(),
+  associatedFilter: AssociatedFilterType.optional(),
 });
 export type GetNotesRequestQueryInput = z.input<typeof GetNotesRequestQuery>;
 
 export type GetNotesResponse = z.infer<typeof GetNotesResponse>;
-export const GetNotesResponse = z.union([GetNotesResult, z.object({})]);
+export const GetNotesResponse = GetNotesResult;

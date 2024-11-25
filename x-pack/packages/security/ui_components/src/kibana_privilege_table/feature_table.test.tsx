@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiIconTip } from '@elastic/eui';
+import { EuiAccordion, EuiIconTip, EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
+import type { Role } from '@kbn/security-plugin-types-common';
 import {
   createFeature,
   createKibanaPrivileges,
   kibanaFeatures,
 } from '@kbn/security-role-management-model/src/__fixtures__';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import type { Role } from '@kbn/security-plugin-types-common';
 
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import { FeatureTable } from './feature_table';
@@ -47,16 +47,19 @@ const setup = (config: TestConfig) => {
   const onChange = jest.fn();
   const onChangeAll = jest.fn();
   const wrapper = mountWithIntl(
-    <FeatureTable
-      role={config.role}
-      privilegeCalculator={calculator}
-      kibanaPrivileges={kibanaPrivileges}
-      onChange={onChange}
-      onChangeAll={onChangeAll}
-      canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
-      privilegeIndex={config.privilegeIndex}
-      allSpacesSelected={true}
-    />
+    <EuiThemeProvider>
+      <FeatureTable
+        role={config.role}
+        privilegeCalculator={calculator}
+        kibanaPrivileges={kibanaPrivileges}
+        onChange={onChange}
+        onChangeAll={onChangeAll}
+        showAdditionalPermissionsMessage={true}
+        canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
+        privilegeIndex={config.privilegeIndex}
+        allSpacesSelected={true}
+      />
+    </EuiThemeProvider>
   );
 
   const displayedPrivileges = config.calculateDisplayedPrivileges

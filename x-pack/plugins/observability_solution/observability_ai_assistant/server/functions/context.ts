@@ -24,8 +24,8 @@ export function registerContextFunction({
   client,
   functions,
   resources,
-  isKnowledgeBaseAvailable,
-}: FunctionRegistrationParameters & { isKnowledgeBaseAvailable: boolean }) {
+  isKnowledgeBaseReady,
+}: FunctionRegistrationParameters & { isKnowledgeBaseReady: boolean }) {
   functions.registerFunction(
     {
       name: CONTEXT_FUNCTION_NAME,
@@ -34,7 +34,7 @@ export function registerContextFunction({
       visibility: FunctionVisibility.Internal,
     },
     async ({ messages, screenContexts, chat }, signal) => {
-      const { analytics } = (await resources.context.core).coreStart;
+      const { analytics } = await resources.plugins.core.start();
 
       async function getContext() {
         const screenDescription = compact(
@@ -54,7 +54,7 @@ export function registerContextFunction({
           ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
         };
 
-        if (!isKnowledgeBaseAvailable) {
+        if (!isKnowledgeBaseReady) {
           return { content };
         }
 
@@ -115,7 +115,6 @@ export function registerContextFunction({
             subscriber.complete();
           });
       });
-    },
-    ['all']
+    }
   );
 }

@@ -53,6 +53,7 @@ import { extractRuleNameOverrideObject } from './extract_rule_name_override_obje
 import { extractRuleSchedule } from './extract_rule_schedule';
 import { extractTimelineTemplateReference } from './extract_timeline_template_reference';
 import { extractTimestampOverrideObject } from './extract_timestamp_override_object';
+import { extractThreatArray } from './extract_threat_array';
 
 /**
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
@@ -128,17 +129,14 @@ const extractDiffableCommonFields = (
     // About -> Advanced settings
     references: rule.references ?? [],
     false_positives: rule.false_positives ?? [],
-    threat: rule.threat ?? [],
+    threat: extractThreatArray(rule),
     note: rule.note ?? '',
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],
     required_fields: addEcsToRequiredFields(rule.required_fields),
-    author: rule.author ?? [],
-    license: rule.license ?? '',
 
     // Other domain fields
     rule_schedule: extractRuleSchedule(rule),
-    exceptions_list: rule.exceptions_list ?? [],
     max_signals: rule.max_signals ?? DEFAULT_MAX_SIGNALS,
 
     // --------------------- OPTIONAL FIELDS
@@ -177,11 +175,15 @@ const extractDiffableEqlFieldsFromRuleObject = (
 ): RequiredOptional<DiffableEqlFields> => {
   return {
     type: rule.type,
-    eql_query: extractRuleEqlQuery(rule.query, rule.language, rule.filters),
+    eql_query: extractRuleEqlQuery({
+      query: rule.query,
+      language: rule.language,
+      filters: rule.filters,
+      eventCategoryOverride: rule.event_category_override,
+      timestampField: rule.timestamp_field,
+      tiebreakerField: rule.tiebreaker_field,
+    }),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
-    event_category_override: rule.event_category_override,
-    timestamp_field: rule.timestamp_field,
-    tiebreaker_field: rule.tiebreaker_field,
     alert_suppression: rule.alert_suppression,
   };
 };

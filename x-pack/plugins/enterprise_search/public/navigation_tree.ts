@@ -31,7 +31,7 @@ export interface DynamicSideNavItems {
 const title = i18n.translate(
   'xpack.enterpriseSearch.searchNav.headerSolutionSwitcher.searchSolutionTitle',
   {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }
 );
 const icon = 'logoElasticsearch';
@@ -93,7 +93,7 @@ export const getNavigationTreeDefinition = ({
                     return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                   },
                   id: 'dev_tools',
-                  link: 'dev_tools:console',
+                  link: 'dev_tools',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
                     defaultMessage: 'Dev Tools',
                   }),
@@ -209,7 +209,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [{ link: 'enterpriseSearchRelevance:inferenceEndpoints' }],
+                  children: [{ link: 'searchInferenceEndpoints:inferenceEndpoints' }],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
@@ -218,7 +218,11 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
-                      getIsActive: () => false,
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        return pathNameSerialized.startsWith(
+                          prepend('/app/enterprise_search/app_search')
+                        );
+                      },
                       link: 'appSearch:engines',
                       title: i18n.translate(
                         'xpack.enterpriseSearch.searchNav.entsearch.appSearch',
@@ -235,7 +239,11 @@ export const getNavigationTreeDefinition = ({
                         : {}),
                     },
                     {
-                      getIsActive: () => false,
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        return pathNameSerialized.startsWith(
+                          prepend('/app/enterprise_search/workplace_search')
+                        );
+                      },
                       link: 'workplaceSearch',
                       ...(workplaceSearch
                         ? {

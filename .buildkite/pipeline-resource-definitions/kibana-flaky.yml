@@ -22,7 +22,6 @@ spec:
       default_branch: refs/pull/INSERT_PR_NUMBER/head
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/flaky_tests/pipeline.sh
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: true
         build_pull_requests: false
@@ -39,3 +38,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana

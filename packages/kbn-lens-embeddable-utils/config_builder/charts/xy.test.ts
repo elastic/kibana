@@ -143,8 +143,8 @@ test('generates xy chart config', async () => {
             "yLeft": true,
             "yRight": true,
           },
-          "emphasizeFitting": false,
-          "fittingFunction": "None",
+          "emphasizeFitting": true,
+          "fittingFunction": "Linear",
           "gridlinesVisibilitySettings": Object {
             "x": true,
             "yLeft": true,

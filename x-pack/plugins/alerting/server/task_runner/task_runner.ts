@@ -290,10 +290,21 @@ export class TaskRunner<
       state: { previousStartedAt },
     } = this.taskInstance;
 
-    const { queryDelaySettings, flappingSettings } =
+    const { queryDelaySettings, flappingSettings: spaceFlappingSettings } =
       await this.context.rulesSettingsService.getSettings(fakeRequest, spaceId);
     const ruleRunMetricsStore = new RuleRunMetricsStore();
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${rule.name}'`;
+
+    const ruleFlappingSettings = rule.flapping
+      ? {
+          enabled: true,
+          ...rule.flapping,
+        }
+      : null;
+
+    const flappingSettings = spaceFlappingSettings.enabled
+      ? ruleFlappingSettings || spaceFlappingSettings
+      : spaceFlappingSettings;
 
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
@@ -403,8 +414,8 @@ export class TaskRunner<
           this.countUsageOfActionExecutionAfterRuleCancellation();
         } else {
           actionSchedulerResult = await actionScheduler.run({
-            ...alertsClient.getProcessedAlerts('activeCurrent'),
-            ...alertsClient.getProcessedAlerts('recoveredCurrent'),
+            activeCurrentAlerts: alertsClient.getProcessedAlerts('activeCurrent'),
+            recoveredCurrentAlerts: alertsClient.getProcessedAlerts('recoveredCurrent'),
           });
         }
       })

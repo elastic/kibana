@@ -9,9 +9,13 @@
 
 import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { pick, Semaphore } from '@kbn/std';
-import { generateOpenApiDocument } from '@kbn/router-to-openapispec';
+import {
+  generateOpenApiDocument,
+  type GenerateOpenApiDocumentOptionsFilters,
+} from '@kbn/router-to-openapispec';
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -158,7 +162,7 @@ export class HttpService
     return this.internalPreboot;
   }
 
-  public async setup(deps: SetupDeps) {
+  public async setup(deps: SetupDeps): Promise<InternalHttpServiceSetup> {
     this.requestHandlerContext = deps.context.createContextContainer();
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
@@ -181,9 +185,11 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
-
+      registerOnPostValidation: (cb) => {
+        Router.on('onPostValidate', cb);
+      },
+      getRegisteredDeprecatedApis: () => serverContract.getDeprecatedRoutes(),
       externalUrl: new ExternalUrlConfig(config.externalUrl),
-
       createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
         path: string,
         pluginId: PluginOpaqueId = this.coreContext.coreId
@@ -254,49 +260,55 @@ export class HttpService
     const baseUrl =
       basePath.publicBaseUrl ?? `http://localhost:${config.port}${basePath.serverBasePath}`;
 
+    const stringOrStringArraySchema = schema.oneOf([
+      schema.string(),
+      schema.arrayOf(schema.string()),
+    ]);
+    const querySchema = schema.object({
+      access: schema.maybe(schema.oneOf([schema.literal('public'), schema.literal('internal')])),
+      excludePathsMatching: schema.maybe(stringOrStringArraySchema),
+      pathStartsWith: schema.maybe(stringOrStringArraySchema),
+      pluginId: schema.maybe(schema.string()),
+      version: schema.maybe(schema.string()),
+    });
+
     server.route({
       path: '/api/oas',
       method: 'GET',
       handler: async (req, h) => {
-        const version = req.query?.version;
-
-        let pathStartsWith: undefined | string[];
-        if (typeof req.query?.pathStartsWith === 'string') {
-          pathStartsWith = [req.query.pathStartsWith];
-        } else {
-          pathStartsWith = req.query?.pathStartsWith;
+        let filters: GenerateOpenApiDocumentOptionsFilters;
+        let query: TypeOf<typeof querySchema>;
+        try {
+          query = querySchema.validate(req.query);
+          filters = {
+            ...query,
+            excludePathsMatching:
+              typeof query.excludePathsMatching === 'string'
+                ? [query.excludePathsMatching]
+                : query.excludePathsMatching,
+            pathStartsWith:
+              typeof query.pathStartsWith === 'string'
+                ? [query.pathStartsWith]
+                : query.pathStartsWith,
+          };
+        } catch (e) {
+          return h.response({ message: e.message }).code(400);
         }
-
-        let excludePathsMatching: undefined | string[];
-        if (typeof req.query?.excludePathsMatching === 'string') {
-          excludePathsMatching = [req.query.excludePathsMatching];
-        } else {
-          excludePathsMatching = req.query?.excludePathsMatching;
-        }
-
-        const pluginId = req.query?.pluginId;
-
-        const access = req.query?.access as 'public' | 'internal' | undefined;
-        if (access && !['public', 'internal'].some((a) => a === access)) {
-          return h
-            .response({
-              message: 'Invalid access query parameter. Must be one of "public" or "internal".',
-            })
-            .code(400);
-        }
-
         return await firstValueFrom(
           of(1).pipe(
             HttpService.generateOasSemaphore.acquire(),
             mergeMap(async () => {
               try {
                 // Potentially quite expensive
-                const result = generateOpenApiDocument(this.httpServer.getRouters({ pluginId }), {
-                  baseUrl,
-                  title: 'Kibana HTTP APIs',
-                  version: '0.0.0', // TODO get a better version here
-                  filters: { pathStartsWith, excludePathsMatching, access, version },
-                });
+                const result = generateOpenApiDocument(
+                  this.httpServer.getRouters({ pluginId: query.pluginId }),
+                  {
+                    baseUrl,
+                    title: 'Kibana HTTP APIs',
+                    version: '0.0.0', // TODO get a better version here
+                    filters,
+                  }
+                );
                 return h.response(result);
               } catch (e) {
                 this.log.error(e);

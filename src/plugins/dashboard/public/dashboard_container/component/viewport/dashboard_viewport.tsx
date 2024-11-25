@@ -10,7 +10,7 @@
 import { debounce } from 'lodash';
 import classNames from 'classnames';
 import useResizeObserver from 'use-resize-observer/polyfilled';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiPortal } from '@elastic/eui';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -22,10 +22,7 @@ import {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import {
-  useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardGrid } from '../grid';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
@@ -44,7 +41,7 @@ export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   return { ref, width };
 };
 
-export const DashboardViewportComponent = () => {
+export const DashboardViewport = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
   const dashboardApi = useDashboardApi();
   const [hasControls, setHasControls] = useState(false);
   const [
@@ -57,6 +54,7 @@ export const DashboardViewportComponent = () => {
     viewMode,
     useMargins,
     uuid,
+    fullScreenMode,
   ] = useBatchedPublishingSubjects(
     dashboardApi.controlGroupApi$,
     dashboardApi.panelTitle,
@@ -66,8 +64,12 @@ export const DashboardViewportComponent = () => {
     dashboardApi.panels$,
     dashboardApi.viewMode,
     dashboardApi.useMargins$,
-    dashboardApi.uuid$
+    dashboardApi.uuid$,
+    dashboardApi.fullScreenMode$
   );
+  const onExit = useCallback(() => {
+    dashboardApi.setFullScreenMode(false);
+  }, [dashboardApi]);
 
   const panelCount = useMemo(() => {
     return Object.keys(panels).length;
@@ -114,6 +116,7 @@ export const DashboardViewportComponent = () => {
     <div
       className={classNames('dshDashboardViewportWrapper', {
         'dshDashboardViewportWrapper--defaultBg': !useMargins,
+        'dshDashboardViewportWrapper--isFullscreen': fullScreenMode,
       })}
     >
       {viewMode !== ViewMode.PRINT ? (
@@ -139,6 +142,11 @@ export const DashboardViewportComponent = () => {
           />
         </div>
       ) : null}
+      {fullScreenMode && (
+        <EuiPortal>
+          <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
+        </EuiPortal>
+      )}
       {panelCount === 0 && <DashboardEmptyScreen />}
       <div
         ref={resizeRef}
@@ -152,37 +160,10 @@ export const DashboardViewportComponent = () => {
             otherwise, there is a race condition where the panels can end up being squashed 
             TODO only render when dashboardInitialized
         */}
-        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
+        {viewportWidth !== 0 && (
+          <DashboardGrid dashboardContainer={dashboardContainer} viewportWidth={viewportWidth} />
+        )}
       </div>
     </div>
   );
 };
-
-// This fullscreen button HOC separates fullscreen button and dashboard content to reduce rerenders
-// because ExitFullScreenButton sets isFullscreenMode to false on unmount while rerendering.
-// This specifically fixed maximizing/minimizing panels without exiting fullscreen mode.
-const WithFullScreenButton = ({ children }: { children: JSX.Element }) => {
-  const dashboardApi = useDashboardApi();
-
-  const isFullScreenMode = useStateFromPublishingSubject(dashboardApi.fullScreenMode$);
-
-  return (
-    <>
-      {children}
-      {isFullScreenMode && (
-        <EuiPortal>
-          <ExitFullScreenButton
-            onExit={() => dashboardApi.setFullScreenMode(false)}
-            toggleChrome={!dashboardApi.isEmbeddedExternally}
-          />
-        </EuiPortal>
-      )}
-    </>
-  );
-};
-
-export const DashboardViewport = () => (
-  <WithFullScreenButton>
-    <DashboardViewportComponent />
-  </WithFullScreenButton>
-);

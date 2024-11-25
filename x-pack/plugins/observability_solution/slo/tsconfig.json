@@ -7,7 +7,9 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    // Emotion theme typing
+    "./emotion.d.ts"
   ],
   "exclude": [
     "target/**/*"
@@ -17,13 +19,11 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
     "@kbn/core",
-    "@kbn/translations-plugin",
     "@kbn/rule-data-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/kibana-react-plugin",
-    "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/kibana-utils-plugin",
     "@kbn/slo-schema",
@@ -96,6 +96,8 @@
     "@kbn/core-application-browser",
     "@kbn/core-theme-browser",
     "@kbn/ebt-tools",
-    "@kbn/observability-alerting-rule-utils"
+    "@kbn/observability-alerting-rule-utils",
+    "@kbn/discover-shared-plugin",
+    "@kbn/server-route-repository-client",
   ]
 }

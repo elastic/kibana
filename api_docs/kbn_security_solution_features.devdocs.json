@@ -57,7 +57,7 @@
                 "section": "def-common.KibanaFeatureScope",
                 "text": "KibanaFeatureScope"
               },
-              "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
+              "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
               {
                 "pluginId": "@kbn/core-application-common",
                 "scope": "common",
@@ -65,7 +65,7 @@
                 "section": "def-common.AppCategory",
                 "text": "AppCategory"
               },
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; hidden?: boolean | undefined; privileges: { all: ",
+              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -170,7 +170,7 @@
             "section": "def-common.KibanaFeatureScope",
             "text": "KibanaFeatureScope"
           },
-          "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
+          "[] | undefined; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
           {
             "pluginId": "@kbn/core-application-common",
             "scope": "common",
@@ -178,7 +178,7 @@
             "section": "def-common.AppCategory",
             "text": "AppCategory"
           },
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; hidden?: boolean | undefined; privileges: { all: ",
+          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; }> | undefined; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",
@@ -445,7 +445,23 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined>; alerting?: ",
+          "<\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined>; replacedBy?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
+          "<readonly ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.FeatureKibanaPrivilegesReference",
+            "text": "FeatureKibanaPrivilegesReference"
+          },
+          "[] | undefined>; alerting?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -461,7 +477,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; } | undefined>; disabled?: ",
+          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; } | undefined>; disabled?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

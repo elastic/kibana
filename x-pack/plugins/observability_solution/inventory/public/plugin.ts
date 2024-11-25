@@ -7,17 +7,17 @@
 
 import {
   AppMountParameters,
+  AppStatus,
   CoreSetup,
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
-  AppStatus,
 } from '@kbn/core/public';
 import { INVENTORY_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { from, map } from 'rxjs';
+import { from, map, mergeMap, of } from 'rxjs';
 import { createCallInventoryAPI } from './api';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 import { InventoryServices } from './services/types';
@@ -40,11 +40,16 @@ export class InventoryPlugin
 {
   logger: Logger;
   telemetry: TelemetryService;
+  kibanaVersion: string;
+  isServerlessEnv: boolean;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
     this.telemetry = new TelemetryService();
+    this.kibanaVersion = context.env.packageInfo.version;
+    this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
   }
+
   setup(
     coreSetup: CoreSetup<InventoryStartDependencies, InventoryPublicStart>,
     pluginsSetup: InventorySetupDependencies
@@ -55,35 +60,61 @@ export class InventoryPlugin
       true
     );
 
-    if (isEntityCentricExperienceSettingEnabled) {
-      pluginsSetup.observabilityShared.navigation.registerSections(
-        from(coreSetup.getStartServices()).pipe(
-          map(([coreStart, pluginsStart]) => {
-            return [
-              {
-                label: '',
-                sortKey: 300,
-                entries: [
-                  {
-                    label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
-                      defaultMessage: 'Inventory',
-                    }),
-                    app: INVENTORY_APP_ID,
-                    path: '/',
-                    matchPath(currentPath: string) {
-                      return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
-                    },
-                    isTechnicalPreview: true,
-                  },
-                ],
-              },
-            ];
-          })
-        )
-      );
-    }
-    this.telemetry.setup({ analytics: coreSetup.analytics });
+    this.telemetry.setup({
+      analytics: coreSetup.analytics,
+    });
+
     const telemetry = this.telemetry.start();
+
+    const getStartServices = coreSetup.getStartServices();
+
+    const hideInventory$ = from(getStartServices).pipe(
+      mergeMap(([coreStart, pluginsStart]) => {
+        if (pluginsStart.spaces) {
+          return from(pluginsStart.spaces.getActiveSpace()).pipe(
+            map(
+              (space) =>
+                space.disabledFeatures.includes(INVENTORY_APP_ID) ||
+                !coreStart.application.capabilities.inventory.show
+            )
+          );
+        }
+
+        return of(!coreStart.application.capabilities.inventory.show);
+      })
+    );
+
+    const sections$ = hideInventory$.pipe(
+      map((hideInventory) => {
+        if (isEntityCentricExperienceSettingEnabled && !hideInventory) {
+          return [
+            {
+              label: '',
+              sortKey: 300,
+              entries: [
+                {
+                  label: i18n.translate('xpack.inventory.inventoryLinkTitle', {
+                    defaultMessage: 'Inventory',
+                  }),
+                  app: INVENTORY_APP_ID,
+                  path: '/',
+                  matchPath(currentPath: string) {
+                    return ['/', ''].some((testPath) => currentPath.startsWith(testPath));
+                  },
+                  isTechnicalPreview: true,
+                },
+              ],
+            },
+          ];
+        }
+        return [];
+      })
+    );
+
+    pluginsSetup.observabilityShared.navigation.registerSections(sections$);
+
+    const isCloudEnv = !!pluginsSetup.cloud?.isCloudEnabled;
+    const isServerlessEnv = pluginsSetup.cloud?.isServerlessEnabled || this.isServerlessEnv;
 
     coreSetup.application.register({
       id: INVENTORY_APP_ID,
@@ -91,7 +122,7 @@ export class InventoryPlugin
         defaultMessage: 'Inventory',
       }),
       euiIconType: 'logoObservability',
-      appRoute: '/app/observability/inventory',
+      appRoute: '/app/inventory',
       category: DEFAULT_APP_CATEGORIES.observability,
       visibleIn: ['sideNav', 'globalSearch'],
       order: 8200,
@@ -102,7 +133,7 @@ export class InventoryPlugin
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
-          coreSetup.getStartServices(),
+          getStartServices,
         ]);
 
         const services: InventoryServices = {
@@ -115,6 +146,11 @@ export class InventoryPlugin
           pluginsStart,
           services,
           appMountParameters,
+          kibanaEnvironment: {
+            isCloudEnv,
+            isServerlessEnv,
+            kibanaVersion: this.kibanaVersion,
+          },
         });
       },
     });

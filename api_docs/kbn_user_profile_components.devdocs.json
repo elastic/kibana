@@ -976,9 +976,9 @@
                   ", \"reportEvent\"> | undefined; theme: ",
                   {
                     "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-public.ThemeServiceStart",
+                    "section": "def-common.ThemeServiceStart",
                     "text": "ThemeServiceStart"
                   },
                   "; }"
@@ -1397,7 +1397,7 @@
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
-              ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
+              ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement>) | (",
               "DisambiguateSet",
               "<",
               "EuiSelectableLIOption",

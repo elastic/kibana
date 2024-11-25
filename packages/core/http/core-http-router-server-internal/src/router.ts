@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EventEmitter } from 'node:events';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
 import apm from 'elastic-apm-node';
 import { isConfigSchema } from '@kbn/config-schema';
@@ -27,19 +28,20 @@ import type {
   VersionedRouter,
   RouteRegistrar,
   RouteSecurity,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { isZod } from '@kbn/zod';
 import { validBodyOutput, getRequestValidation } from '@kbn/core-http-server';
 import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 import { RouteValidator } from './validator';
-import { CoreVersionedRouter } from './versioned_router';
+import { ALLOWED_PUBLIC_VERSION, CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest } from './request';
 import { kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { Method } from './versioned_router/types';
-import { prepareRouteConfigValidation } from './util';
+import { getVersionHeader, injectVersionHeader, prepareRouteConfigValidation } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { validRouteSecurity } from './security_route_config_validator';
 import { InternalRouteConfig } from './route';
@@ -52,7 +54,7 @@ export type ContextEnhancer<
   Context extends RequestHandlerContextBase
 > = (handler: RequestHandler<P, Q, B, Context, Method>) => RequestHandlerEnhanced<P, Q, B, Method>;
 
-function getRouteFullPath(routerPath: string, routePath: string) {
+export function getRouteFullPath(routerPath: string, routePath: string) {
   // If router's path ends with slash and route's path starts with slash,
   // we should omit one of them to have a valid concatenated path.
   const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
@@ -113,6 +115,11 @@ function validOptions(
     );
   }
 
+  // @ts-expect-error to eliminate problems with `security` in the options for route factories abstractions
+  if (options.security) {
+    throw new Error('`options.security` is not allowed in route config. Use `security` instead.');
+  }
+
   const body = shouldNotHavePayload
     ? undefined
     : {
@@ -147,8 +154,15 @@ export interface RouterOptions {
 
 /** @internal */
 export interface InternalRegistrarOptions {
+  /** @default false */
   isVersioned: boolean;
+  /**
+   * Whether this route should emit "route events" like postValidate
+   * @default true
+   */
+  events: boolean;
 }
+
 /** @internal */
 export type VersionedRouteConfig<P, Q, B, M extends RouteMethod> = Omit<
   RouteConfig<P, Q, B, M>,
@@ -165,14 +179,9 @@ export type InternalRegistrar<M extends Method, C extends RequestHandlerContextB
 ) => ReturnType<RouteRegistrar<M, C>>;
 
 /** @internal */
-export interface InternalRouterRoute extends RouterRoute {
-  readonly isVersioned: boolean;
-}
-
-/** @internal */
-interface InternalGetRoutesOptions {
-  excludeVersionedRoutes?: boolean;
-}
+type RouterEvents =
+  /** Called after route validation, regardless of success or failure */
+  'onPostValidate';
 
 /**
  * @internal
@@ -180,7 +189,8 @@ interface InternalGetRoutesOptions {
 export class Router<Context extends RequestHandlerContextBase = RequestHandlerContextBase>
   implements IRouter<Context>
 {
-  public routes: Array<Readonly<InternalRouterRoute>> = [];
+  private static ee = new EventEmitter();
+  public routes: Array<Readonly<RouterRoute>> = [];
   public pluginId?: symbol;
   public get: InternalRegistrar<'get', Context>;
   public post: InternalRegistrar<'post', Context>;
@@ -200,29 +210,38 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       <P, Q, B>(
         route: InternalRouteConfig<P, Q, B, Method>,
         handler: RequestHandler<P, Q, B, Context, Method>,
-        internalOptions: { isVersioned: boolean } = { isVersioned: false }
+        { isVersioned, events }: InternalRegistrarOptions = { isVersioned: false, events: true }
       ) => {
         route = prepareRouteConfigValidation(route);
         const routeSchemas = routeSchemasFromRouteConfig(route, method);
+        const isPublicUnversionedRoute =
+          !isVersioned &&
+          route.options?.access === 'public' &&
+          // We do not consider HTTP resource routes as APIs
+          route.options?.httpResource !== true;
 
         this.routes.push({
-          handler: async (req, responseToolkit) =>
-            await this.handle({
+          handler: async (req, responseToolkit) => {
+            return await this.handle({
               routeSchemas,
               request: req,
               responseToolkit,
+              isPublicUnversionedRoute,
               handler: this.enhanceWithContext(handler),
-            }),
+              emit: events ? { onPostValidation: this.emitPostValidate } : undefined,
+            });
+          },
           method,
           path: getRouteFullPath(this.routerPath, route.path),
           options: validOptions(method, route),
           // For the versioned route security is validated in the versioned router
-          security: internalOptions.isVersioned
+          security: isVersioned
             ? route.security
             : validRouteSecurity(route.security as DeepPartial<RouteSecurity>, route.options),
-          /** Below is added for introspection */
           validationSchemas: route.validate,
-          isVersioned: internalOptions.isVersioned,
+          // @ts-ignore using isVersioned: false in the type instead of boolean
+          // for typeguarding between versioned and unversioned RouterRoute types
+          isVersioned,
         });
       };
 
@@ -233,7 +252,15 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.patch = buildMethod('patch');
   }
 
-  public getRoutes({ excludeVersionedRoutes }: InternalGetRoutesOptions = {}) {
+  public static on(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
+    Router.ee.on(event, cb);
+  }
+
+  public static off(event: RouterEvents, cb: (req: CoreKibanaRequest, ...args: any[]) => void) {
+    Router.ee.off(event, cb);
+  }
+
+  public getRoutes({ excludeVersionedRoutes }: { excludeVersionedRoutes?: boolean } = {}) {
     if (excludeVersionedRoutes) {
       return this.routes.filter((route) => !route.isVersioned);
     }
@@ -262,14 +289,32 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     });
   }
 
+  /** Should be private, just exposed for convenience for the versioned router */
+  public emitPostValidate = (
+    request: KibanaRequest,
+    postValidateConext: PostValidationMetadata = {
+      isInternalApiRequest: true,
+      isPublicAccess: false,
+    }
+  ) => {
+    const postValidate: RouterEvents = 'onPostValidate';
+    Router.ee.emit(postValidate, request, postValidateConext);
+  };
+
   private async handle<P, Q, B>({
     routeSchemas,
     request,
     responseToolkit,
+    emit,
+    isPublicUnversionedRoute,
     handler,
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
+    emit?: {
+      onPostValidation: (req: KibanaRequest, metadata: PostValidationMetadata) => void;
+    };
+    isPublicUnversionedRoute: boolean;
     handler: RequestHandlerEnhanced<
       P,
       Q,
@@ -290,11 +335,35 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
     } catch (error) {
       this.logError('400 Bad Request', 400, { request, error });
-      return hapiResponseAdapter.toBadRequest(error.message);
+      const response = hapiResponseAdapter.toBadRequest(error.message);
+      if (isPublicUnversionedRoute) {
+        response.output.headers = {
+          ...response.output.headers,
+          ...getVersionHeader(ALLOWED_PUBLIC_VERSION),
+        };
+      }
+
+      // Emit onPostValidation even if validation fails.
+      const req = CoreKibanaRequest.from(request);
+      emit?.onPostValidation(req, {
+        deprecated: req.route.options.deprecated,
+        isInternalApiRequest: req.isInternalApiRequest,
+        isPublicAccess: req.route.options.access === 'public',
+      });
+      return response;
     }
+
+    emit?.onPostValidation(kibanaRequest, {
+      deprecated: kibanaRequest.route.options.deprecated,
+      isInternalApiRequest: kibanaRequest.isInternalApiRequest,
+      isPublicAccess: kibanaRequest.route.options.access === 'public',
+    });
 
     try {
       const kibanaResponse = await handler(kibanaRequest, kibanaResponseFactory);
+      if (isPublicUnversionedRoute) {
+        injectVersionHeader(ALLOWED_PUBLIC_VERSION, kibanaResponse);
+      }
       if (kibanaRequest.protocol === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,

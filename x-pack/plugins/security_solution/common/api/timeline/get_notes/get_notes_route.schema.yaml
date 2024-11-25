@@ -51,18 +51,34 @@ paths:
           schema:
             type: string
             nullable: true
+        - in: query
+          name: createdByFilter
+          schema:
+            nullable: true
+            type: string
+        - name: associatedFilter
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssociatedFilterType'
       responses:
         '200':
           description: Indicates the requested notes were returned.
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/GetNotesResult'
-                  - type: object
+                $ref: '#/components/schemas/GetNotesResult'
 
 components:
   schemas:
+    AssociatedFilterType:
+        type: string
+        enum:
+          - all
+          - document_only
+          - saved_object_only
+          - document_and_saved_object
+          - orphan
+        description: Filter notes based on their association with a document or saved object.
     DocumentIds:
       oneOf:
         - type: array

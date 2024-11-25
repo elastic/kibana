@@ -2331,10 +2331,6 @@
                 "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
                 "plugin": "@kbn/core-saved-objects-api-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/apis/utils/internal_utils.ts"
               },
@@ -2345,6 +2341,10 @@
               {
                 "plugin": "@kbn/core-saved-objects-server-internal",
                 "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
+              },
+              {
+                "plugin": "@kbn/core-saved-objects-browser-mocks",
+                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "fleet",
@@ -2627,52 +2627,8 @@
             "path": "src/core/server/index.ts"
           },
           {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/actions_client/actions_client.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
-          },
-          {
-            "plugin": "actions",
-            "path": "x-pack/plugins/actions/server/types.ts"
+            "plugin": "@kbn/alerting-types",
+            "path": "packages/kbn-alerting-types/rule_types.ts"
           },
           {
             "plugin": "@kbn/alerting-types",
@@ -2731,24 +2687,64 @@
             "path": "x-pack/plugins/alerting/common/rule.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/types/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
           },
           {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/data/rule/types/rule_attributes.ts"
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/types/types.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/update/update.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
+          },
+          {
+            "plugin": "actions",
+            "path": "x-pack/plugins/actions/server/application/connector/methods/create/create.ts"
           },
           {
             "plugin": "alerting",
@@ -2757,30 +2753,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/rules_client/common/inject_references.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
             "plugin": "alerting",
@@ -2821,6 +2793,14 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
           },
           {
             "plugin": "enterpriseSearch",

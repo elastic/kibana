@@ -372,7 +372,7 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined) => ",
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined) => ",
               {
                 "pluginId": "@kbn/core-application-browser",
                 "scope": "public",
@@ -463,7 +463,7 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+                  "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
                 ],
                 "path": "packages/core/application/core-application-browser/src/app_leave.ts",
                 "deprecated": false,
@@ -582,7 +582,7 @@
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
             ],
             "path": "packages/core/application/core-application-browser/src/app_leave.ts",
             "deprecated": false,
@@ -821,7 +821,7 @@
             "tags": [],
             "label": "navigateToApp",
             "description": [
-              "\nNavigate to a given app\n"
+              "\nNavigate to a given app.\nIf a plugin is disabled any applications it registers won't be available either.\nBefore rendering a UI element that a user could use to navigate to another application,\nfirst check if the destination application is actually available using the isAppRegistered API.\n"
             ],
             "signature": [
               "(appId: string, options?: ",
@@ -844,7 +844,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [],
+                "description": [
+                  "- The identifier of the app to navigate to"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -947,6 +949,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser",
+            "id": "def-public.ApplicationStart.isAppRegistered",
+            "type": "Function",
+            "tags": [],
+            "label": "isAppRegistered",
+            "description": [
+              "\nChecks whether a given application is registered.\n"
+            ],
+            "signature": [
+              "(appId: string) => boolean"
+            ],
+            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser",
+                "id": "def-public.ApplicationStart.isAppRegistered.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [
+                  "- The identifier of the app to check"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "true if the given appId is registered in the system, false otherwise."
+            ]
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
@@ -1147,7 +1187,6 @@
             ],
             "path": "packages/core/application/core-application-browser/src/app_mount.ts",
             "deprecated": true,
-            "removeBy": "8.8.0",
             "trackAdoption": false,
             "references": [
               {
@@ -1155,12 +1194,12 @@
                 "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
               },
               {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
-              },
-              {
                 "plugin": "management",
                 "path": "src/plugins/management/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/core-application-browser-mocks",
+                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
               },
               {
                 "plugin": "fleet",

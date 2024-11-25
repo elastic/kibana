@@ -11,18 +11,20 @@ import React from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ESQLMenuPopover } from './esql_menu_popover';
 
 describe('ESQLMenuPopover', () => {
-  const renderESQLPopover = () => {
+  const renderESQLPopover = (adHocDataview?: DataView) => {
     const startMock = coreMock.createStart();
     const services = {
       docLinks: startMock.docLinks,
     };
     return render(
       <KibanaContextProvider services={services}>
-        <ESQLMenuPopover />{' '}
+        <ESQLMenuPopover adHocDataview={adHocDataview} />
       </KibanaContextProvider>
     );
   };
@@ -37,8 +39,14 @@ describe('ESQLMenuPopover', () => {
     expect(screen.getByTestId('esql-menu-button')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button'));
     expect(screen.getByTestId('esql-quick-reference')).toBeInTheDocument();
-    expect(screen.getByTestId('esql-examples')).toBeInTheDocument();
+    expect(screen.queryByTestId('esql-recommended-queries')).not.toBeInTheDocument();
     expect(screen.getByTestId('esql-about')).toBeInTheDocument();
     expect(screen.getByTestId('esql-feedback')).toBeInTheDocument();
+  });
+
+  it('should have recommended queries if a dataview is passed', async () => {
+    renderESQLPopover(stubIndexPattern);
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByTestId('esql-recommended-queries')).toBeInTheDocument();
   });
 });

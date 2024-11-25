@@ -37,6 +37,8 @@ const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as jest.MockedFunc
   typeof deletePrerequisiteAssets
 >;
 
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+
 import {
   stepInstallIndexTemplatePipelines,
   cleanupIndexTemplatePipelinesStep,
@@ -122,6 +124,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         owner: { github: 'elastic/fleet' },
       } as any,
       assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
       paths: [],
     };
     appContextService.start(
@@ -281,6 +284,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         ],
       } as any,
       assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
       paths: [],
     };
     appContextService.start(
@@ -431,6 +435,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         ],
       } as any,
       assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
       paths: [],
     };
     appContextService.start(
@@ -521,6 +526,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         ],
       } as any,
       assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
       paths: [],
     };
     appContextService.start(
@@ -574,6 +580,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         owner: { github: 'elastic/fleet' },
       } as any,
       assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
       paths: [],
     };
     appContextService.start(
@@ -647,6 +654,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       ],
     } as any,
     assetsMap: new Map(),
+    archiveIterator: createArchiveIteratorFromMap(new Map()),
     paths: [],
   };
   const mockInstalledPackageSo: SavedObject<Installation> = {

@@ -5,49 +5,27 @@
  * 2.0.
  */
 
-export interface RulesSettingsModificationMetadata {
-  createdBy: string | null;
-  updatedBy: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RulesSettingsFlappingProperties {
-  enabled: boolean;
-  lookBackWindow: number;
-  statusChangeThreshold: number;
-}
-
-export interface RuleSpecificFlappingProperties {
-  lookBackWindow: number;
-  statusChangeThreshold: number;
-}
-
-export type RulesSettingsFlapping = RulesSettingsFlappingProperties &
-  RulesSettingsModificationMetadata;
-
-export interface RulesSettingsQueryDelayProperties {
-  delay: number;
-}
-
-export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
-  RulesSettingsModificationMetadata;
-
-export interface RulesSettingsProperties {
-  flapping?: RulesSettingsFlappingProperties;
-  queryDelay?: RulesSettingsQueryDelayProperties;
-}
-
-export interface RulesSettings {
-  flapping?: RulesSettingsFlapping;
-  queryDelay?: RulesSettingsQueryDelay;
-}
+import type {
+  RulesSettingsFlappingProperties,
+  RulesSettingsQueryDelayProperties,
+} from '@kbn/alerting-types';
 
 export {
   MIN_LOOK_BACK_WINDOW,
   MAX_LOOK_BACK_WINDOW,
   MIN_STATUS_CHANGE_THRESHOLD,
   MAX_STATUS_CHANGE_THRESHOLD,
+} from '@kbn/alerting-types/flapping/latest';
+
+export type {
+  RulesSettingsModificationMetadata,
+  RulesSettingsFlappingProperties,
+  RulesSettingsQueryDelayProperties,
+  RuleSpecificFlappingProperties,
+  RulesSettingsFlapping,
+  RulesSettingsQueryDelay,
+  RulesSettingsProperties,
+  RulesSettings,
 } from '@kbn/alerting-types';
 
 export const MIN_QUERY_DELAY = 0;

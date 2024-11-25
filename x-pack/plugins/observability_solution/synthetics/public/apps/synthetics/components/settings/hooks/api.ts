@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PolicyFromES } from '@kbn/index-lifecycle-management-plugin/common/types';
+import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { DataStream } from '@kbn/index-management-plugin/common';
 import { CatIndicesResponse } from '@elastic/elasticsearch/lib/api/types';
 import { apiService } from '../../../../../utils/api_service';
@@ -22,9 +22,10 @@ export const getDslPolicies = async (): Promise<{ data: DataStream[] }> => {
       includeStats: true,
     },
     undefined,
-    undefined,
     {
-      'X-Elastic-Internal-Origin': 'Kibana',
+      headers: {
+        'X-Elastic-Internal-Origin': 'Kibana',
+      },
     }
   );
 };

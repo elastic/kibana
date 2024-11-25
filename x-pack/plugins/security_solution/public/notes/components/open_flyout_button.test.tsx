@@ -13,6 +13,7 @@ import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useSourcererDataView } from '../../sourcerer/containers';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../sourcerer/containers');
@@ -27,7 +28,11 @@ describe('OpenFlyoutButtonIcon', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <OpenFlyoutButtonIcon eventId={mockEventId} timelineId={mockTimelineId} />
+        <OpenFlyoutButtonIcon
+          eventId={mockEventId}
+          timelineId={mockTimelineId}
+          iconType="arrowRight"
+        />
       </TestProviders>
     );
 
@@ -41,7 +46,11 @@ describe('OpenFlyoutButtonIcon', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <OpenFlyoutButtonIcon eventId={mockEventId} timelineId={mockTimelineId} />
+        <OpenFlyoutButtonIcon
+          eventId={mockEventId}
+          timelineId={mockTimelineId}
+          iconType="arrowRight"
+        />
       </TestProviders>
     );
 
@@ -54,7 +63,7 @@ describe('OpenFlyoutButtonIcon', () => {
         params: {
           id: mockEventId,
           indexName: 'test1,test2',
-          scopeId: mockTimelineId,
+          scopeId: TableId.alertsOnAlertsPage,
         },
       },
     });

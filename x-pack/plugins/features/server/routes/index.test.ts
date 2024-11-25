@@ -44,6 +44,7 @@ function getExpectedSubFeatures(licenseType: LicenseType = 'platinum'): SubFeatu
               name: 'basic sub 1',
               includeIn: 'all',
               ...createPrivilege(),
+              replacedBy: undefined,
             },
           ],
         },
@@ -63,6 +64,7 @@ function getExpectedSubFeatures(licenseType: LicenseType = 'platinum'): SubFeatu
                     includeIn: 'all',
                     minimumLicense: 'platinum',
                     ...createPrivilege(),
+                    replacedBy: undefined,
                   },
                 ]
               : [],
@@ -75,6 +77,7 @@ function getExpectedSubFeatures(licenseType: LicenseType = 'platinum'): SubFeatu
               name: 'platinum sub 1',
               includeIn: 'all',
               ...createPrivilege(),
+              replacedBy: undefined,
             },
           ],
         },
@@ -126,6 +129,26 @@ describe('GET /api/features', () => {
       privileges: null,
     });
 
+    featureRegistry.registerKibanaFeature({
+      deprecated: { notice: 'It was a mistake.' },
+      id: 'deprecated-feature',
+      name: 'Deprecated Feature',
+      app: [],
+      category: { id: 'deprecated', label: 'deprecated' },
+      privileges: {
+        all: {
+          savedObject: { all: [], read: [] },
+          ui: [],
+          replacedBy: [{ feature: 'feature_1', privileges: ['all'] }],
+        },
+        read: {
+          savedObject: { all: [], read: [] },
+          ui: [],
+          replacedBy: [{ feature: 'feature_1', privileges: ['all'] }],
+        },
+      },
+    });
+
     featureRegistry.lockRegistration();
 
     const routerMock = httpServiceMock.createRouter();
@@ -137,7 +160,7 @@ describe('GET /api/features', () => {
     routeHandler = routerMock.get.mock.calls[0][1];
   });
 
-  it('returns a list of available features, sorted by their configured order', async () => {
+  it('returns a list of available features omitting deprecated ones, sorted by their configured order', async () => {
     const mockResponse = httpServerMock.createResponseFactory();
     await routeHandler(createContextMock(), { query: {} } as any, mockResponse);
 

@@ -7,34 +7,39 @@
 
 import { RequestHandler } from '@kbn/core/server';
 import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
-
 import { errorHandler } from '../error_handler';
+import { getMeteringStats } from '../../utils/get_metering_stats';
 
 export const getDataStreamsHandler = (
   dataUsageContext: DataUsageContext
-): RequestHandler<never, unknown, DataUsageRequestHandlerContext> => {
+): RequestHandler<never, never, unknown, DataUsageRequestHandlerContext> => {
   const logger = dataUsageContext.logFactory.get('dataStreamsRoute');
-
   return async (context, _, response) => {
-    logger.debug(`Retrieving user data streams`);
+    logger.debug('Retrieving user data streams');
 
     try {
       const core = await context.core;
-      const esClient = core.elasticsearch.client.asCurrentUser;
+      const { datastreams: meteringStats } = await getMeteringStats(
+        core.elasticsearch.client.asSecondaryAuthUser
+      );
 
-      const { data_streams: dataStreamsResponse } = await esClient.indices.dataStreamsStats({
-        name: '*',
-        expand_wildcards: 'all',
-      });
+      const body =
+        meteringStats && !!meteringStats.length
+          ? meteringStats
+              .sort((a, b) => b.size_in_bytes - a.size_in_bytes)
+              .reduce<Array<{ name: string; storageSizeBytes: number }>>((acc, stat) => {
+                if (stat.size_in_bytes > 0) {
+                  acc.push({
+                    name: stat.name,
+                    storageSizeBytes: stat.size_in_bytes ?? 0,
+                  });
+                }
+                return acc;
+              }, [])
+          : [];
 
-      const sorted = dataStreamsResponse
-        .sort((a, b) => b.store_size_bytes - a.store_size_bytes)
-        .map((dataStream) => ({
-          name: dataStream.data_stream,
-          storageSizeBytes: dataStream.store_size_bytes,
-        }));
       return response.ok({
-        body: sorted,
+        body,
       });
     } catch (error) {
       return errorHandler(logger, response, error);

@@ -12,7 +12,13 @@
         "hidden",
         "none"
       ],
-      "include_defaults": "__flag__"
+      "include_defaults": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "verbose": "__flag__"
     },
     "methods": [
       "GET"

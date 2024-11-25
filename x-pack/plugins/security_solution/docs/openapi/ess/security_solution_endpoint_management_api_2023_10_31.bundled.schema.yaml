@@ -31,32 +31,6 @@ paths:
       summary: Get response actions
       tags:
         - Security Endpoint Management API
-  /api/endpoint/action_log/{agent_id}:
-    get:
-      deprecated: true
-      description: Get an action request log for the specified agent ID.
-      operationId: EndpointGetActionLog
-      parameters:
-        - in: path
-          name: agent_id
-          required: true
-          schema:
-            $ref: '#/components/schemas/AgentId'
-        - in: query
-          name: query
-          required: true
-          schema:
-            $ref: '#/components/schemas/ActionLogRequestQuery'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-          description: OK
-      summary: Get an action request log
-      tags:
-        - Security Endpoint Management API
   /api/endpoint/action_status:
     get:
       description: Get the status of response actions for the specified agent IDs.
@@ -348,56 +322,6 @@ paths:
       summary: Upload a file
       tags:
         - Security Endpoint Management API
-  /api/endpoint/isolate:
-    post:
-      deprecated: true
-      description: >
-        Isolate an endpoint from the network.
-
-        > info
-
-        > This URL will return a 308 permanent redirect to `POST <kibana
-        host>:<port>/api/endpoint/action/isolate`.
-      operationId: EndpointIsolateRedirect
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                agent_type:
-                  $ref: '#/components/schemas/AgentTypes'
-                alert_ids:
-                  $ref: '#/components/schemas/AlertIds'
-                case_ids:
-                  $ref: '#/components/schemas/CaseIds'
-                comment:
-                  $ref: '#/components/schemas/Comment'
-                endpoint_ids:
-                  $ref: '#/components/schemas/EndpointIds'
-                parameters:
-                  $ref: '#/components/schemas/Parameters'
-              required:
-                - endpoint_ids
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-          description: OK
-        '308':
-          description: Permanent Redirect
-          headers:
-            Location:
-              description: Permanently redirects to "/api/endpoint/action/isolate"
-              schema:
-                example: /api/endpoint/action/isolate
-                type: string
-      summary: Isolate an endpoint
-      tags:
-        - Security Endpoint Management API
   /api/endpoint/metadata:
     get:
       operationId: GetEndpointMetadataList
@@ -436,19 +360,6 @@ paths:
       summary: Get metadata
       tags:
         - Security Endpoint Management API
-  /api/endpoint/metadata/transforms:
-    get:
-      operationId: GetEndpointMetadataTransform
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-          description: OK
-      summary: Get metadata transforms
-      tags:
-        - Security Endpoint Management API
   /api/endpoint/policy_response:
     get:
       operationId: GetPolicyResponse
@@ -469,32 +380,6 @@ paths:
                 $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get a policy response
-      tags:
-        - Security Endpoint Management API
-  /api/endpoint/policy/summaries:
-    get:
-      deprecated: true
-      operationId: GetAgentPolicySummary
-      parameters:
-        - in: query
-          name: query
-          required: true
-          schema:
-            type: object
-            properties:
-              package_name:
-                type: string
-              policy_id:
-                nullable: true
-                type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-          description: OK
-      summary: Get an agent policy summary
       tags:
         - Security Endpoint Management API
   /api/endpoint/protection_updates_note/{package_policy_id}:
@@ -543,106 +428,8 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
-  /api/endpoint/suggestions/{suggestion_type}:
-    post:
-      deprecated: true
-      operationId: GetEndpointSuggestions
-      parameters:
-        - in: path
-          name: suggestion_type
-          required: true
-          schema:
-            enum:
-              - eventFilters
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                field:
-                  type: string
-                fieldMeta: {}
-                filters: {}
-                query:
-                  type: string
-              required:
-                - parameters
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-          description: OK
-      summary: Get suggestions
-      tags:
-        - Security Endpoint Management API
-  /api/endpoint/unisolate:
-    post:
-      deprecated: true
-      description: >
-        Release an isolated endpoint, allowing it to rejoin a network.
-
-        > info
-
-        > This URL will return a 308 permanent redirect to `POST <kibana
-        host>:<port>/api/endpoint/action/unisolate`.
-      operationId: EndpointUnisolateRedirect
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                agent_type:
-                  $ref: '#/components/schemas/AgentTypes'
-                alert_ids:
-                  $ref: '#/components/schemas/AlertIds'
-                case_ids:
-                  $ref: '#/components/schemas/CaseIds'
-                comment:
-                  $ref: '#/components/schemas/Comment'
-                endpoint_ids:
-                  $ref: '#/components/schemas/EndpointIds'
-                parameters:
-                  $ref: '#/components/schemas/Parameters'
-              required:
-                - endpoint_ids
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-          description: OK
-        '308':
-          description: Permanent Redirect
-          headers:
-            Location:
-              description: Permanently redirects to "/api/endpoint/action/unisolate"
-              schema:
-                example: /api/endpoint/action/unisolate
-                type: string
-      summary: Release an isolated endpoint
-      tags:
-        - Security Endpoint Management API
 components:
   schemas:
-    ActionLogRequestQuery:
-      type: object
-      properties:
-        end_date:
-          $ref: '#/components/schemas/EndDate'
-        page:
-          $ref: '#/components/schemas/Page'
-        page_size:
-          $ref: '#/components/schemas/PageSize'
-        start_date:
-          $ref: '#/components/schemas/StartDate'
     ActionStateSuccessResponse:
       type: object
       properties:
@@ -948,12 +735,6 @@ components:
     Page:
       default: 1
       description: Page number
-      minimum: 1
-      type: integer
-    PageSize:
-      default: 10
-      description: Number of items per page
-      maximum: 100
       minimum: 1
       type: integer
     Parameters:

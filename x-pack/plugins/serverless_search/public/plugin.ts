@@ -81,7 +81,7 @@ export class ServerlessSearchPlugin
       }),
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      appRoute: '/app/elasticsearch',
+      appRoute: '/app/elasticsearch/getting_started',
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application/elasticsearch');
         const [coreStart, services] = await core.getStartServices();
@@ -120,6 +120,43 @@ export class ServerlessSearchPlugin
       },
     });
 
+    const webCrawlersTitle = i18n.translate('xpack.serverlessSearch.app.webCrawlers.title', {
+      defaultMessage: 'Web Crawlers',
+    });
+
+    core.application.register({
+      id: 'serverlessWebCrawlers',
+      title: webCrawlersTitle,
+      appRoute: '/app/web_crawlers',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({ element, history }: AppMountParameters) {
+        const { renderApp } = await import('./application/web_crawlers');
+        const [coreStart, services] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(webCrawlersTitle);
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        return await renderApp(element, coreStart, { history, ...services }, queryClient);
+      },
+    });
+
+    const { searchIndices } = setupDeps;
+    core.application.register({
+      id: 'serverlessHomeRedirect',
+      title: homeTitle,
+      appRoute: '/app/elasticsearch',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({}: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(homeTitle);
+        coreStart.application.navigateToApp(searchIndices.startAppId);
+        return () => {};
+      },
+    });
+
     setupDeps.discover.showInlineTopNav();
 
     return {};
@@ -130,11 +167,10 @@ export class ServerlessSearchPlugin
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     const { serverless, management, indexManagement, security } = services;
+    serverless.setProjectHome(services.searchIndices.startRoute);
 
-    serverless.setProjectHome('/app/elasticsearch');
-
-    const navigationTree$ = of(navigationTree());
-    serverless.initNavigation('search', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    const navigationTree$ = of(navigationTree(core.application));
+    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled()

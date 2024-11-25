@@ -12,7 +12,6 @@ import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
 export const GetCategoriesRequestSchema = {
   query: schema.object({
     prerelease: schema.maybe(schema.boolean()),
-    experimental: schema.maybe(schema.boolean()), // deprecated
     include_policy_templates: schema.maybe(schema.boolean()),
   }),
 };
@@ -27,16 +26,12 @@ const CategorySummaryItemSchema = schema.object({
 
 export const GetCategoriesResponseSchema = schema.object({
   items: schema.arrayOf(CategorySummaryItemSchema),
-  response: schema.maybe(
-    schema.arrayOf(CategorySummaryItemSchema.extends({}, { meta: { deprecated: true } }))
-  ),
 });
 
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
     prerelease: schema.maybe(schema.boolean()),
-    experimental: schema.maybe(schema.boolean()), // deprecated
     excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
@@ -142,7 +137,6 @@ const PackageIconSchema = schema.object({
 export const PackageInfoSchema = schema
   .object({
     status: schema.maybe(schema.string()),
-    savedObject: schema.maybe(schema.any({ meta: { deprecated: true } })),
     installationInfo: schema.maybe(InstallationInfoSchema),
     name: schema.string(),
     version: schema.string(),
@@ -163,7 +157,13 @@ export const PackageInfoSchema = schema
     release: schema.maybe(
       schema.oneOf([schema.literal('ga'), schema.literal('beta'), schema.literal('experimental')])
     ),
-    type: schema.maybe(schema.oneOf([schema.literal('integration'), schema.literal('input')])),
+    type: schema.maybe(
+      schema.oneOf([
+        schema.literal('integration'),
+        schema.literal('input'),
+        schema.literal('content'),
+      ])
+    ),
     path: schema.maybe(schema.string()),
     download: schema.maybe(schema.string()),
     internal: schema.maybe(schema.boolean()),
@@ -192,6 +192,11 @@ export const PackageInfoSchema = schema
     format_version: schema.maybe(schema.string()),
     vars: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
     latestVersion: schema.maybe(schema.string()),
+    discovery: schema.maybe(
+      schema.object({
+        fields: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
+      })
+    ),
   })
   // sometimes package list response contains extra properties, e.g. installed_kibana
   .extendsDeep({
@@ -205,9 +210,6 @@ export const PackageListItemSchema = PackageInfoSchema.extends({
 
 export const GetPackagesResponseSchema = schema.object({
   items: schema.arrayOf(PackageListItemSchema),
-  response: schema.maybe(
-    schema.arrayOf(PackageListItemSchema.extends({}, { meta: { deprecated: true } }))
-  ),
 });
 
 export const InstalledPackageSchema = schema.object({
@@ -243,7 +245,6 @@ export const GetInstalledPackagesResponseSchema = schema.object({
 
 export const GetLimitedPackagesResponseSchema = schema.object({
   items: schema.arrayOf(schema.string()),
-  response: schema.maybe(schema.arrayOf(schema.string(), { meta: { deprecated: true } })),
 });
 
 export const GetStatsResponseSchema = schema.object({
@@ -316,12 +317,10 @@ export const GetPackageInfoSchema = PackageInfoSchema.extends({
 export const GetInfoResponseSchema = schema.object({
   item: GetPackageInfoSchema,
   metadata: schema.maybe(PackageMetadataSchema),
-  response: schema.maybe(GetPackageInfoSchema.extends({}, { meta: { deprecated: true } })),
 });
 
 export const UpdatePackageResponseSchema = schema.object({
   item: GetPackageInfoSchema,
-  response: schema.maybe(GetPackageInfoSchema.extends({}, { meta: { deprecated: true } })),
 });
 
 export const AssetReferenceSchema = schema.oneOf([
@@ -334,7 +333,6 @@ export const InstallPackageResponseSchema = schema.object({
   _meta: schema.object({
     install_source: schema.string(),
   }),
-  response: schema.maybe(schema.arrayOf(AssetReferenceSchema, { meta: { deprecated: true } })),
 });
 
 export const InstallKibanaAssetsResponseSchema = schema.object({
@@ -364,14 +362,10 @@ export const BulkInstallPackagesResponseItemSchema = schema.oneOf([
 
 export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
   items: schema.arrayOf(BulkInstallPackagesResponseItemSchema),
-  response: schema.maybe(
-    schema.arrayOf(BulkInstallPackagesResponseItemSchema, { meta: { deprecated: true } })
-  ),
 });
 
 export const DeletePackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),
-  response: schema.maybe(schema.arrayOf(AssetReferenceSchema, { meta: { deprecated: true } })),
 });
 
 export const GetVerificationKeyIdResponseSchema = schema.object({
@@ -483,31 +477,10 @@ export const GetBulkAssetsRequestSchema = {
   }),
 };
 
-export const GetInfoRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
-  }),
-  query: schema.object({
-    ignoreUnverified: schema.maybe(schema.boolean()),
-    prerelease: schema.maybe(schema.boolean()),
-    full: schema.maybe(schema.boolean()),
-    withMetadata: schema.boolean({ defaultValue: false }),
-  }),
-};
-
 export const UpdatePackageRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
     pkgVersion: schema.maybe(schema.string()),
-  }),
-  body: schema.object({
-    keepPoliciesUpToDate: schema.boolean(),
-  }),
-};
-
-export const UpdatePackageRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
   }),
   body: schema.object({
     keepPoliciesUpToDate: schema.boolean(),
@@ -549,22 +522,6 @@ export const ReauthorizeTransformRequestSchema = {
   body: schema.object({
     transforms: schema.arrayOf(schema.object({ transformId: schema.string() })),
   }),
-};
-
-export const InstallPackageFromRegistryRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
-  }),
-  query: schema.object({
-    prerelease: schema.maybe(schema.boolean()),
-    ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
-    skipDataStreamRollover: schema.boolean({ defaultValue: false }),
-  }),
-  body: schema.nullable(
-    schema.object({
-      force: schema.boolean(),
-    })
-  ),
 };
 
 export const BulkInstallPackagesFromRegistryRequestSchema = {
@@ -617,17 +574,11 @@ export const CreateCustomIntegrationRequestSchema = {
 export const DeletePackageRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
-    pkgVersion: schema.string(),
+    pkgVersion: schema.maybe(schema.string()),
   }),
   query: schema.object({
     force: schema.maybe(schema.boolean()),
   }),
-  // body is deprecated on delete request
-  body: schema.nullable(
-    schema.object({
-      force: schema.boolean(),
-    })
-  ),
 };
 
 export const InstallKibanaAssetsRequestSchema = {
@@ -648,17 +599,6 @@ export const DeleteKibanaAssetsRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
-};
-
-export const DeletePackageRequestSchemaDeprecated = {
-  params: schema.object({
-    pkgkey: schema.string(),
-  }),
-  body: schema.nullable(
-    schema.object({
-      force: schema.boolean(),
-    })
-  ),
 };
 
 export const GetInputsRequestSchema = {

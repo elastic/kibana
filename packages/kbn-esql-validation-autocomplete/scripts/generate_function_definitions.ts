@@ -13,7 +13,7 @@ import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
 import { FunctionDefinition } from '../src/definitions/types';
-
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
   to_unsigned_long: ['to_ul', 'to_ulong'],
@@ -52,7 +52,7 @@ const extraFunctions: FunctionDefinition[] = [
           { name: 'value', type: 'any' },
         ],
         minParams: 2,
-        returnType: 'any',
+        returnType: 'unknown',
       },
     ],
     examples: [
@@ -218,7 +218,7 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     ],
   },
   mv_sort: {
-    signatures: new Array(9).fill({
+    signatures: new Array(10).fill({
       params: [{}, { acceptedValues: ['asc', 'desc'] }],
     }),
   },
@@ -246,21 +246,40 @@ const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
  * @returns
  */
 function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
+  let supportedCommandsAndOptions: Pick<
+    FunctionDefinition,
+    'supportedCommands' | 'supportedOptions'
+  > =
+    ESFunctionDefinition.type === 'eval'
+      ? scalarSupportedCommandsAndOptions
+      : aggregationSupportedCommandsAndOptions;
+
+  // MATCH and QSRT has limited supported for where commands only
+  if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
+    supportedCommandsAndOptions = {
+      supportedCommands: ['where'],
+      supportedOptions: [],
+    };
+  }
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
-    ...(ESFunctionDefinition.type === 'eval'
-      ? scalarSupportedCommandsAndOptions
-      : aggregationSupportedCommandsAndOptions),
+    ...supportedCommandsAndOptions,
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
+    ignoreAsSuggestion: ESFunctionDefinition.snapshot_only,
+    preview: ESFunctionDefinition.preview,
     signatures: _.uniqBy(
       ESFunctionDefinition.signatures.map((signature: any) => ({
         ...signature,
-        params: signature.params.map((param: any) => ({
+        params: signature.params.map((param: any, idx: number) => ({
           ...param,
           type: convertDateTime(param.type),
           description: undefined,
+          ...(idx === 0 && FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
+            ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+              { fieldsOnly: true }
+            : {}),
         })),
         returnType: convertDateTime(signature.returnType),
         variadic: undefined, // we don't support variadic property
@@ -332,7 +351,8 @@ function printGeneratedFunctionsFile(
     name: '${name}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-    )} }),
+    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
+    preview: ${functionDefinition.preview || 'false'},
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
     supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
@@ -392,6 +412,9 @@ import { isLiteralItem } from '../../shared/helpers';`
 
 (async function main() {
   const pathToElasticsearch = process.argv[2];
+  if (!pathToElasticsearch) {
+    throw new Error('Path to Elasticsearch is required');
+  }
 
   const ESFunctionDefinitionsDirectory = join(
     pathToElasticsearch,

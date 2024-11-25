@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { TestProviders } from '../../../../common/mock';
 import { DocumentDetailsContext } from '../../shared/context';
@@ -24,8 +25,10 @@ import {
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
+  USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
@@ -35,8 +38,10 @@ import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -75,7 +80,9 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 
 jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
+  useSourcererDataView: jest
+    .fn()
+    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -100,6 +107,19 @@ const mockUseUsersRelatedHosts = useUserRelatedHosts as jest.Mock;
 
 jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
+
+jest.mock(
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
+);
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
 
 const timestamp = '2022-07-25T08:20:18.966Z';
 
@@ -155,6 +175,8 @@ describe('<UserDetails />', () => {
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   it('should render user details correctly', () => {
@@ -276,6 +298,33 @@ describe('<UserDetails />', () => {
           banner: NETWORK_PREVIEW_BANNER,
         },
       });
+    });
+  });
+
+  describe('distribution bar insights', () => {
+    it('should not render if no data is available', () => {
+      const { queryByTestId } = renderUserDetails(mockContextValue);
+      expect(queryByTestId(USER_DETAILS_MISCONFIGURATIONS_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(USER_DETAILS_ALERT_COUNT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render alert count when data is available', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+
+      const { getByTestId } = renderUserDetails(mockContextValue);
+      expect(getByTestId(USER_DETAILS_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render misconfiguration when data is available', () => {
+      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+        data: { count: { passed: 1, failed: 2 } },
+      });
+
+      const { getByTestId } = renderUserDetails(mockContextValue);
+      expect(getByTestId(USER_DETAILS_MISCONFIGURATIONS_TEST_ID)).toBeInTheDocument();
     });
   });
 });

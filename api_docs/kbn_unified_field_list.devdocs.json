@@ -277,7 +277,7 @@
         "label": "FieldPopover",
         "description": [],
         "signature": [
-          "({ isOpen, closePopover, renderHeader, renderContent, ...otherPopoverProps }: ",
+          "({ isOpen, closePopover, renderHeader, renderContent, renderFooter, ...otherPopoverProps }: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -296,7 +296,7 @@
             "id": "def-public.FieldPopover.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isOpen,\n  closePopover,\n  renderHeader,\n  renderContent,\n  ...otherPopoverProps\n}",
+            "label": "{\n  isOpen,\n  closePopover,\n  renderHeader,\n  renderContent,\n  renderFooter,\n  ...otherPopoverProps\n}",
             "description": [],
             "signature": [
               {
@@ -371,7 +371,7 @@
         "label": "FieldPopoverHeader",
         "description": [],
         "signature": [
-          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, services, }: ",
+          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddBreakdownField, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, services, }: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -390,7 +390,7 @@
             "id": "def-public.FieldPopoverHeader.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n  services,\n}",
+            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddBreakdownField,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n  services,\n}",
             "description": [],
             "signature": [
               {
@@ -3693,6 +3693,53 @@
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldPopoverHeaderProps.onAddBreakdownField",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddBreakdownField",
+            "description": [],
+            "signature": [
+              "((field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined) => void) | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-field-list",
+                "id": "def-public.FieldPopoverHeaderProps.onAddBreakdownField.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
             "id": "def-public.FieldPopoverHeaderProps.onAddFieldToWorkspace",
             "type": "Function",
             "tags": [],
@@ -3891,6 +3938,22 @@
             "type": "Function",
             "tags": [],
             "label": "renderContent",
+            "description": [],
+            "signature": [
+              "(() => React.ReactNode) | undefined"
+            ],
+            "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.FieldPopoverProps.renderFooter",
+            "type": "Function",
+            "tags": [],
+            "label": "renderFooter",
             "description": [],
             "signature": [
               "(() => React.ReactNode) | undefined"

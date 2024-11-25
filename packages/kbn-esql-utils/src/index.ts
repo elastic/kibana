@@ -22,6 +22,7 @@ export {
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
 } from './utils/query_parsing_helpers';
+export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
 export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
 export {
   getESQLQueryColumns,
@@ -31,3 +32,8 @@ export {
   getStartEndParams,
   hasStartEndParams,
 } from './utils/run_query';
+export {
+  isESQLColumnSortable,
+  isESQLColumnGroupable,
+  isESQLFieldGroupable,
+} from './utils/esql_fields_utils';

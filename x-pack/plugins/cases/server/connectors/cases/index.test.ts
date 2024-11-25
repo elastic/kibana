@@ -36,6 +36,7 @@ describe('getCasesConnectorType', () => {
         'cases:my-owner/updateComment',
         'cases:my-owner/deleteComment',
         'cases:my-owner/findConfigurations',
+        'cases:my-owner/reopenCase',
       ]);
     });
 
@@ -80,26 +81,26 @@ describe('getCasesConnectorType', () => {
     });
 
     it('sets the correct connectorTypeId', () => {
-      const adapter = getCasesConnectorAdapter();
+      const adapter = getCasesConnectorAdapter({});
 
       expect(adapter.connectorTypeId).toEqual('.cases');
     });
 
     describe('ruleActionParamsSchema', () => {
       it('validates getParams() correctly', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(adapter.ruleActionParamsSchema.validate(getParams())).toEqual(getParams());
       });
 
       it('throws if missing getParams()', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(() => adapter.ruleActionParamsSchema.validate({})).toThrow();
       });
 
       it('does not accept more than one groupingBy key', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(() =>
           adapter.ruleActionParamsSchema.validate(
@@ -109,7 +110,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('should fail with not valid time window', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(() =>
           adapter.ruleActionParamsSchema.validate(getParams({ timeWindow: '10d+3d' }))
@@ -119,7 +120,7 @@ describe('getCasesConnectorType', () => {
 
     describe('buildActionParams', () => {
       it('builds the action getParams() correctly', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(
           adapter.buildActionParams({
@@ -164,7 +165,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('builds the action getParams() and templateId correctly', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(
           adapter.buildActionParams({
@@ -209,7 +210,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('builds the action getParams() correctly without ruleUrl', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
         expect(
           adapter.buildActionParams({
             // @ts-expect-error: not all fields are needed
@@ -252,7 +253,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('maps observability consumers to the correct owner', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         for (const consumer of [
           AlertConsumers.OBSERVABILITY,
@@ -276,7 +277,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('maps security solution consumers to the correct owner', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         for (const consumer of [AlertConsumers.SIEM]) {
           const connectorParams = adapter.buildActionParams({
@@ -292,7 +293,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('maps stack consumers to the correct owner', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         for (const consumer of [AlertConsumers.ML, AlertConsumers.STACK_ALERTS]) {
           const connectorParams = adapter.buildActionParams({
@@ -308,7 +309,7 @@ describe('getCasesConnectorType', () => {
       });
 
       it('fallback to the cases owner if the consumer is not in the mapping', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         const connectorParams = adapter.buildActionParams({
           // @ts-expect-error: not all fields are needed
@@ -320,11 +321,27 @@ describe('getCasesConnectorType', () => {
 
         expect(connectorParams.subActionParams.owner).toBe('cases');
       });
+
+      it('correctly fallsback to security owner if the project is serverless security', () => {
+        const adapter = getCasesConnectorAdapter({ isServerlessSecurity: true });
+
+        for (const consumer of [AlertConsumers.ML, AlertConsumers.STACK_ALERTS]) {
+          const connectorParams = adapter.buildActionParams({
+            // @ts-expect-error: not all fields are needed
+            alerts,
+            rule: { ...rule, consumer },
+            params: getParams(),
+            spaceId: 'default',
+          });
+
+          expect(connectorParams.subActionParams.owner).toBe('securitySolution');
+        }
+      });
     });
 
     describe('getKibanaPrivileges', () => {
       it('constructs the correct privileges from the consumer', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(
           adapter.getKibanaPrivileges?.({
@@ -340,11 +357,12 @@ describe('getCasesConnectorType', () => {
           'cases:securitySolution/updateComment',
           'cases:securitySolution/deleteComment',
           'cases:securitySolution/findConfigurations',
+          'cases:securitySolution/reopenCase',
         ]);
       });
 
       it('constructs the correct privileges from the producer if the consumer is not found', () => {
-        const adapter = getCasesConnectorAdapter();
+        const adapter = getCasesConnectorAdapter({});
 
         expect(
           adapter.getKibanaPrivileges?.({
@@ -360,6 +378,28 @@ describe('getCasesConnectorType', () => {
           'cases:observability/updateComment',
           'cases:observability/deleteComment',
           'cases:observability/findConfigurations',
+          'cases:observability/reopenCase',
+        ]);
+      });
+
+      it('correctly overrides the consumer and producer if the project is serverless security', () => {
+        const adapter = getCasesConnectorAdapter({ isServerlessSecurity: true });
+
+        expect(
+          adapter.getKibanaPrivileges?.({
+            consumer: 'alerting',
+            producer: AlertConsumers.LOGS,
+          })
+        ).toEqual([
+          'cases:securitySolution/createCase',
+          'cases:securitySolution/updateCase',
+          'cases:securitySolution/deleteCase',
+          'cases:securitySolution/pushCase',
+          'cases:securitySolution/createComment',
+          'cases:securitySolution/updateComment',
+          'cases:securitySolution/deleteComment',
+          'cases:securitySolution/findConfigurations',
+          'cases:securitySolution/reopenCase',
         ]);
       });
     });

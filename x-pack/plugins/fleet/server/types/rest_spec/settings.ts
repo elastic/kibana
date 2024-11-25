@@ -17,15 +17,6 @@ export const GetSettingsRequestSchema = {};
 
 export const PutSettingsRequestSchema = {
   body: schema.object({
-    fleet_server_hosts: schema.maybe(
-      schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
-        validate: (value) => {
-          if (value.length && isDiffPathProtocol(value)) {
-            return 'Protocol and path must be the same for each URL';
-          }
-        },
-      })
-    ),
     has_seen_add_data_notice: schema.maybe(schema.boolean()),
     additional_yaml_config: schema.maybe(schema.string()),
     // Deprecated not used
@@ -40,6 +31,12 @@ export const PutSettingsRequestSchema = {
     ),
     kibana_ca_sha256: schema.maybe(schema.string()),
     prerelease_integrations_enabled: schema.maybe(schema.boolean()),
+    delete_unenrolled_agents: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        is_preconfigured: schema.boolean(),
+      })
+    ),
   }),
 };
 
@@ -55,8 +52,7 @@ export const SpaceSettingsResponseSchema = schema.object({
 export const SettingsResponseSchema = schema.object({
   item: schema.object({
     has_seen_add_data_notice: schema.maybe(schema.boolean()),
-    fleet_server_hosts: schema.maybe(schema.arrayOf(schema.string())),
-    prerelease_integrations_enabled: schema.boolean(),
+    prerelease_integrations_enabled: schema.maybe(schema.boolean()),
     id: schema.string(),
     version: schema.maybe(schema.string()),
     preconfigured_fields: schema.maybe(schema.arrayOf(schema.literal('fleet_server_hosts'))),
@@ -65,7 +61,15 @@ export const SettingsResponseSchema = schema.object({
     use_space_awareness_migration_status: schema.maybe(
       schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
     ),
-    use_space_awareness_migration_started_at: schema.maybe(schema.string()),
+    use_space_awareness_migration_started_at: schema.maybe(
+      schema.oneOf([schema.literal(null), schema.string()])
+    ),
+    delete_unenrolled_agents: schema.maybe(
+      schema.object({
+        enabled: schema.boolean(),
+        is_preconfigured: schema.boolean(),
+      })
+    ),
   }),
 });
 

@@ -10,9 +10,40 @@ xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
 enterpriseSearch.enabled: false
-xpack.fleet.enabled: false
-xpack.observabilityAIAssistant.enabled: false
 xpack.osquery.enabled: false
+
+# Enable fleet on search projects for agentless features
+xpack.fleet.enabled: true
+xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.3'
+xpack.fleet.packages:
+  # fleet_server package installed to publish agent metrics
+  - name: fleet_server
+    version: latest
+# Filter out some observability and security integrations
+xpack.fleet.internal.registry.excludePackages: [
+  # Security integrations
+  'endpoint',
+  'beaconing',
+  'cloud_security_posture',
+  'cloud_defend',
+  'security_detection_engine',
+
+  # Oblt integrations
+  'apm',
+  'synthetics',
+  'synthetics_dashboards',
+
+  # Removed in 8.11 integrations
+  'cisco',
+  'microsoft',
+  'symantec',
+  'cyberark',
+
+  # Profiling integrations
+  'profiler_agent',
+]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -34,6 +65,7 @@ xpack.cloud.serverless.project_type: search
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
+xpack.searchIndices.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
@@ -56,7 +88,23 @@ xpack.painless_lab.enabled: false
 
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp.enabled: true
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    allowStaticAllocations: true
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+        static: 2
+      medium:
+        min: 1
+        max: 32
+        static: 32
+      high:
+        min: 1
+        max: 512
+        static: 512
 xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
@@ -65,10 +113,22 @@ data_visualizer.resultLinks.fileBeat.enabled: false
 xpack.searchPlayground.ui.enabled: true
 
 # Search InferenceEndpoints
-xpack.searchInferenceEndpoints.ui.enabled: false
+xpack.searchInferenceEndpoints.ui.enabled: true
 
 # Search Notebooks
 xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
 # Semantic text UI
-xpack.index_management.dev.enableSemanticText: false
+
+xpack.index_management.dev.enableSemanticText: true
+
+# AI Assistant config
+xpack.observabilityAIAssistant.enabled: true
+xpack.searchAssistant.enabled: true
+xpack.searchAssistant.ui.enabled: true
+xpack.observabilityAIAssistant.scope: "search"
+xpack.observabilityAIAssistant.enableKnowledgeBase: false
+aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
+xpack.observabilityAiAssistantManagement.spacesEnabled: false
+xpack.observabilityAiAssistantManagement.visibilityEnabled: false

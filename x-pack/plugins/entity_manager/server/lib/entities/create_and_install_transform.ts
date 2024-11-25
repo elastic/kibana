@@ -9,57 +9,20 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateLatestTransform } from './transform/generate_latest_transform';
-import {
-  generateBackfillHistoryTransform,
-  generateHistoryTransform,
-} from './transform/generate_history_transform';
 
-export async function createAndInstallHistoryTransform(
+export async function createAndInstallTransforms(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
-) {
-  try {
-    const historyTransform = generateHistoryTransform(definition);
-    await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
-      logger,
-    });
-  } catch (e) {
-    logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
-    throw e;
-  }
-}
-
-export async function createAndInstallHistoryBackfillTransform(
-  esClient: ElasticsearchClient,
-  definition: EntityDefinition,
-  logger: Logger
-) {
-  try {
-    const historyTransform = generateBackfillHistoryTransform(definition);
-    await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
-      logger,
-    });
-  } catch (e) {
-    logger.error(
-      `Cannot create entity history backfill transform for [${definition.id}] entity definition`
-    );
-    throw e;
-  }
-}
-
-export async function createAndInstallLatestTransform(
-  esClient: ElasticsearchClient,
-  definition: EntityDefinition,
-  logger: Logger
-) {
+): Promise<Array<{ type: 'transform'; id: string }>> {
   try {
     const latestTransform = generateLatestTransform(definition);
     await retryTransientEsErrors(() => esClient.transform.putTransform(latestTransform), {
       logger,
     });
+    return [{ type: 'transform', id: latestTransform.transform_id }];
   } catch (e) {
-    logger.error(`Cannot create entity latest transform for [${definition.id}] entity definition`);
+    logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
     throw e;
   }
 }

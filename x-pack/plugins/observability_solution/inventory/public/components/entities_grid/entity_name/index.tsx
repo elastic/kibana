@@ -5,65 +5,52 @@
  * 2.0.
  */
 
-import { EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import {
-  AssetDetailsLocatorParams,
-  ASSET_DETAILS_LOCATOR_ID,
-  ServiceOverviewParams,
-  ENTITY_TYPE,
-  ENTITY_DISPLAY_NAME,
-} from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { InventoryEntity } from '../../../../common/entities';
 import { EntityIcon } from '../../entity_icon';
-import { Entity } from '../../../../common/entities';
-import { parseServiceParams } from '../../../utils/parse_service_params';
+import { useDetailViewRedirect } from '../../../hooks/use_detail_view_redirect';
 
 interface EntityNameProps {
-  entity: Entity;
+  entity: InventoryEntity;
 }
 
 export function EntityName({ entity }: EntityNameProps) {
-  const { services } = useKibana();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
-  const assetDetailsLocator =
-    services.share?.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
+  const { getEntityRedirectUrl } = useDetailViewRedirect();
 
-  const serviceOverviewLocator =
-    services.share?.url.locators.get<ServiceOverviewParams>('serviceOverviewLocator');
+  const href = getEntityRedirectUrl(entity);
 
-  const getEntityRedirectUrl = useCallback(() => {
-    const type = entity[ENTITY_TYPE];
+  const handleLinkClick = useCallback(() => {
+    telemetry.reportEntityViewClicked({
+      view_type: 'detail',
+      entity_type: entity.entityType,
+    });
+  }, [entity, telemetry]);
 
-    // Any unrecognised types will always return undefined
-    switch (type) {
-      case 'host':
-      case 'container':
-        return assetDetailsLocator?.getRedirectUrl({
-          assetId: entity[ENTITY_DISPLAY_NAME],
-          assetType: type,
-        });
+  const entityName = (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={0}>
+        <EntityIcon entity={entity} />
+      </EuiFlexItem>
+      <EuiFlexItem className="eui-textTruncate">
+        <span className="eui-textTruncate" data-test-subj="entityNameDisplayName">
+          {entity.entityDisplayName}
+        </span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
-      case 'service':
-        // For services, the format of the display name is `service.name:service.environment`.
-        // We just want the first part of the name for the locator.
-        // TODO: Replace this with a better approach for handling service names. See https://github.com/elastic/kibana/issues/194131
-        return serviceOverviewLocator?.getRedirectUrl(
-          parseServiceParams(entity[ENTITY_DISPLAY_NAME])
-        );
-    }
-  }, [entity, assetDetailsLocator, serviceOverviewLocator]);
-
-  return (
-    <EuiLink data-test-subj="inventoryCellValueLink" href={getEntityRedirectUrl()}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={0}>
-          <EntityIcon entity={entity} />
-        </EuiFlexItem>
-        <EuiFlexItem className="eui-textTruncate">
-          <span className="eui-textTruncate">{entity[ENTITY_DISPLAY_NAME]}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  return href ? (
+    // eslint-disable-next-line @elastic/eui/href-or-on-click
+    <EuiLink data-test-subj="entityNameLink" href={href} onClick={handleLinkClick}>
+      {entityName}
     </EuiLink>
+  ) : (
+    entityName
   );
 }

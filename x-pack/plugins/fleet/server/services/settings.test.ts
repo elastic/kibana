@@ -14,6 +14,8 @@ import { GLOBAL_SETTINGS_ID, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../com
 
 import type { Settings } from '../types';
 
+import { DeleteUnenrolledAgentsPreconfiguredError } from '../errors';
+
 import { appContextService } from './app_context';
 import { getSettings, saveSettings, settingsSetup } from './settings';
 import { auditLoggingService } from './audit_logging';
@@ -141,6 +143,42 @@ describe('getSettings', () => {
 
     await getSettings(soClient);
   });
+
+  it('should handle null values for space awareness migration fields', async () => {
+    const soClient = savedObjectsClientMock.create();
+
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {
+            use_space_awareness_migration_status: null,
+            use_space_awareness_migration_started_at: null,
+          },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+      page: 1,
+      per_page: 10,
+      total: 1,
+    });
+
+    const settings = await getSettings(soClient);
+    expect(settings).toEqual({
+      delete_unenrolled_agents: undefined,
+      has_seen_add_data_notice: undefined,
+      id: 'fleet-default-settings',
+      output_secret_storage_requirements_met: undefined,
+      preconfigured_fields: [],
+      prerelease_integrations_enabled: undefined,
+      secret_storage_requirements_met: undefined,
+      use_space_awareness_migration_started_at: undefined,
+      use_space_awareness_migration_status: undefined,
+      version: undefined,
+    });
+  });
 });
 
 describe('saveSettings', () => {
@@ -149,7 +187,7 @@ describe('saveSettings', () => {
       const soClient = savedObjectsClientMock.create();
 
       const newData: Partial<Omit<Settings, 'id'>> = {
-        fleet_server_hosts: ['http://localhost:8220'],
+        output_secret_storage_requirements_met: true,
       };
 
       soClient.find.mockResolvedValueOnce({
@@ -203,7 +241,7 @@ describe('saveSettings', () => {
         const soClient = savedObjectsClientMock.create();
 
         const newData: Partial<Omit<Settings, 'id'>> = {
-          fleet_server_hosts: ['http://localhost:8220'],
+          output_secret_storage_requirements_met: true,
         };
 
         soClient.find.mockRejectedValueOnce(Boom.notFound('not found'));
@@ -224,5 +262,120 @@ describe('saveSettings', () => {
         });
       });
     });
+  });
+
+  it('should allow updating preconfigured setting if called from setup', async () => {
+    const soClient = savedObjectsClientMock.create();
+
+    const newData: Partial<Omit<Settings, 'id'>> = {
+      delete_unenrolled_agents: {
+        enabled: true,
+        is_preconfigured: true,
+      },
+    };
+
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {
+            delete_unenrolled_agents: {
+              enabled: false,
+              is_preconfigured: true,
+            },
+          },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+      page: 1,
+      per_page: 10,
+      total: 1,
+    });
+    mockListFleetServerHosts.mockResolvedValueOnce({
+      items: [
+        {
+          id: 'fleet-server-host',
+          name: 'Fleet Server Host',
+          is_default: true,
+          is_preconfigured: false,
+          host_urls: ['http://localhost:8220'],
+        },
+      ],
+      page: 1,
+      perPage: 10,
+      total: 1,
+    });
+
+    soClient.update.mockResolvedValueOnce({
+      id: GLOBAL_SETTINGS_ID,
+      attributes: {},
+      references: [],
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    });
+
+    await saveSettings(soClient, newData, { fromSetup: true });
+
+    expect(soClient.update).toHaveBeenCalled();
+  });
+
+  it('should not allow updating preconfigured setting if not called from setup', async () => {
+    const soClient = savedObjectsClientMock.create();
+
+    const newData: Partial<Omit<Settings, 'id'>> = {
+      delete_unenrolled_agents: {
+        enabled: true,
+        is_preconfigured: true,
+      },
+    };
+
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: {
+            delete_unenrolled_agents: {
+              enabled: false,
+              is_preconfigured: true,
+            },
+          },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+      page: 1,
+      per_page: 10,
+      total: 1,
+    });
+    mockListFleetServerHosts.mockResolvedValueOnce({
+      items: [
+        {
+          id: 'fleet-server-host',
+          name: 'Fleet Server Host',
+          is_default: true,
+          is_preconfigured: false,
+          host_urls: ['http://localhost:8220'],
+        },
+      ],
+      page: 1,
+      perPage: 10,
+      total: 1,
+    });
+
+    soClient.update.mockResolvedValueOnce({
+      id: GLOBAL_SETTINGS_ID,
+      attributes: {},
+      references: [],
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    });
+
+    try {
+      await saveSettings(soClient, newData);
+      fail('Expected to throw');
+    } catch (e) {
+      expect(e).toBeInstanceOf(DeleteUnenrolledAgentsPreconfiguredError);
+    }
   });
 });

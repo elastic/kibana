@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
-import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { ExpandablePanel } from '@kbn/security-solution-common';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { UserDetailsPanelKey } from '../../../flyout/entity_details/user_details_left';
-import { HostDetailsPanelKey } from '../../../flyout/entity_details/host_details_left';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../common/search_strategy';
+import { statusColors } from '@kbn/cloud-security-posture';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
 
-const FIRST_RECORD_PAGINATION = {
-  cursorStart: 0,
-  querySize: 1,
-};
-
-const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+export const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
     {
@@ -40,7 +34,7 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
         }
       ),
       count: passedFindingsStats,
-      color: euiThemeVars.euiColorSuccess,
+      color: statusColors.passed,
     },
     {
       key: i18n.translate(
@@ -50,63 +44,31 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
         }
       ),
       count: failedFindingsStats,
-      color: euiThemeVars.euiColorVis9,
+      color: statusColors.failed,
     },
   ];
-};
-
-const MisconfigurationEmptyState = ({ euiTheme }: { euiTheme: EuiThemeComputed<{}> }) => {
-  return (
-    <EuiFlexItem>
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem>
-          <EuiTitle size="m">
-            <h1>{'-'}</h1>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText
-            size="m"
-            css={css`
-              font-weight: ${euiTheme.font.weight.semiBold};
-            `}
-            data-test-subj="noFindingsDataTestSubj"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.insights.misconfigurations.noFindingsDescription"
-              defaultMessage="No Findings"
-            />
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  );
 };
 
 const MisconfigurationPreviewScore = ({
   passedFindings,
   failedFindings,
   euiTheme,
-  numberOfPassedFindings,
-  numberOfFailedFindings,
 }: {
   passedFindings: number;
   failedFindings: number;
   euiTheme: EuiThemeComputed<{}>;
-  numberOfPassedFindings?: number;
-  numberOfFailedFindings?: number;
 }) => {
   return (
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h1>{`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}</h1>
+            <h3>{`${Math.round((passedFindings / (passedFindings + failedFindings)) * 100)}%`}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText
-            size="m"
+            size="xs"
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
@@ -123,62 +85,30 @@ const MisconfigurationPreviewScore = ({
 };
 
 export const MisconfigurationsPreview = ({
-  name,
-  fieldName,
+  value,
+  field,
   isPreviewMode,
 }: {
-  name: string;
-  fieldName: 'host.name' | 'user.name';
+  value: string;
+  field: 'host.name' | 'user.name';
   isPreviewMode?: boolean;
 }) => {
-  const { data } = useMisconfigurationPreview({
-    query: buildEntityFlyoutPreviewQuery(fieldName, name),
-    sort: [],
-    enabled: true,
-    pageSize: 1,
-  });
-  const isUsingHostName = fieldName === 'host.name';
-  const passedFindings = data?.count.passed || 0;
-  const failedFindings = data?.count.failed || 0;
-
-  const { euiTheme } = useEuiTheme();
-  const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
-
-  const buildFilterQuery = useMemo(
-    () => (isUsingHostName ? buildHostNamesFilter([name]) : buildUserNamesFilter([name])),
-    [isUsingHostName, name]
+  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
+    field,
+    value
   );
 
-  const riskScoreState = useRiskScore({
-    riskEntity: isUsingHostName ? RiskScoreEntity.host : RiskScoreEntity.user,
-    filterQuery: buildFilterQuery,
-    onlyLatest: false,
-    pagination: FIRST_RECORD_PAGINATION,
+  useEffect(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT);
+  }, []);
+  const { euiTheme } = useEuiTheme();
+
+  const { goToEntityInsightTab } = useNavigateEntityInsight({
+    field,
+    value,
+    queryIdExtension: 'MISCONFIGURATION_PREVIEW',
+    subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
   });
-  const { data: hostRisk } = riskScoreState;
-  const riskData = hostRisk?.[0];
-  const isRiskScoreExist = isUsingHostName
-    ? !!(riskData as HostRiskScore)?.host.risk
-    : !!(riskData as UserRiskScore)?.user.risk;
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const goToEntityInsightTab = useCallback(() => {
-    openLeftPanel({
-      id: isUsingHostName ? HostDetailsPanelKey : UserDetailsPanelKey,
-      params: isUsingHostName
-        ? {
-            name,
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            path: { tab: 'csp_insights' },
-          }
-        : {
-            user: { name },
-            isRiskScoreExist,
-            hasMisconfigurationFindings,
-            path: { tab: 'csp_insights' },
-          },
-    });
-  }, [hasMisconfigurationFindings, isRiskScoreExist, isUsingHostName, name, openLeftPanel]);
   const link = useMemo(
     () =>
       !isPreviewMode
@@ -199,32 +129,29 @@ export const MisconfigurationsPreview = ({
       header={{
         iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
-          <EuiText
-            size="xs"
+          <EuiTitle
             css={css`
               font-weight: ${euiTheme.font.weight.semiBold};
             `}
+            data-test-subj={'securitySolutionFlyoutInsightsMisconfigurationsTitleText'}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.right.insights.misconfigurations.misconfigurationsTitle"
               defaultMessage="Misconfigurations"
             />
-          </EuiText>
+          </EuiTitle>
         ),
         link: hasMisconfigurationFindings ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsMisconfigurations'}
     >
       <EuiFlexGroup gutterSize="none">
-        {hasMisconfigurationFindings ? (
-          <MisconfigurationPreviewScore
-            passedFindings={passedFindings}
-            failedFindings={failedFindings}
-            euiTheme={euiTheme}
-          />
-        ) : (
-          <MisconfigurationEmptyState euiTheme={euiTheme} />
-        )}
+        <MisconfigurationPreviewScore
+          passedFindings={passedFindings}
+          failedFindings={failedFindings}
+          euiTheme={euiTheme}
+        />
+
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />

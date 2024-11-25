@@ -1,0 +1,30 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/es-types",
+    "@kbn/apm-utils",
+    "@kbn/es-query",
+    "@kbn/observability-utils-common",
+    "@kbn/alerting-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/utility-types",
+    "@kbn/task-manager-plugin",
+  ]
+}

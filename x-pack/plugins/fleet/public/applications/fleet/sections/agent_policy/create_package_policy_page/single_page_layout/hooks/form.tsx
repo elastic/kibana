@@ -280,7 +280,7 @@ export function useOnSubmit({
 
   useEffect(() => {
     if (
-      agentPolicies.length > 0 &&
+      (canUseMultipleAgentPolicies || agentPolicies.length > 0) &&
       !isEqual(
         agentPolicies.map((policy) => policy.id),
         packagePolicy.policy_ids
@@ -290,7 +290,7 @@ export function useOnSubmit({
         policy_ids: agentPolicies.map((policy) => policy.id),
       });
     }
-  }, [packagePolicy, agentPolicies, updatePackagePolicy]);
+  }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -391,7 +391,7 @@ export function useOnSubmit({
 
       // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
       const isAgentlessConfigured =
-        isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
+        isAgentlessAgentPolicy(createdPolicy) || (data && isAgentlessPackagePolicy(data.item));
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
       if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {

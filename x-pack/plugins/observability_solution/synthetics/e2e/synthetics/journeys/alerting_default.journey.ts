@@ -43,13 +43,13 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.press('input[type="text"]', 'Tab');
   });
   step(
-    'Fill text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
+    'Fill text=Webhook URLCreate a Slack Webhook URL(external, opens in a new tab or window) >> input[type="text"]',
     async () => {
       if (await page.isVisible(byTestId('webhookButton'))) {
         await page.click(byTestId('webhookButton'));
       }
       await page.fill(
-        'text=Webhook URLCreate a Slack Webhook URL(opens in a new tab or window) >> input[type="text"]',
+        'text=Webhook URLCreate a Slack Webhook URL(external, opens in a new tab or window) >> input[type="text"]',
         'https://www.slack.com'
       );
       await page.click('button:has-text("Save")');
@@ -74,10 +74,10 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.fill('input[type="password"]', 'changeme');
     await page.click('button:has-text("Save")');
     await page.click(
-      'text=Sender is required.Configure email accounts(opens in a new tab or window) >> input[type="text"]'
+      'text=Sender is required.Configure email accounts(external, opens in a new tab or window) >> input[type="text"]'
     );
     await page.fill(
-      'text=Sender is required.Configure email accounts(opens in a new tab or window) >> input[type="text"]',
+      'text=Sender is required.Configure email accounts(external, opens in a new tab or window) >> input[type="text"]',
       'test@gmail.com'
     );
     await page.click('button:has-text("Save")');

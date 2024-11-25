@@ -11,39 +11,44 @@ import { arrayOfStringsSchema } from './common';
 export const entityBaseSchema = z.object({
   id: z.string(),
   type: z.string(),
-  identityFields: arrayOfStringsSchema,
-  displayName: z.string(),
-  metrics: z.record(z.string(), z.number()),
-  definitionVersion: z.string(),
-  schemaVersion: z.string(),
-  definitionId: z.string(),
+  identity_fields: z.union([arrayOfStringsSchema, z.string()]),
+  display_name: z.string(),
+  metrics: z.optional(z.record(z.string(), z.number())),
+  definition_version: z.string(),
+  schema_version: z.string(),
+  definition_id: z.string(),
 });
 
 export interface MetadataRecord {
   [key: string]: string[] | MetadataRecord | string;
 }
 
+export interface EntityV2 {
+  'entity.id': string;
+  'entity.last_seen_timestamp': string;
+  'entity.type': string;
+  [metadata: string]: any;
+}
+
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+
 type Literal = z.infer<typeof literalSchema>;
-type Metadata = Literal | { [key: string]: Metadata } | Metadata[];
+interface Metadata {
+  [key: string]: Metadata | Literal | Literal[];
+}
 export const entityMetadataSchema: z.ZodType<Metadata> = z.lazy(() =>
-  z.union([literalSchema, z.array(entityMetadataSchema), z.record(entityMetadataSchema)])
+  z.record(z.string(), z.union([literalSchema, z.array(literalSchema), entityMetadataSchema]))
 );
 
 export const entityLatestSchema = z
   .object({
     entity: entityBaseSchema.merge(
       z.object({
-        lastSeenTimestamp: z.string(),
-        firstSeenTimestamp: z.string(),
+        last_seen_timestamp: z.string(),
       })
     ),
   })
   .and(entityMetadataSchema);
 
-export const entityHistorySchema = z
-  .object({
-    '@timestamp': z.string(),
-    entity: entityBaseSchema,
-  })
-  .and(entityMetadataSchema);
+export type EntityInstance = z.infer<typeof entityLatestSchema>;
+export type EntityMetadata = z.infer<typeof entityMetadataSchema>;

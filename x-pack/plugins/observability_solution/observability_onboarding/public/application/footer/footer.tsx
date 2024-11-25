@@ -43,6 +43,7 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Explore demo' }
       ),
       link: URL_DEMO_ENV,
+      testSubject: 'observabilityOnboardingFooterExploreDemoLink',
     },
     {
       iconUrl: forumIconUrl,
@@ -65,6 +66,7 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Open Elastic Discuss forum' }
       ),
       link: URL_FORUM,
+      testSubject: 'observabilityOnboardingFooterDiscussForumLink',
     },
     {
       iconUrl: docsIconUrl,
@@ -87,6 +89,7 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Learn more about all Elastic features' }
       ),
       link: docLinks.links.observability.guide,
+      testSubject: 'observabilityOnboardingFooterLearnMoreLink',
     },
     {
       iconUrl: supportIconUrl,
@@ -105,38 +108,43 @@ export const Footer: FunctionComponent = () => {
         { defaultMessage: 'Open Support Hub' }
       ),
       link: helpSupportUrl,
+      testSubject: 'observabilityOnboardingFooterOpenSupportHubLink',
     },
   ];
 
   return (
-    <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
-      {sections.map((section, index) => (
-        <EuiFlexItem key={index} grow={false}>
-          <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
-          <EuiSpacer size="m" />
-          <EuiText size="s">
-            <strong>{section.title}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <p>{section.description}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <p>
-              <EuiLink
-                data-test-subj="observabilityOnboardingFooterLearnMoreLink"
-                aria-label={section.linkARIALabel}
-                href={section.link}
-                target="_blank"
-                external
-              >
-                {section.linkLabel}
-              </EuiLink>
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup gutterSize="xl" justifyContent="center" alignItems="center">
+        {sections.map((section, index) => (
+          <EuiFlexItem key={index} grow={false}>
+            <EuiAvatar size="l" name="" imageUrl={section.iconUrl} color="subdued" />
+            <EuiSpacer size="m" />
+            <EuiText size="s">
+              <strong>{section.title}</strong>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiText size="xs">
+              <p>{section.description}</p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiText size="xs">
+              <p>
+                <EuiLink
+                  data-test-subj={section.testSubject}
+                  aria-label={section.linkARIALabel}
+                  href={section.link}
+                  target="_blank"
+                  external
+                >
+                  {section.linkLabel}
+                </EuiLink>
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+    </>
   );
 };

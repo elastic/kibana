@@ -22,7 +22,7 @@ import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
-import { ErrorCode } from '../../common/constants';
+import { CATEGORIZATION_RECURSION_LIMIT, GenerationErrorCode } from '../../common/constants';
 
 export function registerCategorizationRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -40,6 +40,13 @@ export function registerCategorizationRoutes(
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(CategorizationRequestBody),
@@ -91,6 +98,7 @@ export function registerCategorizationRoutes(
               samplesFormat,
             };
             const options = {
+              recursionLimit: CATEGORIZATION_RECURSION_LIMIT,
               callbacks: [
                 new APMTracer({ projectName: langSmithOptions?.projectName ?? 'default' }, logger),
                 ...getLangSmithTracer({ ...langSmithOptions, logger }),
@@ -98,12 +106,14 @@ export function registerCategorizationRoutes(
             };
 
             const graph = await getCategorizationGraph({ client, model });
-            const results = await graph.invoke(parameters, options);
+            const results = await graph
+              .withConfig({ runName: 'Categorization' })
+              .invoke(parameters, options);
 
             return res.ok({ body: CategorizationResponse.parse(results) });
           } catch (err) {
             try {
-              handleCustomErrors(err, ErrorCode.RECURSION_LIMIT);
+              handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
             } catch (e) {
               if (isErrorThatHandlesItsOwnResponse(e)) {
                 return e.sendResponse(res);

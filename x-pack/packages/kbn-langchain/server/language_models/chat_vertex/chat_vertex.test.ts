@@ -12,6 +12,8 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ActionsClientChatVertexAI } from './chat_vertex';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { GeminiContent } from '@langchain/google-common';
+import { FinishReason } from '@google/generative-ai';
 
 const connectorId = 'mock-connector-id';
 
@@ -54,8 +56,78 @@ const mockStreamExecute = jest.fn().mockImplementation(() => {
   };
 });
 
+const mockStreamExecuteWithGoodStopEvents = jest.fn().mockImplementation(() => {
+  const passThrough = new PassThrough();
+
+  // Write the data chunks to the stream
+  setTimeout(() => {
+    passThrough.write(
+      Buffer.from(
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token1"}]}}],"modelVersion": "gemini-1.5-pro-001"}`
+      )
+    );
+  });
+  setTimeout(() => {
+    passThrough.write(
+      Buffer.from(
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token2"}]}}],"modelVersion": "gemini-1.5-pro-001"}`
+      )
+    );
+  });
+  setTimeout(() => {
+    passThrough.write(
+      Buffer.from(
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token3"}]},"finishReason": "${FinishReason.STOP}","safetyRatings": [{"category": "HARM_CATEGORY_HATE_SPEECH","probability": "NEGLIGIBLE","probabilityScore": 0.060086742,"severity": "HARM_SEVERITY_NEGLIGIBLE","severityScore": 0.17106095},{"category": "HARM_CATEGORY_DANGEROUS_CONTENT","probability": "NEGLIGIBLE","probabilityScore": 0.16776322,"severity": "HARM_SEVERITY_LOW","severityScore": 0.37113687},{"category": "HARM_CATEGORY_HARASSMENT","probability": "NEGLIGIBLE","probabilityScore": 0.124212936,"severity": "HARM_SEVERITY_NEGLIGIBLE","severityScore": 0.17441037},{"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT","probability": "NEGLIGIBLE","probabilityScore": 0.05419875,"severity": "HARM_SEVERITY_NEGLIGIBLE","severityScore": 0.03461887}]}],"usageMetadata": {"promptTokenCount": 1062,"candidatesTokenCount": 15,"totalTokenCount": 1077},"modelVersion": "gemini-1.5-pro-002"}`
+      )
+    );
+    // End the stream
+    passThrough.end();
+  });
+
+  return {
+    data: passThrough, // PassThrough stream will act as the async iterator
+    status: 'ok',
+  };
+});
+
+const mockStreamExecuteWithBadStopEvents = jest.fn().mockImplementation(() => {
+  const passThrough = new PassThrough();
+
+  // Write the data chunks to the stream
+  setTimeout(() => {
+    passThrough.write(
+      Buffer.from(
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token1"}]}}],"modelVersion": "gemini-1.5-pro-001"}`
+      )
+    );
+  });
+  setTimeout(() => {
+    passThrough.write(
+      Buffer.from(
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token2"}]}}],"modelVersion": "gemini-1.5-pro-001"}`
+      )
+    );
+  });
+  setTimeout(() => {
+    passThrough.write(
+      Buffer.from(
+        `data: {"candidates": [{"content": {"role": "model","parts": [{"text": "token3"}]},"finishReason": "${FinishReason.SAFETY}","safetyRatings": [{"category": "HARM_CATEGORY_HATE_SPEECH","probability": "NEGLIGIBLE","probabilityScore": 0.060086742,"severity": "HARM_SEVERITY_NEGLIGIBLE","severityScore": 0.17106095},{"category": "HARM_CATEGORY_DANGEROUS_CONTENT","probability": "HIGH","probabilityScore": 0.96776322,"severity": "HARM_SEVERITY_HIGH","severityScore": 0.97113687,"blocked":true},{"category": "HARM_CATEGORY_HARASSMENT","probability": "NEGLIGIBLE","probabilityScore": 0.124212936,"severity": "HARM_SEVERITY_NEGLIGIBLE","severityScore": 0.17441037},{"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT","probability": "NEGLIGIBLE","probabilityScore": 0.05419875,"severity": "HARM_SEVERITY_NEGLIGIBLE","severityScore": 0.03461887}]}],"usageMetadata": {"promptTokenCount": 1062,"candidatesTokenCount": 15,"totalTokenCount": 1077},"modelVersion": "gemini-1.5-pro-002"}`
+      )
+    );
+    // End the stream
+    passThrough.end();
+  });
+
+  return {
+    data: passThrough, // PassThrough stream will act as the async iterator
+    status: 'ok',
+  };
+});
+
+const systemInstruction = 'Answer the following questions truthfully and as best you can.';
+
 const callMessages = [
-  new SystemMessage('Answer the following questions truthfully and as best you can.'),
+  new SystemMessage(systemInstruction),
   new HumanMessage('Question: Do you know my name?\n\n'),
 ] as unknown as BaseMessage[];
 
@@ -194,6 +266,87 @@ describe('ActionsClientChatVertexAI', () => {
       expect(handleLLMNewToken).toHaveBeenCalledWith('token1');
       expect(handleLLMNewToken).toHaveBeenCalledWith('token2');
       expect(handleLLMNewToken).toHaveBeenCalledWith('token3');
+    });
+    it('includes tokens from finishReason: STOP', async () => {
+      actionsClient.execute.mockImplementationOnce(mockStreamExecuteWithGoodStopEvents);
+
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI({
+        ...defaultArgs,
+        actionsClient,
+        streaming: true,
+      });
+
+      const gen = actionsClientChatVertexAI._streamResponseChunks(
+        callMessages,
+        callOptions,
+        callRunManager
+      );
+
+      const chunks = [];
+
+      for await (const chunk of gen) {
+        chunks.push(chunk);
+      }
+
+      expect(chunks.map((c) => c.text)).toEqual(['token1', 'token2', 'token3']);
+      expect(handleLLMNewToken).toHaveBeenCalledTimes(3);
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token1');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token2');
+      expect(handleLLMNewToken).toHaveBeenCalledWith('token3');
+    });
+    it('throws an error on bad stop events', async () => {
+      actionsClient.execute.mockImplementationOnce(mockStreamExecuteWithBadStopEvents);
+
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI({
+        ...defaultArgs,
+        actionsClient,
+        streaming: true,
+      });
+
+      const gen = actionsClientChatVertexAI._streamResponseChunks(
+        callMessages,
+        callOptions,
+        callRunManager
+      );
+
+      const chunks = [];
+      await expect(async () => {
+        for await (const chunk of gen) {
+          chunks.push(chunk);
+        }
+      }).rejects.toEqual(
+        Error(
+          `Gemini Utils: action result status is error. Candidate was blocked due to SAFETY - HARM_CATEGORY_DANGEROUS_CONTENT: HARM_SEVERITY_HIGH`
+        )
+      );
+    });
+  });
+
+  describe('message formatting', () => {
+    it('Properly sorts out the system role', async () => {
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
+
+      await actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager);
+      const params = actionsClient.execute.mock.calls[0][0].params.subActionParams as unknown as {
+        messages: GeminiContent[];
+        systemInstruction: string;
+      };
+      expect(params.messages.length).toEqual(1);
+      expect(params.messages[0].parts.length).toEqual(1);
+      expect(params.systemInstruction).toEqual(systemInstruction);
+    });
+    it('Handles 2 messages in a row from the same role', async () => {
+      const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
+
+      await actionsClientChatVertexAI._generate(
+        [...callMessages, new HumanMessage('Oh boy, another')],
+        callOptions,
+        callRunManager
+      );
+      const { messages } = actionsClient.execute.mock.calls[0][0].params
+        .subActionParams as unknown as { messages: GeminiContent[] };
+      expect(messages.length).toEqual(1);
+      expect(messages[0].parts.length).toEqual(2);
     });
   });
 });

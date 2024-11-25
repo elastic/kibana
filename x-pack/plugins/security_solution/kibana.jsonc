@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/security-solution-plugin",
-  "owner": "@elastic/security-solution",
+  "owner": [
+    "@elastic/security-solution"
+  ],
+  "group": "security",
+  "visibility": "private",
   "plugin": {
     "id": "securitySolution",
-    "server": true,
     "browser": true,
+    "server": true,
     "configPath": [
       "xpack",
       "securitySolution"
@@ -54,7 +58,8 @@
       "savedSearch",
       "unifiedDocViewer",
       "charts",
-      "entityManager"
+      "entityManager",
+      "inference"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -71,7 +76,8 @@
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant"
+      "integrationAssistant",
+      "serverless"
     ],
     "requiredBundles": [
       "esUiShared",

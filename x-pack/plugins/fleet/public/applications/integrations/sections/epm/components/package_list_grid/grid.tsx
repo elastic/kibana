@@ -68,7 +68,6 @@ export const GridColumn = ({
 }: GridColumnProps) => {
   const itemsSizeRefs = useRef(new Map<number, number>());
   const listRef = useRef<List>(null);
-
   const onHeightChange = useCallback((index: number, size: number) => {
     itemsSizeRefs.current.set(index, size);
     if (listRef.current) {

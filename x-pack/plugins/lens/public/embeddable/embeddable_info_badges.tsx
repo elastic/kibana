@@ -20,6 +20,7 @@ import React, { Fragment } from 'react';
 import { useState } from 'react';
 import type { UserMessage } from '../types';
 import './embeddable_info_badges.scss';
+import { getLongMessage } from '../user_messages_utils';
 
 export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -98,8 +99,8 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
                 <ul className="lnsEmbeddablePanelFeatureList">
-                  {messageGroup.map(({ longMessage }, i) => (
-                    <Fragment key={`${uniqueId}-${i}`}>{longMessage as React.ReactNode}</Fragment>
+                  {messageGroup.map((message, i) => (
+                    <Fragment key={`${uniqueId}-${i}`}>{getLongMessage(message)}</Fragment>
                   ))}
                 </ul>
               </aside>

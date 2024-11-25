@@ -12,14 +12,13 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { mapValues, once } from 'lodash';
+import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
 } from '@kbn/actions-plugin/server/constants/saved_objects';
-import { firstValueFrom } from 'rxjs';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
@@ -32,11 +31,11 @@ import {
   ObservabilityAIAssistantPluginSetupDependencies,
   ObservabilityAIAssistantPluginStartDependencies,
 } from './types';
-import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
+import { registerMigrateKnowledgeBaseEntriesTask } from './service/task_manager_definitions/register_migrate_knowledge_base_entries_task';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -78,7 +77,7 @@ export class ObservabilityAIAssistantPlugin
       privileges: {
         all: {
           app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant'],
+          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant', 'manage_llm_product_doc'],
           catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
           savedObject: {
             all: [
@@ -112,64 +111,40 @@ export class ObservabilityAIAssistantPlugin
             ];
           }),
       };
-    }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
+    }) as Pick<
+      ObservabilityAIAssistantRouteHandlerResources['plugins'],
+      keyof ObservabilityAIAssistantPluginStartDependencies
+    >;
 
-    // Using once to make sure the same model ID is used during service init and Knowledge base setup
-    const getModelId = once(async () => {
-      const configModelId = this.config.modelId;
-      if (configModelId) {
-        return configModelId;
-      }
-      const defaultModelId = '.elser_model_2';
-      const [_, pluginsStart] = await core.getStartServices();
-      // Wait for the license to be available so the ML plugin's guards pass once we ask for ELSER stats
-      const license = await firstValueFrom(pluginsStart.licensing.license$);
-      if (!license.hasAtLeast('enterprise')) {
-        return defaultModelId;
-      }
-
-      try {
-        // Wait for the ML plugin's dependency on the internal saved objects client to be ready
-        const { ml } = await core.plugins.onSetup('ml');
-
-        if (!ml.found) {
-          throw new Error('Could not find ML plugin');
-        }
-
-        const elserModelDefinition = await (
-          ml.contract as {
-            trainedModelsProvider: (
-              request: {},
-              soClient: {}
-            ) => { getELSER: () => Promise<{ model_id: string }> };
-          }
-        )
-          .trainedModelsProvider({} as any, {} as any) // request, savedObjectsClient (but we fake it to use the internal user)
-          .getELSER();
-
-        return elserModelDefinition.model_id;
-      } catch (error) {
-        this.logger.error(`Failed to resolve ELSER model definition: ${error}`);
-        return defaultModelId;
-      }
-    });
+    const withCore = {
+      ...routeHandlerPlugins,
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+      },
+    };
 
     const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
       core,
-      taskManager: plugins.taskManager,
-      getModelId,
+      config: this.config,
     }));
 
-    service.register(registerFunctions);
+    registerMigrateKnowledgeBaseEntriesTask({
+      core,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(`Failed to register migrate knowledge base entries task: ${error}`);
+    });
 
-    addLensDocsToKb({ service, logger: this.logger.get('kb').get('lens') });
+    service.register(registerFunctions);
 
     registerServerRoutes({
       core,
       logger: this.logger,
       dependencies: {
-        plugins: routeHandlerPlugins,
+        plugins: withCore,
         service: this.service,
       },
     });

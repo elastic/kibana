@@ -15,23 +15,23 @@ export const registerUsageMetricsRoute = (
   router: DataUsageRouter,
   dataUsageContext: DataUsageContext
 ) => {
-  if (dataUsageContext.serverConfig.enabled) {
-    router.versioned
-      .get({
-        access: 'internal',
-        path: DATA_USAGE_METRICS_API_ROUTE,
-      })
-      .addVersion(
-        {
-          version: '1',
-          validate: {
-            request: UsageMetricsRequestSchema,
-            response: {
-              200: UsageMetricsResponseSchema,
-            },
+  router.versioned
+    .post({
+      access: 'internal',
+      path: DATA_USAGE_METRICS_API_ROUTE,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: UsageMetricsRequestSchema,
+          },
+          response: {
+            200: UsageMetricsResponseSchema,
           },
         },
-        getUsageMetricsHandler(dataUsageContext)
-      );
-  }
+      },
+      getUsageMetricsHandler(dataUsageContext)
+    );
 };

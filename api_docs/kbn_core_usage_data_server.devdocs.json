@@ -100,6 +100,75 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server",
+        "id": "def-server.CoreDeprecatedApiUsageStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreDeprecatedApiUsageStats",
+        "description": [],
+        "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiId",
+            "type": "string",
+            "tags": [],
+            "label": "apiId",
+            "description": [],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.totalMarkedAsResolved",
+            "type": "number",
+            "tags": [],
+            "label": "totalMarkedAsResolved",
+            "description": [],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.markedAsResolvedLastCalledAt",
+            "type": "string",
+            "tags": [],
+            "label": "markedAsResolvedLastCalledAt",
+            "description": [],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiTotalCalls",
+            "type": "number",
+            "tags": [],
+            "label": "apiTotalCalls",
+            "description": [],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreDeprecatedApiUsageStats.apiLastCalledAt",
+            "type": "string",
+            "tags": [],
+            "label": "apiLastCalledAt",
+            "description": [],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-usage-data-server",
         "id": "def-server.CoreEnvironmentUsageData",
         "type": "Interface",
         "tags": [],
@@ -327,9 +396,7 @@
         "parentPluginId": "@kbn/core-usage-data-server",
         "id": "def-server.CoreUsageDataSetup",
         "type": "Interface",
-        "tags": [
-          "note"
-        ],
+        "tags": [],
         "label": "CoreUsageDataSetup",
         "description": [
           "\nInternal API for registering the Usage Tracker used for Core's usage data payload.\n"
@@ -376,6 +443,52 @@
                     "docId": "kibKbnCoreUsageDataServerPluginApi",
                     "section": "def-server.CoreUsageCounter",
                     "text": "CoreUsageCounter"
+                  }
+                ],
+                "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageDataSetup.registerDeprecatedUsageFetch",
+            "type": "Function",
+            "tags": [],
+            "label": "registerDeprecatedUsageFetch",
+            "description": [],
+            "signature": [
+              "(fetchFn: ",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-server.DeprecatedApiUsageFetcher",
+                "text": "DeprecatedApiUsageFetcher"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-usage-data-server",
+                "id": "def-server.CoreUsageDataSetup.registerDeprecatedUsageFetch.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "fetchFn",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-usage-data-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreUsageDataServerPluginApi",
+                    "section": "def-server.DeprecatedApiUsageFetcher",
+                    "text": "DeprecatedApiUsageFetcher"
                   }
                 ],
                 "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
@@ -2219,6 +2332,34 @@
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls_resolved.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls_resolved.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2281,6 +2422,62 @@
                 "section": "def-server.CoreIncrementCounterParams",
                 "text": "CoreIncrementCounterParams"
               }
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-usage-data-server",
+        "id": "def-server.DeprecatedApiUsageFetcher",
+        "type": "Type",
+        "tags": [],
+        "label": "DeprecatedApiUsageFetcher",
+        "description": [],
+        "signature": [
+          "(params: { soClient: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.ISavedObjectsRepository",
+            "text": "ISavedObjectsRepository"
+          },
+          "; }) => Promise<",
+          {
+            "pluginId": "@kbn/core-usage-data-server",
+            "scope": "server",
+            "docId": "kibKbnCoreUsageDataServerPluginApi",
+            "section": "def-server.CoreDeprecatedApiUsageStats",
+            "text": "CoreDeprecatedApiUsageStats"
+          },
+          "[]>"
+        ],
+        "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.DeprecatedApiUsageFetcher.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ soClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              },
+              "; }"
             ],
             "path": "packages/core/usage-data/core-usage-data-server/src/setup_contract.ts",
             "deprecated": false,

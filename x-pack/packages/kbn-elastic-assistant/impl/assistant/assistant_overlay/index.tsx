@@ -12,11 +12,7 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { createGlobalStyle } from 'styled-components';
-import {
-  ShowAssistantOverlayProps,
-  useAssistantContext,
-  UserAvatar,
-} from '../../assistant_context';
+import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -25,9 +21,6 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export interface Props {
-  currentUserAvatar?: UserAvatar;
-}
 
 export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
@@ -35,7 +28,7 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
   }
 `;
 
-export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
+export const AssistantOverlay = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   // Why is this named Title and not Id?
   const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
@@ -144,7 +137,6 @@ export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
           onCloseFlyout={handleCloseModal}
           chatHistoryVisible={chatHistoryVisible}
           setChatHistoryVisible={toggleChatHistory}
-          currentUserAvatar={currentUserAvatar}
         />
       </EuiFlyoutResizable>
       <UnifiedTimelineGlobalStyles />

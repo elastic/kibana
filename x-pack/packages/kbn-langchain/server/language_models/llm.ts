@@ -108,9 +108,13 @@ export class ActionsClientLlm extends LLM {
     const actionResult = await this.#actionsClient.execute(requestBody);
 
     if (actionResult.status === 'error') {
-      throw new Error(
+      const error = new Error(
         `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
       );
+      if (actionResult?.serviceMessage) {
+        error.name = actionResult?.serviceMessage;
+      }
+      throw error;
     }
 
     const content = get('data.message', actionResult);

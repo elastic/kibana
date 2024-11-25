@@ -12,7 +12,7 @@ import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
+import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
 
@@ -44,6 +44,7 @@ import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import { ClaimOwnershipResult } from './task_claimers';
 import { TaskPartitioner } from './lib/task_partitioner';
+import { TaskPoller } from './polling/task_poller';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -54,7 +55,6 @@ export interface ITaskEventEmitter<T> {
 export type TaskPollingLifecycleOpts = {
   logger: Logger;
   definitions: TaskTypeDictionary;
-  unusedTypes: string[];
   taskStore: TaskStore;
   config: TaskManagerConfig;
   middleware: Middleware;
@@ -86,7 +86,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
+  private poller: TaskPoller<string, TimedFillPoolResult>;
+
   public pool: TaskPool;
+
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
 
@@ -111,7 +114,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     config,
     taskStore,
     definitions,
-    unusedTypes,
     executionContext,
     usageCounter,
     taskPartitioner,
@@ -149,7 +151,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       maxAttempts: config.max_attempts,
       excludedTaskTypes: config.unsafe.exclude_task_types,
       definitions,
-      unusedTypes,
       logger: this.logger,
       getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),
       taskPartitioner,
@@ -170,7 +171,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
     }
 
-    const poller = createTaskPoller<string, TimedFillPoolResult>({
+    this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: pollIntervalConfiguration$,
@@ -192,17 +193,17 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       work: this.pollForWork,
     });
 
-    this.subscribeToPoller(poller.events$);
+    this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable) {
         // start polling for work
-        poller.start();
+        this.poller.start();
       } else if (!areESAndSOAvailable) {
         this.logger.info(
           `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
         );
-        poller.stop();
+        this.poller.stop();
         this.pool.cancelRunningTasks();
       }
     });
@@ -210,6 +211,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   public get events(): Observable<TaskLifecycleEvent> {
     return this.events$;
+  }
+
+  public stop() {
+    this.poller.stop();
   }
 
   private emitEvent = (event: TaskLifecycleEvent) => {
@@ -238,18 +243,19 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private pollForWork = async (): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
-      () => {
-        return claimAvailableTasks(this.taskClaiming, this.logger).pipe(
-          tap(
-            mapOk(({ timing }: ClaimOwnershipResult) => {
-              if (timing) {
-                this.emitEvent(
-                  asTaskManagerStatEvent('claimDuration', asOk(timing.stop - timing.start))
-                );
-              }
-            })
-          )
-        );
+      async () => {
+        const result = await claimAvailableTasks(this.taskClaiming, this.logger);
+
+        if (isOk(result) && result.value.timing) {
+          this.emitEvent(
+            asTaskManagerStatEvent(
+              'claimDuration',
+              asOk(result.value.timing.stop - result.value.timing.start)
+            )
+          );
+        }
+
+        return result;
       },
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
@@ -344,39 +350,23 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   }
 }
 
-export function claimAvailableTasks(
+export async function claimAvailableTasks(
   taskClaiming: TaskClaiming,
   logger: Logger
-): Observable<Result<ClaimOwnershipResult, FillPoolResult>> {
-  return new Observable((observer) => {
-    taskClaiming
-      .claimAvailableTasksIfCapacityIsAvailable({
-        claimOwnershipUntil: intervalFromNow('30s')!,
-      })
-      .subscribe(
-        (claimResult) => {
-          observer.next(claimResult);
-        },
-        (ex) => {
-          // if the `taskClaiming` stream errors out we want to catch it and see if
-          // we can identify the reason
-          // if we can - we emit an FillPoolResult error rather than erroring out the wrapping Observable
-          // returned by `claimAvailableTasks`
-          if (isEsCannotExecuteScriptError(ex)) {
-            logger.warn(
-              `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
-            );
-            observer.next(asErr(FillPoolResult.Failed));
-            observer.complete();
-          } else {
-            const esError = identifyEsError(ex);
-            // as we could't identify the reason - we'll error out the wrapping Observable too
-            observer.error(esError.length > 0 ? esError : ex);
-          }
-        },
-        () => {
-          observer.complete();
-        }
-      );
-  });
+): Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
+  try {
+    return taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+      claimOwnershipUntil: intervalFromNow('30s')!,
+    });
+  } catch (err) {
+    // if we can identify the reason for the error, emit a FillPoolResult error
+    if (isEsCannotExecuteScriptError(err)) {
+      logger.warn(`Task Manager cannot operate when inline scripts are disabled in Elasticsearch`);
+      return asErr(FillPoolResult.Failed);
+    } else {
+      const esError = identifyEsError(err);
+      // as we could't identify the reason - propagate the error
+      throw esError.length > 0 ? esError : err;
+    }
+  }
 }

@@ -497,10 +497,10 @@
             "tags": [],
             "label": "source",
             "description": [
-              "If given, it will load the given map else will load the create a new map page."
+              "If given, it will load the given onboarding flow\nelse will load the main onboarding screen."
             ],
             "signature": [
-              "\"customLogs\" | \"systemLogs\" | undefined"
+              "\"kubernetes\" | \"auto-detect\" | \"customLogs\" | \"otel-logs\" | \"firehose\" | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
@@ -857,7 +857,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\" | \"inventory\""
+          "\"profiling\" | \"metrics\" | \"apm\" | \"synthetics\" | \"ux\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"observability-overview\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,
@@ -1014,6 +1014,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.LAST_USED_LOGS_VIEWER_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LAST_USED_LOGS_VIEWER_APP_ID",
+        "description": [],
+        "signature": [
+          "\"last-used-logs-viewer\""
+        ],
+        "path": "packages/deeplinks/observability/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.ListFilterControl",
         "type": "Type",
         "tags": [],
@@ -1096,6 +1111,21 @@
         "description": [],
         "signature": [
           "\"OBS_LOGS_EXPLORER_DATA_VIEW_LOCATOR\""
+        ],
+        "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "OBS_LOGS_EXPLORER_LOGS_VIEWER_KEY",
+        "description": [],
+        "signature": [
+          "\"obs-logs-explorer:lastUsedViewer\""
         ],
         "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
         "deprecated": false,

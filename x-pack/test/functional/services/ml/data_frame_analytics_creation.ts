@@ -397,7 +397,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
 
     async selectDependentVariable(dependentVariable: string) {
       await this.waitForDependentVariableInputLoaded();
-      await comboBox.set(
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
         '~mlAnalyticsCreateJobWizardDependentVariableSelect > comboBoxInput',
         dependentVariable
       );
