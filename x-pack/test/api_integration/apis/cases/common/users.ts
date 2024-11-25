@@ -80,7 +80,7 @@ export const secCasesV2NoReopenWithCreateCommentUser: User = {
 };
 
 export const secCasesV2NoCreateCommentWithReopenUser: User = {
-  username: 'sec_cases_v2_create_comment_no_reopen_user_api_int',
+  username: 'sec_cases_v2_no_create_comment_with_reopen_user_api_int',
   password: 'password',
   roles: [secCasesV2NoCreateCommentWithReopen.name],
 };

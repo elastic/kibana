@@ -293,8 +293,9 @@ function partitionPatchRequest(
     }
 
     if (
-      reqCase.status != null &&
       foundCase != null &&
+      !isSOError(foundCase) &&
+      reqCase.status != null &&
       foundCase.attributes.status !== reqCase.status &&
       foundCase.attributes.status === CaseStatuses.closed
     ) {
