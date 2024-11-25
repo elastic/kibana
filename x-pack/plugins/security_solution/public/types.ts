@@ -94,6 +94,7 @@ import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingService } from './onboarding/service';
 import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
+import type { SiemMigrationsService } from './siem_migrations/service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -193,6 +194,7 @@ export type StartServices = CoreStart &
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
+    siemMigrations: SiemMigrationsService;
   };
 
 export type StartRenderServices = Pick<

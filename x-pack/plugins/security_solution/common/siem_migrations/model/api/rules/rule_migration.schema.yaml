@@ -93,7 +93,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationAllTaskStats'
+                type: array
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskStats'
 
   ## Specific rule migration APIs
 
