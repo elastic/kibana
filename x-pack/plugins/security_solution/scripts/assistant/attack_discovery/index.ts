@@ -22,14 +22,12 @@ export const cli = () => {
         url: cliContext.flags.kibanaUrl as string,
         username: cliContext.flags.username as string,
         password: cliContext.flags.password as string,
-        noCertForSsl: true,
       });
       const esClient = createEsClient({
         log,
         url: cliContext.flags.elasticsearchUrl as string,
         username: cliContext.flags.username as string,
         password: cliContext.flags.password as string,
-        noCertForSsl: true,
       });
 
       log.info(`${HORIZONTAL_LINE}
@@ -45,10 +43,10 @@ ${HORIZONTAL_LINE}
     {
       description: `Loads data into a environment for testing/development`,
       flags: {
-        string: ['kibana', 'username', 'password'],
+        string: ['kibanaUrl', 'username', 'password'],
         default: {
-          kibana: 'http://127.0.0.1:5601',
-          elasticsearch: 'http://127.0.0.1:9200',
+          kibanaUrl: 'http://127.0.0.1:5601',
+          elasticsearchUrl: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
         },
