@@ -221,9 +221,6 @@ export const getRuleReducer =
           return state;
         } else {
           const oldAction = rule.actions.splice(index, 1)[0];
-          if (actionTypeRegistry.get(oldAction.actionTypeId).isSystemActionType) {
-            return state;
-          }
           const oldSanitizedAction = oldAction as SanitizedRuleAction;
           const updatedAction = {
             ...oldSanitizedAction,

@@ -79,7 +79,9 @@ export const actionRequestSchema = schema.object({
 
 export const systemActionRequestSchema = schema.object({
   uuid: schema.maybe(schema.string()),
+  group: schema.string(),
   actionTypeId: schema.maybe(schema.string()),
   id: schema.string(),
   params: actionParamsSchema,
+  frequency: schema.maybe(actionFrequencySchema),
 });

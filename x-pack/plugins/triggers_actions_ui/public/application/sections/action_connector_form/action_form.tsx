@@ -260,6 +260,9 @@ export const ActionForm = ({
           actionTypeId: actionTypeModel.id,
           params: {},
           uuid: uuidv4(),
+          // use hideNotifyWhen
+          group: defaultActionGroupId,
+          frequency: defaultRuleFrequency,
         }
       : {
           id: '',
@@ -482,6 +485,15 @@ export const ActionForm = ({
                 producerId={producerId}
                 ruleTypeId={ruleTypeId}
                 disableErrorMessages={disableErrorMessages}
+                hideNotifyWhen={hideNotifyWhen}
+                hasAlertsMappings={hasAlertsMappings}
+                minimumThrottleInterval={minimumThrottleInterval}
+                notifyWhenSelectOptions={notifyWhenSelectOptions}
+                setActionFrequencyProperty={setActionFrequencyProperty}
+                actionGroups={actionGroups}
+                defaultActionGroupId={defaultActionGroupId}
+                setActionGroupIdByIndex={setActionGroupIdByIndex}
+                isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               />
             );
           }

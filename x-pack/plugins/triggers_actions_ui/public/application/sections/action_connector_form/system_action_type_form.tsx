@@ -23,10 +23,18 @@ import {
   EuiSplitPanel,
   EuiCallOut,
   IconType,
+  EuiSuperSelect,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import {
+  getDurationNumberInItsUnit,
+  getDurationUnitValue,
+  parseDuration,
+} from '@kbn/alerting-plugin/common/parse_duration';
+import { ActionVariable, RuleActionFrequency, RuleActionParam } from '@kbn/alerting-plugin/common';
+import { RuleActionsNotifyWhen } from '@kbn/alerts-ui-shared/src/rule_form/rule_actions/rule_actions_notify_when';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import {
@@ -37,6 +45,7 @@ import {
   ActionVariables,
   ActionTypeRegistryContract,
   ActionConnectorMode,
+  NotifyWhenSelectOptions,
 } from '../../../types';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
@@ -49,6 +58,7 @@ export type SystemActionTypeFormProps = {
   index: number;
   onDeleteAction: () => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
+  setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
   actionTypesIndex: ActionTypeIndex;
   connectors: ActionConnector[];
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -56,9 +66,17 @@ export type SystemActionTypeFormProps = {
   producerId: string;
   ruleTypeId?: string;
   disableErrorMessages?: boolean;
+  hideNotifyWhen?: boolean;
+  hasAlertsMappings?: boolean;
+  minimumThrottleInterval?: [number | undefined, string];
+  notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
+  isActionGroupDisabledForActionType?: (actionGroupId: string, actionTypeId: string) => boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'setActionParamsProperty'
+  | 'defaultActionGroupId'
+  | 'actionGroups'
+  | 'setActionGroupIdByIndex'
   | 'messageVariables'
   | 'summaryMessageVariables'
   | 'defaultActionMessage'
@@ -82,14 +100,59 @@ export const SystemActionTypeForm = ({
   featureId,
   ruleTypeId,
   disableErrorMessages,
+  hideNotifyWhen,
+  hasAlertsMappings,
+  minimumThrottleInterval,
+  notifyWhenSelectOptions,
+  setActionFrequencyProperty,
+  actionGroups,
+  defaultActionGroupId,
+  setActionGroupIdByIndex,
+  isActionGroupDisabledForActionType,
 }: SystemActionTypeFormProps) => {
   const { http } = useKibana().services;
   const [isOpen, setIsOpen] = useState(true);
+  const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+  const selectedActionGroup =
+    actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+  const [actionGroup, setActionGroup] = useState<string>();
+  const [actionThrottle, setActionThrottle] = useState<number | null>(
+    actionItem.frequency?.throttle
+      ? getDurationNumberInItsUnit(actionItem.frequency.throttle)
+      : null
+  );
+  const [actionThrottleUnit, setActionThrottleUnit] = useState<string>(
+    actionItem.frequency?.throttle ? getDurationUnitValue(actionItem.frequency?.throttle) : 'h'
+  );
+  const [minimumActionThrottle = -1, minimumActionThrottleUnit] = minimumThrottleInterval ?? [
+    -1,
+    's',
+  ];
+  const [showMinimumThrottleWarning, showMinimumThrottleUnitWarning] = useMemo(() => {
+    try {
+      if (!actionThrottle) return [false, false];
+      const throttleUnitDuration = parseDuration(`1${actionThrottleUnit}`);
+      const minThrottleUnitDuration = parseDuration(`1${minimumActionThrottleUnit}`);
+      const boundedThrottle =
+        throttleUnitDuration > minThrottleUnitDuration
+          ? actionThrottle
+          : Math.max(actionThrottle, minimumActionThrottle);
+      const boundedThrottleUnit =
+        parseDuration(`${actionThrottle}${actionThrottleUnit}`) >= minThrottleUnitDuration
+          ? actionThrottleUnit
+          : minimumActionThrottleUnit;
+      return [boundedThrottle !== actionThrottle, boundedThrottleUnit !== actionThrottleUnit];
+    } catch (e) {
+      return [false, false];
+    }
+  }, [minimumActionThrottle, minimumActionThrottleUnit, actionThrottle, actionThrottleUnit]);
 
   const [warning, setWarning] = useState<string | null>(null);
+
+  const [useDefaultMessage, setUseDefaultMessage] = useState(false);
 
   const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(http, ruleTypeId, true);
 
@@ -168,9 +231,99 @@ export const SystemActionTypeForm = ({
 
   const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
 
+  const showSelectActionGroup =
+    actionGroups &&
+    selectedActionGroup &&
+    setActionGroupIdByIndex &&
+    !actionItem.frequency?.summary;
+
+  const actionGroupDisplay = (
+    actionGroupId: string,
+    actionGroupName: string,
+    actionTypeId: string
+  ): string =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+        ? i18n.translate(
+            'xpack.triggersActionsUI.sections.actionTypeForm.addNewActionConnectorActionGroup.display',
+            {
+              defaultMessage: '{actionGroupName} (Not Currently Supported)',
+              values: { actionGroupName },
+            }
+          )
+        : actionGroupName
+      : actionGroupName;
+
+  const isActionGroupDisabled = (actionGroupId: string, actionTypeId: string): boolean =>
+    isActionGroupDisabledForActionType
+      ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
+      : false;
+
+  const onActionFrequencyChange = (frequency: RuleActionFrequency | undefined) => {
+    const { notifyWhen, throttle, summary } = frequency || {};
+
+    setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+
+    if (throttle) {
+      setActionThrottle(getDurationNumberInItsUnit(throttle));
+      setActionThrottleUnit(getDurationUnitValue(throttle));
+    }
+
+    setActionFrequencyProperty('throttle', throttle ? throttle : null, index);
+
+    setActionFrequencyProperty('summary', summary, index);
+  };
+
+  const actionNotifyWhen = (
+    <RuleActionsNotifyWhen
+      frequency={actionItem.frequency}
+      throttle={actionThrottle}
+      throttleUnit={actionThrottleUnit}
+      hasAlertsMappings={hasAlertsMappings}
+      onChange={onActionFrequencyChange}
+      showMinimumThrottleWarning={showMinimumThrottleWarning}
+      showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
+      notifyWhenSelectOptions={notifyWhenSelectOptions}
+      onUseDefaultMessage={() => setUseDefaultMessage(true)}
+    />
+  );
+
   const accordionContent = (
     <>
       <EuiSplitPanel.Inner color="plain">
+        {!hideNotifyWhen && actionNotifyWhen}
+        {showSelectActionGroup && (
+          <>
+            {!hideNotifyWhen && <EuiSpacer size="s" />}
+            <EuiSuperSelect
+              prepend={
+                <EuiFormLabel
+                  htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenInActionGroup"
+                    defaultMessage="Run when"
+                  />
+                </EuiFormLabel>
+              }
+              fullWidth
+              id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+              data-test-subj={`addNewActionConnectorActionGroup-${index}`}
+              options={actionGroups.map(({ id: value, name }) => ({
+                value,
+                inputDisplay: actionGroupDisplay(value, name, actionItem.actionTypeId),
+                disabled: isActionGroupDisabled(value, actionItem.actionTypeId),
+                'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
+              }))}
+              valueOfSelected={selectedActionGroup.id}
+              onChange={(group) => {
+                setActionGroupIdByIndex(group, index);
+                setActionGroup(group);
+              }}
+            />
+          </>
+        )}
+        <EuiSpacer size="xl" />
         {ParamsFieldsComponent ? (
           <EuiErrorBoundary>
             <EuiFlexGroup gutterSize="m" direction="column">
