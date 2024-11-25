@@ -28,22 +28,9 @@ describe('Mappings editor: core', () => {
   let onChangeHandler: jest.Mock = jest.fn();
   let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
-  let hasEnterpriseLicense = true;
-  const mockLicenseCheck = jest.fn((type: any) => hasEnterpriseLicense);
   const appDependencies = {
     plugins: {
       ml: { mlApi: {} },
-      licensing: {
-        license$: {
-          subscribe: jest.fn((callback: any) => {
-            callback({
-              isActive: true,
-              hasAtLeast: mockLicenseCheck,
-            });
-            return { unsubscribe: jest.fn() };
-          }),
-        },
-      },
     },
   };
 
@@ -314,6 +301,7 @@ describe('Mappings editor: core', () => {
       config: {
         enableMappingsSourceFieldSection: true,
       },
+      canUseSyntheticSource: true,
       ...appDependencies,
     };
 
@@ -512,8 +500,7 @@ describe('Mappings editor: core', () => {
       });
 
       ['logsdb', 'time_series'].forEach((indexMode) => {
-        it(`defaults to 'synthetic' with ${indexMode} index mode prop on enterprise license`, async () => {
-          hasEnterpriseLicense = true;
+        it(`defaults to 'synthetic' with ${indexMode} index mode prop when 'canUseSyntheticSource' is set to true`, async () => {
           await act(async () => {
             testBed = setup(
               {
@@ -537,8 +524,7 @@ describe('Mappings editor: core', () => {
           expect(find('sourceValueField').prop('value')).toBe('synthetic');
         });
 
-        it(`defaults to 'standard' with ${indexMode} index mode prop on basic license`, async () => {
-          hasEnterpriseLicense = false;
+        it(`defaults to 'standard' with ${indexMode} index mode prop when 'canUseSyntheticSource' is set to true`, async () => {
           await act(async () => {
             testBed = setup(
               {
@@ -546,7 +532,7 @@ describe('Mappings editor: core', () => {
                 onChange: onChangeHandler,
                 indexMode,
               },
-              ctx
+              { ...ctx, canUseSyntheticSource: false }
             );
           });
           testBed.component.update();
