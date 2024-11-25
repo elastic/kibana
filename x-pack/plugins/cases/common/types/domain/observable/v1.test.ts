@@ -10,8 +10,8 @@ import { CaseObservableRt } from './v1';
 describe('CaseObservableRt', () => {
   it('has expected attributes in request', () => {
     const observable = {
-      description: undefined,
-      id: undefined,
+      description: null,
+      id: null,
       typeKey: 'ef528526-2af9-4345-9b78-046512c5bbd6',
       value: 'email@example.com',
       createdAt: '2024-10-01',
