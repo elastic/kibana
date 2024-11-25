@@ -7,50 +7,42 @@
 
 import { createAPMTransactionErrorRateIndicator, createSLO } from '../fixtures/slo';
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
+import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
-const generator = new ApmTransactionErrorRateTransformGenerator();
+const generator = new ApmTransactionErrorRateTransformGenerator('my-space-id', dataViewsService);
 
 describe('Transform Generator', () => {
-  it('builds empty runtime mappings without group by', async () => {
-    const slo = createSLO({
-      id: 'irrelevant',
-      indicator: createAPMTransactionErrorRateIndicator(),
-    });
-    const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-    expect(commonRuntime).toMatchSnapshot();
-
-    const commonGroupBy = generator.buildCommonGroupBy(slo);
-    expect(commonGroupBy).toMatchSnapshot();
-  });
-
-  it.each(['example', ['example']])(
-    'builds common runtime mappings and group by with single group by',
-    async (groupBy) => {
-      const indicator = createAPMTransactionErrorRateIndicator();
+  describe('buildCommonGroupBy', () => {
+    it('builds empty runtime mappings without group by', async () => {
       const slo = createSLO({
         id: 'irrelevant',
-        groupBy,
-        indicator,
+        indicator: createAPMTransactionErrorRateIndicator(),
       });
-      const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-      expect(commonRuntime).toMatchSnapshot();
 
       const commonGroupBy = generator.buildCommonGroupBy(slo);
       expect(commonGroupBy).toMatchSnapshot();
-    }
-  );
-
-  it('builds common runtime mappings without multi group by', async () => {
-    const indicator = createAPMTransactionErrorRateIndicator();
-    const slo = createSLO({
-      id: 'irrelevant',
-      groupBy: ['example1', 'example2'],
-      indicator,
     });
-    const commonRuntime = generator.buildCommonRuntimeMappings(slo);
-    expect(commonRuntime).toMatchSnapshot();
 
-    const commonGroupBy = generator.buildCommonGroupBy(slo);
-    expect(commonGroupBy).toMatchSnapshot();
+    it.each(['example', ['example'], ['example1', 'example2']])(
+      'builds common groupBy with single group by',
+      async (groupBy) => {
+        const indicator = createAPMTransactionErrorRateIndicator();
+        const slo = createSLO({
+          id: 'irrelevant',
+          groupBy,
+          indicator,
+        });
+
+        const commonGroupBy = generator.buildCommonGroupBy(slo);
+        expect(commonGroupBy).toMatchSnapshot();
+      }
+    );
+  });
+
+  describe('buildCommonRuntimeMappings', () => {
+    it('builds empty runtime mappings without data view', async () => {
+      const runtimeMappings = generator.buildCommonRuntimeMappings();
+      expect(runtimeMappings).toEqual({});
+    });
   });
 });
