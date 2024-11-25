@@ -33,12 +33,14 @@ export const retrieveFromVault = async () => {
 
   await writeFile(LOCAL_FILE, JSON.stringify(config, undefined, 2));
 
+  // eslint-disable-next-line no-console
   console.log(`Config dumped into ${LOCAL_FILE}`);
 };
 
 export const formatCurrentConfig = async () => {
   const config = await readFile(LOCAL_FILE, 'utf-8');
   const asB64 = Buffer.from(config).toString('base64');
+  // eslint-disable-next-line no-console
   console.log(asB64);
 };
 
