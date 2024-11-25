@@ -10,16 +10,22 @@ import { camelCase, startCase } from 'lodash';
 import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { fieldToDisplayNameMap } from '../../diff_components/translations';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import { ModifiedBadge } from './badges/modified_badge';
 import { FieldUpgradeStateInfo } from './field_upgrade_state_info';
 
 interface FieldUpgradeConflictsResolverHeaderProps {
   fieldName: string;
   fieldUpgradeState: FieldUpgradeState;
+  /**
+   * Whether the field was customized by users (current and base versions differ)
+   */
+  isCustomized: boolean;
 }
 
 export function FieldUpgradeConflictsResolverHeader({
   fieldName,
   fieldUpgradeState,
+  isCustomized,
 }: FieldUpgradeConflictsResolverHeaderProps): JSX.Element {
   return (
     <EuiFlexGroup direction="row" alignItems="center">
@@ -27,7 +33,15 @@ export function FieldUpgradeConflictsResolverHeader({
         <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
       </EuiTitle>
 
-      <FieldUpgradeStateInfo state={fieldUpgradeState} />
+      <span>
+        {isCustomized && (
+          <>
+            <ModifiedBadge />
+            &nbsp;
+          </>
+        )}
+        <FieldUpgradeStateInfo state={fieldUpgradeState} />
+      </span>
     </EuiFlexGroup>
   );
 }

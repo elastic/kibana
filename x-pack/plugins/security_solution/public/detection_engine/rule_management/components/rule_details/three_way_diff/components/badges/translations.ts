@@ -27,3 +27,10 @@ export const ACTION_REQUIRED = i18n.translate(
     defaultMessage: 'Action required',
   }
 );
+
+export const MODIFIED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.badge.modified',
+  {
+    defaultMessage: 'Modified',
+  }
+);
