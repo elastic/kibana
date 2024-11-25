@@ -1715,6 +1715,9 @@
   },
   "fleet-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },
@@ -2300,6 +2303,9 @@
   },
   "ingest-package-policies": {
     "properties": {
+      "bump_agent_policy_revision": {
+        "type": "boolean"
+      },
       "created_at": {
         "type": "date"
       },

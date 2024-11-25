@@ -20,6 +20,7 @@ import type {
   RequestHandlerContext,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
+  SavedObject,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
@@ -446,7 +447,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
+    const createdPackagePolicy = mapPackagePolicySavedObjectToPackagePolicy(newSo);
     logger.debug(`Created new package policy with id ${newSo.id} and version ${newSo.version}`);
 
     return packagePolicyService.runExternalCallbacks(
@@ -668,11 +669,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
     logger.debug(`Created new package policies`);
     return {
-      created: newSos.map((newSo) => ({
-        id: newSo.id,
-        version: newSo.version,
-        ...newSo.attributes,
-      })),
+      created: newSos.map((newSo) => mapPackagePolicySavedObjectToPackagePolicy(newSo)),
       failed: failedPolicies,
     };
   }
@@ -754,11 +751,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
-    const response = {
-      id: packagePolicySO.id,
-      version: packagePolicySO.version,
-      ...packagePolicySO.attributes,
-    };
+    const response = mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
 
     // If possible, return the experimental features map for the package policy's `package` field
     if (experimentalFeatures && response.package) {
@@ -788,11 +781,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return [];
     }
 
-    const packagePolicies = packagePolicySO.saved_objects.map((so) => ({
-      id: so.id,
-      version: so.version,
-      ...so.attributes,
-    }));
+    const packagePolicies = packagePolicySO.saved_objects.map((so) =>
+      mapPackagePolicySavedObjectToPackagePolicy(so)
+    );
 
     for (const packagePolicy of packagePolicies) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -835,11 +826,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           }
         }
 
-        return {
-          id: so.id,
-          version: so.version,
-          ...so.attributes,
-        };
+        return mapPackagePolicySavedObjectToPackagePolicy(so);
       })
       .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
 
@@ -889,12 +876,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     return {
-      items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
-        id: packagePolicySO.id,
-        version: packagePolicySO.version,
-        ...packagePolicySO.attributes,
-        spaceIds: packagePolicySO.namespaces,
-      })),
+      items: packagePolicies?.saved_objects.map((so) =>
+        mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
+      ),
       total: packagePolicies?.total,
       page,
       perPage,
@@ -1392,13 +1376,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const updatedPoliciesSuccess = updatedPolicies
       .filter((policy) => !policy.error && policy.attributes)
-      .map(
-        (soPolicy) =>
-          ({
-            id: soPolicy.id,
-            version: soPolicy.version,
-            ...soPolicy.attributes,
-          } as PackagePolicy)
+      .map((soPolicy) =>
+        mapPackagePolicySavedObjectToPackagePolicy(
+          soPolicy as SavedObject<PackagePolicySOAttributes>
+        )
       );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
@@ -2189,7 +2170,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           perPage: SO_SEARCH_LIMIT,
           namespaces: ['*'],
         })
-    ).saved_objects.map(mapPackagePolicySavedObjectToPackagePolicy);
+    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces));
 
     if (packagePolicies.length > 0) {
       const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
@@ -2306,7 +2287,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             savedObjectType,
           });
 
-          return mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
+          return mapPackagePolicySavedObjectToPackagePolicy(
+            packagePolicySO,
+            packagePolicySO.namespaces
+          );
         });
       },
     });
