@@ -17,6 +17,7 @@ export function initializeStaticValuesControlSelections(
 ) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
+  const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
 
   const selectedOptionsComparatorFunction = (a: string[], b: string[]) =>
     deepEqual(a ?? [], b ?? []);
@@ -32,8 +33,9 @@ export function initializeStaticValuesControlSelections(
     comparators: {
       selectedOptions: [selectedOptions$, setSelectedOptions, selectedOptionsComparatorFunction],
       availableOptions: [availableOptions$, (next) => availableOptions$.next(next)],
+      variableName: [variableName$, (next) => variableName$.next(next)],
     } as StateComparators<
-      Pick<StaticValuesListControlState, 'selectedOptions' | 'availableOptions'>
+      Pick<StaticValuesListControlState, 'selectedOptions' | 'availableOptions' | 'variableName'>
     >,
     hasInitialSelections: initialState.selectedOptions?.length,
     selectedOptions$: selectedOptions$ as PublishingSubject<string[]>,

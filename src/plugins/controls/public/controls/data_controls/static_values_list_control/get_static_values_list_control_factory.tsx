@@ -30,11 +30,14 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
     isFieldCompatible: () => false,
     CustomOptionsComponent: undefined,
     buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
-      // initialize the interval variable
-      esqlVariablesService.addVariable({ key: 'interval', value: initialState.selectedOptions[0] });
-
       const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
       const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
+      const variableName$ = new BehaviorSubject<string>(initialState.variableName ?? '');
+      // initialize the interval variable
+      esqlVariablesService.addVariable({
+        key: initialState.variableName,
+        value: initialState.selectedOptions[0],
+      });
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
       const dataControl = initializeDataControl<
@@ -86,9 +89,10 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
         api,
         Component: ({ className: controlPanelClassName }) => {
           // /** Get display settings - if these are ever made editable, should be part of stateManager instead */
-          const [availableOptions, selectedOptions] = useBatchedPublishingSubjects(
+          const [availableOptions, selectedOptions, variableName] = useBatchedPublishingSubjects(
             availableOptions$,
-            selections.selectedOptions$
+            selections.selectedOptions$,
+            variableName$
           );
 
           return (
@@ -104,7 +108,7 @@ export const getStaticValuesListControlFactory = (): DataControlFactory<
                   const selectedValues = options.map((option) => option.label);
                   selections.setSelectedOptions(selectedValues);
                   // take the name from the variable name
-                  esqlVariablesService.updateVariable('interval', selectedValues[0]);
+                  esqlVariablesService.updateVariable(variableName, selectedValues[0]);
                 }}
               />
             </div>

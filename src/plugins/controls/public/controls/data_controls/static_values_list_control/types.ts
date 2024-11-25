@@ -12,6 +12,7 @@ import type { DataControlApi } from '../types';
 export interface StaticValuesListControlState extends DefaultDataControlState {
   availableOptions: string[];
   selectedOptions: string[];
+  variableName: string;
 }
 
 export type StaticValuesListControlApi = DataControlApi;
