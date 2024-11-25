@@ -9,13 +9,13 @@ import React, { useEffect, useState } from 'react';
 
 import {
   EuiSteps,
-  EuiText,
   EuiPageHeader,
   EuiButtonEmpty,
   EuiSpacer,
   EuiLink,
   EuiPageBody,
   EuiPageSection,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -92,20 +92,35 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             </EuiButtonEmpty>,
           ]}
         >
-          <EuiText>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajor',
+              {
+                defaultMessage:
+                  'You need to upgrade to the last minor version before you can safely proceed to the next major.',
+              }
+            )}
+          >
             <FormattedMessage
-              id="xpack.upgradeAssistant.overview.checkUpcomingVersion"
-              defaultMessage="If you are not on the latest version of the Elastic Stack, use the Upgrade Assistant to prepare for the next upgrade."
+              id="xpack.upgradeAssistant.overview.whatsNewMessage"
+              defaultMessage="Check the {link}"
+              values={{
+                link: (
+                  <EuiLink
+                    data-test-subj="whatsNewLink"
+                    href={docLinks.links.elasticsearch.latestReleaseHighlights}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.overview.whatsNewLink"
+                      defaultMessage="latest release highlights"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
-          </EuiText>
-          <EuiText data-test-subj="whatsNewLink">
-            <EuiLink href={docLinks.links.elasticsearch.latestReleaseHighlights} target="_blank">
-              <FormattedMessage
-                id="xpack.upgradeAssistant.overview.whatsNewLink"
-                defaultMessage="Check the latest release highlights"
-              />
-            </EuiLink>
-          </EuiText>
+          </EuiCallOut>
+          <EuiSpacer />
         </EuiPageHeader>
         <EuiSpacer size="l" />
         <EuiSteps
