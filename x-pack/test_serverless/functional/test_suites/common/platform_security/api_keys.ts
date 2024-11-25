@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-<<<<<<< HEAD
 async function clearAllApiKeys(esClient: Client, logger: ToolingLog) {
   const existingKeys = await esClient.security.queryApiKeys();
   if (existingKeys.count > 0) {
@@ -22,8 +21,6 @@ async function clearAllApiKeys(esClient: Client, logger: ToolingLog) {
   }
 }
 
-=======
->>>>>>> 492a9a4643b (Unskips api key functional tests in MKI (#196572))
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'apiKeys']);
   const browser = getService('browser');
