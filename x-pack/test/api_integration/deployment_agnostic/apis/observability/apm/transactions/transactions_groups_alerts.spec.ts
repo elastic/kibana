@@ -73,7 +73,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return response.body as TransactionsGroupsMainStatistics;
   }
 
-  describe('Transaction groups alerts', () => {
+  describe('Transaction groups alerts', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/201531
+    this.tags(['failsOnMKI']);
+
     describe('when data is loaded', () => {
       const transactions = [
         {
@@ -208,9 +211,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('returns the correct number of alert counts', async () => {
-          // fails on MKI, see https://github.com/elastic/kibana/issues/201531
-          // @ts-expect-error
-          this.tags(['failsOnMKI']);
           const txGroupsTypeRequest = await getTransactionGroups({
             query: { transactionType: 'request' },
           });
