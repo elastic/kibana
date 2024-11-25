@@ -63,7 +63,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const { history } = useAppContext();
+  const { history, core } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
 
   return (
@@ -171,7 +171,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   {ilmPolicy?.name && ilmPolicyLink ? (
-                    <EuiLink href={ilmPolicyLink}>{ilmPolicy!.name}</EuiLink>
+                    <EuiLink onClick={() => core.application.navigateToUrl(ilmPolicyLink)}>
+                      {ilmPolicy!.name}
+                    </EuiLink>
                   ) : (
                     ilmPolicy?.name || i18nTexts.none
                   )}

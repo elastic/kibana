@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiFilterButton, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { type FilterName } from '../../hooks/use_charts_filter';
-import { FILTER_NAMES } from '../../translations';
+import { FILTER_NAMES } from '../../../translations';
 
 export const ChartsFilterPopover = memo(
   ({
