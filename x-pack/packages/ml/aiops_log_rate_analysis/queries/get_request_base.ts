@@ -7,8 +7,7 @@
 
 import type { AiopsLogRateAnalysisSchema } from '../api/schema';
 
-export const getRequestBase = ({ index, includeFrozen }: AiopsLogRateAnalysisSchema) => ({
+export const getRequestBase = ({ index }: AiopsLogRateAnalysisSchema) => ({
   index,
-  ...(includeFrozen ? { ignore_throttled: false } : {}),
   ignore_unavailable: true,
 });

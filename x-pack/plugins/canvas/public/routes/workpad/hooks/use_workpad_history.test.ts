@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useWorkpadHistory } from './use_workpad_history';
 import { encode } from '../route_state';
 
