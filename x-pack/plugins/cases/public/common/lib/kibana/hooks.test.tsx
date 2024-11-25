@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useApplicationCapabilities } from './hooks';
 import { allCasesPermissions, TestProviders } from '../../mock';
@@ -14,10 +14,7 @@ import { allCasesPermissions, TestProviders } from '../../mock';
 describe('hooks', () => {
   describe('useApplicationCapabilities', () => {
     it('should return the correct capabilities', async () => {
-      const { result } = renderHook<
-        React.PropsWithChildren<{}>,
-        ReturnType<typeof useApplicationCapabilities>
-      >(() => useApplicationCapabilities(), {
+      const { result } = renderHook(() => useApplicationCapabilities(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
 
