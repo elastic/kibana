@@ -407,12 +407,26 @@ async function extractRuleActions({
     return { hasUnsupportedActions: false, actions: [], references: [] };
   }
 
-  const hasUnsupportedActions = rule.actions.some(
+  const ruleLevelNotifyWhen = rule.notifyWhen;
+  const normalizedActions = [];
+  for (const action of rule.actions) {
+    // if action level frequency is not defined and rule level notifyWhen is, set the action level frequency
+    if (!action.frequency && ruleLevelNotifyWhen) {
+      normalizedActions.push({
+        ...action,
+        frequency: { notifyWhen: ruleLevelNotifyWhen, summary: false, throttle: null },
+      });
+    } else {
+      normalizedActions.push(action);
+    }
+  }
+
+  const hasUnsupportedActions = normalizedActions.some(
     (action) => action.frequency?.notifyWhen !== 'onActiveAlert'
   );
 
   const allActions = [
-    ...rule.actions.filter((action) => action.frequency?.notifyWhen === 'onActiveAlert'),
+    ...normalizedActions.filter((action) => action.frequency?.notifyWhen === 'onActiveAlert'),
     ...(rule.systemActions ?? []),
   ] as NormalizedAlertActionWithGeneratedValues[];
 
