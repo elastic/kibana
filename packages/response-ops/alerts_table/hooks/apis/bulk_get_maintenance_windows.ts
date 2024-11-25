@@ -8,11 +8,9 @@
  */
 
 import { HttpStart } from '@kbn/core-http-browser';
-import {
-  MaintenanceWindow,
-  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-} from '@kbn/alerting-plugin/common';
+import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { AsApiContract } from '@kbn/actions-plugin/common';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../constants';
 
 export interface BulkGetMaintenanceWindowsParams {
   http: HttpStart;

@@ -39,6 +39,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-application-browser-mocks",
-    "@kbn/response-ops-alerts-apis"
+    "@kbn/response-ops-alerts-apis",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/licensing-plugin",
+    "@kbn/core-application-browser",
   ]
 }

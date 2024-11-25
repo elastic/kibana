@@ -37,7 +37,8 @@ const initialSort = [
 export function ObservabilityAlertsTable(
   props: Omit<ObservabilityAlertsTableProps, 'services'> & { hideLazyLoader?: boolean }
 ) {
-  const { data, http, notifications, fieldFormats, application, licensing } = useKibana().services;
+  const { data, http, notifications, fieldFormats, application, licensing, cases } =
+    useKibana().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
   const { hideLazyLoader, ...tableProps } = props;
 
@@ -61,6 +62,7 @@ export function ObservabilityAlertsTable(
           fieldFormats,
           application,
           licensing,
+          cases,
         }}
         {...tableProps}
       />
