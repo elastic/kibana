@@ -52,13 +52,13 @@ export const StepEditHosts: React.FunctionComponent<Props> = ({
   const existingAgentPolicies: AgentPolicy[] = useAllNonManagedAgentPolicies();
 
   useEffect(() => {
-    if (existingAgentPolicies.length > 0) {
+    if (existingAgentPolicies && existingAgentPolicies.length > 0) {
       updateNewAgentPolicy({
         ...newAgentPolicy,
         name: incrementPolicyName(existingAgentPolicies),
       });
     }
-  }, [existingAgentPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [existingAgentPolicies, newAgentPolicy, updateNewAgentPolicy]);
 
   return (
     <EuiFlexGroup direction="column" alignItems="flexStart">
