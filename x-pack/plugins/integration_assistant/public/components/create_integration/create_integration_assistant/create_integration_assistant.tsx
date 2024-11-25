@@ -10,12 +10,12 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Header } from './header';
 import { Footer } from './footer';
 import { useNavigate, Page } from '../../../common/hooks/use_navigate';
-import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
-import { IntegrationStep, isIntegrationStepReady } from './steps/integration_step';
-import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
-import { ReviewStep, isReviewStepReady } from './steps/review_step';
-import { CelInputStep, isCelInputStepReady } from './steps/cel_input_step';
-import { ReviewCelStep, isCelReviewStepReady } from './steps/review_cel_step';
+import { ConnectorStep, isConnectorStepCompleted } from './steps/connector_step';
+import { IntegrationStep, isIntegrationStepCompleted } from './steps/integration_step';
+import { DataStreamStep, isDataStreamStepCompleted } from './steps/data_stream_step';
+import { ReviewStep, isReviewStepCompleted } from './steps/review_step';
+import { CelInputStep, isCelInputStepCompleted } from './steps/cel_input_step';
+import { ReviewCelStep, isCelReviewStepCompleted } from './steps/review_cel_step';
 import { DeployStep } from './steps/deploy_step';
 import { reducer, initialState, ActionsProvider, type Actions } from './state';
 import { useTelemetry } from '../telemetry';
@@ -38,17 +38,17 @@ export const CreateIntegrationAssistant = React.memo(() => {
 
   const isNextStepEnabled = useMemo(() => {
     if (state.step === 1) {
-      return isConnectorStepReady(state);
+      return isConnectorStepCompleted(state);
     } else if (state.step === 2) {
-      return isIntegrationStepReady(state);
+      return isIntegrationStepCompleted(state);
     } else if (state.step === 3) {
-      return isDataStreamStepReady(state);
+      return isDataStreamStepCompleted(state);
     } else if (state.step === 4) {
-      return isReviewStepReady(state);
+      return isReviewStepCompleted(state);
     } else if (isGenerateCelEnabled && state.step === 5) {
-      return isCelInputStepReady(state);
+      return isCelInputStepCompleted(state);
     } else if (isGenerateCelEnabled && state.step === 6) {
-      return isCelReviewStepReady(state);
+      return isCelReviewStepCompleted(state);
     }
     return false;
   }, [state, isGenerateCelEnabled]);

@@ -7,5 +7,5 @@
 
 import type { State } from '../../state';
 
-export const isCelReviewStepReady = ({ isGenerating, celInputResult }: State) =>
+export const isCelReviewStepCompleted = ({ isGenerating, celInputResult }: State) =>
   isGenerating === false && celInputResult != null;

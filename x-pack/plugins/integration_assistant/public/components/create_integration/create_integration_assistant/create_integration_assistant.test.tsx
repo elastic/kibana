@@ -41,36 +41,36 @@ const mockCelInputStep = jest.fn(() => <div data-test-subj="celInputStepMock" />
 const mockReviewCelStep = jest.fn(() => <div data-test-subj="reviewCelStepMock" />);
 const mockDeployStep = jest.fn(() => <div data-test-subj="deployStepMock" />);
 
-const mockIsConnectorStepReady = jest.fn();
-const mockIsIntegrationStepReady = jest.fn();
-const mockIsDataStreamStepReady = jest.fn();
-const mockIsReviewStepReady = jest.fn();
-const mockIsCelInputStepReady = jest.fn();
-const mockIsCelReviewStepReady = jest.fn();
+const mockIsConnectorStepCompleted = jest.fn();
+const mockIsIntegrationStepCompleted = jest.fn();
+const mockIsDataStreamStepCompleted = jest.fn();
+const mockIsReviewStepCompleted = jest.fn();
+const mockIsCelInputStepCompleted = jest.fn();
+const mockIsCelReviewStepCompleted = jest.fn();
 
 jest.mock('./steps/connector_step', () => ({
   ConnectorStep: () => mockConnectorStep(),
-  isConnectorStepReady: () => mockIsConnectorStepReady(),
+  isConnectorStepCompleted: () => mockIsConnectorStepCompleted(),
 }));
 jest.mock('./steps/integration_step', () => ({
   IntegrationStep: () => mockIntegrationStep(),
-  isIntegrationStepReady: () => mockIsIntegrationStepReady(),
+  isIntegrationStepCompleted: () => mockIsIntegrationStepCompleted(),
 }));
 jest.mock('./steps/data_stream_step', () => ({
   DataStreamStep: () => mockDataStreamStep(),
-  isDataStreamStepReady: () => mockIsDataStreamStepReady(),
+  isDataStreamStepCompleted: () => mockIsDataStreamStepCompleted(),
 }));
 jest.mock('./steps/review_step', () => ({
   ReviewStep: () => mockReviewStep(),
-  isReviewStepReady: () => mockIsReviewStepReady(),
+  isReviewStepCompleted: () => mockIsReviewStepCompleted(),
 }));
 jest.mock('./steps/cel_input_step', () => ({
   CelInputStep: () => mockCelInputStep(),
-  isCelInputStepReady: () => mockIsCelInputStepReady(),
+  isCelInputStepCompleted: () => mockIsCelInputStepCompleted(),
 }));
 jest.mock('./steps/review_cel_step', () => ({
   ReviewCelStep: () => mockReviewCelStep(),
-  isCelReviewStepReady: () => mockIsCelReviewStepReady(),
+  isCelReviewStepCompleted: () => mockIsCelReviewStepCompleted(),
 }));
 jest.mock('./steps/deploy_step', () => ({ DeployStep: () => mockDeployStep() }));
 
@@ -102,14 +102,14 @@ describe('CreateIntegration', () => {
       expect(result.queryByTestId('connectorStepMock')).toBeInTheDocument();
     });
 
-    it('should call isConnectorStepReady', () => {
+    it('should call isConnectorStepCompleted', () => {
       renderIntegrationAssistant();
-      expect(mockIsConnectorStepReady).toHaveBeenCalled();
+      expect(mockIsConnectorStepCompleted).toHaveBeenCalled();
     });
 
     describe('when connector step is not done', () => {
       beforeEach(() => {
-        mockIsConnectorStepReady.mockReturnValue(false);
+        mockIsConnectorStepCompleted.mockReturnValue(false);
       });
 
       it('should disable the next button', () => {
@@ -130,7 +130,7 @@ describe('CreateIntegration', () => {
 
     describe('when connector step is done', () => {
       beforeEach(() => {
-        mockIsConnectorStepReady.mockReturnValue(true);
+        mockIsConnectorStepCompleted.mockReturnValue(true);
       });
 
       it('should enable the next button', () => {
@@ -201,9 +201,9 @@ describe('CreateIntegration', () => {
       expect(result.queryByTestId('integrationStepMock')).toBeInTheDocument();
     });
 
-    it('should call isIntegrationStepReady', () => {
+    it('should call isIntegrationStepCompleted', () => {
       renderIntegrationAssistant();
-      expect(mockIsIntegrationStepReady).toHaveBeenCalled();
+      expect(mockIsIntegrationStepCompleted).toHaveBeenCalled();
     });
   });
 
@@ -217,9 +217,9 @@ describe('CreateIntegration', () => {
       expect(result.queryByTestId('dataStreamStepMock')).toBeInTheDocument();
     });
 
-    it('should call isDataStreamStepReady', () => {
+    it('should call isDataStreamStepCompleted', () => {
       renderIntegrationAssistant();
-      expect(mockIsDataStreamStepReady).toHaveBeenCalled();
+      expect(mockIsDataStreamStepCompleted).toHaveBeenCalled();
     });
   });
 
@@ -233,9 +233,9 @@ describe('CreateIntegration', () => {
       expect(result.queryByTestId('reviewStepMock')).toBeInTheDocument();
     });
 
-    it('should call isReviewStepReady', () => {
+    it('should call isReviewStepCompleted', () => {
       renderIntegrationAssistant();
-      expect(mockIsReviewStepReady).toHaveBeenCalled();
+      expect(mockIsReviewStepCompleted).toHaveBeenCalled();
     });
   });
 
@@ -270,9 +270,9 @@ describe('CreateIntegration with generateCel enabled', () => {
       expect(result.queryByTestId('celInputStepMock')).toBeInTheDocument();
     });
 
-    it('should call isCelInputStepReady', () => {
+    it('should call isCelInputStepCompleted', () => {
       renderIntegrationAssistant();
-      expect(mockIsCelInputStepReady).toHaveBeenCalled();
+      expect(mockIsCelInputStepCompleted).toHaveBeenCalled();
     });
   });
 
@@ -301,9 +301,9 @@ describe('CreateIntegration with generateCel enabled', () => {
       expect(result.queryByTestId('reviewCelStepMock')).toBeInTheDocument();
     });
 
-    it('should call isReviewCelStepReady', () => {
+    it('should call isReviewCelStepCompleted', () => {
       renderIntegrationAssistant();
-      expect(mockIsCelReviewStepReady).toHaveBeenCalled();
+      expect(mockIsCelReviewStepCompleted).toHaveBeenCalled();
     });
   });
 
