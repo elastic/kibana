@@ -266,4 +266,36 @@ describe('validateReferences()', () => {
       'Error fetching references for imported objects'
     );
   });
+
+  // test that when references are missing returns only deduplicated errors
+  test('returns only deduplicated errors when references are missing', async () => {
+    const params = setup({
+      objects: [
+        {
+          id: '2',
+          type: 'visualization',
+          attributes: { title: 'My Visualization 2' },
+          references: [
+            { name: 'ref_0', type: 'index-pattern', id: '3' },
+            { name: 'ref_0', type: 'index-pattern', id: '3' },
+          ],
+        },
+      ],
+    });
+    params.savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [createNotFoundError({ type: 'index-pattern', id: '3' })],
+    });
+
+    const result = await validateReferences(params);
+    expect(result).toEqual([
+      expect.objectContaining({
+        type: 'visualization',
+        id: '2',
+        error: {
+          type: 'missing_references',
+          references: [{ type: 'index-pattern', id: '3' }],
+        },
+      }),
+    ]);
+  });
 });

@@ -1213,6 +1213,58 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
+        it('should be able to import a rule with both single space and space agnostic exception lists', async () => {
+          const ndjson = combineToNdJson(
+            getCustomQueryRuleParams({
+              exceptions_list: [
+                {
+                  id: 'agnostic',
+                  list_id: 'test_list_agnostic_id',
+                  type: 'detection',
+                  namespace_type: 'agnostic',
+                },
+                {
+                  id: 'single',
+                  list_id: 'test_list_id',
+                  type: 'rule_default',
+                  namespace_type: 'single',
+                },
+              ],
+            }),
+            { ...getImportExceptionsListSchemaMock('test_list_id'), type: 'rule_default' },
+            getImportExceptionsListItemNewerVersionSchemaMock('test_item_id', 'test_list_id'),
+            {
+              ...getImportExceptionsListSchemaMock('test_list_agnostic_id'),
+              type: 'detection',
+              namespace_type: 'agnostic',
+            },
+            {
+              ...getImportExceptionsListItemNewerVersionSchemaMock(
+                'test_item_id',
+                'test_list_agnostic_id'
+              ),
+              namespace_type: 'agnostic',
+            }
+          );
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+            .expect(200);
+
+          expect(body).toMatchObject({
+            success: true,
+            success_count: 1,
+            rules_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 2,
+          });
+        });
+
         it('should only remove non existent exception list references from rule', async () => {
           // create an exception list
           const { body: exceptionBody } = await supertest

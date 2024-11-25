@@ -217,7 +217,7 @@ export class AssetCriticalityDataClient {
       index: this.getIndex(),
       flushBytes,
       retries,
-      refreshOnCompletion: true, // refresh the index after all records are processed
+      refreshOnCompletion: this.getIndex(),
       onDocument: ({ record }) => [
         { update: { _id: createId(record) } },
         {

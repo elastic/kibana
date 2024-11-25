@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { HttpServiceSetup, Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { routes } from './rest_api_routes/public';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
 
@@ -19,19 +19,23 @@ import { registerFields } from './rest_api_routes/internal/fields';
 
 interface RegisterRoutesArgs {
   http: HttpServiceSetup;
+  logger: Logger;
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >;
   isRollupsEnabled: () => boolean;
   dataViewRestCounter?: UsageCounter;
+  hasEsDataTimeout: number;
 }
 
 export function registerRoutes({
   http,
+  logger,
   getStartServices,
-  dataViewRestCounter,
   isRollupsEnabled,
+  dataViewRestCounter,
+  hasEsDataTimeout,
 }: RegisterRoutesArgs) {
   const router = http.createRouter();
 
@@ -41,5 +45,5 @@ export function registerRoutes({
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
   registerFields(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
-  registerHasEsDataRoute(router);
+  registerHasEsDataRoute(router, logger, hasEsDataTimeout);
 }
