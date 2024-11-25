@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import { type FC, useCallback } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -51,9 +51,17 @@ export const modelsListRouteFactory = (
 const PageWrapper: FC = () => {
   const { initSavedObjects } = useSavedObjectsApiService();
 
+  const initSavedObjectsWrapper = useCallback(async () => {
+    try {
+      await initSavedObjects();
+    } catch (error) {
+      // ignore error as user may not have permission to sync
+    }
+  }, [initSavedObjects]);
+
   const { context } = useRouteResolver('full', ['canGetTrainedModels'], {
     ...basicResolvers(),
-    initSavedObjects: () => initSavedObjects(),
+    initSavedObjectsWrapper,
   });
 
   return (
