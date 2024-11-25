@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 import { TestProvider } from '../../../mocks/test_provider';
 import { CreateIntegrationAssistant } from './create_integration_assistant';
 import type { State } from './state';
 import { ExperimentalFeaturesService } from '../../../services';
+import { mockReportEvent } from '../../../services/telemetry/mocks/service';
+import { TelemetryEventType } from '../../../services/telemetry/types';
 
 export const defaultInitialState: State = {
   step: 1,
@@ -72,6 +74,12 @@ jest.mock('./steps/review_cel_step', () => ({
 }));
 jest.mock('./steps/deploy_step', () => ({ DeployStep: () => mockDeployStep() }));
 
+const mockNavigate = jest.fn();
+jest.mock('../../../common/hooks/use_navigate', () => ({
+  ...jest.requireActual('../../../common/hooks/use_navigate'),
+  useNavigate: () => mockNavigate,
+}));
+
 const renderIntegrationAssistant = () =>
   render(<CreateIntegrationAssistant />, { wrapper: TestProvider });
 
@@ -89,7 +97,7 @@ describe('CreateIntegration', () => {
       mockInitialState.mockReturnValueOnce({ ...defaultInitialState, step: 1 });
     });
 
-    it('should render connector', () => {
+    it('should render connector step', () => {
       const result = renderIntegrationAssistant();
       expect(result.queryByTestId('connectorStepMock')).toBeInTheDocument();
     });
@@ -97,6 +105,89 @@ describe('CreateIntegration', () => {
     it('should call isConnectorStepReady', () => {
       renderIntegrationAssistant();
       expect(mockIsConnectorStepReady).toHaveBeenCalled();
+    });
+
+    describe('when connector step is not done', () => {
+      beforeEach(() => {
+        mockIsConnectorStepReady.mockReturnValue(false);
+      });
+
+      it('should disable the next button', () => {
+        const result = renderIntegrationAssistant();
+        expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+      });
+
+      it('should still enable the back button', () => {
+        const result = renderIntegrationAssistant();
+        expect(result.getByTestId('buttonsFooter-backButton')).toBeEnabled();
+      });
+
+      it('should still enable the cancel button', () => {
+        const result = renderIntegrationAssistant();
+        expect(result.getByTestId('buttonsFooter-cancelButton')).toBeEnabled();
+      });
+    });
+
+    describe('when connector step is done', () => {
+      beforeEach(() => {
+        mockIsConnectorStepReady.mockReturnValue(true);
+      });
+
+      it('should enable the next button', () => {
+        const result = renderIntegrationAssistant();
+        expect(result.getByTestId('buttonsFooter-nextButton')).toBeEnabled();
+      });
+
+      it('should enable the back button', () => {
+        const result = renderIntegrationAssistant();
+        expect(result.getByTestId('buttonsFooter-backButton')).toBeEnabled();
+      });
+
+      it('should enable the cancel button', () => {
+        const result = renderIntegrationAssistant();
+        expect(result.getByTestId('buttonsFooter-cancelButton')).toBeEnabled();
+      });
+
+      describe('when next button is clicked', () => {
+        beforeEach(() => {
+          const result = renderIntegrationAssistant();
+          mockReportEvent.mockClear();
+          act(() => {
+            result.getByTestId('buttonsFooter-nextButton').click();
+          });
+        });
+
+        it('should report telemetry for connector step completion', () => {
+          expect(mockReportEvent).toHaveBeenCalledWith(
+            TelemetryEventType.IntegrationAssistantStepComplete,
+            {
+              sessionId: expect.any(String),
+              step: 1,
+              stepName: 'Connector Step',
+              durationMs: expect.any(Number),
+              sessionElapsedTime: expect.any(Number),
+            }
+          );
+        });
+      });
+    });
+
+    describe('when back button is clicked', () => {
+      beforeEach(() => {
+        const result = renderIntegrationAssistant();
+        mockReportEvent.mockClear();
+        act(() => {
+          result.getByTestId('buttonsFooter-backButton').click();
+        });
+      });
+
+      it('should not report telemetry', () => {
+        expect(mockReportEvent).not.toHaveBeenCalled();
+      });
+
+      it('should return to landing page', () => {
+        expect(mockNavigate).toHaveBeenCalledWith('landing');
+      });
     });
   });
 
