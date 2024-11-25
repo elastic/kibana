@@ -21,7 +21,8 @@
       "observability",
       "observabilityShared",
       "dataViews",
-      "unifiedSearch"
+      "unifiedSearch",
+      "share"
     ],
     "optionalPlugins": [
       "infra",
@@ -39,7 +40,8 @@
     "requiredBundles": [
       "kibanaUtils",
       "alerting",
-      "kibanaReact"
+      "kibanaReact",
+      "logsShared"
     ]
   }
 }

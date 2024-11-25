@@ -126,7 +126,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/core-status-common-internal",
+    "@kbn/core-status-common",
     "@kbn/repo-info",
     "@kbn/storybook",
     "@kbn/controls-plugin",
@@ -222,7 +222,6 @@
     "@kbn/entities-schema",
     "@kbn/inference-plugin",
     "@kbn/core-saved-objects-server-mocks",
-    "@kbn/core-http-router-server-internal",
     "@kbn/core-security-server-mocks",
     "@kbn/serverless",
     "@kbn/core-user-profile-browser",
@@ -230,6 +229,8 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-common",
     "@kbn/langchain",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/index-adapter",
+    "@kbn/core-http-server-utils"
   ]
 }

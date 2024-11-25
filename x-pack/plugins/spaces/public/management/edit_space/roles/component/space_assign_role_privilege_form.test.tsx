@@ -6,7 +6,7 @@
  */
 
 import { EuiThemeProvider } from '@elastic/eui';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
@@ -142,6 +142,15 @@ describe('PrivilegesRolesForm', () => {
     jest.clearAllMocks();
   });
 
+  it("would open the 'manage roles' link in a new tab", () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(screen.getByText('Manage roles')).toHaveAttribute('target', '_blank');
+  });
+
   it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
     getRolesSpy.mockResolvedValue([]);
     getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
@@ -168,6 +177,23 @@ describe('PrivilegesRolesForm', () => {
     await waitFor(() => null);
 
     expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+  });
+
+  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(1);
+
+    // trigger click on manage roles link, which is perquisite for page visibility handler to trigger role refetch
+    fireEvent.click(screen.getByText(/manage roles/i));
+
+    // trigger page visibility change
+    fireEvent(document, new Event('visibilitychange'));
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(2);
   });
 
   it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {

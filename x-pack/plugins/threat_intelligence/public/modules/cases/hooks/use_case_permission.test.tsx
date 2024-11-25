@@ -36,7 +36,7 @@ describe('useCasePermission', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: true,
+            createComment: true,
             update: true,
           }),
         },
@@ -60,7 +60,7 @@ describe('useCasePermission', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: false,
+            createComment: false,
             update: true,
           }),
         },
@@ -84,7 +84,7 @@ describe('useCasePermission', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: true,
+            createComment: true,
             update: true,
           }),
         },

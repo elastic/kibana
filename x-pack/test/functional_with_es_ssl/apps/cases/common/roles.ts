@@ -25,7 +25,7 @@ export const casesReadDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCases: ['minimal_read', 'cases_delete'],
+          generalCasesV2: ['minimal_read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -49,7 +49,7 @@ export const casesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCases: ['minimal_all'],
+          generalCasesV2: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -73,7 +73,7 @@ export const casesAll: Role = {
     kibana: [
       {
         feature: {
-          generalCases: ['all'],
+          generalCasesV2: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

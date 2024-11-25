@@ -7,12 +7,12 @@
 
 import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
+import type { SiemMigrationRuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
   ElasticRule,
   OriginalRule,
   RuleMigration,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { SiemMigrationRuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 
 export const migrateRuleState = Annotation.Root({
   messages: Annotation<BaseMessage[]>({

@@ -295,7 +295,6 @@ describe('Timeline save middleware', () => {
         isFavorite: false,
         isLive: false,
         isSelectAllChecked: false,
-        isLoading: false,
         isSaving: false,
         itemsPerPage: 25,
         itemsPerPageOptions: [10, 25, 50, 100],

@@ -50,6 +50,54 @@ For Elastic Security release information, refer to {security-guide}/release-note
 ==== Kibana APIs
 
 [discrete]
+[[breaking-199656]]
+.Removed all security v1 endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+All `v1` Kibana security HTTP endpoints have been removed.
+
+`GET /api/security/v1/logout` has been replaced by `GET /api/security/logout`
+`GET /api/security/v1/oidc/implicit` has been replaced by `GET /api/security/oidc/implicit`
+`GET /api/security/v1/oidc` has been replaced by GET `/api/security/oidc/callback`
+`POST /api/security/v1/oidc` has been replaced by POST `/api/security/oidc/initiate_login`
+`POST /api/security/v1/saml` has been replaced by POST `/api/security/saml/callback`
+`GET /api/security/v1/me` has been removed with no replacement.
+
+For more information, refer to {kibana-pull}199656[#199656].
+
+*Impact* + 
+Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0.
+Third party OIDC and SAML identity providers configured with `v1` endpoints will no longer work.
+
+*Action* +
+Update any OIDC and SAML identity providers to reference the corresponding replacement endpoint listed above.
+Remove references to the `/api/security/v1/me` endpoint from any automations, applications, tooling, and scripts.
+====
+
+[discrete]
+[[breaking-193792]]
+.Access to all internal APIs is blocked (9.0.0)
+[%collapsible]
+====
+*Details* +
+Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure
+that HTTP API integrations with Kibana avoid unexpected breaking changes. 
+Refer to {kibana-pull}193792[#193792].
+
+*Impact* +
+Any HTTP API calls to internal Kibana endpoints will fail with a 400 status code starting
+from version 9.0.0.
+
+*Action* +
+**Do not integrate with internal HTTP APIs**. They may change or be removed without notice, 
+and lead to unexpected behaviors. If you would like some capability to be exposed over an
+HTTP API, https://github.com/elastic/kibana/issues/new/choose[create an issue].
+We would love to discuss your use case.
+
+====
+
+[discrete]
 [[breaking-162506]]
 .Get case metrics APIs became internal. (8.10)
 [%collapsible]
@@ -411,6 +459,15 @@ The endpoint is now split into two separate endpoints:
 ====
 
 // General settings
+
+[discrete]
+[[breaking-180986]]
+.[General settings] Updated request processing during shutdown. (8.16)
+[%collapsible]
+====
+*Details* +
+During shutdown, {kib} now waits for all the ongoing requests to complete according to the `server.shutdownTimeout` setting. During that period, the incoming socket is closed and any new incoming requests are rejected. Before this update, new incoming requests received a response with the status code 503 and body `{"message": "Kibana is shutting down and not accepting new incoming requests"}`. For more information, refer to {kibana-pull}180986[#180986].
+====
 
 [discrete]
 [[breaking-111535]]
@@ -781,18 +838,6 @@ The legacy audit logger has been removed. For more information, refer to {kibana
 
 *Impact* +
 Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the <<audit-logging-settings, audit logging settings>>.
-====
-
-[discrete]
-[[breaking-47929]]
-.[Security] Removed `/api/security/v1/saml` route. (8.0)
-[%collapsible]
-====
-*Details* +
-The `/api/security/v1/saml` route has been removed and is reflected in the kibana.yml `server.xsrf.whitelist` setting, {es}, and the Identity Provider SAML settings. For more information, refer to {kibana-pull}47929[#47929]
-
-*Impact* +
-Use the `/api/security/saml/callback` route, or wait to upgrade to 8.0.0-alpha2 when the `/api/security/saml/callback` route breaking change is reverted.
 ====
 
 [discrete]
@@ -1411,6 +1456,35 @@ The `/agent_status` Fleet API now returns the following statuses:
 ====
 
 [discrete]
+[[kibana-150267]]
+.Deprecated Saved objects APIs. (8.7)
+[%collapsible]
+====
+*Details* +
+The following saved objects APIs have been deprecated.
+
+[source,text]
+--
+/api/saved_objects/{type}/{id}
+/api/saved_objects/resolve/{type}/{id}
+/api/saved_objects/{type}/{id?}
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_find
+/api/saved_objects/{type}/{id}
+/api/saved_objects/_bulk_get
+/api/saved_objects/_bulk_create
+/api/saved_objects/_bulk_resolve
+/api/saved_objects/_bulk_update
+/api/saved_objects/_bulk_delete
+--
+
+For more information, refer to ({kibana-pull}150267[#150267]).
+
+*Impact* +
+Use dedicated public APIs instead, for example use <<data-views-api>> to manage Data Views.
+====
+
+[discrete]
 [[deprecation-119494]]
 .Updates Fleet API to improve consistency. (8.0)
 [%collapsible]
@@ -1609,6 +1683,18 @@ The following security_linux and security_windows job configurations are updated
 ** v3_windows_rare_user_type10_remote_login
 ====
 
+// Setup
+
+[discrete]
+[[deprecation-macos-x8664]]
+.[Setup] New versions of Kibana for macOS x86_64 will end after 8.17.
+[%collapsible]
+====
+*Details* +
+New versions of Kibana builds for macOS x86_64 are deprecated and will no longer be released after 8.17.  Kibana for macOS AArch64 is unaffected. 
+
+Use Docker to run new versions of Kibana on macOS 86x_64.
+====
 
 // Sharing & Reporting
 

@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 
 import { mockTimelineResults, mockGetOneTimelineResult } from '../../../common/mock';
 import { timelineDefaults } from '../../store/defaults';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../store/actions';
 import type { QueryTimelineById } from './helpers';
 import {
   defaultTimelineToTimelineModel,
@@ -646,13 +645,6 @@ describe('helpers', () => {
         jest.clearAllMocks();
       });
 
-      test('dispatch updateIsLoading to true', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-      });
-
       test('get timeline by Id', () => {
         expect(resolveTimeline).toHaveBeenCalled();
       });
@@ -669,13 +661,6 @@ describe('helpers', () => {
         );
         expect(onOpenTimeline).toBeCalledWith({
           ...timeline,
-        });
-      });
-
-      test('dispatch updateIsLoading to false', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
         });
       });
     });
@@ -704,11 +689,6 @@ describe('helpers', () => {
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           await queryTimelineById(args);
-        });
-
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
         });
 
         // expect(resolveTimeline).toHaveBeenCalled();
@@ -741,11 +721,6 @@ describe('helpers', () => {
             },
           });
         });
-
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
       });
 
       test('should update timeline correctly when timeline is untitled', async () => {
@@ -764,11 +739,6 @@ describe('helpers', () => {
           queryTimelineById(newArgs);
         });
 
-        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-
         expect(mockUpdateTimeline).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
@@ -778,10 +748,6 @@ describe('helpers', () => {
             }),
           })
         );
-        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
       });
 
       test('should update timeline correctly when timeline is already saved and onOpenTimeline is not provided', async () => {
@@ -789,11 +755,6 @@ describe('helpers', () => {
         renderHook(async () => {
           const queryTimelineById = useQueryTimelineById();
           queryTimelineById(args);
-        });
-
-        expect(dispatchUpdateIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
         });
 
         await waitFor(() => {
@@ -860,13 +821,6 @@ describe('helpers', () => {
         jest.clearAllMocks();
       });
 
-      test('dispatch updateIsLoading to true', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-      });
-
       test('get timeline by Id', () => {
         expect(resolveTimeline).toHaveBeenCalled();
       });
@@ -883,13 +837,6 @@ describe('helpers', () => {
             end: '2020-10-28T11:37:31.655Z',
             start: '2020-10-27T11:37:31.655Z',
           },
-        });
-      });
-
-      test('dispatch updateIsLoading to false', () => {
-        expect(dispatchUpdateIsLoading).toBeCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
         });
       });
     });

@@ -28,7 +28,6 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
-  TemplateAgentPolicyInput,
 } from '../../types';
 
 import type { FleetAuthzRouteConfig } from '../security/types';
@@ -120,12 +119,12 @@ export interface PackageClient {
     prerelease?: false;
   }): Promise<PackageList>;
 
-  getAgentPolicyInputs(
+  getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
     ignoreUnverified?: boolean
-  ): Promise<TemplateAgentPolicyInput[]>;
+  ): Promise<string>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -288,7 +287,7 @@ class PackageClientImpl implements PackageClient {
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
-  public async getAgentPolicyInputs(
+  public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
@@ -302,16 +301,14 @@ class PackageClientImpl implements PackageClient {
       pkgVersion = pkg.version;
     }
 
-    const { inputs } = await getTemplateInputs(
+    return getTemplateInputs(
       this.internalSoClient,
       pkgName,
       pkgVersion,
-      'json',
+      'yml',
       prerelease,
       ignoreUnverified
     );
-
-    return inputs;
   }
 
   public async getPackage(

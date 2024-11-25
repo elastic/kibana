@@ -348,6 +348,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await elasticChart.setNewChartUiDebugFlag(true);
         });
 
+        it(`${testData.suiteTitle} attaches log rate analysis to a dashboard`, async () => {
+          await aiops.logRateAnalysisPage.navigateToDataViewSelection();
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} loads the log rate analysis page with selected data source`
+          );
+          await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
+            testData.sourceIndexOrSavedSearch
+          );
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} starting dashboard attachment process`
+          );
+          await aiops.logRateAnalysisPage.attachToDashboard();
+
+          await ml.navigation.navigateToMl();
+        });
+
         runTests(testData);
       });
     }

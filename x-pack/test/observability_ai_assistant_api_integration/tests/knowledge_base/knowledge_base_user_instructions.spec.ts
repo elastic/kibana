@@ -12,9 +12,11 @@ import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/se
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
+  TINY_ELSER,
   clearConversations,
   clearKnowledgeBase,
   createKnowledgeBaseModel,
+  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from './helpers';
 import { getConversationCreatedEvent } from '../conversations/helpers';
@@ -28,19 +30,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const ml = getService('ml');
   const log = getService('log');
+  const retry = getService('retry');
   const getScopedApiClientForUsername = getService('getScopedApiClientForUsername');
 
   describe('Knowledge base user instructions', () => {
     before(async () => {
       await createKnowledgeBaseModel(ml);
-
       await observabilityAIAssistantAPIClient
-        .editor({ endpoint: 'POST /internal/observability_ai_assistant/kb/setup' })
+        .admin({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+          params: {
+            query: {
+              model_id: TINY_ELSER.id,
+            },
+          },
+        })
         .expect(200);
     });
 
     after(async () => {
       await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es });
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });
@@ -85,62 +95,69 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        await retry.try(async () => {
+          const res = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const instructions = res.body.userInstructions;
+          expect(instructions).to.have.length(3);
+
+          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+
+          expect(sortById(instructions)).to.eql(
+            sortById([
+              {
+                id: 'private-doc-from-editor',
+                public: false,
+                text: 'Private user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-secondary_editor',
+                public: true,
+                text: 'Public user instruction from "secondary_editor"',
+              },
+            ])
+          );
         });
-
-        const instructions = res.body.userInstructions;
-
-        const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
-
-        expect(sortById(instructions)).to.eql(
-          sortById([
-            {
-              id: 'private-doc-from-editor',
-              public: false,
-              text: 'Private user instruction from "editor"',
-            },
-            {
-              id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              id: 'public-doc-from-secondary_editor',
-              public: true,
-              text: 'Public user instruction from "secondary_editor"',
-            },
-          ])
-        );
       });
 
       it('"secondaryEditor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.secondaryEditor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        await retry.try(async () => {
+          const res = await observabilityAIAssistantAPIClient.secondaryEditor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const instructions = res.body.userInstructions;
+          expect(instructions).to.have.length(3);
+
+          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+
+          expect(sortById(instructions)).to.eql(
+            sortById([
+              {
+                id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-secondary_editor',
+                public: true,
+                text: 'Public user instruction from "secondary_editor"',
+              },
+              {
+                id: 'private-doc-from-secondary_editor',
+                public: false,
+                text: 'Private user instruction from "secondary_editor"',
+              },
+            ])
+          );
         });
-        const instructions = res.body.userInstructions;
-
-        const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
-
-        expect(sortById(instructions)).to.eql(
-          sortById([
-            {
-              id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              id: 'public-doc-from-secondary_editor',
-              public: true,
-              text: 'Public user instruction from "secondary_editor"',
-            },
-            {
-              id: 'private-doc-from-secondary_editor',
-              public: false,
-              text: 'Private user instruction from "secondary_editor"',
-            },
-          ])
-        );
       });
     });
 

@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 20000
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
-  aiops: 16000
+  aiops: 16670
   alerting: 106936
   apm: 64385
   banners: 17946
@@ -119,11 +119,12 @@ pageLoadAssetSize:
   observabilityAiAssistantManagement: 19279
   observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 80000
+  observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 55463
   presentationUtil: 58834
+  productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
   reporting: 58600
@@ -142,6 +143,7 @@ pageLoadAssetSize:
   searchHomepage: 19831
   searchIndices: 20519
   searchInferenceEndpoints: 20470
+  searchNavigation: 19233
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080

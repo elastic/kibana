@@ -12,10 +12,12 @@ import loadJsonFile from 'load-json-file';
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
+import { set } from '@kbn/safer-lodash-set';
 
 import { getPackages } from '@kbn/repo-packages';
 import { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFips } from 'crypto';
 import {
   createTestEsCluster,
   CreateTestEsClusterOptions,
@@ -58,6 +60,17 @@ export function createRootWithSettings(
     pkg.version = customKibanaVersion;
   }
 
+  /*
+   * Most of these integration tests expect OSS to default to true, but FIPS
+   * requires the security plugin to be enabled
+   */
+  let oss = true;
+  if (getFips() === 1) {
+    set(settings, 'xpack.security.fipsMode.enabled', true);
+    oss = false;
+    delete cliArgs.oss;
+  }
+
   const env = Env.createDefault(
     REPO_ROOT,
     {
@@ -67,10 +80,10 @@ export function createRootWithSettings(
         watch: false,
         basePath: false,
         runExamples: false,
-        oss: true,
         disableOptimizer: true,
         cache: true,
         dist: false,
+        oss,
         ...cliArgs,
       },
       repoPackages: getPackages(REPO_ROOT),
@@ -237,7 +250,13 @@ export function createTestServers({
   if (!adjustTimeout) {
     throw new Error('adjustTimeout is required in order to avoid flaky tests');
   }
-  const license = settings.es?.license ?? 'basic';
+  let license = settings.es?.license ?? 'basic';
+
+  if (getFips() === 1) {
+    // Set license to 'trial' if Node is running in FIPS mode
+    license = 'trial';
+  }
+
   const usersToBeAdded = settings.users ?? [];
   if (usersToBeAdded.length > 0) {
     if (license !== 'trial') {
@@ -274,6 +293,7 @@ export function createTestServers({
           hosts: es.getHostUrls(),
           username: kibanaServerTestUser.username,
           password: kibanaServerTestUser.password,
+          ...(getFips() ? kbnSettings.elasticsearch : {}),
         };
       }
 

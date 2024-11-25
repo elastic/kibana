@@ -236,6 +236,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the siem migrations feature
    */
   siemMigrationsEnabled: false,
+
+  /**
+   * Enables the Defend Insights feature
+   */
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

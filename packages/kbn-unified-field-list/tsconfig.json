@@ -34,7 +34,8 @@
     "@kbn/visualization-utils",
     "@kbn/search-types",
     "@kbn/fields-metadata-plugin",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/esql-utils",
   ],
   "exclude": ["target/**/*"]
 }

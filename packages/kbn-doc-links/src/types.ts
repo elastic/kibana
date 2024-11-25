@@ -317,6 +317,7 @@ export interface DocLinks {
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
+    readonly dashboardImportExport: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;
@@ -342,6 +343,7 @@ export interface DocLinks {
     readonly aiAssistant: string;
     readonly artifactControl: string;
     readonly avcResults: string;
+    readonly bidirectionalIntegrations: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
@@ -506,6 +508,7 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
+    deprecatedV1Endpoints: string;
   }>;
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
@@ -675,6 +678,9 @@ export interface DocLinks {
     readonly retrieval: string;
     readonly context: string;
     readonly hiddenFields: string;
+  };
+  readonly inferenceManagement: {
+    readonly inferenceAPIDocumentation: string;
   };
 }
 

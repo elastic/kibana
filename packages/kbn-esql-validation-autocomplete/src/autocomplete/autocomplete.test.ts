@@ -887,6 +887,7 @@ describe('autocomplete', () => {
         'FROM a | ENRICH policy /',
         ['ON $0', 'WITH $0', '| '].map(attachTriggerCommand)
       );
+
       testSuggestions(
         'FROM a | ENRICH policy ON /',
         getFieldNamesByType('any')

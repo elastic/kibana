@@ -21,19 +21,22 @@ export enum ConditionEntryField {
   HASH = 'process.hash.*',
   PATH = 'process.executable.caseless',
   SIGNER = 'process.Ext.code_signature',
+  SIGNER_MAC = 'process.code_signature',
 }
 
 export enum EntryFieldType {
   HASH = '.hash.',
   EXECUTABLE = '.executable.caseless',
   PATH = '.path',
-  SIGNER = '.Ext.code_signature',
+  SIGNER = '.code_signature',
 }
 
 export type TrustedAppConditionEntryField =
   | 'process.hash.*'
   | 'process.executable.caseless'
-  | 'process.Ext.code_signature';
+  | 'process.Ext.code_signature'
+  | 'process.code_signature';
+
 export type BlocklistConditionEntryField =
   | 'file.hash.*'
   | 'file.path'

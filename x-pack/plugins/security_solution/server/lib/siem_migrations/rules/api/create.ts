@@ -8,11 +8,14 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { v4 as uuidV4 } from 'uuid';
-import type { CreateRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
-import { CreateRuleMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rules_migration.gen';
+import {
+  CreateRuleMigrationRequestBody,
+  type CreateRuleMigrationResponse,
+} from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { CreateRuleMigrationInput } from '../data_stream/rule_migrations_data_client';
+import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rules_client';
+import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -31,26 +34,28 @@ export const registerSiemRuleMigrationsCreateRoute = (
           request: { body: buildRouteValidationWithZod(CreateRuleMigrationRequestBody) },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
-        const originalRules = req.body;
-        try {
-          const ctx = await context.resolve(['securitySolution']);
-          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+      withLicense(
+        async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
+          const originalRules = req.body;
+          try {
+            const ctx = await context.resolve(['securitySolution']);
+            const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-          const migrationId = uuidV4();
+            const migrationId = uuidV4();
 
-          const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
-            migration_id: migrationId,
-            original_rule: originalRule,
-          }));
+            const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
+              migration_id: migrationId,
+              original_rule: originalRule,
+            }));
 
-          await ruleMigrationsClient.data.create(ruleMigrations);
+            await ruleMigrationsClient.data.rules.create(ruleMigrations);
 
-          return res.ok({ body: { migration_id: migrationId } });
-        } catch (err) {
-          logger.error(err);
-          return res.badRequest({ body: err.message });
+            return res.ok({ body: { migration_id: migrationId } });
+          } catch (err) {
+            logger.error(err);
+            return res.badRequest({ body: err.message });
+          }
         }
-      }
+      )
     );
 };
