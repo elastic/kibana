@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { AddEmptyPrompt } from './add_empty_prompt';
+export const timeXMinutesAgo = (x: number) =>
+  new Date(new Date().getTime() - x * 60 * 1000).toISOString();
