@@ -21,7 +21,7 @@ const SolutionOptions: Record<
     label: (
       <FormattedMessage
         id="xpack.spaces.spaceSolutionBadge.elasticsearch"
-        defaultMessage="Search"
+        defaultMessage="Elasticsearch"
       />
     ),
   },

@@ -40,5 +40,4 @@ export const logViewSavedObjectType: SavedObjectsType = {
       },
     },
   },
-  migrations: {},
 };

@@ -55,7 +55,7 @@ export interface GetAIAssistantKnowledgeBaseDataClientParams {
   manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
-interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
+export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
   ml: MlPluginSetup;
   getElserId: GetElser;
   getIsKBSetupInProgress: () => boolean;
@@ -178,9 +178,22 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   public createInferenceEndpoint = async () => {
     const elserId = await this.options.getElserId();
     this.options.logger.debug(`Deploying ELSER model '${elserId}'...`);
-    try {
-      const esClient = await this.options.elasticsearchClientPromise;
+    const esClient = await this.options.elasticsearchClientPromise;
 
+    try {
+      await esClient.inference.delete({
+        inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+        // it's being used in the mapping so we need to force delete
+        force: true,
+      });
+      this.options.logger.debug(`Deleted existing inference endpoint for ELSER model '${elserId}'`);
+    } catch (error) {
+      this.options.logger.error(
+        `Error deleting inference endpoint for ELSER model '${elserId}':\n${error}`
+      );
+    }
+
+    try {
       await esClient.inference.put({
         task_type: 'sparse_embedding',
         inference_id: ASSISTANT_ELSER_INFERENCE_ID,
@@ -198,6 +211,9 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
           task_settings: {},
         },
       });
+
+      // await for the model to be deployed
+      await this.isInferenceEndpointExists();
     } catch (error) {
       this.options.logger.error(
         `Error creating inference endpoint for ELSER model '${elserId}':\n${error}`

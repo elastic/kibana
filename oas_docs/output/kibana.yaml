@@ -10282,6 +10282,42 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -10589,6 +10625,26 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
   /api/exception_lists:
@@ -12322,15 +12378,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -12846,15 +12907,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -13020,15 +13086,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -13563,15 +13634,20 @@ paths:
                             agent_download_target_directory:
                               nullable: true
                             agent_download_timeout:
-                              default: 2h
                               nullable: true
                             agent_limits_go_max_procs:
                               nullable: true
+                            agent_logging_files_interval:
+                              nullable: true
+                            agent_logging_files_keepfiles:
+                              nullable: true
+                            agent_logging_files_rotateeverybytes:
+                              nullable: true
                             agent_logging_level:
-                              default: info
                               nullable: true
                             agent_logging_metrics_period:
-                              default: 30s
+                              nullable: true
+                            agent_logging_to_files:
                               nullable: true
                         agent_features:
                           items:
@@ -14086,15 +14162,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -14609,15 +14690,20 @@ paths:
                     agent_download_target_directory:
                       nullable: true
                     agent_download_timeout:
-                      default: 2h
                       nullable: true
                     agent_limits_go_max_procs:
                       nullable: true
+                    agent_logging_files_interval:
+                      nullable: true
+                    agent_logging_files_keepfiles:
+                      nullable: true
+                    agent_logging_files_rotateeverybytes:
+                      nullable: true
                     agent_logging_level:
-                      default: info
                       nullable: true
                     agent_logging_metrics_period:
-                      default: 30s
+                      nullable: true
+                    agent_logging_to_files:
                       nullable: true
                 agent_features:
                   items:
@@ -14783,15 +14869,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -15326,15 +15417,20 @@ paths:
                           agent_download_target_directory:
                             nullable: true
                           agent_download_timeout:
-                            default: 2h
                             nullable: true
                           agent_limits_go_max_procs:
                             nullable: true
+                          agent_logging_files_interval:
+                            nullable: true
+                          agent_logging_files_keepfiles:
+                            nullable: true
+                          agent_logging_files_rotateeverybytes:
+                            nullable: true
                           agent_logging_level:
-                            default: info
                             nullable: true
                           agent_logging_metrics_period:
-                            default: 30s
+                            nullable: true
+                          agent_logging_to_files:
                             nullable: true
                       agent_features:
                         items:
@@ -15946,6 +16042,30 @@ paths:
                                   required:
                                     - enabled
                                 type: object
+                              limits:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  go_max_procs:
+                                    type: number
+                              logging:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  files:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      interval:
+                                        type: string
+                                      keepfiles:
+                                        type: number
+                                      rotateeverybytes:
+                                        type: number
+                                  level:
+                                    type: string
+                                  to_files:
+                                    type: boolean
                               monitoring:
                                 additionalProperties: false
                                 type: object
@@ -32487,6 +32607,7 @@ paths:
                       secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
+                        nullable: true
                         type: string
                       use_space_awareness_migration_status:
                         enum:
@@ -32619,6 +32740,7 @@ paths:
                       secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
+                        nullable: true
                         type: string
                       use_space_awareness_migration_status:
                         enum:
@@ -34241,13 +34363,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
           description: Indicates the note was successfully deleted.
       summary: Delete a note
       tags:
@@ -34308,9 +34423,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
-                  - type: object
+                $ref: '#/components/schemas/Security_Timeline_API_GetNotesResult'
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -34353,17 +34466,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistNote:
-                        $ref: '#/components/schemas/Security_Timeline_API_ResponseNote'
-                    required:
-                      - persistNote
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_ResponseNote'
           description: Indicates the note was successfully created.
       summary: Add or update a note
       tags:
@@ -34701,17 +34804,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistPinnedEventOnTimeline:
-                        $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
-                    required:
-                      - persistPinnedEventOnTimeline
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_PersistPinnedEventResponse'
           description: Indicates the event was successfully pinned to the Timeline.
       summary: Pin an event
       tags:
@@ -37250,20 +37343,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      deleteTimeline:
-                        type: boolean
-                    required:
-                      - deleteTimeline
-                required:
-                  - data
           description: Indicates the Timeline was successfully deleted.
       summary: Delete Timelines or Timeline templates
       tags:
@@ -37287,20 +37366,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        type: object
-                        properties:
-                          getOneTimeline:
-                            $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-                        required:
-                          - getOneTimeline
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -37604,17 +37670,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      persistFavorite:
-                        $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResponse'
-                    required:
-                      - persistFavorite
-                required:
-                  - data
+                $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResponse'
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
@@ -37768,15 +37824,7 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                oneOf:
-                  - type: object
-                    properties:
-                      data:
-                        $ref: '#/components/schemas/Security_Timeline_API_ResolvedTimeline'
-                    required:
-                      - data
-                  - additionalProperties: false
-                    type: object
+                $ref: '#/components/schemas/Security_Timeline_API_ResolvedTimeline'
           description: The (template) Timeline has been found
         '400':
           description: The request is missing parameters
@@ -53601,6 +53649,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -54885,16 +54941,10 @@ components:
     Security_Timeline_API_FavoriteTimelineResponse:
       type: object
       properties:
-        code:
-          nullable: true
-          type: number
         favorite:
           items:
             $ref: '#/components/schemas/Security_Timeline_API_FavoriteTimelineResult'
           type: array
-        message:
-          nullable: true
-          type: string
         savedObjectId:
           type: string
         templateTimelineId:
@@ -55063,28 +55113,15 @@ components:
             - version
     Security_Timeline_API_PersistPinnedEventResponse:
       oneOf:
-        - allOf:
-            - $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
-            - $ref: '#/components/schemas/Security_Timeline_API_PinnedEventBaseResponseBody'
-        - nullable: true
-          type: object
-    Security_Timeline_API_PersistTimelineResponse:
-      type: object
-      properties:
-        data:
-          type: object
+        - $ref: '#/components/schemas/Security_Timeline_API_PinnedEvent'
+        - type: object
           properties:
-            persistTimeline:
-              type: object
-              properties:
-                timeline:
-                  $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
-              required:
-                - timeline
+            unpinned:
+              type: boolean
           required:
-            - persistTimeline
-      required:
-        - data
+            - unpinned
+    Security_Timeline_API_PersistTimelineResponse:
+      $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
     Security_Timeline_API_PinnedEvent:
       allOf:
         - $ref: '#/components/schemas/Security_Timeline_API_BarePinnedEvent'
@@ -55097,15 +55134,6 @@ components:
           required:
             - pinnedEventId
             - version
-    Security_Timeline_API_PinnedEventBaseResponseBody:
-      type: object
-      properties:
-        code:
-          type: number
-        message:
-          type: string
-      required:
-        - code
     Security_Timeline_API_QueryMatchResult:
       type: object
       properties:
@@ -55146,15 +55174,9 @@ components:
     Security_Timeline_API_ResponseNote:
       type: object
       properties:
-        code:
-          type: number
-        message:
-          type: string
         note:
           $ref: '#/components/schemas/Security_Timeline_API_Note'
       required:
-        - code
-        - message
         - note
     Security_Timeline_API_RowRendererId:
       enum:

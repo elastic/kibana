@@ -1,5 +1,9 @@
 {
   "type": "shared-server",
   "id": "@kbn/core-custom-branding-server-mocks",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

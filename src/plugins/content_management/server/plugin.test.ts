@@ -91,7 +91,7 @@ describe('ContentManagementPlugin', () => {
       const { plugin, coreSetup, pluginsSetup } = setup();
       const api = plugin.setup(coreSetup, pluginsSetup);
 
-      expect(Object.keys(api).sort()).toEqual(['crud', 'eventBus', 'register']);
+      expect(Object.keys(api).sort()).toEqual(['crud', 'eventBus', 'favorites', 'register']);
       expect(api.crud('')).toBe('mockedCrud');
       expect(api.register({} as any)).toBe('mockedRegister');
       expect(api.eventBus.emit({} as any)).toBe('mockedEventBusEmit');

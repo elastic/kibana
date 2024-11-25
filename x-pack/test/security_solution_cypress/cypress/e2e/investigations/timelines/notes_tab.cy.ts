@@ -33,7 +33,7 @@ describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
     deleteTimelines();
 
     createTimeline(getTimelineNonValidQuery())
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((response) => response.body.savedObjectId)
       .then((timelineId: string) => {
         login();
         visitTimeline(timelineId);
