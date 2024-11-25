@@ -934,6 +934,7 @@
     "@kbn/status-plugin-a-plugin": "link:test/server_integration/plugins/status_plugin_a",
     "@kbn/status-plugin-b-plugin": "link:test/server_integration/plugins/status_plugin_b",
     "@kbn/std": "link:packages/kbn-std",
+    "@kbn/streams-app-plugin": "link:x-pack/plugins/streams_app",
     "@kbn/streams-plugin": "link:x-pack/plugins/streams",
     "@kbn/synthetics-plugin": "link:x-pack/plugins/observability_solution/synthetics",
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",
