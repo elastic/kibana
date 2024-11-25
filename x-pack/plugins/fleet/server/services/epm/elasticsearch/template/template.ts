@@ -46,6 +46,9 @@ import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 
+// Limit concurrent putMapping/rollover requests to avoid overwhelming ES cluster
+const MAX_CONCURRENT_DATASTREAM_OPERATIONS = 20;
+
 interface Properties {
   [key: string]: any;
 }
@@ -930,10 +933,15 @@ const queryDataStreamsFromTemplates = async (
   esClient: ElasticsearchClient,
   templates: IndexTemplateEntry[]
 ): Promise<CurrentDataStream[]> => {
-  const dataStreamPromises = templates.map((template) => {
-    return getDataStreams(esClient, template);
-  });
-  const dataStreamObjects = await Promise.all(dataStreamPromises);
+  const dataStreamObjects = await pMap(
+    templates,
+    (template) => {
+      return getDataStreams(esClient, template);
+    },
+    {
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
+    }
+  );
   return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
@@ -994,8 +1002,7 @@ const updateAllDataStreams = async (
       });
     },
     {
-      // Limit concurrent putMapping/rollover requests to avoid overwhelming ES cluster
-      concurrency: 20,
+      concurrency: MAX_CONCURRENT_DATASTREAM_OPERATIONS,
     }
   );
 };

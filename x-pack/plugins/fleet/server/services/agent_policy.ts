@@ -124,6 +124,7 @@ import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
+const MAX_CONCURRENT_FLEETSERVER_POLICIES_OPERATIONS = 50;
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
@@ -1423,27 +1424,29 @@ class AgentPolicyService {
       );
     }
 
-    await Promise.all(
-      fleetServerPolicies
-        .filter((fleetServerPolicy) => {
-          const policy = policiesMap[fleetServerPolicy.policy_id];
-          return (
-            !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
-          );
-        })
-        .map((fleetServerPolicy) =>
-          // There are some potential performance concerns around using `agentPolicyService.update` in this context.
-          // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
-          agentPolicyService.update(
-            soClient,
-            esClient,
-            fleetServerPolicy.policy_id,
-            {
-              schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
-            },
-            { force: true }
-          )
-        )
+    const filteredFleetServerPolicies = fleetServerPolicies.filter((fleetServerPolicy) => {
+      const policy = policiesMap[fleetServerPolicy.policy_id];
+      return (
+        !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
+      );
+    });
+    await pMap(
+      filteredFleetServerPolicies,
+      (fleetServerPolicy) =>
+        // There are some potential performance concerns around using `agentPolicyService.update` in this context.
+        // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
+        agentPolicyService.update(
+          soClient,
+          esClient,
+          fleetServerPolicy.policy_id,
+          {
+            schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          },
+          { force: true }
+        ),
+      {
+        concurrency: MAX_CONCURRENT_FLEETSERVER_POLICIES_OPERATIONS,
+      }
     );
   }
 
