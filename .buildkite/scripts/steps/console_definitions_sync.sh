@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GENERATED_DEFINITIONS="src/plugins/console/server/lib/spec_definitions/json/generated"
-GIT_SCOPE="$GENERATED_DEFINITIONS/**/*"
+GENERATED_DEFINITIONS="src/plugins/console/server/lib/spec_definitions"
+GIT_SCOPE="$GENERATED_DEFINITIONS"
 
 report_main_step () {
   echo "--- $1"
