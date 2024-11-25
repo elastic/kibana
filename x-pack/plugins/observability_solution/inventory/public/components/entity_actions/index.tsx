@@ -41,8 +41,8 @@ export const EntityActions = ({ entity, setShowActions }: Props) => {
       icon="discoverApp"
       href={discoverUrl}
     >
-      {i18n.translate('xpack.inventory.entityActions.discoverLink', {
-        defaultMessage: 'Open in discover',
+      {i18n.translate('xpack.inventory.entityActions.exploreInDiscoverLink', {
+        defaultMessage: 'Explore in Discover',
       })}
     </EuiContextMenuItem>,
   ];
