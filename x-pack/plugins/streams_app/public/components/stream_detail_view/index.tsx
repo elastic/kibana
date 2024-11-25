@@ -11,11 +11,15 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { StreamDetailManagement } from '../stream_detail_management';
 
 export function StreamDetailView() {
-  const {
-    path: { key, tab },
-  } = useStreamsAppParams('/{key}/{tab}');
+  const params1 = useStreamsAppParams('/{key}/{tab}', true);
+
+  const params2 = useStreamsAppParams('/{key}/{tab}/{subtab}', true);
+
+  const key = params1?.path?.key || params2.path.key;
+  const tab = params1?.path?.tab || params2.path.tab;
 
   const {
     dependencies: {
@@ -25,7 +29,7 @@ export function StreamDetailView() {
     },
   } = useKibana();
 
-  const { value: streamEntity } = useStreamsAppFetch(
+  const { value: streamEntity, refresh } = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
         signal,
@@ -54,7 +58,7 @@ export function StreamDetailView() {
     },
     {
       name: 'management',
-      content: <></>,
+      content: <StreamDetailManagement definition={streamEntity} refreshDefinition={refresh} />,
       label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
         defaultMessage: 'Management',
       }),
