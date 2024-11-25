@@ -10,6 +10,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import { CrowdstrikeSessionManager } from './rtr_session_manager';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { isAggregateError, NodeSystemError } from './types';
 import type {
@@ -29,8 +30,8 @@ import {
   CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
   RelaxedCrowdstrikeBaseApiResponseSchema,
-  CrowdstrikeInitRTRParamsSchema,
   CrowdstrikeInitRTRResponseSchema,
+  CrowdstrikeRTRCommandParamsSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -66,6 +67,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     hostAction: string;
     agentStatus: string;
     batchInitRTRSession: string;
+    batchRefreshRTRSession: string;
   };
 
   constructor(
@@ -80,6 +82,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       agents: `${this.config.url}/devices/entities/devices/v2`,
       agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
       batchInitRTRSession: `${this.config.url}/real-time-response/combined/batch-init-session/v1`,
+      batchRefreshRTRSession: `${this.config.url}/real-time-response/combined/batch-refresh-session/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -88,6 +91,10 @@ export class CrowdstrikeConnector extends SubActionConnector<
       ).toString('base64');
     }
 
+    this.sessionManager = new CrowdstrikeSessionManager(
+      this.urls,
+      this.crowdstrikeApiRequest.bind(this)
+    );
     this.registerSubActions();
   }
 
@@ -109,13 +116,19 @@ export class CrowdstrikeConnector extends SubActionConnector<
       method: 'getAgentOnlineStatus',
       schema: CrowdstrikeGetAgentsParamsSchema,
     });
-    if (this.experimentalFeatures.crowdstrikeConnectorRTROn) {
-      this.registerSubAction({
-        name: SUB_ACTION.BATCH_INIT_RTR_SESSION,
-        method: 'batchInitRTRSession',
-        schema: CrowdstrikeInitRTRParamsSchema,
-      });
-    }
+
+    this.registerSubAction({
+      name: SUB_ACTION.EXECUTE_RTR_COMMAND,
+      method: 'executeRTRCommand',
+      schema: CrowdstrikeRTRCommandParamsSchema, // Define a proper schema for the command
+    });
+    // if (this.experimentalFeatures.crowdstrikeConnectorRTROn) {
+    //   this.registerSubAction({
+    //     name: SUB_ACTION.BATCH_INIT_RTR_SESSION,
+    //     method: 'batchInitRTRSession',
+    //     schema: CrowdstrikeInitRTRParamsSchema,
+    //   });
+    // }
   }
 
   public async executeHostActions(
@@ -263,6 +276,19 @@ export class CrowdstrikeConnector extends SubActionConnector<
     );
 
     CrowdstrikeConnector.currentBatchId = response.batch_id;
+  }
+
+  // TODO: WIP - just to have session init logic in place
+  public async executeRTRCommand(
+    payload: { command: string; endpoint_ids: string[] },
+    connectorUsageCollector: ConnectorUsageCollector
+  ) {
+    const batchId = await this.sessionManager.initializeSession(
+      { endpoint_ids: payload.endpoint_ids },
+      connectorUsageCollector
+    );
+
+    return Promise.resolve({ batchId });
   }
 
   protected getResponseErrorMessage(

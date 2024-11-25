@@ -231,6 +231,8 @@ export const CrowdstrikeHostActionsResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+// TODO temporary any value
+export const CrowdstrikeRTRCommandParamsSchema = schema.any();
 export const CrowdstrikeHostActionsParamsSchema = schema.object({
   command: schema.oneOf([schema.literal('contain'), schema.literal('lift_containment')]),
   actionParameters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
