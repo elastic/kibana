@@ -74,8 +74,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('Autocompletion works', async () => {
+          await retry.waitFor('wait for page to be loaded', async () => {
+            return testSubjects.exists('superDatePickerToggleQuickMenuButton');
+          });
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
-          await observability.alerts.common.clickOnQueryBar();
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
         });
