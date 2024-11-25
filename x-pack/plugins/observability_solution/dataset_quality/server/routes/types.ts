@@ -29,7 +29,5 @@ export interface DatasetQualityRouteHandlerResources {
 }
 
 export interface DatasetQualityRouteCreateOptions {
-  options: {
-    tags: string[];
-  };
+  tags: string[];
 }

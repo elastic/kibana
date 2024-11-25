@@ -10,12 +10,15 @@ import type {
   FieldCapsRequest,
   FieldCapsResponse,
   MsearchRequest,
+  ScalarValue,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ESQLSearchResponse, ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { Required } from 'utility-types';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { Required, ValuesType } from 'utility-types';
+import { DedotObject } from '@kbn/utility-types';
+import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
 import { esqlResultToPlainObjects } from '../esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
@@ -24,19 +27,52 @@ type SearchRequest = ESSearchRequest & {
   size: number | boolean;
 };
 
-type EsqlQueryParameters = EsqlQueryRequest & { parseOutput?: boolean };
-type EsqlOutputParameters = Omit<EsqlQueryRequest, 'format' | 'columnar'> & {
-  parseOutput?: true;
-  format?: 'json';
-  columnar?: false;
-};
+export interface EsqlOptions {
+  transform?: 'none' | 'plain' | 'unflatten';
+}
 
-type EsqlParameters = EsqlOutputParameters | EsqlQueryParameters;
+export type EsqlValue = ScalarValue | ScalarValue[];
+
+export type EsqlOutput = Record<string, EsqlValue>;
+
+type MaybeUnflatten<T extends Record<string, any>, TApply> = TApply extends true
+  ? DedotObject<T>
+  : T;
+
+interface UnparsedEsqlResponseOf<TOutput extends EsqlOutput> {
+  columns: Array<{ name: keyof TOutput; type: string }>;
+  values: Array<Array<ValuesType<TOutput>>>;
+}
+
+interface ParsedEsqlResponseOf<
+  TOutput extends EsqlOutput,
+  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+> {
+  hits: Array<
+    MaybeUnflatten<
+      {
+        [key in keyof TOutput]: TOutput[key];
+      },
+      TOptions extends { transform: 'unflatten' } ? true : false
+    >
+  >;
+}
 
 export type InferEsqlResponseOf<
-  TOutput = unknown,
-  TParameters extends EsqlParameters = EsqlParameters
-> = TParameters extends EsqlOutputParameters ? TOutput[] : ESQLSearchResponse;
+  TOutput extends EsqlOutput,
+  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+> = TOptions extends { transform: 'plain' | 'unflatten' }
+  ? ParsedEsqlResponseOf<TOutput, TOptions>
+  : UnparsedEsqlResponseOf<TOutput>;
+
+export type ObservabilityESSearchRequest = SearchRequest;
+
+export type ObservabilityEsQueryRequest = Omit<EsqlQueryRequest, 'format' | 'columnar'>;
+
+export type ParsedEsqlResponse = ParsedEsqlResponseOf<EsqlOutput, EsqlOptions>;
+export type UnparsedEsqlResponse = UnparsedEsqlResponseOf<EsqlOutput>;
+
+export type EsqlQueryResponse = UnparsedEsqlResponse | ParsedEsqlResponse;
 
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
@@ -57,14 +93,18 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     request: Required<FieldCapsRequest, 'index_filter' | 'fields' | 'index'>
   ): Promise<FieldCapsResponse>;
-  esql<TOutput = unknown, TQueryParams extends EsqlOutputParameters = EsqlOutputParameters>(
+  esql<TOutput extends EsqlOutput = EsqlOutput>(
     operationName: string,
-    parameters: TQueryParams
-  ): Promise<InferEsqlResponseOf<TOutput, TQueryParams>>;
-  esql<TOutput = unknown, TQueryParams extends EsqlQueryParameters = EsqlQueryParameters>(
+    parameters: ObservabilityEsQueryRequest
+  ): Promise<InferEsqlResponseOf<TOutput, { transform: 'none' }>>;
+  esql<
+    TOutput extends EsqlOutput = EsqlOutput,
+    TEsqlOptions extends EsqlOptions = { transform: 'none' }
+  >(
     operationName: string,
-    parameters: TQueryParams
-  ): Promise<InferEsqlResponseOf<TOutput, TQueryParams>>;
+    parameters: ObservabilityEsQueryRequest,
+    options: TEsqlOptions
+  ): Promise<InferEsqlResponseOf<TOutput, TEsqlOptions>>;
   client: ElasticsearchClient;
 }
 
@@ -109,32 +149,41 @@ export function createObservabilityEsClient({
         });
       });
     },
-    esql<TOutput = unknown, TSearchRequest extends EsqlParameters = EsqlParameters>(
+    esql(
       operationName: string,
-      { parseOutput = true, format = 'json', columnar = false, ...parameters }: TSearchRequest
-    ) {
-      logger.trace(() => `Request (${operationName}):\n${JSON.stringify(parameters, null, 2)}`);
-      return withSpan({ name: operationName, labels: { plugin } }, () => {
-        return client.esql.query(
-          { ...parameters, format, columnar },
-          {
-            querystring: {
-              drop_null_columns: true,
-            },
-          }
-        );
-      })
-        .then((response) => {
-          logger.trace(() => `Response (${operationName}):\n${JSON.stringify(response, null, 2)}`);
+      parameters: ObservabilityEsQueryRequest,
+      options?: EsqlOptions
+    ): Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>> {
+      return callWithLogger(operationName, parameters, () => {
+        return client.esql
+          .query(
+            { ...parameters },
+            {
+              querystring: {
+                drop_null_columns: true,
+              },
+            }
+          )
+          .then((response) => {
+            const esqlResponse = response as unknown as UnparsedEsqlResponseOf<EsqlOutput>;
 
-          const esqlResponse = response as unknown as ESQLSearchResponse;
+            const transform = options?.transform ?? 'none';
 
-          const shouldParseOutput = parseOutput && !columnar && format === 'json';
-          return shouldParseOutput ? esqlResultToPlainObjects<TOutput>(esqlResponse) : esqlResponse;
-        })
-        .catch((error) => {
-          throw error;
-        });
+            if (transform === 'none') {
+              return esqlResponse;
+            }
+
+            const parsedResponse = { hits: esqlResultToPlainObjects(esqlResponse) };
+
+            if (transform === 'plain') {
+              return parsedResponse;
+            }
+
+            return {
+              hits: parsedResponse.hits.map((hit) => unflattenObject(hit)),
+            };
+          }) as Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>>;
+      });
     },
     search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
       operationName: string,
