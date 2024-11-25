@@ -241,19 +241,19 @@ export class EntityStoreDataClient {
   ) {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
-    const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
-
-    const unitedDefinition = getUnitedEntityDefinition({
-      indexPatterns,
-      entityType,
-      namespace,
-      fieldHistoryLength,
-      syncDelay: `${config.syncDelay.asSeconds()}s`,
-      frequency: `${config.frequency.asSeconds()}s`,
-    });
-    const { entityManagerDefinition } = unitedDefinition;
-
     try {
+      const indexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+
+      const unitedDefinition = getUnitedEntityDefinition({
+        indexPatterns,
+        entityType,
+        namespace,
+        fieldHistoryLength,
+        syncDelay: `${config.syncDelay.asSeconds()}s`,
+        frequency: `${config.frequency.asSeconds()}s`,
+      });
+      const { entityManagerDefinition } = unitedDefinition;
+
       // clean up any existing entity store
       await this.delete(entityType, taskManager, { deleteData: false, deleteEngine: false });
 

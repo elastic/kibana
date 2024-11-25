@@ -722,6 +722,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+      deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
@@ -1003,6 +1004,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       retrieval: `${KIBANA_DOCS}playground-query.html`,
       context: `${KIBANA_DOCS}playground-context.html`,
       hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
+    },
+    inferenceManagement: {
+      inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
     },
   });
 };
