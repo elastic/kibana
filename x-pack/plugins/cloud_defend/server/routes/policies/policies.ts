@@ -60,8 +60,10 @@ export const defineGetPoliciesRoute = (router: CloudDefendRouter) =>
     .get({
       access: 'internal',
       path: POLICIES_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-defend-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-defend-read'],
+        },
       },
     })
     .addVersion(

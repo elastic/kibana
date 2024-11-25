@@ -268,7 +268,13 @@
                 "label": "themeTags",
                 "description": [],
                 "signature": [
-                  "ThemeTags"
+                  {
+                    "pluginId": "@kbn/core-ui-settings-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                    "section": "def-common.ThemeTags",
+                    "text": "ThemeTags"
+                  }
                 ],
                 "path": "packages/kbn-optimizer/src/optimizer/optimizer_config.ts",
                 "deprecated": false,

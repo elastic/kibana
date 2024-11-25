@@ -16,10 +16,11 @@ import {
   niceTimeFormatter,
   DARK_THEME,
   LIGHT_THEME,
+  LineSeries,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
-import { MetricTypes, MetricSeries } from '../../../common/rest_types';
+import { type MetricTypes, type MetricSeries } from '../../../common/rest_types';
 import { formatBytes } from '../../utils/format_bytes';
 
 // TODO: Remove this when we have a title for each metric type
@@ -59,8 +60,23 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
     [minTimestamp, maxTimestamp]
   );
 
+  // Calculate the total for each time bucket
+  const totalSeries = useMemo(() => {
+    const totalsMap = new Map<number, number>();
+
+    series.forEach((stream) => {
+      stream.data.forEach((point) => {
+        totalsMap.set(point.x, (totalsMap.get(point.x) || 0) + point.y);
+      });
+    });
+
+    return Array.from(totalsMap.entries()).map(([x, y]) => ({ x, y }));
+  }, [series]);
   const renderLegendAction = useCallback(
     ({ label }: { label: string }) => {
+      if (label === 'Total') {
+        return null;
+      }
       return (
         <LegendAction
           label={label}
@@ -86,6 +102,19 @@ export const ChartPanel: React.FC<ChartPanelProps> = ({
             legendPosition="right"
             xDomain={{ min: minTimestamp, max: maxTimestamp }}
             legendAction={renderLegendAction}
+          />
+          <LineSeries
+            id="Total"
+            name="Total"
+            data={totalSeries}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            lineSeriesStyle={{
+              line: { strokeWidth: 2 },
+              point: { visible: 'always', radius: 5 },
+            }}
           />
           {series.map((stream, streamIdx) => (
             <BarSeries

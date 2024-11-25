@@ -10,7 +10,6 @@ import type { CoreSetup } from '@kbn/core/server';
 import { registerDataStreamsRoute } from './data_streams';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { DataUsageService } from '../../services';
 import type {
   DataUsageRequestHandlerContext,
   DataUsageRouter,
@@ -27,8 +26,8 @@ const mockGetMeteringStats = getMeteringStats as jest.Mock;
 describe('registerDataStreamsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;
   let router: DataUsageRouter;
-  let dataUsageService: DataUsageService;
   let context: DataUsageRequestHandlerContext;
+  let mockedDataUsageContext: ReturnType<typeof createMockedDataUsageContext>;
 
   beforeEach(() => {
     mockCore = coreMock.createSetup();
@@ -37,11 +36,10 @@ describe('registerDataStreamsRoute', () => {
       coreMock.createRequestHandlerContext()
     ) as unknown as DataUsageRequestHandlerContext;
 
-    const mockedDataUsageContext = createMockedDataUsageContext(
+    mockedDataUsageContext = createMockedDataUsageContext(
       coreMock.createPluginInitializerContext()
     );
-    dataUsageService = new DataUsageService(mockedDataUsageContext);
-    registerDataStreamsRoute(router, dataUsageService);
+    registerDataStreamsRoute(router, mockedDataUsageContext);
   });
 
   it('should request correct API', () => {
@@ -62,6 +60,48 @@ describe('registerDataStreamsRoute', () => {
         {
           name: 'datastream2',
           size_in_bytes: 200,
+        },
+      ],
+    });
+    const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRouter = mockCore.http.createRouter.mock.results[0].value;
+    const [[, handler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
+    await handler(context, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    expect(mockResponse.ok.mock.calls[0][0]).toEqual({
+      body: [
+        {
+          name: 'datastream2',
+          storageSizeBytes: 200,
+        },
+        {
+          name: 'datastream1',
+          storageSizeBytes: 100,
+        },
+      ],
+    });
+  });
+
+  it('should not include data streams with 0 size', async () => {
+    mockGetMeteringStats.mockResolvedValue({
+      datastreams: [
+        {
+          name: 'datastream1',
+          size_in_bytes: 100,
+        },
+        {
+          name: 'datastream2',
+          size_in_bytes: 200,
+        },
+        {
+          name: 'datastream3',
+          size_in_bytes: 0,
+        },
+        {
+          name: 'datastream4',
+          size_in_bytes: 0,
         },
       ],
     });
@@ -107,7 +147,7 @@ describe('registerDataStreamsRoute', () => {
   it.each([
     ['no datastreams', {}, []],
     ['empty array', { datastreams: [] }, []],
-    ['an empty element', { datastreams: [{}] }, [{ name: undefined, storageSizeBytes: 0 }]],
+    ['an empty element', { datastreams: [{}] }, []],
   ])('should return empty array when no stats data with %s', async (_, stats, res) => {
     mockGetMeteringStats.mockResolvedValue(stats);
     const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
