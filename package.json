@@ -1221,7 +1221,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
-    "re2js": "0.4.2",
+    "re2js": "0.4.3",
     "react": "^17.0.2",
     "react-diff-view": "^3.2.1",
     "react-dom": "^17.0.2",
