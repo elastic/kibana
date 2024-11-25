@@ -53,7 +53,10 @@ export const validateFile = (
   file: File,
   formatBytes: (bytes: number) => string
 ): { valid: false; errorMessage: string; code: string } | { valid: true } => {
-  if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
+  if (
+    file.type !== '' && // file.type might be an empty string on windows
+    !SUPPORTED_FILE_TYPES.includes(file.type)
+  ) {
     return {
       valid: false,
       code: 'unsupported_file_type',

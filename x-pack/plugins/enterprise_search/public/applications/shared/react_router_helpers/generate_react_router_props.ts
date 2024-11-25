@@ -11,6 +11,7 @@ import { EuiSideNavItemType } from '@elastic/eui';
 
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
+import { ReactRouterProps } from '../types';
 
 import { letBrowserHandleEvent, createHref } from '.';
 
@@ -23,14 +24,6 @@ import { letBrowserHandleEvent, createHref } from '.';
  * but separated out from EuiLink portion as we use this for multiple EUI components
  */
 
-export interface ReactRouterProps {
-  to: string;
-  onClick?(): void;
-  // Used to navigate outside of the React Router plugin basename but still within Kibana,
-  // e.g. if we need to go from Enterprise Search to App Search
-  shouldNotCreateHref?: boolean;
-}
-
 export type GeneratedReactRouterProps<T> = Required<
   Pick<EuiSideNavItemType<T>, 'href' | 'onClick'>
 >;
@@ -39,12 +32,13 @@ export const generateReactRouterProps = ({
   to,
   onClick,
   shouldNotCreateHref = false,
+  shouldNotPrepend = false,
 }: ReactRouterProps): GeneratedReactRouterProps<unknown> => {
   const { navigateToUrl, history } = KibanaLogic.values;
   const { http } = HttpLogic.values;
 
   // Generate the correct link href (with basename etc. accounted for)
-  const href = createHref(to, { history, http }, { shouldNotCreateHref });
+  const href = createHref(to, { history, http }, { shouldNotCreateHref, shouldNotPrepend });
 
   const reactRouterLinkClick = (event: React.MouseEvent) => {
     if (onClick) onClick(); // Run any passed click events (e.g. telemetry)
@@ -54,7 +48,7 @@ export const generateReactRouterProps = ({
     event.preventDefault();
 
     // Perform SPA navigation.
-    navigateToUrl(to, { shouldNotCreateHref });
+    navigateToUrl(to, { shouldNotCreateHref, shouldNotPrepend });
   };
 
   return { href, onClick: reactRouterLinkClick };

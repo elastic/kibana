@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { TimelineId, TimelineTabs } from '../../../../../common/types';
-import { renderHook, act } from '@testing-library/react-hooks/dom';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import type { UseNotesInFlyoutArgs } from './use_notes_in_flyout';
 import { useNotesInFlyout } from './use_notes_in_flyout';
-import { waitFor } from '@testing-library/react';
 import { useDispatch } from 'react-redux';
 
 jest.mock('react-redux', () => ({
@@ -202,8 +201,8 @@ describe('useNotesInFlyout', () => {
     expect(result.current.isNotesFlyoutVisible).toBe(false);
   });
 
-  it('should close the flyout when activeTab is changed', () => {
-    const { result, rerender, waitForNextUpdate } = renderTestHook();
+  it('should close the flyout when activeTab is changed', async () => {
+    const { result, rerender } = renderTestHook();
 
     act(() => {
       result.current.setNotesEventId('event-1');
@@ -226,8 +225,6 @@ describe('useNotesInFlyout', () => {
       rerender({ activeTab: TimelineTabs.eql });
     });
 
-    waitForNextUpdate();
-
-    expect(result.current.isNotesFlyoutVisible).toBe(false);
+    await waitFor(() => expect(result.current.isNotesFlyoutVisible).toBe(false));
   });
 });

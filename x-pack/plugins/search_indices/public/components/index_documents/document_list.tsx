@@ -20,9 +20,15 @@ export interface DocumentListProps {
   indexName: string;
   docs: SearchHit[];
   mappingProperties: Record<string, MappingProperty>;
+  hasDeleteDocumentsPrivilege: boolean;
 }
 
-export const DocumentList = ({ indexName, docs, mappingProperties }: DocumentListProps) => {
+export const DocumentList = ({
+  indexName,
+  docs,
+  mappingProperties,
+  hasDeleteDocumentsPrivilege,
+}: DocumentListProps) => {
   const { mutate } = useDeleteDocument(indexName);
 
   return (
@@ -39,6 +45,7 @@ export const DocumentList = ({ indexName, docs, mappingProperties }: DocumentLis
                 mutate({ id: doc._id! });
               }}
               compactCard={false}
+              hasDeleteDocumentsPrivilege={hasDeleteDocumentsPrivilege}
             />
             <EuiSpacer size="s" />
           </React.Fragment>

@@ -106,33 +106,31 @@ export const LinksEditorSingleLink = ({
           <LinkLabel />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="none" responsive={false} className="links_hoverActions">
-            <EuiFlexItem>
-              <EuiToolTip content={LinksStrings.editor.getEditLinkTitle()}>
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="pencil"
-                  onClick={editLink}
-                  aria-label={LinksStrings.editor.getEditLinkTitle(link.title)}
-                  data-test-subj="panelEditorLink--editBtn"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiToolTip content={LinksStrings.editor.getDeleteLinkTitle()}>
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="trash"
-                  aria-label={LinksStrings.editor.getDeleteLinkTitle(link.title)}
-                  color="danger"
-                  onClick={deleteLink}
-                  data-test-subj="panelEditorLink--deleteBtn"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexGroup gutterSize="none" responsive={false} className="links_hoverActions">
+          <EuiFlexItem>
+            <EuiToolTip content={LinksStrings.editor.getEditLinkTitle()}>
+              <EuiButtonIcon
+                size="xs"
+                iconType="pencil"
+                onClick={editLink}
+                aria-label={LinksStrings.editor.getEditLinkTitle(link.title)}
+                data-test-subj="panelEditorLink--editBtn"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiToolTip content={LinksStrings.editor.getDeleteLinkTitle()}>
+              <EuiButtonIcon
+                size="xs"
+                iconType="trash"
+                aria-label={LinksStrings.editor.getDeleteLinkTitle(link.title)}
+                color="danger"
+                onClick={deleteLink}
+                data-test-subj="panelEditorLink--deleteBtn"
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );

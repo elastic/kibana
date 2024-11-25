@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { SessionViewConfig } from '../../../common/types';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type { Sort } from '../components/timeline/body/sort';
 import type {
   DataProvider,
   QueryOperator,
@@ -23,15 +22,16 @@ import {
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
   SerializedFilterQuery,
   TimelinePersistInput,
   SortColumnTimeline,
+  SortColumnTimeline as Sort,
 } from '../../../common/types/timeline';
 import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
-import { TimelineId } from '../../../common/types/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -131,7 +131,6 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      isLoading: timelineById[id].isLoading,
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
@@ -180,7 +179,6 @@ export const addNewTimeline = ({
       savedObjectId: null,
       version: null,
       isSaving: false,
-      isLoading: false,
       timelineType,
       ...templateTimelineInfo,
     },

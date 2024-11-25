@@ -1116,7 +1116,7 @@
         "signature": [
           "{ [x: string]: FilterValue; }"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/public/src/hooks/use_navigate_findings.ts",
+        "path": "x-pack/packages/kbn-cloud-security-posture/public/src/utils/query_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1510,6 +1510,17 @@
             "type": "string",
             "tags": [],
             "label": "failed",
+            "description": [],
+            "path": "x-pack/packages/kbn-cloud-security-posture/public/src/constants/component_constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.statusColors.unknown",
+            "type": "string",
+            "tags": [],
+            "label": "unknown",
             "description": [],
             "path": "x-pack/packages/kbn-cloud-security-posture/public/src/constants/component_constants.ts",
             "deprecated": false,

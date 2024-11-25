@@ -10,21 +10,49 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useGetPackageInfoByKeyQuery, useLink, useDashboardLocator } from '../../../../hooks';
+import type { GetInfoResponse } from '../../../../../../../common/types';
+import {
+  useGetPackageInfoByKeyQuery,
+  useLink,
+  useDashboardLocator,
+  useFleetStatus,
+} from '../../../../hooks';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   DASHBOARD_LOCATORS_IDS,
 } from '../../../../../../../common/constants';
+import { getDashboardIdForSpace } from '../../services/dashboard_helpers';
+
+function isKibanaAssetsInstalledInSpace(spaceId: string | undefined, res?: GetInfoResponse) {
+  if (res?.item?.status !== 'installed') {
+    return false;
+  }
+
+  const installationInfo = res.item.installationInfo;
+
+  if (!installationInfo || installationInfo.install_status !== 'installed') {
+    return false;
+  }
+  return (
+    installationInfo.installed_kibana_space_id === spaceId ||
+    (spaceId && installationInfo.additional_spaces_installed_kibana?.[spaceId])
+  );
+}
 
 function useAgentDashboardLink(agent: Agent) {
   const { isLoading, data } = useGetPackageInfoByKeyQuery(FLEET_ELASTIC_AGENT_PACKAGE);
+  const { spaceId } = useFleetStatus();
 
-  const isInstalled = data?.item.status === 'installed';
+  const isInstalled = isKibanaAssetsInstalledInSpace(spaceId, data);
   const dashboardLocator = useDashboardLocator();
 
   const link = dashboardLocator?.getRedirectUrl({
-    dashboardId: DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS,
+    dashboardId: getDashboardIdForSpace(
+      spaceId,
+      data,
+      DASHBOARD_LOCATORS_IDS.ELASTIC_AGENT_AGENT_METRICS
+    ),
     query: {
       language: 'kuery',
       query: `elastic_agent.id:${agent.id}`,

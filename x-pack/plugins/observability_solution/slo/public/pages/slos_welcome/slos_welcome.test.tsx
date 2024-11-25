@@ -14,7 +14,7 @@ import { emptySloList, sloList } from '../../data/slo/slo';
 import { usePermissions } from '../../hooks/use_permissions';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { render } from '../../utils/test_helper';
 import { SlosWelcomePage } from './slos_welcome';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
@@ -25,7 +25,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../utils/kibana_react');
+jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_slo_list');
 jest.mock('../../hooks/use_permissions');

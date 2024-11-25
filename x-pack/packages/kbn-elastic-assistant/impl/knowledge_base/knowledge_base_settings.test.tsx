@@ -26,6 +26,9 @@ const mockUseAssistantContext = {
   },
   setAllSystemPrompts: jest.fn(),
   setConversations: jest.fn(),
+  assistantAvailability: {
+    isAssistantEnabled: true,
+  },
 };
 
 jest.mock('../assistant_context', () => {
@@ -44,15 +47,6 @@ const defaultProps = {
   },
   setUpdatedKnowledgeBaseSettings,
 };
-const mockDelete = jest.fn();
-jest.mock('../assistant/api/knowledge_base/use_delete_knowledge_base', () => ({
-  useDeleteKnowledgeBase: jest.fn(() => {
-    return {
-      mutate: mockDelete,
-      isLoading: false,
-    };
-  }),
-}));
 
 const mockSetup = jest.fn();
 jest.mock('../assistant/api/knowledge_base/use_setup_knowledge_base', () => ({

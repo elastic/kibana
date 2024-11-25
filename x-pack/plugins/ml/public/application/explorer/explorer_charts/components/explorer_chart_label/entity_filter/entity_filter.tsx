@@ -22,11 +22,13 @@ interface EntityFilterProps {
   }) => void;
   influencerFieldName: string;
   influencerFieldValue: string;
+  isEmbeddable?: boolean;
 }
 export const EntityFilter: FC<EntityFilterProps> = ({
   onFilter,
   influencerFieldName,
   influencerFieldValue,
+  isEmbeddable,
 }) => {
   return (
     <React.Fragment>
@@ -34,7 +36,7 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         content={
           <FormattedMessage
             id="xpack.ml.entityFilter.addFilterTooltip"
-            defaultMessage="Add filter"
+            defaultMessage="Filter for"
           />
         }
       >
@@ -57,10 +59,17 @@ export const EntityFilter: FC<EntityFilterProps> = ({
       </EuiToolTip>
       <EuiToolTip
         content={
-          <FormattedMessage
-            id="xpack.ml.entityFilter.removeFilterTooltip"
-            defaultMessage="Remove filter"
-          />
+          isEmbeddable ? (
+            <FormattedMessage
+              id="xpack.ml.entityFilter.filterOutTooltip"
+              defaultMessage={'Filter out'}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.ml.entityFilter.removeFilterTooltip"
+              defaultMessage={'Remove filter'}
+            />
+          )
         }
       >
         <EuiButtonIcon

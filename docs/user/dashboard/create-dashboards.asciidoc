@@ -83,6 +83,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltf75cdb828
 [[save-dashboards]]
 . **Save** the dashboard. You can then leave the **Edit** mode and *Switch to view mode*. 
 
+NOTE: Managed dashboards can't be edited directly, but you can <<duplicate-dashboards,duplicate>> them and edit these duplicates.
 
 [[reset-the-dashboard]]
 === Reset dashboard changes
@@ -154,6 +155,24 @@ Copy panels from one dashboard to another dashboard.
 +
 [role="screenshot"]
 image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt64206db263cf5514/66f49286833cffb09bebd18d/copy-to-dashboard-8.15.0.gif[Copy a panel to another dashboard, width 30%]
+
+[[duplicate-dashboards]]
+== Duplicate dashboards
+
+. Open the dashboard you want to duplicate.
+
+. In *View* mode, click *Duplicate* in the toolbar.
+
+. In the *Duplicate dashboard* window, enter a title and optional description and tags.
+
+. Click *Save*.
+
+You will be redirected to the duplicated dashboard.
+
+To duplicate a managed dashboard, follow the instructions above or click the *Managed* badge in the toolbar. Then click *Duplicate* in the dialogue that appears. 
+
+[role="screenshot"]
+image::images/managed-dashboard-popover-8.16.0.png[Managed badge dialog with Duplicate button, width=40%]
 
 == Import dashboards
 

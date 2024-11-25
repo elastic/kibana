@@ -9,7 +9,7 @@ if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
       "--metrics" "build/kibana/node_modules/@kbn/ui-shared-deps-src/shared_built_assets/metrics.json"
   )
 
-  if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-on-merge" ]; then
+  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-on-merge" ]] || [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-pull-request" ]]; then
     cmd+=("--validate")
   fi
 

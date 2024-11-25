@@ -9,7 +9,7 @@ import { TimelineTabs } from '../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import React from 'react';
 import { UnifiedTimeline } from '../unified_components';
-import { defaultUdtHeaders } from '../unified_components/default_headers';
+import { defaultUdtHeaders } from './column_headers/default_headers';
 import type { UnifiedTimelineBodyProps } from './unified_timeline_body';
 import { UnifiedTimelineBody } from './unified_timeline_body';
 import { render, screen } from '@testing-library/react';

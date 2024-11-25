@@ -53,11 +53,11 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
 
       await esNode.load(esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
       });
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });

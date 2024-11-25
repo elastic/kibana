@@ -18,6 +18,7 @@ import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { SO_SEARCH_LIMIT } from '../../../common/constants';
+import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import {
@@ -254,11 +255,7 @@ export async function getAgentsByKuery(
 
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
 
-  const isDefaultSort = sortField === 'enrolled_at' && sortOrder === 'desc';
-  // if using default sorting (enrolled_at), adding a secondary sort on hostname, so that the results are not changing randomly in case many agents were enrolled at the same time
-  const secondarySort: estypes.Sort = isDefaultSort
-    ? [{ 'local_metadata.host.hostname.keyword': { order: 'asc' } }]
-    : [];
+  const sort = getSortConfig(sortField, sortOrder);
 
   const statusSummary: Record<AgentStatus, number> = {
     online: 0,
@@ -302,7 +299,7 @@ export async function getAgentsByKuery(
       rest_total_hits_as_int: true,
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
-      sort: [{ [sortField]: { order: sortOrder } }, ...secondarySort],
+      sort,
       query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
       ...(pitId
         ? {

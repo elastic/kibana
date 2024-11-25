@@ -24,6 +24,7 @@ export interface UseKnowledgeBaseEntriesParams {
   signal?: AbortSignal | undefined;
   toasts?: IToasts;
   enabled?: boolean; // For disabling if FF is off
+  isRefetching?: boolean; // For enabling polling
 }
 
 const defaultQuery: FindKnowledgeBaseEntriesRequestQuery = {
@@ -56,6 +57,7 @@ export const useKnowledgeBaseEntries = ({
   signal,
   toasts,
   enabled = false,
+  isRefetching = false,
 }: UseKnowledgeBaseEntriesParams) =>
   useQuery(
     KNOWLEDGE_BASE_ENTRY_QUERY_KEY,
@@ -73,6 +75,7 @@ export const useKnowledgeBaseEntries = ({
       enabled,
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
+      refetchInterval: isRefetching ? 30000 : false,
       onError: (error: IHttpFetchError<ResponseErrorBody>) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(error, {

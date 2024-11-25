@@ -13,6 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let supertestDeveloperWithCookieCredentials: SupertestWithRoleScopeType;
   let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
+  const testIndexName = 'search-test-index';
 
   describe('search_indices Status APIs', function () {
     describe('indices status', function () {
@@ -37,37 +38,41 @@ export default function ({ getService }: FtrProviderContext) {
       describe('developer', function () {
         it('returns expected privileges', async () => {
           const { body } = await supertestDeveloperWithCookieCredentials
-            .get('/internal/search_indices/start_privileges')
+            .get(`/internal/search_indices/start_privileges/${testIndexName}`)
             .expect(200);
 
           expect(body).toEqual({
             privileges: {
               canCreateApiKeys: true,
-              canCreateIndex: true,
+              canDeleteDocuments: true,
+              canManageIndex: true,
             },
           });
         });
       });
-      describe('viewer', function () {
-        before(async () => {
-          supertestViewerWithCookieCredentials =
-            await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
-              useCookieHeader: true,
-              withInternalHeaders: true,
-            });
-        });
+    });
+    describe('viewer', function () {
+      before(async () => {
+        supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+          'viewer',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          }
+        );
+      });
 
-        it('returns expected privileges', async () => {
-          const { body } = await supertestViewerWithCookieCredentials
-            .get('/internal/search_indices/start_privileges')
-            .expect(200);
+      it('returns expected privileges', async () => {
+        const { body } = await supertestViewerWithCookieCredentials
+          .get(`/internal/search_indices/start_privileges/${testIndexName}`)
+          .expect(200);
 
-          expect(body).toEqual({
-            privileges: {
-              canCreateApiKeys: false,
-              canCreateIndex: false,
-            },
-          });
+        expect(body).toEqual({
+          privileges: {
+            canCreateApiKeys: false,
+            canDeleteDocuments: false,
+            canManageIndex: false,
+          },
         });
       });
     });

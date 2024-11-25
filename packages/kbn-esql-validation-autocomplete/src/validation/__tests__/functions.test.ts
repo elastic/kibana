@@ -552,11 +552,7 @@ describe('function validation', () => {
         | EVAL foo = TEST1(1.)
         | EVAL TEST2(foo)
         | EVAL TEST3(foo)`,
-        [
-          'Argument of [test1] must be [keyword], found value [1.] type [double]',
-          'Argument of [test2] must be [keyword], found value [foo] type [unknown]',
-          'Argument of [test3] must be [long], found value [foo] type [unknown]',
-        ]
+        ['Argument of [test1] must be [keyword], found value [1.] type [double]']
       );
     });
 

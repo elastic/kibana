@@ -42,6 +42,8 @@ import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplink
 import type { ChromeNavLink } from './nav_links';
 import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
+export type SolutionId = 'es' | 'oblt' | 'security';
+
 /** @public */
 export type AppId =
   | DevToolsApp
@@ -414,6 +416,7 @@ export interface NavigationTreeDefinition<
  * with their corresponding "deepLink"...)
  */
 export interface NavigationTreeDefinitionUI {
+  id: SolutionId;
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }
@@ -429,7 +432,7 @@ export interface NavigationTreeDefinitionUI {
 
 export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
   /** Unique id for the solution navigation. */
-  id: string;
+  id: SolutionId;
   /** Title for the solution navigation. */
   title: string;
   /** The navigation tree definition */
@@ -442,9 +445,9 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
   homePage?: LinkId;
 }
 
-export interface SolutionNavigationDefinitions {
-  [id: string]: SolutionNavigationDefinition;
-}
+export type SolutionNavigationDefinitions = {
+  [id in SolutionId]?: SolutionNavigationDefinition;
+};
 
 /**
  * Temporary helper interface while we have to maintain both the legacy side navigation

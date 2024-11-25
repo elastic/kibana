@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react-hooks';
+import { act, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
@@ -36,7 +36,7 @@ describe('useHistoryBlock', () => {
 
       act(() => renderer.mountHistory.push('/test'));
       // needed because we have an async useEffect
-      await act(() => new Promise((resolve) => resolve()));
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
@@ -53,7 +53,7 @@ describe('useHistoryBlock', () => {
 
       act(() => renderer.mountHistory.push('/test'));
       // needed because we have an async useEffect
-      await act(() => new Promise((resolve) => resolve()));
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
@@ -81,7 +81,7 @@ describe('useHistoryBlock', () => {
 
       act(() => renderer.mountHistory.push('/test?param=test'));
       // needed because we have an async useEffect
-      await act(() => new Promise((resolve) => resolve()));
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
@@ -98,7 +98,7 @@ describe('useHistoryBlock', () => {
 
       act(() => renderer.mountHistory.push('/test?param=test'));
       // needed because we have an async useEffect
-      await act(() => new Promise((resolve) => resolve()));
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();
@@ -127,7 +127,7 @@ describe('useHistoryBlock', () => {
 
       act(() => renderer.mountHistory.push('/test#/hash'));
       // needed because we have an async useEffect
-      await act(() => new Promise((resolve) => resolve()));
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
@@ -144,7 +144,7 @@ describe('useHistoryBlock', () => {
 
       act(() => renderer.mountHistory.push('/test#/hash'));
       // needed because we have an async useEffect
-      await act(() => new Promise((resolve) => resolve()));
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toBeCalled();
       expect(renderer.startServices.application.navigateToUrl).not.toBeCalled();

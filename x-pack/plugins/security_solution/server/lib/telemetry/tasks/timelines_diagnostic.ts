@@ -6,11 +6,12 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { DEFAULT_DIAGNOSTIC_INDEX_PATTERN } from '../../../../common/endpoint/constants';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
-import { DEFAULT_DIAGNOSTIC_INDEX, TELEMETRY_CHANNEL_TIMELINE } from '../constants';
+import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
 import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
 
 export function createTelemetryDiagnosticTimelineTaskConfig() {
@@ -43,7 +44,7 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
         const { rangeFrom, rangeTo } = ranges(taskExecutionPeriod);
 
         const alerts = await receiver.fetchTimelineAlerts(
-          DEFAULT_DIAGNOSTIC_INDEX,
+          DEFAULT_DIAGNOSTIC_INDEX_PATTERN,
           rangeFrom,
           rangeTo
         );

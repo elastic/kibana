@@ -9,6 +9,7 @@
 export const DEFAULT_ALLOW = [
   '_id',
   '@timestamp',
+  'agent.id',
   'cloud.availability_zone',
   'cloud.provider',
   'cloud.region',

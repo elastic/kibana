@@ -10,6 +10,7 @@ import { AnomalyEntity } from '../../../common/components/ml/anomaly/use_anomali
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { TestProviders } from '../../../common/mock';
 import { AnomaliesCountLink } from './anomalies_count_link';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -37,6 +38,9 @@ describe('AnomaliesCountLink', () => {
 
     fireEvent.click(getByRole('button'));
 
-    expect(mockedTelemetry.reportAnomaliesCountClicked).toHaveBeenLastCalledWith({ jobId, count });
+    expect(mockedTelemetry.reportEvent).toHaveBeenLastCalledWith(
+      EntityEventTypes.AnomaliesCountClicked,
+      { jobId, count }
+    );
   });
 });

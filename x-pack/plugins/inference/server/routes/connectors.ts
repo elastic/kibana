@@ -23,6 +23,12 @@ export function registerConnectorsRoute({
   router.get(
     {
       path: '/internal/inference/connectors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (_context, request, response) => {

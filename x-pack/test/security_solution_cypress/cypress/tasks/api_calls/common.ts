@@ -14,7 +14,7 @@ import { deleteAllDocuments } from './elasticsearch';
 import { getSpaceUrl } from '../space';
 import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 
-export const API_AUTH = Object.freeze({
+export const ESS_API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),
   pass: Cypress.env(ELASTICSEARCH_PASSWORD),
 });
@@ -28,17 +28,32 @@ export const API_HEADERS = Object.freeze({
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
 export const rootRequest = <T = unknown>({
-  headers: optionHeaders,
+  headers: optionHeaders = {},
+  role = 'admin',
   ...restOptions
-}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
-  cy.request<T>({
-    auth: API_AUTH,
-    headers: {
-      ...API_HEADERS,
-      ...(optionHeaders || {}),
-    },
-    ...restOptions,
-  });
+}: Partial<Cypress.RequestOptions> & { role?: string }): Cypress.Chainable<Cypress.Response<T>> => {
+  if (Cypress.env('IS_SERVERLESS')) {
+    return cy.task('getApiKeyForRole', role).then((response) => {
+      return cy.request<T>({
+        headers: {
+          ...API_HEADERS,
+          ...optionHeaders,
+          Authorization: `ApiKey ${response}`,
+        },
+        ...restOptions,
+      });
+    });
+  } else {
+    return cy.request<T>({
+      auth: ESS_API_AUTH,
+      headers: {
+        ...API_HEADERS,
+        ...optionHeaders,
+      },
+      ...restOptions,
+    });
+  }
+};
 
 // a helper function to wait for the root request to be successful
 // defaults to 5 second intervals for 3 attempts
@@ -105,24 +120,7 @@ export const deleteConnectors = () => {
 };
 
 export const deletePrebuiltRulesAssets = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'security-rule',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
+  cy.task('deleteSecurityRulesFromKibana');
 };
 
 export const postDataView = (indexPattern: string, name?: string, id?: string) => {

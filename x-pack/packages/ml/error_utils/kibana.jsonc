@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/ml-error-utils",
-  "owner": "@elastic/ml-ui"
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

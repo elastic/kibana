@@ -668,7 +668,7 @@ describe('suggestions', () => {
       ).toContainEqual(
         expect.objectContaining({
           state: {
-            shape: PieChartTypes.DONUT,
+            shape: PieChartTypes.PIE,
             palette,
             layers: [
               {

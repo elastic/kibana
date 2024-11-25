@@ -44,6 +44,6 @@ export const getInsightsInputTab = ({
         defaultMessage="Insights"
       />
     ),
-    content: <InsightsTabCsp name={name} fieldName={fieldName} />,
+    content: <InsightsTabCsp value={name} field={fieldName} />,
   };
 };

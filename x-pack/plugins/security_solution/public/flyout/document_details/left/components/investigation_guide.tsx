@@ -7,11 +7,11 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlyoutLoading } from '@kbn/security-solution-common';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
 import { InvestigationGuideView } from './investigation_guide_view';
+import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 
 /**
  * Investigation guide displayed in the left panel.

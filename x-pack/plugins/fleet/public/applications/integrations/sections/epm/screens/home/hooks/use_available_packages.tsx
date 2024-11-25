@@ -28,6 +28,7 @@ import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../
 import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
+  filterPolicyTemplatesTiles,
 } from '../../../../../../../../common/services';
 
 import {
@@ -83,30 +84,33 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       categories: getAllCategoriesFromIntegrations(pkg),
     };
 
-    return [
-      ...acc,
-      topPackage,
-      ...(doesPackageHaveIntegrations(pkg)
-        ? policyTemplates.map((policyTemplate) => {
-            const { name, title, description, icons } = policyTemplate;
+    const integrationsPolicyTemplates = doesPackageHaveIntegrations(pkg)
+      ? policyTemplates.map((policyTemplate) => {
+          const { name, title, description, icons } = policyTemplate;
 
-            const categories =
-              isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
-                ? policyTemplate.categories
-                : [];
-            const allCategories = [...topCategories, ...categories];
-            return {
-              ...restOfPackage,
-              id: `${restOfPackage.id}-${name}`,
-              integration: name,
-              title,
-              description,
-              icons: icons || restOfPackage.icons,
-              categories: uniq(allCategories),
-            };
-          })
-        : []),
-    ];
+          const categories =
+            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.categories
+              ? policyTemplate.categories
+              : [];
+          const allCategories = [...topCategories, ...categories];
+          return {
+            ...restOfPackage,
+            id: `${restOfPackage.id}-${name}`,
+            integration: name,
+            title,
+            description,
+            icons: icons || restOfPackage.icons,
+            categories: uniq(allCategories),
+          };
+        })
+      : [];
+
+    const tiles = filterPolicyTemplatesTiles<PackageListItem>(
+      pkg.policy_templates_behavior,
+      topPackage,
+      integrationsPolicyTemplates
+    );
+    return [...acc, ...tiles];
   }, []);
 };
 

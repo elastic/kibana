@@ -8,17 +8,16 @@ exports[`Fleet - getTemplateInputs should work for input package 1`] = `
     streams:
       # Custom log file: Custom log file
       - id: logfile-log.logs
-        data_stream:
-          dataset: <DATA_STREAM.DATASET>
-            # Dataset name: Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use \`-\` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
-
-        paths:
-          - <PATHS> # Log file path: Path to log files to be collected
-        exclude_files:
-          - <EXCLUDE_FILES> # Exclude files: Patterns to be ignored
         ignore_older: 72h
-        tags:
-          - <TAGS> # Tags: Tags to include in the published event
+        # data_stream:
+        #  dataset: <DATA_STREAM.DATASET>
+        #    # Dataset name: Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use \`-\` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
+        # paths:
+        #  - <PATHS> # Log file path: Path to log files to be collected
+        # exclude_files:
+        #  - <EXCLUDE_FILES> # Exclude files: Patterns to be ignored
+        # tags:
+        #  - <TAGS> # Tags: Tags to include in the published event
 "
 `;
 
@@ -49,8 +48,34 @@ exports[`Fleet - getTemplateInputs should work for integration package 1`] = `
             pattern: '*'
         maxconn: 10
         network: tcp
-        username: <USERNAME> # Username
-        password: <PASSWORD> # Password
         period: 10s
+        tags:
+          - test
+          # - <TAGS> # Tags
+        # username: <USERNAME> # Username
+        # password: <PASSWORD> # Password
+        # tags_streams:
+        #  - <TAGS_STREAMS> # Tags in streams
+"
+`;
+
+exports[`Fleet - getTemplateInputs should work for package with dynamic ids 1`] = `
+"inputs:
+  # Collect Docker container logs: Collecting docker container logs
+  - id: docker-filestream
+    type: filestream
+    streams:
+      # Collect Docker container logs: Collect Docker container logs
+      - id: docker-container-logs-\${docker.container.name}-\${docker.container.id}
+        data_stream:
+          dataset: docker.container_logs
+          type: logs
+        paths:
+          - /var/lib/docker/containers/\${docker.container.id}/*-json.log
+        parsers:
+          - container:
+              stream: all
+              format: docker
+        # condition: <CONDITION> # Condition: Condition to filter when to apply this datastream. Refer to [Docker provider](https://www.elastic.co/guide/en/fleet/current/docker-provider.html) to find the available keys and to [Conditions](https://www.elastic.co/guide/en/fleet/current/dynamic-input-configuration.html#conditions) on how to use the available keys in conditions.
 "
 `;

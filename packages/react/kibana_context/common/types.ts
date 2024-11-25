@@ -20,6 +20,10 @@ import { Observable } from 'rxjs';
 export interface KibanaTheme {
   /** is dark mode enabled or not */
   readonly darkMode: boolean;
+  /**
+   * Name of the active theme
+   */
+  readonly name: string;
 }
 
 // To avoid a circular dependency with the deprecation of `CoreThemeProvider`,

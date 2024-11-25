@@ -35,7 +35,8 @@ To get to the fun of visualizing and alerting on Portland public transport vehic
 [float]
 ==== Step 1: Set up an Elasticsearch index
 
-. In Kibana, open the main menu, then click *Dev Tools*.
+. In Kibana, go to *Developer tools* using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . In *Console*, create the `tri_met_tracks` index lifecyle policy. This policy will keep the events in the hot data phase for 7 days. The data then moves to the warm phase. After 365 days in the warm phase, the data is deleted.
 +
 .ILM policy definition
@@ -503,7 +504,7 @@ TIP: You may want to tweak this Data View to adjust the field names and number o
 [float]
 ==== Step 4: Explore the Portland TriMet data
 
-. Open the main menu, and click *Discover*.
+. Go to *Discover*.
 . Set the data view to *{ems-asset-index-name}*.
 . Open the <<set-time-filter, time filter>>, and set the time range to the last 15 minutes.
 . Expand a document and explore some of the fields that you will use later in this tutorial: `trimet.bearing`, `trimet.inCongestion`, `trimet.location`, and `trimet.vehicleID`.
@@ -523,7 +524,7 @@ It's hard to get an overview of Portland vehicles by looking at individual event
 Create your map and set the theme for the default layer to dark mode.
 
 
-. Open the main menu, and click *Maps*.
+. Go to *Maps*.
 . Click *Create map*.
 . In the *Layers* list, click *Road map*, and then click *Edit layer settings*.
 . Open the *Tile service* dropdown, and select *Road map - dark*.

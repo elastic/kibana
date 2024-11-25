@@ -152,7 +152,7 @@ describe('monitor upgrade telemetry helpers', () => {
   it('handles formatting update events', () => {
     const actual = formatTelemetryUpdateEvent(
       createTestConfig({}, '2011-10-05T16:48:00.000Z'),
-      testConfig,
+      testConfig.updated_at,
       stackVersion,
       false,
       errors

@@ -52,6 +52,19 @@ describe('TelemetryService', () => {
       expect(telemetry).toHaveProperty('reportHostFlyoutFilterRemoved');
       expect(telemetry).toHaveProperty('reportHostFlyoutFilterAdded');
       expect(telemetry).toHaveProperty('reportHostsViewQuerySubmitted');
+      expect(telemetry).toHaveProperty('reportHostsViewTotalHostCountRetrieved');
+      expect(telemetry).toHaveProperty('reportAssetDetailsFlyoutViewed');
+      expect(telemetry).toHaveProperty('reportAssetDetailsPageViewed');
+      expect(telemetry).toHaveProperty('reportPerformanceMetricEvent');
+      expect(telemetry).toHaveProperty('reportAssetDashboardLoaded');
+      expect(telemetry).toHaveProperty('reportAddMetricsCalloutAddMetricsClicked');
+      expect(telemetry).toHaveProperty('reportAddMetricsCalloutTryItClicked');
+      expect(telemetry).toHaveProperty('reportAddMetricsCalloutLearnMoreClicked');
+      expect(telemetry).toHaveProperty('reportAddMetricsCalloutDismissed');
+      expect(telemetry).toHaveProperty('reportAnomalyDetectionSetup');
+      expect(telemetry).toHaveProperty('reportAnomalyDetectionDateFieldChange');
+      expect(telemetry).toHaveProperty('reportAnomalyDetectionPartitionFieldChange');
+      expect(telemetry).toHaveProperty('reportAnomalyDetectionFilterFieldChange');
     });
   });
 
@@ -339,6 +352,101 @@ describe('TelemetryService', () => {
         'Add Metrics Callout Dismissed',
         {
           view,
+        }
+      );
+    });
+  });
+
+  describe('#reportAnomalyDetectionSetup', () => {
+    it('should report anomaly detection setup with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const jobType = 'host';
+      const configuredFields = {
+        start_date: new Date().toISOString(),
+        partition_field: 'partitionField',
+        filter_field: 'filterField',
+      };
+
+      telemetry.reportAnomalyDetectionSetup({
+        job_type: jobType,
+        configured_fields: configuredFields,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Infra Anomaly Detection Job Setup',
+        {
+          job_type: jobType,
+          configured_fields: configuredFields,
+        }
+      );
+    });
+  });
+
+  describe('#reportAnomalyDetectionDateFieldChange', () => {
+    it('should report anomaly detection date field change with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const startDate = new Date().toISOString();
+
+      telemetry.reportAnomalyDetectionDateFieldChange({
+        job_type: 'host',
+        start_date: startDate,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Infra Anomaly Detection Job Date Field Change',
+        {
+          job_type: 'host',
+          start_date: startDate,
+        }
+      );
+    });
+  });
+
+  describe('#reportAnomalyDetectionPartitionFieldChange', () => {
+    it('should report anomaly detection partition field change with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportAnomalyDetectionPartitionFieldChange({
+        job_type: 'host',
+        partition_field: 'partitionField',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Infra Anomaly Detection Job Partition Field Change',
+        {
+          job_type: 'host',
+          partition_field: 'partitionField',
+        }
+      );
+    });
+  });
+
+  describe('#reportAnomalyDetectionFilterFieldChange', () => {
+    it('should report anomaly detection filter field change with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+
+      telemetry.reportAnomalyDetectionFilterFieldChange({
+        job_type: 'host',
+        filter_field: 'filterField',
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Infra Anomaly Detection Job Filter Field Change',
+        {
+          job_type: 'host',
+          filter_field: 'filterField',
         }
       );
     });

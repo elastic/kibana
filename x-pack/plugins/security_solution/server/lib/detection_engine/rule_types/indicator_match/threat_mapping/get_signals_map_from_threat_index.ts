@@ -90,7 +90,9 @@ export async function getSignalsQueryMapFromThreatIndex(
 
   while (maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0) {
     threatList.hits.hits.forEach((threatHit) => {
-      const matchedQueries = threatHit?.matched_queries || [];
+      const matchedQueries = Array.isArray(threatHit?.matched_queries)
+        ? threatHit.matched_queries
+        : [];
 
       matchedQueries.forEach((matchedQuery) => {
         const decodedQuery = decodeThreatMatchNamedQuery(matchedQuery);

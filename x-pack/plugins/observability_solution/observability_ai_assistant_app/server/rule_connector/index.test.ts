@@ -91,14 +91,17 @@ describe('observabilityAIAssistant rule_connector', () => {
           getFunctionClient: async () => ({
             getFunctions: () => [],
             getInstructions: () => [],
+            getAdhocInstructions: () => [],
           }),
         },
-        context: {
-          core: Promise.resolve({
-            coreStart: { http: { basePath: { publicBaseUrl: 'http://kibana.com' } } },
-          }),
-        },
+        context: {},
         plugins: {
+          core: {
+            start: () =>
+              Promise.resolve({
+                http: { basePath: { publicBaseUrl: 'http://kibana.com' } },
+              }),
+          },
           actions: {
             start: async () => {
               return {

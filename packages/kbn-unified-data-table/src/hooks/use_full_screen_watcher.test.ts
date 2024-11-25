@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import {
   EUI_DATA_GRID_FULL_SCREEN_CLASS,
   UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS,
@@ -40,7 +40,7 @@ const nextTick = () => {
   return act(() => {
     return new Promise((resolve) =>
       requestAnimationFrame(() => {
-        resolve();
+        resolve(null);
       })
     );
   });

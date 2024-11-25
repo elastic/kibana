@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         before(async () => {
           await visualize.navigateToNewVisualization();
           await visualize.clickVisType('lens');
-          await lens.goToTimeRange();
           await navigationalSearch.focus();
           await navigationalSearch.searchFor('type:lens lnsTableVis');
           await navigationalSearch.clickOnOption(0);
@@ -74,7 +73,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualize.gotoVisualizationLandingPage();
           await listingTable.searchForItemWithName('lnsTableVis');
           await lens.clickVisualizeListItemTitle('lnsTableVis');
-          await lens.goToTimeRange();
           await navigationalSearch.focus();
           await navigationalSearch.searchFor('type:application lens');
           await navigationalSearch.clickOnOption(0);
@@ -109,7 +107,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('lnsTableVis');
         await lens.clickVisualizeListItemTitle('lnsTableVis');
-        await lens.goToTimeRange();
         // go to empty vis
         await lens.goToListingPageViaBreadcrumbs();
         await visualize.clickNewVisualization();

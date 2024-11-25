@@ -67,26 +67,30 @@ const createToasterPlainError = (message: string) => new ToasterError([message])
 
 const parseOrThrow = parseOrThrowErrorFactory(createToasterPlainError);
 
-const decodeTimelineResponse = (respTimeline?: PersistTimelineResponse | TimelineErrorResponse) =>
-  parseOrThrow(PersistTimelineResponse)(respTimeline);
+const decodeTimelineResponse = (
+  respTimeline?: PersistTimelineResponse | TimelineErrorResponse
+): PersistTimelineResponse => parseOrThrow(PersistTimelineResponse)(respTimeline);
 
-const decodeSingleTimelineResponse = (respTimeline?: GetTimelineResponse) =>
+const decodeSingleTimelineResponse = (respTimeline?: GetTimelineResponse): GetTimelineResponse =>
   parseOrThrow(GetTimelineResponse)(respTimeline);
 
-const decodeResolvedSingleTimelineResponse = (respTimeline?: ResolveTimelineResponse) =>
-  parseOrThrow(ResolveTimelineResponse)(respTimeline);
+const decodeResolvedSingleTimelineResponse = (
+  respTimeline?: ResolveTimelineResponse
+): ResolveTimelineResponse => parseOrThrow(ResolveTimelineResponse)(respTimeline);
 
-const decodeGetTimelinesResponse = (respTimeline: GetTimelinesResponse) =>
+const decodeGetTimelinesResponse = (respTimeline: GetTimelinesResponse): GetTimelinesResponse =>
   parseOrThrow(GetTimelinesResponse)(respTimeline);
 
-const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
+const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse): TimelineErrorResponse =>
   parseOrThrow(TimelineErrorResponse)(respTimeline);
 
-const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResult) =>
-  parseOrThrow(ImportTimelineResult)(respTimeline);
+const decodePrepackedTimelineResponse = (
+  respTimeline?: ImportTimelineResult
+): ImportTimelineResult => parseOrThrow(ImportTimelineResult)(respTimeline);
 
-const decodeResponseFavoriteTimeline = (respTimeline?: PersistFavoriteRouteResponse) =>
-  parseOrThrow(PersistFavoriteRouteResponse)(respTimeline);
+const decodeResponseFavoriteTimeline = (
+  respTimeline?: PersistFavoriteRouteResponse
+): PersistFavoriteRouteResponse => parseOrThrow(PersistFavoriteRouteResponse)(respTimeline);
 
 const postTimeline = async ({
   timeline,
@@ -219,22 +223,19 @@ export const persistTimeline = async ({
       const templateTimelineInfo =
         timeline.timelineType === TimelineTypeEnum.template
           ? {
-              templateTimelineId:
-                draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
-                timeline.templateTimelineId,
+              templateTimelineId: draftTimeline.templateTimelineId ?? timeline.templateTimelineId,
               templateTimelineVersion:
-                draftTimeline.data.persistTimeline.timeline.templateTimelineVersion ??
-                timeline.templateTimelineVersion,
+                draftTimeline.templateTimelineVersion ?? timeline.templateTimelineVersion,
             }
           : {};
 
       return patchTimeline({
-        timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
+        timelineId: draftTimeline.savedObjectId,
         timeline: {
           ...timeline,
           ...templateTimelineInfo,
         },
-        version: draftTimeline.data.persistTimeline.timeline.version ?? '',
+        version: draftTimeline.version ?? '',
         savedSearch,
       });
     }
@@ -250,19 +251,10 @@ export const persistTimeline = async ({
       savedSearch,
     });
   } catch (err) {
-    if (err.status_code === 403 || err.body.status_code === 403) {
+    if (err.status_code === 403 || err.body?.status_code === 403) {
       return Promise.resolve({
-        data: {
-          persistTimeline: {
-            code: 403,
-            message: err.message || err.body.message,
-            timeline: {
-              ...timeline,
-              savedObjectId: '',
-              version: '',
-            },
-          },
-        },
+        statusCode: 403,
+        message: err.message || err.body.message,
       });
     }
     return Promise.resolve(err);

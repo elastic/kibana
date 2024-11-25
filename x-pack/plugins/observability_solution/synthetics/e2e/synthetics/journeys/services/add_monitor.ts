@@ -7,10 +7,7 @@
 
 import axios from 'axios';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import {
-  privateLocationsSavedObjectId,
-  privateLocationsSavedObjectName,
-} from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
+import { legacyPrivateLocationsSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 
 export const enableMonitorManagedViaApi = async (kibanaUrl: string) => {
   try {
@@ -46,21 +43,6 @@ export const addTestMonitor = async (
   }
 };
 
-export const getPrivateLocations = async (params: Record<string, any>) => {
-  const getService = params.getService;
-  const server = getService('kibanaServer');
-
-  try {
-    return await server.savedObjects.get({
-      id: privateLocationsSavedObjectId,
-      type: privateLocationsSavedObjectName,
-    });
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log(e);
-  }
-};
-
 export const cleanTestMonitors = async (params: Record<string, any>) => {
   const getService = params.getService;
   const server = getService('kibanaServer');
@@ -79,7 +61,11 @@ export const cleanPrivateLocations = async (params: Record<string, any>) => {
 
   try {
     await server.savedObjects.clean({
-      types: [privateLocationsSavedObjectName, 'ingest-agent-policies', 'ingest-package-policies'],
+      types: [
+        legacyPrivateLocationsSavedObjectName,
+        'ingest-agent-policies',
+        'ingest-package-policies',
+      ],
     });
   } catch (e) {
     // eslint-disable-next-line no-console

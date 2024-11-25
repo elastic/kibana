@@ -11,7 +11,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { ALERT_STATUS_ALL } from './constants';
 
 export type Maybe<T> = T | null | undefined;
@@ -52,6 +52,11 @@ export interface Group {
 export interface TimeRange {
   from?: string;
   to?: string;
+}
+
+export interface EventNonEcsData {
+  field: string;
+  value?: Maybe<string[]>;
 }
 
 // Alert fields['kibana.alert.group] type

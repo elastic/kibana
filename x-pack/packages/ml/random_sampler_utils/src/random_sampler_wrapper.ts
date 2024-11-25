@@ -69,7 +69,6 @@ export const createRandomSamplerWrapper = (options: RandomSamplerOptions) => {
 
     return {
       [aggName]: {
-        // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
         random_sampler: {
           probability,
           ...(options.seed ? { seed: options.seed } : {}),

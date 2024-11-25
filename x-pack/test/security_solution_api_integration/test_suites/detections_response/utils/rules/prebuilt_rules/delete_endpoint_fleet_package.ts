@@ -21,9 +21,9 @@ export async function deleteEndpointFleetPackage(supertest: SuperTest.Agent) {
     .set('elastic-api-version', '2023-10-31')
     .send();
 
-  if (resp.status === 200 && resp.body.response.status === 'installed') {
+  if (resp.status === 200 && resp.body.item.status === 'installed') {
     await supertest
-      .delete(epmRouteService.getRemovePath(ENDPOINT_PACKAGE_NAME, resp.body.response.version))
+      .delete(epmRouteService.getRemovePath(ENDPOINT_PACKAGE_NAME, resp.body.item.version))
       .set('kbn-xsrf', 'true')
       .send({ force: true });
   }

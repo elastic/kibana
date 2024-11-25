@@ -58,10 +58,10 @@ export const getGenerateNode = ({
         () => `generate node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const rawResponse = (await chain.invoke({
+      const rawResponse = await chain.invoke({
         format_instructions: formatInstructions,
         query,
-      })) as unknown as string;
+      });
 
       // LOCAL MUTATION:
       partialResponse = extractJson(rawResponse); // remove the surrounding ```json```
@@ -86,7 +86,7 @@ export const getGenerateNode = ({
         generationsAreRepeating({
           currentGeneration: partialResponse,
           previousGenerations: generations,
-          sampleLastNGenerations: maxRepeatedGenerations,
+          sampleLastNGenerations: maxRepeatedGenerations - 1,
         })
       ) {
         logger?.debug(

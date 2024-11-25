@@ -34,9 +34,13 @@ export const archiveMaintenanceWindowRoute = (
         params: archiveParamsSchemaV1,
         body: archiveBodySchemaV1,
       },
+      security: {
+        authz: {
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
+        },
+      },
       options: {
         access: 'internal',
-        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.WRITE_MAINTENANCE_WINDOW}`],
       },
     },
     router.handleLegacyErrors(

@@ -16,7 +16,6 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/home-plugin",
-    "@kbn/vis-type-timeseries-plugin",
     "@kbn/features-plugin",
     "@kbn/spaces-plugin",
     "@kbn/alerting-plugin",

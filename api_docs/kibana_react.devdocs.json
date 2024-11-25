@@ -1455,9 +1455,9 @@
           "<",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.KibanaTheme",
+            "section": "def-common.KibanaTheme",
             "text": "KibanaTheme"
           },
           ">) => React.JSX.Element"
@@ -1493,9 +1493,9 @@
               "<",
               {
                 "pluginId": "@kbn/react-kibana-context-common",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                "section": "def-public.KibanaTheme",
+                "section": "def-common.KibanaTheme",
                 "text": "KibanaTheme"
               },
               ">"
@@ -2653,17 +2653,17 @@
           "Pick<",
           {
             "pluginId": "@kbn/react-kibana-context-theme",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextThemePluginApi",
-            "section": "def-public.KibanaThemeProviderProps",
+            "section": "def-common.KibanaThemeProviderProps",
             "text": "KibanaThemeProviderProps"
           },
           ", \"children\" | \"modify\"> & ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.ThemeServiceStart",
+            "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           }
         ],

@@ -108,8 +108,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId?}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get info of a trained inference model',
       description: 'Retrieves configuration information for a trained model.',
@@ -278,8 +280,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get stats for all trained models',
       description: 'Retrieves usage information for all trained models.',
@@ -307,8 +311,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get stats for a trained model',
       description: 'Retrieves usage information for a trained model.',
@@ -342,8 +348,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/pipelines`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get trained model pipelines',
       description: 'Retrieves ingest pipelines associated with a trained model.',
@@ -376,8 +384,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/ingest_pipelines`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'], // TODO: update permissions
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get ingest pipelines',
       description: 'Retrieves ingest pipelines.',
@@ -403,8 +413,10 @@ export function trainedModelsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/create_inference_pipeline`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
       summary: 'Create an inference pipeline',
       description: 'Creates a pipeline with inference processor',
@@ -438,8 +450,10 @@ export function trainedModelsRoutes(
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
       summary: 'Put a trained model',
       description: 'Adds a new trained model',
@@ -478,8 +492,10 @@ export function trainedModelsRoutes(
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteTrainedModels'],
+        },
       },
       summary: 'Delete a trained model',
       description:
@@ -523,8 +539,10 @@ export function trainedModelsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/deployment/_start`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopTrainedModels'],
+        },
       },
       summary: 'Start trained model deployment',
       description: 'Starts trained model deployment.',
@@ -569,8 +587,10 @@ export function trainedModelsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/{deploymentId}/deployment/_update`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopTrainedModels'],
+        },
       },
       summary: 'Update trained model deployment',
       description: 'Updates trained model deployment.',
@@ -604,8 +624,10 @@ export function trainedModelsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/{modelId}/{deploymentId}/deployment/_stop`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopTrainedModels'],
+        },
       },
       summary: 'Stop trained model deployment',
       description: 'Stops trained model deployment.',
@@ -653,8 +675,10 @@ export function trainedModelsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/pipeline_simulate`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canTestTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canTestTrainedModels'],
+        },
       },
       summary: 'Simulates an ingest pipeline',
       description: 'Simulates an ingest pipeline.',
@@ -688,8 +712,10 @@ export function trainedModelsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/infer/{modelId}/{deploymentId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canTestTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canTestTrainedModels'],
+        },
       },
       summary: 'Evaluates a trained model.',
       description: 'Evaluates a trained model.',
@@ -732,8 +758,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/model_downloads`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get available models for download',
       description:
@@ -761,8 +789,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/elser_config`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get ELSER config for download',
       description: 'Gets ELSER config for download based on the cluster OS and CPU architecture.',
@@ -797,8 +827,10 @@ export function trainedModelsRoutes(
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/install_elastic_trained_model/{modelId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
       summary: 'Install Elastic trained model',
       description: 'Downloads and installs Elastic trained model.',
@@ -835,8 +867,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/download_status`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateTrainedModels'],
+        },
       },
       summary: 'Get models download status',
       description: 'Gets download status for all currently downloading models.',
@@ -865,8 +899,10 @@ export function trainedModelsRoutes(
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/trained_models/curated_model_config/{modelName}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
       summary: 'Get curated model config',
       description:

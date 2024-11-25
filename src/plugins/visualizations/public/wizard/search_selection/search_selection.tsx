@@ -49,6 +49,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           <DialogNavigation goBack={this.props.goBack} />
           <SavedObjectFinder
             key="searchSavedObjectFinder"
+            id="visSearchSelection"
             onChoose={this.props.onSearchSelected}
             showFilter
             noItemsMessage={i18n.translate(

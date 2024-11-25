@@ -34,7 +34,7 @@ const triggerValidateEql = () => {
     query: 'any where true',
     signal,
     runtimeMappings: undefined,
-    options: undefined,
+    eqlOptions: undefined,
   });
 };
 

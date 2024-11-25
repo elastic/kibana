@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useFavoritesClient, useFavoritesContext } from './favorites_context';
 
 const favoritesKeys = {
@@ -54,14 +55,14 @@ export const useAddFavorite = () => {
       onSuccess: (data) => {
         queryClient.setQueryData(favoritesKeys.byType(favoritesClient!.getFavoriteType()), data);
       },
-      onError: (error: Error) => {
+      onError: (error: IHttpFetchError<{ message?: string }>) => {
         notifyError?.(
           <>
             {i18n.translate('contentManagement.favorites.addFavoriteError', {
               defaultMessage: 'Error adding to Starred',
             })}
           </>,
-          error?.message
+          error?.body?.message ?? error.message
         );
       },
     }

@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/security-solution-upselling",
-  "owner": "@elastic/security-threat-hunting-explore"
+  "owner": [
+    "@elastic/security-threat-hunting-explore"
+  ],
+  "group": "security",
+  "visibility": "private"
 }

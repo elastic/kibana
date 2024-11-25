@@ -181,8 +181,3 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
-
-# Must be removed before v9 release
-# Requires all registry packages to add v9 as a compatible semver range
-# https://github.com/elastic/kibana/issues/192624
-xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false

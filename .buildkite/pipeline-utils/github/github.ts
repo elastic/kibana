@@ -93,6 +93,26 @@ export const doAnyChangesMatch = async (
   return anyFilesMatchRequired;
 };
 
+export function addComment(
+  comment: string,
+  owner = process.env.GITHUB_PR_BASE_OWNER,
+  repo = process.env.GITHUB_PR_BASE_REPO,
+  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
+) {
+  if (!owner || !repo || !prNumber) {
+    throw Error(
+      "Couldn't retrieve Github PR info from environment variables in order to add a comment"
+    );
+  }
+
+  return github.issues.createComment({
+    owner,
+    repo,
+    issue_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
+    body: comment,
+  });
+}
+
 export function getGithubClient() {
   return github;
 }

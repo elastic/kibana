@@ -55,6 +55,37 @@ const features = [
     catalogue: ['feature3Entry'],
     category: { id: 'securitySolution' },
   },
+  {
+    deprecated: { notice: 'It was a mistake.' },
+    id: 'feature_4_deprecated',
+    name: 'Deprecated Feature',
+    app: ['feature2', 'feature3'],
+    catalogue: ['feature2Entry', 'feature3Entry'],
+    category: { id: 'deprecated', label: 'deprecated' },
+    scope: ['spaces', 'security'],
+    privileges: {
+      all: {
+        savedObject: { all: [], read: [] },
+        ui: [],
+        app: ['feature2', 'feature3'],
+        catalogue: ['feature2Entry', 'feature3Entry'],
+        replacedBy: [
+          { feature: 'feature_2', privileges: ['all'] },
+          { feature: 'feature_3', privileges: ['all'] },
+        ],
+      },
+      read: {
+        savedObject: { all: [], read: [] },
+        ui: [],
+        app: ['feature2', 'feature3'],
+        catalogue: ['feature2Entry', 'feature3Entry'],
+        replacedBy: [
+          { feature: 'feature_2', privileges: ['read'] },
+          { feature: 'feature_3', privileges: ['read'] },
+        ],
+      },
+    },
+  },
 ] as unknown as KibanaFeature[];
 const featuresStart = featuresPluginMock.createStart();
 
@@ -103,6 +134,17 @@ describe('#getAll', () => {
         bar: 'baz-bar', // an extra attribute that will be ignored during conversion
       },
     },
+    {
+      // alpha only has deprecated disabled features
+      id: 'alpha',
+      type: 'space',
+      references: [],
+      attributes: {
+        name: 'alpha-name',
+        description: 'alpha-description',
+        disabledFeatures: ['feature_1', 'feature_4_deprecated'],
+      },
+    },
   ];
 
   const expectedSpaces: Space[] = [
@@ -129,6 +171,12 @@ describe('#getAll', () => {
       name: 'baz-name',
       description: 'baz-description',
       disabledFeatures: [],
+    },
+    {
+      id: 'alpha',
+      name: 'alpha-name',
+      description: 'alpha-description',
+      disabledFeatures: ['feature_1', 'feature_2', 'feature_3'],
     },
   ];
 

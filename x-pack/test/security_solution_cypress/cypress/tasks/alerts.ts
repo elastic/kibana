@@ -7,6 +7,7 @@
 
 import { encode } from '@kbn/rison';
 import { recurse } from 'cypress-recurse';
+import 'cypress-network-idle';
 import { formatPageFilterSearchParam } from '@kbn/security-solution-plugin/common/utils/format_page_filter_search_param';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
@@ -56,7 +57,6 @@ import {
   TOOLTIP,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
-import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
 import {
   UPDATE_ENRICHMENT_RANGE_BUTTON,
   ENRICHMENT_QUERY_END_INPUT,
@@ -80,6 +80,7 @@ import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
 import { openFilterGroupContextMenu } from './common/filter_group';
 import { visitWithTimeRange } from './navigation';
+import { GET_DATA_GRID_HEADER_ACTION_BUTTON } from '../screens/common/data_grid';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -214,7 +215,6 @@ export const goToClosedAlertsOnRuleDetailsPage = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToClosedAlerts = () => {
@@ -231,7 +231,6 @@ export const goToClosedAlerts = () => {
   selectPageFilterValue(0, 'closed');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToOpenedAlertsOnRuleDetailsPage = () => {
@@ -295,7 +294,6 @@ export const goToAcknowledgedAlerts = () => {
   selectPageFilterValue(0, 'acknowledged');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
-  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const markAlertsAcknowledged = () => {
@@ -351,6 +349,7 @@ const clickAction = (propertySelector: string, rowIndex: number, actionSelector:
     () => {
       // To clear focus
       cy.get('body').type('{esc}');
+      cy.get(propertySelector).eq(rowIndex).should('be.visible');
       cy.get(propertySelector).eq(rowIndex).realHover();
       return cy.get(actionSelector).first();
     },
@@ -387,24 +386,22 @@ export const showTopNAlertProperty = (propertySelector: string, rowIndex: number
 };
 
 export const waitForAlerts = () => {
-  /*
-   * below line commented because alertpagefiltersenabled feature flag
-   * is disabled by default
-   * target: enable by default in v8.8
-   *
-   * waitforpagefilters();
-   *
-   * */
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');
   cy.get(LOADING_INDICATOR).should('not.exist');
+  cy.waitForNetworkIdle('/internal/search/privateRuleRegistryAlertsSearchStrategy', 500);
 };
 
 export const expandAlertTableCellValue = (columnSelector: string, row = 1) => {
   cy.get(columnSelector).eq(1).realHover();
   cy.get(columnSelector).eq(1).find(CELL_EXPAND_VALUE).click();
+};
+
+export const hideAlertTableHorizontalScrollBar = () => {
+  // .realHover ends up being flaky if the scroll bar is visible as the element below it cannot be properly
+  cy.get('.euiDataGrid__virtualized').invoke('attr', 'style', 'overflow-x: hidden');
 };
 
 export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
@@ -417,6 +414,24 @@ export const scrollAlertTableColumnIntoView = (columnSelector: string) => {
   });
 };
 
+export const scrollAlertTableColumnIntoViewAndTest = (
+  columnSelector: string,
+  testCallback: () => void
+) => {
+  cy.get(columnSelector).eq(0).scrollIntoView();
+
+  // Wait for data grid to populate column
+  cy.waitUntil(() => cy.get(columnSelector).then(($el) => $el.length > 1), {
+    interval: 500,
+    timeout: 12000,
+  });
+  // We remove the horizontal scrollbar from the table after scrolling
+  // so `realHover` doesn't conflict with it when attempting to click elements in the table
+  cy.get('.euiDataGrid__virtualized').invoke('attr', 'style', 'overflow-x: hidden');
+  testCallback();
+  cy.get('.euiDataGrid__virtualized').invoke('attr', 'style', 'overflow-x: auto');
+};
+
 export const waitForPageFilters = () => {
   cy.log('Waiting for Page Filters');
   cy.url().then((urlString) => {
@@ -427,6 +442,7 @@ export const waitForPageFilters = () => {
       cy.get(DETECTION_PAGE_FILTER_GROUP_LOADING).should('not.exist');
       cy.get(DETECTION_PAGE_FILTERS_LOADING).should('not.exist');
       cy.get(OPTION_LISTS_LOADING).should('have.lengthOf', 0);
+      cy.waitForNetworkIdle('*/internal/controls/optionsList/*', 500);
     } else {
       cy.log('Skipping Page Filters Wait');
     }
@@ -513,4 +529,9 @@ export const switchAlertTableToEventRenderedView = () => {
 export const switchAlertTableToGridView = () => {
   cy.get(ALERT_TABLE_SUMMARY_VIEW_SELECTABLE).should('be.visible').trigger('click');
   cy.get(ALERT_TABLE_GRID_VIEW_OPTION).should('be.visible').trigger('click');
+};
+
+export const openDataGridColumnActions = (fieldName: string) => {
+  cy.get(GET_DATA_GRID_HEADER_ACTION_BUTTON(fieldName)).realHover();
+  cy.get(GET_DATA_GRID_HEADER_ACTION_BUTTON(fieldName)).trigger('click');
 };

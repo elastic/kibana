@@ -6,16 +6,16 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
-import { fromKueryExpression, Query, TimeRange, toElasticsearchQuery } from '@kbn/es-query';
+import { css } from '@emotion/react';
+import { Query, TimeRange, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 import React, { memo } from 'react';
-import styled from 'styled-components';
-import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
-import { SearchBarProps } from './query_builder';
-import { useKibana } from '../../../../utils/kibana_react';
+import { Controller, useFormContext } from 'react-hook-form';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { CreateSLOForm } from '../../types';
 import { OptionalText } from './optional_text';
+import { SearchBarProps } from './query_builder';
 
 export const QuerySearchBar = memo(
   ({
@@ -69,7 +69,7 @@ export const QuerySearchBar = memo(
               field.onChange(String(value?.query));
             } else {
               field.onChange({
-                ...(field.value ?? {}),
+                filters: field.value?.filters ?? [],
                 kqlQuery: String(value?.query),
               });
             }
@@ -90,7 +90,13 @@ export const QuerySearchBar = memo(
               error={fieldState.error?.message}
               fullWidth
             >
-              <Container>
+              <div
+                css={css`
+                  .uniSearchBar {
+                    padding: 0;
+                  }
+                `}
+              >
                 <SearchBar
                   appName={observabilityAppId}
                   dataTestSubj={dataTestSubj}
@@ -111,15 +117,27 @@ export const QuerySearchBar = memo(
                   }
                   onQuerySubmit={(value) => handleQueryChange(value.query, value.dateRange)}
                   onFiltersUpdated={(filters) => {
+                    const updatedFilters = filters.map((filter) => {
+                      const { $state, meta, ...rest } = filter;
+                      const query = filter?.query ? { ...filter.query } : { ...rest };
+                      return {
+                        meta: {
+                          ...meta,
+                          alias: meta?.alias ?? JSON.stringify(query),
+                        },
+                        query,
+                      };
+                    });
+
                     if (kqlQuerySchema.is(field.value)) {
                       field.onChange({
-                        filters,
+                        filters: updatedFilters,
                         kqlQuery: field.value,
                       });
                     } else {
                       field.onChange({
-                        ...(field.value ?? {}),
-                        filters,
+                        kqlQuery: field.value?.kqlQuery ?? '',
+                        filters: updatedFilters,
                       });
                     }
                   }}
@@ -141,7 +159,7 @@ export const QuerySearchBar = memo(
                   onClearSavedQuery={() => {}}
                   filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
                 />
-              </Container>
+              </div>
             </EuiFormRow>
           );
         }}
@@ -149,9 +167,3 @@ export const QuerySearchBar = memo(
     );
   }
 );
-
-const Container = styled.div`
-  .uniSearchBar {
-    padding: 0;
-  }
-`;

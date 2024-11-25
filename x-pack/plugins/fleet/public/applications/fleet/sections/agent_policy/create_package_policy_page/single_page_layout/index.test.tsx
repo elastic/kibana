@@ -52,7 +52,7 @@ jest.mock('../../../../hooks', () => {
     sendGetStatus: jest
       .fn()
       .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
-    sendGetAgentStatus: jest.fn().mockResolvedValue({ data: { results: { total: 0 } } }),
+    sendGetAgentStatus: jest.fn().mockResolvedValue({ data: { results: { active: 0 } } }),
     useGetAgentPolicies: jest.fn().mockReturnValue({
       data: {
         items: [
@@ -154,14 +154,7 @@ afterAll(() => {
   consoleDebugMock.mockRestore();
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/196463
-// FLAKY: https://github.com/elastic/kibana/issues/196464
-// FLAKY: https://github.com/elastic/kibana/issues/196465
-// FLAKY: https://github.com/elastic/kibana/issues/196466
-// FLAKY: https://github.com/elastic/kibana/issues/196467
-// FLAKY: https://github.com/elastic/kibana/issues/196468
-// FLAKY: https://github.com/elastic/kibana/issues/196469
-describe.skip('When on the package policy create page', () => {
+describe('When on the package policy create page', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -291,17 +284,15 @@ describe.skip('When on the package policy create page', () => {
       let cancelButton: HTMLAnchorElement;
 
       beforeEach(async () => {
-        await act(async () => {
-          render();
+        render();
 
-          cancelLink = renderResult.getByTestId(
-            'createPackagePolicy_cancelBackLink'
-          ) as HTMLAnchorElement;
+        cancelLink = renderResult.getByTestId(
+          'createPackagePolicy_cancelBackLink'
+        ) as HTMLAnchorElement;
 
-          cancelButton = (await renderResult.findByTestId(
-            'createPackagePolicyCancelButton'
-          )) as HTMLAnchorElement;
-        });
+        cancelButton = (await renderResult.findByTestId(
+          'createPackagePolicyCancelButton'
+        )) as HTMLAnchorElement;
       });
 
       test('should use custom "cancel" URL', () => {
@@ -534,7 +525,7 @@ describe.skip('When on the package policy create page', () => {
         (sendCreateAgentPolicy as jest.MockedFunction<any>).mockClear();
         (sendCreatePackagePolicy as jest.MockedFunction<any>).mockClear();
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
-          data: { results: { total: 0 } },
+          data: { results: { active: 0 } },
         });
       });
 
@@ -584,7 +575,7 @@ describe.skip('When on the package policy create page', () => {
 
       test('should show modal if agent policy has agents', async () => {
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
-          data: { results: { total: 1 } },
+          data: { results: { active: 1 } },
         });
 
         await act(async () => {
@@ -787,7 +778,7 @@ describe.skip('When on the package policy create page', () => {
 
       test('should not show confirmation modal', async () => {
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
-          data: { results: { total: 1 } },
+          data: { results: { active: 1 } },
         });
 
         await act(async () => {
@@ -854,8 +845,8 @@ describe.skip('When on the package policy create page', () => {
         expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
         expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
           expect.objectContaining({
-            monitoring_enabled: ['logs', 'metrics', 'traces'],
-            name: 'Agent policy 1',
+            monitoring_enabled: ['logs', 'metrics'],
+            name: 'Agentless policy for nginx-1',
           }),
           { withSysMonitoring: true }
         );
@@ -868,7 +859,7 @@ describe.skip('When on the package policy create page', () => {
 
       test('should create agentless agent policy and package policy when in cloud and agentless API url is set', async () => {
         fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
-        fireEvent.click(renderResult.getByText('Agentless'));
+        fireEvent.click(renderResult.getAllByText('Agentless')[0]);
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
@@ -879,7 +870,7 @@ describe.skip('When on the package policy create page', () => {
             name: 'Agentless policy for nginx-1',
             supports_agentless: true,
           }),
-          { withSysMonitoring: false }
+          { withSysMonitoring: true }
         );
         expect(sendCreatePackagePolicy).toHaveBeenCalled();
 
@@ -894,7 +885,7 @@ describe.skip('When on the package policy create page', () => {
 const mockApiCalls = (http: MockedFleetStartServices['http']) => {
   http.get.mockImplementation(async (path: any) => {
     if (path === '/api/fleet/agents/setup') {
-      return Promise.resolve({ data: { results: { total: 0 } } });
+      return Promise.resolve({ data: { results: { active: 0 } } });
     }
     if (path === '/api/fleet/package_policies') {
       return Promise.resolve({ data: { items: [] } });

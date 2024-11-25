@@ -55,6 +55,7 @@ import {
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import type {
   FilterEvent,
   BrushEvent,
@@ -232,6 +233,7 @@ export function XYChart({
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
+  const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
     (hashMap, layer) => ({ ...hashMap, [layer.layerId]: layer }),
@@ -767,7 +769,7 @@ export function XYChart({
       >
         <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
           <Tooltip<Record<string, string | number>, XYChartSeriesIdentifier>
-            boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+            boundary={appFixedViewport}
             headerFormatter={
               !args.detailedTooltip && xAxisColumn
                 ? ({ value }) => (

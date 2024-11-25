@@ -33,6 +33,11 @@ describe('parseMonitorLocations', () => {
     id: 'local',
     isServiceManaged: true,
   };
+  const localLoc2 = {
+    label: 'Local 2',
+    id: 'local2',
+    isServiceManaged: true,
+  };
 
   it('should return expected', function () {
     const result = parseMonitorLocations({
@@ -81,6 +86,20 @@ describe('parseMonitorLocations', () => {
     });
   });
 
+  it('should handle editing location', function () {
+    const result = parseMonitorLocations(
+      {
+        locations: ['local'],
+      } as any,
+      [localLoc, localLoc2]
+    );
+
+    expect(result).toEqual({
+      locations: ['local'],
+      privateLocations: [],
+    });
+  });
+
   it('should add private locations to existing', function () {
     const result = parseMonitorLocations(
       {
@@ -91,7 +110,7 @@ describe('parseMonitorLocations', () => {
 
     expect(result).toEqual({
       locations: ['local'],
-      privateLocations: ['test-private-location-2', 'test-private-location'],
+      privateLocations: ['test-private-location-2'],
     });
   });
 
@@ -183,6 +202,21 @@ describe('parseMonitorLocations', () => {
     expect(result).toEqual({
       locations: ['local'],
       privateLocations: [],
+    });
+  });
+
+  it('should handle private location objects', function () {
+    const result = parseMonitorLocations(
+      {
+        locations: [pvtLoc1],
+      } as any,
+      [localLoc, pvtLoc1],
+      true
+    );
+
+    expect(result).toEqual({
+      locations: [],
+      privateLocations: ['test-private-location'],
     });
   });
 });

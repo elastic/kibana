@@ -8,7 +8,9 @@
 import { Client } from '@elastic/elasticsearch';
 import {
   CreateKnowledgeBaseResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  GetKnowledgeBaseIndicesResponse,
 } from '@kbn/elastic-assistant-common';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
@@ -64,7 +66,10 @@ export const setupKnowledgeBase = async (
   namespace?: string
 ): Promise<CreateKnowledgeBaseResponse> => {
   const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-  const route = routeWithNamespace(`${path}?modelId=pt_tiny_elser`, namespace);
+  const route = routeWithNamespace(
+    `${path}?modelId=pt_tiny_elser&ignoreSecurityLabs=true`,
+    namespace
+  );
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
@@ -93,4 +98,32 @@ export const clearKnowledgeBase = async (es: Client, space = 'default') => {
     query: { match_all: {} },
     refresh: true,
   });
+};
+
+/**
+ * Get indices with the `semantic_text` type fields
+ * @param supertest The supertest deps
+ * @param log The tooling logger
+ */
+export const getKnowledgeBaseIndices = async ({
+  supertest,
+  log,
+}: {
+  supertest: SuperTest.Agent;
+  log: ToolingLog;
+}): Promise<GetKnowledgeBaseIndicesResponse> => {
+  const response = await supertest
+    .get(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL)
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .send();
+  if (response.status !== 200) {
+    throw new Error(
+      `Unexpected non 200 ok when attempting to find entries: ${JSON.stringify(
+        response.status
+      )},${JSON.stringify(response, null, 4)}`
+    );
+  } else {
+    return response.body;
+  }
 };

@@ -316,6 +316,16 @@ export const ModelsList: FC<Props> = ({
           };
         });
       });
+
+      setItemIdToExpandedRowMap((prev) => {
+        // Refresh expanded rows
+        return Object.fromEntries(
+          Object.keys(prev).map((modelId) => {
+            const item = resultItems.find((i) => i.model_id === modelId);
+            return item ? [modelId, <ExpandedRow item={item as ModelItemFull} />] : [];
+          })
+        );
+      });
     } catch (error) {
       displayErrorToast(
         error,
@@ -687,7 +697,7 @@ export const ModelsList: FC<Props> = ({
                     <>
                       {downloadState
                         ? (
-                            (downloadState.downloaded_parts / downloadState.total_parts) *
+                            (downloadState.downloaded_parts / (downloadState.total_parts || -1)) *
                             100
                           ).toFixed(0) + '%'
                         : '100%'}
@@ -945,6 +955,14 @@ export const ModelsList: FC<Props> = ({
               if (model.state === MODEL_STATE.DOWNLOADING) {
                 abortedDownload.current.add(model.model_id);
               }
+            });
+
+            setItemIdToExpandedRowMap((prev) => {
+              const newMap = { ...prev };
+              modelsToDelete.forEach((model) => {
+                delete newMap[model.model_id];
+              });
+              return newMap;
             });
 
             setModelsToDelete([]);

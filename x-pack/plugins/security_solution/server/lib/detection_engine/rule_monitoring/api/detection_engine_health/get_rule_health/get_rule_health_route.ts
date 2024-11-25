@@ -33,8 +33,10 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
     .post({
       access: 'internal',
       path: GET_RULE_HEALTH_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

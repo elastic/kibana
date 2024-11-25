@@ -11,7 +11,7 @@ post:
     - $ref: ../components/parameters/space_id.yaml
     - $ref: ../components/parameters/slo_id.yaml
   responses:
-    '200':
+    '204':
       description: Successful request
     '400':
       description: Bad request

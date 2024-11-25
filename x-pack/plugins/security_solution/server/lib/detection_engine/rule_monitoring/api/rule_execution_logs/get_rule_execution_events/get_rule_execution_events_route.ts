@@ -27,8 +27,10 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
     .get({
       access: 'internal',
       path: GET_RULE_EXECUTION_EVENTS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

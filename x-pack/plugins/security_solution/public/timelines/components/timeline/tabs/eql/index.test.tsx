@@ -35,9 +35,6 @@ jest.mock('../../../../containers/details', () => ({
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
-jest.mock('../../body/events', () => ({
-  Events: () => <></>,
-}));
 
 jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({

@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/shared-ux-page-no-data",
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

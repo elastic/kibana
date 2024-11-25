@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getElasticOutline, getElasticLogo } from '@kbn/presentation-util-plugin/common';
 import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRevealImageRenderer } from '..';
@@ -27,7 +28,13 @@ const Renderer = ({
     origin: Origin.LEFT,
     percent: 0.45,
   };
-  return <Render renderer={getRevealImageRenderer()} config={config} />;
+
+  return (
+    <Render
+      renderer={getRevealImageRenderer(coreMock.createStart().theme.theme$)}
+      config={config}
+    />
+  );
 };
 
 storiesOf('renderers/revealImage', module).add(

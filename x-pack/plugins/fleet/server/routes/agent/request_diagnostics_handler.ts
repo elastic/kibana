@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../common/services';
 
 import * as AgentService from '../../services/agents';
 import type {
+  FleetRequestHandler,
   PostBulkRequestDiagnosticsActionRequestSchema,
   PostRequestDiagnosticsActionRequestSchema,
 } from '../../types';
-import { defaultFleetErrorHandler } from '../../errors';
 import { getAgentById } from '../../services/agents';
 
-export const requestDiagnosticsHandler: RequestHandler<
+export const requestDiagnosticsHandler: FleetRequestHandler<
   TypeOf<typeof PostRequestDiagnosticsActionRequestSchema.params>,
   undefined,
   TypeOf<typeof PostRequestDiagnosticsActionRequestSchema.body>
@@ -26,32 +25,28 @@ export const requestDiagnosticsHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  try {
-    const agent = await getAgentById(esClient, soClient, request.params.agentId);
+  const agent = await getAgentById(esClient, soClient, request.params.agentId);
 
-    if (!isAgentRequestDiagnosticsSupported(agent)) {
-      return response.customError({
-        statusCode: 400,
-        body: {
-          message: `Agent ${request.params.agentId} does not support request diagnostics action.`,
-        },
-      });
-    }
-
-    const result = await AgentService.requestDiagnostics(
-      esClient,
-      soClient,
-      request.params.agentId,
-      request.body?.additional_metrics
-    );
-
-    return response.ok({ body: { actionId: result.actionId } });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  if (!isAgentRequestDiagnosticsSupported(agent)) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `Agent ${request.params.agentId} does not support request diagnostics action.`,
+      },
+    });
   }
+
+  const result = await AgentService.requestDiagnostics(
+    esClient,
+    soClient,
+    request.params.agentId,
+    request.body?.additional_metrics
+  );
+
+  return response.ok({ body: { actionId: result.actionId } });
 };
 
-export const bulkRequestDiagnosticsHandler: RequestHandler<
+export const bulkRequestDiagnosticsHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof PostBulkRequestDiagnosticsActionRequestSchema.body>
@@ -62,15 +57,11 @@ export const bulkRequestDiagnosticsHandler: RequestHandler<
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents };
-  try {
-    const result = await AgentService.bulkRequestDiagnostics(esClient, soClient, {
-      ...agentOptions,
-      batchSize: request.body.batchSize,
-      additionalMetrics: request.body.additional_metrics,
-    });
+  const result = await AgentService.bulkRequestDiagnostics(esClient, soClient, {
+    ...agentOptions,
+    batchSize: request.body.batchSize,
+    additionalMetrics: request.body.additional_metrics,
+  });
 
-    return response.ok({ body: { actionId: result.actionId } });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body: { actionId: result.actionId } });
 };

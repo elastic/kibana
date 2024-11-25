@@ -51,7 +51,7 @@ export const ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY = i18n.translate(
 export const ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.store',
   {
-    defaultMessage: "Allows comprehensive monitoring of your system's hosts and users.",
+    defaultMessage: 'Store host and user entities observed in events.',
   }
 );
 
@@ -60,5 +60,12 @@ export const ENABLEMENT_DESCRIPTION_BOTH = i18n.translate(
   {
     defaultMessage:
       'Your entity store is currently empty. Add information about your entities directly from your logs, or import them using a text file.',
+  }
+);
+
+export const ENABLEMENT_WARNING_SELECT_TO_PROCEED = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.enablementWarningMessage',
+  {
+    defaultMessage: 'Please enable at least one option to proceed.',
   }
 );

@@ -92,7 +92,9 @@
           },
           ", cb: (span?: ",
           "Span",
-          " | undefined) => Promise<T>) => Promise<T>"
+          " | undefined) => Promise<T>, logger: ",
+          "Logger",
+          " | undefined) => Promise<T>"
         ],
         "path": "packages/kbn-apm-utils/index.ts",
         "deprecated": false,
@@ -136,6 +138,22 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-utils",
+            "id": "def-common.withSpan.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger",
+              " | undefined"
+            ],
+            "path": "packages/kbn-apm-utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

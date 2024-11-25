@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
 import {
   type EuiIconProps,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import { getSpanIcon } from './get_span_icon';
+import type { NodeExpandButtonProps } from './node_expand_button';
 
 export const LABEL_PADDING_X = 15;
 export const LABEL_BORDER_WIDTH = 1;
@@ -100,11 +101,63 @@ export const NodeShapeSvg = styled.svg`
   z-index: 1;
 `;
 
+export interface NodeButtonProps {
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+}
+
+export const NodeButton: React.FC<NodeButtonProps> = ({ onClick }) => (
+  <StyledNodeContainer>
+    <StyledNodeButton onClick={onClick} />
+  </StyledNodeContainer>
+);
+
+const StyledNodeContainer = styled.div`
+  position: absolute;
+  width: ${NODE_WIDTH}px;
+  height: ${NODE_HEIGHT}px;
+  z-index: 1;
+`;
+
+const StyledNodeButton = styled.div`
+  width: ${NODE_WIDTH}px;
+  height: ${NODE_HEIGHT}px;
+`;
+
+export const StyledNodeExpandButton = styled.div<NodeExpandButtonProps>`
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.2s ease; /* Smooth transition */
+  ${(props: NodeExpandButtonProps) =>
+    (Boolean(props.x) || Boolean(props.y)) &&
+    `transform: translate(${props.x ?? '0'}, ${props.y ?? '0'});`}
+  position: absolute;
+  z-index: 1;
+
+  &.toggled {
+    opacity: 1;
+  }
+
+  ${NodeShapeContainer}:hover & {
+    opacity: 1; /* Show on hover */
+  }
+
+  &:has(button:focus) {
+    opacity: 1; /* Show when button is active */
+  }
+
+  .react-flow__node:focus:focus-visible & {
+    opacity: 1; /* Show on node focus */
+  }
+`;
+
 export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
 
   ${NodeShapeContainer}:hover & {
+    opacity: 1; /* Show on hover */
+  }
+
+  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
@@ -145,9 +198,9 @@ NodeLabel.defaultProps = {
   textAlign: 'center',
 };
 
-const ExpandButtonSize = 18;
+export const ExpandButtonSize = 18;
 
-const RoundEuiButtonIcon = styled(EuiButtonIcon)`
+export const RoundEuiButtonIcon = styled(EuiButtonIcon)`
   border-radius: 50%;
   background-color: ${(_props) => useEuiBackgroundColor('plain')};
   width: ${ExpandButtonSize}px;
@@ -163,57 +216,6 @@ const RoundEuiButtonIcon = styled(EuiButtonIcon)`
     background-color: ${(_props) => useEuiBackgroundColor('plain')};
   }
 `;
-
-export const StyledNodeButton = styled.div<NodeButtonProps>`
-  opacity: 0; /* Hidden by default */
-  transition: opacity 0.2s ease; /* Smooth transition */
-  ${(props: NodeButtonProps) =>
-    (Boolean(props.x) || Boolean(props.y)) &&
-    `transform: translate(${props.x ?? '0'}, ${props.y ?? '0'});`}
-  position: absolute;
-  z-index: 1;
-
-  ${NodeShapeContainer}:hover & {
-    opacity: 1; /* Show on hover */
-  }
-
-  &:has(button:focus) {
-    opacity: 1; /* Show when button is active */
-  }
-
-  .react-flow__node:focus:focus-visible & {
-    opacity: 1; /* Show on node focus */
-  }
-`;
-
-export interface NodeButtonProps {
-  x?: string;
-  y?: string;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
-}
-
-export const NodeButton = ({ x, y, onClick }: NodeButtonProps) => {
-  // State to track whether the icon is "plus" or "minus"
-  const [isToggled, setIsToggled] = useState(false);
-
-  const onClickHandler = (e: React.MouseEvent<HTMLElement>) => {
-    setIsToggled(!isToggled);
-    onClick?.(e);
-  };
-
-  return (
-    <StyledNodeButton x={x} y={y}>
-      <RoundEuiButtonIcon
-        color="primary"
-        iconType={isToggled ? 'minusInCircleFilled' : 'plusInCircleFilled'}
-        onClick={onClickHandler}
-        iconSize="m"
-      />
-    </StyledNodeButton>
-  );
-};
-
-NodeButton.ExpandButtonSize = ExpandButtonSize;
 
 export const HandleStyleOverride: React.CSSProperties = {
   background: 'none',

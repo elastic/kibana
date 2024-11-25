@@ -13,12 +13,14 @@ import { isEmptyArray } from '../../../validators/array';
 import { ERROR_CODE } from './types';
 
 export const emptyField =
-  (message: string) =>
+  (message: string, trimString: boolean = true) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value, path }] = args;
 
     if (typeof value === 'string') {
-      return isEmptyString(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+      return isEmptyString(value, trimString)
+        ? { code: 'ERR_FIELD_MISSING', path, message }
+        : undefined;
     }
 
     if (Array.isArray(value)) {

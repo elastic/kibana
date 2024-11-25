@@ -13,6 +13,7 @@ import {
   AGENT_ACTIONS_RESULTS_INDEX,
   AGENT_POLICY_INDEX,
   AGENTS_INDEX,
+  type FleetServerAgent,
 } from '@kbn/fleet-plugin/common';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
@@ -115,6 +116,15 @@ export async function createFleetAgent(esClient: Client, agentPolicyId: string, 
   });
 
   return agentResponse._id;
+}
+
+export async function getFleetAgentDoc(esClient: Client, agentId: string) {
+  const agentResponse = await esClient.get<FleetServerAgent>({
+    index: '.fleet-agents',
+    id: agentId,
+  });
+
+  return agentResponse;
 }
 
 export async function makeAgentsUpgradeable(esClient: Client, agentIds: string[], version: string) {

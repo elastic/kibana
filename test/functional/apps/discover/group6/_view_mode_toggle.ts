@@ -95,25 +95,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           it('should not show', async function () {
             await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
-            await retry.try(async () => {
-              const documentTab = await testSubjects.find('dscViewModeDocumentButton');
-              expect(await documentTab.getAttribute('aria-selected')).to.be('true');
-            });
           });
         });
 
-        it('should show Field Statistics tab', async () => {
-          await testSubjects.click('dscViewModeFieldStatsButton');
-
-          await retry.try(async () => {
-            const fieldStatsTab = await testSubjects.find('dscViewModeFieldStatsButton');
-            expect(await fieldStatsTab.getAttribute('aria-selected')).to.be('true');
-          });
-
+        it('should not show Field Statistics tab', async () => {
           await testSubjects.existOrFail('dscViewModeToggle');
         });
 
-        it('should still show view mode toggle for ES|QL searches', async () => {
+        it('should not show view mode toggle for ES|QL searches', async () => {
           await testSubjects.click('dscViewModeDocumentButton');
 
           await retry.try(async () => {
@@ -125,7 +114,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await discover.selectTextBaseLang();
 
-          await testSubjects.existOrFail('dscViewModeToggle');
+          await testSubjects.missingOrFail('dscViewModeToggle');
+          await testSubjects.existOrFail('discoverQueryTotalHits');
 
           if (!useLegacyTable) {
             await testSubjects.existOrFail('unifiedDataTableToolbar');

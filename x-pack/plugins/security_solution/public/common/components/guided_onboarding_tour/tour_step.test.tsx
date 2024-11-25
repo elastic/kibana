@@ -194,7 +194,7 @@ describe('SecurityTourStep', () => {
     });
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
     expect(mockCall.step).toEqual(1);
-    expect(mockCall.stepsTotal).toEqual(7);
+    expect(mockCall.stepsTotal).toEqual(6);
   });
 
   it('forces the render for createCase step of the SecurityStepId.alertsCases tour step', () => {

@@ -116,11 +116,12 @@
           {
             "parentPluginId": "@kbn/server-route-repository-utils",
             "id": "def-common.DefaultRouteCreateOptions.options",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "options",
             "description": [],
             "signature": [
+              "(",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -136,7 +137,15 @@
                 "section": "def-server.RouteMethod",
                 "text": "RouteMethod"
               },
-              "> | undefined"
+              "> & { security?: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
+              },
+              " | undefined; }) | undefined"
             ],
             "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
             "deprecated": false,

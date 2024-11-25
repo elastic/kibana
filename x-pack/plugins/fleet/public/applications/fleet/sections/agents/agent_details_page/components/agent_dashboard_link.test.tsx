@@ -21,6 +21,7 @@ jest.mock('../../../../../../hooks/use_fleet_status', () => ({
   FleetStatusProvider: (props: any) => {
     return props.children;
   },
+  useFleetStatus: jest.fn().mockReturnValue({ spaceId: 'default' }),
 }));
 
 jest.mock('../../../../../../hooks/use_request/epm');
@@ -30,7 +31,7 @@ jest.mock('../../../../../../hooks/use_locator', () => {
     useDashboardLocator: jest.fn().mockImplementation(() => {
       return {
         id: 'DASHBOARD_APP_LOCATOR',
-        getRedirectUrl: jest.fn().mockResolvedValue('app/dashboards#/view/elastic_agent-a0001'),
+        getRedirectUrl: jest.fn().mockReturnValue('app/dashboards#/view/elastic_agent-a0001'),
       };
     }),
   };
@@ -43,6 +44,10 @@ describe('AgentDashboardLink', () => {
       data: {
         item: {
           status: 'installed',
+          installationInfo: {
+            install_status: 'installed',
+            installed_kibana_space_id: 'default',
+          },
         },
       },
     } as ReturnType<typeof useGetPackageInfoByKeyQuery>);

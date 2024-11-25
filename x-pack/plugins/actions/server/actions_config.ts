@@ -122,10 +122,7 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxySSLSettings: getSSLSettingsFromConfig(
-      config.ssl?.proxyVerificationMode,
-      config.proxyRejectUnauthorizedCertificates
-    ),
+    proxySSLSettings: getSSLSettingsFromConfig(config.ssl?.proxyVerificationMode),
   };
 }
 
@@ -200,8 +197,7 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    getSSLSettings: () =>
-      getSSLSettingsFromConfig(config.ssl?.verificationMode, config.rejectUnauthorized),
+    getSSLSettings: () => getSSLSettingsFromConfig(config.ssl?.verificationMode),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));

@@ -71,8 +71,7 @@ image::images/visualization-journey.png[User data analysis journey]
 
 | *1*
 | *Add data.* The best way to add data to the Elastic Stack is to use one of our many <<connect-to-elasticsearch,integrations>>.
-Alternatively, you can add a sample data set or upload a file. All three options are available
-on the home page.
+On the **Integrations** page, you can also find options to add sample data sets or to upload a file.
 
 | *2*
 | *Explore.* With <<discover,*Discover*>>, you can search your data for hidden

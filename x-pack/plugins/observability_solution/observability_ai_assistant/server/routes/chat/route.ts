@@ -42,7 +42,7 @@ const chatCompleteBaseRt = t.type({
       ]),
       instructions: t.array(
         t.intersection([
-          t.partial({ doc_id: t.string }),
+          t.partial({ id: t.string }),
           t.type({
             text: t.string,
             instruction_type: t.union([
@@ -194,7 +194,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
 
     const response$ = from(
       recallAndScore({
-        analytics: (await resources.context.core).coreStart.analytics,
+        analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
           client
             .chat(name, {

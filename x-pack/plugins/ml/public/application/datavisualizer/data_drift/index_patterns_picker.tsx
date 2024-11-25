@@ -53,6 +53,7 @@ export const DataDriftIndexOrSearchRedirect: FC = () => {
         </MlPageHeader>
         <EuiPanel hasShadow={false} hasBorder>
           <SavedObjectFinder
+            id="mlDataDriftDataViewsPicker"
             key="searchSavedObjectFinder"
             onChoose={onObjectSelection}
             showFilter

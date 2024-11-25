@@ -142,7 +142,7 @@ export class GeoUploadForm extends Component<Props, State> {
               onIndexNameValidationEnd={this.props.onIndexNameValidationEnd}
             />
             <EuiSpacer size="m" />
-            <EuiFormRow display="columnCompressedSwitch">
+            <EuiFormRow display="columnCompressed">
               <EuiToolTip
                 position="top"
                 content={i18n.translate('xpack.fileUpload.smallChunks.tooltip', {

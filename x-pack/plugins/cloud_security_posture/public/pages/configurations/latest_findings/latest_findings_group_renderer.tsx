@@ -198,11 +198,15 @@ const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
 
 const FindingsCount = React.memo(FindingsCountComponent);
 
-const ComplianceBarComponent = ({ bucket }: { bucket: RawBucket<FindingsGroupingAggregation> }) => {
+export const ComplianceBarComponent = ({
+  bucket,
+}: {
+  bucket: RawBucket<FindingsGroupingAggregation>;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const totalFailed = bucket.failedFindings?.doc_count || 0;
-  const totalPassed = bucket.doc_count - totalFailed;
+  const totalPassed = bucket.passedFindings?.doc_count || 0;
   return (
     <ComplianceScoreBar
       size="l"

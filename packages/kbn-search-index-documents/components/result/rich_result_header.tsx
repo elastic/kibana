@@ -24,10 +24,12 @@ import {
   EuiTextColor,
   EuiTitle,
   useEuiTheme,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { MetaDataProps } from './result_types';
 
 interface Props {
@@ -60,6 +62,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   onDocumentDelete,
   score,
   showScore = false,
+  hasDeleteDocumentsPrivilege,
 }) => {
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
   const closePopover = () => setPopoverIsOpen(false);
@@ -85,9 +88,10 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   return (
     <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
-        {i18n.translate('searchIndexDocuments.result.header.metadata.title', {
-          defaultMessage: 'Document metadata',
-        })}
+        <FormattedMessage
+          id="searchIndexDocuments.result.compactCard.header.metadata.title"
+          defaultMessage="Document metadata"
+        />
       </EuiPopoverTitle>
       <EuiFlexGroup
         gutterSize="s"
@@ -107,9 +111,12 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
               <Term
-                label={i18n.translate('searchIndexDocuments.result.header.metadata.score', {
-                  defaultMessage: 'Score',
-                })}
+                label={i18n.translate(
+                  'searchIndexDocuments.result.header.compactCard.metadata.score',
+                  {
+                    defaultMessage: 'Score',
+                  }
+                )}
               />
               <Definition label={score?.toString()} />
             </EuiFlexGroup>
@@ -118,22 +125,40 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
       </EuiFlexGroup>
       {onDocumentDelete && (
         <EuiPopoverFooter>
-          <EuiButton
-            iconType="trash"
-            color="danger"
-            size="s"
-            data-test-subj="deleteDocumentButton"
-            onClick={(e: React.MouseEvent<HTMLElement>) => {
-              e.stopPropagation();
-              onDocumentDelete();
-              closePopover();
-            }}
-            fullWidth
+          <EuiToolTip
+            content={
+              /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
+              hasDeleteDocumentsPrivilege === false
+                ? i18n.translate(
+                    'searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
+                    {
+                      defaultMessage: 'You do not have permision to delete documents',
+                    }
+                  )
+                : undefined
+            }
+            position="bottom"
+            data-test-subj="deleteDocumentButtonToolTip"
           >
-            {i18n.translate('searchIndexDocuments.result.header.metadata.deleteDocument', {
-              defaultMessage: 'Delete document',
-            })}
-          </EuiButton>
+            <EuiButton
+              iconType="trash"
+              color="danger"
+              size="s"
+              isDisabled={hasDeleteDocumentsPrivilege === false}
+              data-test-subj="deleteDocumentButton"
+              onClick={(e: React.MouseEvent<HTMLElement>) => {
+                e.stopPropagation();
+                onDocumentDelete();
+                closePopover();
+              }}
+              fullWidth
+            >
+              <FormattedMessage
+                id="searchIndexDocuments.result.header.compactCard.metadata.deleteDocument"
+                defaultMessage="Delete document"
+              />
+            </EuiButton>
+          </EuiToolTip>
         </EuiPopoverFooter>
       )}
     </EuiPopover>

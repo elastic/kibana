@@ -31,7 +31,7 @@ import {
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 // Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-describe.skip('Fleet cloud preconfiguration', () => {
+describe('Fleet cloud preconfiguration', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
 

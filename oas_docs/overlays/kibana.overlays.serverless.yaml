@@ -4,7 +4,7 @@ info:
   title: Overlays for the Kibana API document
   version: 0.0.1
 actions:
-  # Clean up server definitions
+# Clean up server definitions
   - target: '$.servers.*'
     description: Remove all servers so we can add our own.
     remove: true
@@ -15,12 +15,12 @@ actions:
         variables:
           kibana_url:
             default: localhost:5601
-  # Mark all operations as beta
+# Mark all operations as beta
   - target: "$.paths[*]['get','put','post','delete','options','head','patch','trace']"
     description: Add x-beta
     update:
       x-beta: true
-  # Add some tag descriptions and displayNames
+# Add some tag descriptions and displayNames
   - target: '$.tags[?(@.name=="alerting")]'
     description: Change tag description and displayName
     update:
@@ -50,6 +50,14 @@ actions:
     description: Change displayName
     update:
       x-displayName: "Machine learning"
+  - target: '$.tags[?(@.name=="roles")]'
+    description: Change displayName and description
+    update:
+      x-displayName: "Roles"
+      description: Manage the roles that grant Elasticsearch and Kibana privileges.
+      externalDocs:
+        description: Kibana role management
+        url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
   - target: '$.tags[?(@.name=="slo")]'
     description: Change displayName
     update:
@@ -65,7 +73,7 @@ actions:
       x-displayName: "System"
       description: >
         Get information about the system status, resource usage, and installed plugins.
-  # Remove extra tags from operations
+# Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
     remove: true

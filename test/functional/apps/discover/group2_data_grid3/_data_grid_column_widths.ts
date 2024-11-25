@@ -56,11 +56,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should not show reset width button for auto width column', async () => {
       await unifiedFieldList.clickFieldListItemAdd('@message');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.resetColumnWidthExists('@message')).to.be(false);
     });
 
     it('should show reset width button for absolute width column, and allow resetting to auto width', async () => {
       await unifiedFieldList.clickFieldListItemAdd('@message');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await testResizeColumn('@message');
     });
 

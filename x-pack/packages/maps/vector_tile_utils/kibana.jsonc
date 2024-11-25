@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/maps-vector-tile-utils",
-  "owner": "@elastic/kibana-presentation"
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

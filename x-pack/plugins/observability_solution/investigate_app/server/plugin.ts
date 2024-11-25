@@ -19,6 +19,7 @@ import type {
 } from './types';
 import { investigation } from './saved_objects/investigation';
 import { InvestigateAppConfig } from './config';
+import { registerUsageCollector } from './lib/collectors/register';
 
 export class InvestigateAppPlugin
   implements
@@ -53,6 +54,7 @@ export class InvestigateAppPlugin
 
     if (this.config.enabled === true) {
       coreSetup.savedObjects.registerType(investigation);
+      registerUsageCollector(pluginsSetup.usageCollection);
 
       registerServerRoutes({
         core: coreSetup,

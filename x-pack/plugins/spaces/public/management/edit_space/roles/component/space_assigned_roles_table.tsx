@@ -41,7 +41,7 @@ interface ISpaceAssignedRolesTableProps {
   assignedRoles: Map<Role['name'], Role>;
   onClickAssignNewRole: () => Promise<void>;
   onClickRowEditAction: (role: Role) => void;
-  onClickRowRemoveAction: (role: Role) => void;
+  onClickRemoveRoleConfirm: (role: Role) => void;
   supportsBulkAction?: boolean;
   onClickBulkRemove?: (selectedRoles: Role[]) => void;
 }
@@ -67,10 +67,10 @@ const getTableColumns = ({
   isReadOnly,
   currentSpace,
   onClickRowEditAction,
-  onClickRowRemoveAction,
+  onClickRemoveRoleConfirm,
 }: Pick<
   ISpaceAssignedRolesTableProps,
-  'isReadOnly' | 'onClickRowEditAction' | 'onClickRowRemoveAction' | 'currentSpace'
+  'isReadOnly' | 'onClickRowEditAction' | 'onClickRemoveRoleConfirm' | 'currentSpace'
 >) => {
   const columns: Array<EuiBasicTableColumn<Role>> = [
     {
@@ -205,7 +205,7 @@ const getTableColumns = ({
             { defaultMessage: 'Click this action to remove the user from this space.' }
           ),
           available: (rowRecord) => isEditableRole(rowRecord),
-          onClick: onClickRowRemoveAction,
+          onClick: onClickRemoveRoleConfirm,
         },
       ],
     });
@@ -237,14 +237,19 @@ export const SpaceAssignedRolesTable = ({
   onClickAssignNewRole,
   onClickBulkRemove,
   onClickRowEditAction,
-  onClickRowRemoveAction,
+  onClickRemoveRoleConfirm,
   isReadOnly = false,
   supportsBulkAction = false,
 }: ISpaceAssignedRolesTableProps) => {
   const tableColumns = useMemo(
     () =>
-      getTableColumns({ isReadOnly, onClickRowEditAction, onClickRowRemoveAction, currentSpace }),
-    [currentSpace, isReadOnly, onClickRowEditAction, onClickRowRemoveAction]
+      getTableColumns({
+        isReadOnly,
+        onClickRowEditAction,
+        onClickRemoveRoleConfirm,
+        currentSpace,
+      }),
+    [currentSpace, isReadOnly, onClickRowEditAction, onClickRemoveRoleConfirm]
   );
   const [rolesInView, setRolesInView] = useState<Role[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
@@ -262,14 +267,17 @@ export const SpaceAssignedRolesTable = ({
 
   const onSearchQueryChange = useCallback<NonNullable<NonNullable<EuiSearchBarProps['onChange']>>>(
     ({ query }) => {
-      const _assignedRolesTransformed = Array.from(assignedRoles.values());
+      const assignedRolesTransformed = Array.from(assignedRoles.values());
+      const sortedAssignedRolesTransformed = assignedRolesTransformed.sort(sortRolesForListing);
 
       if (query?.text) {
         setRolesInView(
-          _assignedRolesTransformed.filter((role) => role.name.includes(query.text.toLowerCase()))
+          sortedAssignedRolesTransformed.filter((role) =>
+            role.name.includes(query.text.toLowerCase())
+          )
         );
       } else {
-        setRolesInView(_assignedRolesTransformed);
+        setRolesInView(sortedAssignedRolesTransformed);
       }
     },
     [assignedRoles]

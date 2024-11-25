@@ -10,6 +10,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+// The euiTour shows with a small delay, so with 1s we should be safe
+const DELAY_FOR = 1000;
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const browser = getService('browser');
@@ -40,22 +43,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await isTourStepOpen('filesTourStep')).to.be(false);
     };
 
+    const waitUntilFinishedLoading = async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.sleep(DELAY_FOR);
+    };
+
     it('displays all five steps in the tour', async () => {
+      const andWaitFor = DELAY_FOR;
+      await waitUntilFinishedLoading();
+
       log.debug('on Shell tour step');
       expect(await isTourStepOpen('shellTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep();
+      await PageObjects.console.clickNextTourStep(andWaitFor);
 
       log.debug('on Editor tour step');
       expect(await isTourStepOpen('editorTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep();
+      await PageObjects.console.clickNextTourStep(andWaitFor);
 
       log.debug('on History tour step');
       expect(await isTourStepOpen('historyTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep();
+      await PageObjects.console.clickNextTourStep(andWaitFor);
 
       log.debug('on Config tour step');
       expect(await isTourStepOpen('configTourStep')).to.be(true);
-      await PageObjects.console.clickNextTourStep();
+      await PageObjects.console.clickNextTourStep(andWaitFor);
 
       log.debug('on Files tour step');
       expect(await isTourStepOpen('filesTourStep')).to.be(true);
@@ -73,10 +84,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Tour should reset after clearing local storage
       await browser.clearLocalStorage();
       await browser.refresh();
+
+      await waitUntilFinishedLoading();
       expect(await isTourStepOpen('shellTourStep')).to.be(true);
     });
 
     it('skipping the tour hides the tour steps', async () => {
+      await waitUntilFinishedLoading();
+
       expect(await isTourStepOpen('shellTourStep')).to.be(true);
       expect(await testSubjects.exists('consoleSkipTourButton')).to.be(true);
       await PageObjects.console.clickSkipTour();
@@ -90,6 +105,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows re-running the tour', async () => {
+      await waitUntilFinishedLoading();
+
       await PageObjects.console.skipTourIfExists();
 
       // Verify that tour is hiddern
@@ -100,6 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clickRerunTour();
 
       // Verify that first tour step is visible
+      await waitUntilFinishedLoading();
       expect(await isTourStepOpen('shellTourStep')).to.be(true);
     });
   });

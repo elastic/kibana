@@ -43,7 +43,7 @@ function buildMockFipsServiceSetupParams(
 
   let mockConfig = {};
   if (isFipsConfigured) {
-    mockConfig = { experimental: { fipsMode: { enabled: true } } };
+    mockConfig = { fipsMode: { enabled: true } };
   }
 
   return {
@@ -84,7 +84,7 @@ describe('FipsService', () => {
 
   describe('#validateLicenseForFips', () => {
     describe('start-up check', () => {
-      it('should not throw Error/log.error if license features allowFips and `experimental.fipsMode.enabled` is `false`', () => {
+      it('should not throw Error/log.error if license features allowFips and `fipsMode.enabled` is `false`', () => {
         fipsServiceSetup = fipsService.setup(
           buildMockFipsServiceSetupParams('platinum', false, of({ allowFips: true }))
         );
@@ -93,7 +93,7 @@ describe('FipsService', () => {
         expect(logger.error).not.toHaveBeenCalled();
       });
 
-      it('should not throw Error/log.error if license features allowFips and `experimental.fipsMode.enabled` is `true`', () => {
+      it('should not throw Error/log.error if license features allowFips and `fipsMode.enabled` is `true`', () => {
         fipsServiceSetup = fipsService.setup(
           buildMockFipsServiceSetupParams('platinum', true, of({ allowFips: true }))
         );
@@ -102,7 +102,7 @@ describe('FipsService', () => {
         expect(logger.error).not.toHaveBeenCalled();
       });
 
-      it('should not throw Error/log.error if license features do not allowFips and `experimental.fipsMode.enabled` is `false`', () => {
+      it('should not throw Error/log.error if license features do not allowFips and `fipsMode.enabled` is `false`', () => {
         fipsServiceSetup = fipsService.setup(
           buildMockFipsServiceSetupParams('basic', false, of({ allowFips: false }))
         );
@@ -111,7 +111,7 @@ describe('FipsService', () => {
         expect(logger.error).not.toHaveBeenCalled();
       });
 
-      it('should throw Error/log.error if license features do not allowFips and `experimental.fipsMode.enabled` is `true`', () => {
+      it('should throw Error/log.error if license features do not allowFips and `fipsMode.enabled` is `true`', () => {
         fipsServiceSetup = fipsService.setup(
           buildMockFipsServiceSetupParams('basic', true, of({ allowFips: false }))
         );
@@ -124,7 +124,7 @@ describe('FipsService', () => {
     });
 
     describe('monitoring check', () => {
-      describe('with experimental.fipsMode.enabled', () => {
+      describe('with fipsMode.enabled', () => {
         let mockFeaturesSubject: BehaviorSubject<Partial<SecurityLicenseFeatures>>;
         let mockIsAvailableSubject: BehaviorSubject<boolean>;
         let mockFeatures$: Observable<Partial<SecurityLicenseFeatures>>;
@@ -149,23 +149,23 @@ describe('FipsService', () => {
           mockIsAvailableSubject.next(true);
         });
 
-        it('should not log.error if license changes to unavailable and `experimental.fipsMode.enabled` is `true`', () => {
+        it('should not log.error if license changes to unavailable and `fipsMode.enabled` is `true`', () => {
           mockIsAvailableSubject.next(false);
           expect(logger.error).not.toHaveBeenCalled();
         });
 
-        it('should not log.error if license features continue to allowFips and `experimental.fipsMode.enabled` is `true`', () => {
+        it('should not log.error if license features continue to allowFips and `fipsMode.enabled` is `true`', () => {
           mockFeaturesSubject.next({ allowFips: true });
           expect(logger.error).not.toHaveBeenCalled();
         });
 
-        it('should log.error if license features change to not allowFips and `experimental.fipsMode.enabled` is `true`', () => {
+        it('should log.error if license features change to not allowFips and `fipsMode.enabled` is `true`', () => {
           mockFeaturesSubject.next({ allowFips: false });
           expect(logger.error).toHaveBeenCalledTimes(1);
         });
       });
 
-      describe('with not experimental.fipsMode.enabled', () => {
+      describe('with not fipsMode.enabled', () => {
         let mockFeaturesSubject: BehaviorSubject<Partial<SecurityLicenseFeatures>>;
         let mockIsAvailableSubject: BehaviorSubject<boolean>;
         let mockFeatures$: Observable<Partial<SecurityLicenseFeatures>>;
@@ -191,17 +191,17 @@ describe('FipsService', () => {
           mockIsAvailableSubject.next(true);
         });
 
-        it('should not log.error if license changes to unavailable and `experimental.fipsMode.enabled` is `false`', () => {
+        it('should not log.error if license changes to unavailable and `fipsMode.enabled` is `false`', () => {
           mockIsAvailableSubject.next(false);
           expect(logger.error).not.toHaveBeenCalled();
         });
 
-        it('should not log.error if license features continue to allowFips and `experimental.fipsMode.enabled` is `false`', () => {
+        it('should not log.error if license features continue to allowFips and `fipsMode.enabled` is `false`', () => {
           mockFeaturesSubject.next({ allowFips: true });
           expect(logger.error).not.toHaveBeenCalled();
         });
 
-        it('should not log.error if license change to not allowFips and `experimental.fipsMode.enabled` is `false`', () => {
+        it('should not log.error if license change to not allowFips and `fipsMode.enabled` is `false`', () => {
           mockFeaturesSubject.next({ allowFips: false });
           expect(logger.error).not.toHaveBeenCalled();
         });

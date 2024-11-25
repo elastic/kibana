@@ -13,6 +13,7 @@ import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from '../api_keys';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { appContextService } from '../app_context';
 import { scheduleDeployAgentPoliciesTask } from '../agent_policies/deploy_agent_policies_task';
+import { scheduleBumpAgentPoliciesTask } from '../agent_policies/bump_agent_policies_task';
 
 export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
   logger,
@@ -37,7 +38,6 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
   });
 
   const outdatedAgentPolicyIds: Array<{ id: string; spaceId?: string }> = [];
-
   await pMap(
     agentPolicies,
     async (agentPolicy) => {
@@ -55,23 +55,23 @@ export async function ensureAgentPoliciesFleetServerKeysAndPolicies({
     }
   );
 
-  if (!outdatedAgentPolicyIds.length) {
-    return;
-  }
+  await scheduleBumpAgentPoliciesTask(appContextService.getTaskManagerStart()!);
 
-  if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
-    return scheduleDeployAgentPoliciesTask(
-      appContextService.getTaskManagerStart()!,
-      outdatedAgentPolicyIds
-    );
-  } else {
-    return agentPolicyService
-      .deployPolicies(
-        soClient,
-        outdatedAgentPolicyIds.map(({ id }) => id)
-      )
-      .catch((error) => {
-        logger.warn(`Error deploying policies: ${error.message}`, { error });
-      });
+  if (outdatedAgentPolicyIds.length) {
+    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
+      return scheduleDeployAgentPoliciesTask(
+        appContextService.getTaskManagerStart()!,
+        outdatedAgentPolicyIds
+      );
+    } else {
+      return agentPolicyService
+        .deployPolicies(
+          soClient,
+          outdatedAgentPolicyIds.map(({ id }) => id)
+        )
+        .catch((error) => {
+          logger.warn(`Error deploying policies: ${error.message}`, { error });
+        });
+    }
   }
 }

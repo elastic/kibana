@@ -13,6 +13,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { hostFieldsMap } from '@kbn/securitysolution-ecs';
+import { toObjectArrayOfStrings } from '@kbn/timelines-plugin/common';
 import { Direction } from '../../../../../../common/search_strategy/common';
 import type {
   AggregationRequest,
@@ -22,7 +23,6 @@ import type {
   HostItem,
   HostValue,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { getPendingActionsSummary } from '../../../../../endpoint/services';
 

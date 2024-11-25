@@ -79,3 +79,12 @@ export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
 export const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = 'data_views:fields_excluded_data_tiers';
 
 export const DEFAULT_DATA_VIEW_ID = 'defaultIndex';
+
+/**
+ * Valid `failureReason` attribute values for `has_es_data` API error responses
+ */
+export enum HasEsDataFailureReason {
+  localDataTimeout = 'local_data_timeout',
+  remoteDataTimeout = 'remote_data_timeout',
+  unknown = 'unknown',
+}

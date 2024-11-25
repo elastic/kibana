@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -19,6 +20,7 @@ import {
   EuiPopoverTitle,
   EuiText,
   useEuiPaddingCSS,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type {
@@ -29,6 +31,9 @@ import type {
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { EsQueryRuleMetaData } from '../es_query/types';
+
+const DESKTOP_WIDTH = 450;
+const MOBILE_WIDTH = 350;
 
 export interface DataViewSelectPopoverProps {
   dependencies: {
@@ -60,6 +65,8 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
 }) => {
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
+
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -179,9 +186,14 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
       anchorPosition="downLeft"
       display="block"
     >
-      <div style={{ width: '450px' }} data-test-subj="chooseDataViewPopoverContent">
+      <div
+        css={css`
+          width: ${isMobile ? `${MOBILE_WIDTH}px` : `${DESKTOP_WIDTH}px`};
+        `}
+        data-test-subj="chooseDataViewPopoverContent"
+      >
         <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem>
               {i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPopoverTitle', {
                 defaultMessage: 'Data view',

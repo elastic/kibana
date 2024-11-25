@@ -225,6 +225,7 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
     onChange: (arg: Partial<T>) => void;
     selectedField: string;
     isValid?: boolean;
+    errorMessages?: string[];
   }>;
   /** Aggregation specific configuration */
   aggConfig: Partial<T>;
@@ -238,6 +239,8 @@ export interface PivotAggsConfigWithExtra<T, ESConfig extends { [key: string]: a
   getAggName?: () => string | undefined;
   /** Helper text for the aggregation reflecting some configuration info */
   helperText?: () => string | undefined;
+  /** Returns validation error messages */
+  getErrorMessages?: () => string[] | undefined;
 }
 
 interface PivotAggsConfigPercentiles extends PivotAggsConfigWithUiBase {

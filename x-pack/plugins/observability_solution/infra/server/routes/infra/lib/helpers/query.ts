@@ -9,6 +9,7 @@ import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
 import { estypes } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import {
   EVENT_MODULE,
@@ -17,12 +18,16 @@ import {
 } from '../../../../../common/constants';
 import type { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
-export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) => {
+export const getFilterByIntegration = (
+  integration: typeof SYSTEM_INTEGRATION,
+  extraFilter: estypes.QueryDslQueryContainer[] = []
+) => {
   return {
     bool: {
       should: [
         ...termQuery(EVENT_MODULE, integration),
         ...termQuery(METRICSET_MODULE, integration),
+        ...extraFilter,
       ],
       minimum_should_match: 1,
     },
@@ -63,7 +68,6 @@ export const getDocumentsFilter = async ({
   from: number;
   to: number;
 }) => {
-  const filters: estypes.QueryDslQueryContainer[] = [getFilterByIntegration('system')];
   const apmDocumentsFilter =
     apmDataAccessServices && apmDocumentSources
       ? await getApmDocumentsFilter({
@@ -74,9 +78,9 @@ export const getDocumentsFilter = async ({
         })
       : undefined;
 
-  if (apmDocumentsFilter) {
-    filters.push(apmDocumentsFilter);
-  }
+  const filters: estypes.QueryDslQueryContainer[] = [
+    getFilterByIntegration('system', apmDocumentsFilter && castArray(apmDocumentsFilter)),
+  ];
 
   return filters;
 };

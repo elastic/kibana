@@ -52,9 +52,6 @@ export interface FindingsGroupingAggregation {
   resourceSubType?: {
     buckets?: GenericBuckets[];
   };
-  resourceType?: {
-    buckets?: GenericBuckets[];
-  };
   benchmarkName?: {
     buckets?: GenericBuckets[];
   };

@@ -57,7 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           const documentTitle = await browser.getTitle();
           expect(documentTitle).to.contain(
-            'Infrastructure Inventory - Infrastructure - Observability - Elastic'
+            'Infrastructure inventory - Infrastructure - Observability - Elastic'
           );
         });
 
@@ -87,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'demo-stack-redis-01 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
+                'demo-stack-redis-01 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 
@@ -103,7 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await retry.try(async () => {
               const documentTitle = await browser.getTitle();
               expect(documentTitle).to.contain(
-                'pod-0 - Infrastructure Inventory - Infrastructure - Observability - Elastic'
+                'pod-0 - Infrastructure inventory - Infrastructure - Observability - Elastic'
               );
             });
 

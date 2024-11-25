@@ -5,12 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadTagsQuery } from './use_load_tags_query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { waitFor } from '@testing-library/react';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 
@@ -53,7 +52,7 @@ describe('useLoadTagsQuery', () => {
   });
 
   it('should call loadRuleTags API and handle result', async () => {
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () =>
         useLoadTagsQuery({
           enabled: true,
@@ -67,18 +66,18 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(loadRuleTags).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          search: 'test',
+          perPage: 50,
+          page: 1,
+        })
+      );
 
-    expect(loadRuleTags).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        search: 'test',
-        perPage: 50,
-        page: 1,
-      })
-    );
-
-    expect(result.current.tags).toEqual(MOCK_TAGS);
-    expect(result.current.hasNextPage).toEqual(false);
+      expect(result.current.tags).toEqual(MOCK_TAGS);
+      expect(result.current.hasNextPage).toEqual(false);
+    });
   });
 
   it('should support pagination', async () => {
@@ -88,7 +87,7 @@ describe('useLoadTagsQuery', () => {
       perPage: 5,
       total: 10,
     });
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () =>
         useLoadTagsQuery({
           enabled: true,
@@ -101,17 +100,17 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(loadRuleTags).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          perPage: 5,
+          page: 1,
+        })
+      );
 
-    expect(loadRuleTags).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        perPage: 5,
-        page: 1,
-      })
-    );
-
-    expect(result.current.tags).toEqual(['a', 'b', 'c', 'd', 'e']);
-    expect(result.current.hasNextPage).toEqual(true);
+      expect(result.current.tags).toEqual(['a', 'b', 'c', 'd', 'e']);
+      expect(result.current.hasNextPage).toEqual(true);
+    });
 
     loadRuleTags.mockResolvedValue({
       data: ['a', 'b', 'c', 'd', 'e'],
@@ -119,6 +118,7 @@ describe('useLoadTagsQuery', () => {
       perPage: 5,
       total: 10,
     });
+
     result.current.fetchNextPage();
 
     expect(loadRuleTags).toHaveBeenLastCalledWith(
@@ -129,9 +129,7 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
-
-    expect(result.current.hasNextPage).toEqual(false);
+    await waitFor(() => expect(result.current.hasNextPage).toEqual(false));
   });
 
   it('should support pagination when there are no tags', async () => {
@@ -142,7 +140,7 @@ describe('useLoadTagsQuery', () => {
       total: 0,
     });
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () =>
         useLoadTagsQuery({
           enabled: true,
@@ -155,17 +153,17 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(loadRuleTags).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          perPage: 5,
+          page: 1,
+        })
+      );
 
-    expect(loadRuleTags).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        perPage: 5,
-        page: 1,
-      })
-    );
-
-    expect(result.current.tags).toEqual([]);
-    expect(result.current.hasNextPage).toEqual(false);
+      expect(result.current.tags).toEqual([]);
+      expect(result.current.hasNextPage).toEqual(false);
+    });
   });
 
   it('should call onError if API fails', async () => {

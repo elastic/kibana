@@ -11,8 +11,7 @@ import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiCallOut } from '@elasti
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { ConnectorDefinition } from '@kbn/search-connectors-plugin/common/types';
+import { ConnectorDefinition } from '@kbn/search-connectors';
 
 interface ResearchConfigurationProps {
   nativeConnector: ConnectorDefinition;

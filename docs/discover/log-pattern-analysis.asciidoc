@@ -7,7 +7,7 @@ Log pattern analysis works on every text field.
 This example uses the <<gs-get-data-into-kibana, sample web logs data>>, or you
 can use your own data.
 
-. Open the main menu, and click *Discover*.
+. Go to *Discover*.
 
 . Expand the {data-source} dropdown, and select *Kibana Sample Data Logs*.
 

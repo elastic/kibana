@@ -106,31 +106,31 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
           {dataView.getName()}
         </div>
       }
+      rightSideGroupProps={{
+        gutterSize: 's',
+        'data-test-subj': 'dataComparisonTimeRangeSelectorSection',
+      }}
       rightSideItems={[
-        <EuiFlexGroup gutterSize="s" data-test-subj="dataComparisonTimeRangeSelectorSection">
-          {hasValidTimeField ? (
-            <EuiFlexItem grow={false}>
-              <FullTimeRangeSelector
-                frozenDataPreference={frozenDataPreference}
-                setFrozenDataPreference={setFrozenDataPreference}
-                dataView={dataView}
-                query={undefined}
-                disabled={false}
-                timefilter={timefilter}
-                callback={updateTimeState}
-              />
-            </EuiFlexItem>
-          ) : null}
-          <DatePickerWrapper
-            isAutoRefreshOnly={!hasValidTimeField}
-            showRefresh={!hasValidTimeField}
-            width="full"
-            flexGroup={false}
-            onRefresh={onRefresh}
-            needsUpdate={needsUpdate}
+        <DatePickerWrapper
+          isAutoRefreshOnly={!hasValidTimeField}
+          showRefresh={!hasValidTimeField}
+          width="full"
+          flexGroup={!hasValidTimeField}
+          onRefresh={onRefresh}
+          needsUpdate={needsUpdate}
+        />,
+        hasValidTimeField && (
+          <FullTimeRangeSelector
+            frozenDataPreference={frozenDataPreference}
+            setFrozenDataPreference={setFrozenDataPreference}
+            dataView={dataView}
+            query={undefined}
+            disabled={false}
+            timefilter={timefilter}
+            callback={updateTimeState}
           />
-        </EuiFlexGroup>,
-      ]}
+        ),
+      ].filter(Boolean)}
     />
   );
 };

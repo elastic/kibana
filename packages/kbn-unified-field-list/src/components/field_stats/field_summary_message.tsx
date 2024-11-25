@@ -12,8 +12,16 @@ import { EuiText } from '@elastic/eui';
 
 export interface FieldSummaryMessageProps {
   message: string;
+  dataTestSubj?: string;
 }
 
-export const FieldSummaryMessage: React.FC<FieldSummaryMessageProps> = ({ message }) => {
-  return <EuiText size="s">{message}</EuiText>;
+export const FieldSummaryMessage: React.FC<FieldSummaryMessageProps> = ({
+  message,
+  dataTestSubj,
+}) => {
+  return (
+    <EuiText size="s" data-test-subj={dataTestSubj}>
+      {message}
+    </EuiText>
+  );
 };

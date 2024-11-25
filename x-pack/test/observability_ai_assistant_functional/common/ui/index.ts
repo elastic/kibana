@@ -27,6 +27,11 @@ export interface ObservabilityAIAssistantUIService {
 }
 
 const pages = {
+  kbManagementTab: {
+    table: 'knowledgeBaseTable',
+    tableTitleCell: 'knowledgeBaseTableTitleCell',
+    tableAuthorCell: 'knowledgeBaseTableAuthorCell',
+  },
   conversations: {
     setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',

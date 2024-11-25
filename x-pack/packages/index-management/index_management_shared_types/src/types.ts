@@ -79,9 +79,11 @@ export interface Index {
 export interface IndexMappingProps {
   index?: Index;
   showAboutMappings?: boolean;
+  hasUpdateMappingsPrivilege?: boolean;
 }
 export interface IndexSettingProps {
   indexName: string;
+  hasUpdateSettingsPrivilege?: boolean;
 }
 export interface SendRequestResponse<D = any, E = any> {
   data: D | null;

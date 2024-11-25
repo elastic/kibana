@@ -29,6 +29,10 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json'
       );
+      // canvas application is only available when installation contains canvas workpads
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
+      );
 
       await kibanaServer.uiSettings.update({
         defaultIndex: 'kibana_sample_data_flights',
@@ -45,6 +49,9 @@ export default function canvasExpressionTest({ getService, getPageObjects }: Ftr
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/legacy.json');
       await kibanaServer.importExport.unload(
         'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern.json'
+      );
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/canvas/default'
       );
     });
 

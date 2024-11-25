@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
@@ -82,6 +83,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('a11y test for customize feature privilege', async () => {
+      await testSubjects.click('spaceSelectorComboBox');
+      const globalSpaceOption = await find.byCssSelector(`#spaceOption_\\*`);
+      await globalSpaceOption.click();
       await testSubjects.click('featureCategory_kibana');
       await a11y.testAppSnapshot();
       await testSubjects.click('cancelSpacePrivilegeButton');

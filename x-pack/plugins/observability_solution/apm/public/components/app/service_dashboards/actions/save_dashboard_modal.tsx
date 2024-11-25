@@ -23,7 +23,6 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { useDashboardFetcher } from '../../../../hooks/use_dashboards_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -76,7 +75,7 @@ export function SaveDashboardModal({
 
   const isEditMode = !!currentDashboard?.id;
 
-  const options = allAvailableDashboards?.map((dashboardItem: DashboardItem) => ({
+  const options = allAvailableDashboards?.map((dashboardItem) => ({
     label: dashboardItem.attributes.title,
     value: dashboardItem.id,
     disabled:

@@ -19,7 +19,7 @@ describe('FROM', () => {
     await validate('SHOW');
     await validate('ROW \t');
 
-    expect(callbacks.getFieldsFor.mock.calls.length).toBe(0);
+    expect(callbacks.getColumnsFor.mock.calls.length).toBe(0);
   });
 
   test('loads fields with FROM source when commands after pipe present', async () => {
@@ -27,6 +27,6 @@ describe('FROM', () => {
 
     await validate('FROM kibana_ecommerce METADATA _id | eval');
 
-    expect(callbacks.getFieldsFor.mock.calls.length).toBe(1);
+    expect(callbacks.getColumnsFor.mock.calls.length).toBe(1);
   });
 });

@@ -50,8 +50,10 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/filters`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFilters'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFilters'],
+        },
       },
       summary: 'Gets filters',
       description:
@@ -79,8 +81,10 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFilters'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFilters'],
+        },
       },
       summary: 'Gets filter by ID',
       description: 'Retrieves the filter with the specified ID.',
@@ -108,8 +112,10 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/filters`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateFilter'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateFilter'],
+        },
       },
       summary: 'Creates a filter',
       description: 'Instantiates a filter, for use by custom rules in anomaly detection.',
@@ -139,8 +145,10 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateFilter'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateFilter'],
+        },
       },
       summary: 'Updates a filter',
       description: 'Updates the description of a filter, adds items or removes items.',
@@ -174,8 +182,10 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/filters/{filterId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteFilter'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteFilter'],
+        },
       },
       summary: 'Deletes a filter',
       description: 'Deletes the filter with the specified ID.',
@@ -207,8 +217,10 @@ export function filtersRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/filters/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetFilters'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetFilters'],
+        },
       },
       summary: 'Gets filters stats',
       description:

@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
@@ -78,7 +78,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualize.gotoVisualizationLandingPage();
           await visualize.navigateToNewVisualization();
           await visualize.clickVisType('lens');
-          await lens.goToTimeRange();
 
           await lens.configureDimension({
             dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

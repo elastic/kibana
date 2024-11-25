@@ -48,7 +48,7 @@ export const createIndexPipelineDefinitions = async (
     const ingestPipeline = {
       _meta: {
         managed: true,
-        managed_by: 'Search',
+        managed_by: 'Elasticsearch',
       },
       description: `Ingest pipeline for the '${indexName}' index`,
       id: `${indexName}`,

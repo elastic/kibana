@@ -11,7 +11,7 @@ import React from 'react';
 import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { OverViewItem } from './overview_item';
 
 export function SLOOverviewAlerts({

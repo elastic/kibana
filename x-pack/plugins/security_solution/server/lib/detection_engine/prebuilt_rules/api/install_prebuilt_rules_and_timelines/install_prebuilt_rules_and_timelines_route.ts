@@ -33,8 +33,12 @@ export const installPrebuiltRulesAndTimelinesRoute = (router: SecuritySolutionPl
     .put({
       access: 'public',
       path: PREBUILT_RULES_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
         },

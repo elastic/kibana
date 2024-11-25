@@ -9,11 +9,8 @@ import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/be
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { Logger } from '@kbn/logging';
-import { Readable } from 'stream';
 import { PublicMethodsOf } from '@kbn/utility-types';
-
-export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
-export const DEFAULT_BEDROCK_REGION = 'us-east-1';
+import { prepareMessages, DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../utils/bedrock';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -25,6 +22,11 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   maxTokens?: number;
 }
 
+/**
+ * @deprecated Use the ActionsClientChatBedrockConverse chat model instead.
+ * ActionsClientBedrockChatModel chat model supports non-streaming only the Bedrock Invoke API.
+ * The LangChain team will support only the Bedrock Converse API in the future.
+ */
 export class ActionsClientBedrockChatModel extends _BedrockChat {
   constructor({ actionsClient, connectorId, logger, ...params }: CustomChatModelInput) {
     super({
@@ -36,32 +38,10 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
       fetchFn: async (url, options) => {
         const inputBody = JSON.parse(options?.body as string);
 
-        if (this.streaming && !inputBody.tools?.length) {
-          const data = (await actionsClient.execute({
-            actionId: connectorId,
-            params: {
-              subAction: 'invokeStream',
-              subActionParams: {
-                messages: inputBody.messages,
-                temperature: params.temperature ?? inputBody.temperature,
-                stopSequences: inputBody.stop_sequences,
-                system: inputBody.system,
-                maxTokens: params.maxTokens ?? inputBody.max_tokens,
-                tools: inputBody.tools,
-                anthropicVersion: inputBody.anthropic_version,
-              },
-            },
-          })) as { data: Readable; status: string; message?: string; serviceMessage?: string };
-
-          if (data.status === 'error') {
-            throw new Error(
-              `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
-            );
-          }
-
-          return {
-            body: Readable.toWeb(data.data),
-          } as unknown as Response;
+        if (this.streaming) {
+          throw new Error(
+            `ActionsClientBedrockChat does not support streaming, use ActionsClientChatBedrockConverse instead`
+          );
         }
 
         const data = (await actionsClient.execute({
@@ -84,7 +64,6 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
           message?: string;
           serviceMessage?: string;
         };
-
         if (data.status === 'error') {
           throw new Error(
             `ActionsClientBedrockChat: action result status is error: ${data?.message} - ${data?.serviceMessage}`
@@ -99,20 +78,3 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
     });
   }
 }
-
-const prepareMessages = (messages: Array<{ role: string; content: string[] }>) =>
-  messages.reduce((acc, { role, content }) => {
-    const lastMessage = acc[acc.length - 1];
-
-    if (!lastMessage || lastMessage.role !== role) {
-      acc.push({ role, content });
-      return acc;
-    }
-
-    if (lastMessage.role === role) {
-      acc[acc.length - 1].content = lastMessage.content.concat(content);
-      return acc;
-    }
-
-    return acc;
-  }, [] as Array<{ role: string; content: string[] }>);

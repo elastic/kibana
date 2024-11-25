@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export const ControlGroupStrings = {
   getSaveChangesTitle: () =>
     i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
-      defaultMessage: 'Save and close',
+      defaultMessage: 'Save',
     }),
   getCancelTitle: () =>
     i18n.translate('controls.controlGroup.manageControl.cancelTitle', {

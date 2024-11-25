@@ -11,6 +11,7 @@ export {
   setAnalysisType,
   setAutoRunAnalysis,
   setDocumentCountChartData,
+  setGroupResults,
   setInitialAnalysisStart,
   setIsBrushCleared,
   setStickyHistogram,
@@ -23,9 +24,10 @@ export {
   setPinnedSignificantItem,
   setSelectedGroup,
   setSelectedSignificantItem,
-} from './log_rate_analysis_table_row_slice';
+  setSkippedColumns,
+} from './log_rate_analysis_table_slice';
 export { LogRateAnalysisReduxProvider } from './store';
-export { useAppDispatch, useAppSelector, useAppStore } from './hooks';
+export { useAppDispatch, useAppSelector } from './hooks';
 export { useCurrentSelectedGroup } from './use_current_selected_group';
 export { useCurrentSelectedSignificantItem } from './use_current_selected_significant_item';
 export type { GroupTableItem, GroupTableItemGroup, TableItemAction } from './types';

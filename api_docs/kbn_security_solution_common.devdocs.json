@@ -277,7 +277,7 @@
           "\nWrapper component that is composed of a header section and a content section.\nThe header can display an icon, a title (that can be a link), and an optional content section on the right.\nThe content section can display a loading spinner, an error message, or any other content.\nThe component can be expanded or collapsed by clicking on the chevron icon on the left of the title."
         ],
         "signature": [
-          "{ ({ header: { title, link, iconType, headerContent }, content: { loading, error }, expand: { expandable, expandedOnFirstRender }, \"data-test-subj\": dataTestSubj, children, }: React.PropsWithChildren<",
+          "{ ({ header: { title, link, iconType, headerContent }, content: { loading, error, paddingSize: contentPaddingSize }, expand: { expandable, expandedOnFirstRender }, \"data-test-subj\": dataTestSubj, children, }: React.PropsWithChildren<",
           "ExpandablePanelPanelProps",
           ">): React.JSX.Element; displayName: string | undefined; }"
         ],
@@ -290,7 +290,7 @@
             "id": "def-public.ExpandablePanel.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  header: { title, link, iconType, headerContent },\n  content: { loading, error } = { loading: false, error: false },\n  expand: { expandable, expandedOnFirstRender } = {\n    expandable: false,\n    expandedOnFirstRender: false,\n  },\n  'data-test-subj': dataTestSubj,\n  children,\n}",
+            "label": "{\n  header: { title, link, iconType, headerContent },\n  content: { loading, error, paddingSize: contentPaddingSize } = {\n    loading: false,\n    error: false,\n    paddingSize: 'm',\n  },\n  expand: { expandable, expandedOnFirstRender } = {\n    expandable: false,\n    expandedOnFirstRender: false,\n  },\n  'data-test-subj': dataTestSubj,\n  children,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",

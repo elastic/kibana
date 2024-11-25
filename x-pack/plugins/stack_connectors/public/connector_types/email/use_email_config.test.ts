@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useEmailConfig } from './use_email_config';
 
 const http = httpServiceMock.createStartContract();
@@ -16,6 +16,12 @@ const renderUseEmailConfigHook = (currentService?: string) =>
   renderHook(() => useEmailConfig({ http, toasts }));
 
 describe('useEmailConfig', () => {
+  let res: ReturnType<ReturnType<typeof useEmailConfig>['getEmailServiceConfig']> extends Promise<
+    infer R
+  >
+    ? R
+    : never;
+
   beforeEach(() => jest.clearAllMocks());
 
   it('should return the correct result when requesting the config of a service', async () => {
@@ -26,14 +32,16 @@ describe('useEmailConfig', () => {
     });
 
     const { result } = renderUseEmailConfigHook();
+
     await act(async () => {
-      const res = await result.current.getEmailServiceConfig('gmail');
-      expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/gmail');
-      expect(res).toEqual({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-      });
+      res = await result.current.getEmailServiceConfig('gmail');
+    });
+
+    expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/gmail');
+    expect(res).toEqual({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
     });
   });
 
@@ -44,14 +52,16 @@ describe('useEmailConfig', () => {
     });
 
     const { result } = renderUseEmailConfigHook();
+
     await act(async () => {
-      const res = await result.current.getEmailServiceConfig('gmail');
-      expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/gmail');
-      expect(res).toEqual({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: false,
-      });
+      res = await result.current.getEmailServiceConfig('gmail');
+    });
+
+    expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/gmail');
+    expect(res).toEqual({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: false,
     });
   });
 
@@ -60,13 +70,14 @@ describe('useEmailConfig', () => {
     const { result } = renderUseEmailConfigHook();
 
     await act(async () => {
-      const res = await result.current.getEmailServiceConfig('foo');
-      expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/foo');
-      expect(res).toEqual({
-        host: '',
-        port: 0,
-        secure: false,
-      });
+      res = await result.current.getEmailServiceConfig('foo');
+    });
+
+    expect(http.get).toHaveBeenCalledWith('/internal/stack_connectors/_email_config/foo');
+    expect(res).toEqual({
+      host: '',
+      port: 0,
+      secure: false,
     });
   });
 
@@ -75,13 +86,13 @@ describe('useEmailConfig', () => {
       throw new Error('no!');
     });
 
-    const { result, waitForNextUpdate } = renderUseEmailConfigHook();
+    const { result } = renderUseEmailConfigHook();
 
     await act(async () => {
       result.current.getEmailServiceConfig('foo');
-      await waitForNextUpdate();
-      expect(toasts.addDanger).toHaveBeenCalled();
     });
+
+    await waitFor(() => expect(toasts.addDanger).toHaveBeenCalled());
   });
 
   it('should not make an API call if the service is empty', async () => {

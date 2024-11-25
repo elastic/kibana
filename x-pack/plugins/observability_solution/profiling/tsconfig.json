@@ -54,7 +54,8 @@
     "@kbn/management-settings-components-field-row",
     "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-render",
-    "@kbn/apm-data-access-plugin"
+    "@kbn/apm-data-access-plugin",
+    "@kbn/security-plugin-types-server"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

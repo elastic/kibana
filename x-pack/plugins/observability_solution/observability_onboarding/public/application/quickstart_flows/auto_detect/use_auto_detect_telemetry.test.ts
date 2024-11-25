@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAutoDetectTelemetry } from './use_auto_detect_telemetry';
 import { ObservabilityOnboardingFlowStatus } from './get_onboarding_status';

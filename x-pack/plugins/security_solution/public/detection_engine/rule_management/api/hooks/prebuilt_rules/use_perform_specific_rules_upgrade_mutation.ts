@@ -8,6 +8,7 @@ import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type {
   PerformRuleUpgradeResponseBody,
+  PickVersionValues,
   UpgradeSpecificRulesRequest,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { PERFORM_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
@@ -26,6 +27,7 @@ export const PERFORM_SPECIFIC_RULES_UPGRADE_KEY = [
 ];
 
 export const usePerformSpecificRulesUpgradeMutation = (
+  pickVersion: PickVersionValues,
   options?: UseMutationOptions<
     PerformRuleUpgradeResponseBody,
     Error,
@@ -43,7 +45,7 @@ export const usePerformSpecificRulesUpgradeMutation = (
 
   return useMutation<PerformRuleUpgradeResponseBody, Error, UpgradeSpecificRulesRequest['rules']>(
     (rulesToUpgrade: UpgradeSpecificRulesRequest['rules']) => {
-      return performUpgradeSpecificRules(rulesToUpgrade);
+      return performUpgradeSpecificRules(rulesToUpgrade, pickVersion);
     },
     {
       ...options,

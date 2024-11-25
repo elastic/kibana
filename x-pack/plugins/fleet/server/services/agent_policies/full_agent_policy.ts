@@ -386,14 +386,11 @@ export function transformOutputToFullPolicyOutput(
       round_robin,
       hash,
       topic,
-      topics,
       headers,
       timeout,
       broker_timeout,
       required_acks,
     } = output;
-
-    const kafkaTopic = topic ? topic : topics?.filter((t) => !t.when)?.[0]?.topic;
 
     const transformPartition = () => {
       if (!partition) return {};
@@ -431,7 +428,7 @@ export function transformOutputToFullPolicyOutput(
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
-      topic: kafkaTopic,
+      topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,

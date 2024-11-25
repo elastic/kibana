@@ -107,6 +107,6 @@ export async function getUnstructuredGraph({ model, client }: UnstructuredGraphP
     .addEdge('handleUnstructuredError', 'handleUnstructuredValidate')
     .addEdge('modelOutput', END);
 
-  const compiledUnstructuredGraph = workflow.compile().withConfig({ runName: 'Unstructured' });
+  const compiledUnstructuredGraph = workflow.compile();
   return compiledUnstructuredGraph;
 }

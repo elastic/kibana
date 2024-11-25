@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { CustomInferenceEndpointConfig, SemanticTextField } from '../../../../../types';
 import { useSemanticText } from './use_semantic_text';
 import { act } from 'react-dom/test-utils';
@@ -258,7 +258,9 @@ describe('useSemanticText', () => {
       {
         service: 'elser',
         service_settings: {
-          num_allocations: 1,
+          adaptive_allocations: {
+            enabled: true,
+          },
           num_threads: 1,
           model_id: '.elser_model_2',
         },

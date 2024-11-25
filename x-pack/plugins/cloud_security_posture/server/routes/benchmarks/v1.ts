@@ -48,7 +48,7 @@ export const getBenchmarksData = (
         const agentPolicyStatus = {
           id: agentPolicy.id,
           name: agentPolicy.name,
-          agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
+          agents: agentStatusByAgentPolicyId[agentPolicy.id]?.active,
         };
         return {
           package_policy: cspPackage,

@@ -19,6 +19,14 @@ describe('UrlFormat', () => {
     );
   });
 
+  test('outputs a mailto: link when URL starts with mailto:', () => {
+    const url = new UrlFormat({});
+
+    expect(url.convert('mailto:test@example.com', HTML_CONTEXT_TYPE)).toBe(
+      '<a href="mailto:test@example.com" target="_blank" rel="noopener noreferrer">mailto:test@example.com</a>'
+    );
+  });
+
   test('outputs an <audio> if type === "audio"', () => {
     const url = new UrlFormat({ type: 'audio' });
 

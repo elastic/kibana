@@ -196,6 +196,9 @@ export default async function ({ readConfigFile }) {
       obsAIAssistantManagement: {
         pathname: '/app/management/kibana/observabilityAiAssistantManagement',
       },
+      enterpriseSearch: {
+        pathname: '/app/enterprise_search/overview',
+      },
     },
 
     suiteTags: {

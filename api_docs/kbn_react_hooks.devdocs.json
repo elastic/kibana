@@ -58,6 +58,24 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useErrorTextStyle",
+        "type": "Function",
+        "tags": [],
+        "label": "useErrorTextStyle",
+        "description": [],
+        "signature": [
+          "() => ",
+          "SerializedStyles"
+        ],
+        "path": "packages/kbn-react-hooks/src/use_error_text_style/use_error_text_style.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

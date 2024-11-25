@@ -14,16 +14,39 @@ import type {
   UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import type { DataTableRecord } from '@kbn/discover-utils';
+import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
 import type { CellAction, CellActionExecutionContext, CellActionsData } from '@kbn/cell-actions';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { PropsWithChildren, ReactElement } from 'react';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+
+/**
+ * Supports extending the Discover app menu
+ */
+export interface AppMenuExtension {
+  /**
+   * Supports extending the app menu with additional actions
+   * @param prevRegistry The app menu registry
+   * @returns The updated app menu registry
+   */
+  appMenuRegistry: (prevRegistry: AppMenuRegistry) => AppMenuRegistry;
+}
+
+/**
+ * Parameters passed to the app menu extension
+ */
+export interface AppMenuExtensionParams {
+  isEsqlMode: boolean;
+  dataView: DataView | undefined;
+  adHocDataViews: DataView[];
+  onUpdateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
+}
 
 /**
  * Supports customizing the Discover document viewer flyout
@@ -236,6 +259,14 @@ export interface Profile {
    */
 
   /**
+   * Render a custom wrapper component around the Discover application,
+   * e.g. to allow using profile specific context providers
+   * @param props The app wrapper props
+   * @returns The custom app wrapper component
+   */
+  getRenderAppWrapper: (props: PropsWithChildren<{}>) => ReactElement;
+
+  /**
    * Gets default Discover app state that should be used when the profile is resolved
    * @param params The default app state extension parameters
    * @returns The default app state
@@ -288,4 +319,20 @@ export interface Profile {
    * @returns The doc viewer extension
    */
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
+
+  /**
+   * App Menu (Top Nav actions)
+   */
+
+  /**
+   * Supports extending the app menu with additional actions
+   * The `getAppMenu` extension point gives access to AppMenuRegistry with methods registerCustomAction and registerCustomActionUnderSubmenu.
+   * The extension also provides the essential params like current dataView, adHocDataViews etc when defining a custom action implementation.
+   * And it supports opening custom flyouts and any other modals on the click.
+   * `getAppMenu` can be configured in both root and data source profiles.
+   * Note: Only 2 custom actions are allowed to be rendered in the app menu. The rest will be ignored.
+   * @param params The app menu extension parameters
+   * @returns The app menu extension
+   */
+  getAppMenu: (params: AppMenuExtensionParams) => AppMenuExtension;
 }

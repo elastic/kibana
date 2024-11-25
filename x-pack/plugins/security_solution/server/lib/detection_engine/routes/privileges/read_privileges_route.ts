@@ -22,8 +22,10 @@ export const readPrivilegesRoute = (
     .get({
       path: DETECTION_ENGINE_PRIVILEGES_URL,
       access: 'public',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

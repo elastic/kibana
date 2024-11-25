@@ -231,7 +231,7 @@ export default function (providerContext: FtrProviderContext) {
           hosts: ['test.fr:2000'],
           auth_type: 'user_pass',
           username: 'user',
-          topics: [{ topic: 'topic1' }],
+          topic: 'topic1',
           config_yaml: 'shipper: {}',
           shipper: {
             disk_queue_enabled: true,

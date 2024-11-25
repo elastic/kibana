@@ -25,6 +25,9 @@ export type { DataUsageServerSetup, DataUsageServerStart };
 
 export const config: PluginConfigDescriptor<DataUsageConfigType> = {
   schema: configSchema,
+  exposeToBrowser: {
+    enableExperimental: true,
+  },
 };
 
 export const plugin: PluginInitializer<

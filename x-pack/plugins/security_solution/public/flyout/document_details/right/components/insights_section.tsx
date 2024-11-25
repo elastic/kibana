@@ -35,7 +35,7 @@ export const InsightsSection = memo(() => {
 
   const { activeStep, isTourShown } = useTourContext();
   const isGuidedOnboardingTourShown =
-    isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase;
+    isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase;
 
   const expanded =
     useExpandSection({ title: KEY, defaultValue: false }) || isGuidedOnboardingTourShown;

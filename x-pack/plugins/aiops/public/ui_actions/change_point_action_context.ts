@@ -6,7 +6,8 @@
  */
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiIsOfType } from '@kbn/presentation-publishing/interfaces/has_type';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { ChangePointEmbeddableApi } from '../embeddables/change_point_chart/types';
 

@@ -11,7 +11,8 @@ import { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import moment from 'moment';
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject, Subscription, skip } from 'rxjs';
+import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { getTimeRangeMeta, getTimezone, TimeRangeMeta } from './get_time_range_meta';
 import { getMomentTimezone } from './time_utils';
 
@@ -26,6 +27,13 @@ export function initTimeRangeSubscription(controlGroupApi: unknown) {
     timeRangeMeta$.next(getTimeRangeMeta(timeRange));
   });
 
+  let reloadSubscription: undefined | Subscription;
+  if (apiHasParentApi(controlGroupApi) && apiPublishesReload(controlGroupApi.parentApi)) {
+    reloadSubscription = controlGroupApi.parentApi.reload$.subscribe(() => {
+      timeRangeMeta$.next(getTimeRangeMeta(timeRange$.value));
+    });
+  }
+
   return {
     timeRangeMeta$,
     formatDate: (epoch: number) => {
@@ -35,6 +43,7 @@ export function initTimeRangeSubscription(controlGroupApi: unknown) {
         .format(timeRangeMeta$.value.format);
     },
     cleanupTimeRangeSubscription: () => {
+      reloadSubscription?.unsubscribe();
       timeRangeSubscription.unsubscribe();
     },
   };

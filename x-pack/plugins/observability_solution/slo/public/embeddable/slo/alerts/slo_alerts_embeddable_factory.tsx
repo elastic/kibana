@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { Router } from '@kbn/shared-ux-router';
-import { BehaviorSubject, Subject } from 'rxjs';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
+  FetchContext,
+  fetch$,
   initializeTitles,
   useBatchedPublishingSubjects,
-  fetch$,
-  FetchContext,
   useFetchContext,
 } from '@kbn/presentation-publishing';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserHistory } from 'history';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { PluginContext } from '../../../context/plugin_context';
+import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
-import { SloAlertsEmbeddableState, SloAlertsApi } from './types';
-import { SloPublicPluginsStart, SloPublicStart } from '../../../types';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
+import { SloAlertsApi, SloAlertsEmbeddableState } from './types';
 const history = createBrowserHistory();
 const queryClient = new QueryClient();
 
@@ -34,10 +35,17 @@ export const getAlertsPanelTitle = () =>
     defaultMessage: 'SLO Alerts',
   });
 
-export function getAlertsEmbeddableFactory(
-  getStartServices: StartServicesAccessor<SloPublicPluginsStart, SloPublicStart>,
-  kibanaVersion: string
-) {
+export function getAlertsEmbeddableFactory({
+  coreStart,
+  pluginsStart,
+  sloClient,
+  kibanaVersion,
+}: {
+  coreStart: CoreStart;
+  pluginsStart: SLOPublicPluginsStart;
+  sloClient: SLORepositoryClient;
+  kibanaVersion: string;
+}) {
   const factory: ReactEmbeddableFactory<
     SloAlertsEmbeddableState,
     SloAlertsEmbeddableState,
@@ -48,15 +56,15 @@ export function getAlertsEmbeddableFactory(
       return state.rawState as SloAlertsEmbeddableState;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const [coreStart, pluginStart] = await getStartServices();
-      const deps = { ...coreStart, ...pluginStart };
+      const deps = { ...coreStart, ...pluginsStart };
       async function onEdit() {
         try {
           const { openSloConfiguration } = await import('./slo_alerts_open_configuration');
 
           const result = await openSloConfiguration(
             coreStart,
-            pluginStart,
+            pluginsStart,
+            sloClient,
             api.getSloAlertsConfig()
           );
           api.updateSloAlertsConfig(result);
@@ -143,18 +151,28 @@ export function getAlertsEmbeddableFactory(
                   kibanaVersion,
                 }}
               >
-                <Router history={history}>
-                  <QueryClientProvider client={queryClient}>
-                    <SloAlertsWrapper
-                      onEdit={onEdit}
-                      deps={deps}
-                      slos={slos}
-                      timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
-                      reloadSubject={reload$}
-                      showAllGroupByInstances={showAllGroupByInstances}
-                    />
-                  </QueryClientProvider>
-                </Router>
+                <PluginContext.Provider
+                  value={{
+                    observabilityRuleTypeRegistry:
+                      pluginsStart.observability.observabilityRuleTypeRegistry,
+                    ObservabilityPageTemplate:
+                      pluginsStart.observabilityShared.navigation.PageTemplate,
+                    sloClient,
+                  }}
+                >
+                  <Router history={history}>
+                    <QueryClientProvider client={queryClient}>
+                      <SloAlertsWrapper
+                        onEdit={onEdit}
+                        deps={deps}
+                        slos={slos}
+                        timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
+                        reloadSubject={reload$}
+                        showAllGroupByInstances={showAllGroupByInstances}
+                      />
+                    </QueryClientProvider>
+                  </Router>
+                </PluginContext.Provider>
               </KibanaContextProvider>
             </I18nContext>
           );

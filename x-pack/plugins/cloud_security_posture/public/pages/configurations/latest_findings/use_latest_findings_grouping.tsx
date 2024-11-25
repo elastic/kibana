@@ -21,6 +21,7 @@ import {
 } from '@kbn/cloud-security-posture-common';
 import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import {
+  CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS,
   FINDINGS_GROUPING_OPTIONS,
   LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
 } from '../../../common/constants';
@@ -90,7 +91,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         ...aggMetrics,
         getTermAggregation('resourceName', 'resource.id'),
         getTermAggregation('resourceSubType', 'resource.sub_type'),
-        getTermAggregation('resourceType', 'resource.type'),
       ];
     case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
       return [
@@ -122,62 +122,18 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 const getRuntimeMappingsByGroupField = (
   field: string
 ): Record<string, { type: 'keyword' }> | undefined => {
-  switch (field) {
-    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
-      return {
-        [FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME]: {
+  if (CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
+    return CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
+      (acc, runtimeField) => ({
+        ...acc,
+        [runtimeField]: {
           type: 'keyword',
         },
-        'resource.id': {
-          type: 'keyword',
-        },
-        'resource.sub_type': {
-          type: 'keyword',
-        },
-        'resource.type': {
-          type: 'keyword',
-        },
-      };
-    case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
-      return {
-        [FINDINGS_GROUPING_OPTIONS.RULE_NAME]: {
-          type: 'keyword',
-        },
-        'rule.benchmark.version': {
-          type: 'keyword',
-        },
-      };
-    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
-      return {
-        [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: {
-          type: 'keyword',
-        },
-        'rule.benchmark.name': {
-          type: 'keyword',
-        },
-        'rule.benchmark.id': {
-          type: 'keyword',
-        },
-      };
-    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
-      return {
-        [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: {
-          type: 'keyword',
-        },
-        'rule.benchmark.name': {
-          type: 'keyword',
-        },
-        'rule.benchmark.id': {
-          type: 'keyword',
-        },
-      };
-    default:
-      return {
-        [field]: {
-          type: 'keyword',
-        },
-      };
+      }),
+      {}
+    );
   }
+  return {};
 };
 
 /**
@@ -255,12 +211,7 @@ export const useLatestFindingsGrouping = ({
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }, { complianceScore: { order: 'asc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
-    runtimeMappings: {
-      ...getRuntimeMappingsByGroupField(currentSelectedGroup),
-      'result.evaluation': {
-        type: 'keyword',
-      },
-    },
+    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
     rootAggregations: [
       {
         failedFindings: {

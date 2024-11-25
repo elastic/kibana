@@ -7,7 +7,7 @@
 
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useIsPrebuiltRulesCustomizationEnabled } from './use_is_prebuilt_rules_customization_enabled';
 
 /**
  * Gets the default index pattern for cases when rule has neither index patterns or data view.
@@ -15,9 +15,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
  */
 export function useDefaultIndexPattern(): string[] {
   const { services } = useKibana();
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
 
   return isPrebuiltRulesCustomizationEnabled
     ? services.settings.client.get(DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN)

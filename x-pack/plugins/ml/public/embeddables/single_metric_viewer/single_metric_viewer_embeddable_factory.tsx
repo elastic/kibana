@@ -123,7 +123,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
         services[1].data.query.timefilter.timefilter
       );
 
-      const SingleMetricViewerComponent = getSingleMetricViewerComponent(...services);
+      const SingleMetricViewerComponent = getSingleMetricViewerComponent(...services, api);
 
       return {
         api,

@@ -17,7 +17,7 @@ import {
 import React from 'react';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { DisplayQuery } from './display_query';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,

@@ -20,7 +20,7 @@ indicator is displayed:
 [role="screenshot"]
 image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in Kibana's header]
 
-To add the privilege, open the main menu, then click *Stack Management > Roles*.
+To add the privilege, go to the *Roles* management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 
 For more information on granting access to {kib}, refer to <<xpack-security-authorization>>.
 
@@ -30,7 +30,7 @@ For more information on granting access to {kib}, refer to <<xpack-security-auth
 
 Change the settings that apply only to {kib} spaces.
 
-. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Go to the *Advanced settings* page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 . Click *Space Settings*.
 . Scroll or search for the setting.
 . Make your change, then click *Save changes*.
@@ -329,9 +329,6 @@ the minimum and maximum values of a numeric field or a map of a geo field.
 
 [[discover:showMultiFields]]`discover:showMultiFields`::
 Controls the display of multi-fields in the expanded document view.
-
-[[discover:showLegacyFieldTopValues]]`discover:showLegacyFieldTopValues`::
-To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.
 
 [[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
 The default sort direction for time-based data views.
@@ -647,7 +644,7 @@ Disable this option if you prefer to use the new heatmap charts with improved pe
 
 Change the settings that apply only to {kib} spaces.
 
-. Open the main menu, then click *Stack Management > Advanced Settings*.
+. Go to the *Advanced settings* page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 . Click *Global Settings*.
 . Scroll or search for the setting.
 . Make your change, then click *Save changes*.

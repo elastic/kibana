@@ -377,6 +377,24 @@ export const FullAgentPolicyResponseSchema = schema.object({
           signing_key: schema.string(),
         })
       ),
+      logging: schema.maybe(
+        schema.object({
+          level: schema.maybe(schema.string()),
+          to_files: schema.maybe(schema.boolean()),
+          files: schema.maybe(
+            schema.object({
+              rotateeverybytes: schema.maybe(schema.number()),
+              keepfiles: schema.maybe(schema.number()),
+              interval: schema.maybe(schema.string()),
+            })
+          ),
+        })
+      ),
+      limits: schema.maybe(
+        schema.object({
+          go_max_procs: schema.maybe(schema.number()),
+        })
+      ),
     })
   ),
   secret_references: schema.maybe(

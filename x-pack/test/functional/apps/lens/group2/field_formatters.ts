@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-        await lens.goToTimeRange();
         await lens.switchToVisualization('lnsDatatable');
       });
 
@@ -115,7 +114,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-        await lens.goToTimeRange();
         await lens.switchToVisualization('lnsDatatable');
       });
 
@@ -189,7 +187,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
-        await lens.goToTimeRange();
         await lens.switchToVisualization('lnsDatatable');
       });
 

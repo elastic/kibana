@@ -15,6 +15,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
+  ArchiveEntry,
   InstallablePackage,
   InstallSource,
   PackageAssetReference,
@@ -24,7 +25,6 @@ import { PackageInvalidArchiveError, PackageNotFoundError } from '../../../error
 import { appContextService } from '../../app_context';
 
 import { setPackageInfo } from '.';
-import type { ArchiveEntry } from '.';
 import { filterAssetPathForParseAndVerifyArchive, parseAndVerifyArchive } from './parse';
 
 const ONE_BYTE = 1024 * 1024;

@@ -1183,6 +1183,18 @@ export function getCoreUsageCollector(
             'How many times a saved object has resolved with any of the four possible outcomes.',
         },
       },
+      'deprecated_api_calls_resolved.total': {
+        type: 'integer',
+        _meta: {
+          description: 'How many times deprecated APIs has been marked as resolved',
+        },
+      },
+      'deprecated_api_calls.total': {
+        type: 'integer',
+        _meta: {
+          description: 'How many times deprecated APIs has been called.',
+        },
+      },
     },
     fetch() {
       return getCoreUsageDataService().getCoreUsageData();

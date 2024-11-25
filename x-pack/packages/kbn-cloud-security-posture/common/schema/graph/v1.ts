@@ -6,14 +6,26 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ApiMessageCode } from '../../types/graph/v1';
 
 export const graphRequestSchema = schema.object({
+  nodesLimit: schema.maybe(schema.number()),
+  showUnknownTarget: schema.maybe(schema.boolean()),
   query: schema.object({
-    actorIds: schema.arrayOf(schema.string()),
     eventIds: schema.arrayOf(schema.string()),
     // TODO: use zod for range validation instead of config schema
     start: schema.oneOf([schema.number(), schema.string()]),
     end: schema.oneOf([schema.number(), schema.string()]),
+    esQuery: schema.maybe(
+      schema.object({
+        bool: schema.object({
+          filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+          must_not: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+        }),
+      })
+    ),
   }),
 });
 
@@ -23,6 +35,9 @@ export const graphResponseSchema = () =>
       schema.oneOf([entityNodeDataSchema, groupNodeDataSchema, labelNodeDataSchema])
     ),
     edges: schema.arrayOf(edgeDataSchema),
+    messages: schema.maybe(
+      schema.arrayOf(schema.oneOf([schema.literal(ApiMessageCode.ReachedNodesLimit)]))
+    ),
   });
 
 export const colorSchema = schema.oneOf([

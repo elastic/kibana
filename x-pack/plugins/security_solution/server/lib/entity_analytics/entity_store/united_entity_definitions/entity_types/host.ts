@@ -18,7 +18,17 @@ export const getHostUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLen
       collect({ field: 'host.domain' }),
       collect({ field: 'host.hostname' }),
       collect({ field: 'host.id' }),
-      collect({ field: 'host.os.name' }),
+      collect({
+        field: 'host.os.name',
+        mapping: {
+          type: 'keyword',
+          fields: {
+            text: {
+              type: 'match_only_text',
+            },
+          },
+        },
+      }),
       collect({ field: 'host.os.type' }),
       collect({
         field: 'host.ip',

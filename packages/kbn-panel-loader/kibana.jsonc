@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/panel-loader",
-  "owner": "@elastic/kibana-presentation"
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

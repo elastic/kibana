@@ -277,11 +277,11 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(reviewResponse.rules[0].diff.fields.name).toBeUndefined();
 
             expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(1);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1); // version is considered a conflict
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(0);
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);
-            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(1);
+            expect(reviewResponse.stats.num_rules_with_conflicts).toBe(0);
             expect(reviewResponse.stats.num_rules_with_non_solvable_conflicts).toBe(0);
           });
         });
@@ -326,7 +326,7 @@ export default ({ getService }: FtrProviderContext): void => {
             });
 
             expect(reviewResponse.rules[0].diff.num_fields_with_updates).toBe(2);
-            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(2); // name + version are both considered conflicts
+            expect(reviewResponse.rules[0].diff.num_fields_with_conflicts).toBe(1); // name is considered as a conflict
             expect(reviewResponse.rules[0].diff.num_fields_with_non_solvable_conflicts).toBe(0);
 
             expect(reviewResponse.stats.num_rules_to_upgrade_total).toBe(1);

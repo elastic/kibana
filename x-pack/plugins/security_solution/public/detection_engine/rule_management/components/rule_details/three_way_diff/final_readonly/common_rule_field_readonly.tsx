@@ -45,7 +45,7 @@ export function CommonRuleFieldReadOnly({
 }: CommonRuleFieldReadOnlyProps) {
   switch (fieldName) {
     case 'building_block':
-      return <BuildingBlockReadOnly />;
+      return <BuildingBlockReadOnly buildingBlock={finalDiffableRule.building_block} />;
     case 'description':
       return <DescriptionReadOnly description={finalDiffableRule.description} />;
     case 'investigation_fields':

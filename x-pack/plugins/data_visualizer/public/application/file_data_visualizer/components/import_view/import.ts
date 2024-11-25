@@ -12,13 +12,17 @@ import type {
 } from '@kbn/file-upload-plugin/common/types';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
+import type { HttpSetup } from '@kbn/core/public';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IMPORT_STATUS } from '../import_progress/import_progress';
+import { AutoDeploy } from './auto_deploy';
 
 interface Props {
   data: ArrayBuffer;
   results: FindFileStructureResponse;
   dataViewsContract: DataViewsServicePublic;
   fileUpload: FileUploadStartApi;
+  http: HttpSetup;
 }
 
 interface Config {
@@ -33,7 +37,7 @@ interface Config {
 }
 
 export async function importData(props: Props, config: Config, setState: (state: unknown) => void) {
-  const { data, results, dataViewsContract, fileUpload } = props;
+  const { data, results, dataViewsContract, fileUpload, http } = props;
   const {
     index,
     dataView,
@@ -76,14 +80,6 @@ export async function importData(props: Props, config: Config, setState: (state:
     return;
   }
 
-  setState({
-    importing: true,
-    imported: false,
-    reading: true,
-    initialized: true,
-    permissionCheckStatus: IMPORT_STATUS.COMPLETE,
-  });
-
   let success = true;
 
   let settings = {};
@@ -122,7 +118,15 @@ export async function importData(props: Props, config: Config, setState: (state:
     errors.push(`${parseError} ${error.message}`);
   }
 
+  const inferenceId = getInferenceId(mappings);
+
   setState({
+    importing: true,
+    imported: false,
+    reading: true,
+    initialized: true,
+    permissionCheckStatus: IMPORT_STATUS.COMPLETE,
+    initializeDeployment: inferenceId !== null,
     parseJSONStatus: getSuccess(success),
   });
 
@@ -142,6 +146,32 @@ export async function importData(props: Props, config: Config, setState: (state:
     reading: false,
     importer,
   });
+
+  if (success === false) {
+    return;
+  }
+
+  if (inferenceId) {
+    // Initialize deployment
+    const autoDeploy = new AutoDeploy(http, inferenceId);
+
+    try {
+      await autoDeploy.deploy();
+      setState({
+        initializeDeploymentStatus: IMPORT_STATUS.COMPLETE,
+      });
+    } catch (error) {
+      success = false;
+      const deployError = i18n.translate('xpack.dataVisualizer.file.importView.deployModelError', {
+        defaultMessage: 'Error deploying trained model:',
+      });
+      errors.push(`${deployError} ${error.message}`);
+      setState({
+        initializeDeploymentStatus: IMPORT_STATUS.FAILED,
+        errors,
+      });
+    }
+  }
 
   if (success === false) {
     return;
@@ -244,4 +274,13 @@ async function createKibanaDataView(
 
 function getSuccess(success: boolean) {
   return success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED;
+}
+
+function getInferenceId(mappings: MappingTypeMapping) {
+  for (const value of Object.values(mappings.properties ?? {})) {
+    if (value.type === 'semantic_text') {
+      return value.inference_id;
+    }
+  }
+  return null;
 }

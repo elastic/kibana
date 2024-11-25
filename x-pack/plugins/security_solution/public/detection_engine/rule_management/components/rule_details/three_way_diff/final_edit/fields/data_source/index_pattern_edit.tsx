@@ -44,7 +44,7 @@ export function IndexPatternField({ field }: IndexPatternFieldProps): JSX.Elemen
             iconType="refresh"
             onClick={handleResetIndices}
           >
-            {i18n.RESET_DEFAULT_INDEX}
+            {i18n.RESET_TO_DEFAULT_INDEX_PATTERNS}
           </EuiButtonEmpty>
         ) : undefined
       }

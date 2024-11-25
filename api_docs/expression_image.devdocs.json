@@ -11,7 +11,7 @@
         "label": "getImageRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {

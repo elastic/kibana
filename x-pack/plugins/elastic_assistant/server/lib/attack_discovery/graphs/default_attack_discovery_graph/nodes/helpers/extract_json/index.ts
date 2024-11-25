@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const extractJson = (input: string): string => {
+export const extractJson = (input: unknown): string => {
+  if (typeof input !== 'string') {
+    return '';
+  }
+
   const regex = /```json\s*([\s\S]*?)(?:\s*```|$)/;
   const match = input.match(regex);
 

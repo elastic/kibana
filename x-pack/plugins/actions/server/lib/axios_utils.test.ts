@@ -577,4 +577,12 @@ describe('throwIfResponseIsNotValid', () => {
       })
     ).not.toThrow();
   });
+
+  test('it does NOT throw if HTTP status code is 204 even if the content type is not supported', () => {
+    expect(() =>
+      throwIfResponseIsNotValid({
+        res: { ...res, status: 204, headers: { ['content-type']: 'text/html' } },
+      })
+    ).not.toThrow();
+  });
 });

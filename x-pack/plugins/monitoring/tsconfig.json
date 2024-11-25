@@ -19,7 +19,6 @@
     "@kbn/features-plugin",
     "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/telemetry-collection-xpack-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/expect",
     "@kbn/i18n",
@@ -49,6 +48,7 @@
     "@kbn/flot-charts",
     "@kbn/ui-theme",
     "@kbn/core-elasticsearch-server",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

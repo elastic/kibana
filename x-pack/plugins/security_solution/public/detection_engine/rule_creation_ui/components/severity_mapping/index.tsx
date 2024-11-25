@@ -5,53 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiFormRow,
-  EuiCheckbox,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiIcon,
-  EuiSpacer,
-  EuiSuperSelect,
-} from '@elastic/eui';
-import { noop } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  FieldComponent,
-  AutocompleteFieldMatchComponent,
-} from '@kbn/securitysolution-autocomplete';
-import type {
-  Severity,
-  SeverityMapping,
-  SeverityMappingItem,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-
-import type { SeverityOptionItem } from '../step_about_rule/data';
+import type { Severity, SeverityMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { AboutStepSeverity } from '../../../../detections/pages/detection_engine/rules/types';
-import { useKibana } from '../../../../common/lib/kibana';
-import * as i18n from './translations';
-
-const NestedContent = styled.div`
-  margin-left: 24px;
-`;
-
-const EuiFlexItemComboBoxColumn = styled(EuiFlexItem)`
-  max-width: 376px;
-`;
-
-const EuiFlexItemIconColumn = styled(EuiFlexItem)`
-  width: 20px;
-`;
-
-const EuiFlexItemSeverityColumn = styled(EuiFlexItem)`
-  width: 80px;
-`;
+import { DefaultSeverity } from './default_severity';
+import { SeverityOverride } from './severity_override';
 
 interface SeverityFieldProps {
   dataTestSubj: string;
@@ -59,7 +20,6 @@ interface SeverityFieldProps {
   idAria: string;
   indices: DataViewBase;
   isDisabled: boolean;
-  options: SeverityOptionItem[];
   setRiskScore: (severity: Severity) => void;
 }
 
@@ -69,10 +29,8 @@ export const SeverityField = ({
   idAria,
   indices,
   isDisabled,
-  options,
   setRiskScore,
 }: SeverityFieldProps) => {
-  const { services } = useKibana();
   const { value, isMappingChecked, mapping } = field.value;
   const { setValue } = field;
 
@@ -126,6 +84,7 @@ export const SeverityField = ({
           severity,
         },
       ];
+
       handleFieldValueChange(newMappingItems, index);
     },
     [mapping, handleFieldValueChange]
@@ -139,178 +98,22 @@ export const SeverityField = ({
     });
   }, [isMappingChecked, mapping, value, setValue]);
 
-  const severityLabel = useMemo(() => {
-    return (
-      <div>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>{i18n.SEVERITY}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiText size={'xs'}>{i18n.SEVERITY_DESCRIPTION}</EuiText>
-      </div>
-    );
-  }, []);
-
-  const severityMappingLabel = useMemo(() => {
-    return (
-      <div>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          onClick={!isDisabled ? handleSeverityMappingChecked : noop}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id={`severity-mapping-override`}
-              checked={isMappingChecked}
-              disabled={isDisabled}
-              onChange={handleSeverityMappingChecked}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>{i18n.SEVERITY_MAPPING}</EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <NestedContent>
-          <EuiText size={'xs'}>{i18n.SEVERITY_MAPPING_DESCRIPTION}</EuiText>
-        </NestedContent>
-      </div>
-    );
-  }, [handleSeverityMappingChecked, isDisabled, isMappingChecked]);
-
   return (
     <EuiFlexGroup direction={'column'}>
+      <DefaultSeverity value={value} onChange={handleDefaultSeverityChange} />
       <EuiFlexItem>
-        <EuiFormRow
-          label={severityLabel}
-          labelAppend={field.labelAppend}
-          helpText={field.helpText}
-          error={'errorMessage'}
-          isInvalid={false}
-          fullWidth
-          data-test-subj="detectionEngineStepAboutRuleSeverity"
-          describedByIds={['detectionEngineStepAboutRuleSeverity']}
-        >
-          <EuiSuperSelect
-            fullWidth={false}
-            disabled={false}
-            valueOfSelected={value}
-            onChange={handleDefaultSeverityChange}
-            options={options}
-            data-test-subj="select"
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-
-      <EuiFlexItem>
-        <EuiFormRow
-          label={severityMappingLabel}
-          labelAppend={field.labelAppend}
-          helpText={
-            isMappingChecked ? <NestedContent>{i18n.SEVERITY_MAPPING_DETAILS}</NestedContent> : ''
-          }
-          error={'errorMessage'}
-          isInvalid={false}
-          fullWidth
-          data-test-subj={`${dataTestSubj}-severityOverride`}
-          describedByIds={idAria ? [idAria] : undefined}
-        >
-          <NestedContent>
-            <EuiSpacer size="s" />
-            {isMappingChecked && (
-              <EuiFlexGroup direction={'column'} gutterSize="s">
-                <EuiFlexItem>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItemComboBoxColumn>
-                      <EuiFormLabel>{i18n.SOURCE_FIELD}</EuiFormLabel>
-                    </EuiFlexItemComboBoxColumn>
-                    <EuiFlexItemComboBoxColumn>
-                      <EuiFormLabel>{i18n.SOURCE_VALUE}</EuiFormLabel>
-                    </EuiFlexItemComboBoxColumn>
-                    <EuiFlexItemIconColumn grow={false} />
-                    <EuiFlexItemSeverityColumn grow={false}>
-                      <EuiFormLabel>{i18n.DEFAULT_SEVERITY}</EuiFormLabel>
-                    </EuiFlexItemSeverityColumn>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                {mapping.map((severityMappingItem: SeverityMappingItem, index) => (
-                  <EuiFlexItem key={`${severityMappingItem.severity}-${index}`}>
-                    <EuiFlexGroup
-                      data-test-subj="severityOverrideRow"
-                      alignItems="center"
-                      gutterSize="s"
-                    >
-                      <EuiFlexItemComboBoxColumn>
-                        <FieldComponent
-                          placeholder={''}
-                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
-                          isLoading={false}
-                          isDisabled={isDisabled}
-                          isClearable={false}
-                          indexPattern={indices}
-                          onChange={handleFieldChange.bind(
-                            null,
-                            index,
-                            severityMappingItem.severity
-                          )}
-                          data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
-                          aria-label={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
-                        />
-                      </EuiFlexItemComboBoxColumn>
-
-                      <EuiFlexItemComboBoxColumn>
-                        <AutocompleteFieldMatchComponent
-                          autocompleteService={services.unifiedSearch.autocomplete}
-                          placeholder={''}
-                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
-                          selectedValue={severityMappingItem.value}
-                          isClearable={false}
-                          isDisabled={isDisabled}
-                          isLoading={false}
-                          indexPattern={indices}
-                          onChange={handleFieldMatchValueChange.bind(
-                            null,
-                            index,
-                            severityMappingItem.severity
-                          )}
-                          data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
-                          aria-label={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
-                        />
-                      </EuiFlexItemComboBoxColumn>
-                      <EuiFlexItemIconColumn grow={false}>
-                        <EuiIcon type={'sortRight'} />
-                      </EuiFlexItemIconColumn>
-                      <EuiFlexItemSeverityColumn grow={false}>
-                        {
-                          options.find((o) => o.value === severityMappingItem.severity)
-                            ?.inputDisplay
-                        }
-                      </EuiFlexItemSeverityColumn>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            )}
-          </NestedContent>
-        </EuiFormRow>
+        <SeverityOverride
+          isDisabled={isDisabled}
+          onSeverityMappingChecked={handleSeverityMappingChecked}
+          onFieldChange={handleFieldChange}
+          onFieldMatchValueChange={handleFieldMatchValueChange}
+          isMappingChecked={isMappingChecked}
+          dataTestSubj={dataTestSubj}
+          idAria={idAria}
+          mapping={mapping}
+          indices={indices}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-/**
- * Looks for field metadata (DataViewFieldBase) in existing index pattern.
- * If specified field doesn't exist, returns a stub DataViewFieldBase created based on the mapping --
- * because the field might not have been indexed yet, but we still need to display the mapping.
- *
- * @param mapping Mapping of a specified field name + value to a certain severity value.
- * @param pattern Existing index pattern.
- */
-const getFieldTypeByMapping = (
-  mapping: SeverityMappingItem,
-  pattern: DataViewBase
-): DataViewFieldBase => {
-  const { field } = mapping;
-  const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);
-  return knownFieldType ?? { name: field, type: 'string' };
 };

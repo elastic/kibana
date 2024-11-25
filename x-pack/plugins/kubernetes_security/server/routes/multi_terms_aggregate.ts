@@ -35,6 +35,11 @@ export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            requiredPrivileges: ['securitySolution'],
+          },
+        },
         validate: {
           request: {
             query: schema.object({

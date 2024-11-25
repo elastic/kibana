@@ -8,7 +8,7 @@
  */
 
 export * from './src/check_empty_value';
-export * from './src/field';
+export * from './src/es_field_selector';
 export * from './src/field_value_exists';
 export * from './src/field_value_lists';
 export * from './src/field_value_match';

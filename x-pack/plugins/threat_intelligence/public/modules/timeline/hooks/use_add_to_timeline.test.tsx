@@ -6,7 +6,7 @@
  */
 
 import { EMPTY_VALUE } from '../../../constants/common';
-import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
@@ -16,7 +16,7 @@ import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { useAddToTimeline, UseAddToTimelineValue } from './use_add_to_timeline';
 
 describe('useInvestigateInTimeline()', () => {
-  let hookResult: RenderHookResult<{}, UseAddToTimelineValue, Renderer<unknown>>;
+  let hookResult: RenderHookResult<UseAddToTimelineValue, unknown>;
 
   xit('should return empty object if Indicator is incorrect', () => {
     const indicator: Indicator = generateMockIndicator();

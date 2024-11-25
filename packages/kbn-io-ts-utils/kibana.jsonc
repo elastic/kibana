@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/io-ts-utils",
-  "owner": "@elastic/obs-knowledge-team"
+  "owner": [
+    "@elastic/obs-knowledge-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

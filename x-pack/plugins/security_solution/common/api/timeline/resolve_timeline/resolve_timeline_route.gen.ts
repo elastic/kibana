@@ -32,9 +32,4 @@ export const ResolveTimelineRequestQuery = z.object({
 export type ResolveTimelineRequestQueryInput = z.input<typeof ResolveTimelineRequestQuery>;
 
 export type ResolveTimelineResponse = z.infer<typeof ResolveTimelineResponse>;
-export const ResolveTimelineResponse = z.union([
-  z.object({
-    data: ResolvedTimeline,
-  }),
-  z.object({}).strict(),
-]);
+export const ResolveTimelineResponse = ResolvedTimeline;

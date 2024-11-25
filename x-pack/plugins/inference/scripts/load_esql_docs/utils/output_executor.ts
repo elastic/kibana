@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
-import type { OutputAPI } from '../../../common/output';
+import type { OutputAPI } from '@kbn/inference-common';
 
 export interface Prompt {
   system?: string;
@@ -27,13 +26,13 @@ export type PromptCallerFactory = ({
 
 export const bindOutput: PromptCallerFactory = ({ connectorId, output }) => {
   return async ({ input, system }) => {
-    const response = await lastValueFrom(
-      output('', {
-        connectorId,
-        input,
-        system,
-      })
-    );
+    const response = await output({
+      id: 'output',
+      connectorId,
+      input,
+      system,
+    });
+
     return response.content ?? '';
   };
 };

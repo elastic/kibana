@@ -140,6 +140,7 @@ export const FieldPicker = ({
         placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
           defaultMessage: 'Search field names',
         }),
+        compressed: true,
         disabled: Boolean(selectableProps?.isLoading),
         inputRef: setSearchRef,
       }}

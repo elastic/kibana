@@ -15,11 +15,11 @@ export function MachineLearningNavigationProviderObservability({
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   async function navigateToArea(id: string) {
-    await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops');
-    await testSubjects.existOrFail(`~nav-item-observability_project_nav.aiops.ml:${id}`, {
+    await svlCommonNavigation.sidenav.openPanel('machine_learning-landing');
+    await testSubjects.existOrFail(`~panelNavItem-id-ml:${id}`, {
       timeout: 60 * 1000,
     });
-    await testSubjects.click(`~nav-item-observability_project_nav.aiops.ml:${id}`);
+    await testSubjects.click(`~panelNavItem-id-ml:${id}`);
   }
 
   return {

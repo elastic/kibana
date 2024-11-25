@@ -17,7 +17,7 @@ import {
   VisualizationsStart,
   type BaseVisType,
 } from '@kbn/visualizations-plugin/public';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { uiActionsService, visualizationsService } from '../../../services/kibana_services';
 import { useGetDashboardPanels } from './use_get_dashboard_panels';

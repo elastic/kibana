@@ -58,7 +58,7 @@ export const KubernetesPanel: React.FC = () => {
               encodedApiKey={data.apiKeyEncoded}
               onboardingId={data.onboardingId}
               elasticsearchUrl={data.elasticsearchUrl}
-              elasticAgentVersion={data.elasticAgentVersion}
+              elasticAgentVersionInfo={data.elasticAgentVersionInfo}
               isCopyPrimaryAction={!isMonitoringStepActive}
             />
           )}

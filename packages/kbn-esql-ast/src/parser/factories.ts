@@ -11,7 +11,13 @@
  * In case of changes in the grammar, this script should be updated: esql_update_ast_script.js
  */
 
-import type { Token, ParserRuleContext, TerminalNode, RecognitionException } from 'antlr4';
+import type {
+  Token,
+  ParserRuleContext,
+  TerminalNode,
+  RecognitionException,
+  ParseTree,
+} from 'antlr4';
 import {
   IndexPatternContext,
   QualifiedNameContext,
@@ -21,6 +27,11 @@ import {
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
   QualifiedNamePatternContext,
+  FunctionContext,
+  IdentifierContext,
+  InputParamContext,
+  InputNamedOrPositionalParamContext,
+  IdentifierOrParameterContext,
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
@@ -42,6 +53,8 @@ import type {
   ESQLNumericLiteral,
   ESQLOrderExpression,
   InlineCastingType,
+  ESQLFunctionCallExpression,
+  ESQLIdentifier,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -201,22 +214,80 @@ export function createFunction<Subtype extends FunctionSubtype>(
   return node;
 }
 
+export const createFunctionCall = (ctx: FunctionContext): ESQLFunctionCallExpression => {
+  const functionExpressionCtx = ctx.functionExpression();
+  const functionName = functionExpressionCtx.functionName();
+  const node: ESQLFunctionCallExpression = {
+    type: 'function',
+    subtype: 'variadic-call',
+    name: functionName.getText().toLowerCase(),
+    text: ctx.getText(),
+    location: getPosition(ctx.start, ctx.stop),
+    args: [],
+    incomplete: Boolean(ctx.exception),
+  };
+
+  const identifierOrParameter = functionName.identifierOrParameter();
+
+  if (identifierOrParameter instanceof IdentifierOrParameterContext) {
+    const operator = createIdentifierOrParam(identifierOrParameter);
+
+    if (operator) {
+      node.operator = operator;
+    }
+  }
+
+  return node;
+};
+
+export const createIdentifierOrParam = (ctx: IdentifierOrParameterContext) => {
+  const identifier = ctx.identifier();
+  if (identifier) {
+    return createIdentifier(identifier);
+  } else {
+    const parameter = ctx.parameter();
+    if (parameter) {
+      return createParam(parameter);
+    }
+  }
+};
+
+export const createIdentifier = (identifier: IdentifierContext): ESQLIdentifier => {
+  const text = identifier.getText();
+  const name = parseIdentifier(text);
+
+  return Builder.identifier({ name }, createParserFields(identifier));
+};
+
+export const createParam = (ctx: ParseTree) => {
+  if (ctx instanceof InputParamContext) {
+    return Builder.param.unnamed(createParserFields(ctx));
+  } else if (ctx instanceof InputNamedOrPositionalParamContext) {
+    const text = ctx.getText();
+    const value = text.slice(1);
+    const valueAsNumber = Number(value);
+    const isPositional = String(valueAsNumber) === value;
+    const parserFields = createParserFields(ctx);
+
+    if (isPositional) {
+      return Builder.param.positional({ value: valueAsNumber }, parserFields);
+    } else {
+      return Builder.param.named({ value }, parserFields);
+    }
+  }
+};
+
 export const createOrderExpression = (
   ctx: ParserRuleContext,
-  arg: ESQLAstItem,
+  arg: ESQLColumn,
   order: ESQLOrderExpression['order'],
   nulls: ESQLOrderExpression['nulls']
 ) => {
-  const node: ESQLOrderExpression = {
-    type: 'order',
-    name: '',
-    order,
-    nulls,
-    args: [arg],
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception),
-  };
+  const node = Builder.expression.order(
+    arg as ESQLColumn,
+    { order, nulls },
+    createParserFields(ctx)
+  );
 
   return node;
 };
@@ -412,42 +483,68 @@ export function createSource(
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
   const text = ctx.getText();
-
-  return {
-    type: 'column',
-    name: text,
-    parts: [text],
+  const parserFields = {
     text,
     location: getPosition(ctx.symbol),
     incomplete: ctx.getText() === '',
     quoted: false,
   };
+  const node = Builder.expression.column(
+    { args: [Builder.identifier({ name: '*' }, parserFields)] },
+    parserFields
+  );
+
+  node.name = text;
+
+  return node;
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
-  const parts: string[] = [];
+  const args: ESQLColumn['args'] = [];
+
   if (ctx instanceof QualifiedNamePatternContext) {
-    parts.push(
-      ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
-    );
+    const list = ctx.identifierPattern_list();
+
+    for (const identifier of list) {
+      const name = parseIdentifier(identifier.getText());
+      const node = Builder.identifier({ name }, createParserFields(identifier));
+
+      args.push(node);
+    }
   } else if (ctx instanceof QualifiedNameContext) {
-    parts.push(
-      ...ctx.identifierOrParameter_list().map((identifier) => parseIdentifier(identifier.getText()))
-    );
+    const list = ctx.identifierOrParameter_list();
+
+    for (const item of list) {
+      if (item instanceof IdentifierOrParameterContext) {
+        const node = createIdentifierOrParam(item);
+
+        if (node) {
+          args.push(node);
+        }
+      }
+    }
   } else {
-    parts.push(sanitizeIdentifierString(ctx));
+    const name = sanitizeIdentifierString(ctx);
+    const node = Builder.identifier({ name }, createParserFields(ctx));
+
+    args.push(node);
   }
+
   const text = sanitizeIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
-  return {
-    type: 'column' as const,
-    name: text,
-    parts,
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception || text === ''),
-    quoted: hasQuotes,
-  };
+  const column = Builder.expression.column(
+    { args },
+    {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+    }
+  );
+
+  column.name = text;
+  column.quoted = hasQuotes;
+
+  return column;
 }
 
 export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandOption {

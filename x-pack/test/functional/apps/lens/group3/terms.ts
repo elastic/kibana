@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
         await elasticChart.setNewChartUiDebugFlag(true);
-        await lens.goToTimeRange();
 
         await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -164,7 +163,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualize.navigateToNewVisualization();
           await visualize.clickVisType('lens');
           await elasticChart.setNewChartUiDebugFlag(true);
-          await lens.goToTimeRange();
 
           await lens.configureDimension({
             dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -282,7 +280,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.navigateToNewVisualization();
         await visualize.clickVisType('lens');
         await elasticChart.setNewChartUiDebugFlag(true);
-        await lens.goToTimeRange();
         await lens.switchDataPanelIndexPattern(esIndexPrefix);
 
         await lens.configureDimension({

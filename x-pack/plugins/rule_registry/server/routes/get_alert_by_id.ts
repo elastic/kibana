@@ -7,7 +7,7 @@
 
 import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
-import { id as _id } from '@kbn/securitysolution-io-ts-list-types';
+import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { RacRequestHandlerContext } from '../types';
@@ -23,7 +23,7 @@ export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => 
           t.intersection([
             t.exact(
               t.type({
-                id: _id,
+                id: NonEmptyString,
               })
             ),
             t.exact(
@@ -34,9 +34,13 @@ export const getAlertByIdRoute = (router: IRouter<RacRequestHandlerContext>) => 
           ])
         ),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['rac'],
+        },
+      },
       options: {
         access: 'internal',
-        tags: ['access:rac'],
       },
     },
     async (context, request, response) => {

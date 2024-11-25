@@ -93,14 +93,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/scripts/endpoint/blocklists/index.ts"
           },
           {
@@ -297,14 +289,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/scripts/endpoint/event_filters/index.ts"
           },
           {
@@ -450,14 +434,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/services/exception_lists/get_exception_list_summary.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
           },
           {
             "plugin": "securitySolution",
@@ -733,14 +709,6 @@
             "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lists_integration/endpoint/validators/trusted_app_validator.ts"
-          },
-          {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
           },
@@ -775,14 +743,6 @@
           {
             "plugin": "lists",
             "path": "x-pack/plugins/lists/server/saved_objects/migrations.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/endpoint/data_generators/exceptions_list_item_generator.ts"
           },
           {
             "plugin": "securitySolution",

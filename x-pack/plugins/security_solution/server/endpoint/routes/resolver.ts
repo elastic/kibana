@@ -35,6 +35,11 @@ export const registerResolverRoutes = (
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       validate: validateTree,
       options: { authRequired: true },
     },
@@ -44,6 +49,11 @@ export const registerResolverRoutes = (
   router.post(
     {
       path: '/api/endpoint/resolver/events',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       validate: validateEvents,
       options: { authRequired: true },
     },
@@ -56,6 +66,11 @@ export const registerResolverRoutes = (
   router.get(
     {
       path: '/api/endpoint/resolver/entity',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       validate: validateEntities,
       options: { authRequired: true },
     },

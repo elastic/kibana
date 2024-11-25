@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { mockSearchHit } from '../mocks/mock_search_hit';
 import type { UseGetFieldsDataParams, UseGetFieldsDataResult } from './use_get_fields_data';
 import { useGetFieldsData } from './use_get_fields_data';
@@ -17,7 +17,7 @@ const fieldsData = {
 };
 
 describe('useGetFieldsData', () => {
-  let hookResult: RenderHookResult<UseGetFieldsDataParams, UseGetFieldsDataResult>;
+  let hookResult: RenderHookResult<UseGetFieldsDataResult, UseGetFieldsDataParams>;
 
   it('should return the value for a field', () => {
     hookResult = renderHook(() => useGetFieldsData({ fieldsData }));

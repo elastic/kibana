@@ -434,7 +434,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             legendNames = await visualBuilder.getLegendNames();
             expect(legendNames).to.eql(['png', 'php']);
 
-            await visualize.clickRefresh(true);
+            await visualize.clickRefresh();
             legendNames = await visualBuilder.getLegendNames();
             expect(legendNames).to.eql(['png', 'php']);
           });

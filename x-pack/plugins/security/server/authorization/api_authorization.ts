@@ -48,10 +48,6 @@ export function initAPIAuthorization(
 
     if (security) {
       if (isAuthzDisabled(security.authz)) {
-        logger.warn(
-          `Route authz is disabled for ${request.url.pathname}${request.url.search}": ${security.authz.reason}`
-        );
-
         return toolkit.next();
       }
 

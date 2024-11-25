@@ -58,7 +58,8 @@
       "savedSearch",
       "unifiedDocViewer",
       "charts",
-      "entityManager"
+      "entityManager",
+      "inference"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

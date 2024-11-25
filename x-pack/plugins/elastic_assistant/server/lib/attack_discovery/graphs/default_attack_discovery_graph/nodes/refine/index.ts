@@ -89,7 +89,7 @@ export const getRefineNode = ({
         generationsAreRepeating({
           currentGeneration: partialResponse,
           previousGenerations: refinements,
-          sampleLastNGenerations: maxRepeatedGenerations,
+          sampleLastNGenerations: maxRepeatedGenerations - 1,
         })
       ) {
         logger?.debug(

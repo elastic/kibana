@@ -15,14 +15,6 @@ import type {
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import type { FC } from 'react';
-import type { SelectedChangePoint } from '../../components/change_point_detection/change_point_detection_context';
-
-export type ViewComponent = FC<{
-  changePoints: SelectedChangePoint[];
-  interval: string;
-  onRenderComplete?: () => void;
-}>;
 
 export interface ChangePointComponentApi {
   viewType: PublishingSubject<ChangePointEmbeddableState['viewType']>;

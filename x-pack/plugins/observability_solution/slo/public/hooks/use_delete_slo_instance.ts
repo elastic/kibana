@@ -7,34 +7,37 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useDeleteSloInstance() {
   const {
-    http,
     notifications: { toasts },
   } = useKibana().services;
+  const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
-  return useMutation<string, ServerError, { slo: SLOWithSummaryResponse; excludeRollup: boolean }>(
+  return useMutation<void, ServerError, { slo: SLOWithSummaryResponse; excludeRollup: boolean }>(
     ['deleteSloInstance'],
     ({ slo, excludeRollup }) => {
       try {
-        return http.post(`/api/observability/slos/_delete_instances`, {
-          body: JSON.stringify({
-            list: [
-              {
-                sloId: slo.id,
-                instanceId: slo.instanceId,
-                excludeRollup,
-              },
-            ],
-          }),
+        return sloClient.fetch(`POST /api/observability/slos/_delete_instances 2023-10-31`, {
+          params: {
+            body: {
+              list: [
+                {
+                  sloId: slo.id,
+                  instanceId: slo.instanceId ?? ALL_VALUE,
+                  excludeRollup,
+                },
+              ],
+            },
+          },
         });
       } catch (error) {
         return Promise.reject(`Something went wrong: ${String(error)}`);

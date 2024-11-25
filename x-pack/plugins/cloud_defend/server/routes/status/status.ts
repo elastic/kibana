@@ -218,8 +218,10 @@ export const defineGetCloudDefendStatusRoute = (router: CloudDefendRouter) =>
     .get({
       access: 'internal',
       path: STATUS_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-defend-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-defend-read'],
+        },
       },
     })
     .addVersion({ version: '1', validate: {} }, async (context, request, response) => {

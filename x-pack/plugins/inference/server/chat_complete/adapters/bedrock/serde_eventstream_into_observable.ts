@@ -11,7 +11,7 @@ import { identity } from 'lodash';
 import { Observable } from 'rxjs';
 import { Readable } from 'stream';
 import { Message } from '@smithy/types';
-import { createInferenceInternalError } from '../../../../common/errors';
+import { createInferenceInternalError } from '@kbn/inference-common';
 
 interface ModelStreamErrorException {
   name: 'ModelStreamErrorException';

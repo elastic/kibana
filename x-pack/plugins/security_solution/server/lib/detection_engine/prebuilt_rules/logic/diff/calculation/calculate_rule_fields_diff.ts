@@ -48,6 +48,7 @@ import {
   eqlQueryDiffAlgorithm,
   esqlQueryDiffAlgorithm,
   ruleTypeDiffAlgorithm,
+  forceTargetVersionDiffAlgorithm,
 } from './algorithms';
 
 const BASE_TYPE_ERROR = `Base version can't be of different rule type`;
@@ -179,7 +180,11 @@ const calculateCommonFieldsDiff = (
 
 const commonFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableCommonFields> = {
   rule_id: simpleDiffAlgorithm,
-  version: numberDiffAlgorithm,
+  /**
+   * `version` shouldn't have a conflict. It always get target value automatically.
+   * Diff has informational purpose.
+   */
+  version: forceTargetVersionDiffAlgorithm,
   name: singleLineStringDiffAlgorithm,
   tags: scalarArrayDiffAlgorithm,
   description: multiLineStringDiffAlgorithm,
@@ -239,9 +244,6 @@ const eqlFieldsDiffAlgorithms: FieldsDiffAlgorithmsFor<DiffableEqlFields> = {
   type: ruleTypeDiffAlgorithm,
   eql_query: eqlQueryDiffAlgorithm,
   data_source: dataSourceDiffAlgorithm,
-  event_category_override: singleLineStringDiffAlgorithm,
-  timestamp_field: singleLineStringDiffAlgorithm,
-  tiebreaker_field: singleLineStringDiffAlgorithm,
   alert_suppression: simpleDiffAlgorithm,
 };
 

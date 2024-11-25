@@ -37,11 +37,10 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      await testPrivateLocations.setTestLocations([testPolicyId]);
+      const loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.id;
     });
 
     beforeEach(() => {

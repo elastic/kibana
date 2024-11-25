@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/try-in-console",
-  "owner": "@elastic/search-kibana"
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

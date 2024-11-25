@@ -56,6 +56,7 @@ export {
   getVisibleColumns,
   canPrependTimeFieldColumn,
   DiscoverFlyouts,
+  AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
   dismissFlyouts,
   LogLevelBadge,

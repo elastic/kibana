@@ -34,7 +34,12 @@ export function registerTopNFunctionsSearchRoute({
   router.get(
     {
       path: paths.TopNFunctions,
-      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling'],
+        },
+      },
+      options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: { query: querySchema },
     },
     async (context, request, response) => {

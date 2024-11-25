@@ -183,6 +183,7 @@ enabled:
   - x-pack/test/fleet_api_integration/config.agent.ts
   - x-pack/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/test/fleet_api_integration/config.epm.ts
+  - x-pack/test/fleet_api_integration/config.event_ingested.ts
   - x-pack/test/fleet_api_integration/config.fleet.ts
   - x-pack/test/fleet_api_integration/config.package_policy.ts
   - x-pack/test/fleet_api_integration/config.space_awareness.ts
@@ -374,3 +375,4 @@ enabled:
   - x-pack/test/custom_branding/config.ts
   # stateful config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
+  - x-pack/test/api_integration/apis/cloud/config.ts

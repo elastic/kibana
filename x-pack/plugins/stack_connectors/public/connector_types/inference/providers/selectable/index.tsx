@@ -11,6 +11,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ServiceProviderKeys } from '../../../../../common/inference/constants';
 import {
+  ProviderSolution,
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
   ServiceProviderName,
@@ -47,7 +48,20 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
 
   const renderProviderOption = useCallback<NonNullable<EuiSelectableProps['renderOption']>>(
     (option, searchValue) => {
-      const provider = SERVICE_PROVIDERS[option.label as ServiceProviderKeys];
+      const provider = Object.keys(SERVICE_PROVIDERS).includes(option.label)
+        ? SERVICE_PROVIDERS[option.label as ServiceProviderKeys]
+        : undefined;
+
+      const supportedBySolutions = (provider &&
+        provider.solutions.map((solution) => (
+          <EuiFlexItem>
+            <EuiBadge color="hollow">{solution}</EuiBadge>
+          </EuiFlexItem>
+        ))) ?? (
+        <EuiFlexItem>
+          <EuiBadge color="hollow">{'Search' as ProviderSolution}</EuiBadge>
+        </EuiFlexItem>
+      );
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -65,12 +79,7 @@ const SelectableProviderComponent: React.FC<SelectableProviderProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" responsive={false}>
-              {provider &&
-                provider.solutions.map((solution) => (
-                  <EuiFlexItem>
-                    <EuiBadge color="hollow">{solution}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
+              {supportedBySolutions}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

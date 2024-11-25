@@ -44,10 +44,7 @@ import {
   getPolicyIdsFromArtifact,
   getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
-import {
-  isMacosLinuxTrustedAppCondition,
-  isWindowsTrustedAppCondition,
-} from '../../state/type_guards';
+import { isSignerFieldExcluded } from '../../state/type_guards';
 
 import {
   CONDITIONS_HEADER,
@@ -364,16 +361,38 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           entries: [] as ArtifactFormComponentProps['item']['entries'],
         };
 
-        if (os !== OperatingSystem.WINDOWS) {
-          const macOsLinuxConditionEntry = item.entries.filter((entry) =>
-            isMacosLinuxTrustedAppCondition(entry as TrustedAppConditionEntry)
-          );
-          nextItem.entries.push(...macOsLinuxConditionEntry);
-          if (item.entries.length === 0) {
-            nextItem.entries.push(defaultConditionEntry());
-          }
-        } else {
-          nextItem.entries.push(...item.entries);
+        switch (os) {
+          case OperatingSystem.LINUX:
+            nextItem.entries = item.entries.filter((entry) =>
+              isSignerFieldExcluded(entry as TrustedAppConditionEntry)
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          case OperatingSystem.MAC:
+            nextItem.entries = item.entries.map((entry) =>
+              entry.field === ConditionEntryField.SIGNER
+                ? { ...entry, field: ConditionEntryField.SIGNER_MAC }
+                : entry
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          case OperatingSystem.WINDOWS:
+            nextItem.entries = item.entries.map((entry) =>
+              entry.field === ConditionEntryField.SIGNER_MAC
+                ? { ...entry, field: ConditionEntryField.SIGNER }
+                : entry
+            );
+            if (item.entries.length === 0) {
+              nextItem.entries.push(defaultConditionEntry());
+            }
+            break;
+          default:
+            nextItem.entries.push(...item.entries);
+            break;
         }
 
         processChanged(nextItem);
@@ -429,17 +448,15 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         entries: [],
       };
       const os = ((item.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
-      if (os === OperatingSystem.WINDOWS) {
-        nextItem.entries = [...item.entries, defaultConditionEntry()].filter((entry) =>
-          isWindowsTrustedAppCondition(entry as TrustedAppConditionEntry)
-        );
-      } else {
+      if (os === OperatingSystem.LINUX) {
         nextItem.entries = [
           ...item.entries.filter((entry) =>
-            isMacosLinuxTrustedAppCondition(entry as TrustedAppConditionEntry)
+            isSignerFieldExcluded(entry as TrustedAppConditionEntry)
           ),
           defaultConditionEntry(),
         ];
+      } else {
+        nextItem.entries = [...item.entries, defaultConditionEntry()];
       }
       processChanged(nextItem);
       setHasFormChanged(true);

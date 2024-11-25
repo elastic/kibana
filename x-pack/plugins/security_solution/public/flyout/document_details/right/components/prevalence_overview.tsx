@@ -7,10 +7,10 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExpandablePanel } from '@kbn/security-solution-common';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -18,6 +18,13 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import { InsightsSummaryRow } from './insights_summary_row';
+
+const UNCOMMON = (
+  <FormattedMessage
+    id="xpack.securitySolution.flyout.right.insights.prevalence.uncommonLabel"
+    defaultMessage="Uncommon"
+  />
+);
 
 const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is below 10%
 const DEFAULT_FROM = 'now-30d';
@@ -104,18 +111,17 @@ export const PrevalenceOverview: FC = () => {
       content={{ loading, error }}
       data-test-subj={PREVALENCE_TEST_ID}
     >
-      <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexGroup direction="column" gutterSize="s">
         {uncommonData.length > 0 ? (
           uncommonData.map((d) => (
             <InsightsSummaryRow
-              icon={'warning'}
               text={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.insights.prevalence.rowDescription"
-                  defaultMessage="{field}, {value} is uncommon"
-                  values={{ field: d.field, value: d.values.toString() }}
-                />
+                <>
+                  {d.field}
+                  {','} {d.values.toString()}
+                </>
               }
+              value={<EuiBadge color="warning">{UNCOMMON}</EuiBadge>}
               data-test-subj={`${PREVALENCE_TEST_ID}${d.field}`}
               key={`${PREVALENCE_TEST_ID}${d.field}`}
             />

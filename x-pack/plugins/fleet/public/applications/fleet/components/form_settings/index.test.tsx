@@ -102,6 +102,35 @@ describe('ConfiguredSettings', () => {
     expect(mockUpdateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
   });
 
+  it('should render boolean field using checkbox', () => {
+    const result = render([
+      {
+        name: 'agent.logging.to_files',
+        title: 'Agent logging to files',
+        description: 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'agent_logging_to_files',
+        },
+        schema: z.boolean().default(false),
+      },
+    ]);
+
+    expect(result.getByText('Agent logging to files')).not.toBeNull();
+    const input = result.getByTestId('configuredSetting-agent.logging.to_files');
+    expect(input).not.toBeChecked();
+
+    act(() => {
+      fireEvent.click(input);
+    });
+
+    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        advanced_settings: expect.objectContaining({ agent_logging_to_files: true }),
+      })
+    );
+  });
+
   it('should not render field if hidden', () => {
     const result = render([
       {

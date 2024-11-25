@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../detection_engine/rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -34,6 +35,7 @@ import {
 import { useDownloadExportedRules } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_download_exported_rules';
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   &.euiButtonIcon {
@@ -71,6 +73,7 @@ const RuleActionsOverflowComponent = ({
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -136,7 +139,10 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"
-              disabled={!userHasPermissions || rule.immutable}
+              disabled={
+                !userHasPermissions ||
+                (isPrebuiltRulesCustomizationEnabled === false && rule.immutable)
+              }
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
@@ -161,7 +167,7 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
                 closePopover();
                 const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
-                telemetry.reportManualRuleRunOpenModal({
+                telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
                   type: 'single',
                 });
                 if (modalManualRuleRunConfirmationResult === null) {
@@ -202,21 +208,22 @@ const RuleActionsOverflowComponent = ({
           ]
         : [],
     [
-      bulkExport,
+      rule,
       canDuplicateRuleWithActions,
+      userHasPermissions,
+      isPrebuiltRulesCustomizationEnabled,
+      startTransaction,
       closePopover,
+      showBulkDuplicateExceptionsConfirmation,
       executeBulkAction,
       navigateToApp,
-      onRuleDeletedCallback,
-      rule,
-      showBulkDuplicateExceptionsConfirmation,
-      showManualRuleRunConfirmation,
-      startTransaction,
-      userHasPermissions,
+      bulkExport,
       downloadExportedRules,
-      confirmDeletion,
-      scheduleRuleRun,
+      showManualRuleRunConfirmation,
       telemetry,
+      scheduleRuleRun,
+      confirmDeletion,
+      onRuleDeletedCallback,
     ]
   );
 

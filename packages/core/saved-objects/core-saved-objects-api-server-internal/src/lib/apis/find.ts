@@ -16,6 +16,7 @@ import {
   CheckAuthorizationResult,
   SavedObjectsRawDocSource,
   GetFindRedactTypeMapParams,
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
@@ -57,6 +58,7 @@ export const performFind = async <T = unknown, A = unknown>(
     common: commonHelper,
     serializer: serializerHelper,
     migration: migrationHelper,
+    encryption: encryptionHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
   let namespaces!: string[];
@@ -266,13 +268,27 @@ export const performFind = async <T = unknown, A = unknown>(
   const migratedDocuments: Array<SavedObjectsFindResult<T>> = [];
   try {
     for (const savedObject of savedObjects) {
+      let migrated: SavedObjectUnsanitizedDoc | undefined;
       const { sort, score, ...rawObject } = savedObject;
-      const migrated = disableExtensions
-        ? migrationHelper.migrateStorageDocument(rawObject)
-        : await migrationHelper.migrateAndDecryptStorageDocument({
-            document: rawObject,
-            typeMap: redactTypeMap,
-          });
+
+      if (fields !== undefined) {
+        // If the fields argument is set, don't migrate.
+        // This document may only contains a subset of it's fields meaning the migration
+        // (transform and forwardCompatibilitySchema) is not guaranteed to succeed. We
+        // still try to decrypt/redact the fields that are present in the document.
+        migrated = await encryptionHelper.optionallyDecryptAndRedactSingleResult(
+          savedObject,
+          redactTypeMap
+        );
+      } else if (disableExtensions) {
+        migrated = migrationHelper.migrateStorageDocument(rawObject);
+      } else {
+        migrated = await migrationHelper.migrateAndDecryptStorageDocument({
+          document: rawObject,
+          typeMap: redactTypeMap,
+        });
+      }
+
       migratedDocuments.push({ ...migrated, sort, score } as SavedObjectsFindResult<T>);
     }
   } catch (error) {

@@ -43,7 +43,7 @@ describe('EnterpriseSearchAnalyticsPageTemplate', () => {
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
-    expect(wrapper.prop('solutionNav')).toEqual({ name: 'Search', items: [] });
+    expect(wrapper.prop('solutionNav')).toEqual({ name: 'Elasticsearch', items: [] });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
 

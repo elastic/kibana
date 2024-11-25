@@ -10,7 +10,7 @@
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import type Boom from '@hapi/boom';
 import type { VersionedRouter } from '../versioning';
-import type { RouteConfig, RouteDeprecationInfo, RouteMethod } from './route';
+import type { RouteAccess, RouteConfig, RouteDeprecationInfo, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
 import type { RouteConfigOptions } from './route';
@@ -143,9 +143,22 @@ export interface RouterRoute {
 }
 
 /** @public */
-export interface RouterDeprecatedRouteDetails {
-  routeDeprecationOptions: RouteDeprecationInfo;
+export interface RouterDeprecatedApiDetails {
+  routeDeprecationOptions?: RouteDeprecationInfo;
   routeMethod: RouteMethod;
   routePath: string;
   routeVersion?: string;
+  routeAccess?: RouteAccess;
+}
+
+/** @public */
+export interface RouterRouteDeprecatedApiDetails extends RouterDeprecatedApiDetails {
+  routeAccess: 'public';
+  routeDeprecationOptions: RouteDeprecationInfo;
+}
+
+/** @public */
+export interface RouterAccessDeprecatedApiDetails extends RouterDeprecatedApiDetails {
+  routeAccess: 'internal';
+  routeDeprecationOptions?: RouteDeprecationInfo;
 }

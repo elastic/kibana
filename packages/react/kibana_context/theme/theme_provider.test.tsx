@@ -52,7 +52,7 @@ describe('KibanaThemeProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'amsterdam' });
 
     const wrapper = mountWithIntl(
       <KibanaThemeProvider theme={{ theme$: coreTheme$ }}>
@@ -66,7 +66,10 @@ describe('KibanaThemeProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({
+      darkMode: true,
+      name: 'amsterdam',
+    });
 
     const wrapper = mountWithIntl(
       <KibanaThemeProvider theme={{ theme$: coreTheme$ }}>
@@ -79,7 +82,7 @@ describe('KibanaThemeProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false });
+      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
     });
 
     await refresh(wrapper);

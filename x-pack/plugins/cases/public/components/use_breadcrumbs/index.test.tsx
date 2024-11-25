@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useCasesBreadcrumbs, useCasesTitleBreadcrumbs } from '.';
 import { CasesDeepLinkId } from '../../common/navigation';

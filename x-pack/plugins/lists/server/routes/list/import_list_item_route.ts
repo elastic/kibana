@@ -34,12 +34,16 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
           maxBytes: config.maxImportPayloadBytes,
           parse: false,
         },
-        tags: ['access:lists-all'],
         timeout: {
           payload: config.importTimeout.asMilliseconds(),
         },
       },
       path: `${LIST_ITEM_URL}/_import`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {

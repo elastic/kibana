@@ -1,0 +1,28 @@
+{
+  "type": "plugin",
+  "id": "@kbn/streams-plugin",
+  "owner": "@simianhacker @flash1293 @dgieselaar",
+  "description": "A manager for Streams",
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "streams",
+    "configPath": ["xpack", "streams"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "security",
+      "encryptedSavedObjects",
+      "usageCollection",
+      "licensing",
+      "taskManager"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+    ]
+  }
+}

@@ -362,8 +362,6 @@ steps:
       imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build
@@ -381,8 +379,6 @@ steps:
       imageProject: elastic-images-qa
       provider: gcp
       enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
       machineType: n2-standard-4
     depends_on:
       - build

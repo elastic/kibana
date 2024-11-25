@@ -50,6 +50,13 @@ import { createEntityManagerServerRoute } from '../create_entity_manager_server_
  */
 export const getEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'GET /internal/entities/definition/{id?}',
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
+    },
+  },
   params: z.object({
     query: getEntityDefinitionQuerySchema,
     path: z.object({ id: z.optional(z.string()) }),

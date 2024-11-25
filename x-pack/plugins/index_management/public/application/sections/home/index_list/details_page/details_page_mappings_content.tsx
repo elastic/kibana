@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -62,13 +63,16 @@ import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
 
+const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
+
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
   data: string;
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
+  hasUpdateMappingsPrivilege?: boolean;
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings, hasUpdateMappingsPrivilege }) => {
   const {
     services: { extensionsService },
     core: {
@@ -233,7 +237,8 @@ export const DetailsPageMappingsContent: FunctionComponent<{
               .filter(
                 (inferenceId: string) =>
                   inferenceToModelIdMap?.[inferenceId].trainedModelId && // third-party inference models don't have trainedModelId
-                  !inferenceToModelIdMap?.[inferenceId].isDeployed
+                  !inferenceToModelIdMap?.[inferenceId].isDeployed &&
+                  !isInferencePreconfigured(inferenceId)
               );
         setHasSavedFields(true);
         if (inferenceIdsInPendingList.length === 0) {
@@ -475,18 +480,32 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             {!index.hidden && (
               <EuiFlexItem grow={false}>
                 {!isAddingFields ? (
-                  <EuiButton
-                    onClick={addFieldButtonOnClick}
-                    iconType="plusInCircle"
-                    color="text"
-                    size="m"
-                    data-test-subj="indexDetailsMappingsAddField"
+                  <EuiToolTip
+                    position="bottom"
+                    data-test-subj="indexDetailsMappingsAddFieldTooltip"
+                    content={
+                      /* for serverless search users hasUpdateMappingsPrivilege flag indicates if user has privilege to update index mappings, for stack hasUpdateMappingsPrivilege would be undefined */
+                      hasUpdateMappingsPrivilege === false
+                        ? i18n.translate('xpack.idxMgmt.indexDetails.mappings.addNewFieldToolTip', {
+                            defaultMessage: 'You do not have permission to add fields in an Index',
+                          })
+                        : undefined
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.idxMgmt.indexDetails.mappings.addNewField"
-                      defaultMessage="Add field"
-                    />
-                  </EuiButton>
+                    <EuiButton
+                      onClick={addFieldButtonOnClick}
+                      iconType="plusInCircle"
+                      color="text"
+                      size="m"
+                      data-test-subj="indexDetailsMappingsAddField"
+                      isDisabled={hasUpdateMappingsPrivilege === false}
+                    >
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexDetails.mappings.addNewField"
+                        defaultMessage="Add field"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
                 ) : (
                   <EuiButton
                     onClick={() => updateMappings()}

@@ -23,19 +23,20 @@ import {
 } from '@elastic/eui';
 import type { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from '@kbn/coloring';
 import { flatten, zip } from 'lodash';
-import { ChartsPluginSetup, createColorPalette as createLegacyColorPalette } from '../..';
+import { createColorPalette as createLegacyColorPalette } from '../..';
 import { lightenColor } from './lighten_color';
-import { LegacyColorsService } from '../legacy_colors';
 import { MappedColors } from '../mapped_colors';
 import { workoutColorForValue } from './helpers';
 
-function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
-  const colors = euiPaletteColorBlind({ rotations: 2 });
-  const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
+function buildRoundRobinCategoricalWithMappedColors(
+  id = 'default',
+  colors = euiPaletteColorBlind({ rotations: 2 }),
+  behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 })
+): Omit<PaletteDefinition, 'title'> {
   const behindTextColorMap: Record<string, string> = Object.fromEntries(
     zip(colors, behindTextColors)
   );
-  const mappedColors = new MappedColors(undefined, (num: number) => {
+  const mappedColors = new MappedColors((num: number) => {
     return flatten(new Array(Math.ceil(num / 10)).fill(colors)).map((color) => color.toLowerCase());
   });
   function getColor(
@@ -61,9 +62,9 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
     return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
   }
   return {
-    id: 'default',
+    id,
     getCategoricalColor: getColor,
-    getCategoricalColors: () => euiPaletteColorBlind(),
+    getCategoricalColors: () => colors.slice(0, 10),
     toExpression: () => ({
       type: 'expression',
       chain: [
@@ -71,7 +72,7 @@ function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, '
           type: 'function',
           function: 'system_palette',
           arguments: {
-            name: ['default'],
+            name: [id],
           },
         },
       ],
@@ -111,45 +112,6 @@ function buildGradient(
           function: 'system_palette',
           arguments: {
             name: [id],
-          },
-        },
-      ],
-    }),
-  };
-}
-
-function buildSyncedKibanaPalette(
-  colors: ChartsPluginSetup['legacyColors']
-): Omit<PaletteDefinition, 'title'> {
-  const staticColors = createLegacyColorPalette(20);
-  function getColor(series: SeriesLayer[], chartConfiguration: ChartColorConfiguration = {}) {
-    let outputColor: string;
-    if (chartConfiguration.syncColors) {
-      colors.mappedColors.mapKeys([series[0].name]);
-      outputColor = colors.mappedColors.get(series[0].name);
-    } else {
-      const configColor = colors.mappedColors.getColorFromConfig(series[0].name);
-      outputColor = configColor || staticColors[series[0].rankAtDepth % staticColors.length];
-    }
-
-    if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
-      return outputColor;
-    }
-
-    return lightenColor(outputColor, series.length, chartConfiguration.maxDepth);
-  }
-  return {
-    id: 'kibana_palette',
-    getCategoricalColor: getColor,
-    getCategoricalColors: () => colors.seedColors.slice(0, 10),
-    toExpression: () => ({
-      type: 'expression',
-      chain: [
-        {
-          type: 'function',
-          function: 'system_palette',
-          arguments: {
-            name: ['kibana_palette'],
           },
         },
       ],
@@ -258,54 +220,50 @@ function buildCustomPalette(): PaletteDefinition {
   } as PaletteDefinition<unknown>;
 }
 
-export const buildPalettes: (
-  legacyColorsService: LegacyColorsService
-) => Record<string, PaletteDefinition> = (legacyColorsService) => {
-  return {
-    default: {
-      title: i18n.translate('charts.palettes.defaultPaletteLabel', { defaultMessage: 'Default' }),
-      ...buildRoundRobinCategoricalWithMappedColors(),
-    },
-    status: {
-      title: i18n.translate('charts.palettes.statusLabel', { defaultMessage: 'Status' }),
-      ...buildGradient('status', euiPaletteForStatus),
-    },
-    temperature: {
-      title: i18n.translate('charts.palettes.temperatureLabel', { defaultMessage: 'Temperature' }),
-      ...buildGradient('temperature', euiPaletteForTemperature),
-    },
-    complementary: {
-      title: i18n.translate('charts.palettes.complementaryLabel', {
-        defaultMessage: 'Complementary',
-      }),
-      ...buildGradient('complementary', euiPaletteComplementary),
-    },
-    negative: {
-      title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),
-      ...buildGradient('negative', euiPaletteRed),
-    },
-    positive: {
-      title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'Positive' }),
-      ...buildGradient('positive', euiPaletteGreen),
-    },
-    cool: {
-      title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'Cool' }),
-      ...buildGradient('cool', euiPaletteCool),
-    },
-    warm: {
-      title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'Warm' }),
-      ...buildGradient('warm', euiPaletteWarm),
-    },
-    gray: {
-      title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'Gray' }),
-      ...buildGradient('gray', euiPaletteGray),
-    },
-    kibana_palette: {
-      title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
-        defaultMessage: 'Compatibility',
-      }),
-      ...buildSyncedKibanaPalette(legacyColorsService),
-    },
-    custom: buildCustomPalette() as PaletteDefinition<unknown>,
-  };
-};
+export const buildPalettes = (): Record<string, PaletteDefinition> => ({
+  default: {
+    title: i18n.translate('charts.palettes.defaultPaletteLabel', { defaultMessage: 'Default' }),
+    ...buildRoundRobinCategoricalWithMappedColors(),
+  },
+  status: {
+    title: i18n.translate('charts.palettes.statusLabel', { defaultMessage: 'Status' }),
+    ...buildGradient('status', euiPaletteForStatus),
+  },
+  temperature: {
+    title: i18n.translate('charts.palettes.temperatureLabel', { defaultMessage: 'Temperature' }),
+    ...buildGradient('temperature', euiPaletteForTemperature),
+  },
+  complementary: {
+    title: i18n.translate('charts.palettes.complementaryLabel', {
+      defaultMessage: 'Complementary',
+    }),
+    ...buildGradient('complementary', euiPaletteComplementary),
+  },
+  negative: {
+    title: i18n.translate('charts.palettes.negativeLabel', { defaultMessage: 'Negative' }),
+    ...buildGradient('negative', euiPaletteRed),
+  },
+  positive: {
+    title: i18n.translate('charts.palettes.positiveLabel', { defaultMessage: 'Positive' }),
+    ...buildGradient('positive', euiPaletteGreen),
+  },
+  cool: {
+    title: i18n.translate('charts.palettes.coolLabel', { defaultMessage: 'Cool' }),
+    ...buildGradient('cool', euiPaletteCool),
+  },
+  warm: {
+    title: i18n.translate('charts.palettes.warmLabel', { defaultMessage: 'Warm' }),
+    ...buildGradient('warm', euiPaletteWarm),
+  },
+  gray: {
+    title: i18n.translate('charts.palettes.grayLabel', { defaultMessage: 'Gray' }),
+    ...buildGradient('gray', euiPaletteGray),
+  },
+  kibana_palette: {
+    title: i18n.translate('charts.palettes.kibanaPaletteLabel', {
+      defaultMessage: 'Compatibility',
+    }),
+    ...buildRoundRobinCategoricalWithMappedColors('kibana_palette', createLegacyColorPalette(20)),
+  },
+  custom: buildCustomPalette() as PaletteDefinition<unknown>,
+});

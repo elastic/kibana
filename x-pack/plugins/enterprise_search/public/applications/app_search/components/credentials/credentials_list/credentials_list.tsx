@@ -19,9 +19,9 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
+import { docLinks } from '../../../../shared/doc_links';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
-import { API_KEYS_DOCS_URL } from '../../../routes';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { CredentialsLogic } from '../credentials_logic';
 import { ApiToken } from '../types';
@@ -141,7 +141,7 @@ export const CredentialsList: React.FC = () => {
             defaultMessage: 'Allow applications to access Elastic App Search on your behalf.',
           })}
           actions={
-            <EuiButton size="s" target="_blank" iconType="popout" href={API_KEYS_DOCS_URL}>
+            <EuiButton size="s" target="_blank" iconType="popout" href={docLinks.appSearchApiKeys}>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.buttonLabel', {
                 defaultMessage: 'Learn about API keys',
               })}

@@ -42,6 +42,7 @@ import {
   SearchEmbeddableSerializedState,
 } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
+import { BaseAppWrapper } from '../context_awareness';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -69,7 +70,10 @@ export const getSearchEmbeddableFactory = ({
       const solutionNavId = await firstValueFrom(
         discoverServices.core.chrome.getActiveSolutionNavId$()
       );
-      await discoverServices.profilesManager.resolveRootProfile({ solutionNavId });
+      const { getRenderAppWrapper } = await discoverServices.profilesManager.resolveRootProfile({
+        solutionNavId,
+      });
+      const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState?.savedObjectId);
@@ -280,30 +284,32 @@ export const getSearchEmbeddableFactory = ({
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
-                {renderAsFieldStatsTable ? (
-                  <SearchEmbeddablFieldStatsTableComponent
-                    api={{
-                      ...api,
-                      fetchContext$,
-                    }}
-                    dataView={dataView!}
-                    onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
-                    stateManager={searchEmbeddable.stateManager}
-                  />
-                ) : (
-                  <CellActionsProvider
-                    getTriggerCompatibleActions={
-                      discoverServices.uiActions.getTriggerCompatibleActions
-                    }
-                  >
-                    <SearchEmbeddableGridComponent
-                      api={{ ...api, fetchWarnings$, fetchContext$ }}
+                <AppWrapper>
+                  {renderAsFieldStatsTable ? (
+                    <SearchEmbeddablFieldStatsTableComponent
+                      api={{
+                        ...api,
+                        fetchContext$,
+                      }}
                       dataView={dataView!}
                       onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
                       stateManager={searchEmbeddable.stateManager}
                     />
-                  </CellActionsProvider>
-                )}
+                  ) : (
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={
+                        discoverServices.uiActions.getTriggerCompatibleActions
+                      }
+                    >
+                      <SearchEmbeddableGridComponent
+                        api={{ ...api, fetchWarnings$, fetchContext$ }}
+                        dataView={dataView!}
+                        onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                        stateManager={searchEmbeddable.stateManager}
+                      />
+                    </CellActionsProvider>
+                  )}
+                </AppWrapper>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );

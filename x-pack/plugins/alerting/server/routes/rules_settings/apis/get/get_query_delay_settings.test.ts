@@ -38,11 +38,15 @@ describe('getQueryDelaySettingsRoute', () => {
       Object {
         "options": Object {
           "access": "internal",
-          "tags": Array [
-            "access:read-query-delay-settings",
-          ],
         },
         "path": "/internal/alerting/rules/settings/_query_delay",
+        "security": Object {
+          "authz": Object {
+            "requiredPrivileges": Array [
+              "read-query-delay-settings",
+            ],
+          },
+        },
         "validate": Object {},
       }
     `);

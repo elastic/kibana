@@ -9,6 +9,7 @@ import type { StartServices } from '../../types';
 import { enhanceActionWithTelemetry } from './telemetry';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
+import { AppEventTypes } from '../../common/lib/telemetry';
 
 const actionId = 'test_action_id';
 const displayName = 'test-actions';
@@ -29,13 +30,13 @@ const context = {
 
 describe('enhanceActionWithTelemetry', () => {
   it('calls telemetry report when the action is executed', () => {
-    const telemetry = { reportCellActionClicked: jest.fn() };
+    const telemetry = { reportEvent: jest.fn() };
     const services = { telemetry } as unknown as StartServices;
 
     const enhancedAction = enhanceActionWithTelemetry(action, services);
     enhancedAction.execute(context);
 
-    expect(telemetry.reportCellActionClicked).toHaveBeenCalledWith({
+    expect(telemetry.reportEvent).toHaveBeenCalledWith(AppEventTypes.CellActionClicked, {
       displayName,
       actionId,
       fieldName,

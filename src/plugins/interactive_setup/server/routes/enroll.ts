@@ -40,6 +40,13 @@ export function defineEnrollRoutes({
   router.post(
     {
       path: '/internal/interactive_setup/enroll',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'Interactive setup is strictly a "pre-boot" feature which cannot leverage conventional authorization.',
+        },
+      },
       validate: {
         body: schema.object({
           hosts: schema.arrayOf(schema.uri({ scheme: 'https' }), {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { ALL_VALUE, FetchHistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '../utils/kibana_react';
-import { sloKeys } from './query_key_factory';
+import { useQuery } from '@tanstack/react-query';
 import { SLO_LONG_REFETCH_INTERVAL } from '../constants';
+import { sloKeys } from './query_key_factory';
+import { usePluginContext } from './use_plugin_context';
 
 export interface UseFetchHistoricalSummaryResponse {
   data: FetchHistoricalSummaryResponse | undefined;
@@ -34,7 +34,7 @@ export function useFetchHistoricalSummary({
   shouldRefetch,
   range,
 }: Params): UseFetchHistoricalSummaryResponse {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
 
   const list = sloList.map((slo) => ({
     sloId: slo.id,
@@ -57,15 +57,10 @@ export function useFetchHistoricalSummary({
     queryKey: sloKeys.historicalSummary(list),
     queryFn: async ({ signal }) => {
       try {
-        const response = await http.post<FetchHistoricalSummaryResponse>(
-          '/internal/observability/slos/_historical_summary',
-          {
-            body: JSON.stringify({ list }),
-            signal,
-          }
-        );
-
-        return response;
+        return await sloClient.fetch('POST /internal/observability/slos/_historical_summary', {
+          params: { body: { list } },
+          signal,
+        });
       } catch (error) {
         // ignore error
       }

@@ -9,14 +9,14 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import TooltipTrigger from 'react-popper-tooltip';
+import type { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { TooltipValueFormatter } from '@elastic/charts';
 
-import './_index.scss';
-
-import type { ChildrenArg, TooltipTriggerProps } from 'react-popper-tooltip/dist/types';
 import type { ChartTooltipValue, TooltipData } from './chart_tooltip_service';
 import { ChartTooltipService } from './chart_tooltip_service';
+import { useChartTooltipStyles } from './chart_tooltip_styles';
 
 const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFormatter) => {
   if (!headerData) {
@@ -30,17 +30,26 @@ const renderHeader = (headerData?: ChartTooltipValue, formatter?: TooltipValueFo
  * Pure component for rendering the tooltip content with a custom layout across the ML plugin.
  */
 export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData }) => {
+  const {
+    mlChartTooltip,
+    mlChartTooltipList,
+    mlChartTooltipHeader,
+    mlChartTooltipItem,
+    mlChartTooltipLabel,
+    mlChartTooltipValue,
+  } = useChartTooltipStyles();
+
   return (
-    <div className="mlChartTooltip">
+    <div css={mlChartTooltip}>
       {tooltipData.length > 0 && tooltipData[0].skipHeader === undefined && (
-        <div className="mlChartTooltip__header">{renderHeader(tooltipData[0])}</div>
+        <div css={mlChartTooltipHeader}>{renderHeader(tooltipData[0])}</div>
       )}
       {tooltipData.length > 1 && (
-        <div className="mlChartTooltip__list">
+        <div css={mlChartTooltipList}>
           {tooltipData
             .slice(1)
             .map(({ label, value, color, isHighlighted, seriesIdentifier, valueAccessor }) => {
-              const classes = classNames('mlChartTooltip__item', {
+              const classes = classNames({
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 echTooltip__rowHighlighted: isHighlighted,
               });
@@ -52,16 +61,21 @@ export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData
               return (
                 <div
                   key={`${seriesIdentifier.key}__${valueAccessor}`}
+                  css={mlChartTooltipItem}
                   className={classes}
                   style={{
                     borderLeftColor: color,
                   }}
                 >
                   <EuiFlexGroup>
-                    <EuiFlexItem className="eui-textBreakWord mlChartTooltip__label" grow={false}>
+                    <EuiFlexItem
+                      css={mlChartTooltipLabel}
+                      className="eui-textBreakWord"
+                      grow={false}
+                    >
                       {label}
                     </EuiFlexItem>
-                    <EuiFlexItem className="eui-textBreakAll mlChartTooltip__value">
+                    <EuiFlexItem css={mlChartTooltipValue} className="eui-textBreakAll">
                       {renderValue}
                     </EuiFlexItem>
                   </EuiFlexGroup>

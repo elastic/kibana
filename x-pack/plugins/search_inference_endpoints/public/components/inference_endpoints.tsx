@@ -11,7 +11,6 @@ import { EuiPageTemplate } from '@elastic/eui';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
-import { AddEmptyPrompt } from './empty_prompt/add_empty_prompt';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
 
 export const InferenceEndpoints: React.FC = () => {
@@ -21,13 +20,9 @@ export const InferenceEndpoints: React.FC = () => {
 
   return (
     <>
-      {inferenceEndpoints.length > 0 && <InferenceEndpointsHeader />}
-      <EuiPageTemplate.Section className="eui-yScroll">
-        {inferenceEndpoints.length === 0 ? (
-          <AddEmptyPrompt />
-        ) : (
-          <TabularPage inferenceEndpoints={inferenceEndpoints} />
-        )}
+      <InferenceEndpointsHeader />
+      <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
+        <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
     </>
   );

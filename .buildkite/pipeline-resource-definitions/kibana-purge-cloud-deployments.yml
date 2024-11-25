@@ -26,7 +26,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/purge_cloud_deployments.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false

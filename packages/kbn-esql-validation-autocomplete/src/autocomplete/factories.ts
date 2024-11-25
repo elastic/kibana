@@ -20,6 +20,7 @@ import {
   CommandDefinition,
   CommandOptionsDefinition,
   CommandModeDefinition,
+  FunctionParameterType,
 } from '../definitions/types';
 import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
@@ -27,6 +28,14 @@ import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
+import { builtinFunctions } from '../definitions/builtin';
+
+const techPreviewLabel = i18n.translate(
+  'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
+  {
+    defaultMessage: `Technical Preview`,
+  }
+);
 
 const allFunctions = memoize(
   () =>
@@ -38,10 +47,6 @@ const allFunctions = memoize(
 );
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
-
-export const getAddDateHistogramSnippet = (histogramBarTarget = 50) => {
-  return `BUCKET($0, ${histogramBarTarget}, ${TIME_SYSTEM_PARAMS.join(', ')})`;
-};
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -61,14 +66,18 @@ function getSafeInsertSourceText(text: string) {
   return shouldBeQuotedSource(text) ? getQuotedText(text) : text;
 }
 
-export function getSuggestionFunctionDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
+export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefinition {
+  let detail = fn.description;
+  if (fn.preview) {
+    detail = `[${techPreviewLabel}] ${detail}`;
+  }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
   return {
-    label: fullSignatures[0].declaration,
+    label: fn.name.toUpperCase(),
     text: `${fn.name.toUpperCase()}($0)`,
     asSnippet: true,
     kind: 'Function',
-    detail: fn.description,
+    detail,
     documentation: {
       value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
@@ -79,7 +88,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
   };
 }
 
-export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): SuggestionRawDefinition {
+export function getOperatorSuggestion(fn: FunctionDefinition): SuggestionRawDefinition {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
     label: fn.name.toUpperCase(),
@@ -95,35 +104,97 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   };
 }
 
-export const getCompatibleFunctionDefinition = (
-  command: string,
-  option: string | undefined,
-  returnTypes?: string[],
-  ignored: string[] = []
-): SuggestionRawDefinition[] => {
-  const fnSupportedByCommand = allFunctions()
-    .filter(
-      ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion }) =>
-        (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-        !ignored.includes(name) &&
-        !ignoreAsSuggestion
-    )
-    .sort((a, b) => a.name.localeCompare(b.name));
-  if (!returnTypes) {
-    return fnSupportedByCommand.map(getSuggestionFunctionDefinition);
+interface FunctionFilterPredicates {
+  command?: string;
+  option?: string | undefined;
+  returnTypes?: string[];
+  ignored?: string[];
+}
+
+export const filterFunctionDefinitions = (
+  functions: FunctionDefinition[],
+  predicates: FunctionFilterPredicates | undefined
+): FunctionDefinition[] => {
+  if (!predicates) {
+    return functions;
   }
-  return fnSupportedByCommand
-    .filter((mathDefinition) =>
-      mathDefinition.signatures.some(
-        (signature) =>
-          returnTypes[0] === 'any' || returnTypes.includes(signature.returnType as string)
-      )
-    )
-    .map(getSuggestionFunctionDefinition);
+  const { command, option, returnTypes, ignored = [] } = predicates;
+  return functions.filter(
+    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
+      if (ignoreAsSuggestion) {
+        return false;
+      }
+
+      if (ignored.includes(name)) {
+        return false;
+      }
+
+      if (option && !supportedOptions?.includes(option)) {
+        return false;
+      }
+
+      if (command && !supportedCommands.includes(command)) {
+        return false;
+      }
+
+      if (returnTypes && !returnTypes.includes('any')) {
+        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+      }
+
+      return true;
+    }
+  );
+};
+
+/**
+ * Builds suggestions for functions based on the provided predicates.
+ *
+ * @param predicates a set of conditions that must be met for a function to be included in the suggestions
+ * @returns
+ */
+export const getFunctionSuggestions = (
+  predicates?: FunctionFilterPredicates
+): SuggestionRawDefinition[] => {
+  return filterFunctionDefinitions(allFunctions(), predicates).map(getFunctionSuggestion);
+};
+
+/**
+ * Builds suggestions for operators based on the provided predicates.
+ *
+ * @param predicates a set of conditions that must be met for an operator to be included in the suggestions
+ * @returns
+ */
+export const getOperatorSuggestions = (
+  predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
+): SuggestionRawDefinition[] => {
+  const filteredDefinitions = filterFunctionDefinitions(
+    getTestFunctions().length ? [...builtinFunctions, ...getTestFunctions()] : builtinFunctions,
+    predicates
+  );
+
+  // make sure the operator has at least one signature that matches
+  // the type of the existing left argument if provided (e.g. "doubleField <suggest>")
+  return (
+    predicates?.leftParamType
+      ? filteredDefinitions.filter(({ signatures }) =>
+          signatures.some(
+            ({ params }) =>
+              !params.length ||
+              params.some((pArg) => pArg.type === predicates?.leftParamType || pArg.type === 'any')
+          )
+        )
+      : filteredDefinitions
+  ).map(getOperatorSuggestion);
+};
+
+export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
+  return builtinFunctions
+    .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
+    .map(getOperatorSuggestion);
 };
 
 export function getSuggestionCommandDefinition(
-  command: CommandDefinition
+  command: CommandDefinition<string>
 ): SuggestionRawDefinition {
   const commandDefinition = getCommandDefinition(command.name);
   const commandSignature = getCommandSignature(commandDefinition);
@@ -253,7 +324,7 @@ export const buildValueDefinitions = (
     command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 
-export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
+export const getNewVariableSuggestion = (label: string): SuggestionRawDefinition => {
   return {
     label,
     text: `${label} = `,

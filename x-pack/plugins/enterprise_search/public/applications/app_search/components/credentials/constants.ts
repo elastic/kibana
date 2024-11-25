@@ -7,8 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { AUTHENTICATION_DOCS_URL } from '../../routes';
-
 export const CREDENTIALS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.credentials.title',
   { defaultMessage: 'Credentials' }
@@ -108,5 +106,3 @@ export const TOKEN_TYPE_INFO = [
 ];
 
 export const FLYOUT_ARIA_LABEL_ID = 'credentialsFlyoutTitle';
-
-export const DOCS_HREF = AUTHENTICATION_DOCS_URL;

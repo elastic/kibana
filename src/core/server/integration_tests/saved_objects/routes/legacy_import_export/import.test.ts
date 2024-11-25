@@ -41,6 +41,7 @@ import {
   registerLegacyImportRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { legacyDeprecationMock } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
@@ -58,11 +59,13 @@ describe('POST /api/dashboards/import', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementLegacyDashboardsImport.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+
     registerLegacyImportRoute(router, {
       maxImportPayloadBytes: 26214400,
       coreUsageData,
       logger: loggerMock.create(),
       access: 'public',
+      legacyDeprecationInfo: legacyDeprecationMock,
     });
 
     handlerContext.savedObjects.client.bulkCreate.mockResolvedValueOnce({

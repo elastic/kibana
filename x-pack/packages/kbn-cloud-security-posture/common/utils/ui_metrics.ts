@@ -10,6 +10,15 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 export const APP_NAME = 'cloud-security';
 
+export const MISCONFIGURATION_INSIGHT = 'misconfiguration-insight';
+export const VULNERABILITIES_INSIGHT = 'vulnerabilities-insight';
+export const MISCONFIGURATION_INSIGHT_HOST_DETAILS = `${MISCONFIGURATION_INSIGHT}-host-details`;
+export const MISCONFIGURATION_INSIGHT_USER_DETAILS = `${MISCONFIGURATION_INSIGHT}-user-details`;
+export const MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW = `${MISCONFIGURATION_INSIGHT}-host-entity-overview`;
+export const MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW = `${MISCONFIGURATION_INSIGHT}-user-entity-overview`;
+export const VULNERABILITIES_INSIGHT_HOST_DETAILS = `${VULNERABILITIES_INSIGHT}-host-details`;
+export const VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW = `${VULNERABILITIES_INSIGHT}-host-entity-overview`;
+
 export const ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT =
   'entity-flyout-with-misconfiguration-visits';
 export const ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW =
@@ -41,7 +50,13 @@ type CloudSecurityUiCounters =
   | typeof CREATE_DETECTION_RULE_FROM_FLYOUT
   | typeof CREATE_DETECTION_FROM_TABLE_ROW_ACTION
   | typeof GROUP_BY_CLICK
-  | typeof CHANGE_RULE_STATE;
+  | typeof CHANGE_RULE_STATE
+  | typeof MISCONFIGURATION_INSIGHT_HOST_DETAILS
+  | typeof MISCONFIGURATION_INSIGHT_USER_DETAILS
+  | typeof MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW
+  | typeof MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW
+  | typeof VULNERABILITIES_INSIGHT_HOST_DETAILS
+  | typeof VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW;
 
 export class UiMetricService {
   private usageCollection: UsageCollectionSetup | undefined;

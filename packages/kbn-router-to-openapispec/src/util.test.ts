@@ -15,8 +15,11 @@ import {
   mergeResponseContent,
   prepareRoutes,
   getPathParameters,
+  createOpIdGenerator,
+  GetOpId,
+  assignToPaths,
+  extractTags,
 } from './util';
-import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
   test.each([
@@ -113,9 +116,11 @@ describe('assignToPaths', () => {
     const paths = {};
     assignToPaths(paths, '/foo', {});
     assignToPaths(paths, '/bar/{id?}', {});
+    assignToPaths(paths, '/bar/file/{path*}', {});
     expect(paths).toEqual({
       '/foo': {},
       '/bar/{id}': {},
+      '/bar/file/{path}': {},
     });
   });
 });
@@ -258,5 +263,85 @@ describe('getPathParameters', () => {
     ],
   ])('%s', (input, output) => {
     expect(getPathParameters(input)).toEqual(output);
+  });
+});
+
+describe('createOpIdGenerator', () => {
+  let getOpId: GetOpId;
+  beforeEach(() => {
+    getOpId = createOpIdGenerator();
+  });
+  test('empty', () => {
+    expect(() => getOpId({ method: '', path: '/asd' })).toThrow(/Must provide method and path/);
+    expect(() => getOpId({ method: 'get', path: '' })).toThrow(/Must provide method and path/);
+    expect(() => getOpId({ method: '', path: '' })).toThrow(/Must provide method and path/);
+  });
+  test('disambiguate', () => {
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test');
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test-2');
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test-3');
+    expect(getOpId({ method: 'get', path: '/test' })).toBe('get-test-4');
+  });
+  test.each([
+    { input: { method: 'GET', path: '/api/file' }, output: 'get-file' },
+    { input: { method: 'GET', path: '///api/file///' }, output: 'get-file' },
+    { input: { method: 'POST', path: '/internal/api/file' }, output: 'post-file' },
+    { input: { method: 'PUT', path: '/internal/file' }, output: 'put-file' },
+    { input: { method: 'Put', path: 'fOO/fILe' }, output: 'put-foo-file' },
+    {
+      input: { method: 'delete', path: '/api/my/really/cool/domain/resource' },
+      output: 'delete-my-really-cool-domain-resource',
+    },
+    {
+      input: {
+        method: 'delete',
+        path: '/api/my/really/cool/domain/resource',
+      },
+      output: 'delete-my-really-cool-domain-resource',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{id}',
+      },
+      output: 'get-my-resource-id',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{id}/{type?}',
+      },
+      output: 'get-my-resource-id-type',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{id?}',
+      },
+      output: 'get-my-resource-id',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/resource/{path}',
+      },
+      output: 'get-my-resource-path',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/underscore_resource',
+      },
+      output: 'get-my-underscore-resource',
+    },
+    {
+      input: {
+        method: 'get',
+        path: '/api/my/_underscore_resource',
+      },
+      output: 'get-my-underscore-resource',
+    },
+  ])('$input.method $input.path -> $output', ({ input, output }) => {
+    expect(getOpId(input)).toBe(output);
   });
 });

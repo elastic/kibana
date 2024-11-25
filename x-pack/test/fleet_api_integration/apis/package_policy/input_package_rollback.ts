@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { getInstallationInfo } from './helper';
 const PACKAGE_NAME = 'input_package_upgrade';
 const START_VERSION = '1.0.0';
 
@@ -29,11 +30,6 @@ export default function (providerContext: FtrProviderContext) {
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
-  };
-
-  const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
-    return res.body.item.savedObject.attributes;
   };
 
   const getPackage = async (name: string, version: string) => {
@@ -131,7 +127,7 @@ export default function (providerContext: FtrProviderContext) {
       await installPackage(PACKAGE_NAME, START_VERSION);
       await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
 
-      const installation = await getInstallationSavedObject(PACKAGE_NAME, START_VERSION);
+      const installation = await getInstallationInfo(supertest, PACKAGE_NAME, START_VERSION);
       expectIdArraysEqual(installation.installed_es, []);
 
       await uninstallPackage(PACKAGE_NAME, START_VERSION);

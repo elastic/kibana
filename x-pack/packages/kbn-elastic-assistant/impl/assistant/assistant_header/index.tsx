@@ -23,7 +23,7 @@ import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
-import { AssistantSettingsButton } from '../settings/assistant_settings_button';
+import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import * as i18n from './translations';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
@@ -113,7 +113,7 @@ export const AssistantHeader: React.FC<Props> = ({
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false}>
-            <AssistantSettingsButton
+            <AssistantSettingsModal
               defaultConnector={defaultConnector}
               isDisabled={isDisabled}
               isSettingsModalVisible={isSettingsModalVisible}

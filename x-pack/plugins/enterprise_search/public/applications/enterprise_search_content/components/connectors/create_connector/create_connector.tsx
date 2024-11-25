@@ -28,6 +28,11 @@ import {
 
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+
+import { HttpLogic } from '../../../../shared/http';
+import { KibanaLogic } from '../../../../shared/kibana';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
@@ -47,20 +52,23 @@ import { StartStep } from './start_step';
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
 export const CreateConnector: React.FC = () => {
+  const { overlays } = useKibana().services;
+
+  const { http } = useValues(HttpLogic);
+  const { application, history } = useValues(KibanaLogic);
+
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
   const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
 
-  const { selectedConnector, currentStep } = useValues(NewConnectorLogic);
+  const { selectedConnector, currentStep, isFormDirty } = useValues(NewConnectorLogic);
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
 
   useEffect(() => {
     // TODO: separate this to ability and preference
-    if (!selectedConnector?.isNative || !selfManagePreference) {
+    if (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') {
       setSelfManagePreference('selfManaged');
-    } else {
-      setSelfManagePreference('native');
     }
   }, [selectedConnector]);
 
@@ -136,6 +144,33 @@ export const CreateConnector: React.FC = () => {
       />
     ),
   };
+
+  useUnsavedChangesPrompt({
+    cancelButtonText: i18n.translate(
+      'xpack.enterpriseSearch.createConnector.unsavedPrompt.cancel',
+      {
+        defaultMessage: 'Continue setup',
+      }
+    ),
+    confirmButtonText: i18n.translate(
+      'xpack.enterpriseSearch.createConnector.unsavedPrompt.confirm',
+      {
+        defaultMessage: 'Leave the page',
+      }
+    ),
+    hasUnsavedChanges: isFormDirty,
+    history,
+    http,
+    messageText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.body', {
+      defaultMessage:
+        'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
+    }),
+    navigateToUrl: application.navigateToUrl,
+    openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
+    titleText: i18n.translate('xpack.enterpriseSearch.createConnector.unsavedPrompt.title', {
+      defaultMessage: 'Your connector is not fully configured',
+    }),
+  });
 
   return (
     <EnterpriseSearchContentPageTemplate
@@ -239,11 +274,11 @@ export const CreateConnector: React.FC = () => {
                 </EuiFormRow>
                 <EuiSpacer size="s" />
                 <EuiBadge color="hollow">
-                  {selfManagePreference
+                  {selfManagePreference === 'selfManaged'
                     ? i18n.translate(
                         'xpack.enterpriseSearch.createConnector.badgeType.selfManaged',
                         {
-                          defaultMessage: 'Self managed',
+                          defaultMessage: 'Self-managed',
                         }
                       )
                     : i18n.translate(

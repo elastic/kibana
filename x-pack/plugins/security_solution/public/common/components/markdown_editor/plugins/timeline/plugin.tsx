@@ -78,7 +78,7 @@ const TimelineEditor = memo(TimelineEditorComponent);
 export const plugin = ({
   interactionsUpsellingMessage,
 }: {
-  interactionsUpsellingMessage: string | null;
+  interactionsUpsellingMessage?: string;
 }): EuiMarkdownEditorUiPlugin => {
   return {
     name: ID,

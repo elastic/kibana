@@ -21,7 +21,7 @@ import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import { transformESSearchToConversations } from '../../ai_assistant_data_clients/conversations/transforms';
-import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
+import { performChecks } from '../helpers';
 
 export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -46,16 +46,17 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
+          // Perform license and authenticated user checks
+          const checkResponse = performChecks({
+            context: ctx,
+            request,
+            response,
+          });
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const currentUser = ctx.elasticAssistant.getCurrentUser();
+          const currentUser = checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
           const userFilter = currentUser?.username

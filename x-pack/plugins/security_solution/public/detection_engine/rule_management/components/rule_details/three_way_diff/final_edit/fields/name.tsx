@@ -13,16 +13,12 @@ import type { RuleName } from '../../../../../../../../common/api/detection_engi
 
 export const nameSchema = { name: schema.name } as FormSchema<{ name: RuleName }>;
 
+const componentProps = {
+  euiFieldProps: {
+    fullWidth: true,
+  },
+};
+
 export function NameEdit(): JSX.Element {
-  return (
-    <UseField
-      path="name"
-      component={Field}
-      componentProps={{
-        euiFieldProps: {
-          fullWidth: true,
-        },
-      }}
-    />
-  );
+  return <UseField path="name" component={Field} componentProps={componentProps} />;
 }

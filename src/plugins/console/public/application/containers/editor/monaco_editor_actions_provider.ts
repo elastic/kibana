@@ -132,12 +132,19 @@ export class MonacoEditorActionsProvider {
         visibility: 'hidden',
       });
     } else {
-      // if a request is selected, the actions buttons are placed at lineNumberOffset - scrollOffset
-      const offset = this.editor.getTopForLineNumber(lineNumber) - this.editor.getScrollTop();
+      const lineTop = this.editor.getTopForLineNumber(lineNumber);
+      const scrollTop = this.editor.getScrollTop();
+      const offset = lineTop - scrollTop;
+
+      // Ensure offset is never less than or equal to zero, moving it down
+      // by 1 px if needed.
+      const adjustedOffset = offset <= 0 ? 1 : offset;
+
       this.setEditorActionsCss({
         visibility: 'visible',
-        //  Move position down by 1 px so that the action buttons panel doesn't cover the top border of the selected block
-        top: offset + 1,
+        // Move position down by 1 px so that the action buttons panel doesn't
+        // cover the top border of the selected block.
+        top: adjustedOffset + 1,
       });
     }
   }

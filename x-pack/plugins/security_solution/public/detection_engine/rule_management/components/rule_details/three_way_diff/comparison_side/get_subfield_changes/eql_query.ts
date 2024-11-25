@@ -15,26 +15,25 @@ export const getSubfieldChangesForEqlQuery = (
 ): SubfieldChange[] => {
   const changes: SubfieldChange[] = [];
 
-  const oldQuery = stringifyToSortedJson(oldFieldValue?.query);
-  const newQuery = stringifyToSortedJson(newFieldValue?.query);
+  const subFieldNames: Array<keyof DiffableAllFields['eql_query']> = [
+    'query',
+    'filters',
+    'event_category_override',
+    'tiebreaker_field',
+    'timestamp_field',
+  ];
 
-  if (oldQuery !== newQuery) {
-    changes.push({
-      subfieldName: 'query',
-      oldSubfieldValue: oldQuery,
-      newSubfieldValue: newQuery,
-    });
-  }
+  for (const subFieldName of subFieldNames) {
+    const oldValue = stringifyToSortedJson(oldFieldValue?.[subFieldName]);
+    const newValue = stringifyToSortedJson(newFieldValue?.[subFieldName]);
 
-  const oldFilters = stringifyToSortedJson(oldFieldValue?.filters);
-  const newFilters = stringifyToSortedJson(newFieldValue?.filters);
-
-  if (oldFilters !== newFilters) {
-    changes.push({
-      subfieldName: 'filters',
-      oldSubfieldValue: oldFilters,
-      newSubfieldValue: newFilters,
-    });
+    if (newValue !== oldValue) {
+      changes.push({
+        subfieldName: subFieldName,
+        oldSubfieldValue: oldValue,
+        newSubfieldValue: newValue,
+      });
+    }
   }
 
   return changes;

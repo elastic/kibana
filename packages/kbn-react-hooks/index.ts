@@ -8,4 +8,5 @@
  */
 
 export { useBoolean } from './src/use_boolean';
+export { useErrorTextStyle } from './src/use_error_text_style';
 export type { UseBooleanHandlers, UseBooleanResult } from './src/use_boolean';

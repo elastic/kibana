@@ -166,8 +166,10 @@ export const deprecatedRiskScoreEntityCalculationRoute = (
     .post({
       path: '/api/risk_scores/calculation/entity',
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
@@ -192,8 +194,10 @@ export const riskScoreEntityCalculationRoute = (
     .post({
       path: RISK_SCORE_ENTITY_CALCULATION_URL,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

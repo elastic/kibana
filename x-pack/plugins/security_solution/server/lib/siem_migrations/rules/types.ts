@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
-import type { Subject } from 'rxjs';
-import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  RuleMigration,
+  RuleMigrationResource,
+} from '../../../../common/siem_migrations/model/rule_migration.gen';
 
-export interface SiemRulesMigrationsSetupParams {
-  esClusterClient: IClusterClient;
-  pluginStop$: Subject<void>;
-  tasksTimeoutMs?: number;
-}
+export type Stored<T extends object> = T & { id: string };
 
-export interface SiemRuleMigrationsGetClientParams {
-  request: KibanaRequest;
-  spaceId: string;
-}
+export type StoredRuleMigration = Stored<RuleMigration>;
+export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
 
-export interface RuleMigrationSearchParams {
-  migration_id?: string;
-}
-export interface SiemRuleMigrationsClient {
-  create: (body: RuleMigration[]) => Promise<BulkResponse>;
-  search: (params: RuleMigrationSearchParams) => Promise<SearchResponse>;
+export interface Integration {
+  title: string;
+  id: string;
+  description: string;
+  data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
+  elser_embedding: string;
 }

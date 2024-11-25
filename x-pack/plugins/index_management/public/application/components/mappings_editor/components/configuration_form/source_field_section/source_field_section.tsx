@@ -5,18 +5,61 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiComboBox, EuiFormRow, EuiCallOut, EuiText } from '@elastic/eui';
 
+import { useAppContext } from '../../../../../app_context';
 import { documentationService } from '../../../../../services/documentation';
-import { UseField, FormDataProvider, FormRow, ToggleField } from '../../../shared_imports';
+import { UseField, FormDataProvider, FormRow, SuperSelectField } from '../../../shared_imports';
 import { ComboBoxOption } from '../../../types';
+import { sourceOptionLabels, sourceOptionDescriptions } from './i18n_texts';
+import {
+  STORED_SOURCE_OPTION,
+  DISABLED_SOURCE_OPTION,
+  SYNTHETIC_SOURCE_OPTION,
+  SourceOptionKey,
+} from './constants';
 
 export const SourceFieldSection = () => {
-  const renderWarning = () => (
+  const { canUseSyntheticSource } = useAppContext();
+
+  const renderOptionDropdownDisplay = (option: SourceOptionKey) => (
+    <Fragment>
+      <strong>{sourceOptionLabels[option]}</strong>
+      <EuiText size="s" color="subdued">
+        <p>{sourceOptionDescriptions[option]}</p>
+      </EuiText>
+    </Fragment>
+  );
+
+  const sourceValueOptions = [
+    {
+      value: STORED_SOURCE_OPTION,
+      inputDisplay: sourceOptionLabels[STORED_SOURCE_OPTION],
+      dropdownDisplay: renderOptionDropdownDisplay(STORED_SOURCE_OPTION),
+      'data-test-subj': 'storedSourceFieldOption',
+    },
+  ];
+
+  if (canUseSyntheticSource) {
+    sourceValueOptions.push({
+      value: SYNTHETIC_SOURCE_OPTION,
+      inputDisplay: sourceOptionLabels[SYNTHETIC_SOURCE_OPTION],
+      dropdownDisplay: renderOptionDropdownDisplay(SYNTHETIC_SOURCE_OPTION),
+      'data-test-subj': 'syntheticSourceFieldOption',
+    });
+  }
+  sourceValueOptions.push({
+    value: DISABLED_SOURCE_OPTION,
+    inputDisplay: sourceOptionLabels[DISABLED_SOURCE_OPTION],
+    dropdownDisplay: renderOptionDropdownDisplay(DISABLED_SOURCE_OPTION),
+    'data-test-subj': 'disabledSourceFieldOption',
+  });
+
+  const renderDisableWarning = () => (
     <EuiCallOut
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutTitle', {
         defaultMessage: 'Use caution when disabling the _source field',
@@ -27,7 +70,7 @@ export const SourceFieldSection = () => {
       <p>
         <FormattedMessage
           id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription1"
-          defaultMessage="Disabling {source} lowers storage overhead within the index, but this comes at a cost. It also disables important features, such as the ability to reindex or debug queries by viewing the original document."
+          defaultMessage="Disabling {source} is not recommended. If storage overhead is a concern, consider using synthetic {source} instead. Disabling {source} will disable important features, such as the ability to reindex or debug queries by viewing the original document."
           values={{
             source: (
               <code>
@@ -45,13 +88,13 @@ export const SourceFieldSection = () => {
 
       <p>
         <a
-          href={documentationService.getDisablingMappingSourceFieldLink()}
+          href={documentationService.getMappingSyntheticSourceFieldLink()}
           target="_blank"
           rel="noopener noreferrer"
         >
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
-            defaultMessage="Learn more about alternatives to disabling the {source} field."
+            defaultMessage="Learn more about synthetic {source}."
             values={{
               source: (
                 <code>
@@ -68,6 +111,44 @@ export const SourceFieldSection = () => {
         </a>
       </p>
     </EuiCallOut>
+  );
+
+  const renderSyntheticWarning = () => (
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
+          defaultMessage="Synthetic {source} has been set by the selected index mode. Changing this setting will reduce the optimization provided by the index mode. {learnMoreLink}"
+          values={{
+            source: (
+              <code>
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2.sourceText',
+                  {
+                    defaultMessage: '_source',
+                  }
+                )}
+              </code>
+            ),
+            learnMoreLink: (
+              <EuiLink
+                href={documentationService.getMappingSyntheticSourceFieldLink()}
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2.sourceText',
+                  {
+                    defaultMessage: 'Learn more.',
+                  }
+                )}
+              </EuiLink>
+            ),
+          }}
+        />
+      }
+      iconType="warning"
+      color="warning"
+    />
   );
 
   const renderFormFields = () => (
@@ -155,21 +236,34 @@ export const SourceFieldSection = () => {
             }}
           />
           <EuiSpacer size="m" />
-          <UseField path="sourceField.enabled" component={ToggleField} />
+          <UseField
+            path="sourceField.option"
+            component={SuperSelectField}
+            componentProps={{
+              euiFieldProps: {
+                fullWidth: false,
+                hasDividers: true,
+                'data-test-subj': 'sourceValueField',
+                options: sourceValueOptions,
+              },
+            }}
+          />
         </>
       }
     >
-      <FormDataProvider pathsToWatch={['sourceField.enabled']}>
+      <FormDataProvider pathsToWatch={['sourceField.option']}>
         {(formData) => {
-          const {
-            sourceField: { enabled },
-          } = formData;
+          const { sourceField } = formData;
 
-          if (enabled === undefined) {
+          if (sourceField?.option === undefined) {
             return null;
           }
 
-          return enabled ? renderFormFields() : renderWarning();
+          return sourceField?.option === STORED_SOURCE_OPTION
+            ? renderFormFields()
+            : sourceField?.option === DISABLED_SOURCE_OPTION
+            ? renderDisableWarning()
+            : renderSyntheticWarning();
         }}
       </FormDataProvider>
     </FormRow>

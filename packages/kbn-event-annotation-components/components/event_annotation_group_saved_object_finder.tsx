@@ -100,6 +100,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
   ) : (
     <SavedObjectFinder
       key="searchSavedObjectFinder"
+      id="eventAnnotationGroup"
       fixedPageSize={fixedPageSize}
       onChoose={(id, type, fullName, savedObject) => {
         onChoose({ id, type, fullName, savedObject });

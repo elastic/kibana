@@ -213,7 +213,7 @@ You can then **Save** and add it to an existing or a new dashboard using the sav
 . From your dashboard, select **Add panel**.
 . Choose **ES|QL** under **Visualizations**. An ES|QL editor appears and lets you configure your query and its associated visualization. The **Suggestions** panel can help you find alternative ways to configure the visualization.
 +
-TIP: Check the link:esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
+TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
 . When editing your query or its configuration, run the query to update the preview of the visualization.
 +
 image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt69dcceb4f1e12bc1/66c752d6aff77d384dc44209/edit-esql-visualization.gif[Previewing an ESQL visualization]
@@ -232,7 +232,7 @@ The Maps editor has extensive documentation. For your reading comfort, we have m
 . From your dashboard, select **Add panel**.
 . Choose **Field statistics** under **Visualizations**. An ES|QL editor appears and lets you configure your query with the fields and information that you want to show.
 +
-TIP: Check the link:esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
+TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
 . When editing your query or its configuration, run the query to update the preview of the visualization.
 +
 image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte2b1371159f5b9ff/66fc6ca13804eb2532b20727/field-statistics-preview-8.16.0.gif[Editing a field statistics dashboard panel and running the query to update the preview]
@@ -289,7 +289,8 @@ To personalize your dashboards, add your own logos and graphics with the *Image*
 [role="screenshot"]
 image::images/dashboard_addImageEditor_8.7.0.png[Add image editor]
 
-To manage your uploaded image files, open the main menu, then click *Stack Management > Kibana > Files*. 
+To manage your uploaded image files, go to the *Files* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 
 [WARNING]

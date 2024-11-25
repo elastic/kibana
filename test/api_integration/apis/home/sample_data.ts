@@ -24,12 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
    * @see {@link src/plugins/home/server/services/sample_data/data_sets/flights/index.ts}
    */
   const FLIGHTS_OVERVIEW_DASHBOARD_ID = '7adfa750-4c81-11e8-b3d7-01146121b73d';
-  const FLIGHTS_CANVAS_APPLINK_PATH =
-    '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0'; // includes default ID of the flights canvas applink path
-
-  const includesPathInAppLinks = (appLinks: Array<{ path: string }>, path: string): boolean => {
-    return appLinks.some((item) => item.path === path);
-  };
 
   describe('sample data apis', () => {
     before(async () => {
@@ -52,12 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');
-          // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
-          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-          expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-            true
-          );
         });
       });
 
@@ -79,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(resp.body).to.eql({
             elasticsearchIndicesCreated: { kibana_sample_data_flights: 13014 },
-            kibanaSavedObjectsLoaded: 8,
+            kibanaSavedObjectsLoaded: 7,
           });
         });
 
@@ -136,19 +125,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('installed');
-          // Check and make sure the sample dataset reflects the existing object IDs in each space.
-          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           if (space === 'default') {
             expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-            expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-              true
-            );
           } else {
             // the sample data objects installed in the 'other' space had their IDs regenerated upon import
             expect(flightsData.overviewDashboard).not.to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-            expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-              false
-            );
           }
         });
       });
@@ -186,12 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           const flightsData = findFlightsData(resp);
           expect(flightsData.status).to.be('not_installed');
-          // Check and make sure the sample dataset reflects the default object IDs, because no sample data objects exist.
-          // Instead of checking each object ID, we check the dashboard and canvas app link as representatives.
           expect(flightsData.overviewDashboard).to.be(FLIGHTS_OVERVIEW_DASHBOARD_ID);
-          expect(includesPathInAppLinks(flightsData.appLinks, FLIGHTS_CANVAS_APPLINK_PATH)).to.be(
-            true
-          );
         });
       });
     }

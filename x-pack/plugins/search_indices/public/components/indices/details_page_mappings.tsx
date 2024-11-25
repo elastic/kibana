@@ -10,10 +10,16 @@ import { Index } from '@kbn/index-management-shared-types';
 import React from 'react';
 import { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import type { UserStartPrivilegesResponse } from '../../../common';
+
 export interface SearchIndexDetailsMappingsProps {
   index?: Index;
+  userPrivileges?: UserStartPrivilegesResponse;
 }
-export const SearchIndexDetailsMappings = ({ index }: SearchIndexDetailsMappingsProps) => {
+export const SearchIndexDetailsMappings = ({
+  index,
+  userPrivileges,
+}: SearchIndexDetailsMappingsProps) => {
   const { indexManagement, history } = useKibana().services;
 
   const IndexMappingComponent = useMemo(
@@ -21,10 +27,18 @@ export const SearchIndexDetailsMappings = ({ index }: SearchIndexDetailsMappings
     [indexManagement, history]
   );
 
+  const hasUpdateMappingsPrivilege = useMemo(() => {
+    return userPrivileges?.privileges.canManageIndex === true;
+  }, [userPrivileges]);
+
   return (
     <>
       <EuiSpacer />
-      <IndexMappingComponent index={index} showAboutMappings={false} />
+      <IndexMappingComponent
+        index={index}
+        showAboutMappings={false}
+        hasUpdateMappingsPrivilege={hasUpdateMappingsPrivilege}
+      />
     </>
   );
 };

@@ -17,6 +17,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
+  EuiWindowEvent,
+  keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -392,40 +394,51 @@ export function LensEditConfigurationFlyout({
     getUserMessages,
   ]);
 
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === keys.ESCAPE) {
+      closeFlyout?.();
+      setIsInlineFlyoutVisible(false);
+    }
+  };
+
   if (isLoading) return null;
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
   if (!canEditTextBasedQuery && hidesSuggestions) {
     return (
-      <FlyoutWrapper
-        isInlineFlyoutVisible={isInlineFlyoutVisible}
-        displayFlyoutHeader={displayFlyoutHeader}
-        onCancel={onCancel}
-        navigateToLensEditor={navigateToLensEditor}
-        onApply={onApply}
-        isScrollable
-        isNewPanel={isNewPanel}
-        isSaveable={isSaveable}
-      >
-        <LayerConfiguration
-          // TODO: remove this once we support switching to any chart in Discover
-          onlyAllowSwitchToSubtypes
-          getUserMessages={getUserMessages}
-          attributes={attributes}
-          coreStart={coreStart}
-          startDependencies={startDependencies}
-          visualizationMap={visualizationMap}
-          datasourceMap={datasourceMap}
-          datasourceId={datasourceId}
-          hasPadding
-          framePublicAPI={framePublicAPI}
-          setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
-        />
-      </FlyoutWrapper>
+      <>
+        {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
+        <FlyoutWrapper
+          isInlineFlyoutVisible={isInlineFlyoutVisible}
+          displayFlyoutHeader={displayFlyoutHeader}
+          onCancel={onCancel}
+          navigateToLensEditor={navigateToLensEditor}
+          onApply={onApply}
+          isScrollable
+          isNewPanel={isNewPanel}
+          isSaveable={isSaveable}
+        >
+          <LayerConfiguration
+            // TODO: remove this once we support switching to any chart in Discover
+            onlyAllowSwitchToSubtypes
+            getUserMessages={getUserMessages}
+            attributes={attributes}
+            coreStart={coreStart}
+            startDependencies={startDependencies}
+            visualizationMap={visualizationMap}
+            datasourceMap={datasourceMap}
+            datasourceId={datasourceId}
+            hasPadding
+            framePublicAPI={framePublicAPI}
+            setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+          />
+        </FlyoutWrapper>
+      </>
     );
   }
 
   return (
     <>
+      {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
       <FlyoutWrapper
         isInlineFlyoutVisible={isInlineFlyoutVisible}
         displayFlyoutHeader={displayFlyoutHeader}

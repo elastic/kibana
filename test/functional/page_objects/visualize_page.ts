@@ -41,6 +41,7 @@ export class VisualizePageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -52,7 +53,7 @@ export class VisualizePageObject extends FtrService {
   remoteEsPrefix = 'ftr-remote:';
   defaultIndexString = 'logstash-*';
 
-  public async initTests(isNewLibrary = false) {
+  public async initTests(isLegacyChart = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
     await this.kibanaServer.importExport.load(
       'test/functional/fixtures/kbn_archiver/visualize.json'
@@ -61,8 +62,9 @@ export class VisualizePageObject extends FtrService {
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyHeatmapChartsLibrary': isLegacyChart,
       'histogram:maxBars': 100,
+      'timepicker:timeDefaults': `{ "from": "${this.timePicker.defaultStartTimeUTC}", "to": "${this.timePicker.defaultEndTimeUTC}"}`,
     });
   }
 
@@ -149,8 +151,8 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async clickRefresh(isNewChartLibrary = false) {
-    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewChartLibrary) {
+  public async clickRefresh(isLegacyChart = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || !isLegacyChart) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
     await this.queryBar.clickQuerySubmitButton();
@@ -515,14 +517,6 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
     await this.testSubjects.click('visualizesaveAndReturnButton');
-  }
-
-  public async getDeprecationWarningStatus() {
-    if (await this.visChart.isNewChartsLibraryEnabled()) {
-      await this.testSubjects.missingOrFail('vizDeprecationWarning');
-    } else {
-      await this.testSubjects.existOrFail('vizDeprecationWarning');
-    }
   }
 
   public async linkedToOriginatingApp() {

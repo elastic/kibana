@@ -8,9 +8,21 @@
  */
 
 import { CoreStart, HttpStart } from '@kbn/core/public';
-import { DEFAULT_ASSETS_TO_IGNORE } from '../../common';
+import { IHttpFetchError, ResponseErrorBody, isHttpFetchError } from '@kbn/core-http-browser';
+import { isObject } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { DEFAULT_ASSETS_TO_IGNORE, HasEsDataFailureReason } from '../../common';
 import { HasDataViewsResponse, IndicesViaSearchResponse } from '..';
 import { IndicesResponse, IndicesResponseModified } from '../types';
+
+export interface HasEsDataParams {
+  /**
+   * Callback to handle the case where checking for remote data times out.
+   * If not provided, the default behavior is to show a toast notification.
+   * @param body The error response body
+   */
+  onRemoteDataTimeout?: (body: ResponseErrorBody) => void;
+}
 
 export class HasData {
   private removeAliases = (source: IndicesResponseModified): boolean => !source.item.indices;
@@ -38,28 +50,55 @@ export class HasData {
       return hasLocalESData;
     };
 
-    const hasESDataViaResolveCluster = async () => {
+    const hasESDataViaResolveCluster = async (
+      onRemoteDataTimeout: (body: ResponseErrorBody) => void
+    ) => {
       try {
         const { hasEsData } = await http.get<{ hasEsData: boolean }>(
           '/internal/data_views/has_es_data',
-          {
-            version: '1',
-          }
+          { version: '1' }
         );
+
         return hasEsData;
       } catch (e) {
+        if (
+          this.isResponseError(e) &&
+          e.body?.statusCode === 504 &&
+          e.body?.attributes?.failureReason === HasEsDataFailureReason.remoteDataTimeout
+        ) {
+          onRemoteDataTimeout(e.body);
+
+          // In the case of a remote cluster timeout,
+          // we can't be sure if there is data or not,
+          // so just assume there is
+          return true;
+        }
+
         // fallback to previous implementation
         return hasESDataViaResolveIndex();
       }
     };
 
+    const showRemoteDataTimeoutToast = () =>
+      core.notifications.toasts.addDanger({
+        title: i18n.translate('dataViews.hasData.remoteDataTimeoutTitle', {
+          defaultMessage: 'Remote cluster timeout',
+        }),
+        text: i18n.translate('dataViews.hasData.remoteDataTimeoutText', {
+          defaultMessage:
+            'Checking for data on remote clusters timed out. One or more remote clusters may be unavailable.',
+        }),
+      });
+
     return {
       /**
        * Check to see if ES data exists
        */
-      hasESData: async (): Promise<boolean> => {
+      hasESData: async ({
+        onRemoteDataTimeout = showRemoteDataTimeoutToast,
+      }: HasEsDataParams = {}): Promise<boolean> => {
         if (callResolveCluster) {
-          return hasESDataViaResolveCluster();
+          return hasESDataViaResolveCluster(onRemoteDataTimeout);
         }
         return hasESDataViaResolveIndex();
       },
@@ -81,6 +120,9 @@ export class HasData {
   }
 
   // ES Data
+
+  private isResponseError = (e: Error): e is IHttpFetchError<ResponseErrorBody> =>
+    isHttpFetchError(e) && isObject(e.body) && 'message' in e.body && 'statusCode' in e.body;
 
   private responseToItemArray = (response: IndicesResponse): IndicesResponseModified[] => {
     const { indices = [], aliases = [] } = response;

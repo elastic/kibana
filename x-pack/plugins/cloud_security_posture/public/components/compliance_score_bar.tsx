@@ -11,7 +11,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { statusColors } from '@kbn/cloud-security-posture';
 import { calculatePostureScore } from '../../common/utils/helpers';
-import { CSP_FINDINGS_COMPLIANCE_SCORE } from './test_subjects';
+import {
+  CSP_FINDINGS_COMPLIANCE_SCORE,
+  COMPLIANCE_SCORE_BAR_UNKNOWN,
+  COMPLIANCE_SCORE_BAR_FAILED,
+  COMPLIANCE_SCORE_BAR_PASSED,
+} from './test_subjects';
 
 /**
  * This component will take 100% of the width set by the parent
@@ -59,12 +64,22 @@ export const ComplianceScoreBar = ({
               gap: 1px;
             `}
           >
+            {!totalPassed && !totalFailed && (
+              <EuiFlexItem
+                css={css`
+                  flex: 1;
+                  background: ${statusColors.unknown};
+                `}
+                data-test-subj={COMPLIANCE_SCORE_BAR_UNKNOWN}
+              />
+            )}
             {!!totalPassed && (
               <EuiFlexItem
                 css={css`
                   flex: ${totalPassed};
                   background: ${statusColors.passed};
                 `}
+                data-test-subj={COMPLIANCE_SCORE_BAR_PASSED}
               />
             )}
             {!!totalFailed && (
@@ -73,6 +88,7 @@ export const ComplianceScoreBar = ({
                   flex: ${totalFailed};
                   background: ${statusColors.failed};
                 `}
+                data-test-subj={COMPLIANCE_SCORE_BAR_FAILED}
               />
             )}
           </EuiFlexGroup>

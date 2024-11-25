@@ -23,6 +23,13 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     description: i18n.translate('xpack.infra.enableLogsStreamDescription', {
       defaultMessage: 'Enables the legacy Logs Stream application and dashboard panel. ',
     }),
+    deprecation: {
+      message: i18n.translate('xpack.infra.enableLogsStreamDeprecationWarning', {
+        defaultMessage:
+          'Logs Stream is deprecated, and this setting will be removed in Kibana 9.0.',
+      }),
+      docLinksKey: 'generalSettings',
+    },
     type: 'boolean',
     schema: schema.boolean(),
     requiresPageReload: true,

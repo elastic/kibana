@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/search-api-keys-components",
-  "owner": "@elastic/search-kibana"
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "search",
+  "visibility": "private"
 }

@@ -1370,8 +1370,6 @@ class TimeseriesChartIntl extends Component {
       .attr('y', -2)
       .attr('height', contextChartLineTopMargin);
 
-    // Draw the brush handles using SVG foreignObject elements.
-    // Note these are not supported on IE11 and below, so will not appear in IE.
     const leftHandle = contextGroup
       .append('foreignObject')
       .attr('width', 10)

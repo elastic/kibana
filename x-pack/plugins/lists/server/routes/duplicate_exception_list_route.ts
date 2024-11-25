@@ -21,10 +21,12 @@ export const duplicateExceptionsRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
-      },
       path: `${EXCEPTION_LIST_URL}/_duplicate`,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {

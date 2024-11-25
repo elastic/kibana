@@ -10,11 +10,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ExecutionRunTypeFilter } from '.';
 import { RuleRunTypeEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { useKibana } from '../../../../../../common/lib/kibana';
+import { EventLogEventTypes } from '../../../../../../common/lib/telemetry';
 
 jest.mock('../../../../../../common/lib/kibana');
 
 const mockTelemetry = {
-  reportEventLogFilterByRunType: jest.fn(),
+  reportEvent: jest.fn(),
 };
 
 const mockUseKibana = useKibana as jest.Mock;
@@ -28,7 +29,7 @@ mockUseKibana.mockReturnValue({
 const items = [RuleRunTypeEnum.backfill, RuleRunTypeEnum.standard];
 
 describe('ExecutionRunTypeFilter', () => {
-  it('calls telemetry.reportEventLogFilterByRunType on selection change', () => {
+  it('calls telemetry.reportEvent on selection change', () => {
     const handleChange = jest.fn();
 
     render(<ExecutionRunTypeFilter items={items} selectedItems={[]} onChange={handleChange} />);
@@ -40,8 +41,11 @@ describe('ExecutionRunTypeFilter', () => {
     fireEvent.click(manualRun);
 
     expect(handleChange).toHaveBeenCalledWith([RuleRunTypeEnum.backfill]);
-    expect(mockTelemetry.reportEventLogFilterByRunType).toHaveBeenCalledWith({
-      runType: [RuleRunTypeEnum.backfill],
-    });
+    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+      EventLogEventTypes.EventLogFilterByRunType,
+      {
+        runType: [RuleRunTypeEnum.backfill],
+      }
+    );
   });
 });

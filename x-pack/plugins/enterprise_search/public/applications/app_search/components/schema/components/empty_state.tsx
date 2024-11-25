@@ -12,8 +12,8 @@ import { useValues, useActions } from 'kea';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { SchemaAddFieldModal } from '../../../../shared/schema';
-import { INDEXING_SCHEMA_DOCS_URL } from '../../../routes';
 import { SchemaLogic } from '../schema_logic';
 
 export const EmptyState: React.FC = () => {
@@ -40,7 +40,12 @@ export const EmptyState: React.FC = () => {
           </p>
         }
         actions={
-          <EuiButton size="s" target="_blank" iconType="popout" href={INDEXING_SCHEMA_DOCS_URL}>
+          <EuiButton
+            size="s"
+            target="_blank"
+            iconType="popout"
+            href={docLinks.appSearchIndexingDocsSchema}
+          >
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.empty.buttonLabel', {
               defaultMessage: 'Read the indexing schema guide',
             })}

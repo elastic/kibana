@@ -23,7 +23,11 @@ export const readSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
     .get({
       access: 'public',
       path: '/api/osquery/saved_queries/{id}',
-      options: { tags: [`access:${PLUGIN_ID}-readSavedQueries`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-readSavedQueries`],
+        },
+      },
     })
     .addVersion(
       {

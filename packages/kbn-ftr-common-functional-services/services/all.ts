@@ -11,7 +11,7 @@ import { EsArchiverProvider } from './es_archiver';
 import { EsProvider } from './es';
 import { KibanaServerProvider } from './kibana_server';
 import { RetryService } from './retry';
-import { BsearchService } from './bsearch';
+import { SearchService } from './search';
 import { ConsoleProvider } from './console';
 import { DeploymentService } from './deployment';
 import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
@@ -27,7 +27,7 @@ export const services = {
   kibanaServer: KibanaServerProvider,
   esArchiver: EsArchiverProvider,
   retry: RetryService,
-  bsearch: BsearchService,
+  search: SearchService,
   console: ConsoleProvider,
   deployment: DeploymentService,
   esDeleteAllIndices: EsDeleteAllIndicesProvider,

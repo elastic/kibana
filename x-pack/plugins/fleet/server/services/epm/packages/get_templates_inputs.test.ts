@@ -16,6 +16,7 @@ import REDIS_1_18_0_PACKAGE_INFO from './__fixtures__/redis_1_18_0_package_info.
 import { getPackageAssetsMap, getPackageInfo } from './get';
 import { REDIS_ASSETS_MAP } from './__fixtures__/redis_1_18_0_streams_template';
 import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs_2_3_0';
+import { DOCKER_2_11_0_PACKAGE_INFO, DOCKER_2_11_0_ASSETS_MAP } from './__fixtures__/docker_2_11_0';
 
 jest.mock('./get');
 
@@ -41,6 +42,7 @@ packageInfoCache.set('limited_package-0.0.0', {
 
 packageInfoCache.set('redis-1.18.0', REDIS_1_18_0_PACKAGE_INFO);
 packageInfoCache.set('log-2.3.0', LOGS_2_3_0_PACKAGE_INFO);
+packageInfoCache.set('docker-2.11.0', DOCKER_2_11_0_PACKAGE_INFO);
 
 describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
   const mockInput: PackagePolicyInput = {
@@ -330,6 +332,9 @@ describe('Fleet - getTemplateInputs', () => {
       if (packageInfo.name === 'log') {
         return LOGS_2_3_0_ASSETS_MAP;
       }
+      if (packageInfo.name === 'docker') {
+        return DOCKER_2_11_0_ASSETS_MAP;
+      }
 
       return new Map();
     });
@@ -346,6 +351,14 @@ describe('Fleet - getTemplateInputs', () => {
     const soMock = savedObjectsClientMock.create();
     soMock.get.mockResolvedValue({ attributes: {} } as any);
     const template = await getTemplateInputs(soMock, 'redis', '1.18.0', 'yml');
+
+    expect(template).toMatchSnapshot();
+  });
+
+  it('should work for package with dynamic ids', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+    const template = await getTemplateInputs(soMock, 'docker', '2.11.0', 'yml');
 
     expect(template).toMatchSnapshot();
   });

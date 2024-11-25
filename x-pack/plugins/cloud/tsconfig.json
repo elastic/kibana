@@ -12,10 +12,12 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-chrome-browser",
     "@kbn/usage-collection-plugin",
     "@kbn/config-schema",
     "@kbn/logging-mocks",
     "@kbn/logging",
+    "@kbn/core-saved-objects-server",
   ],
   "exclude": [
     "target/**/*",

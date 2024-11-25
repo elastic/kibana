@@ -46,7 +46,7 @@ import { appContextService } from '../../app_context';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../../agent_policy';
 import { isSpaceAwarenessEnabled } from '../../spaces/helpers';
 
-interface UninstallTokenSOAttributes {
+export interface UninstallTokenSOAttributes {
   policy_id: string;
   token: string;
   token_plain: string;

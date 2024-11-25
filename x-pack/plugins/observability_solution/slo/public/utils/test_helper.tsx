@@ -9,14 +9,14 @@ import { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import translations from '@kbn/translations-plugin/translations/ja-JP.json';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
+import type { SLORouteRepository } from '../../server/routes/get_slo_server_route_repository';
 import { PluginContext } from '../context/plugin_context';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
@@ -40,10 +40,12 @@ const queryClient = new QueryClient({
   },
 });
 
+const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
-    <IntlProvider locale="en-US" messages={translations.messages}>
+    <IntlProvider locale="en-US">
       <KibanaContextProvider
         services={{
           ...core,
@@ -61,11 +63,10 @@ export const render = (component: React.ReactNode) => {
             appMountParameters,
             observabilityRuleTypeRegistry,
             ObservabilityPageTemplate: KibanaPageTemplate,
+            sloClient,
           }}
         >
-          <QueryClientProvider client={queryClient}>
-            <EuiThemeProvider>{component}</EuiThemeProvider>
-          </QueryClientProvider>
+          <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
         </PluginContext.Provider>
       </KibanaContextProvider>
     </IntlProvider>

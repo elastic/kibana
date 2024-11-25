@@ -1,0 +1,117 @@
+{
+  "id": "llmTasks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "llmTasks",
+      "id": "def-server.LlmTasksPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "LlmTasksPluginSetup",
+      "description": [
+        "\nDescribes public llmTasks plugin contract returned at the `setup` stage."
+      ],
+      "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "llmTasks",
+      "id": "def-server.LlmTasksPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "LlmTasksPluginStart",
+      "description": [
+        "\nDescribes public llmTasks plugin contract returned at the `start` stage."
+      ],
+      "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "llmTasks",
+          "id": "def-server.LlmTasksPluginStart.retrieveDocumentationAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "retrieveDocumentationAvailable",
+          "description": [
+            "\nChecks if all prerequisites to use the `retrieveDocumentation` task\nare respected. Can be used to check if the task can be registered\nas LLM tool for example."
+          ],
+          "signature": [
+            "() => Promise<boolean>"
+          ],
+          "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "llmTasks",
+          "id": "def-server.LlmTasksPluginStart.retrieveDocumentation",
+          "type": "Function",
+          "tags": [
+            "see"
+          ],
+          "label": "retrieveDocumentation",
+          "description": [
+            "\nPerform the `retrieveDocumentation` task.\n"
+          ],
+          "signature": [
+            "(options: ",
+            "RetrieveDocumentationParams",
+            ") => Promise<",
+            "RetrieveDocumentationResult",
+            ">"
+          ],
+          "path": "x-pack/plugins/ai_infra/llm_tasks/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "llmTasks",
+              "id": "def-server.LlmTasksPluginStart.retrieveDocumentation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [],
+              "signature": [
+                "RetrieveDocumentationParams"
+              ],
+              "path": "x-pack/plugins/ai_infra/llm_tasks/server/tasks/retrieve_documentation/types.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

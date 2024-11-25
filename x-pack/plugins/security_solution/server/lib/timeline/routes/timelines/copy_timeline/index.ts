@@ -23,8 +23,10 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_COPY_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'internal',
     })
@@ -42,9 +44,17 @@ export const copyTimelineRoute = (router: SecuritySolutionPluginRouter) => {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const { timeline, timelineIdToCopy } = request.body;
           const copiedTimeline = await copyTimeline(frameworkRequest, timeline, timelineIdToCopy);
-          return response.ok({
-            body: { data: { persistTimeline: copiedTimeline } },
-          });
+
+          if (copiedTimeline.code === 200) {
+            return response.ok({
+              body: copiedTimeline.timeline,
+            });
+          } else {
+            return siemResponse.error({
+              body: copiedTimeline.message,
+              statusCode: copiedTimeline.code,
+            });
+          }
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export type { ESLicense } from './telemetry_collection';
-
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 

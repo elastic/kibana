@@ -51,14 +51,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('discover field visualize button', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace(defaultSettings);
-    });
-    beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+    });
+
+    beforeEach(async () => {
       await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
       await setDiscoverTimeRange();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
     });
 
     after(async () => {
@@ -73,7 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await unifiedFieldList.expectFieldListItemVisualize('bytes');
     });
 
-    it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
+    it('visualizes field to Lens and loads fields to the dimension editor', async () => {
       await unifiedFieldList.findFieldByName('bytes');
       await unifiedFieldList.clickFieldListItemVisualize('bytes');
       await header.waitUntilLoadingHasFinished();

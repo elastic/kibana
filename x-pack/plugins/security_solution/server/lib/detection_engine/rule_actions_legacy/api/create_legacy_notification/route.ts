@@ -34,8 +34,10 @@ export const legacyCreateLegacyNotificationRoute = (
     .post({
       path: UPDATE_OR_CREATE_LEGACY_ACTIONS,
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

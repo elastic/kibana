@@ -83,7 +83,7 @@
             "label": "trackUiMetric",
             "description": [],
             "signature": [
-              "(metricType: string, eventName: CloudSecurityUiCounters) => void"
+              "(metricType: string, eventName: string) => void"
             ],
             "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
             "deprecated": false,
@@ -107,12 +107,12 @@
               {
                 "parentPluginId": "@kbn/cloud-security-posture-common",
                 "id": "def-common.UiMetricService.trackUiMetric.$2",
-                "type": "CompoundType",
+                "type": "string",
                 "tags": [],
                 "label": "eventName",
                 "description": [],
                 "signature": [
-                  "CloudSecurityUiCounters"
+                  "string"
                 ],
                 "path": "x-pack/packages/kbn-cloud-security-posture/common/utils/ui_metrics.ts",
                 "deprecated": false,
@@ -1547,7 +1547,7 @@
         "label": "VulnSeverity",
         "description": [],
         "signature": [
-          "\"UNKNOWN\" | \"LOW\" | \"MEDIUM\" | \"HIGH\" | \"CRITICAL\""
+          "\"MEDIUM\" | \"UNKNOWN\" | \"LOW\" | \"HIGH\" | \"CRITICAL\""
         ],
         "path": "x-pack/packages/kbn-cloud-security-posture/common/types/vulnerabilities.ts",
         "deprecated": false,

@@ -50,24 +50,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [persistNote]
-                    properties:
-                      persistNote:
-                        $ref: '#/components/schemas/ResponseNote'
+                $ref: '#/components/schemas/ResponseNote'
 components:
   schemas:
     ResponseNote:
       type: object
-      required: [code, message, note]
+      required: [note]
       properties:
-        code:
-          type: number
-        message:
-          type: string
         note:
           $ref: '../model/components.schema.yaml#/components/schemas/Note'

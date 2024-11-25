@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -29,18 +29,33 @@ export interface HitsCounterProps {
 export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }) => {
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
-  const hitsTotal = totalHitsState.result;
+  let hitsTotal = totalHitsState.result;
   const hitsStatus = totalHitsState.fetchStatus;
+
+  const documents$ = stateContainer.dataState.data$.documents$;
+  const documentsState = useDataState(documents$);
+  const documentsCount = documentsState.result?.length || 0;
 
   if (!hitsTotal && hitsStatus === FetchStatus.LOADING) {
     return null;
   }
 
+  if (
+    hitsStatus === FetchStatus.ERROR &&
+    documentsState.fetchStatus === FetchStatus.COMPLETE &&
+    documentsCount > (hitsTotal ?? 0)
+  ) {
+    // if histogram returned partial results and which are less than the fetched documents count =>
+    // override hitsTotal with the fetched documents count
+    hitsTotal = documentsCount;
+  }
+
+  const showGreaterOrEqualSign =
+    hitsStatus === FetchStatus.PARTIAL || hitsStatus === FetchStatus.ERROR;
+
   const formattedHits = (
     <span
-      data-test-subj={
-        hitsStatus === FetchStatus.PARTIAL ? 'discoverQueryHitsPartial' : 'discoverQueryHits'
-      }
+      data-test-subj={showGreaterOrEqualSign ? 'discoverQueryHitsPartial' : 'discoverQueryHits'}
     >
       <FormattedNumber value={hitsTotal ?? 0} />
     </span>
@@ -55,7 +70,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
 
   const element = (
     <EuiFlexGroup
-      gutterSize="s"
+      gutterSize="xs"
       responsive={false}
       justifyContent="center"
       alignItems="center"
@@ -66,8 +81,8 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
       <EuiFlexItem grow={false} aria-live="polite" css={hitsCounterTextCss}>
         <EuiText className="eui-textTruncate" size="s">
           <strong>
-            {hitsStatus === FetchStatus.PARTIAL &&
-              (mode === HitsCounterMode.standalone ? (
+            {showGreaterOrEqualSign ? (
+              mode === HitsCounterMode.standalone ? (
                 <FormattedMessage
                   id="discover.hitsCounter.partialHitsPluralTitle"
                   defaultMessage="≥{formattedHits} {hits, plural, one {result} other {results}}"
@@ -79,17 +94,16 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
                   defaultMessage="≥{formattedHits}"
                   values={{ formattedHits }}
                 />
-              ))}
-            {hitsStatus !== FetchStatus.PARTIAL &&
-              (mode === HitsCounterMode.standalone ? (
-                <FormattedMessage
-                  id="discover.hitsCounter.hitsPluralTitle"
-                  defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
-                  values={{ hits: hitsTotal, formattedHits }}
-                />
-              ) : (
-                formattedHits
-              ))}
+              )
+            ) : mode === HitsCounterMode.standalone ? (
+              <FormattedMessage
+                id="discover.hitsCounter.hitsPluralTitle"
+                defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
+                values={{ hits: hitsTotal, formattedHits }}
+              />
+            ) : (
+              formattedHits
+            )}
           </strong>
         </EuiText>
       </EuiFlexItem>
@@ -100,6 +114,19 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
             aria-label={i18n.translate('discover.hitsCounter.hitCountSpinnerAriaLabel', {
               defaultMessage: 'Final hit count still loading',
             })}
+          />
+        </EuiFlexItem>
+      )}
+      {hitsStatus === FetchStatus.ERROR && (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="warning"
+            color="warning"
+            size="s"
+            content={i18n.translate('discover.hitsCounter.hitCountWarningTooltip', {
+              defaultMessage: 'Results might be incomplete',
+            })}
+            iconProps={{ css: { display: 'block' } }}
           />
         </EuiFlexItem>
       )}

@@ -9,9 +9,9 @@ import {
   API_VERSIONS,
   CreateKnowledgeBaseRequestParams,
   CreateKnowledgeBaseResponse,
-  DeleteKnowledgeBaseRequestParams,
-  DeleteKnowledgeBaseResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  GetKnowledgeBaseIndicesResponse,
   ReadKnowledgeBaseRequestParams,
   ReadKnowledgeBaseResponse,
 } from '@kbn/elastic-assistant-common';
@@ -78,32 +78,29 @@ export const postKnowledgeBase = async ({
 };
 
 /**
- * API call for deleting the Knowledge Base. Provide a resource to delete that specific resource.
+ * API call for getting indices that have fields of `semantic_text` type.
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.resource] - Resource to be deleted from the KB, otherwise delete the entire KB
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<DeleteKnowledgeBaseResponse | IHttpFetchError>}
+ * @returns {Promise<GetKnowledgeBaseIndicesResponse | IHttpFetchError>}
  */
-export const deleteKnowledgeBase = async ({
+export const getKnowledgeBaseIndices = async ({
   http,
-  resource,
   signal,
-}: DeleteKnowledgeBaseRequestParams & {
+}: {
   http: HttpSetup;
   signal?: AbortSignal | undefined;
-}): Promise<DeleteKnowledgeBaseResponse | IHttpFetchError> => {
+}): Promise<GetKnowledgeBaseIndicesResponse | IHttpFetchError> => {
   try {
-    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-    const response = await http.fetch(path, {
-      method: 'DELETE',
+    const response = await http.fetch(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL, {
+      method: 'GET',
       signal,
       version: API_VERSIONS.internal.v1,
     });
 
-    return response as DeleteKnowledgeBaseResponse;
+    return response as GetKnowledgeBaseIndicesResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }

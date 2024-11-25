@@ -37,7 +37,7 @@ describe('VulnerabilitiesPreview', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <VulnerabilitiesPreview name="host1" />
+        <VulnerabilitiesPreview value="host1" field="host.name" />
       </TestProviders>
     );
 

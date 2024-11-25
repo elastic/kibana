@@ -25,6 +25,7 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
+  getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,
 } from '../helpers';
@@ -63,22 +64,20 @@ export const chatCompleteRoute = (
         const assistantResponse = buildResponse(response);
         let telemetry;
         let actionTypeId;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const logger: Logger = ctx.elasticAssistant.logger;
         try {
-          const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const logger: Logger = ctx.elasticAssistant.logger;
           telemetry = ctx.elasticAssistant.telemetry;
           const inference = ctx.elasticAssistant.inference;
 
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
-            authenticatedUser: true,
             context: ctx,
-            license: true,
             request,
             response,
           });
-          if (checkResponse) {
-            return checkResponse;
+          if (!checkResponse.isSuccess) {
+            return checkResponse.response;
           }
 
           const conversationsDataClient =
@@ -221,13 +220,16 @@ export const chatCompleteRoute = (
           });
         } catch (err) {
           const error = transformError(err as Error);
+          const kbDataClient =
+            (await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient()) ?? undefined;
+          const isKnowledgeBaseInstalled = await getIsKnowledgeBaseInstalled(kbDataClient);
+
           telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
             actionTypeId: actionTypeId ?? '',
             model: request.body.model,
             errorMessage: error.message,
-            // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
-            // tracked here: https://github.com/elastic/security-team/issues/7363
             assistantStreamingEnabled: request.body.isStream ?? false,
+            isEnabledKnowledgeBase: isKnowledgeBaseInstalled,
           });
           return assistantResponse.error({
             body: error.message,

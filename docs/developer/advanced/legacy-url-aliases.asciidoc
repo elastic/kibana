@@ -13,11 +13,20 @@ type are *globally unique across all spaces*.
 {kib} creates a special entity called a **legacy URL alias** for each saved object that requires a new ID. This legacy URL alias allows
 {kib} to preserve any deep link URLs that exist for these objects.
 
+There are two cases where a legacy URL alias will get generated.
+
+1. During migration, when an object's namespace type is being converted from the single-namespace type to a multi-namespace type. If
+the object resides in a non-default space, it gets a new ID and a legacy URL alias is generated.
+
+2. During copy/import of saved objects, when any object requires a new ID **and the compatibilityMode option is enabled** (see the
+<<spaces-api-copy-saved-objects, copy saved objects to space>> API and https://github.com/elastic/kibana/pull/149021[PR #149021] 
+for more information).
+
 [[legacy-url-aliases-example]]
-=== Example
+=== Examples
+Consider the following scenarios:
 
-Consider the following scenario:
-
+==== Migration scenario
 You have {kib} 7.16, and you create a new dashboard.The ID of this dashboard is "123". You create a new space called "Bill's space" and
 <<managing-saved-objects-copy-to-space,copy>> your dashboard to the other space. Now you have two different dashboards that can be accessed
 at the following URLs:
@@ -32,6 +41,19 @@ dashboard is different -- not to worry though, there is a legacy URL alias for t
 If you use your bookmark to access that dashboard using its old URL, {kib} detects that you are using a legacy URL, and finds the new object
 ID. If you navigate to `http://localhost:5601/s/bills-space/app/dashboards#/view/123`, you'll see a message indicating that the dashboard
 has a new URL, and you're automatically redirected to `http://localhost:5601/s/bills-space/app/dashboards#/view/456`.
+
+==== Copy scenario (weak links)
+You have a data view and two dashboards in the default space, but you would also like to have them in another space. One of the dashboards
+includes a Markdown visualization with a link to the other dashboard - a so-called **weak link**. This is a weak link because the ID of the
+referenced object is not added to the object's references array, and therefore there is no explicit relationship between the objects.
+
+If you were to use the <<spaces-api-copy-saved-objects, copy saved objects to space>> API to create new copies of these assets in another 
+space **without the `compatibilityMode` option set to true**, the Markdown link would be broken. The copied objects created in the target
+space receive a new ID, and the weak link in the Markdown visualization would point to the ID of the source object from the originating space.
+
+By setting `compatibilityMode` to true when using the copy API, legacy aliases will be generated for any objects that require a new ID. This
+allows the weak link to the second dashboard to be resolved. Though a dashboard with the ID from the weak link will not be found, a legacy
+alias with this source ID will have been generated, and it will contain a target ID of the new local copy of the dashboard.
 
 [[legacy-url-aliases-handling-errors]]
 === Handling errors

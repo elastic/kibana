@@ -93,7 +93,9 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
 
   useEffect(() => {
     usageTracker?.click(
-      `${AnalyticsEvents.modelSelected}_${selectedModel!.value || selectedModel!.connectorType}`
+      `${AnalyticsEvents.modelSelected}_${
+        selectedModel?.value || selectedModel?.connectorType || 'unknown'
+      }`
     );
   }, [usageTracker, selectedModel]);
 

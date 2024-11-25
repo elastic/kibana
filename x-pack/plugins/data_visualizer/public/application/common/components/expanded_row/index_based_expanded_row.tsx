@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExpandedRowCss } from './use_expanded_row_css';
 import { GeoPointContentWithMap } from './geo_point_content_with_map';
@@ -34,6 +34,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   totalDocuments,
   timeFieldName,
   typeAccessor = 'type',
+  onVisibilityChange,
 }: {
   item: FieldVisConfig;
   dataView: DataView | undefined;
@@ -46,6 +47,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   timeFieldName?: string;
+  onVisibilityChange?: (visible: boolean, item: FieldVisConfig) => void;
 }) => {
   const config = { ...item, stats: { ...item.stats, totalDocuments } };
   const { loading, existsInDocs, fieldName } = config;
@@ -97,6 +99,14 @@ export const IndexBasedDataVisualizerExpandedRow = ({
         return <OtherContent config={config} />;
     }
   }
+
+  useEffect(() => {
+    onVisibilityChange?.(true, item);
+
+    return () => {
+      onVisibilityChange?.(false, item);
+    };
+  }, [item, onVisibilityChange]);
 
   return (
     <div css={dvExpandedRow} data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>

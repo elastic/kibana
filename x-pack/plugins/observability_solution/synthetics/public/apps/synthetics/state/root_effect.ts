@@ -7,7 +7,12 @@
 
 import { all, fork } from 'redux-saga/effects';
 import { getCertsListEffect } from './certs';
-import { addGlobalParamEffect, editGlobalParamEffect, getGlobalParamEffect } from './global_params';
+import {
+  addGlobalParamEffect,
+  deleteGlobalParamsEffect,
+  editGlobalParamEffect,
+  getGlobalParamEffect,
+} from './global_params';
 import { fetchManualTestRunsEffect } from './manual_test_runs/effects';
 import {
   enableDefaultAlertingEffect,
@@ -66,6 +71,7 @@ export const rootEffect = function* root(): Generator {
     fork(fetchManualTestRunsEffect),
     fork(addGlobalParamEffect),
     fork(editGlobalParamEffect),
+    fork(deleteGlobalParamsEffect),
     fork(getGlobalParamEffect),
     fork(getCertsListEffect),
     fork(getDefaultAlertingEffect),

@@ -66,13 +66,13 @@ const connectors = [
   },
 ];
 
-describe('Enterprise Search search provider', () => {
+describe('Search search provider', () => {
   const crawlerResult = {
     icon: 'crawlerIcon.svg',
     id: 'elastic-crawler',
     score: 75,
     title: 'Elastic Web Crawler',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`,
       prependBasePath: true,
@@ -84,7 +84,7 @@ describe('Enterprise Search search provider', () => {
     id: 'mongodb',
     score: 75,
     title: 'MongoDB',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=mongodb`,
       prependBasePath: true,
@@ -96,7 +96,7 @@ describe('Enterprise Search search provider', () => {
     id: 'mongodb',
     score: 75,
     title: 'MongoDB',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=native&service_type=mongodb`,
       prependBasePath: true,
@@ -108,7 +108,7 @@ describe('Enterprise Search search provider', () => {
     id: '',
     score: 75,
     title: 'Customized connector',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=`,
       prependBasePath: true,

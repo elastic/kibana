@@ -2,6 +2,10 @@
   "type": "plugin",
   "id": "@kbn/screenshotting-example-plugin",
   "owner": "@elastic/appex-sharedux",
+  // This plugin is not meant to be referenced or imported
+  "visibility": "private",
+  // If cloned / used as an inspiration, please bear in mind that your plugin might belong to a specific solution group
+  "group": "platform",
   "description": "An example integration with the screenshotting plugin.",
   "plugin": {
     "id": "screenshottingExample",

@@ -5,4 +5,3 @@
  * 2.0.
  */
 export const SLO_LONG_REFETCH_INTERVAL = 60 * 1000; // 1 minute
-export const SLO_SHORT_REFETCH_INTERVAL = 5 * 1000; // 5 seconds

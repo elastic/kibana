@@ -23,6 +23,13 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
+import type {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
+import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
 import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar';
 import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
 import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
@@ -43,7 +50,7 @@ import type {
   RequiredFieldInput,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import type {
   RuleResponseAction,
   ResponseAction,
@@ -132,7 +139,7 @@ export enum DataSourceType {
   DataView = 'dataView',
 }
 
-export enum GroupByOptions {
+export enum AlertSuppressionDurationType {
   PerRuleExecution = 'per-rule-execution',
   PerTimePeriod = 'per-time-period',
 }
@@ -157,16 +164,16 @@ export interface DefineStepRule {
   threatIndex: ThreatIndex;
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
-  eqlOptions: EqlOptionsSelected;
+  eqlOptions: EqlOptions;
   dataSourceType: DataSourceType;
   newTermsFields: string[];
   historyWindowSize: string;
   shouldLoadQueryDynamically: boolean;
-  groupByFields: string[];
-  groupByRadioSelection: GroupByOptions;
-  groupByDuration: Duration;
-  suppressionMissingFields?: AlertSuppressionMissingFieldsStrategy;
-  enableThresholdSuppression: boolean;
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: string[];
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType;
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: Duration;
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: AlertSuppressionMissingFieldsStrategy;
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: boolean;
 }
 
 export interface QueryDefineStep {

@@ -10,7 +10,7 @@ import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '../../../../common/locators/paths';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import {
   ALERTS_TAB_ID,

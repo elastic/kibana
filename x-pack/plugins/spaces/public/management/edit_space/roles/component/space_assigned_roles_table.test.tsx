@@ -18,7 +18,7 @@ const defaultProps: Pick<
   | 'onClickAssignNewRole'
   | 'onClickBulkRemove'
   | 'onClickRowEditAction'
-  | 'onClickRowRemoveAction'
+  | 'onClickRemoveRoleConfirm'
   | 'currentSpace'
 > = {
   currentSpace: {
@@ -29,7 +29,7 @@ const defaultProps: Pick<
   onClickBulkRemove: jest.fn(),
   onClickRowEditAction: jest.fn(),
   onClickAssignNewRole: jest.fn(),
-  onClickRowRemoveAction: jest.fn(),
+  onClickRemoveRoleConfirm: jest.fn(),
 };
 
 const renderTestComponent = (

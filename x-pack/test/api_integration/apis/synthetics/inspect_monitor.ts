@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('inspect http monitor  in private location', async () => {
-      const location = await testPrivateLocations.addTestPrivateLocation();
+      const location = await testPrivateLocations.addPrivateLocation();
       const apiResponse = await monitorTestService.inspectMonitor({
         ..._monitors[0],
         locations: [

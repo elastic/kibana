@@ -22,7 +22,6 @@ import {
   updateFleetProxy,
   getFleetProxyRelatedSavedObjects,
 } from '../../services/fleet_proxies';
-import { defaultFleetErrorHandler } from '../../errors';
 import type {
   GetOneFleetProxyRequestSchema,
   PostFleetProxyRequestSchema,
@@ -80,18 +79,14 @@ export const postFleetProxyHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
-  try {
-    const { id, ...data } = request.body;
-    const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
+  const { id, ...data } = request.body;
+  const proxy = await createFleetProxy(soClient, { ...data, is_preconfigured: false }, { id });
 
-    const body = {
-      item: proxy,
-    };
+  const body = {
+    item: proxy,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 
 export const putFleetProxyHandler: RequestHandler<
@@ -125,26 +120,22 @@ export const putFleetProxyHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
 export const getAllFleetProxyHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
 
-  try {
-    const res = await listFleetProxies(soClient);
-    const body = {
-      items: res.items,
-      page: res.page,
-      perPage: res.perPage,
-      total: res.total,
-    };
+  const res = await listFleetProxies(soClient);
+  const body = {
+    items: res.items,
+    page: res.page,
+    perPage: res.perPage,
+    total: res.total,
+  };
 
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  return response.ok({ body });
 };
 
 export const deleteFleetProxyHandler: RequestHandler<
@@ -177,7 +168,7 @@ export const deleteFleetProxyHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -199,6 +190,6 @@ export const getFleetProxyHandler: RequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };

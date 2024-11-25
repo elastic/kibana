@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
+import { act, renderHook } from '@testing-library/react';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';

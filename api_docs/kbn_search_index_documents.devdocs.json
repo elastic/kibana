@@ -333,7 +333,7 @@
         "label": "Result",
         "description": [],
         "signature": [
-          "({ metaData, fields, defaultVisibleFields, compactCard, showScore, onDocumentClick, onDocumentDelete, }: ",
+          "({ metaData, fields, defaultVisibleFields, compactCard, showScore, onDocumentClick, onDocumentDelete, hasDeleteDocumentsPrivilege, }: ",
           "ResultProps",
           ") => React.JSX.Element"
         ],
@@ -346,7 +346,7 @@
             "id": "def-common.Result.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  metaData,\n  fields,\n  defaultVisibleFields = DEFAULT_VISIBLE_FIELDS,\n  compactCard = true,\n  showScore = false,\n  onDocumentClick,\n  onDocumentDelete,\n}",
+            "label": "{\n  metaData,\n  fields,\n  defaultVisibleFields = DEFAULT_VISIBLE_FIELDS,\n  compactCard = true,\n  showScore = false,\n  onDocumentClick,\n  onDocumentDelete,\n  hasDeleteDocumentsPrivilege,\n}",
             "description": [],
             "signature": [
               "ResultProps"

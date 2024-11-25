@@ -6,7 +6,10 @@
  */
 
 import { useMemo } from 'react';
-import { LIST_ENTITIES_URL } from '../../../common/entity_analytics/entity_store/constants';
+import {
+  ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
+  LIST_ENTITIES_URL,
+} from '../../../common/entity_analytics/entity_store/constants';
 import type { UploadAssetCriticalityRecordsResponse } from '../../../common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type { DisableRiskEngineResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
@@ -173,6 +176,15 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
+     * Get Entity Store privileges
+     */
+    const fetchEntityStorePrivileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_INTERNAL_PRIVILEGES_URL, {
+        version: '1',
+        method: 'GET',
+      });
+
+    /**
      * Create asset criticality
      */
     const createAssetCriticality = async (
@@ -295,6 +307,7 @@ export const useEntityAnalyticsRoutes = () => {
       scheduleNowRiskEngine,
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
+      fetchEntityStorePrivileges,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,

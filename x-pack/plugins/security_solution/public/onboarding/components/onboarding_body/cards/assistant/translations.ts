@@ -42,3 +42,10 @@ export const ASSISTANT_CARD_CREATE_NEW_CONNECTOR_POPOVER = i18n.translate(
     defaultMessage: 'Create new connector',
   }
 );
+
+export const PRIVILEGES_MISSING_TITLE = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.callout.title',
+  {
+    defaultMessage: 'Missing privileges',
+  }
+);

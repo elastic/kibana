@@ -120,7 +120,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                 label={i18n.translate('xpack.lens.xyChart.missingValuesStyle', {
                   defaultMessage: 'Show as dotted line',
                 })}
-                display="columnCompressedSwitch"
+                display="columnCompressed"
               >
                 <EuiSwitch
                   showLabel={false}

@@ -37,7 +37,9 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 }) {
   const { http } = useKibana().services;
 
-  const modelName = knowledgeBase.status.value?.model_name;
+  const modelId = knowledgeBase.status.value?.endpoint?.service_settings?.model_id;
+  const deploymentState = knowledgeBase.status.value?.model_stats?.deployment_state;
+  const allocationState = knowledgeBase.status.value?.model_stats?.allocation_state;
 
   return (
     <div
@@ -56,48 +58,42 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 
           <EuiDescriptionListDescription>
             <ul>
-              {!knowledgeBase.status.value?.deployment_state ? (
+              {!deploymentState ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
                     id="xpack.aiAssistant.welcomeMessage.modelIsNotDeployedLabel"
-                    defaultMessage="Model {modelName} is not deployed"
+                    defaultMessage="Model {modelId} is not deployed"
                     values={{
-                      modelName: <EuiCode>{modelName}</EuiCode>,
+                      modelId: <EuiCode>{modelId}</EuiCode>,
                     }}
                   />
                 </li>
               ) : null}
 
-              {knowledgeBase.status.value?.deployment_state &&
-              knowledgeBase.status.value.deployment_state !== 'started' ? (
+              {deploymentState && deploymentState !== 'started' ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
                     id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabel"
-                    defaultMessage="Deployment state of {modelName} is {deploymentState}"
+                    defaultMessage="Deployment state of {modelId} is {deploymentState}"
                     values={{
-                      modelName: <EuiCode>{modelName}</EuiCode>,
-                      deploymentState: (
-                        <EuiCode>{knowledgeBase.status.value?.deployment_state}</EuiCode>
-                      ),
+                      modelId: <EuiCode>{modelId}</EuiCode>,
+                      deploymentState: <EuiCode>{deploymentState}</EuiCode>,
                     }}
                   />
                 </li>
               ) : null}
 
-              {knowledgeBase.status.value?.allocation_state &&
-              knowledgeBase.status.value.allocation_state !== 'fully_allocated' ? (
+              {allocationState && allocationState !== 'fully_allocated' ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
                     id="xpack.aiAssistant.welcomeMessage.modelIsNotFullyAllocatedLabel"
-                    defaultMessage="Allocation state of {modelName} is {allocationState}"
+                    defaultMessage="Allocation state of {modelId} is {allocationState}"
                     values={{
-                      modelName: <EuiCode>{modelName}</EuiCode>,
-                      allocationState: (
-                        <EuiCode>{knowledgeBase.status.value?.allocation_state}</EuiCode>
-                      ),
+                      modelId: <EuiCode>{modelId}</EuiCode>,
+                      allocationState: <EuiCode>{allocationState}</EuiCode>,
                     }}
                   />
                 </li>
@@ -114,9 +110,9 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
           <FormattedMessage
             id="xpack.aiAssistant.welcomeMessage.div.checkTrainedModelsToLabel"
             defaultMessage="
-                {retryInstallingLink} or check {trainedModelsLink} to ensure {modelName} is deployed and running."
+                {retryInstallingLink} or check {trainedModelsLink} to ensure {modelId} is deployed and running."
             values={{
-              modelName,
+              modelId,
               retryInstallingLink: (
                 <EuiLink
                   data-test-subj="observabilityAiAssistantWelcomeMessageKnowledgeBaseSetupErrorPanelRetryInstallingLink"

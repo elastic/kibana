@@ -204,10 +204,9 @@ export class UnifiedFieldListPageObject extends FtrService {
 
     if (!isActive) {
       // expand the field to show the "Visualize" button
-      await field.click();
+      await this.clickFieldListItem(fieldName);
     }
 
-    await this.waitUntilFieldPopoverIsOpen();
     const visualizeButtonTestSubject = `fieldVisualize-${fieldName}`;
     // wrap visualize button click in retry to ensure button is clicked and retry if button click is not registered
     await this.retry.try(async () => {
@@ -224,6 +223,16 @@ export class UnifiedFieldListPageObject extends FtrService {
 
   public async expectMissingFieldListItemVisualize(field: string) {
     await this.testSubjects.missingOrFail(`fieldVisualize-${field}`);
+  }
+
+  public async clickFieldListAddBreakdownField(field: string) {
+    const addBreakdownFieldTestSubj = `fieldPopoverHeader_addBreakdownField-${field}`;
+    if (!(await this.testSubjects.exists(addBreakdownFieldTestSubj))) {
+      // field has to be open
+      await this.clickFieldListItem(field);
+    }
+    await this.testSubjects.click(addBreakdownFieldTestSubj);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickFieldListPlusFilter(field: string, value: string) {

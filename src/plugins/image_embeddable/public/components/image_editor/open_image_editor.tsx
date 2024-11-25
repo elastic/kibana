@@ -79,6 +79,9 @@ export const openImageEditor = async ({
         onClose: () => {
           onCancel();
         },
+        size: 'm',
+        maxWidth: 500,
+        paddingSize: 'm',
         ownFocus: true,
         'data-test-subj': 'createImageEmbeddableFlyout',
       }

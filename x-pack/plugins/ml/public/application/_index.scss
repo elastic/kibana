@@ -5,15 +5,12 @@
 // SASSTODO: Prefix ml selectors instead
 .ml-app {
   // Sub applications
-  @import 'data_frame_analytics/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
 
   // Components
   @import 'components/annotations/annotation_description_list/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/anomalies_table/index'; // SASSTODO: This file overwrites EUI directly
-  @import 'components/color_range_legend/index';
   @import 'components/entity_cell/index';
-  @import 'components/influencers_list/index';
   @import 'components/job_selector/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
 

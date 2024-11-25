@@ -55,6 +55,7 @@ class DocumentationService {
   private mappingSimilarity: string = '';
   private mappingSourceFields: string = '';
   private mappingSourceFieldsDisable: string = '';
+  private mappingSyntheticSourceFields: string = '';
   private mappingStore: string = '';
   private mappingSubobjects: string = '';
   private mappingTermVector: string = '';
@@ -115,6 +116,7 @@ class DocumentationService {
     this.mappingSimilarity = links.elasticsearch.mappingSimilarity;
     this.mappingSourceFields = links.elasticsearch.mappingSourceFields;
     this.mappingSourceFieldsDisable = links.elasticsearch.mappingSourceFieldsDisable;
+    this.mappingSyntheticSourceFields = links.elasticsearch.mappingSyntheticSourceFields;
     this.mappingStore = links.elasticsearch.mappingStore;
     this.mappingSubobjects = links.elasticsearch.mappingSubobjects;
     this.mappingTermVector = links.elasticsearch.mappingTermVector;
@@ -213,6 +215,10 @@ class DocumentationService {
 
   public getDisablingMappingSourceFieldLink() {
     return this.mappingSourceFieldsDisable;
+  }
+
+  public getMappingSyntheticSourceFieldLink() {
+    return this.mappingSyntheticSourceFields;
   }
 
   public getNullValueLink() {

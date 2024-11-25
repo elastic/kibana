@@ -11,7 +11,12 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexedFieldItem } from '../../types';
-import { Table, renderFieldName, getConflictModalContent, showDelete } from './table';
+import {
+  TableWithoutPersist as Table,
+  renderFieldName,
+  getConflictModalContent,
+  showDelete,
+} from './table';
 import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
 
 const coreStart = coreMock.createStart();
@@ -80,6 +85,14 @@ const items: IndexedFieldItem[] = [
   },
 ];
 
+const baseProps = {
+  euiTablePersist: {
+    pageSize: 10,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'name' as const } },
+  },
+};
+
 const renderTable = (
   { editField } = {
     editField: () => {},
@@ -87,6 +100,7 @@ const renderTable = (
 ) =>
   shallow(
     <Table
+      {...baseProps}
       indexPattern={indexPattern}
       items={items}
       editField={editField}

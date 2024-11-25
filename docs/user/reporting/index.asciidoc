@@ -54,7 +54,7 @@ In the following dashboard, the shareable container is highlighted:
 [role="screenshot"]
 image::user/reporting/images/shareable-container.png["Shareable Container"]
 
-. Open the main menu, then open the saved search, dashboard, visualization, or workpad you want to share.
+. Open the saved search, dashboard, visualization, or workpad you want to share.
 
 . From the toolbar, click *Share*, then select the report option. 
 
@@ -94,7 +94,7 @@ include::reporting-pdf-limitations.asciidoc[]
 
 Create and share JSON files for workpads.
 
-. Open the main menu, then click *Canvas*.
+. Go to *Canvas*.
 
 . Open the workpad you want to share.
 
@@ -118,7 +118,7 @@ change {kib} sizing, {ess-console}[edit the deployment].
 
 beta[] Create and securely share static *Canvas* workpads on a website. To customize the behavior of the workpad on your website, you can choose to autoplay the pages or hide the workpad toolbar.
 
-. Open the main menu, then click *Canvas*.
+. Go to *Canvas*.
 
 . Open the workpad you want to share.
 
@@ -140,7 +140,7 @@ Display your dashboards on an internal company website or personal web page with
 
 For information about granting access to embedded dashboards, refer to <<kibana-authentication>>.
 
-. Open the main menu, then open the dashboard you want to share.
+. Open the dashboard you want to share.
 
 . Click *Share > Embed code*.
 

@@ -24,8 +24,10 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
     .delete({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

@@ -2332,6 +2332,34 @@
             "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls_resolved.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls_resolved.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-usage-data-server",
+            "id": "def-server.CoreUsageStats.deprecated_api_calls.total",
+            "type": "number",
+            "tags": [],
+            "label": "'deprecated_api_calls.total'",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/usage-data/core-usage-data-server/src/core_usage_stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

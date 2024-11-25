@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { PropsWithChildren } from 'react';
 import { merge } from 'lodash';
 import { createMemoryHistory } from 'history';
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { act, waitFor, renderHook } from '@testing-library/react';
 
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
@@ -22,7 +23,7 @@ import { fromQuery } from '../../shared/links/url_helpers';
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import type { APIEndpoint } from '../../../../server';
 
-function wrapper({ children, error = false }: { children?: ReactNode; error: boolean }) {
+function wrapper({ children, error = false }: PropsWithChildren<{ error?: boolean }>) {
   const getHttpMethodMock = (method: 'GET' | 'POST') =>
     jest.fn().mockImplementation(async (pathname) => {
       await delay(100);
@@ -107,17 +108,18 @@ describe('useFailedTransactionsCorrelations', () => {
         wrapper,
       });
 
-      try {
+      await waitFor(() =>
         expect(result.current.progress).toEqual({
           isRunning: true,
           loaded: 0,
-        });
-        expect(result.current.response).toEqual({ ccsWarning: false });
-        expect(typeof result.current.startFetch).toEqual('function');
-        expect(typeof result.current.cancelFetch).toEqual('function');
-      } finally {
-        unmount();
-      }
+        })
+      );
+
+      expect(result.current.response).toEqual({ ccsWarning: false });
+      expect(result.current.startFetch).toEqual(expect.any(Function));
+      expect(result.current.cancelFetch).toEqual(expect.any(Function));
+
+      unmount();
     });
 
     it('should not have received any results after 50ms', async () => {
@@ -125,21 +127,21 @@ describe('useFailedTransactionsCorrelations', () => {
         wrapper,
       });
 
-      try {
-        jest.advanceTimersByTime(50);
+      jest.advanceTimersByTime(50);
 
+      await waitFor(() =>
         expect(result.current.progress).toEqual({
           isRunning: true,
           loaded: 0,
-        });
-        expect(result.current.response).toEqual({ ccsWarning: false });
-      } finally {
-        unmount();
-      }
+        })
+      );
+
+      expect(result.current.response).toEqual({ ccsWarning: false });
+      unmount();
     });
 
     it('should receive partial updates and finish running', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useFailedTransactionsCorrelations(), {
+      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
         wrapper,
       });
 
@@ -253,29 +255,37 @@ describe('useFailedTransactionsCorrelations', () => {
   });
   describe('when throwing an error', () => {
     it('should automatically start fetching results', async () => {
-      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useFailedTransactionsCorrelations, {
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
-      try {
+      await waitFor(() =>
         expect(result.current.progress).toEqual({
           isRunning: true,
           loaded: 0,
-        });
-      } finally {
-        unmount();
-      }
+        })
+      );
+
+      unmount();
     });
 
     it('should still be running after 50ms', async () => {
-      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useFailedTransactionsCorrelations, {
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       try {
@@ -292,11 +302,15 @@ describe('useFailedTransactionsCorrelations', () => {
     });
 
     it('should stop and return an error after more than 100ms', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useFailedTransactionsCorrelations(), {
-        wrapper,
-        initialProps: {
-          error: true,
-        },
+      const { result, unmount } = renderHook(useFailedTransactionsCorrelations, {
+        wrapper: ({ children }) =>
+          React.createElement(
+            wrapper,
+            {
+              error: true,
+            },
+            children
+          ),
       });
 
       try {
@@ -316,7 +330,7 @@ describe('useFailedTransactionsCorrelations', () => {
 
   describe('when canceled', () => {
     it('should stop running', async () => {
-      const { result, unmount, waitFor } = renderHook(() => useFailedTransactionsCorrelations(), {
+      const { result, unmount } = renderHook(() => useFailedTransactionsCorrelations(), {
         wrapper,
       });
 

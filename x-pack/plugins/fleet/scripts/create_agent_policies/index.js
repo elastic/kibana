@@ -12,6 +12,6 @@ require('./create_agent_policies').run();
 Usage:
 
 cd x-pack/plugins/fleet
-node scripts/create_agents/index.js
+node scripts/create_agent_policies/index.js
 
 */

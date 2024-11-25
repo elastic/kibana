@@ -13,11 +13,11 @@ import {
   apmTransactionErrorRateIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
+import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
+  SLO_DESTINATION_INDEX_NAME,
   getSLOPipelineId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { APMTransactionErrorRateIndicator, SLODefinition } from '../../domain/models';
@@ -25,11 +25,11 @@ import { InvalidTransformError } from '../../errors';
 import { getFilterRange, getTimesliceTargetComparator, parseIndex } from './common';
 
 export class ApmTransactionErrorRateTransformGenerator extends TransformGenerator {
-  public async getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest> {
+  constructor(spaceId: string, dataViewService: DataViewsService) {
+    super(spaceId, dataViewService);
+  }
+
+  public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
     if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
       throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
@@ -37,7 +37,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     return getSLOTransformTemplate(
       this.buildTransformId(slo),
       this.buildDescription(slo),
-      await this.buildSource(slo, slo.indicator, dataViewService),
+      await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildGroupBy(slo, slo.indicator),
       this.buildAggregations(slo),
@@ -73,11 +73,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     return this.buildCommonGroupBy(slo, '@timestamp', extraGroupByFields);
   }
 
-  private async buildSource(
-    slo: SLODefinition,
-    indicator: APMTransactionErrorRateIndicator,
-    dataViewService: DataViewsService
-  ) {
+  private async buildSource(slo: SLODefinition, indicator: APMTransactionErrorRateIndicator) {
     const queryFilter: estypes.QueryDslQueryContainer[] = [getFilterRange(slo, '@timestamp')];
 
     if (indicator.params.service !== ALL_VALUE) {
@@ -112,10 +108,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
       });
     }
 
-    const dataView = await this.getIndicatorDataView({
-      dataViewService,
-      dataViewId: indicator.params.dataViewId,
-    });
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
 
     if (indicator.params.filter) {
       queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter, dataView));
@@ -123,7 +116,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
 
     return {
       index: parseIndex(indicator.params.index),
-      runtime_mappings: this.buildCommonRuntimeMappings(slo, dataView),
+      runtime_mappings: this.buildCommonRuntimeMappings(dataView),
       query: {
         bool: {
           filter: [

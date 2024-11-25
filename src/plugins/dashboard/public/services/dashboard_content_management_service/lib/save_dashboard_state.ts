@@ -13,9 +13,16 @@ import moment, { Moment } from 'moment';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
 import { isFilterPinned } from '@kbn/es-query';
 
+import type { SavedObjectReference } from '@kbn/core/server';
 import { getDashboardContentManagementCache } from '..';
-import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
-import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
+import { convertPanelMapToPanelsArray, extractReferences } from '../../../../common';
+import type {
+  DashboardAttributes,
+  DashboardCreateIn,
+  DashboardCreateOut,
+  DashboardUpdateIn,
+  DashboardUpdateOut,
+} from '../../../../server/content_management';
 import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
@@ -28,7 +35,7 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../../kibana_services';
-import { SaveDashboardProps, SaveDashboardReturn } from '../types';
+import { DashboardSearchSource, SaveDashboardProps, SaveDashboardReturn } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
 
 export const convertTimeToUTCString = (time?: string | Moment): undefined | string => {
@@ -88,33 +95,30 @@ export const saveDashboardState = async ({
     //
   }
 
-  /**
-   * Stringify filters and query into search source JSON
-   */
-  const { searchSourceJSON, searchSourceReferences } = await (async () => {
-    const searchSource = await dataSearchService.searchSource.create();
-    searchSource.setField(
+  const { searchSource, searchSourceReferences } = await (async () => {
+    const searchSourceFields = await dataSearchService.searchSource.create();
+    searchSourceFields.setField(
       'filter', // save only unpinned filters
       filters.filter((filter) => !isFilterPinned(filter))
     );
-    searchSource.setField('query', query);
+    searchSourceFields.setField('query', query);
 
-    const rawSearchSourceFields = searchSource.getSerializedFields();
-    const [fields, references] = extractSearchSourceReferences(rawSearchSourceFields);
-    return { searchSourceReferences: references, searchSourceJSON: JSON.stringify(fields) };
+    const rawSearchSourceFields = searchSourceFields.getSerializedFields();
+    const [fields, references] = extractSearchSourceReferences(rawSearchSourceFields) as [
+      DashboardSearchSource,
+      SavedObjectReference[]
+    ];
+    return { searchSourceReferences: references, searchSource: fields };
   })();
 
-  /**
-   * Stringify options and panels
-   */
-  const optionsJSON = JSON.stringify({
+  const options = {
     useMargins,
     syncColors,
     syncCursor,
     syncTooltips,
     hidePanelTitles,
-  });
-  const panelsJSON = JSON.stringify(convertPanelMapToSavedPanels(panels, true));
+  };
+  const savedPanels = convertPanelMapToPanelsArray(panels, true);
 
   /**
    * Parse global time filter settings
@@ -134,12 +138,12 @@ export const saveDashboardState = async ({
   const rawDashboardAttributes: DashboardAttributes = {
     version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput,
-    kibanaSavedObjectMeta: { searchSourceJSON },
+    kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
     refreshInterval,
     timeRestore,
-    optionsJSON,
-    panelsJSON,
+    options,
+    panels: savedPanels,
     timeFrom,
     title,
     timeTo,
@@ -174,10 +178,7 @@ export const saveDashboardState = async ({
 
   try {
     const result = idToSaveTo
-      ? await contentManagementService.client.update<
-          DashboardCrudTypes['UpdateIn'],
-          DashboardCrudTypes['UpdateOut']
-        >({
+      ? await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
           id: idToSaveTo,
           contentTypeId: DASHBOARD_CONTENT_ID,
           data: attributes,
@@ -187,10 +188,7 @@ export const saveDashboardState = async ({
             mergeAttributes: false,
           },
         })
-      : await contentManagementService.client.create<
-          DashboardCrudTypes['CreateIn'],
-          DashboardCrudTypes['CreateOut']
-        >({
+      : await contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
           contentTypeId: DASHBOARD_CONTENT_ID,
           data: attributes,
           options: {

@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { configSchema } from '../common/config';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { SLOConfig, configSchema } from '../common/config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SloPlugin } = await import('./plugin');
-  return new SloPlugin(initializerContext);
+export async function plugin(ctx: PluginInitializerContext<SLOConfig>) {
+  const { SLOPlugin } = await import('./plugin');
+  return new SLOPlugin(ctx);
 }
 
-export type { PluginSetup, PluginStart } from './plugin';
-
-export const config = {
+export const config: PluginConfigDescriptor<SLOConfig> = {
   schema: configSchema,
   exposeToBrowser: {
     experimental: true,
   },
 };
-export type { SloConfig } from '../common/config';

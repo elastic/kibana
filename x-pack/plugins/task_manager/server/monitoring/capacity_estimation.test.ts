@@ -644,7 +644,7 @@ describe('estimateCapacity', () => {
       value: expect.any(Object),
     });
     expect(logger.warn).toHaveBeenCalledWith(
-      'Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (175) < capacityPerMinutePerKibana (200)'
+      'Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (215) >= capacityPerMinutePerKibana (200)'
     );
   });
 
@@ -710,7 +710,7 @@ describe('estimateCapacity', () => {
       value: expect.any(Object),
     });
     expect(logger.warn).toHaveBeenCalledWith(
-      'Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (250) >= capacityPerMinutePerKibana (200) AND assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) >= capacityPerMinutePerKibana (200)'
+      'Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (210) > capacityPerMinutePerKibana (200)'
     );
   });
 

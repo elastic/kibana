@@ -23,8 +23,10 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages/{jobId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Gets audit messages',
       description: 'Retrieves the audit messages for the specified job ID.',
@@ -66,8 +68,10 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/messages`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetJobs'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetJobs'],
+        },
       },
       summary: 'Gets all audit messages',
       description: 'Retrieves all audit messages.',
@@ -102,8 +106,10 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/job_audit_messages/clear_messages`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Clear messages',
       description: 'Clear the job audit messages.',

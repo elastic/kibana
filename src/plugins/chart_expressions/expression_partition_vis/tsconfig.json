@@ -30,6 +30,7 @@
     "@kbn/chart-expressions-common",
     "@kbn/cell-actions",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-rendering-browser",
   ],
   "exclude": [
     "target/**/*",

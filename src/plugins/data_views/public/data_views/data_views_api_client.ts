@@ -56,6 +56,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const userId = await this.getCurrentUserId();
 
     const userHash = userId ? await sha1(userId) : '';
+    const headers = userHash ? { 'user-hash': userHash } : undefined;
 
     const request = body
       ? this.http.post<T>(url, { query, body, version, asResponse })
@@ -64,7 +65,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
           version,
           ...cacheOptions,
           asResponse,
-          headers: { 'user-hash': userHash },
+          headers,
         });
 
     return request.catch((resp) => {

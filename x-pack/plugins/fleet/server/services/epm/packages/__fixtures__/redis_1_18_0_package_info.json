@@ -140,6 +140,15 @@
               "default": "20s"
             },
             {
+              "name": "tags",
+              "type": "text",
+              "title": "Tags",
+              "multi": true,
+              "required": false,
+              "show_user": false,
+              "default": ""
+            },
+            {
               "name": "maxconn",
               "type": "integer",
               "title": "Maxconn",
@@ -203,6 +212,15 @@
         {
           "input": "redis/metrics",
           "vars": [
+            {
+              "name": "tags_streams",
+              "type": "text",
+              "title": "Tags in streams",
+              "multi": true,
+              "required": false,
+              "show_user": false,
+              "default": ""
+            },
             {
               "name": "key.patterns",
               "type": "yaml",

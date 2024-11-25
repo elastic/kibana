@@ -18,7 +18,11 @@ export const getAgentPolicyRoute = (router: IRouter, osqueryContext: OsqueryAppC
     .get({
       access: 'internal',
       path: '/internal/osquery/fleet_wrapper/agent_policies/{id}',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
     })
     .addVersion(
       {

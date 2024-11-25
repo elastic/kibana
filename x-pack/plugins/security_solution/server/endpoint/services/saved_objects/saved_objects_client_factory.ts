@@ -9,10 +9,10 @@
 
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import type { HttpServiceSetup } from '@kbn/core/server';
-import { type SavedObjectsClientContract } from '@kbn/core/server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
@@ -39,8 +39,8 @@ export class SavedObjectsClientFactory {
     private readonly httpServiceSetup: HttpServiceSetup
   ) {}
 
-  protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): CoreKibanaRequest {
-    const fakeRequest = CoreKibanaRequest.from({
+  protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
+    const fakeRequest = kibanaRequestFactory({
       headers: {},
       path: '/',
       route: { settings: {} },

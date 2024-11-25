@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../common/mock';
 import { EntitiesDetails } from './entities_details';
 import { ENTITIES_DETAILS_TEST_ID, HOST_DETAILS_TEST_ID, USER_DETAILS_TEST_ID } from './test_ids';
 import { mockContextValue } from '../../shared/mocks/mock_context';
-import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '@kbn/security-solution-common';
+import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
@@ -65,7 +65,9 @@ jest.mock('../../../../helper_hooks', () => ({
 }));
 
 jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
+  useSourcererDataView: jest
+    .fn()
+    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({

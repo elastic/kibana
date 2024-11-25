@@ -55,6 +55,7 @@ export function useAlertsHistory({
   http,
   instanceId,
 }: Props): UseAlertsHistory {
+  const enabled = !!featureIds.length;
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -71,10 +72,11 @@ export function useAlertsHistory({
       });
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
   return {
     data: isInitialLoading ? EMPTY_ALERTS_HISTORY : data ?? EMPTY_ALERTS_HISTORY,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    isLoading: enabled && (isInitialLoading || isLoading || isRefetching),
     isSuccess,
     isError,
   };

@@ -43,3 +43,30 @@ export interface Suggestion<T = unknown, V = unknown> {
   changeType: TableChangeType;
   keptLayerIds: string[];
 }
+
+export enum ChartType {
+  XY = 'XY',
+  Gauge = 'Gauge',
+  Bar = 'Bar',
+  Line = 'Line',
+  Area = 'Area',
+  Donut = 'Donut',
+  Heatmap = 'Heatmap',
+  Metric = 'Metric',
+  Treemap = 'Treemap',
+  Tagcloud = 'Tagcloud',
+  Waffle = 'Waffle',
+  Pie = 'Pie',
+  Mosaic = 'Mosaic',
+  Table = 'Table',
+}
+
+export enum LensVisualizationType {
+  XY = 'lnsXY',
+  Metric = 'lnsMetric',
+  Pie = 'lnsPie',
+  Heatmap = 'lnsHeatmap',
+  Gauge = 'lnsGauge',
+  Datatable = 'lnsDatatable',
+  LegacyMetric = 'lnsLegacyMetric',
+}

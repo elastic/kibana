@@ -125,7 +125,7 @@ export const createPlatformPipeline = async ({
         managed_by: 'entity_store',
         managed: true,
       },
-      description: `Ingest pipeline for entity defiinition ${entityManagerDefinition.id}`,
+      description: `Ingest pipeline for entity definition ${entityManagerDefinition.id}`,
       processors: buildIngestPipeline({
         namespace: unitedDefinition.namespace,
         version: unitedDefinition.version,

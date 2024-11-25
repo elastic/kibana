@@ -94,6 +94,7 @@ function toMissingDataStream({
     privileges: { delete_index: true, manage_data_stream_lifecycle: true },
     hidden: false,
     nextGenerationManagedBy: 'Data stream lifecycle',
+    indexMode: 'standard',
   };
 }
 

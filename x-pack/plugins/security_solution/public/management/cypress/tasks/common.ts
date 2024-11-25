@@ -15,7 +15,7 @@ export const API_AUTH = Object.freeze({
 export const COMMON_API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress',
   'x-elastic-internal-origin': 'security-solution',
-  'Elastic-Api-Version': '2023-10-31',
+  'elastic-api-version': '2023-10-31',
 });
 
 export const waitForPageToBeLoaded = () => {

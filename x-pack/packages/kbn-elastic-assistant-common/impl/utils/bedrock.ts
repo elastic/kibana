@@ -15,14 +15,14 @@ import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
  * @param {Uint8Array[]} chunks - Array of Uint8Array chunks to be parsed.
  * @returns {string} - Parsed string from the Bedrock buffer.
  */
-export const parseBedrockBuffer = (chunks: Uint8Array[], logger: Logger): string => {
+export const parseBedrockBuffer = (chunks: Uint8Array[]): string => {
   // Initialize an empty Uint8Array to store the concatenated buffer.
   let bedrockBuffer: Uint8Array = new Uint8Array(0);
 
   // Map through each chunk to process the Bedrock buffer.
   return chunks
     .map((chunk) => {
-      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer, logger });
+      const processedChunk = handleBedrockChunk({ chunk, bedrockBuffer });
       bedrockBuffer = processedChunk.bedrockBuffer;
       return processedChunk.decodedChunk;
     })

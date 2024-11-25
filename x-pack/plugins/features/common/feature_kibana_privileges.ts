@@ -188,6 +188,7 @@ export interface FeatureKibanaPrivileges {
     read?: readonly string[];
     /**
      * List of case owners which users should have update access to when granted this privilege.
+     * This privilege does NOT provide access to re-opening a case. Please see `reopenCase` for said functionality.
      * @example
      * ```ts
      *  {
@@ -216,6 +217,26 @@ export interface FeatureKibanaPrivileges {
      * ```
      */
     settings?: readonly string[];
+    /**
+     * List of case owners whose users should have createComment access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    createComment: ['securitySolution']
+     *  }
+     * ```
+     */
+    createComment?: readonly string[];
+    /**
+     * List of case owners whose users should have reopenCase access when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    reopenCase: ['securitySolution']
+     *  }
+     * ```
+     */
+    reopenCase?: readonly string[];
   };
 
   /**

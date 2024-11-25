@@ -15,6 +15,7 @@ import type {
 
 import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 import { DocumentCountChartRedux } from '@kbn/aiops-components';
+import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
@@ -30,28 +31,47 @@ export interface DocumentCountContentProps {
   barStyleAccessor?: BarStyleAccessor;
   baselineAnnotationStyle?: RectAnnotationSpec['style'];
   deviationAnnotationStyle?: RectAnnotationSpec['style'];
+  attachmentsMenu?: React.ReactNode;
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
+  attachmentsMenu,
   ...docCountChartProps
 }) => {
-  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+  const { data, uiSettings, fieldFormats, charts, embeddingOrigin } = useAiopsAppContext();
 
   const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
   const { sampleProbability, totalCount, documentCountStats } = documentStats;
 
   if (documentCountStats === undefined) {
-    return totalCount !== undefined ? (
+    return totalCount !== undefined && embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD ? (
       <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
     ) : null;
+  }
+
+  if (embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD) {
+    return (
+      <DocumentCountChartRedux
+        dependencies={{ data, uiSettings, fieldFormats, charts }}
+        barColorOverride={barColorOverride}
+        barHighlightColorOverride={barHighlightColorOverride}
+        changePoint={documentCountStats.changePoint}
+        {...docCountChartProps}
+      />
+    );
   }
 
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexItem>
-        <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
+          </EuiFlexItem>
+          {attachmentsMenu && <EuiFlexItem grow={false}>{attachmentsMenu}</EuiFlexItem>}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <DocumentCountChartRedux

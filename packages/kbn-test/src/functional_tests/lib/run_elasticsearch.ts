@@ -11,6 +11,7 @@ import Url from 'url';
 import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
+import getopts from 'getopts';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import { isServerlessProjectType, extractAndArchiveLogs } from '@kbn/es/src/utils';
@@ -196,12 +197,8 @@ function getESServerlessOptions(
       (config.get('kbnTestServer.serverArgs') as string[])) ||
     [];
 
-  const projectType = kbnServerArgs
-    .filter((arg) => arg.startsWith('--serverless'))
-    .reduce((acc, arg) => {
-      const match = arg.match(/--serverless[=\s](\w+)/);
-      return acc + (match ? match[1] : '');
-    }, '') as ServerlessProjectType;
+  const options = getopts(kbnServerArgs);
+  const projectType = options.serverless as ServerlessProjectType;
 
   if (!isServerlessProjectType(projectType)) {
     throw new Error(`Unsupported serverless projectType: ${projectType}`);

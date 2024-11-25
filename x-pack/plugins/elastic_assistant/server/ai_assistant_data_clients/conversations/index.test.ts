@@ -7,21 +7,15 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AIAssistantConversationsDataClient } from '.';
-import { AuthenticatedUser } from '@kbn/core-security-common';
 import { getUpdateConversationSchemaMock } from '../../__mocks__/conversations_schema.mock';
+import { authenticatedUser } from '../../__mocks__/user';
 import { AIAssistantDataClientParams } from '..';
 
 const date = '2023-03-28T22:27:28.159Z';
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const mockUser1 = {
-  username: 'my_username',
-  authentication_realm: {
-    type: 'my_realm_type',
-    name: 'my_realm_name',
-  },
-} as AuthenticatedUser;
+const mockUser1 = authenticatedUser;
 
 describe('AIAssistantConversationsDataClient', () => {
   let assistantConversationsDataClientParams: AIAssistantDataClientParams;

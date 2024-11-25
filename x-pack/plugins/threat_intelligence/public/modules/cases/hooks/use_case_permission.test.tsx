@@ -6,7 +6,7 @@
  */
 
 import React, { FC, ReactNode } from 'react';
-import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { KibanaContext } from '../../../hooks/use_kibana';
 import { useCaseDisabled } from './use_case_permission';
@@ -27,7 +27,7 @@ const getProviderComponent =
     );
 
 describe('useCasePermission', () => {
-  let hookResult: RenderHookResult<{}, boolean, Renderer<unknown>>;
+  let hookResult: RenderHookResult<boolean, unknown>;
 
   it('should return false if user has correct permissions and indicator has a name', () => {
     const mockedServices = {
@@ -36,7 +36,7 @@ describe('useCasePermission', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: true,
+            createComment: true,
             update: true,
           }),
         },
@@ -60,7 +60,7 @@ describe('useCasePermission', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: false,
+            createComment: false,
             update: true,
           }),
         },
@@ -84,7 +84,7 @@ describe('useCasePermission', () => {
         helpers: {
           ...casesServiceMock.helpers,
           canUseCases: () => ({
-            create: true,
+            createComment: true,
             update: true,
           }),
         },

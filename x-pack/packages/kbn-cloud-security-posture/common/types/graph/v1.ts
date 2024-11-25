@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   colorSchema,
   edgeDataSchema,
@@ -17,12 +18,20 @@ import {
   nodeShapeSchema,
 } from '../../schema/graph/v1';
 
-export type GraphRequest = TypeOf<typeof graphRequestSchema>;
-export type GraphResponse = TypeOf<typeof graphResponseSchema>;
+export type GraphRequest = Omit<TypeOf<typeof graphRequestSchema>, 'query.esQuery'> & {
+  query: { esQuery?: { bool: Partial<BoolQuery> } };
+};
+export type GraphResponse = Omit<TypeOf<typeof graphResponseSchema>, 'messages'> & {
+  messages?: ApiMessageCode[];
+};
 
 export type Color = typeof colorSchema.type;
 
 export type NodeShape = TypeOf<typeof nodeShapeSchema>;
+
+export enum ApiMessageCode {
+  ReachedNodesLimit = 'REACHED_NODES_LIMIT',
+}
 
 export type EntityNodeDataModel = TypeOf<typeof entityNodeDataSchema>;
 

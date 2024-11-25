@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
       await lens.clickVisualizeListItemTitle('lnsXYvis');
-      await lens.goToTimeRange();
       await lens.save('Embedded Visualization', true, false, false, 'new');
 
       await dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {

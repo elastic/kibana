@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { syntheticsAvailabilityIndicatorSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
-import { useKibana } from '../../../../utils/kibana_react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { OverviewItem } from './overview_item';
 
 interface Props {

@@ -194,9 +194,7 @@ describe('SearchBar', () => {
     });
 
     it(`tracks the user's search term`, async () => {
-      searchService.find.mockReturnValueOnce(
-        of(createBatch('Discover', { id: 'My Dashboard', type: 'test' }))
-      );
+      searchService.find.mockReturnValue(of(createBatch('Discover')));
 
       render(
         <IntlProvider locale="en">

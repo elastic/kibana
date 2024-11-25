@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/saved-objects-plugin",
   "owner": [
-    "@elastic/kibana-core"
+    "@elastic/appex-sharedux"
   ],
   "group": "platform",
   "visibility": "shared",

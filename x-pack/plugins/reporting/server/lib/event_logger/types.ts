@@ -20,7 +20,7 @@ export interface ReportingAction<A extends ActionType> extends LogMeta {
   kibana: {
     reporting: {
       actionType: A;
-      id?: string; // "immediate download" exports have no ID
+      id: string;
       jobType: string;
       byteSize?: number;
     } & TaskRunMetrics;

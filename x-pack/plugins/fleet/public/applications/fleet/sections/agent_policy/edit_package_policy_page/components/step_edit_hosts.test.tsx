@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
+
+import { userEvent } from '@testing-library/user-event';
 
 import type { TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
@@ -111,19 +113,20 @@ describe('StepEditHosts', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  it('should display create form when no agent policies', () => {
+  it('should display create form when no agent policies', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [],
       },
     });
 
+    (useAllNonManagedAgentPolicies as jest.MockedFunction<any>).mockReturnValue([]);
+
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByText('Agent policy 1')).toBeInTheDocument();
-    });
     expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
+    expect(renderResult.getByText('For existing hosts:')).toBeInTheDocument();
+    expect(renderResult.getByText('For a new host:')).toBeInTheDocument();
   });
 
   it('should display new policy button and existing policies when agent policies exist', () => {
@@ -144,7 +147,7 @@ describe('StepEditHosts', () => {
     ).toContain('Agent policy 1');
   });
 
-  it('should display dropdown without preselected value when mulitple agent policies', () => {
+  it('should display dropdown without preselected value when multiple agent policies', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [
@@ -156,12 +159,12 @@ describe('StepEditHosts', () => {
 
     render();
 
-    waitFor(() => {
-      expect(renderResult.getByText('At least one agent policy is required.')).toBeInTheDocument();
-    });
+    expect(
+      renderResult.getByText('Select an agent policy to add this integration to')
+    ).toBeInTheDocument();
   });
 
-  it('should display delete button when add button clicked', () => {
+  it('should display delete button when add button clicked', async () => {
     (useGetAgentPolicies as jest.MockedFunction<any>).mockReturnValue({
       data: {
         items: [{ id: '1', name: 'Agent policy 1', namespace: 'default' }],
@@ -173,10 +176,12 @@ describe('StepEditHosts', () => {
 
     render();
 
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('createNewAgentPolicyButton').closest('button')!);
-    });
+    await userEvent.click(
+      renderResult.getByTestId('createNewAgentPolicyButton').closest('button')!
+    );
 
-    expect(renderResult.getByTestId('deleteNewAgentPolicyButton')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(renderResult.getByTestId('deleteNewAgentPolicyButton')).toBeInTheDocument();
+    });
   });
 });

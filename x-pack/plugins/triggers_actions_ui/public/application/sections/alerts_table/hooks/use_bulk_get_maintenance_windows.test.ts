@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
 import * as api from './apis/bulk_get_maintenance_windows';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -96,7 +95,7 @@ describe('useBulkGetMaintenanceWindows', () => {
     const spy = jest.spyOn(api, 'bulkGetMaintenanceWindows');
     spy.mockResolvedValue(response);
 
-    const { waitForNextUpdate, result } = renderHook(
+    const { result } = renderHook(
       () =>
         useBulkGetMaintenanceWindows({
           ids: ['test-id'],
@@ -107,9 +106,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(result.current.data?.get('test-id')).toEqual(mockMaintenanceWindow);
+    await waitFor(() => expect(result.current.data?.get('test-id')).toEqual(mockMaintenanceWindow));
 
     expect(spy).toHaveBeenCalledWith({
       http: expect.anything(),
@@ -132,7 +129,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('does not call the api if license is not platinum', async () => {
@@ -152,7 +149,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('does not call the api if capabilities are not adequate', async () => {
@@ -177,7 +174,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       }
     );
 
-    expect(spy).not.toHaveBeenCalled();
+    await waitFor(() => expect(spy).not.toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -185,7 +182,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       .spyOn(api, 'bulkGetMaintenanceWindows')
       .mockRejectedValue(new Error('An error'));
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () =>
         useBulkGetMaintenanceWindows({
           ids: ['test-id'],
@@ -195,8 +192,6 @@ describe('useBulkGetMaintenanceWindows', () => {
         wrapper: appMockRender.AppWrapper,
       }
     );
-
-    await waitForNextUpdate();
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({

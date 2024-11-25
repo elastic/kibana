@@ -36,6 +36,7 @@ export interface RunFromSourceStepProps {
   connectorId?: string;
   isWaitingForConnector: boolean;
   serviceType: string;
+  connectorVersion: string;
 }
 
 export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
@@ -43,6 +44,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
   connectorId,
   isWaitingForConnector,
   serviceType,
+  connectorVersion,
 }) => {
   const [isOpen, setIsOpen] = React.useState<EuiAccordionProps['forceState']>('open');
   useEffect(() => {
@@ -125,7 +127,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         <CodeBox
           showTopBar={false}
           languageType="bash"
-          codeSnippet="cd connectors && touch config.yml"
+          codeSnippet={`cd connectors && git checkout ${connectorVersion} && touch config.yml`}
         />
         <EuiSpacer size="s" />
         <EuiText size="s">

@@ -80,6 +80,89 @@
       },
       {
         "parentPluginId": "@kbn/core-status-common",
+        "id": "def-common.ServerVersion",
+        "type": "Interface",
+        "tags": [],
+        "label": "ServerVersion",
+        "description": [],
+        "path": "packages/core/status/core-status-common/src/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.ServerVersion.number",
+            "type": "string",
+            "tags": [],
+            "label": "number",
+            "description": [],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.ServerVersion.build_hash",
+            "type": "string",
+            "tags": [],
+            "label": "build_hash",
+            "description": [],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.ServerVersion.build_number",
+            "type": "number",
+            "tags": [],
+            "label": "build_number",
+            "description": [],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.ServerVersion.build_snapshot",
+            "type": "boolean",
+            "tags": [],
+            "label": "build_snapshot",
+            "description": [],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.ServerVersion.build_flavor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "build_flavor",
+            "description": [],
+            "signature": [
+              "\"serverless\" | \"traditional\""
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.ServerVersion.build_date",
+            "type": "string",
+            "tags": [],
+            "label": "build_date",
+            "description": [],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-status-common",
         "id": "def-common.ServiceStatus",
         "type": "Interface",
         "tags": [],
@@ -180,10 +263,263 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-status-common",
+        "id": "def-common.StatusInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "StatusInfo",
+        "description": [],
+        "path": "packages/core/status/core-status-common/src/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusInfo.overall",
+            "type": "Object",
+            "tags": [],
+            "label": "overall",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.StatusInfoServiceStatus",
+                "text": "StatusInfoServiceStatus"
+              }
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusInfo.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              "{ elasticsearch: ",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.StatusInfoServiceStatus",
+                "text": "StatusInfoServiceStatus"
+              },
+              "; savedObjects: ",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.StatusInfoServiceStatus",
+                "text": "StatusInfoServiceStatus"
+              },
+              "; }"
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusInfo.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.StatusInfoServiceStatus",
+                "text": "StatusInfoServiceStatus"
+              },
+              "; }"
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-status-common",
+        "id": "def-common.StatusInfoServiceStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "StatusInfoServiceStatus",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-status-common",
+            "scope": "common",
+            "docId": "kibKbnCoreStatusCommonPluginApi",
+            "section": "def-common.StatusInfoServiceStatus",
+            "text": "StatusInfoServiceStatus"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "@kbn/core-status-common",
+            "scope": "common",
+            "docId": "kibKbnCoreStatusCommonPluginApi",
+            "section": "def-common.ServiceStatus",
+            "text": "ServiceStatus"
+          },
+          "<unknown>, \"level\">"
+        ],
+        "path": "packages/core/status/core-status-common/src/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusInfoServiceStatus.level",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "level",
+            "description": [],
+            "signature": [
+              "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-status-common",
+        "id": "def-common.StatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "StatusResponse",
+        "description": [],
+        "path": "packages/core/status/core-status-common/src/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusResponse.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusResponse.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusResponse.version",
+            "type": "Object",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.ServerVersion",
+                "text": "ServerVersion"
+              }
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusResponse.status",
+            "type": "Object",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-status-common",
+                "scope": "common",
+                "docId": "kibKbnCoreStatusCommonPluginApi",
+                "section": "def-common.StatusInfo",
+                "text": "StatusInfo"
+              }
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-common",
+            "id": "def-common.StatusResponse.metrics",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "@kbn/core-metrics-server",
+                "scope": "server",
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-server.OpsMetrics",
+                "text": "OpsMetrics"
+              },
+              ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
+            ],
+            "path": "packages/core/status/core-status-common/src/status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/core-status-common",
+        "id": "def-common.ServerMetrics",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerMetrics",
+        "description": [],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "@kbn/core-metrics-server",
+            "scope": "server",
+            "docId": "kibKbnCoreMetricsServerPluginApi",
+            "section": "def-server.OpsMetrics",
+            "text": "OpsMetrics"
+          },
+          ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
+        ],
+        "path": "packages/core/status/core-status-common/src/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/core-status-common",
         "id": "def-common.ServiceStatusLevel",
@@ -214,6 +550,39 @@
           "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
         ],
         "path": "packages/core/status/core-status-common/src/service_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-status-common",
+        "id": "def-common.StatusInfoCoreStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "StatusInfoCoreStatus",
+        "description": [
+          "\nCopy all the services listed in CoreStatus with their specific ServiceStatus declarations\nbut overwriting the `level` to its stringified version."
+        ],
+        "signature": [
+          "{ elasticsearch: ",
+          {
+            "pluginId": "@kbn/core-status-common",
+            "scope": "common",
+            "docId": "kibKbnCoreStatusCommonPluginApi",
+            "section": "def-common.StatusInfoServiceStatus",
+            "text": "StatusInfoServiceStatus"
+          },
+          "; savedObjects: ",
+          {
+            "pluginId": "@kbn/core-status-common",
+            "scope": "common",
+            "docId": "kibKbnCoreStatusCommonPluginApi",
+            "section": "def-common.StatusInfoServiceStatus",
+            "text": "StatusInfoServiceStatus"
+          },
+          "; }"
+        ],
+        "path": "packages/core/status/core-status-common/src/status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

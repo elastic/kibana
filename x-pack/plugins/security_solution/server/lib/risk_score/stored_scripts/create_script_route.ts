@@ -18,8 +18,10 @@ export const createStoredScriptRoute = (router: SecuritySolutionPluginRouter, lo
     .put({
       access: 'internal',
       path: RISK_SCORE_CREATE_STORED_SCRIPT,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

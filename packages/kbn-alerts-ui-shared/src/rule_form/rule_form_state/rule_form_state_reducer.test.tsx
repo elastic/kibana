@@ -8,7 +8,7 @@
  */
 
 import React, { useReducer } from 'react';
-import { act, renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook, act } from '@testing-library/react';
 import { ruleFormStateReducer } from './rule_form_state_reducer';
 import { RuleFormState } from '../types';
 import { getAction } from '../../common/test_utils/actions_test_utils';

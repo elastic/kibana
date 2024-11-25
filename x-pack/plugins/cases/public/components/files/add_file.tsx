@@ -107,7 +107,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
     [caseId, createAttachments, owner, refreshAttachmentsTable, showDangerToast, showSuccessToast]
   );
 
-  return permissions.create && permissions.update ? (
+  return permissions.createComment ? (
     <EuiFlexItem grow={false}>
       <EuiButton
         data-test-subj="cases-files-add"

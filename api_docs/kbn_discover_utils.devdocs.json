@@ -17,7 +17,266 @@
     "objects": []
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuRegistry",
+        "type": "Class",
+        "tags": [],
+        "label": "AppMenuRegistry",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.CUSTOM_ITEMS_LIMIT",
+            "type": "number",
+            "tags": [],
+            "label": "CUSTOM_ITEMS_LIMIT",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.Unnamed.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "primaryAndSecondaryActions",
+                "description": [],
+                "signature": [
+                  "(",
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.AppMenuActionPrimary",
+                    "text": "AppMenuActionPrimary"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.AppMenuItemSecondary",
+                    "text": "AppMenuItemSecondary"
+                  },
+                  ")[]"
+                ],
+                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.isActionRegistered",
+            "type": "Function",
+            "tags": [],
+            "label": "isActionRegistered",
+            "description": [],
+            "signature": [
+              "(appMenuItemId: string) => boolean"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.isActionRegistered.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appMenuItemId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.registerCustomAction",
+            "type": "Function",
+            "tags": [],
+            "label": "registerCustomAction",
+            "description": [
+              "\nRegister a custom action to the app menu. It can be a simple action or a submenu with more actions and horizontal rules.\nNote: Only 2 top level custom actions are allowed to be rendered in the app menu. The rest will be ignored.\nA custom action can also open a flyout or a modal. For that, return your custom react node from action's `onClick` event and call `onFinishAction` when you're done."
+            ],
+            "signature": [
+              "(appMenuItem: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuItemCustom",
+                "text": "AppMenuItemCustom"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerCustomAction.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "appMenuItem",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.AppMenuItemCustom",
+                    "text": "AppMenuItemCustom"
+                  }
+                ],
+                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.registerCustomActionUnderSubmenu",
+            "type": "Function",
+            "tags": [],
+            "label": "registerCustomActionUnderSubmenu",
+            "description": [
+              "\nRegister a custom action under a submenu. It can be an action or a horizontal rule.\nAny number of submenu actions can be registered and rendered.\nYou can also extend an existing submenu with more actions. For example, AppMenuActionType.alerts.\n`order` property is optional and can be used to control the order of actions in the submenu."
+            ],
+            "signature": [
+              "(submenuId: string, appMenuItem: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuSubmenuActionCustom",
+                "text": "AppMenuSubmenuActionCustom"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuSubmenuHorizontalRule",
+                "text": "AppMenuSubmenuHorizontalRule"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerCustomActionUnderSubmenu.$1",
+                "type": "string",
+                "tags": [],
+                "label": "submenuId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.AppMenuRegistry.registerCustomActionUnderSubmenu.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "appMenuItem",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.AppMenuSubmenuActionCustom",
+                    "text": "AppMenuSubmenuActionCustom"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/discover-utils",
+                    "scope": "common",
+                    "docId": "kibKbnDiscoverUtilsPluginApi",
+                    "section": "def-common.AppMenuSubmenuHorizontalRule",
+                    "text": "AppMenuSubmenuHorizontalRule"
+                  }
+                ],
+                "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuRegistry.getSortedItems",
+            "type": "Function",
+            "tags": [],
+            "label": "getSortedItems",
+            "description": [
+              "\nGet the resulting app menu items sorted by type and order."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuItem",
+                "text": "AppMenuItem"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/app_menu_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/discover-utils",
@@ -2038,6 +2297,749 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionBase",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuActionBase",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionBase.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionBase.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionCustom",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuActionCustom",
+        "description": [
+          "\nA custom menu action"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionCustom",
+            "text": "AppMenuActionCustom"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionBase",
+            "text": "AppMenuActionBase"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionCustom.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionType",
+                "text": "AppMenuActionType"
+              },
+              ".custom"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionCustom.controlProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controlProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.TopNavMenuData",
+                "text": "TopNavMenuData"
+              },
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => Promise<void | React.ReactNode>) | ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => void | React.ReactNode) | undefined; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionPrimary",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuActionPrimary",
+        "description": [
+          "\nA primary menu action (with icon only)"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionPrimary",
+            "text": "AppMenuActionPrimary"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionBase",
+            "text": "AppMenuActionBase"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionPrimary.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionType",
+                "text": "AppMenuActionType"
+              },
+              ".primary"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionPrimary.controlProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controlProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.TopNavMenuData",
+                "text": "TopNavMenuData"
+              },
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => Promise<void | React.ReactNode>) | ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"memory\" | \"stop\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"image\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"brush\" | \"percent\" | \"temperature\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionSecondary",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuActionSecondary",
+        "description": [
+          "\nA secondary menu action"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSecondary",
+            "text": "AppMenuActionSecondary"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionBase",
+            "text": "AppMenuActionBase"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionSecondary.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionType",
+                "text": "AppMenuActionType"
+              },
+              ".secondary"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionSecondary.controlProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controlProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.TopNavMenuData",
+                "text": "TopNavMenuData"
+              },
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => Promise<void | React.ReactNode>) | ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => void | React.ReactNode) | undefined; }"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionSubmenuBase",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuActionSubmenuBase",
+        "description": [
+          "\nA menu action which opens a submenu with more actions"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSubmenuBase",
+            "text": "AppMenuActionSubmenuBase"
+          },
+          "<T> extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionBase",
+            "text": "AppMenuActionBase"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionSubmenuBase.type",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "T extends ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionSecondary",
+                "text": "AppMenuActionSecondary"
+              },
+              " ? ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionType",
+                "text": "AppMenuActionType"
+              },
+              ".secondary : ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionType",
+                "text": "AppMenuActionType"
+              },
+              ".custom"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionSubmenuBase.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionSubmenuBase.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionSubmenuBase.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuActionSubmenuBase.actions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "actions",
+            "description": [],
+            "signature": [
+              "T extends ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionSecondary",
+                "text": "AppMenuActionSecondary"
+              },
+              " ? (",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuSubmenuActionSecondary",
+                "text": "AppMenuSubmenuActionSecondary"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuSubmenuActionCustom",
+                "text": "AppMenuSubmenuActionCustom"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuSubmenuHorizontalRule",
+                "text": "AppMenuSubmenuHorizontalRule"
+              },
+              ")[] : (",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuSubmenuActionCustom",
+                "text": "AppMenuSubmenuActionCustom"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuSubmenuHorizontalRule",
+                "text": "AppMenuSubmenuHorizontalRule"
+              },
+              ")[]"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuControlOnClickParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuControlOnClickParams",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuControlOnClickParams.anchorElement",
+            "type": "Object",
+            "tags": [],
+            "label": "anchorElement",
+            "description": [],
+            "signature": [
+              "HTMLElement"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuControlOnClickParams.onFinishAction",
+            "type": "Function",
+            "tags": [],
+            "label": "onFinishAction",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuSubmenuActionCustom",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuSubmenuActionCustom",
+        "description": [
+          "\nA custom submenu action"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuSubmenuActionCustom",
+            "text": "AppMenuSubmenuActionCustom"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionCustom",
+            "text": "AppMenuActionCustom"
+          },
+          ", \"controlProps\">"
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuSubmenuActionCustom.controlProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controlProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.TopNavMenuData",
+                "text": "TopNavMenuData"
+              },
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => Promise<void | React.ReactNode>) | ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => void | React.ReactNode) | undefined; } & ControlWithOptionalIcon"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuSubmenuActionSecondary",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuSubmenuActionSecondary",
+        "description": [
+          "\nA secondary submenu action"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuSubmenuActionSecondary",
+            "text": "AppMenuSubmenuActionSecondary"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSecondary",
+            "text": "AppMenuActionSecondary"
+          },
+          ", \"controlProps\">"
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuSubmenuActionSecondary.controlProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "controlProps",
+            "description": [],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.TopNavMenuData",
+                "text": "TopNavMenuData"
+              },
+              ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => Promise<void | React.ReactNode>) | ((params: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuControlOnClickParams",
+                "text": "AppMenuControlOnClickParams"
+              },
+              ") => void | React.ReactNode) | undefined; } & ControlWithOptionalIcon"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuSubmenuHorizontalRule",
+        "type": "Interface",
+        "tags": [],
+        "label": "AppMenuSubmenuHorizontalRule",
+        "description": [
+          "\nA horizontal rule between menu items"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuSubmenuHorizontalRule",
+            "text": "AppMenuSubmenuHorizontalRule"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionBase",
+            "text": "AppMenuActionBase"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuSubmenuHorizontalRule.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.AppMenuActionType",
+                "text": "AppMenuActionType"
+              },
+              ".submenuHorizontalRule"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.AppMenuSubmenuHorizontalRule.testId",
+            "type": "string",
+            "tags": [],
+            "label": "testId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DataTableRecord",
         "type": "Interface",
         "tags": [],
@@ -2819,7 +3821,7 @@
             "label": "color",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
             ],
             "path": "packages/kbn-discover-utils/src/components/custom_control_columns/types.ts",
             "deprecated": false,
@@ -2989,6 +3991,30 @@
     "enums": [
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionId",
+        "type": "Enum",
+        "tags": [],
+        "label": "AppMenuActionId",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionType",
+        "type": "Enum",
+        "tags": [],
+        "label": "AppMenuActionType",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DiscoverFlyouts",
         "type": "Enum",
         "tags": [],
@@ -3051,6 +4077,272 @@
           "\"agent.name\""
         ],
         "path": "packages/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionSubmenuCustom",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuActionSubmenuCustom",
+        "description": [
+          "\nA menu action which opens a submenu with more custom actions"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSubmenuBase",
+            "text": "AppMenuActionSubmenuBase"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionCustom",
+            "text": "AppMenuActionCustom"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuActionSubmenuSecondary",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuActionSubmenuSecondary",
+        "description": [
+          "\nA menu action which opens a submenu with more secondary actions"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSubmenuBase",
+            "text": "AppMenuActionSubmenuBase"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSecondary",
+            "text": "AppMenuActionSecondary"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuControlProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuControlProps",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuData",
+            "text": "TopNavMenuData"
+          },
+          ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuControlOnClickParams",
+            "text": "AppMenuControlOnClickParams"
+          },
+          ") => Promise<void | React.ReactNode>) | ((params: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuControlOnClickParams",
+            "text": "AppMenuControlOnClickParams"
+          },
+          ") => void | React.ReactNode) | undefined; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuControlWithIconProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuControlWithIconProps",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "navigation",
+            "scope": "public",
+            "docId": "kibNavigationPluginApi",
+            "section": "def-public.TopNavMenuData",
+            "text": "TopNavMenuData"
+          },
+          ", \"label\" | \"description\" | \"href\" | \"tooltip\" | \"isLoading\" | \"testId\" | \"disableButton\"> & { onClick: ((params: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuControlOnClickParams",
+            "text": "AppMenuControlOnClickParams"
+          },
+          ") => Promise<void | React.ReactNode>) | ((params: ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuControlOnClickParams",
+            "text": "AppMenuControlOnClickParams"
+          },
+          ") => void | React.ReactNode) | undefined; } & { iconType: \"string\" | \"number\" | \"function\" | \"key\" | \"namespace\" | \"error\" | \"filter\" | \"search\" | \"link\" | \"at\" | \"nested\" | \"ip\" | \"push\" | \"list\" | \"cluster\" | \"eql\" | \"index\" | \"unlink\" | \"alert\" | \"color\" | \"grid\" | \"aggregate\" | \"warning\" | \"annotation\" | \"memory\" | \"stop\" | \"stats\" | \"mobile\" | \"article\" | \"menu\" | \"image\" | \"download\" | \"document\" | \"email\" | \"copy\" | \"move\" | \"merge\" | \"partial\" | \"container\" | \"user\" | \"pause\" | \"share\" | \"home\" | \"spaces\" | \"package\" | \"tag\" | \"beta\" | \"users\" | \"brush\" | \"percent\" | \"temperature\" | \"accessibility\" | \"addDataApp\" | \"advancedSettingsApp\" | \"agentApp\" | \"analyzeEvent\" | \"anomalyChart\" | \"anomalySwimLane\" | \"apmApp\" | \"apmTrace\" | \"appSearchApp\" | \"apps\" | \"arrowDown\" | \"arrowLeft\" | \"arrowRight\" | \"arrowUp\" | \"arrowStart\" | \"arrowEnd\" | \"asterisk\" | \"auditbeatApp\" | \"beaker\" | \"bell\" | \"bellSlash\" | \"bolt\" | \"boxesHorizontal\" | \"boxesVertical\" | \"branch\" | \"branchUser\" | \"broom\" | \"bug\" | \"bullseye\" | \"calendar\" | \"canvasApp\" | \"casesApp\" | \"changePointDetection\" | \"check\" | \"checkInCircleFilled\" | \"cheer\" | \"classificationJob\" | \"clickLeft\" | \"clickRight\" | \"clock\" | \"clockCounter\" | \"cloudDrizzle\" | \"cloudStormy\" | \"cloudSunny\" | \"codeApp\" | \"compute\" | \"console\" | \"consoleApp\" | \"continuityAbove\" | \"continuityAboveBelow\" | \"continuityBelow\" | \"continuityWithin\" | \"controlsHorizontal\" | \"controlsVertical\" | \"copyClipboard\" | \"createAdvancedJob\" | \"createMultiMetricJob\" | \"createPopulationJob\" | \"createSingleMetricJob\" | \"cross\" | \"crossClusterReplicationApp\" | \"crossInCircle\" | \"crosshairs\" | \"currency\" | \"cut\" | \"dashboardApp\" | \"dataVisualizer\" | \"database\" | \"desktop\" | \"devToolsApp\" | \"diff\" | \"discoverApp\" | \"discuss\" | \"documentEdit\" | \"documentation\" | \"documents\" | \"dot\" | \"dotInCircle\" | \"doubleArrowLeft\" | \"doubleArrowRight\" | \"editorAlignCenter\" | \"editorAlignLeft\" | \"editorAlignRight\" | \"editorBold\" | \"editorChecklist\" | \"editorCodeBlock\" | \"editorComment\" | \"editorDistributeHorizontal\" | \"editorDistributeVertical\" | \"editorHeading\" | \"editorItalic\" | \"editorItemAlignBottom\" | \"editorItemAlignCenter\" | \"editorItemAlignLeft\" | \"editorItemAlignMiddle\" | \"editorItemAlignRight\" | \"editorItemAlignTop\" | \"editorLink\" | \"editorOrderedList\" | \"editorPositionBottomLeft\" | \"editorPositionBottomRight\" | \"editorPositionTopLeft\" | \"editorPositionTopRight\" | \"editorRedo\" | \"editorStrike\" | \"editorTable\" | \"editorUnderline\" | \"editorUndo\" | \"editorUnorderedList\" | \"empty\" | \"emsApp\" | \"endpoint\" | \"eraser\" | \"errorFilled\" | \"esqlVis\" | \"exit\" | \"expand\" | \"expandMini\" | \"exportAction\" | \"eye\" | \"eyeClosed\" | \"faceHappy\" | \"faceNeutral\" | \"faceSad\" | \"fieldStatistics\" | \"filebeatApp\" | \"filterExclude\" | \"filterIgnore\" | \"filterInclude\" | \"filterInCircle\" | \"flag\" | \"fleetApp\" | \"fold\" | \"folderCheck\" | \"folderClosed\" | \"folderExclamation\" | \"folderOpen\" | \"frameNext\" | \"framePrevious\" | \"fullScreen\" | \"fullScreenExit\" | \"gear\" | \"gisApp\" | \"glasses\" | \"globe\" | \"grab\" | \"grabHorizontal\" | \"grabOmnidirectional\" | \"gradient\" | \"graphApp\" | \"grokApp\" | \"heart\" | \"heartbeatApp\" | \"heatmap\" | \"help\" | \"iInCircle\" | \"importAction\" | \"indexClose\" | \"indexEdit\" | \"indexFlush\" | \"indexManagementApp\" | \"indexMapping\" | \"indexOpen\" | \"indexPatternApp\" | \"indexRollupApp\" | \"indexRuntime\" | \"indexSettings\" | \"indexTemporary\" | \"infinity\" | \"inputOutput\" | \"inspect\" | \"invert\" | \"keyboard\" | \"kqlField\" | \"kqlFunction\" | \"kqlOperand\" | \"kqlSelector\" | \"kqlValue\" | \"kubernetesNode\" | \"kubernetesPod\" | \"launch\" | \"layers\" | \"lensApp\" | \"lettering\" | \"lineDashed\" | \"lineDotted\" | \"lineSolid\" | \"listAdd\" | \"lock\" | \"lockOpen\" | \"logPatternAnalysis\" | \"logRateAnalysis\" | \"logoAWS\" | \"logoAWSMono\" | \"logoAerospike\" | \"logoApache\" | \"logoAppSearch\" | \"logoAzure\" | \"logoAzureMono\" | \"logoBeats\" | \"logoBusinessAnalytics\" | \"logoCeph\" | \"logoCloud\" | \"logoCloudEnterprise\" | \"logoCode\" | \"logoCodesandbox\" | \"logoCouchbase\" | \"logoDocker\" | \"logoDropwizard\" | \"logoElastic\" | \"logoElasticStack\" | \"logoElasticsearch\" | \"logoEnterpriseSearch\" | \"logoEtcd\" | \"logoGCP\" | \"logoGCPMono\" | \"logoGithub\" | \"logoGmail\" | \"logoGolang\" | \"logoGoogleG\" | \"logoHAproxy\" | \"logoIBM\" | \"logoIBMMono\" | \"logoKafka\" | \"logoKibana\" | \"logoKubernetes\" | \"logoLogging\" | \"logoLogstash\" | \"logoMaps\" | \"logoMemcached\" | \"logoMetrics\" | \"logoMongodb\" | \"logoMySQL\" | \"logoNginx\" | \"logoObservability\" | \"logoOsquery\" | \"logoPhp\" | \"logoPostgres\" | \"logoPrometheus\" | \"logoRabbitmq\" | \"logoRedis\" | \"logoSecurity\" | \"logoSiteSearch\" | \"logoSketch\" | \"logoSlack\" | \"logoUptime\" | \"logoVulnerabilityManagement\" | \"logoWebhook\" | \"logoWindows\" | \"logoWorkplaceSearch\" | \"logsApp\" | \"logstashFilter\" | \"logstashIf\" | \"logstashInput\" | \"logstashOutput\" | \"logstashQueue\" | \"machineLearningApp\" | \"magnet\" | \"magnifyWithExclamation\" | \"magnifyWithMinus\" | \"magnifyWithPlus\" | \"managementApp\" | \"mapMarker\" | \"menuDown\" | \"menuLeft\" | \"menuRight\" | \"menuUp\" | \"metricbeatApp\" | \"metricsApp\" | \"minimize\" | \"minus\" | \"minusInCircle\" | \"minusInCircleFilled\" | \"minusInSquare\" | \"monitoringApp\" | \"moon\" | \"newChat\" | \"node\" | \"notebookApp\" | \"offline\" | \"online\" | \"outlierDetectionJob\" | \"packetbeatApp\" | \"pageSelect\" | \"pagesSelect\" | \"palette\" | \"paperClip\" | \"payment\" | \"pencil\" | \"pin\" | \"pinFilled\" | \"pipeBreaks\" | \"pipelineApp\" | \"pipeNoBreaks\" | \"pivot\" | \"play\" | \"playFilled\" | \"plus\" | \"plusInCircle\" | \"plusInCircleFilled\" | \"plusInSquare\" | \"popout\" | \"questionInCircle\" | \"quote\" | \"recentlyViewedApp\" | \"refresh\" | \"regressionJob\" | \"reporter\" | \"reportingApp\" | \"returnKey\" | \"save\" | \"savedObjectsApp\" | \"scale\" | \"searchProfilerApp\" | \"securityAnalyticsApp\" | \"securityApp\" | \"securitySignal\" | \"securitySignalDetected\" | \"securitySignalResolved\" | \"sessionViewer\" | \"shard\" | \"singleMetricViewer\" | \"snowflake\" | \"sortAscending\" | \"sortDescending\" | \"sortDown\" | \"sortLeft\" | \"sortRight\" | \"sortUp\" | \"sortable\" | \"spacesApp\" | \"sparkles\" | \"sqlApp\" | \"starEmpty\" | \"starEmptySpace\" | \"starFilled\" | \"starFilledSpace\" | \"starMinusEmpty\" | \"starMinusFilled\" | \"starPlusEmpty\" | \"starPlusFilled\" | \"stopFilled\" | \"stopSlash\" | \"storage\" | \"submodule\" | \"sun\" | \"swatchInput\" | \"symlink\" | \"tableDensityCompact\" | \"tableDensityExpanded\" | \"tableDensityNormal\" | \"tableOfContents\" | \"tear\" | \"timeline\" | \"timelineWithArrow\" | \"timelionApp\" | \"timeRefresh\" | \"timeslider\" | \"training\" | \"transitionLeftIn\" | \"transitionLeftOut\" | \"transitionTopIn\" | \"transitionTopOut\" | \"trash\" | \"unfold\" | \"upgradeAssistantApp\" | \"uptimeApp\" | \"userAvatar\" | \"usersRolesApp\" | \"vector\" | \"videoPlayer\" | \"visArea\" | \"visAreaStacked\" | \"visBarHorizontal\" | \"visBarHorizontalStacked\" | \"visBarVertical\" | \"visBarVerticalStacked\" | \"visGauge\" | \"visGoal\" | \"visLine\" | \"visMapCoordinate\" | \"visMapRegion\" | \"visMetric\" | \"visPie\" | \"visTable\" | \"visTagCloud\" | \"visText\" | \"visTimelion\" | \"visVega\" | \"visVisualBuilder\" | \"visualizeApp\" | \"vulnerabilityManagementApp\" | \"warningFilled\" | \"watchesApp\" | \"wordWrap\" | \"wordWrapDisabled\" | \"workplaceSearchApp\" | \"wrench\" | \"tokenAlias\" | \"tokenAnnotation\" | \"tokenArray\" | \"tokenBinary\" | \"tokenBoolean\" | \"tokenClass\" | \"tokenCompletionSuggester\" | \"tokenConstant\" | \"tokenDate\" | \"tokenDimension\" | \"tokenElement\" | \"tokenEnum\" | \"tokenEnumMember\" | \"tokenEvent\" | \"tokenException\" | \"tokenField\" | \"tokenFile\" | \"tokenFlattened\" | \"tokenFunction\" | \"tokenGeo\" | \"tokenHistogram\" | \"tokenInterface\" | \"tokenIP\" | \"tokenJoin\" | \"tokenKey\" | \"tokenKeyword\" | \"tokenMethod\" | \"tokenMetricCounter\" | \"tokenMetricGauge\" | \"tokenModule\" | \"tokenNamespace\" | \"tokenNested\" | \"tokenNull\" | \"tokenNumber\" | \"tokenObject\" | \"tokenOperator\" | \"tokenPackage\" | \"tokenParameter\" | \"tokenPercolator\" | \"tokenProperty\" | \"tokenRange\" | \"tokenRankFeature\" | \"tokenRankFeatures\" | \"tokenRepo\" | \"tokenSearchType\" | \"tokenSemanticText\" | \"tokenShape\" | \"tokenString\" | \"tokenStruct\" | \"tokenSymbol\" | \"tokenTag\" | \"tokenText\" | \"tokenTokenCount\" | \"tokenVariable\" | \"tokenVectorDense\" | \"tokenDenseVector\" | \"tokenVectorSparse\"; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuItem",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuItem",
+        "description": [
+          "\nA menu item can be primary, secondary or custom"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionPrimary",
+            "text": "AppMenuActionPrimary"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuItemSecondary",
+            "text": "AppMenuItemSecondary"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuItemCustom",
+            "text": "AppMenuItemCustom"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuItemCustom",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuItemCustom",
+        "description": [
+          "\nA custom menu item can have only a label or a submenu"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionCustom",
+            "text": "AppMenuActionCustom"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSubmenuCustom",
+            "text": "AppMenuActionSubmenuCustom"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuItemPrimary",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuItemPrimary",
+        "description": [
+          "\nA primary menu item can only have an icon"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionPrimary",
+            "text": "AppMenuActionPrimary"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.AppMenuItemSecondary",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuItemSecondary",
+        "description": [
+          "\nA secondary menu item can have only a label or a submenu"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSecondary",
+            "text": "AppMenuActionSecondary"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/discover-utils",
+            "scope": "common",
+            "docId": "kibKbnDiscoverUtilsPluginApi",
+            "section": "def-common.AppMenuActionSubmenuSecondary",
+            "text": "AppMenuActionSubmenuSecondary"
+          }
+        ],
+        "path": "packages/kbn-discover-utils/src/components/app_menu/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

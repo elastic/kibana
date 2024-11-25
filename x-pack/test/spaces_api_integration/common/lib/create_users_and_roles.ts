@@ -470,16 +470,6 @@ export const createUsersAndRoles = async (es: Client, supertest: SuperTestAgent)
   });
 
   await es.security.putUser({
-    username: AUTHENTICATION.APM_USER.username,
-    body: {
-      password: AUTHENTICATION.APM_USER.password,
-      roles: ['apm_user'],
-      full_name: 'a apm user',
-      email: 'a_apm_user@elastic.co',
-    },
-  });
-
-  await es.security.putUser({
     username: AUTHENTICATION.MACHINE_LEARING_ADMIN.username,
     body: {
       password: AUTHENTICATION.MACHINE_LEARING_ADMIN.password,

@@ -7,7 +7,6 @@
 
 import { PREFIX } from '../../../shared/test_ids';
 
-export const FLYOUT_TOUR_TEST_ID = `${PREFIX}Tour` as const;
 export const FLYOUT_PREVIEW_LINK_TEST_ID = `${PREFIX}PreviewLink` as const;
 
 export const SESSION_VIEW_UPSELL_TEST_ID = `${PREFIX}SessionViewUpsell` as const;

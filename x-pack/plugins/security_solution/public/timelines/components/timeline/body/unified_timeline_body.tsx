@@ -10,7 +10,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
 import { UnifiedTimeline } from '../unified_components';
-import { defaultUdtHeaders } from '../unified_components/default_headers';
+import { defaultUdtHeaders } from './column_headers/default_headers';
 import type { PaginationInputPaginated, TimelineItem } from '../../../../../common/search_strategy';
 
 export interface UnifiedTimelineBodyProps extends ComponentProps<typeof UnifiedTimeline> {

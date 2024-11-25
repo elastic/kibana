@@ -99,6 +99,26 @@ describe('checkActionTypeEnabled', () => {
           }
       `);
   });
+  test('checkActionTypeEnabled returns true when actionType is disabled by config', async () => {
+    const actionType: ActionType = {
+      id: '1',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      name: 'my action',
+      enabled: false,
+      enabledInConfig: false,
+      enabledInLicense: true,
+      isSystemActionType: false,
+    };
+
+    const isPreconfiguredConnector = true;
+
+    expect(checkActionTypeEnabled(actionType, isPreconfiguredConnector)).toMatchInlineSnapshot(`
+      Object {
+        "isEnabled": true,
+      }
+  `);
+  });
 });
 
 describe('checkActionFormActionTypeEnabled', () => {

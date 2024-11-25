@@ -67,26 +67,31 @@ const removeOutdatedMessages = (
   'outdatedMessages' | 'updatedMessages',
   Array<[string, string | { message: string }]>
 > => {
-  const outdatedMessages: Array<[string, string | { message: string }]> = [];
-  let updatedMessages = translationMessages;
+  return translationMessages.reduce(
+    (acc, [translatedId, translatedMessage]) => {
+      const messageDescriptor = extractedMessages.find(({ id }) => id === translatedId);
+      // removed from codebase
+      if (!messageDescriptor) {
+        acc.outdatedMessages.push([translatedId, translatedMessage]);
+        return acc;
+      }
 
-  updatedMessages = translationMessages.filter(([translatedId, translatedMessage]) => {
-    const messageDescriptor = extractedMessages.find(({ id }) => id === translatedId);
-    if (!messageDescriptor?.hasValuesObject) {
-      return true;
-    }
-    try {
-      verifyMessageDescriptor(
-        typeof translatedMessage === 'string' ? translatedMessage : translatedMessage.message,
-        messageDescriptor
-      );
-      return true;
-    } catch (err) {
-      outdatedMessages.push([translatedId, translatedMessage]);
-      // failed to verify message against latest descriptor. remove from file.
-      return false;
-    }
-  });
+      try {
+        verifyMessageDescriptor(
+          typeof translatedMessage === 'string' ? translatedMessage : translatedMessage.message,
+          messageDescriptor
+        );
+        acc.updatedMessages.push([translatedId, translatedMessage]);
+      } catch (err) {
+        // failed to verify message against latest descriptor. remove from file.
+        acc.outdatedMessages.push([translatedId, translatedMessage]);
+      }
 
-  return { updatedMessages, outdatedMessages };
+      return acc;
+    },
+    { updatedMessages: [], outdatedMessages: [] } as Record<
+      'outdatedMessages' | 'updatedMessages',
+      Array<[string, string | { message: string }]>
+    >
+  );
 };

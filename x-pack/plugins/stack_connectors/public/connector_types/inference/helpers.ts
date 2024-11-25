@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ConfigEntryView } from '../lib/dynamic_config/types';
+import { ConfigEntryView } from '../../../common/dynamic_config/types';
 import { Config } from './types';
 import * as i18n from './translations';
 

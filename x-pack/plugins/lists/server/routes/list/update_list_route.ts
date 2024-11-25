@@ -18,10 +18,12 @@ export const updateListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .put({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
-      },
       path: LIST_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {

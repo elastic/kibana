@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Renderer, renderHook, RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook, RenderHookResult } from '@testing-library/react';
 import {
   generateMockIndicator,
   generateMockUrlIndicator,
@@ -19,7 +19,7 @@ import { updateFiltersArray } from '../utils/filter';
 jest.mock('../utils/filter', () => ({ updateFiltersArray: jest.fn() }));
 
 describe('useFilterInOut()', () => {
-  let hookResult: RenderHookResult<{}, UseFilterInValue, Renderer<unknown>>;
+  let hookResult: RenderHookResult<UseFilterInValue, unknown>;
 
   it('should return empty object if Indicator is incorrect', () => {
     const indicator: Indicator = generateMockIndicator();

@@ -7,12 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { FormSchema, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import type {
+  FormSchema,
+  ValidationFunc,
+  ERROR_CODE,
+  ValidationError,
+} from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../../../shared_imports';
-import type { AboutStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type {
+  AboutStepRiskScore,
+  AboutStepRule,
+} from '../../../../detections/pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
+import { defaultRiskScoreValidator } from '../../validators/default_risk_score_validator';
+import { maxSignalsValidatorFactory } from '../../validators/max_signals_validator_factory';
 
 const { emptyField } = fieldValidators;
 
@@ -109,6 +119,11 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
+    validations: [
+      {
+        validator: maxSignalsValidatorFactory(),
+      },
+    ],
   },
   isAssociatedToEndpointList: {
     type: FIELD_TYPES.CHECKBOX,
@@ -129,6 +144,18 @@ export const schema: FormSchema<AboutStepRule> = {
     value: {},
     mapping: {},
     isMappingChecked: {},
+    validations: [
+      {
+        validator: (
+          ...args: Parameters<ValidationFunc<{}, ERROR_CODE, AboutStepRiskScore>>
+        ): ValidationError | undefined => {
+          const [{ value: fieldValue, path }] = args;
+          const defaultRiskScore = fieldValue.value;
+
+          return defaultRiskScoreValidator(defaultRiskScore, path);
+        },
+      },
+    ],
   },
   references: {
     label: i18n.translate(

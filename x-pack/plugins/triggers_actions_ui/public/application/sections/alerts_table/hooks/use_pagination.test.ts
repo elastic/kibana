@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { usePagination } from './use_pagination';
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 
 describe('usePagination', () => {
   const onPageChange = jest.fn();

@@ -24,6 +24,12 @@ export function defineChangeUserPasswordRoutes({
   router.post(
     {
       path: '/internal/security/users/{username}/password',
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to the internal authorization service and the Security plugin's canUserChangePassword function`,
+        },
+      },
       validate: {
         params: schema.object({ username: schema.string({ minLength: 1, maxLength: 1024 }) }),
         body: schema.object({

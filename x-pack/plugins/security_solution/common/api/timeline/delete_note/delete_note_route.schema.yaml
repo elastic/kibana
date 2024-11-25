@@ -37,10 +37,3 @@ paths:
       responses:
         '200':
           description: Indicates the note was successfully deleted.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object

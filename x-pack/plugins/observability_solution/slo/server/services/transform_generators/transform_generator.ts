@@ -9,22 +9,22 @@ import {
   MappingRuntimeFields,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
 import { SLODefinition } from '../../domain/models';
 
 export abstract class TransformGenerator {
-  public abstract getTransformParams(
-    slo: SLODefinition,
-    spaceId: string,
-    dataViewService: DataViewsService
-  ): Promise<TransformPutTransformRequest>;
+  constructor(
+    protected spaceId: string,
+    protected dataViewService: DataViewsService,
+    protected isServerless: boolean = false
+  ) {}
 
-  public buildCommonRuntimeMappings(slo: SLODefinition, dataView?: DataView): MappingRuntimeFields {
-    return {
-      ...(dataView?.getRuntimeMappings?.() ?? {}),
-    };
+  public abstract getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest>;
+
+  public buildCommonRuntimeMappings(dataView?: DataView): MappingRuntimeFields {
+    return dataView?.getRuntimeMappings?.() ?? {};
   }
 
   public buildDescription(slo: SLODefinition): string {
@@ -70,17 +70,11 @@ export abstract class TransformGenerator {
     };
   }
 
-  public async getIndicatorDataView({
-    dataViewService,
-    dataViewId,
-  }: {
-    dataViewService: DataViewsService;
-    dataViewId?: string;
-  }): Promise<DataView | undefined> {
+  public async getIndicatorDataView(dataViewId?: string): Promise<DataView | undefined> {
     let dataView: DataView | undefined;
     if (dataViewId) {
       try {
-        dataView = await dataViewService.get(dataViewId);
+        dataView = await this.dataViewService.get(dataViewId);
       } catch (e) {
         // If the data view is not found, we will continue without it
       }

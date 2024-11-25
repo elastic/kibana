@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await ml.api.cleanMlIndices();
+      await ml.api.cleanAnomalyDetection();
       await ml.testResources.cleanMLSavedObjects();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();

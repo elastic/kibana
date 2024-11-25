@@ -137,14 +137,14 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      if (apiResponse.list.length === expectedAgentCount) {
+      if (apiResponse.items.length === expectedAgentCount) {
         return apiResponse;
       }
 
       if (_attemptsMade >= attempts) {
         throw new Error(
           `Agents not loaded correctly, failing test. All agents: \n: ${JSON.stringify(
-            apiResponse.list,
+            apiResponse.items,
             null,
             2
           )}`

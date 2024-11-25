@@ -14,7 +14,7 @@
     "@kbn/i18n",
     "@kbn/ui-theme",
     "@kbn/core-http-browser",
-    "@kbn/core-status-common-internal",
+    "@kbn/core-status-common",
     "@kbn/safer-lodash-set",
     "@kbn/test-jest-helpers",
     "@kbn/config-schema",

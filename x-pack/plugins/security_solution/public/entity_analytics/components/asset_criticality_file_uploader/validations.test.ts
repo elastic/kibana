@@ -56,6 +56,14 @@ describe('validateFile', () => {
     expect(result.valid).toBe(true);
   });
 
+  it('should return valid if the mime type is empty (Windows)', () => {
+    const file = new File(['file content'], 'test.csv', { type: '' });
+
+    const result = validateFile(file, formatBytes);
+
+    expect(result.valid).toBe(true);
+  });
+
   it('should return an error message if the file type is invalid', () => {
     const file = new File(['file content'], 'test.txt', { type: 'invalid-type' });
 

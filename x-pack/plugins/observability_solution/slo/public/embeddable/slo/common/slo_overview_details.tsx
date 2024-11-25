@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -14,22 +13,23 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiTitle,
-  EuiTabs,
-  EuiTab,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useKibana } from '../../../utils/kibana_react';
-import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
+import React, { useState } from 'react';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
-import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import {
   OVERVIEW_TAB_ID,
   SloDetails,
   SloTabId,
 } from '../../../pages/slo_details/components/slo_details';
+import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
+import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export function SloOverviewDetails({
   slo,

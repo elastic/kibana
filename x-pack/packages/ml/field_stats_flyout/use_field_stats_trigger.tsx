@@ -94,3 +94,5 @@ export function useFieldStatsTrigger<T = DropDownLabel>() {
     populatedFields,
   };
 }
+
+export type UseFieldStatsTrigger = typeof useFieldStatsTrigger;

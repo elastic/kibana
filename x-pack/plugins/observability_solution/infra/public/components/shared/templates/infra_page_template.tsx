@@ -98,12 +98,12 @@ export const InfraPageTemplate = ({
     });
   }, [hasData, setScreenContext, source]);
 
-  if (!isSourceLoading && !remoteClustersExist) {
-    return <NoRemoteCluster />;
+  if (sourceError) {
+    return <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;
   }
 
-  if (sourceError) {
-    <SourceErrorPage errorMessage={sourceError} retry={loadSource} />;
+  if (!isSourceLoading && !remoteClustersExist) {
+    return <NoRemoteCluster />;
   }
 
   if (dataViewLoadError) {

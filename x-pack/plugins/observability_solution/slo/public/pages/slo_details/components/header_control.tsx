@@ -24,7 +24,7 @@ import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useResetSlo } from '../../../hooks/use_reset_slo';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { convertSliApmParamsToApmAppDeeplinkUrl } from '../../../utils/slo/convert_sli_apm_params_to_apm_app_deeplink_url';
 import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';

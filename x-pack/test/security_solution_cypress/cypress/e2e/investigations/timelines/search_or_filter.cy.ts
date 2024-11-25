@@ -66,7 +66,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
-        cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
+        cy.wrap(response?.body.kqlMode).should('eql', 'filter');
         cy.get(ADD_FILTER).should('exist');
       });
     });
@@ -76,7 +76,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
-        cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');
+        cy.wrap(response?.body.kqlMode).should('eql', 'search');
         cy.get(ADD_FILTER).should('not.exist');
       });
     });

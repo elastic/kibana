@@ -14,7 +14,7 @@ import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer'
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { defaultRowRenderers } from '../../body/renderers';
-import type { Sort } from '../../body/sort';
+import type { SortColumnTimeline as Sort } from '../../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
@@ -37,9 +37,6 @@ jest.mock('../../../../containers/details', () => ({
 }));
 jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-jest.mock('../../body/events', () => ({
-  Events: () => <></>,
 }));
 
 jest.mock('../../../../../sourcerer/containers');

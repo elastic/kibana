@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useRouteResolver } from './use_resolver';
@@ -63,8 +63,8 @@ describe('useResolver', () => {
   it.skip('redirects to the access denied page if some required capabilities are missing', async () => {
     (usePermissionCheck as jest.Mock<boolean[]>).mockReturnValueOnce([false]);
 
-    const { waitForNextUpdate } = renderHook(() => useRouteResolver('full', ['canGetCalendars']));
-    await waitForNextUpdate();
+    renderHook(() => useRouteResolver('full', ['canGetCalendars']));
+    await waitFor(() => new Promise((resolve) => resolve(null)));
     expect(useMlKibana().services.application.navigateToUrl).toHaveBeenCalled();
   });
 });

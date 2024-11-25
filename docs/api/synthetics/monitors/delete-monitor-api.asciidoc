@@ -17,16 +17,12 @@ Deletes one or more monitors from the Synthetics app.
 You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
-You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
-<<kibana-feature-privileges,{kib} feature privileges>>.
-
 
 [[delete-monitor-api-path-params]]
 === {api-path-parms-title}
 
 `config_id`::
 (Required, string) The ID of the monitor that you want to delete.
-
 
 Here is an example of a DELETE request to delete a monitor by ID:
 
@@ -37,7 +33,7 @@ DELETE /api/synthetics/monitors/monitor1-id
 
 ==== Bulk Delete Monitors
 
-You can delete multiple monitors by sending a list of config ids to a DELETE request to the `/api/synthetics/monitors` endpoint.
+You can delete multiple monitors by sending a list of config ids to a POST request to the `/api/synthetics/monitors/_bulk_delete` endpoint.
 
 
 [[monitors-delete-request-body]]
@@ -49,11 +45,11 @@ The request body should contain an array of monitors IDs that you want to delete
 (Required, array of strings) An array of monitor IDs to delete.
 
 
-Here is an example of a DELETE request to delete a list of monitors by ID:
+Here is an example of a POST request to delete a list of monitors by ID:
 
 [source,sh]
 --------------------------------------------------
-DELETE /api/synthetics/monitors
+POST /api/synthetics/monitors/_bulk_delete
 {
   "ids": [
     "monitor1-id",

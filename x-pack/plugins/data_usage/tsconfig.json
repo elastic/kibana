@@ -31,6 +31,10 @@
     "@kbn/repo-info",
     "@kbn/cloud-plugin",
     "@kbn/server-http-tools",
+    "@kbn/utility-types-jest",
+    "@kbn/datemath",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
   ],
   "exclude": ["target/**/*"]
 }

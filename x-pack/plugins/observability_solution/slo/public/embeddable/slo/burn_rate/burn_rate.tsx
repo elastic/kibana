@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart } from '@elastic/eui';
-import { css } from '@emotion/css';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingChart,
+  UseEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -41,12 +48,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
 
   if (isLoading || !slo) {
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        className={container}
-      >
+      <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" css={container}>
         <EuiFlexItem grow={false}>
           <EuiLoadingChart />
         </EuiFlexItem>
@@ -56,12 +58,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
 
   if (isSloNotFound) {
     return (
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        justifyContent="center"
-        className={container}
-      >
+      <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" css={container}>
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
@@ -84,7 +81,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
           <EuiFlexItem>
             <EuiLink
               data-test-subj="sloBurnRateLink"
-              className={link}
+              css={link}
               color="text"
               onClick={() => {
                 setSelectedSlo(slo);
@@ -146,7 +143,7 @@ const container = css`
   height: 100%;
 `;
 
-const link = css`
-  font-size: 16px;
-  font-weight: 700;
+const link = ({ euiTheme }: UseEuiTheme) => css`
+  font-size: ${euiTheme.size.base};
+  font-weight: ${euiTheme.font.weight.bold};
 `;

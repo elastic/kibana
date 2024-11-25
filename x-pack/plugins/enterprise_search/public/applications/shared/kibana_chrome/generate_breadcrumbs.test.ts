@@ -162,7 +162,7 @@ describe('useSearchBreadcrumbs', () => {
 
     expect(useSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
-        text: 'Search',
+        text: 'Elasticsearch',
         href: '/app/enterprise_search/overview',
         onClick: expect.any(Function),
       },
@@ -180,7 +180,7 @@ describe('useSearchBreadcrumbs', () => {
   it('shows just the root if breadcrumbs is empty', () => {
     expect(useSearchBreadcrumbs()).toEqual([
       {
-        text: 'Search',
+        text: 'Elasticsearch',
       },
     ]);
   });

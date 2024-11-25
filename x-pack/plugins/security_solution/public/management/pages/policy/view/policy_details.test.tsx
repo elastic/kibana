@@ -124,7 +124,7 @@ describe('Policy Details', () => {
           if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
-              results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
+              results: { events: 0, active: 5, online: 3, error: 1, offline: 1 },
               success: true,
             });
           }

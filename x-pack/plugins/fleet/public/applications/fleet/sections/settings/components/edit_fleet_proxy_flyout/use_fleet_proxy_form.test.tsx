@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-test-renderer';
+import { act } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 

@@ -125,7 +125,7 @@
         "label": "getDebugRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {
@@ -185,7 +185,7 @@
         "label": "getErrorRenderer",
         "description": [],
         "signature": [
-          "(theme$?: ",
+          "(theme$: ",
           "Observable",
           "<",
           {

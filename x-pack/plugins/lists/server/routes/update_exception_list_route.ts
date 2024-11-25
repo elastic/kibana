@@ -21,10 +21,12 @@ export const updateExceptionListRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .put({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
-      },
       path: EXCEPTION_LIST_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {

@@ -140,13 +140,9 @@ a bar chart that displays the top five log traffic sources for every three hours
 
 Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the web logs sample data set>>.
 
-. Click *Other sample data sets*. 
-
-. On the *Sample web logs* card, click *Add data*.
-
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboards*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 

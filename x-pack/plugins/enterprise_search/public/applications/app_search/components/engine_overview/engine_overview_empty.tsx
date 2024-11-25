@@ -12,8 +12,8 @@ import { useValues } from 'kea';
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../shared/doc_links';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
-import { DOCS_URL } from '../../routes';
 import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_creation';
 import illustration from '../document_creation/illustration.svg';
 
@@ -85,7 +85,7 @@ export const EmptyEngineOverview: React.FC = () => {
           { defaultMessage: 'Engine setup' }
         ),
         rightSideItems: [
-          <EuiButton href={DOCS_URL} target="_blank" iconType="popout">
+          <EuiButton href={docLinks.appSearchGuide} target="_blank" iconType="popout">
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction',
               { defaultMessage: 'View documentation' }

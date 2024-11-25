@@ -135,7 +135,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       await element.moveMouseTo();
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
       await button.click();
-      await testSubjects.existOrFail('embeddablePanelAction-openInLens');
+      return testSubjects.existOrFail('embeddablePanelAction-openInLens');
     },
 
     // KPIs

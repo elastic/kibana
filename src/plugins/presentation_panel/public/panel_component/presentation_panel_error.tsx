@@ -16,6 +16,7 @@ import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { useErrorTextStyle } from '@kbn/react-hooks';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
@@ -27,6 +28,8 @@ export const PresentationPanelError = ({
   error: ErrorLike;
   api?: DefaultPresentationPanelApi;
 }) => {
+  const errorTextStyle = useErrorTextStyle();
+
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
     () => (isEditable ? () => editPanelAction?.execute({ embeddable: api }) : undefined),
@@ -82,7 +85,7 @@ export const PresentationPanelError = ({
     <EuiEmptyPrompt
       body={
         searchErrorDisplay?.body ?? (
-          <EuiText size="s">
+          <EuiText size="s" css={errorTextStyle}>
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
               {error.message?.length
                 ? error.message

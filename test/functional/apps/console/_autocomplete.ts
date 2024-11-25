@@ -351,7 +351,8 @@ GET _search
       });
     });
 
-    describe('index fields autocomplete', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/198109
+    describe.skip('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {

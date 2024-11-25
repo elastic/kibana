@@ -25,10 +25,12 @@ export const deleteEndpointListItemRoute = (router: ListsPluginRouter): void => 
   router.versioned
     .delete({
       access: 'public',
-      options: {
-        tags: ['access:lists-all'],
-      },
       path: ENDPOINT_LIST_ITEM_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['lists-all'],
+        },
+      },
     })
     .addVersion(
       {

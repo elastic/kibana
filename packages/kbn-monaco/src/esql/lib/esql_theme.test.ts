@@ -9,12 +9,12 @@
 
 import { ESQLErrorListener, getLexer as _getLexer } from '@kbn/esql-ast';
 import { ESQL_TOKEN_POSTFIX } from './constants';
-import { buildESQlTheme } from './esql_theme';
+import { buildESQLTheme } from './esql_theme';
 import { CharStreams } from 'antlr4';
 
 describe('ESQL Theme', () => {
   it('should not have multiple rules for a single token', () => {
-    const theme = buildESQlTheme();
+    const theme = buildESQLTheme({ darkMode: false });
 
     const seen = new Set<string>();
     const duplicates: string[] = [];
@@ -40,7 +40,7 @@ describe('ESQL Theme', () => {
     .map((name) => name!.toLowerCase());
 
   it('every rule should apply to a valid lexical name', () => {
-    const theme = buildESQlTheme();
+    const theme = buildESQLTheme({ darkMode: false });
 
     // These names aren't from the lexer... they are added on our side
     // see packages/kbn-monaco/src/esql/lib/esql_token_helpers.ts
@@ -62,7 +62,7 @@ describe('ESQL Theme', () => {
   });
 
   it('every valid lexical name should have a corresponding rule', () => {
-    const theme = buildESQlTheme();
+    const theme = buildESQLTheme({ darkMode: false });
     const tokenIDs = theme.rules.map((rule) => rule.token.replace(ESQL_TOKEN_POSTFIX, ''));
 
     const validExceptions = [
@@ -95,6 +95,7 @@ describe('ESQL Theme', () => {
       'setting_ws',
       'metrics_ws',
       'closing_metrics_ws',
+      'join_ws',
     ];
 
     // First, check that every valid exception is actually valid

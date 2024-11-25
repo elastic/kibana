@@ -30,6 +30,7 @@ import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
 import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { MsearchError } from './lib/msearch_error';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();
@@ -490,9 +491,14 @@ describe('TaskStore', () => {
           },
         ],
       } as estypes.MsearchResponse);
-      await expect(store.msearch([{}])).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unexpected status code from taskStore::msearch: 429"`
-      );
+
+      try {
+        await store.msearch([{}]);
+        throw new Error('should have thrown');
+      } catch (err) {
+        expect(err instanceof MsearchError).toBe(true);
+        expect(err.statusCode).toEqual(429);
+      }
       expect(await firstErrorPromise).toMatchInlineSnapshot(
         `[Error: Unexpected status code from taskStore::msearch: 429]`
       );
@@ -1014,7 +1020,10 @@ describe('TaskStore', () => {
         refresh: false,
       });
 
-      expect(result).toEqual([asOk(task)]);
+      expect(result).toEqual([
+        // New version returned after update
+        asOk({ ...task, version: 'Wzg0LDFd' }),
+      ]);
     });
 
     test(`should perform partial update with minimal fields`, async () => {
@@ -1056,7 +1065,8 @@ describe('TaskStore', () => {
         refresh: false,
       });
 
-      expect(result).toEqual([asOk(task)]);
+      // New version returned after update
+      expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
     });
 
     test(`should perform partial update with no version`, async () => {
@@ -1094,7 +1104,8 @@ describe('TaskStore', () => {
         refresh: false,
       });
 
-      expect(result).toEqual([asOk(task)]);
+      // New version returned after update
+      expect(result).toEqual([asOk({ ...task, version: 'Wzg0LDFd' })]);
     });
 
     test(`should gracefully handle errors within the response`, async () => {
@@ -1177,7 +1188,8 @@ describe('TaskStore', () => {
       });
 
       expect(result).toEqual([
-        asOk(task1),
+        // New version returned after update
+        asOk({ ...task1, version: 'Wzg0LDFd' }),
         asErr({
           type: 'task',
           id: '45343254',
@@ -1261,7 +1273,8 @@ describe('TaskStore', () => {
       });
 
       expect(result).toEqual([
-        asOk(task1),
+        // New version returned after update
+        asOk({ ...task1, version: 'Wzg0LDFd' }),
         asErr({
           type: 'task',
           id: 'unknown',
@@ -1283,6 +1296,62 @@ describe('TaskStore', () => {
         `"Failure"`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('pushes errors returned by the saved objects client to errors$', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            update: {
+              _id: '1',
+              _index: 'test-index',
+              status: 403,
+              error: { reason: 'Error reason', type: 'cluster_block_exception' },
+            },
+          },
+        ],
+        took: 10,
+      });
+
+      await store.bulkPartialUpdate([task]);
+
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Error reason]`);
+    });
+
+    test('pushes errors for the malformed responses to errors$', async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+      };
+
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          {
+            update: {
+              _index: 'test-index',
+              status: 200,
+            },
+          },
+        ],
+        took: 10,
+      });
+
+      await store.bulkPartialUpdate([task]);
+
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: malformed response]`);
     });
   });
 

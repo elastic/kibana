@@ -16,6 +16,7 @@ import type {
 } from '@kbn/global-search-plugin/public';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { filterPolicyTemplatesTiles } from '../common/services';
 
 import { sendGetPackages } from './hooks';
 import type { GetPackagesResponse, PackageListItem } from './types';
@@ -30,7 +31,7 @@ const createPackages$ = () =>
       if (error) {
         throw error;
       }
-      return data?.response ?? [];
+      return data?.items ?? [];
     }),
     shareReplay(1)
   );
@@ -74,10 +75,12 @@ export const toSearchResult = (
     })
   );
 
-  return [
+  const tiles = filterPolicyTemplatesTiles<GlobalSearchProviderResult>(
+    pkg.policy_templates_behavior,
     packageResult,
-    ...(policyTemplateResults && policyTemplateResults.length > 1 ? policyTemplateResults : []),
-  ];
+    policyTemplateResults || []
+  );
+  return [...tiles];
 };
 
 export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResultProvider => {
@@ -86,7 +89,7 @@ export const createPackageSearchProvider = (core: CoreSetup): GlobalSearchResult
     shareReplay(1)
   );
 
-  let packages$: undefined | Observable<GetPackagesResponse['response']>;
+  let packages$: undefined | Observable<GetPackagesResponse['items']>;
 
   const getPackages$ = () => {
     if (!packages$) {

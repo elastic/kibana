@@ -166,7 +166,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       objectRemover.add(spaceId, ruleId, 'rule', 'alerting');
 
       const start = moment(originalDocTimestamps[1]).utc().startOf('day').toISOString();
-      const end = moment().utc().startOf('day').subtract(9, 'days').toISOString();
+      const end = moment(originalDocTimestamps[11]).utc().startOf('day').toISOString();
 
       // Schedule backfill for this rule
       const response2 = await supertestWithoutAuth

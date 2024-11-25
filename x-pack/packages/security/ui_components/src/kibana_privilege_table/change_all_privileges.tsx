@@ -15,9 +15,9 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import _ from 'lodash';
 import React, { Component } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { KibanaPrivilege } from '@kbn/security-role-management-model';
 
@@ -38,6 +38,43 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     isPopoverOpen: false,
   };
 
+  private getPrivilegeCopy = (privilege: string): { label?: string; icon?: string } => {
+    switch (privilege) {
+      case 'all':
+        return {
+          icon: 'documentEdit',
+          label: i18n.translate(
+            'xpack.security.management.editRole.changeAllPrivileges.allSelectionLabel',
+            {
+              defaultMessage: 'Grant full access for all',
+            }
+          ),
+        };
+      case 'read':
+        return {
+          icon: 'glasses',
+          label: i18n.translate(
+            'xpack.security.management.editRole.changeAllPrivileges.readSelectionLabel',
+            {
+              defaultMessage: 'Grant read access for all',
+            }
+          ),
+        };
+      case 'none':
+        return {
+          icon: 'trash',
+          label: i18n.translate(
+            'xpack.security.management.editRole.changeAllPrivileges.noneSelectionLabel',
+            {
+              defaultMessage: 'Revoke access to all',
+            }
+          ),
+        };
+      default:
+        return {};
+    }
+  };
+
   public render() {
     const button = (
       <EuiLink
@@ -56,8 +93,10 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     );
 
     const items = this.props.privileges.map((privilege) => {
+      const { icon, label } = this.getPrivilegeCopy(privilege.id);
       return (
         <EuiContextMenuItem
+          icon={icon}
           key={privilege.id}
           data-test-subj={`changeAllPrivileges-${privilege.id}`}
           onClick={() => {
@@ -65,21 +104,24 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
           }}
           disabled={this.props.disabled}
         >
-          {_.upperFirst(privilege.id)}
+          {label}
         </EuiContextMenuItem>
       );
     });
 
     items.push(
       <EuiContextMenuItem
+        icon={this.getPrivilegeCopy(NO_PRIVILEGE_VALUE).icon}
         key={NO_PRIVILEGE_VALUE}
         data-test-subj={`changeAllPrivileges-${NO_PRIVILEGE_VALUE}`}
         onClick={() => {
           this.onSelectPrivilege(NO_PRIVILEGE_VALUE);
         }}
         disabled={this.props.disabled}
+        // @ts-expect-error leaving this here so that when https://github.com/elastic/eui/issues/8123 is fixed we remove this comment
+        css={({ euiTheme }) => ({ color: euiTheme.colors.danger })}
       >
-        {_.upperFirst(NO_PRIVILEGE_VALUE)}
+        {this.getPrivilegeCopy(NO_PRIVILEGE_VALUE).label}
       </EuiContextMenuItem>
     );
 

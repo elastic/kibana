@@ -23,17 +23,17 @@ export class AppContextService {
   private cloud?: CloudSetup;
   private logFactory?: LoggerFactory;
 
-  constructor(appContext: DataUsageContext) {
+  public start(appContext: DataUsageContext) {
     this.cloud = appContext.cloud;
     this.logFactory = appContext.logFactory;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
     this.kibanaInstanceId = appContext.kibanaInstanceId;
-
     if (appContext.config$) {
       this.config$ = appContext.config$;
       const initialValue = appContext.configInitialValue;
       this.configSubject$ = new BehaviorSubject(initialValue);
+      this.config$.subscribe(this.configSubject$);
     }
   }
 
@@ -70,3 +70,5 @@ export class AppContextService {
     return this.kibanaInstanceId;
   }
 }
+
+export const appContextService = new AppContextService();

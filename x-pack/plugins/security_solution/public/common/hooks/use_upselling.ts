@@ -22,11 +22,11 @@ export const useUpsellingComponent = (id: UpsellingSectionId): React.ComponentTy
   return useMemo(() => upsellingSections?.get(id) ?? null, [id, upsellingSections]);
 };
 
-export const useUpsellingMessage = (id: UpsellingMessageId): string | null => {
+export const useUpsellingMessage = (id: UpsellingMessageId): string | undefined => {
   const upselling = useUpsellingService();
   const upsellingMessages = useObservable(upselling.messages$, upselling.getMessagesValue());
 
-  return useMemo(() => upsellingMessages?.get(id) ?? null, [id, upsellingMessages]);
+  return useMemo(() => upsellingMessages?.get(id), [id, upsellingMessages]);
 };
 
 export const useUpsellingPage = (pageName: SecurityPageName): React.ComponentType | null => {

@@ -20,7 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('Artistpreviouslyknownaslens');
       await lens.clickVisualizeListItemTitle('Artistpreviouslyknownaslens');
-      await lens.goToTimeRange();
       await lens.assertLegacyMetric('Maximum of bytes', '19,986');
     });
 

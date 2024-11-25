@@ -13,8 +13,10 @@ import { initializeImportWorkpadRoute } from './import';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
 import { initializeDeleteWorkpadRoute } from './delete';
 import { initializeResolveWorkpadRoute } from './resolve';
+import { initializeHasWorkpadsRoute } from './has_workpads';
 
 export function initWorkpadRoutes(deps: RouteInitializerDeps) {
+  initializeHasWorkpadsRoute(deps);
   initializeFindWorkpadsRoute(deps);
   initializeResolveWorkpadRoute(deps);
   initializeGetWorkpadRoute(deps);

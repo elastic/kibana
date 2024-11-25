@@ -33,7 +33,7 @@ const COPY_TO_CLIPBOARD_SUCCESS = i18n.translate(
   }
 );
 
-const escapeValue = (value: string) => value.replace(/"/g, '\\"');
+const escapeValue = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 export const createCopyToClipboardActionFactory = createCellActionFactory(
   ({ notifications }: { notifications: NotificationsStart }) => ({

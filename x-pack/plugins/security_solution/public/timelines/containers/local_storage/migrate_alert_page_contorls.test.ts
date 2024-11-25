@@ -7,9 +7,10 @@
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
-  PAGE_FILTER_STORAGE_KEY,
+  GET_PAGE_FILTER_STORAGE_KEY,
   migrateAlertPageControlsTo816,
 } from './migrate_alert_page_controls';
+import type { StartPlugins } from '../../../types';
 
 const OLD_FORMAT = {
   viewMode: 'view',
@@ -216,40 +217,94 @@ const NEW_FORMAT = {
 };
 const storage = new Storage(localStorage);
 
+const mockPlugins = {
+  spaces: {
+    getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+  },
+} as unknown as StartPlugins;
+
 describe('migrateAlertPageControlsTo816', () => {
   beforeEach(() => {
     storage.clear();
   });
-  it('should migrate the old format to the new format', () => {
-    storage.set(PAGE_FILTER_STORAGE_KEY, OLD_FORMAT);
-    migrateAlertPageControlsTo816(storage);
-    const migrated = storage.get(PAGE_FILTER_STORAGE_KEY);
-    expect(migrated).toMatchObject(NEW_FORMAT);
+  describe('Default space', () => {
+    beforeEach(() => {
+      if (mockPlugins.spaces?.getActiveSpace) {
+        mockPlugins.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: 'default' });
+      }
+    });
+    it('should migrate the old format to the new format', async () => {
+      storage.set(GET_PAGE_FILTER_STORAGE_KEY(), OLD_FORMAT);
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY());
+      expect(migrated).toMatchObject(NEW_FORMAT);
+    });
+
+    it('should be a no-op if the new format already exists', async () => {
+      storage.set(GET_PAGE_FILTER_STORAGE_KEY(), NEW_FORMAT);
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY());
+      expect(migrated).toMatchObject(NEW_FORMAT);
+    });
+
+    it('should be a no-op if no value is present in localstorage for page filters ', async () => {
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY());
+      expect(migrated).toBeNull();
+    });
+
+    it('should convert custom old format correctly', async () => {
+      const MODIFIED_OLD_FORMAT = structuredClone(OLD_FORMAT);
+      MODIFIED_OLD_FORMAT.panels['0'].explicitInput.hideExists = true;
+      MODIFIED_OLD_FORMAT.chainingSystem = 'NONE';
+      storage.set(GET_PAGE_FILTER_STORAGE_KEY(), MODIFIED_OLD_FORMAT);
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY());
+      const EXPECTED_NEW_FORMAT = structuredClone(NEW_FORMAT);
+      EXPECTED_NEW_FORMAT.initialChildControlState['0'].hideExists = true;
+      EXPECTED_NEW_FORMAT.chainingSystem = 'NONE';
+      expect(migrated).toMatchObject(EXPECTED_NEW_FORMAT);
+    });
   });
 
-  it('should be a no-op if the new format already exists', () => {
-    storage.set(PAGE_FILTER_STORAGE_KEY, NEW_FORMAT);
-    migrateAlertPageControlsTo816(storage);
-    const migrated = storage.get(PAGE_FILTER_STORAGE_KEY);
-    expect(migrated).toMatchObject(NEW_FORMAT);
-  });
+  describe('Non Default space', () => {
+    const nonDefaultSpaceId = 'space1';
+    beforeEach(() => {
+      if (mockPlugins.spaces?.getActiveSpace) {
+        mockPlugins.spaces.getActiveSpace = jest.fn().mockResolvedValue({ id: nonDefaultSpaceId });
+      }
+    });
+    it('should migrate the old format to the new format', async () => {
+      storage.set(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId), OLD_FORMAT);
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId));
+      expect(migrated).toMatchObject(NEW_FORMAT);
+    });
 
-  it('should be a no-op if no value is present in localstorage for page filters ', () => {
-    migrateAlertPageControlsTo816(storage);
-    const migrated = storage.get(PAGE_FILTER_STORAGE_KEY);
-    expect(migrated).toBeNull();
-  });
+    it('should be a no-op if the new format already exists', async () => {
+      storage.set(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId), NEW_FORMAT);
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId));
+      expect(migrated).toMatchObject(NEW_FORMAT);
+    });
 
-  it('should convert custom old format correctly', () => {
-    const MODIFIED_OLD_FORMAT = structuredClone(OLD_FORMAT);
-    MODIFIED_OLD_FORMAT.panels['0'].explicitInput.hideExists = true;
-    MODIFIED_OLD_FORMAT.chainingSystem = 'NONE';
-    storage.set(PAGE_FILTER_STORAGE_KEY, MODIFIED_OLD_FORMAT);
-    migrateAlertPageControlsTo816(storage);
-    const migrated = storage.get(PAGE_FILTER_STORAGE_KEY);
-    const EXPECTED_NEW_FORMAT = structuredClone(NEW_FORMAT);
-    EXPECTED_NEW_FORMAT.initialChildControlState['0'].hideExists = true;
-    EXPECTED_NEW_FORMAT.chainingSystem = 'NONE';
-    expect(migrated).toMatchObject(EXPECTED_NEW_FORMAT);
+    it('should be a no-op if no value is present in localstorage for page filters ', async () => {
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId));
+      expect(migrated).toBeNull();
+    });
+
+    it('should convert custom old format correctly', async () => {
+      const MODIFIED_OLD_FORMAT = structuredClone(OLD_FORMAT);
+      MODIFIED_OLD_FORMAT.panels['0'].explicitInput.hideExists = true;
+      MODIFIED_OLD_FORMAT.chainingSystem = 'NONE';
+      storage.set(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId), MODIFIED_OLD_FORMAT);
+      await migrateAlertPageControlsTo816(storage, mockPlugins);
+      const migrated = storage.get(GET_PAGE_FILTER_STORAGE_KEY(nonDefaultSpaceId));
+      const EXPECTED_NEW_FORMAT = structuredClone(NEW_FORMAT);
+      EXPECTED_NEW_FORMAT.initialChildControlState['0'].hideExists = true;
+      EXPECTED_NEW_FORMAT.chainingSystem = 'NONE';
+      expect(migrated).toMatchObject(EXPECTED_NEW_FORMAT);
+    });
   });
 });

@@ -37,6 +37,11 @@ export function defineInvalidateSessionsRoutes({
           ),
         }),
       },
+      security: {
+        authz: {
+          requiredPrivileges: ['sessionManagement'],
+        },
+      },
       options: {
         // The invalidate session API was introduced to address situations where the session index
         // could grow rapidly - when session timeouts are disabled, or with anonymous access.
@@ -44,7 +49,7 @@ export function defineInvalidateSessionsRoutes({
         // anonymous access. However, keeping this endpoint available internally in serverless would
         // be useful in situations where we need to batch-invalidate user sessions.
         access: buildFlavor === 'serverless' ? 'internal' : 'public',
-        tags: ['access:sessionManagement'],
+
         summary: `Invalidate user sessions`,
       },
     },

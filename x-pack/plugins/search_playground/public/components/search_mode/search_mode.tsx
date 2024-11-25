@@ -69,6 +69,7 @@ export const SearchMode: React.FC = () => {
                 name={ChatFormFields.searchQuery}
                 render={({ field }) => (
                   <EuiFieldText
+                    data-test-subj="searchPlaygroundSearchModeFieldText"
                     {...field}
                     value={searchBarValue}
                     icon="search"

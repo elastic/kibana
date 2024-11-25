@@ -617,7 +617,9 @@ describe('Index Templates tab', () => {
           const { find, actions, exists } = testBed;
 
           httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, template);
-          httpRequestsMockHelpers.setSimulateTemplateResponse({ simulateTemplate: 'response' });
+          httpRequestsMockHelpers.setSimulateTemplateByNameResponse(templates[0].name, {
+            simulateTemplate: 'response',
+          });
 
           await actions.clickTemplateAt(0);
 

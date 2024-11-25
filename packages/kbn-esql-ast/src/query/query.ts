@@ -15,6 +15,10 @@ import {
   WrappingPrettyPrinterOptions,
 } from '../pretty_print/wrapping_pretty_printer';
 
+/**
+ * Represents a parsed or programmatically created ES|QL query. Keeps track of
+ * the AST, source code, and optionally lexer tokens.
+ */
 export class EsqlQuery {
   public static readonly fromSrc = (src: string, opts?: ParseOptions): EsqlQuery => {
     const { root, tokens } = parse(src, opts);

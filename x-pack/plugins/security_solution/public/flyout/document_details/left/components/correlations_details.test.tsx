@@ -28,7 +28,7 @@ import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_f
 import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '@kbn/security-solution-common';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

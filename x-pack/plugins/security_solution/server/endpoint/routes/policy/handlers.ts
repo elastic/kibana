@@ -10,13 +10,8 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { errorHandler } from '../error_handler';
-import type {
-  GetPolicyResponseSchema,
-  GetAgentPolicySummaryRequestSchema,
-} from '../../../../common/api/endpoint';
-import type { EndpointAppContext } from '../../types';
-import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
-import type { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
+import type { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
+import { getPolicyResponseByAgentId } from './service';
 import { NotFoundError } from '../../errors';
 
 export const getHostPolicyResponseHandler = function (
@@ -48,32 +43,5 @@ export const getHostPolicyResponseHandler = function (
     } catch (err) {
       return errorHandler(logger, response, err);
     }
-  };
-};
-
-export const getAgentPolicySummaryHandler = function (
-  endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, TypeOf<typeof GetAgentPolicySummaryRequestSchema.query>, undefined> {
-  return async (_, request, response) => {
-    const result = await getAgentPolicySummary(
-      endpointAppContext,
-      request,
-      request.query.package_name,
-      request.query?.policy_id || undefined
-    );
-    const responseBody = {
-      package: request.query.package_name,
-      versions_count: { ...result },
-    };
-
-    const body: GetAgentSummaryResponse = {
-      summary_response: request.query?.policy_id
-        ? { ...responseBody, ...{ policy_id: request.query?.policy_id } }
-        : responseBody,
-    };
-
-    return response.ok({
-      body,
-    });
   };
 };

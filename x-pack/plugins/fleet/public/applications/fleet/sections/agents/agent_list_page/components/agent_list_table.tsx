@@ -24,15 +24,13 @@ import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../ser
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
-import { useAgentVersion, useGetListOutputsForPolicies } from '../../../../hooks';
+import { useAgentVersion } from '../../../../hooks';
 import { useLink, useAuthz } from '../../../../hooks';
 
 import { AgentPolicySummaryLine } from '../../../../components';
 import { Tags } from '../../components/tags';
-import type { AgentMetrics, OutputsForAgentPolicy } from '../../../../../../../common/types';
+import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
-
-import { AgentPolicyOutputsSummary } from './agent_policy_outputs_summary';
 
 import { AgentUpgradeStatus } from './agent_upgrade_status';
 
@@ -45,8 +43,6 @@ const AGENTS_TABLE_FIELDS = {
   METRICS: 'metrics',
   VERSION: 'local_metadata.elastic.agent.version',
   LAST_CHECKIN: 'last_checkin',
-  OUTPUT_INTEGRATION: 'output_integrations',
-  OUTPUT_MONITORING: 'output_monitoring',
 };
 
 function safeMetadata(val: any) {
@@ -127,14 +123,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         : agents
       : [];
   }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
-
-  // get the policyIds of the agents shown on the page
-  const policyIds = useMemo(() => {
-    return agentsShown.map((agent) => agent?.policy_id ?? '');
-  }, [agentsShown]);
-  const allOutputs = useGetListOutputsForPolicies({
-    ids: policyIds,
-  });
 
   const noItemsMessage =
     isLoading && isCurrentRequestIncremented ? (
@@ -304,40 +292,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       width: '100px',
       render: (lastCheckin: string) =>
         lastCheckin ? <FormattedRelative value={lastCheckin} /> : undefined,
-    },
-    {
-      field: AGENTS_TABLE_FIELDS.OUTPUT_INTEGRATION,
-      sortable: true,
-      truncateText: true,
-      name: i18n.translate('xpack.fleet.agentList.integrationsOutputTitle', {
-        defaultMessage: 'Output for integrations',
-      }),
-      width: '180px',
-      render: (outputs: OutputsForAgentPolicy[], agent: Agent) => {
-        if (!agent?.policy_id) return null;
-
-        const outputsForPolicy = allOutputs?.data?.items.find(
-          (item) => item.agentPolicyId === agent?.policy_id
-        );
-        return <AgentPolicyOutputsSummary outputs={outputsForPolicy} />;
-      },
-    },
-    {
-      field: AGENTS_TABLE_FIELDS.OUTPUT_MONITORING,
-      sortable: true,
-      truncateText: true,
-      name: i18n.translate('xpack.fleet.agentList.monitoringOutputTitle', {
-        defaultMessage: 'Output for monitoring',
-      }),
-      width: '180px',
-      render: (outputs: OutputsForAgentPolicy[], agent: Agent) => {
-        if (!agent?.policy_id) return null;
-
-        const outputsForPolicy = allOutputs?.data?.items.find(
-          (item) => item.agentPolicyId === agent?.policy_id
-        );
-        return <AgentPolicyOutputsSummary outputs={outputsForPolicy} isMonitoring={true} />;
-      },
     },
     {
       field: AGENTS_TABLE_FIELDS.VERSION,

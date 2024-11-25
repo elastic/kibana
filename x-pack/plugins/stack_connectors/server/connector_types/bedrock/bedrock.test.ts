@@ -30,6 +30,7 @@ jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 // @ts-ignore
 const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
+const mockSend = jest.fn();
 describe('BedrockConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
@@ -89,6 +90,8 @@ describe('BedrockConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
+      // @ts-ignore
+      connector.bedrockClient.send = mockSend;
     });
 
     describe('runApi', () => {
@@ -630,6 +633,57 @@ describe('BedrockConnector', () => {
         );
       });
     });
+
+    describe('bedrockClientSend', () => {
+      it('should send the command and return the response', async () => {
+        const command = { input: 'test' };
+        const response = { result: 'success' };
+        mockSend.mockResolvedValue(response);
+
+        const result = await connector.bedrockClientSend(
+          { signal: undefined, command },
+          connectorUsageCollector
+        );
+
+        expect(mockSend).toHaveBeenCalledWith(command, { abortSignal: undefined });
+        expect(result).toEqual(response);
+      });
+
+      it('should handle and split streaming response', async () => {
+        const command = { input: 'test' };
+        const stream = new PassThrough();
+        const response = { stream };
+        mockSend.mockResolvedValue(response);
+
+        const result = (await connector.bedrockClientSend(
+          { signal: undefined, command },
+          connectorUsageCollector
+        )) as unknown as {
+          stream?: unknown;
+          tokenStream?: unknown;
+        };
+
+        expect(mockSend).toHaveBeenCalledWith(command, { abortSignal: undefined });
+        expect(result.stream).toBeDefined();
+        expect(result.tokenStream).toBeDefined();
+      });
+
+      it('should handle non-streaming response', async () => {
+        const command = { input: 'test' };
+        const usage = { stats: 0 };
+        const response = { usage };
+        mockSend.mockResolvedValue(response);
+
+        const result = (await connector.bedrockClientSend(
+          { signal: undefined, command },
+          connectorUsageCollector
+        )) as unknown as {
+          usage?: unknown;
+        };
+        expect(result.usage).toBeDefined();
+      });
+    });
+
     describe('getResponseErrorMessage', () => {
       it('returns an unknown error message', () => {
         // @ts-expect-error expects an axios error as the parameter

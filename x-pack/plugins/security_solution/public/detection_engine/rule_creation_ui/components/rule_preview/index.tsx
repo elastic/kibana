@@ -108,6 +108,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
 
+  const isLoggedRequestsSupported = RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType);
+
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
     setTimeframeStart(start);
@@ -194,7 +196,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         interval: scheduleRuleData.interval,
         lookback: scheduleRuleData.from,
       },
-      enableLoggedRequests: showElasticsearchRequests,
+      enableLoggedRequests: showElasticsearchRequests && isLoggedRequestsSupported,
     });
     setIsRefreshing(true);
   }, [
@@ -205,6 +207,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     startDate,
     startTransaction,
     showElasticsearchRequests,
+    isLoggedRequestsSupported,
   ]);
 
   const isDirty = useMemo(
@@ -279,7 +282,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      {RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType) ? (
+      {isLoggedRequestsSupported ? (
         <EuiFormRow>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
             <EuiFlexItem grow>
@@ -312,7 +315,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
         logs={logs}
         hasNoiseWarning={hasNoiseWarning}
         isAborted={isAborted}
-        showElasticsearchRequests={showElasticsearchRequests}
+        showElasticsearchRequests={showElasticsearchRequests && isLoggedRequestsSupported}
       />
     </div>
   );

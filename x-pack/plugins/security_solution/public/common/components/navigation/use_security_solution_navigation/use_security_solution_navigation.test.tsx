@@ -34,6 +34,20 @@ describe('Security Solution Navigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+  describe('while chrome style is undefined', () => {
+    beforeAll(() => {
+      mockGetChromeStyle$.mockReturnValue(of());
+    });
+
+    it('should return proper navigation props', async () => {
+      const { result } = renderHook(useSecuritySolutionNavigation);
+      expect(result.current).toEqual(undefined);
+
+      // check rendering of SecuritySideNav children
+      expect(mockSecuritySideNav).not.toHaveBeenCalled();
+    });
+  });
+
   describe('when classic navigation is enabled', () => {
     beforeAll(() => {
       mockGetChromeStyle$.mockReturnValue(of('classic'));
@@ -77,9 +91,9 @@ describe('Security Solution Navigation', () => {
       mockGetChromeStyle$.mockReturnValue(of('project'));
     });
 
-    it('should return undefined props when disabled', () => {
+    it('should return null props when disabled', () => {
       const { result } = renderHook(useSecuritySolutionNavigation);
-      expect(result.current).toEqual(undefined);
+      expect(result.current).toEqual(null);
     });
 
     it('should initialize breadcrumbs', () => {

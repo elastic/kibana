@@ -13,10 +13,7 @@ import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-server';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: {
-    csv: {
-      enablePanelActionDownload: true,
-      scroll: true,
-    },
+    csv: { scroll: true },
     poll: true,
     roles: true,
     export_types: true,
@@ -24,6 +21,7 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
   },
   schema: ConfigSchema,
   deprecations: ({ unused }) => [
+    unused('csv.enablePanelActionDownload', { level: 'warning' }), // unused since 9.0
     unused('queue.indexInterval', { level: 'warning' }), // unused since 8.15
     unused('capture.browser.chromium.maxScreenshotDimension', { level: 'warning' }), // unused since 7.8
     unused('capture.browser.type', { level: 'warning' }),
@@ -68,44 +66,11 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
           },
         });
       }
-
-      if (reporting?.csv?.enablePanelActionDownload === true) {
-        addDeprecation({
-          configPath: `${fromPath}.csv.enablePanelActionDownload`,
-          title: i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.title', {
-            defaultMessage:
-              'The setting to enable CSV Download from saved search panels in dashboards is deprecated.',
-          }),
-          level: 'warning',
-          message: i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.message', {
-            defaultMessage: `The "{enablePanelActionDownload}" setting is deprecated.`,
-            values: {
-              enablePanelActionDownload: `${fromPath}.csv.enablePanelActionDownload`,
-            },
-          }),
-          correctiveActions: {
-            manualSteps: [
-              i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.manualStep1', {
-                defaultMessage:
-                  'Remove "{enablePanelActionDownload}" from `kibana.yml` or change the setting to `false`.',
-                values: {
-                  enablePanelActionDownload: `${fromPath}.csv.enablePanelActionDownload`,
-                },
-              }),
-              i18n.translate('xpack.reporting.deprecations.csvPanelActionDownload.manualStep2', {
-                defaultMessage:
-                  'Use the replacement panel action to generate CSV reports from saved search panels in the Dashboard application.',
-              }),
-            ],
-          },
-        });
-      }
     },
   ],
   exposeToUsage: {
     capture: { maxAttempts: true },
     csv: {
-      enablePanelActionDownload: true,
       maxSizeBytes: true,
       scroll: { size: true, duration: true },
     },

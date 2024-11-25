@@ -22,10 +22,12 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
   router.versioned
     .post({
       access: 'internal',
-      options: {
-        tags: ['access:securitySolution'],
-      },
       path: INTERNAL_EXCEPTION_FILTER,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

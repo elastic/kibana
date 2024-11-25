@@ -350,10 +350,10 @@ export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const CUSTOMIZED_PREBUILT_RULE_LABEL = i18n.translate(
+export const MODIFIED_PREBUILT_RULE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRuleLabel',
   {
-    defaultMessage: 'Customized Elastic rule',
+    defaultMessage: 'Modified Elastic rule',
   }
 );
 

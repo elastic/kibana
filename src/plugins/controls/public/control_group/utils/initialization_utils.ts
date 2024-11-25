@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_CONTROL_LABEL_POSITION, type ControlGroupRuntimeState } from '../../../common';
+import {
+  type ControlGroupRuntimeState,
+  DEFAULT_CONTROL_CHAINING,
+  DEFAULT_CONTROL_LABEL_POSITION,
+  DEFAULT_AUTO_APPLY_SELECTIONS,
+  DEFAULT_IGNORE_PARENT_SETTINGS,
+} from '../../../common';
 
 export const getDefaultControlGroupRuntimeState = (): ControlGroupRuntimeState => ({
   initialChildControlState: {},
   labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
-  chainingSystem: 'HIERARCHICAL',
-  autoApplySelections: true,
-  ignoreParentSettings: {
-    ignoreFilters: false,
-    ignoreQuery: false,
-    ignoreTimerange: false,
-    ignoreValidations: false,
-  },
+  chainingSystem: DEFAULT_CONTROL_CHAINING,
+  autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
+  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
 });

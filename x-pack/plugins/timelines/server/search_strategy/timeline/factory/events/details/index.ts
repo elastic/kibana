@@ -12,15 +12,11 @@ import { TimelineEventsQueries } from '../../../../../../common/api/search_strat
 import {
   EventHit,
   TimelineEventsDetailsStrategyResponse,
-  TimelineEventsDetailsItem,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import {
-  getDataFromFieldsHits,
-  getDataSafety,
-} from '../../../../../../common/utils/field_formatters';
+import { getDataFromFieldsHits } from '../../../../../../common/utils/field_formatters';
 import { buildEcsObjects } from '../../helpers/build_ecs_objects';
 
 export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.details> = {
@@ -57,10 +53,7 @@ export const timelineEventsDetails: TimelineFactory<TimelineEventsQueries.detail
       };
     }
 
-    const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(
-      getDataFromFieldsHits,
-      merge(fields, hitsData)
-    );
+    const fieldsData = getDataFromFieldsHits(merge(fields, hitsData));
 
     const rawEventData = response.rawResponse.hits.hits[0];
     const ecs = buildEcsObjects(rawEventData as EventHit);

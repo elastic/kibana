@@ -42,6 +42,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
           <EuiCheckableCard
             data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-basicAuthentication"
             id="basicAuthenticationCheckableCard"
+            name="authenticationCard"
             className="authenticationCheckable"
             label={
               <EuiTitle size="xxs">
@@ -75,6 +76,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
           <EuiCheckableCard
             data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-authenticationHeader"
             id="authenticationHeaderCheckableCard"
+            name="authenticationCard"
             className="authenticationCheckable"
             label={
               <EuiTitle size="xxs">

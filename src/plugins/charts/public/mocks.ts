@@ -10,7 +10,6 @@
 import { ChartsPlugin } from './plugin';
 import { themeServiceMock } from './services/theme/mock';
 import { activeCursorMock } from './services/active_cursor/mock';
-import { colorsServiceMock } from './services/legacy_colors/mock';
 import { getPaletteRegistry, paletteServiceMock } from './services/palettes/mock';
 
 export { MOCK_SPARKLINE_THEME } from './services/theme/mock';
@@ -19,16 +18,14 @@ export type Setup = jest.Mocked<ReturnType<ChartsPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
 
 const createSetupContract = (): Setup => ({
-  legacyColors: colorsServiceMock,
   theme: themeServiceMock,
-  palettes: paletteServiceMock.setup({} as any),
+  palettes: paletteServiceMock.setup(),
 });
 
 const createStartContract = (): Start => ({
-  legacyColors: colorsServiceMock,
   theme: themeServiceMock,
   activeCursor: activeCursorMock,
-  palettes: paletteServiceMock.setup({} as any),
+  palettes: paletteServiceMock.setup(),
 });
 
 export const chartPluginMock = {

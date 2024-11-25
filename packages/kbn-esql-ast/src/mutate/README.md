@@ -60,3 +60,21 @@ console.log(src); // FROM index METADATA _lang, _id
     - `.remove()` &mdash; Remove a `LIMIT` command by index.
     - `.set()` &mdash; Set the limit value of a specific `LIMIT` command.
     - `.upsert()` &mdash; Insert a `LIMIT` command, or update the limit value if it already exists.
+  - `.stats`
+    - `.list()` &mdash; List all `STATS` commands.
+    - `.byIndex()` &mdash; Find a `STATS` command by index.
+    - `.summarize()` &mdash; Summarize all `STATS` commands.
+    - `.summarizeCommand()` &mdash; Summarize a specific `STATS` command.
+
+
+## Examples
+
+Extract all "new" and "used" fields from all `STATS` commands:
+
+```ts
+const query = EsqlQuery.fromSrc('FROM index | STATS a = max(b), agg(c) BY d');
+const summary = mutate.commands.stats.summarize(query);
+
+console.log(summary.newFields);     // [ 'a', '`agg(c)`' ]
+console.log(summary.usedFields);    // [ 'b', 'c', 'd' ]
+```

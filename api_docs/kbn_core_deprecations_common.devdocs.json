@@ -22,6 +22,62 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-deprecations-common",
+        "id": "def-common.ApiDeprecationDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiDeprecationDetails",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.ApiDeprecationDetails",
+            "text": "ApiDeprecationDetails"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.BaseDeprecationDetails",
+            "text": "BaseDeprecationDetails"
+          }
+        ],
+        "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-common",
+            "id": "def-common.ApiDeprecationDetails.apiId",
+            "type": "string",
+            "tags": [],
+            "label": "apiId",
+            "description": [],
+            "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-common",
+            "id": "def-common.ApiDeprecationDetails.deprecationType",
+            "type": "string",
+            "tags": [],
+            "label": "deprecationType",
+            "description": [],
+            "signature": [
+              "\"api\""
+            ],
+            "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-deprecations-common",
         "id": "def-common.BaseDeprecationDetails",
         "type": "Interface",
         "tags": [],
@@ -227,7 +283,15 @@
                 "section": "def-common.DomainDeprecationDetails",
                 "text": "DomainDeprecationDetails"
               },
-              "[]"
+              "<",
+              {
+                "pluginId": "@kbn/core-deprecations-common",
+                "scope": "common",
+                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+                "section": "def-common.DeprecationsDetails",
+                "text": "DeprecationsDetails"
+              },
+              ">[]"
             ],
             "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
             "deprecated": false,
@@ -300,7 +364,13 @@
             "text": "ConfigDeprecationDetails"
           },
           " | ",
-          "ApiDeprecationDetails",
+          {
+            "pluginId": "@kbn/core-deprecations-common",
+            "scope": "common",
+            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
+            "section": "def-common.ApiDeprecationDetails",
+            "text": "ApiDeprecationDetails"
+          },
           " | ",
           {
             "pluginId": "@kbn/core-deprecations-common",
@@ -323,14 +393,7 @@
         "label": "DomainDeprecationDetails",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-deprecations-common",
-            "scope": "common",
-            "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-            "section": "def-common.DeprecationsDetails",
-            "text": "DeprecationsDetails"
-          },
-          " & { domainId: string; }"
+          "ExtendedDetails & { domainId: string; }"
         ],
         "path": "packages/core/deprecations/core-deprecations-common/src/types.ts",
         "deprecated": false,

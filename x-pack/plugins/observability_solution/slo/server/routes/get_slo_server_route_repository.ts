@@ -8,9 +8,7 @@
 import { getSloRouteRepository } from './slo/route';
 
 export function getSloServerRouteRepository({ isServerless }: { isServerless?: boolean } = {}) {
-  return {
-    ...getSloRouteRepository(isServerless),
-  };
+  return getSloRouteRepository(isServerless);
 }
 
-export type SloServerRouteRepository = ReturnType<typeof getSloServerRouteRepository>;
+export type SLORouteRepository = ReturnType<typeof getSloServerRouteRepository>;

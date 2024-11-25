@@ -13,8 +13,6 @@
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
-    "@kbn/core-chrome-browser",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/core-notifications-browser",
     "@kbn/data-plugin",
     "@kbn/deeplinks-observability",

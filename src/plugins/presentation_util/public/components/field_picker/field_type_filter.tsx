@@ -63,7 +63,7 @@ export function FieldTypeFilter({
   );
 
   return (
-    <EuiFilterGroup fullWidth>
+    <EuiFilterGroup compressed fullWidth>
       <EuiInputPopover
         panelPaddingSize="none"
         display="block"

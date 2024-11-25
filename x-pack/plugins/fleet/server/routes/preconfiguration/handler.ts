@@ -9,7 +9,6 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { FleetRequestHandler } from '../../types';
 import type { PostResetOnePreconfiguredAgentPoliciesSchema } from '../../types';
-import { defaultFleetErrorHandler } from '../../errors';
 import { resetPreconfiguredAgentPolicies } from '../../services/preconfiguration/reset_agent_policies';
 
 export const resetOnePreconfigurationHandler: FleetRequestHandler<
@@ -21,12 +20,8 @@ export const resetOnePreconfigurationHandler: FleetRequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  try {
-    await resetPreconfiguredAgentPolicies(soClient, esClient, request.params.agentPolicyId);
-    return response.ok({});
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  await resetPreconfiguredAgentPolicies(soClient, esClient, request.params.agentPolicyId);
+  return response.ok({});
 };
 
 export const resetPreconfigurationHandler: FleetRequestHandler<
@@ -38,10 +33,6 @@ export const resetPreconfigurationHandler: FleetRequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  try {
-    await resetPreconfiguredAgentPolicies(soClient, esClient);
-    return response.ok({});
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+  await resetPreconfiguredAgentPolicies(soClient, esClient);
+  return response.ok({});
 };

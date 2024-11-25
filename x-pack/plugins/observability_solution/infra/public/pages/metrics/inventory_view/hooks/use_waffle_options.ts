@@ -11,6 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { InventoryViewOptions } from '../../../../../common/inventory_views/types';
 import {
   type InventoryLegendOptions,
@@ -24,7 +25,6 @@ import type {
   SnapshotGroupBy,
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api/snapshot_api';
-import { useUrlState } from '../../../../hooks/use_url_state';
 
 export const DEFAULT_LEGEND: WaffleLegendOptions = {
   palette: 'cool',

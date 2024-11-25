@@ -25,8 +25,10 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: NOTE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -51,10 +53,9 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
             note,
             overrideOwner: true,
           });
-          const body: PersistNoteRouteResponse = { data: { persistNote: res } };
 
           return response.ok({
-            body,
+            body: res,
           });
         } catch (err) {
           const error = transformError(err);

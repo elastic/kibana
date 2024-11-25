@@ -17,17 +17,17 @@ describe('generateTitle', () => {
 describe('searchTitle', () => {
   it('automatically appends the Enterprise Search product onto the pages array', () => {
     const title = searchTitle(['Setup Guide']);
-    expect(title).toEqual('Setup Guide - Search');
+    expect(title).toEqual('Setup Guide - Elasticsearch');
   });
 
   it('can be mixed and matched', () => {
     const title = searchTitle([appSearchTitle(['Some Page'])]);
-    expect(title).toEqual('Some Page - App Search - Search');
+    expect(title).toEqual('Some Page - App Search - Elasticsearch');
   });
 
   it('falls back to product name', () => {
     const title = searchTitle();
-    expect(title).toEqual('Search');
+    expect(title).toEqual('Elasticsearch');
   });
 });
 

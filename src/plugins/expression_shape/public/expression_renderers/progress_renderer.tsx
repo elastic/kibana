@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { ProgressRendererConfig } from '../../common/types';
 
 const strings = {
@@ -35,8 +34,7 @@ const strings = {
 };
 
 export const getProgressRenderer =
-  (theme$: Observable<CoreTheme> = defaultTheme$) =>
-  (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
+  (theme$: Observable<CoreTheme>) => (): ExpressionRenderDefinition<ProgressRendererConfig> => ({
     name: 'progress',
     displayName: strings.getDisplayName(),
     help: strings.getHelpDescription(),

@@ -40,13 +40,9 @@ As you edit the specs, work in small steps, and frequently save your work. Small
 
 Before starting, add the eCommerce sample data that you'll use in your spec, then create the dashboard.
 
-. On the home page, click *Try sample data*.
+. <<gs-get-data-into-kibana,Install the eCommerce sample data set>>.
 
-. Click *Other sample data sets*. 
-
-. On the *Sample eCommerce orders* card, click *Add data*.
-
-. Open the main menu, then click *Dashboard*.
+. Go to *Dashboards*.
 
 . On the *Dashboards* page, click *Create dashboard*.
 
@@ -90,7 +86,8 @@ To check your work, open and use the <<console-kibana,*Console*>> on a separate 
 
 . Open {kib} on a new tab. 
 
-. Open the main menu, then click *Dev Tools*.
+. Go to the *Developer tools* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 . On the *Console* editor, enter the aggregation, then click *Click to send request*:
 

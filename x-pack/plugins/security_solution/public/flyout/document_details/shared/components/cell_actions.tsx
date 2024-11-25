@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { useDocumentDetailsContext } from '../context';
 import { getSourcererScopeId } from '../../../../helpers';
-import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import { SecurityCellActionType } from '../../../../app/actions/constants';
 import {
   CellActionsMode,
@@ -40,12 +39,7 @@ interface CellActionsProps {
  * Security cell action wrapper for document details flyout
  */
 export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray, children }) => {
-  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-
-  const triggerId = isAlert
-    ? SecurityCellActionsTrigger.DETAILS_FLYOUT
-    : SecurityCellActionsTrigger.DEFAULT;
+  const { scopeId, isPreview } = useDocumentDetailsContext();
 
   const data = useMemo(() => ({ field, value }), [field, value]);
   const metadata = useMemo(() => ({ scopeId, isObjectArray }), [scopeId, isObjectArray]);
@@ -58,7 +52,7 @@ export const CellActions: FC<CellActionsProps> = ({ field, value, isObjectArray,
     <SecurityCellActions
       data={data}
       mode={CellActionsMode.HOVER_DOWN}
-      triggerId={triggerId}
+      triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
       visibleCellActions={6}
       sourcererScopeId={getSourcererScopeId(scopeId)}
       metadata={metadata}

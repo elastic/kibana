@@ -100,11 +100,9 @@ describe('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] 
     beforeEach(() => {
       login();
       deleteTimelines();
-      createTimeline().then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
-      );
+      createTimeline().then((response) => cy.wrap(response.body.savedObjectId).as('timelineId'));
       createTimeline(getTimelineModifiedSourcerer()).then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('auditbeatTimelineId')
+        cy.wrap(response.body.savedObjectId).as('auditbeatTimelineId')
       );
       visitWithTimeRange(TIMELINES_URL);
       refreshUntilAlertsIndexExists();

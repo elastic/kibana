@@ -173,6 +173,10 @@ const attachCommentDecoration = (
 ) => {
   const commentConsumesWholeLine = !comment.hasContentToLeft && !comment.hasContentToRight;
 
+  if (!comment.node.location) {
+    return;
+  }
+
   if (commentConsumesWholeLine) {
     const node = Visitor.findNodeAtOrAfter(ast, comment.node.location.max - 1);
 

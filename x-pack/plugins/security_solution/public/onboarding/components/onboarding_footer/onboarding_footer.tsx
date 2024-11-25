@@ -8,13 +8,14 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { useFooterStyles } from './onboarding_footer.styles';
-import { footerItems } from './footer_items';
+import { useFooterItems } from './footer_items';
 import { trackOnboardingLinkClick } from '../../common/lib/telemetry';
 import type { OnboardingFooterLinkItemId } from './constants';
 import { TELEMETRY_FOOTER_LINK } from './constants';
 
 export const OnboardingFooter = React.memo(() => {
   const styles = useFooterStyles();
+  const footerItems = useFooterItems();
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" className={styles}>
       {footerItems.map(({ id, title, icon, description, link }) => (

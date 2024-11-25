@@ -35,6 +35,10 @@ type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue
 
 type BulkUpsertFromStreamOptions = {
   recordsStream: NodeJS.ReadableStream;
+  /**
+   * The index number for the first stream element. By default the errors are zero-indexed.
+   */
+  streamIndexStart?: number;
 } & Pick<Parameters<ElasticsearchClient['helpers']['bulk']>[0], 'flushBytes' | 'retries'>;
 
 type StoredAssetCriticalityRecord = {
@@ -93,7 +97,7 @@ export class AssetCriticalityDataClient {
     query,
     size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
-    sort,
+    sort = ['@timestamp'], // without a default sort order the results are not deterministic which makes testing hard
   }: {
     query: ESFilter;
     size?: number;
@@ -236,6 +240,7 @@ export class AssetCriticalityDataClient {
    * @param recordsStream a stream of records to upsert, records may also be an error e.g if there was an error parsing
    * @param flushBytes how big elasticsearch bulk requests should be before they are sent
    * @param retries the number of times to retry a failed bulk request
+   * @param streamIndexStart By default the errors are zero-indexed. You can change it by setting this param to a value like `1`. It could be useful for file upload.
    * @returns an object containing the number of records updated, created, errored, and the total number of records processed
    * @throws an error if the stream emits an error
    * @remarks
@@ -248,6 +253,7 @@ export class AssetCriticalityDataClient {
     recordsStream,
     flushBytes,
     retries,
+    streamIndexStart = 0,
   }: BulkUpsertFromStreamOptions): Promise<BulkUpsertAssetCriticalityRecordsResponse> => {
     const errors: BulkUpsertAssetCriticalityRecordsResponse['errors'] = [];
     const stats: BulkUpsertAssetCriticalityRecordsResponse['stats'] = {
@@ -256,10 +262,13 @@ export class AssetCriticalityDataClient {
       total: 0,
     };
 
-    let streamIndex = 0;
+    let streamIndex = streamIndexStart;
     const recordGenerator = async function* () {
+      const processedEntities = new Set<string>();
+
       for await (const untypedRecord of recordsStream) {
         const record = untypedRecord as unknown as AssetCriticalityUpsert | Error;
+
         stats.total++;
         if (record instanceof Error) {
           stats.failed++;
@@ -268,10 +277,20 @@ export class AssetCriticalityDataClient {
             index: streamIndex,
           });
         } else {
-          yield {
-            record,
-            index: streamIndex,
-          };
+          const entityKey = `${record.idField}-${record.idValue}`;
+          if (processedEntities.has(entityKey)) {
+            errors.push({
+              message: 'Duplicated entity',
+              index: streamIndex,
+            });
+            stats.failed++;
+          } else {
+            processedEntities.add(entityKey);
+            yield {
+              record,
+              index: streamIndex,
+            };
+          }
         }
         streamIndex++;
       }
@@ -282,7 +301,7 @@ export class AssetCriticalityDataClient {
       index: this.getIndex(),
       flushBytes,
       retries,
-      refreshOnCompletion: true, // refresh the index after all records are processed
+      refreshOnCompletion: this.getIndex(),
       onDocument: ({ record }) => [
         { update: { _id: createId(record) } },
         {

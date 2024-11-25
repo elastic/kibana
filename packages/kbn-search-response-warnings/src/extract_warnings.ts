@@ -8,6 +8,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { SearchResponseWarning } from './types';
 
@@ -15,7 +16,7 @@ import type { SearchResponseWarning } from './types';
  * @internal
  */
 export function extractWarnings(
-  rawResponse: estypes.SearchResponse,
+  rawResponse: estypes.SearchResponse | ESQLSearchResponse,
   inspectorService: InspectorStartContract,
   requestAdapter: RequestAdapter,
   requestName: string,
@@ -23,11 +24,13 @@ export function extractWarnings(
 ): SearchResponseWarning[] {
   const warnings: SearchResponseWarning[] = [];
 
+  // ES|QL supports _clusters in case of CCS but doesnt support _shards and timed_out (yet)
   const isPartial = rawResponse._clusters
     ? rawResponse._clusters.partial > 0 ||
       rawResponse._clusters.skipped > 0 ||
       rawResponse._clusters.running > 0
-    : rawResponse.timed_out || rawResponse._shards.failed > 0;
+    : ('timed_out' in rawResponse && rawResponse.timed_out) ||
+      ('_shards' in rawResponse && rawResponse._shards.failed > 0);
   if (isPartial) {
     warnings.push({
       type: 'incomplete',
@@ -39,9 +42,10 @@ export function extractWarnings(
               status: 'partial',
               indices: '',
               took: rawResponse.took,
-              timed_out: rawResponse.timed_out,
-              _shards: rawResponse._shards,
-              failures: rawResponse._shards.failures,
+              timed_out: 'timed_out' in rawResponse && rawResponse.timed_out,
+              ...('_shards' in rawResponse
+                ? { _shards: rawResponse._shards, failures: rawResponse._shards.failures }
+                : {}),
             },
           },
       openInInspector: () => {

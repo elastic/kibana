@@ -38,8 +38,7 @@ export const getAlertDetailsContextHandler = (
   return async (requestContext, query) => {
     const resources = {
       getApmIndices: async () => {
-        const coreContext = await requestContext.core;
-        return resourcePlugins.apmDataAccess.setup.getApmIndices(coreContext.savedObjects.client);
+        return resourcePlugins.apmDataAccess.setup.getApmIndices();
       },
       request: requestContext.request,
       params: { query: { _inspect: false } },

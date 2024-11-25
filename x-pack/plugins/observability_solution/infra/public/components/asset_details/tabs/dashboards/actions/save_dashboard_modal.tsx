@@ -23,7 +23,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import type {
@@ -76,7 +75,7 @@ export function SaveDashboardModal({
 
   const options = useMemo(
     () =>
-      allAvailableDashboards?.map((dashboardItem: DashboardItem) => ({
+      allAvailableDashboards?.map((dashboardItem) => ({
         label: dashboardItem.attributes.title,
         value: dashboardItem.id,
         disabled:

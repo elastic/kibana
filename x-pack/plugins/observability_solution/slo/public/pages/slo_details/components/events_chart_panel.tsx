@@ -25,7 +25,7 @@ import { EventsAreaChart } from './events_area_chart';
 import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { GoodBadEventsChart } from '../../../components/good_bad_events_chart/good_bad_events_chart';
 import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 

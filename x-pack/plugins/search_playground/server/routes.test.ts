@@ -12,6 +12,7 @@ import { MockRouter } from '../__mocks__/router.mock';
 import { ConversationalChain } from './lib/conversational_chain';
 import { getChatParams } from './lib/get_chat_params';
 import { createRetriever, defineRoutes } from './routes';
+import { ContextLimitError } from './lib/errors';
 
 jest.mock('./lib/get_chat_params', () => ({
   getChatParams: jest.fn(),
@@ -97,6 +98,30 @@ describe('Search Playground routes', () => {
       expect(mockRouter.response.badRequest).toHaveBeenCalledWith({
         body: {
           message: 'Unexpected API error - Some Open AI error message',
+        },
+      });
+    });
+
+    it('responds with context error message if there is ContextLimitError', async () => {
+      (getChatParams as jest.Mock).mockResolvedValue({ model: 'open-ai' });
+      (ConversationalChain as jest.Mock).mockImplementation(() => {
+        return {
+          stream: jest
+            .fn()
+            .mockRejectedValue(
+              new ContextLimitError('Context exceeds the model limit', 16385, 24000)
+            ),
+        };
+      });
+
+      await mockRouter.callRoute({
+        body: mockRequestBody,
+      });
+
+      expect(mockRouter.response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            'Your request uses 24000 input tokens. This exceeds the model token limit of 16385 tokens. Please try using a different model thats capable of accepting larger prompts or reducing the prompt by decreasing the size of the context documents. If you are unsure, please see our documentation.',
         },
       });
     });

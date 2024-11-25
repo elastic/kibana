@@ -594,12 +594,12 @@ export function MachineLearningTestResourcesProvider(
 
       await retry.tryForTime(10 * 1000, async () => {
         const { body, status } = await supertest
-          .get(`/api/fleet/epm/packages?experimental=true`)
+          .get(`/api/fleet/epm/packages?prerelease=true`)
           .set(getCommonRequestHeader(`${API_VERSIONS.public.v1}`));
         mlApi.assertResponseStatusCode(200, status, body);
 
         packageVersion =
-          body.response.find(
+          body.items.find(
             ({ name, version }: { name: string; version: string }) =>
               name === packageName && version
           )?.version ?? '';

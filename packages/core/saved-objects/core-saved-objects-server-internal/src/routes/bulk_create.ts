@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteAccess } from '@kbn/core-http-server';
+import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -24,11 +24,12 @@ interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
   access: RouteAccess;
+  deprecationInfo: RouteDeprecationInfo;
 }
 
 export const registerBulkCreateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger, access }: RouteDependencies
+  { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
@@ -38,8 +39,7 @@ export const registerBulkCreateRoute = (
         summary: `Create saved objects`,
         tags: ['oas-tag:saved objects'],
         access,
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: deprecationInfo,
       },
       validate: {
         query: schema.object({

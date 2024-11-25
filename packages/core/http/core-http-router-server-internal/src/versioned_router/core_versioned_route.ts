@@ -26,6 +26,7 @@ import type {
   RouteSecurity,
   RouteMethod,
   VersionedRouterRoute,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import type { Mutable } from 'utility-types';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
@@ -210,6 +211,12 @@ export class CoreVersionedRoute implements VersionedRoute {
       });
     }
     const validation = extractValidationSchemaFromHandler(handler);
+    const postValidateMetadata: PostValidationMetadata = {
+      deprecated: handler.options.options?.deprecated,
+      isInternalApiRequest: req.isInternalApiRequest,
+      isPublicAccess: this.isPublic,
+    };
+
     if (
       validation?.request &&
       Boolean(validation.request.body || validation.request.params || validation.request.query)
@@ -221,7 +228,8 @@ export class CoreVersionedRoute implements VersionedRoute {
         req.query = query;
       } catch (e) {
         // Emit onPostValidation even if validation fails.
-        this.router.emitPostValidate(req, handler.options.options);
+
+        this.router.emitPostValidate(req, postValidateMetadata);
         return res.badRequest({ body: e.message, headers: getVersionHeader(version) });
       }
     } else {
@@ -231,7 +239,7 @@ export class CoreVersionedRoute implements VersionedRoute {
       req.query = {};
     }
 
-    this.router.emitPostValidate(req, handler.options.options);
+    this.router.emitPostValidate(req, postValidateMetadata);
 
     const response = await handler.fn(ctx, req, res);
 

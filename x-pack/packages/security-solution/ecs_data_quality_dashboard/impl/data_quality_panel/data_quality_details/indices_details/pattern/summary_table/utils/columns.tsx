@@ -126,6 +126,7 @@ export const getSummaryTableColumns = ({
               <EuiButtonIcon
                 iconType="refresh"
                 aria-label={CHECK_NOW}
+                data-test-subj={`checkNowAction-${item.indexName}`}
                 onClick={() => onCheckNowAction(item.indexName)}
               />
             </EuiToolTip>
@@ -141,6 +142,7 @@ export const getSummaryTableColumns = ({
               <EuiButtonIcon
                 iconType="clockCounter"
                 aria-label={i18n.VIEW_HISTORY}
+                data-test-subj={`viewHistoryAction-${item.indexName}`}
                 onClick={() => onViewHistoryAction(item.indexName)}
                 {...(isFirstIndexName && {
                   [HISTORICAL_RESULTS_TOUR_SELECTOR_KEY]: pattern,

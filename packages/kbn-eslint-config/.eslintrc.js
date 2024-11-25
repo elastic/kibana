@@ -127,13 +127,16 @@ module.exports = {
           exclude: USES_STYLED_COMPONENTS,
           disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
         },
-        ...['@elastic/eui/dist/eui_theme_light.json', '@elastic/eui/dist/eui_theme_dark.json'].map(
-          (from) => ({
-            from,
-            to: false,
-            disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
-          })
-        ),
+        ...[
+          '@elastic/eui/dist/eui_theme_amsterdam_light.json',
+          '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
+          '@elastic/eui/dist/eui_theme_borealis_light.json',
+          '@elastic/eui/dist/eui_theme_borealis_dark.json',
+        ].map((from) => ({
+          from,
+          to: false,
+          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
+        })),
         {
           from: '@kbn/test/jest',
           to: '@kbn/test-jest-helpers',

@@ -7,7 +7,6 @@
 
 import { SavedObject } from '@kbn/core/server';
 import { mergeWith, omit, omitBy } from 'lodash';
-import { LocationsMap } from '../../../synthetics_service/project_monitor/normalizers/common_fields';
 import {
   ConfigKey,
   EncryptedSyntheticsMonitor,
@@ -22,14 +21,6 @@ const keysToOmit = [
   ConfigKey.CONFIG_HASH,
   ConfigKey.JOURNEY_ID,
   ConfigKey.FORM_MONITOR_TYPE,
-  ConfigKey.MAX_ATTEMPTS,
-  ConfigKey.MONITOR_SOURCE_TYPE,
-  ConfigKey.METADATA,
-  ConfigKey.SOURCE_PROJECT_CONTENT,
-  ConfigKey.PROJECT_ID,
-  ConfigKey.JOURNEY_FILTERS_MATCH,
-  ConfigKey.JOURNEY_FILTERS_TAGS,
-  ConfigKey.MONITOR_SOURCE_TYPE,
 ];
 
 type Result = MonitorFieldsResult & {
@@ -39,14 +30,25 @@ type Result = MonitorFieldsResult & {
   ssl: Record<string, any>;
   response: Record<string, any>;
   check: Record<string, any>;
-  locations: string[];
-  private_locations: string[];
 };
 
 export const transformPublicKeys = (result: Result) => {
+  if (result[ConfigKey.SOURCE_INLINE]) {
+    result.inline_script = result[ConfigKey.SOURCE_INLINE];
+  }
+  if (result[ConfigKey.HOSTS]) {
+    result.host = result[ConfigKey.HOSTS];
+  }
+  if (result[ConfigKey.PARAMS]) {
+    try {
+      result[ConfigKey.PARAMS] = JSON.parse(result[ConfigKey.PARAMS] ?? '{}');
+    } catch (e) {
+      // ignore
+    }
+  }
+
   let formattedResult = {
     ...result,
-    ...formatLocations(result),
     [ConfigKey.PARAMS]: formatParams(result),
     retest_on_failure: (result[ConfigKey.MAX_ATTEMPTS] ?? 1) > 1,
     ...(result[ConfigKey.HOSTS] && { host: result[ConfigKey.HOSTS] }),
@@ -58,20 +60,8 @@ export const transformPublicKeys = (result: Result) => {
       ...(result[ConfigKey.SOURCE_INLINE] && { inline_script: result[ConfigKey.SOURCE_INLINE] }),
       [ConfigKey.PLAYWRIGHT_OPTIONS]: formatPWOptions(result),
     };
-  } else {
-    formattedResult.ssl = formatNestedFields(formattedResult, 'ssl');
-    formattedResult.response = formatNestedFields(formattedResult, 'response');
-    formattedResult.check = formatNestedFields(formattedResult, 'check');
-    if (formattedResult[ConfigKey.MAX_REDIRECTS]) {
-      formattedResult[ConfigKey.MAX_REDIRECTS] = Number(formattedResult[ConfigKey.MAX_REDIRECTS]);
-    }
   }
-  const res = omit(formattedResult, keysToOmit) as Result;
-
-  return omitBy(
-    res,
-    (_, key) => key.startsWith('response.') || key.startsWith('ssl.') || key.startsWith('check.')
-  );
+  return omit(formattedResult, keysToOmit) as Result;
 };
 
 export function mapSavedObjectToMonitor({
@@ -81,7 +71,7 @@ export function mapSavedObjectToMonitor({
   monitor: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>;
   internal?: boolean;
 }) {
-  const result = {
+  let result = {
     ...monitor.attributes,
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
@@ -89,7 +79,9 @@ export function mapSavedObjectToMonitor({
   if (internal) {
     return result;
   }
-  return transformPublicKeys(result);
+  result = transformPublicKeys(result);
+  // omit undefined value or null value
+  return omitBy(result, removeMonitorEmptyValues);
 }
 export function mergeSourceMonitor(
   normalizedPreviousMonitor: EncryptedSyntheticsMonitor,
@@ -106,24 +98,6 @@ const customizer = (destVal: any, srcValue: any, key: string) => {
   if (key !== ConfigKey.METADATA) {
     return srcValue;
   }
-};
-
-const formatLocations = (config: MonitorFields) => {
-  const locMap = Object.entries(LocationsMap);
-  const locations = config[ConfigKey.LOCATIONS]
-    ?.filter((location) => location.isServiceManaged)
-    .map((location) => {
-      return locMap.find(([_key, value]) => value === location.id)?.[0] ?? location.id;
-    });
-
-  const privateLocations = config[ConfigKey.LOCATIONS]
-    ?.filter((location) => !location.isServiceManaged)
-    .map((location) => location.id);
-
-  return {
-    ...(locations && { locations }),
-    ...(privateLocations && { private_locations: privateLocations }),
-  };
 };
 
 const formatParams = (config: MonitorFields) => {
@@ -176,4 +150,18 @@ const formatNestedFields = (
   }
 
   return obj;
+};
+
+export const removeMonitorEmptyValues = (v: any) => {
+  // value is falsy
+  return (
+    v === undefined ||
+    v === null ||
+    // value is empty string
+    (typeof v === 'string' && v.trim() === '') ||
+    // is empty array
+    (Array.isArray(v) && v.length === 0) ||
+    // object is has no values
+    (typeof v === 'object' && Object.keys(v).length === 0)
+  );
 };

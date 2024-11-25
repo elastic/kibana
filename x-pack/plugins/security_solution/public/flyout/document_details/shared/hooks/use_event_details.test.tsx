@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseEventDetailsParams, UseEventDetailsResult } from './use_event_details';
 import { getAlertIndexAlias, useEventDetails } from './use_event_details';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -45,7 +45,7 @@ describe('getAlertIndexAlias', () => {
 });
 
 describe('useEventDetails', () => {
-  let hookResult: RenderHookResult<UseEventDetailsParams, UseEventDetailsResult>;
+  let hookResult: RenderHookResult<UseEventDetailsResult, UseEventDetailsParams>;
 
   it('should return all properties', () => {
     jest.mocked(useSpaceId).mockReturnValue('default');
@@ -53,6 +53,7 @@ describe('useEventDetails', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue({
       browserFields: {},
       indexPattern: {},
+      sourcererDataView: {},
     });
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, [], {}, {}, jest.fn()]);
     jest.mocked(useGetFieldsData).mockReturnValue({ getFieldsData: (field: string) => field });
@@ -63,7 +64,7 @@ describe('useEventDetails', () => {
     expect(hookResult.result.current.dataAsNestedObject).toEqual({});
     expect(hookResult.result.current.dataFormattedForFieldBrowser).toEqual([]);
     expect(hookResult.result.current.getFieldsData('test')).toEqual('test');
-    expect(hookResult.result.current.indexPattern).toEqual({});
+    expect('indexPattern' in hookResult.result.current).toEqual(true);
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.refetchFlyoutData()).toEqual(undefined);
     expect(hookResult.result.current.searchHit).toEqual({});

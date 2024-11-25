@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../common/lib/kibana';
 import { usePostPushToService } from './use_post_push_to_service';
 import { pushedCase } from './mock';
@@ -42,7 +42,7 @@ describe('usePostPushToService', () => {
   it('refresh the case after pushing', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    const { waitForNextUpdate, result } = renderHook(() => usePostPushToService(), {
+    const { result } = renderHook(() => usePostPushToService(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -50,15 +50,15 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitForNextUpdate();
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'pushCase');
-    const { waitForNextUpdate, result } = renderHook(() => usePostPushToService(), {
+    const { result } = renderHook(() => usePostPushToService(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -66,13 +66,11 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith({ caseId, connectorId: connector.id });
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ caseId, connectorId: connector.id }));
   });
 
   it('shows a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => usePostPushToService(), {
+    const { result } = renderHook(() => usePostPushToService(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -80,18 +78,18 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitForNextUpdate();
-
-    expect(addSuccess).toHaveBeenCalledWith({
-      title: 'Successfully sent to My connector',
-      className: 'eui-textBreakWord',
-    });
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Successfully sent to My connector',
+        className: 'eui-textBreakWord',
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'pushCase').mockRejectedValue(new Error('usePostPushToService: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => usePostPushToService(), {
+    const { result } = renderHook(() => usePostPushToService(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -99,8 +97,6 @@ describe('usePostPushToService', () => {
       result.current.mutate({ caseId, connector });
     });
 
-    await waitForNextUpdate();
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

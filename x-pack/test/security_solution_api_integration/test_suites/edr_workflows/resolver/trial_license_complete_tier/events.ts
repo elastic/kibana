@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('@ess @serverless event route', function () {
+  describe('@ess @serverless @serverlessQA event route', function () {
     let entityIDFilterArray: JsonObject[] | undefined;
     let entityIDFilter: string | undefined;
     let adminSupertest: TestAgent;

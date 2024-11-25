@@ -38,11 +38,15 @@ describe('getFlappingSettingsRoute', () => {
       Object {
         "options": Object {
           "access": "internal",
-          "tags": Array [
-            "access:read-flapping-settings",
-          ],
         },
         "path": "/internal/alerting/rules/settings/_flapping",
+        "security": Object {
+          "authz": Object {
+            "requiredPrivileges": Array [
+              "read-flapping-settings",
+            ],
+          },
+        },
         "validate": false,
       }
     `);

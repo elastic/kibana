@@ -360,7 +360,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
       )}
       {showsShowValueSetting && (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
             defaultMessage: 'Show value',
           })}
@@ -415,7 +415,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
 
       {isLegendNotHidden && renderNestedLegendSwitch && (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
             defaultMessage: 'Nested',
           })}

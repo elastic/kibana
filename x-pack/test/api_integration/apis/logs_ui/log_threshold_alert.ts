@@ -18,7 +18,7 @@ import {
   RatioCriteria,
   RuleParams,
 } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
-import { DATES } from '../metrics_ui/constants';
+import { DATES } from './utils/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

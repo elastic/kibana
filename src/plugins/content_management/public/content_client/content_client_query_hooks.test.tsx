@@ -8,7 +8,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { ContentClientProvider } from './content_client_context';
 import { ContentClient } from './content_client';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
@@ -42,9 +42,8 @@ describe('useGetContentQuery', () => {
     const input: GetIn = { id: 'test', contentTypeId: 'testType', version: 2 };
     const output = { test: 'test' };
     crudClient.get.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useGetContentQuery(input), { wrapper: Wrapper });
-    await waitFor(() => result.current.isSuccess);
-    expect(result.current.data).toEqual(output);
+    const { result } = renderHook(() => useGetContentQuery(input), { wrapper: Wrapper });
+    await waitFor(() => expect(result.current.data).toEqual(output));
   });
 });
 
@@ -54,10 +53,9 @@ describe('useSearchContentQuery', () => {
     const input: SearchIn = { contentTypeId: 'testType', query: {}, version: 2 };
     const output = { hits: [{ id: 'test' }] };
     crudClient.search.mockResolvedValueOnce(output);
-    const { result, waitFor } = renderHook(() => useSearchContentQuery(input), {
+    const { result } = renderHook(() => useSearchContentQuery(input), {
       wrapper: Wrapper,
     });
-    await waitFor(() => result.current.isSuccess);
-    expect(result.current.data).toEqual(output);
+    await waitFor(() => expect(result.current.data).toEqual(output));
   });
 });

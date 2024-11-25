@@ -61,8 +61,8 @@ export default function (providerContext: FtrProviderContext) {
         ({ body } = await supertest
           .get(`/api/fleet/epm/packages/endpoint/${latestEndpointVersion}`)
           .expect(200));
-        expect(body.item).to.have.property('savedObject');
-        expect((body.item as InstalledRegistry).savedObject?.attributes.install_version).to.eql(
+        expect(body.item).to.have.property('installationInfo');
+        expect((body.item as InstalledRegistry).installationInfo?.version).to.eql(
           latestEndpointVersion
         );
       });

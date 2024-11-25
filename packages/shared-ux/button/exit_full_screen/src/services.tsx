@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useContext, PropsWithChildren } from 'react';
+import React, { FC, useContext, PropsWithChildren, useCallback } from 'react';
 
 import type {
   Services,
@@ -37,12 +37,16 @@ export const ExitFullScreenButtonProvider: FC<PropsWithChildren<ExitFullScreenBu
 export const ExitFullScreenButtonKibanaProvider: FC<
   PropsWithChildren<ExitFullScreenButtonKibanaDependencies>
 > = ({ children, ...services }) => {
+  const setIsFullscreen = useCallback(
+    (isFullscreen: boolean) => {
+      services.coreStart.chrome.setIsVisible(!isFullscreen);
+    },
+    [services.coreStart.chrome]
+  );
   return (
     <ExitFullScreenButtonContext.Provider
       value={{
-        setIsFullscreen: (isFullscreen: boolean) => {
-          services.coreStart.chrome.setIsVisible(!isFullscreen);
-        },
+        setIsFullscreen,
         customBranding$: services.coreStart.customBranding.customBranding$,
       }}
     >

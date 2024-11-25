@@ -19,6 +19,8 @@ export const SyntheticsParamsReadonlyCodec = t.intersection([
   }),
 ]);
 
+export const SyntheticsParamsReadonlyCodecList = t.array(SyntheticsParamsReadonlyCodec);
+
 export type SyntheticsParamsReadonly = t.TypeOf<typeof SyntheticsParamsReadonlyCodec>;
 
 export const SyntheticsParamsCodec = t.intersection([

@@ -8,7 +8,6 @@
  */
 
 import type { IClusterClient } from '@kbn/core-elasticsearch-server';
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type {
   FakeRawRequest,
   Headers,
@@ -28,6 +27,7 @@ import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { CreateJobFn, RunTaskFn } from './types';
 import type { ReportingConfigType } from '.';
 
@@ -100,7 +100,6 @@ export abstract class ExportType<
     }
   }
 
-  // needed to be protected vs private for the csv search source immediate export type
   protected getUiSettingsServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
     const { uiSettings: uiSettingsService } = this.startDeps;
     const scopedUiSettingsService = uiSettingsService.asScopedToClient(savedObjectsClient);
@@ -127,7 +126,7 @@ export abstract class ExportType<
       headers,
       path: '/',
     };
-    const fakeRequest = CoreKibanaRequest.from(rawRequest);
+    const fakeRequest = kibanaRequestFactory(rawRequest);
 
     const spacesService = this.setupDeps.spaces?.spacesService;
     if (spacesService) {

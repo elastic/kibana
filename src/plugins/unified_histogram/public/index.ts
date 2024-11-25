@@ -36,6 +36,5 @@ export type {
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 export { canImportVisContext } from './utils/external_vis_context';
-export { fieldSupportsBreakdown } from './utils/field_supports_breakdown';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();

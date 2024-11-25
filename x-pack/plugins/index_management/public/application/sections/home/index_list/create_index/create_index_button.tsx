@@ -7,22 +7,32 @@
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { EuiButton } from '@elastic/eui';
 
 import { CreateIndexModal } from './create_index_modal';
 
-export const CreateIndexButton = ({ loadIndices }: { loadIndices: () => void }) => {
+export interface CreateIndexButtonProps {
+  loadIndices: () => void;
+  share?: SharePluginStart;
+}
+
+export const CreateIndexButton = ({ loadIndices, share }: CreateIndexButtonProps) => {
   const [createIndexModalOpen, setCreateIndexModalOpen] = useState<boolean>(false);
+  const createIndexUrl = share?.url.locators.get('SEARCH_CREATE_INDEX')?.useUrl({});
+  const actionProp = createIndexUrl
+    ? { href: createIndexUrl }
+    : { onClick: () => setCreateIndexModalOpen(true) };
 
   return (
     <>
       <EuiButton
         fill
         iconType="plusInCircleFilled"
-        onClick={() => setCreateIndexModalOpen(true)}
         key="createIndexButton"
         data-test-subj="createIndexButton"
         data-telemetry-id="idxMgmt-indexList-createIndexButton"
+        {...actionProp}
       >
         <FormattedMessage
           id="xpack.idxMgmt.indexTable.createIndexButton"

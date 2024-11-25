@@ -12,6 +12,8 @@ import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 
+export const NOT_SUGGESTED_TYPES = ['unsupported'];
+
 export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
   const prevCommand = ast[Math.max(ast.length - 2, 0)];
   return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
@@ -36,7 +38,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
   const getFields = async () => {
     const metadata = await getEcsMetadata();
     if (!cacheFields.size && queryText) {
-      const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
+      const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query: queryText });
       const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
       for (const field of fieldsWithMetadata || []) {
         cacheFields.set(field.name, field);
@@ -54,7 +56,11 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
       return (
         Array.from(cacheFields.values())?.filter(({ name, type }) => {
           const ts = Array.isArray(type) ? type : [type];
-          return !ignored.includes(name) && ts.some((t) => types[0] === 'any' || types.includes(t));
+          return (
+            !ignored.includes(name) &&
+            ts.some((t) => types[0] === 'any' || types.includes(t)) &&
+            !NOT_SUGGESTED_TYPES.includes(type)
+          );
         }) || []
       );
     },

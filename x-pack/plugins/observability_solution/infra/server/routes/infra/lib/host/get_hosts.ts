@@ -49,6 +49,7 @@ export const getHosts = async ({
   const [hostMetricsResponse, alertsCountResponse] = await Promise.all([
     getAllHosts({
       infraMetricsClient,
+      apmDataAccessServices,
       apmDocumentSources,
       from,
       to,

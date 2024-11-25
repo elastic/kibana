@@ -8,10 +8,23 @@
 import type { PivotAggsConfigWithExtra } from '../../../../../../common/pivot_aggs';
 
 export interface PercentilesAggConfig {
-  /** Comma separated list */
-  percents: string;
+  percents: number[];
+  pendingPercentileInput?: string;
+  errors?: ValidationResultErrorType[];
 }
+
+export type ValidationResultErrorType =
+  | 'INVALID_FORMAT'
+  | 'PERCENTILE_OUT_OF_RANGE'
+  | 'NUMBER_TOO_PRECISE'
+  | 'DUPLICATE_VALUE';
+
 export type IPivotAggsConfigPercentiles = PivotAggsConfigWithExtra<
   PercentilesAggConfig,
   { field: string; percents: number[] }
 >;
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors?: ValidationResultErrorType[];
+}

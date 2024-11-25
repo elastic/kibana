@@ -16,6 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { IndexMode } from '../../../../../../common/types/data_streams';
 import { Forms } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
 import {
@@ -33,10 +34,11 @@ interface Props {
   esNodesPlugins: string[];
   defaultValue?: { [key: string]: any };
   indexSettings?: IndexSettings;
+  indexMode?: IndexMode;
 }
 
 export const StepMappings: React.FunctionComponent<Props> = React.memo(
-  ({ defaultValue = {}, onChange, indexSettings, esDocsBase, esNodesPlugins }) => {
+  ({ defaultValue = {}, onChange, indexSettings, esDocsBase, esNodesPlugins, indexMode }) => {
     const [mappings, setMappings] = useState(defaultValue);
     const { docLinks } = useAppContext();
 
@@ -115,6 +117,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
           indexSettings={indexSettings}
           docLinks={docLinks}
           esNodesPlugins={esNodesPlugins}
+          indexMode={indexMode}
         />
 
         <EuiSpacer size="m" />

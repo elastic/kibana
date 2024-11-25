@@ -175,7 +175,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       <Form
         form={form}
         data-test-subj="pipelineForm"
-        isInvalid={form.isSubmitted && !form.isValid}
+        isInvalid={form.isSubmitted && !form.isValid && !form.isSubmitting}
         error={form.getErrors()}
       >
         {/* Request error */}
@@ -244,7 +244,6 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
-
         {/* ES request flyout */}
         {isRequestVisible ? (
           <PipelineRequestFlyout

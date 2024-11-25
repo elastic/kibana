@@ -21,10 +21,14 @@ import type {
   UpgradeableThresholdFields,
   UpgradeableNewTermsFields,
   UpgradeableEqlFields,
+  UpgradeableEsqlFields,
+  UpgradeableMachineLearningFields,
 } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { useFinalSideContext } from '../final_side/final_side_context';
 import { EqlRuleFieldEdit } from './eql_rule_field_edit';
+import { EsqlRuleFieldEdit } from './esql_rule_field_edit';
+import { MachineLearningRuleFieldEdit } from './machine_learning_rule_field_edit';
 
 export function FinalEdit() {
   const { finalDiffableRule } = useDiffableRuleContext();
@@ -44,13 +48,15 @@ export function FinalEdit() {
     case 'eql':
       return <EqlRuleFieldEdit fieldName={fieldName as UpgradeableEqlFields} />;
     case 'esql':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return <EsqlRuleFieldEdit fieldName={fieldName as UpgradeableEsqlFields} />;
     case 'threat_match':
       return <ThreatMatchRuleFieldEdit fieldName={fieldName as UpgradeableThreatMatchFields} />;
     case 'threshold':
       return <ThresholdRuleFieldEdit fieldName={fieldName as UpgradeableThresholdFields} />;
     case 'machine_learning':
-      return <span>{'Rule type not yet implemented'}</span>;
+      return (
+        <MachineLearningRuleFieldEdit fieldName={fieldName as UpgradeableMachineLearningFields} />
+      );
     case 'new_terms':
       return <NewTermsRuleFieldEdit fieldName={fieldName as UpgradeableNewTermsFields} />;
     default:

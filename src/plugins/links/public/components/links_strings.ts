@@ -41,7 +41,7 @@ export const LinksStrings = {
       }),
     getCancelButtonLabel: () =>
       i18n.translate('links.editor.cancelButtonLabel', {
-        defaultMessage: 'Close',
+        defaultMessage: 'Cancel',
       }),
     panelEditor: {
       getLinksTitle: () =>

@@ -8,8 +8,13 @@
 import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 import { agentPolicyService, appContextService } from '../../services';
 import * as fleetServerService from '../../services/fleet_server_host';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { postFleetServerHost, putFleetServerHostHandler } from './handler';
+
+const postFleetServerHostWithErrorHandler = withDefaultErrorHandler(postFleetServerHost);
+const putFleetServerHostHandlerWithErrorHandler =
+  withDefaultErrorHandler(putFleetServerHostHandler);
 
 describe('fleet server hosts handler', () => {
   const mockContext = {
@@ -45,7 +50,7 @@ describe('fleet server hosts handler', () => {
   it('should return error on post in serverless if host url is different from default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await postFleetServerHost(
+    const res = await postFleetServerHostWithErrorHandler(
       mockContext,
       { body: { id: 'host1', host_urls: ['http://localhost:8080'] } } as any,
       mockResponse as any
@@ -62,7 +67,7 @@ describe('fleet server hosts handler', () => {
   it('should return ok on post in serverless if host url is same as default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await postFleetServerHost(
+    const res = await postFleetServerHostWithErrorHandler(
       mockContext,
       { body: { id: 'host1', host_urls: ['http://elasticsearch:9200'] } } as any,
       mockResponse as any
@@ -76,7 +81,7 @@ describe('fleet server hosts handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await postFleetServerHost(
+    const res = await postFleetServerHostWithErrorHandler(
       mockContext,
       { body: { id: 'host1', host_urls: ['http://localhost:8080'] } } as any,
       mockResponse as any
@@ -88,7 +93,7 @@ describe('fleet server hosts handler', () => {
   it('should return error on put in serverless if host url is different from default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await putFleetServerHostHandler(
+    const res = await putFleetServerHostHandlerWithErrorHandler(
       mockContext,
       { body: { host_urls: ['http://localhost:8080'] }, params: { outputId: 'host1' } } as any,
       mockResponse as any
@@ -105,7 +110,7 @@ describe('fleet server hosts handler', () => {
   it('should return ok on put in serverless if host url is same as default', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await putFleetServerHostHandler(
+    const res = await putFleetServerHostHandlerWithErrorHandler(
       mockContext,
       { body: { host_urls: ['http://elasticsearch:9200'] }, params: { outputId: 'host1' } } as any,
       mockResponse as any
@@ -117,7 +122,7 @@ describe('fleet server hosts handler', () => {
   it('should return ok on put in serverless if host urls are not passed', async () => {
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
-    const res = await putFleetServerHostHandler(
+    const res = await putFleetServerHostHandlerWithErrorHandler(
       mockContext,
       { body: { name: ['Renamed'] }, params: { outputId: 'host1' } } as any,
       mockResponse as any
@@ -131,7 +136,7 @@ describe('fleet server hosts handler', () => {
       .spyOn(appContextService, 'getCloud')
       .mockReturnValue({ isServerlessEnabled: false } as any);
 
-    const res = await putFleetServerHostHandler(
+    const res = await putFleetServerHostHandlerWithErrorHandler(
       mockContext,
       { body: { host_urls: ['http://localhost:8080'] }, params: { outputId: 'host1' } } as any,
       mockResponse as any

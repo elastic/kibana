@@ -7,7 +7,7 @@
 
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { useDeleteAction } from './use_delete_action';
 
 import * as api from '../../../containers/api';
@@ -84,7 +84,7 @@ describe('useDeleteAction', () => {
   it('deletes the selected cases', async () => {
     const deleteSpy = jest.spyOn(api, 'deleteCases');
 
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -112,7 +112,7 @@ describe('useDeleteAction', () => {
   });
 
   it('closes the modal', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -137,7 +137,7 @@ describe('useDeleteAction', () => {
   });
 
   it('shows the success toaster correctly when delete one case', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,
@@ -163,7 +163,7 @@ describe('useDeleteAction', () => {
   });
 
   it('shows the success toaster correctly when delete multiple case', async () => {
-    const { result, waitFor } = renderHook(
+    const { result } = renderHook(
       () => useDeleteAction({ onAction, onActionSuccess, isDisabled: false }),
       {
         wrapper: appMockRender.AppWrapper,

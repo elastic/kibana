@@ -146,7 +146,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const model = await testSubjects.find('summarizationModelSelect');
         const defaultModel = await model.getVisibleText();
 
-        expect(defaultModel).to.equal('OpenAI GPT-3.5 Turbo');
+        expect(defaultModel).to.equal('OpenAI GPT-4o');
         expect(defaultModel).not.to.be.empty();
 
         expect(

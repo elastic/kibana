@@ -9,15 +9,15 @@
 
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
 import type { BuildFlavor } from '@kbn/config';
-import type { ServiceStatusLevelId, ServiceStatus } from '@kbn/core-status-common';
-
 import type {
+  ServiceStatusLevelId,
+  ServiceStatus,
   StatusResponse,
   StatusInfoCoreStatus,
   ServerMetrics,
   StatusInfo,
   ServerVersion,
-} from '@kbn/core-status-common-internal';
+} from '@kbn/core-status-common';
 
 const serviceStatusLevelId: () => Type<ServiceStatusLevelId> = () =>
   schema.oneOf(

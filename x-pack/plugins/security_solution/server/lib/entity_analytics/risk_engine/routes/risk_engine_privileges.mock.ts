@@ -19,6 +19,7 @@ const createMockSecurityStartWithFullRiskEngineAccess = () => {
           'index-name': ['read'],
         },
       },
+      kibana: [],
     },
   });
 
@@ -39,6 +40,7 @@ const createMockSecurityStartWithNoRiskEngineAccess = () => {
         cluster: [],
         index: [],
       },
+      kibana: [],
     },
   });
 

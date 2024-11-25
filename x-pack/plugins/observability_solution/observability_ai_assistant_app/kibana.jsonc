@@ -32,7 +32,8 @@
       "alerting",
       "features",
       "inference",
-      "logsDataAccess"
+      "logsDataAccess",
+      "llmTasks"
     ],
     "optionalPlugins": [
       "cloud"

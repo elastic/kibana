@@ -42,6 +42,22 @@ describe('CaseCustomFieldRt', () => {
         value: null,
       },
     ],
+    [
+      'type number value number',
+      {
+        key: 'number_custom_field_1',
+        type: 'number',
+        value: 1,
+      },
+    ],
+    [
+      'type number value null',
+      {
+        key: 'number_custom_field_2',
+        type: 'number',
+        value: null,
+      },
+    ],
   ])(`has expected attributes for customField with %s`, (_, customField) => {
     const query = CaseCustomFieldRt.decode(customField);
 
@@ -69,5 +85,15 @@ describe('CaseCustomFieldRt', () => {
     });
 
     expect(PathReporter.report(query)[0]).toContain('Invalid value "hello" supplied');
+  });
+
+  it('fails if number type but value is a string', () => {
+    const query = CaseCustomFieldRt.decode({
+      key: 'list_custom_field_1',
+      type: 'number',
+      value: 'hi',
+    });
+
+    expect(PathReporter.report(query)[0]).toContain('Invalid value "hi" supplied');
   });
 });

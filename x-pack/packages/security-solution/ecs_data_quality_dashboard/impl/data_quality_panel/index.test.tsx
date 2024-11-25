@@ -67,6 +67,8 @@ describe('DataQualityPanel', () => {
           setLastChecked={jest.fn()}
           baseTheme={DARK_THEME}
           toasts={toasts}
+          defaultStartTime={'now-7d'}
+          defaultEndTime={'now'}
         />
       </TestExternalProviders>
     );

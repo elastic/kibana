@@ -49,6 +49,7 @@ import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { NotesFlyout } from '../../properties/notes_flyout';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
+import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -86,7 +87,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     browserFields,
     dataViewId,
     loading: loadingSourcerer,
-    indexPattern,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
@@ -119,13 +119,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      indexPattern,
+      indexPattern: sourcererDataView,
       browserFields,
       filters,
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, indexPattern, browserFields, filters, kqlQuery, kqlMode]);
+  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
@@ -177,7 +177,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     indexNames: selectedPatterns,
     language: kqlQuery.language,
     limit: sampleSize,
-    runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
     startDate: start,
@@ -185,8 +185,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   });
 
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
+  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesDisabled'
   );
 
   const {
@@ -207,7 +207,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
-      if (eventId && securitySolutionNotesEnabled) {
+      if (eventId && !securitySolutionNotesDisabled) {
         openFlyout({
           right: {
             id: DocumentDetailsRightPanelKey,
@@ -229,10 +229,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             },
           },
         });
-        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        telemetry.reportEvent(NotesEventTypes.OpenNoteInExpandableFlyoutClicked, {
           location: timelineId,
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'left',
         });
@@ -245,7 +245,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     },
     [
       openFlyout,
-      securitySolutionNotesEnabled,
+      securitySolutionNotesDisabled,
       selectedPatterns,
       telemetry,
       timelineId,
@@ -279,15 +279,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(dataLoadingState),
     [dataLoadingState]
   );
-
-  useEffect(() => {
-    dispatch(
-      timelineActions.updateIsLoading({
-        id: timelineId,
-        isLoading: isQueryLoading || loadingSourcerer,
-      })
-    );
-  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
 
   // NOTE: The timeline is blank after browser FORWARD navigation (after using back button to navigate to
   // the previous page from the timeline), yet we still see total count. This is because the timeline

@@ -18,6 +18,7 @@ export interface CasesApiTags {
   all: readonly string[];
   read: readonly string[];
   delete: readonly string[];
+  createComment: readonly string[];
 }
 
 export const getApiTags = (owner: Owner): CasesApiTags => {
@@ -30,7 +31,6 @@ export const getApiTags = (owner: Owner): CasesApiTags => {
       SUGGEST_USER_PROFILES_API_TAG,
       BULK_GET_USER_PROFILES_API_TAG,
       GET_CONNECTORS_CONFIGURE_API_TAG,
-      create,
       read,
     ] as const,
     read: [
@@ -40,5 +40,6 @@ export const getApiTags = (owner: Owner): CasesApiTags => {
       read,
     ] as const,
     delete: [deleteTag] as const,
+    createComment: [create] as const,
   };
 };

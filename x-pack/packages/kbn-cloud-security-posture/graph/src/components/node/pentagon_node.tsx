@@ -20,6 +20,7 @@ import {
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { PentagonHoverShape, PentagonShape } from './shapes/pentagon_shape';
+import { NodeExpandButton } from './node_expand_button';
 
 const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
@@ -29,7 +30,7 @@ const NODE_WIDTH = 91;
 const NODE_HEIGHT = 88;
 
 export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
-  const { id, color, icon, label, interactive, expandButtonClick } =
+  const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
   return (
@@ -60,11 +61,14 @@ export const PentagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           {icon && <NodeIcon x="12.5" y="14.5" icon={icon} color={color} />}
         </NodeShapeSvg>
         {interactive && (
-          <NodeButton
-            onClick={(e) => expandButtonClick?.(e, props)}
-            x={`${NODE_WIDTH - NodeButton.ExpandButtonSize / 2}px`}
-            y={`${(NODE_HEIGHT - NodeButton.ExpandButtonSize) / 2}px`}
-          />
+          <>
+            <NodeButton onClick={(e) => nodeClick?.(e, props)} />
+            <NodeExpandButton
+              onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
+              x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 2}px`}
+              y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2}px`}
+            />
+          </>
         )}
         <Handle
           type="target"

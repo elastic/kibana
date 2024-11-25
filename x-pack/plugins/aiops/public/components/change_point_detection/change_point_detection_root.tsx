@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { pick } from 'lodash';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -86,30 +85,28 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
   const casesPermissions = appContextValue.cases?.helpers.canUseCases();
 
   return (
-    <KibanaThemeProvider theme={appContextValue.theme}>
-      <CasesContext owner={[]} permissions={casesPermissions!}>
-        <AiopsAppContext.Provider value={appContextValue}>
-          <UrlStateProvider>
-            <DataSourceContext.Provider value={{ dataView, savedSearch }}>
-              <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
-                <DatePickerContextProvider {...datePickerDeps}>
-                  <PageHeader />
-                  <EuiSpacer />
-                  <ReloadContextProvider reload$={reload$}>
-                    <FilterQueryContextProvider>
-                      <ChangePointDetectionContextProvider>
-                        <ChangePointDetectionControlsContextProvider>
-                          <ChangePointDetectionPage />
-                        </ChangePointDetectionControlsContextProvider>
-                      </ChangePointDetectionContextProvider>
-                    </FilterQueryContextProvider>
-                  </ReloadContextProvider>
-                </DatePickerContextProvider>
-              </StorageContextProvider>
-            </DataSourceContext.Provider>
-          </UrlStateProvider>
-        </AiopsAppContext.Provider>
-      </CasesContext>
-    </KibanaThemeProvider>
+    <CasesContext owner={[]} permissions={casesPermissions!}>
+      <AiopsAppContext.Provider value={appContextValue}>
+        <UrlStateProvider>
+          <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+            <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>
+                <PageHeader />
+                <EuiSpacer />
+                <ReloadContextProvider reload$={reload$}>
+                  <FilterQueryContextProvider>
+                    <ChangePointDetectionContextProvider>
+                      <ChangePointDetectionControlsContextProvider>
+                        <ChangePointDetectionPage />
+                      </ChangePointDetectionControlsContextProvider>
+                    </ChangePointDetectionContextProvider>
+                  </FilterQueryContextProvider>
+                </ReloadContextProvider>
+              </DatePickerContextProvider>
+            </StorageContextProvider>
+          </DataSourceContext.Provider>
+        </UrlStateProvider>
+      </AiopsAppContext.Provider>
+    </CasesContext>
   );
 };

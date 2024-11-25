@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataViewsService } from '@kbn/data-views-plugin/server';
-import { SLODefinition, IndicatorTypes } from '../domain/models';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IndicatorTypes, SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { TransformGenerator } from './transform_generators';
@@ -29,9 +27,7 @@ export class DefaultTransformManager implements TransformManager {
   constructor(
     private generators: Record<IndicatorTypes, TransformGenerator>,
     private scopedClusterClient: IScopedClusterClient,
-    private logger: Logger,
-    private spaceId: string,
-    private dataViewService: DataViewsService
+    private logger: Logger
   ) {}
 
   async install(slo: SLODefinition): Promise<TransformId> {
@@ -41,11 +37,7 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    const transformParams = await generator.getTransformParams(
-      slo,
-      this.spaceId,
-      this.dataViewService
-    );
+    const transformParams = await generator.getTransformParams(slo);
     try {
       await retryTransientEsErrors(
         () => this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams),
@@ -72,7 +64,7 @@ export class DefaultTransformManager implements TransformManager {
       throw new Error(`Unsupported indicator type [${slo.indicator.type}]`);
     }
 
-    return await generator.getTransformParams(slo, this.spaceId, this.dataViewService);
+    return await generator.getTransformParams(slo);
   }
 
   async preview(transformId: string): Promise<void> {

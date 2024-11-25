@@ -6,11 +6,11 @@
  */
 
 import type {
-  CoreSetup,
   KibanaRequest,
   LifecycleResponseFactory,
   OnPreRoutingToolkit,
-} from '@kbn/core/server';
+} from '@kbn/core-http-server';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 
 import { getSpaceIdFromPath } from '../../../common';
 

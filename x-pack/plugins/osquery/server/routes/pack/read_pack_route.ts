@@ -25,7 +25,11 @@ export const readPackRoute = (router: IRouter) => {
     .get({
       access: 'public',
       path: '/api/osquery/packs/{id}',
-      options: { tags: [`access:${PLUGIN_ID}-readPacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-readPacks`],
+        },
+      },
     })
     .addVersion(
       {

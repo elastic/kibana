@@ -21,91 +21,48 @@ import {
   getTotalPatternSameFamily,
   getIndexId,
 } from './utils/stats';
-import {
-  getStorageResults,
-  postStorageResult,
-  formatStorageResult,
-  formatResultFromStorage,
-} from './utils/storage';
+import { postStorageResult, formatStorageResult } from './utils/storage';
 import { getPatternRollupsWithLatestCheckResult } from './utils/get_pattern_rollups_with_latest_check_result';
-import type {
-  DataQualityCheckResult,
-  OnCheckCompleted,
-  PatternRollup,
-  TelemetryEvents,
-} from '../../types';
+import type { OnCheckCompleted, PatternRollup, TelemetryEvents } from '../../types';
 import {
   getEscapedIncompatibleMappingsFields,
   getEscapedIncompatibleValuesFields,
   getEscapedSameFamilyFields,
 } from './utils/metadata';
 import { UseResultsRollupReturnValue } from './types';
-import { useIsMountedRef } from '../use_is_mounted_ref';
 import { getDocsCount, getIndexIncompatible, getSizeInBytes } from '../../utils/stats';
 import { getIlmPhase } from '../../utils/get_ilm_phase';
+import { useStoredPatternResults } from './hooks/use_stored_pattern_results';
 
 interface Props {
-  ilmPhases: string[];
   patterns: string[];
   toasts: IToasts;
   httpFetch: HttpHandler;
   telemetryEvents: TelemetryEvents;
   isILMAvailable: boolean;
+  startTime: string;
+  endTime: string;
 }
-const useStoredPatternResults = (patterns: string[], toasts: IToasts, httpFetch: HttpHandler) => {
-  const { isMountedRef } = useIsMountedRef();
-  const [storedPatternResults, setStoredPatternResults] = useState<
-    Array<{ pattern: string; results: Record<string, DataQualityCheckResult> }>
-  >([]);
-
-  useEffect(() => {
-    if (isEmpty(patterns)) {
-      return;
-    }
-
-    let ignore = false;
-    const abortController = new AbortController();
-    const fetchStoredPatternResults = async () => {
-      const requests = patterns.map((pattern) =>
-        getStorageResults({ pattern, httpFetch, abortController, toasts }).then((results = []) => ({
-          pattern,
-          results: Object.fromEntries(
-            results.map((storageResult) => [
-              storageResult.indexName,
-              formatResultFromStorage({ storageResult, pattern }),
-            ])
-          ),
-        }))
-      );
-      const patternResults = await Promise.all(requests);
-      if (patternResults?.length && !ignore) {
-        if (isMountedRef.current) {
-          setStoredPatternResults(patternResults);
-        }
-      }
-    };
-
-    fetchStoredPatternResults();
-    return () => {
-      ignore = true;
-    };
-  }, [httpFetch, isMountedRef, patterns, toasts]);
-
-  return storedPatternResults;
-};
-
 export const useResultsRollup = ({
   httpFetch,
   toasts,
-  ilmPhases,
   patterns,
   isILMAvailable,
   telemetryEvents,
+  startTime,
+  endTime,
 }: Props): UseResultsRollupReturnValue => {
   const [patternIndexNames, setPatternIndexNames] = useState<Record<string, string[]>>({});
   const [patternRollups, setPatternRollups] = useState<Record<string, PatternRollup>>({});
 
-  const storedPatternsResults = useStoredPatternResults(patterns, toasts, httpFetch);
+  const storedPatternsResults = useStoredPatternResults({
+    httpFetch,
+    patterns,
+    toasts,
+    isILMAvailable,
+    startTime,
+    endTime,
+  });
 
   useEffect(() => {
     if (!isEmpty(storedPatternsResults)) {
@@ -246,12 +203,6 @@ export const useResultsRollup = ({
     },
     [httpFetch, isILMAvailable, telemetryEvents, toasts]
   );
-
-  useEffect(() => {
-    // reset all state
-    setPatternRollups({});
-    setPatternIndexNames({});
-  }, [ilmPhases, patterns]);
 
   const useResultsRollupReturnValue = useMemo(
     () => ({

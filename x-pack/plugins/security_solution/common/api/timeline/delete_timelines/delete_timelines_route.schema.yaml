@@ -36,15 +36,3 @@ paths:
       responses:
         '200':
           description: Indicates the Timeline was successfully deleted.
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [deleteTimeline]
-                    properties:
-                      deleteTimeline:
-                        type: boolean

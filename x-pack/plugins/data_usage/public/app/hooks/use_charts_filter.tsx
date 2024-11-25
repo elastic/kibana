@@ -6,12 +6,13 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { DEFAULT_SELECTED_OPTIONS } from '../../../common';
 import {
-  isDefaultMetricType,
-  METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   METRIC_TYPE_VALUES,
+  METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
+  isDefaultMetricType,
 } from '../../../common/rest_types';
-import { FILTER_NAMES } from '../translations';
+import { FILTER_NAMES } from '../../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';
 import { ChartsFilterProps } from '../components/filters/charts_filter';
@@ -47,6 +48,7 @@ export const useChartsFilter = ({
 } => {
   const {
     dataStreams: selectedDataStreamsFromUrl,
+    metricTypes: selectedMetricTypesFromUrl,
     setUrlMetricTypesFilter,
     setUrlDataStreamsFilter,
   } = useDataUsageMetricsUrlParams();
@@ -72,12 +74,17 @@ export const useChartsFilter = ({
       ? METRIC_TYPE_VALUES.map((metricType) => ({
           key: metricType,
           label: METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP[metricType],
-          checked: isDefaultMetricType(metricType) ? 'on' : undefined, // default metrics are selected by default
-          disabled: isDefaultMetricType(metricType),
+          checked: selectedMetricTypesFromUrl
+            ? selectedMetricTypesFromUrl.includes(metricType)
+              ? 'on'
+              : undefined
+            : isDefaultMetricType(metricType) // default metrics are selected by default
+            ? 'on'
+            : undefined,
           'data-test-subj': `${filterOptions.filterName}-filter-option`,
         }))
       : isDataStreamsFilter && !!filterOptions.options.length
-      ? filterOptions.options?.map((filterOption) => ({
+      ? filterOptions.options?.map((filterOption, i) => ({
           key: filterOption,
           label: filterOption,
           append: formatBytes(filterOptions.appendOptions?.[filterOption] ?? 0),
@@ -85,7 +92,9 @@ export const useChartsFilter = ({
             ? selectedDataStreamsFromUrl.includes(filterOption)
               ? 'on'
               : undefined
-            : 'on',
+            : i < DEFAULT_SELECTED_OPTIONS
+            ? 'on'
+            : undefined,
           'data-test-subj': `${filterOptions.filterName}-filter-option`,
         }))
       : []

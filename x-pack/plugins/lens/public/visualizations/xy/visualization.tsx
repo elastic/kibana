@@ -742,7 +742,10 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    }).darkMode;
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />

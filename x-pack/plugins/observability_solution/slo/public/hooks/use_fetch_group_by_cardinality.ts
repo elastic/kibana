@@ -10,7 +10,7 @@ import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { getElasticsearchQueryOrThrow } from '../../common/parse_kuery';
-import { useKibana } from '../utils/kibana_react';
+import { useKibana } from './use_kibana';
 
 export interface UseFetchGroupByCardinalityResponse {
   isLoading: boolean;

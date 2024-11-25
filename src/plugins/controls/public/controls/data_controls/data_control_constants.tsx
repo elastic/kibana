@@ -21,14 +21,6 @@ export const DataControlEditorStrings = {
         defaultMessage: 'Edit control',
       }),
     dataSource: {
-      getFormGroupTitle: () =>
-        i18n.translate('controls.controlGroup.manageControl.dataSource.formGroupTitle', {
-          defaultMessage: 'Data source',
-        }),
-      getFormGroupDescription: () =>
-        i18n.translate('controls.controlGroup.manageControl.dataSource.formGroupDescription', {
-          defaultMessage: 'Select the data view and field that you want to create a control for.',
-        }),
       getSelectDataViewMessage: () =>
         i18n.translate('controls.controlGroup.manageControl.dataSource.selectDataViewMessage', {
           defaultMessage: 'Please select a data view',
@@ -95,14 +87,6 @@ export const DataControlEditorStrings = {
       },
     },
     displaySettings: {
-      getFormGroupTitle: () =>
-        i18n.translate('controls.controlGroup.manageControl.displaySettings.formGroupTitle', {
-          defaultMessage: 'Display settings',
-        }),
-      getFormGroupDescription: () =>
-        i18n.translate('controls.controlGroup.manageControl.displaySettings.formGroupDescription', {
-          defaultMessage: 'Change how the control appears on your dashboard.',
-        }),
       getTitleInputTitle: () =>
         i18n.translate('controls.controlGroup.manageControl.displaySettings.titleInputTitle', {
           defaultMessage: 'Label',
@@ -133,7 +117,7 @@ export const DataControlEditorStrings = {
     },
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
-        defaultMessage: 'Save and close',
+        defaultMessage: 'Save',
       }),
     getCancelTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.cancelTitle', {

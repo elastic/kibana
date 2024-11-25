@@ -35,6 +35,7 @@ const { parseKbnImportReq } = require('./modern/parse_kbn_import_req');
 const { getRepoRels, getRepoRelsSync } = require('./modern/get_repo_rels');
 const Jsonc = require('./utils/jsonc');
 const { getPluginPackagesFilter, getPluginSearchPaths } = require('./modern/plugins');
+const { readPackageJson } = require('./modern/parse_package_json');
 
 module.exports = {
   Package,
@@ -52,4 +53,5 @@ module.exports = {
   parseKbnImportReq,
   getRepoRels,
   getRepoRelsSync,
+  readPackageJson,
 };

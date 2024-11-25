@@ -45,6 +45,8 @@ type Handler = RequestHandler<
 
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ *
+ * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
 export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   const handler: Handler = async (

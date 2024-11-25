@@ -6,8 +6,9 @@
  */
 
 import type { RequiredFieldInput } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
-import type { ERROR_CODE, FormData, ValidationFunc } from '../../../../shared_imports';
+import type { ERROR_CODE, FormData, FormHook, ValidationFunc } from '../../../../shared_imports';
 import * as i18n from './translations';
+import { getFlattenedArrayFieldNames } from './utils';
 
 export function makeValidateRequiredField(parentFieldPath: string) {
   return function validateRequiredField(
@@ -15,11 +16,10 @@ export function makeValidateRequiredField(parentFieldPath: string) {
   ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined {
     const [{ value, path, form }] = args;
 
-    const formData = form.getFormData();
-    const parentFieldData: RequiredFieldInput[] = formData[parentFieldPath];
+    const allRequiredFields = getAllRequiredFieldsValues(form, parentFieldPath);
 
     const isFieldNameUsedMoreThanOnce =
-      parentFieldData.filter((field) => field.name === value.name).length > 1;
+      allRequiredFields.filter((field) => field.name === value.name).length > 1;
 
     if (isFieldNameUsedMoreThanOnce) {
       return {
@@ -50,4 +50,21 @@ export function makeValidateRequiredField(parentFieldPath: string) {
       };
     }
   };
+}
+
+function getAllRequiredFieldsValues(
+  form: { getFields: FormHook['getFields'] },
+  parentFieldPath: string
+) {
+  /*
+    Getting values for required fields via flattened fields instead of using `getFormData`.
+    This is because `getFormData` applies a serializer function to field values, which might update values.
+    Using flattened fields allows us to get the original values before the serializer function is applied.
+  */
+  const flattenedFieldNames = getFlattenedArrayFieldNames(form, parentFieldPath);
+  const fields = form.getFields();
+
+  return flattenedFieldNames.map(
+    (fieldName) => fields[fieldName]?.value ?? {}
+  ) as RequiredFieldInput[];
 }

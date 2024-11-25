@@ -5,27 +5,17 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type {
-  MlDeploymentAllocationState,
-  MlDeploymentState,
-} from '@elastic/elasticsearch/lib/api/types';
 import { useMemo, useState } from 'react';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
+  APIReturnType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export interface UseKnowledgeBaseResult {
-  status: AbortableAsyncState<{
-    ready: boolean;
-    enabled: boolean;
-    error?: any;
-    deployment_state?: MlDeploymentState;
-    allocation_state?: MlDeploymentAllocationState;
-    model_name?: string;
-  }>;
+  status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
   isInstalling: boolean;
   installError?: Error;
   install: () => Promise<void>;

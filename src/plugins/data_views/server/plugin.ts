@@ -63,9 +63,11 @@ export class DataViewsServerPlugin
 
     registerRoutes({
       http: core.http,
+      logger: this.logger,
       getStartServices: core.getStartServices,
       isRollupsEnabled: () => this.rollupsEnabled,
       dataViewRestCounter,
+      hasEsDataTimeout: config.hasEsDataTimeout,
     });
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));

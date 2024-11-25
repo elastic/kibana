@@ -830,4 +830,14 @@ describe('UnifiedFieldList FieldStats', () => {
 
     expect(wrapper.text()).toBe('Summarymin29674max36821994Calculated from 5000 sample records.');
   });
+
+  it('should not request field stats for ES|QL query', async () => {
+    const wrapper = await mountComponent(
+      <FieldStats {...defaultProps} query={{ esql: 'from logs* | limit 10' }} />
+    );
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(0);
+
+    expect(wrapper.text()).toBe('Analysis is not available for this field.');
+  });
 });

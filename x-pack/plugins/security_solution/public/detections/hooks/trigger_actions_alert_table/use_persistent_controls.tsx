@@ -20,7 +20,7 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
-import { METRIC_TYPE, track } from '../../../common/lib/telemetry';
+import { METRIC_TYPE, AlertsEventTypes, track } from '../../../common/lib/telemetry';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
@@ -35,7 +35,7 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       services: { telemetry },
     } = useKibana();
 
-    const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
+    const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
     const groupId = useMemo(() => groupIdSelector(), []);
     const { options } = useDeepEqualSelector((state) => groupId(state, tableId)) ?? {
       options: [],
@@ -47,7 +47,10 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           METRIC_TYPE.CLICK,
           getTelemetryEvent.groupChanged({ groupingId: tableId, selected: groupSelection })
         );
-        telemetry.reportAlertsGroupingChanged({ groupByField: groupSelection, tableId });
+        telemetry.reportEvent(AlertsEventTypes.AlertsGroupingChanged, {
+          groupByField: groupSelection,
+          tableId,
+        });
       },
       [telemetry]
     );
@@ -60,10 +63,14 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       [dispatch, trackGroupChange]
     );
 
+    const fields = useMemo(() => {
+      return Object.values(sourcererDataView.fields || {});
+    }, [sourcererDataView.fields]);
+
     const groupSelector = useGetGroupSelectorStateless({
       groupingId: tableId,
       onGroupChange,
-      fields: indexPattern.fields,
+      fields,
       defaultGroupingOptions: options,
       maxGroupingLevels: 3,
     });

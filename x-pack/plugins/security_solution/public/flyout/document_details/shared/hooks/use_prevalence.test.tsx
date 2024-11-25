@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { usePrevalence } from './use_prevalence';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';

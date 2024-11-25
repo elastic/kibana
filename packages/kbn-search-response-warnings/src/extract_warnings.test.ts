@@ -9,6 +9,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { extractWarnings } from './extract_warnings';
 
@@ -101,6 +102,22 @@ describe('extract search response warnings', () => {
             total: 9000,
           },
         } as estypes.SearchResponse,
+        mockInspectorService,
+        mockRequestAdapter,
+        'My request'
+      );
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('should not include warnings when there is no _clusters or _shards information', () => {
+      const warnings = extractWarnings(
+        {
+          took: 46,
+          all_columns: [{ name: 'field1', type: 'string' }],
+          columns: [{ name: 'field1', type: 'string' }],
+          values: [['value1']],
+        } as ESQLSearchResponse,
         mockInspectorService,
         mockRequestAdapter,
         'My request'

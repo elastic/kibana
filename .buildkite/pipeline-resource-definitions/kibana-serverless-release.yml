@@ -23,7 +23,6 @@ spec:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       default_branch: main
       allow_rebuilds: false
-      skip_intermediate_builds: false
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/serverless_deployment/run_serverless_release_assistant.yml
       provider_settings:

@@ -22,6 +22,7 @@ export const getApplication = () => {
     navigateToApp: async (app: string) => {
       action(`Navigate to: ${app}`);
     },
+    isAppRegistered: (appId: string) => true,
     getUrlForApp: (url: string) => url,
     capabilities: {
       catalogue: {},

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingElastic } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiLoadingElastic } from '@elastic/eui';
 import React from 'react';
 
 interface Props {
@@ -16,10 +16,8 @@ interface Props {
 
 export const LoadingIndicator = ({ type = 'spinner' }: Props) => {
   return (
-    <EuiFlexGroup justifyContent="spaceAround" alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        {type === 'spinner' ? <EuiLoadingSpinner size="l" /> : <EuiLoadingElastic size="xxl" />}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiEmptyPrompt
+      icon={type === 'spinner' ? <EuiLoadingSpinner size="l" /> : <EuiLoadingElastic size="xxl" />}
+    />
   );
 };

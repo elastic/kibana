@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export const privateLocationsSavedObjectId = 'synthetics-privates-locations-singleton';
-export const privateLocationsSavedObjectName = 'synthetics-privates-locations';
+export const legacyPrivateLocationsSavedObjectId = 'synthetics-privates-locations-singleton';
+export const legacyPrivateLocationsSavedObjectName = 'synthetics-privates-locations';
+
+export const privateLocationSavedObjectName = 'synthetics-private-location';

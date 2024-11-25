@@ -10,15 +10,11 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-
-function parseThemeTags() {
-  if (!process.env.KBN_OPTIMIZER_THEMES || process.env.KBN_OPTIMIZER_THEMES === '*') {
-    return ['v8light', 'v8dark'];
-  }
-
-  return process.env.KBN_OPTIMIZER_THEMES.split(',').map((t) => t.trim());
-}
+import {
+  type UiSettingsParams,
+  parseThemeTags,
+  SUPPORTED_THEME_NAMES,
+} from '@kbn/core-ui-settings-common';
 
 function getThemeInfo(options: GetThemeSettingsOptions) {
   if (options?.isDist ?? true) {
@@ -27,7 +23,7 @@ function getThemeInfo(options: GetThemeSettingsOptions) {
     };
   }
 
-  const themeTags = parseThemeTags();
+  const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
   return {
     defaultDarkMode: themeTags[0].endsWith('dark'),
   };
@@ -35,6 +31,7 @@ function getThemeInfo(options: GetThemeSettingsOptions) {
 
 interface GetThemeSettingsOptions {
   isDist?: boolean;
+  isThemeSwitcherEnabled?: boolean;
 }
 
 export const getThemeSettings = (
@@ -88,6 +85,35 @@ export const getThemeSettings = (
       value: 'v8' as ThemeVersion,
       readonly: true,
       schema: schema.literal('v8'),
+    },
+    /**
+     * Theme name is the (upcoming) replacement for theme versions.
+     */
+    'theme:name': {
+      name: i18n.translate('core.ui_settings.params.themeName', {
+        defaultMessage: 'Theme',
+      }),
+      type: 'select',
+      options: SUPPORTED_THEME_NAMES,
+      optionLabels: {
+        amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
+          defaultMessage: 'Amsterdam',
+        }),
+        borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
+          defaultMessage: 'Borealis',
+        }),
+      },
+      value: 'amsterdam',
+      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
+        ? !options.isThemeSwitcherEnabled
+        : true,
+      requiresPageReload: true,
+      schema: schema.oneOf([
+        schema.literal('amsterdam'),
+        schema.literal('borealis'),
+        // Allow experimental themes
+        schema.string(),
+      ]),
     },
   };
 };
