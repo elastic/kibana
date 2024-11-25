@@ -6355,18 +6355,27 @@
                                 "nullable": true
                               },
                               "agent_download_timeout": {
-                                "default": "2h",
                                 "nullable": true
                               },
                               "agent_limits_go_max_procs": {
                                 "nullable": true
                               },
+                              "agent_logging_files_interval": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_keepfiles": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_rotateeverybytes": {
+                                "nullable": true
+                              },
                               "agent_logging_level": {
-                                "default": "info",
                                 "nullable": true
                               },
                               "agent_logging_metrics_period": {
-                                "default": "30s",
+                                "nullable": true
+                              },
+                              "agent_logging_to_files": {
                                 "nullable": true
                               }
                             },
@@ -7113,18 +7122,27 @@
                         "nullable": true
                       },
                       "agent_download_timeout": {
-                        "default": "2h",
                         "nullable": true
                       },
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
+                      "agent_logging_files_interval": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_keepfiles": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_rotateeverybytes": {
+                        "nullable": true
+                      },
                       "agent_logging_level": {
-                        "default": "info",
                         "nullable": true
                       },
                       "agent_logging_metrics_period": {
-                        "default": "30s",
+                        "nullable": true
+                      },
+                      "agent_logging_to_files": {
                         "nullable": true
                       }
                     },
@@ -7361,18 +7379,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -8145,18 +8172,27 @@
                                 "nullable": true
                               },
                               "agent_download_timeout": {
-                                "default": "2h",
                                 "nullable": true
                               },
                               "agent_limits_go_max_procs": {
                                 "nullable": true
                               },
+                              "agent_logging_files_interval": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_keepfiles": {
+                                "nullable": true
+                              },
+                              "agent_logging_files_rotateeverybytes": {
+                                "nullable": true
+                              },
                               "agent_logging_level": {
-                                "default": "info",
                                 "nullable": true
                               },
                               "agent_logging_metrics_period": {
-                                "default": "30s",
+                                "nullable": true
+                              },
+                              "agent_logging_to_files": {
                                 "nullable": true
                               }
                             },
@@ -9190,18 +9226,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -9947,18 +9992,27 @@
                         "nullable": true
                       },
                       "agent_download_timeout": {
-                        "default": "2h",
                         "nullable": true
                       },
                       "agent_limits_go_max_procs": {
                         "nullable": true
                       },
+                      "agent_logging_files_interval": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_keepfiles": {
+                        "nullable": true
+                      },
+                      "agent_logging_files_rotateeverybytes": {
+                        "nullable": true
+                      },
                       "agent_logging_level": {
-                        "default": "info",
                         "nullable": true
                       },
                       "agent_logging_metrics_period": {
-                        "default": "30s",
+                        "nullable": true
+                      },
+                      "agent_logging_to_files": {
                         "nullable": true
                       }
                     },
@@ -10195,18 +10249,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -10980,18 +11043,27 @@
                               "nullable": true
                             },
                             "agent_download_timeout": {
-                              "default": "2h",
                               "nullable": true
                             },
                             "agent_limits_go_max_procs": {
                               "nullable": true
                             },
+                            "agent_logging_files_interval": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_keepfiles": {
+                              "nullable": true
+                            },
+                            "agent_logging_files_rotateeverybytes": {
+                              "nullable": true
+                            },
                             "agent_logging_level": {
-                              "default": "info",
                               "nullable": true
                             },
                             "agent_logging_metrics_period": {
-                              "default": "30s",
+                              "nullable": true
+                            },
+                            "agent_logging_to_files": {
                               "nullable": true
                             }
                           },
@@ -11887,6 +11959,42 @@
                                       "enabled"
                                     ],
                                     "type": "object"
+                                  },
+                                  "type": "object"
+                                },
+                                "limits": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "go_max_procs": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "logging": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "files": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "interval": {
+                                          "type": "string"
+                                        },
+                                        "keepfiles": {
+                                          "type": "number"
+                                        },
+                                        "rotateeverybytes": {
+                                          "type": "number"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
+                                    "level": {
+                                      "type": "string"
+                                    },
+                                    "to_files": {
+                                      "type": "boolean"
+                                    }
                                   },
                                   "type": "object"
                                 },
@@ -36515,6 +36623,7 @@
                           "type": "boolean"
                         },
                         "use_space_awareness_migration_started_at": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "use_space_awareness_migration_status": {
@@ -36716,6 +36825,7 @@
                           "type": "boolean"
                         },
                         "use_space_awareness_migration_started_at": {
+                          "nullable": true,
                           "type": "string"
                         },
                         "use_space_awareness_migration_status": {

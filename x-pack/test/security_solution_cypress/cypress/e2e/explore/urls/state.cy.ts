@@ -304,7 +304,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
-      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response?.body.savedObjectId;
       visitWithTimeRange('/app/home');
       visitWithTimeRange(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
