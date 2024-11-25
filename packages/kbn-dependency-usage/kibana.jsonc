@@ -1,0 +1,6 @@
+{
+  "devOnly": true,
+  "type": "shared-common",
+  "id": "@kbn/dependency-usage",
+  "owner": "@elastic/kibana-security"
+}

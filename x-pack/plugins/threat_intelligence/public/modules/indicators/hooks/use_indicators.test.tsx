@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { useIndicators, UseIndicatorsParams, UseIndicatorsValue } from './use_indicators';
+import { act, waitFor, renderHook } from '@testing-library/react';
+import { useIndicators, UseIndicatorsParams } from './use_indicators';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicators } from '../services/fetch_indicators';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
@@ -23,7 +23,7 @@ const useIndicatorsParams: UseIndicatorsParams = {
 const indicatorsQueryResult = { indicators: [], total: 0 };
 
 const renderUseIndicators = (initialProps = useIndicatorsParams) =>
-  renderHook<UseIndicatorsParams, UseIndicatorsValue>((props) => useIndicators(props), {
+  renderHook(useIndicators, {
     initialProps,
     wrapper: TestProvidersComponent,
   });
@@ -53,7 +53,7 @@ describe('useIndicators()', () => {
       expect(indicatorsQuery).toHaveBeenCalledTimes(1);
 
       // isLoading should turn to false eventually
-      await hookResult.waitFor(() => !hookResult.result.current.isLoading);
+      await waitFor(() => expect(hookResult.result.current.isLoading).toBe(false));
       expect(hookResult.result.current.isLoading).toEqual(false);
     });
   });
@@ -77,7 +77,7 @@ describe('useIndicators()', () => {
       // Change page size
       await act(async () => hookResult.result.current.onChangeItemsPerPage(50));
 
-      expect(indicatorsQuery).toHaveBeenCalledTimes(3);
+      await waitFor(() => expect(indicatorsQuery).toHaveBeenCalledTimes(3));
       expect(indicatorsQuery).toHaveBeenLastCalledWith(
         expect.objectContaining({
           pagination: expect.objectContaining({ pageIndex: 0, pageSize: 50 }),
@@ -101,7 +101,7 @@ describe('useIndicators()', () => {
         expect.any(AbortSignal)
       );
 
-      await hookResult.waitFor(() => !hookResult.result.current.isLoading);
+      await waitFor(() => expect(hookResult.result.current.isLoading).toBe(false));
 
       expect(hookResult.result.current).toMatchInlineSnapshot(`
         Object {

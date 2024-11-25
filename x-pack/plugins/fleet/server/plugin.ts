@@ -84,6 +84,8 @@ import {
   MessageSigningService,
 } from './services/security';
 
+import { OutputClient, type OutputClientInterface } from './services/output_client';
+
 import {
   ASSETS_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
@@ -143,6 +145,7 @@ import { registerFieldsMetadataExtractors } from './services/register_fields_met
 import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
+import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -261,6 +264,12 @@ export interface FleetStartContract {
   Function exported to allow creating unique ids for saved object tags
    */
   getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
+
+  /**
+   * Create a Fleet Output Client instance
+   * @param packageName
+   */
+  createOutputClient: (request: KibanaRequest) => Promise<OutputClientInterface>;
 }
 
 export class FleetPlugin
@@ -619,6 +628,7 @@ export class FleetPlugin
     // Register task
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
+    registerBumpAgentPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({
@@ -835,6 +845,11 @@ export class FleetPlugin
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
       getPackageSpecTagId,
+      async createOutputClient(request: KibanaRequest) {
+        const soClient = appContextService.getSavedObjects().getScopedClient(request);
+        const authz = await getAuthzFromRequest(request);
+        return new OutputClient(soClient, authz);
+      },
     };
   }
 

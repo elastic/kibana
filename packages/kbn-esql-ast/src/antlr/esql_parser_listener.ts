@@ -98,6 +98,10 @@ import { EnrichCommandContext } from "./esql_parser.js";
 import { EnrichWithClauseContext } from "./esql_parser.js";
 import { LookupCommandContext } from "./esql_parser.js";
 import { InlinestatsCommandContext } from "./esql_parser.js";
+import { JoinCommandContext } from "./esql_parser.js";
+import { JoinTargetContext } from "./esql_parser.js";
+import { JoinConditionContext } from "./esql_parser.js";
+import { JoinPredicateContext } from "./esql_parser.js";
 
 
 /**
@@ -1031,5 +1035,45 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinCommand?: (ctx: JoinCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinCommand?: (ctx: JoinCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinTarget`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinTarget?: (ctx: JoinTargetContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinTarget`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinTarget?: (ctx: JoinTargetContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinCondition`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinCondition?: (ctx: JoinConditionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinCondition`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinCondition?: (ctx: JoinConditionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.joinPredicate`.
+	 * @param ctx the parse tree
+	 */
+	enterJoinPredicate?: (ctx: JoinPredicateContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.joinPredicate`.
+	 * @param ctx the parse tree
+	 */
+	exitJoinPredicate?: (ctx: JoinPredicateContext) => void;
 }
 
