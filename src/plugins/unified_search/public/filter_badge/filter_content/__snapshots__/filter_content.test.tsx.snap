@@ -3,7 +3,7 @@
 exports[`alias 1`] = `
 <div>
   <span
-    class="globalFilterLabel__value emotion-EuiTextColor"
+    class="globalFilterLabel__value css-y1aj-EuiTextColor"
   >
      geo.coordinates in US
   </span>
@@ -24,7 +24,7 @@ exports[`alias with error status 1`] = `
     :
   </span>
   <span
-    class="globalFilterLabel__value emotion-EuiTextColor"
+    class="globalFilterLabel__value css-y1aj-EuiTextColor"
   >
      Error
   </span>
@@ -45,7 +45,7 @@ exports[`alias with warning status 1`] = `
     :
   </span>
   <span
-    class="globalFilterLabel__value emotion-EuiTextColor"
+    class="globalFilterLabel__value css-y1aj-EuiTextColor"
   >
      Warning
   </span>
@@ -61,7 +61,7 @@ exports[`error 1`] = `
     :
   </span>
   <span
-    class="globalFilterLabel__value emotion-EuiTextColor"
+    class="globalFilterLabel__value css-y1aj-EuiTextColor"
   >
      Error
   </span>
@@ -77,7 +77,7 @@ exports[`field custom label 1`] = `
     :
   </span>
   <span
-    class="globalFilterLabel__value emotion-EuiTextColor"
+    class="globalFilterLabel__value css-y1aj-EuiTextColor"
   >
      ios
   </span>
@@ -93,7 +93,7 @@ exports[`warning 1`] = `
     :
   </span>
   <span
-    class="globalFilterLabel__value emotion-EuiTextColor"
+    class="globalFilterLabel__value css-y1aj-EuiTextColor"
   >
      Warning
   </span>
