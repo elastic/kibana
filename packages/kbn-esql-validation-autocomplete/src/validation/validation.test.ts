@@ -429,7 +429,6 @@ describe('validation logic', () => {
         [],
         ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
       );
-
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "DESC")`, []);
 
