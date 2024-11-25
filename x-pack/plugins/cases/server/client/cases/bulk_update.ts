@@ -288,19 +288,16 @@ function partitionPatchRequest(
       conflictedCases.push(reqCase);
       // let's try to authorize the conflicted case even though we'll fail after afterwards just in case
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
-    } else {
-      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
-    }
-
-    if (
-      foundCase != null &&
-      !isSOError(foundCase) &&
+    } else if (
       reqCase.status != null &&
       foundCase.attributes.status !== reqCase.status &&
       foundCase.attributes.status === CaseStatuses.closed
     ) {
       // Track cases that are closed and a user is attempting to reopen
       reopenedCases.push(reqCase);
+      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
+    } else {
+      casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     }
   }
 
