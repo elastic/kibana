@@ -7,15 +7,13 @@
 
 import React from 'react';
 
-import { EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiHealth, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MlModelDeploymentState } from '../../../../../../common/types/ml';
 import { TrainedModelState } from '../../../../../../common/types/pipelines';
-
-import { WrapperButtonProps } from './inference_pipeline_card';
 
 const modelNotDownloadedText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDownloaded',
@@ -115,14 +113,14 @@ export interface TrainedModelHealthProps {
   modelState: TrainedModelState | MlModelDeploymentState;
   modelStateReason?: string;
   isDownloadable?: boolean;
-  WrapperElement?: React.FC<WrapperButtonProps>;
+  onClickAction?: Function;
 }
 
 export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   modelState,
   modelStateReason,
   isDownloadable,
-  WrapperElement,
+  onClickAction,
 }) => {
   let modelHealth: {
     healthColor: string;
@@ -211,12 +209,16 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   }
   return (
     <EuiToolTip content={modelHealth.tooltipText}>
-      {WrapperElement ? (
-        <span>
-          <WrapperElement>
-            <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
-          </WrapperElement>
-        </span>
+      {onClickAction ? (
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchTrainedModelHealthPopoverButton"
+          iconSide="right"
+          flush="both"
+          iconType="boxesHorizontal"
+          onClick={() => onClickAction()}
+        >
+          <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
+        </EuiButtonEmpty>
       ) : (
         <EuiHealth color={modelHealth.healthColor}>{modelHealth.healthText}</EuiHealth>
       )}
