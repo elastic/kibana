@@ -22,6 +22,7 @@ import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../../..';
 import { type AgentStatusRecords, HostStatus } from '../../../../../../common/endpoint/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { AgentStatusClientOptions } from '../lib/base_agent_status_client';
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { AgentStatusClientError } from '../errors';
 
@@ -42,15 +43,19 @@ export enum CROWDSTRIKE_STATUS_RESPONSE {
 
 export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
+  private connectorActions: NormalizedExternalConnectorClient;
 
-  private async getAgentStatusFromConnectorAction(agentIds: string[]) {
-    const connectorActions = new NormalizedExternalConnectorClient(
+  constructor(options: AgentStatusClientOptions) {
+    super(options);
+    this.connectorActions = new NormalizedExternalConnectorClient(
       this.options.connectorActionsClient as ActionsClient,
       this.log
     );
-    connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
+    this.connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
+  }
 
-    const agentStatusResponse = (await connectorActions.execute({
+  private async getAgentStatusFromConnectorAction(agentIds: string[]) {
+    const agentStatusResponse = (await this.connectorActions.execute({
       params: {
         subAction: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
         subActionParams: {
@@ -66,13 +71,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
     agentIds: string[]
   ): Promise<Record<string, LimitedCrowdstrikeHostDetails>> {
     try {
-      const connectorActions = new NormalizedExternalConnectorClient(
-        this.options.connectorActionsClient as ActionsClient,
-        this.log
-      );
-      connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
-
-      const getAgentDetails = (await connectorActions.execute({
+      const getAgentDetails = (await this.connectorActions.execute({
         params: {
           subAction: SUB_ACTION.GET_AGENT_DETAILS,
           subActionParams: {

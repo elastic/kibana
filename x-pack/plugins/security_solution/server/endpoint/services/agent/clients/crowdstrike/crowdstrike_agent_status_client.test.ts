@@ -11,7 +11,6 @@ import {
   CROWDSTRIKE_NETWORK_STATUS,
   CROWDSTRIKE_STATUS_RESPONSE,
 } from './crowdstrike_agent_status_client';
-import { NormalizedExternalConnectorClient } from '../../..';
 import { AgentStatusClientError } from '../errors';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import { CrowdstrikeMock } from '../../../actions/clients/crowdstrike/mocks';
@@ -19,10 +18,20 @@ import { responseActionsClientMock } from '../../../actions/clients/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { RawCrowdstrikeInfo } from './types';
 
-jest.mock('../../..', () => ({
-  NormalizedExternalConnectorClient: jest.fn(),
-  getPendingActionsSummary: jest.fn().mockResolvedValue([]),
-}));
+jest.mock('../../..', () => {
+  const setupMock = jest.fn();
+  const executeMock = jest.fn();
+  return {
+    NormalizedExternalConnectorClient: jest.fn().mockImplementation(() => ({
+      setup: setupMock,
+      execute: executeMock,
+    })),
+    getPendingActionsSummary: jest.fn().mockResolvedValue([]),
+    executeMock,
+  };
+});
+
+const { executeMock } = jest.requireMock('../../..');
 
 const baseResponse = {
   took: 1,
@@ -69,11 +78,14 @@ const getMockSearchResponse = (
     ],
   },
 });
+
 describe('CrowdstrikeAgentStatusClient', () => {
   let client: CrowdstrikeAgentStatusClient;
   const constructorOptions = responseActionsClientMock.createConstructorOptions();
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     client = new CrowdstrikeAgentStatusClient({
       esClient: constructorOptions.esClient,
       soClient: savedObjectsClientMock.create(),
@@ -85,7 +97,8 @@ describe('CrowdstrikeAgentStatusClient', () => {
   describe('getAgentStatusFromConnectorAction', () => {
     it('should get agent status from connector action', async () => {
       const agentIds = ['agent1', 'agent2'];
-      const mockExecute = jest.fn().mockResolvedValue({
+
+      executeMock.mockResolvedValue({
         data: {
           resources: [
             { id: 'agent1', state: CROWDSTRIKE_STATUS_RESPONSE.ONLINE },
@@ -94,15 +107,10 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
 
-      (NormalizedExternalConnectorClient as jest.Mock).mockImplementation(() => ({
-        setup: jest.fn(),
-        execute: mockExecute,
-      }));
-
       // @ts-expect-error private method
       const result = await client.getAgentStatusFromConnectorAction(agentIds);
 
-      expect(mockExecute).toHaveBeenCalledWith({
+      expect(executeMock).toHaveBeenCalledWith({
         params: {
           subAction: 'getAgentOnlineStatus',
           subActionParams: {
@@ -121,11 +129,9 @@ describe('CrowdstrikeAgentStatusClient', () => {
   describe('getAgentStatuses', () => {
     beforeEach(() => {
       // @ts-expect-error private method
-      (client.getAgentStatusFromConnectorAction as Jest.Mock) = jest.fn();
+      jest.spyOn(client, 'getAgentStatusFromConnectorAction').mockResolvedValue({});
     });
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+
     it('should return found false when there is no agent.host.id', async () => {
       const agentIds = ['agent1'];
       const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
@@ -159,6 +165,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
     });
+
     it('should accept NORMAL status', async () => {
       const agentIds = ['agent1'];
       const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
@@ -192,7 +199,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
       });
     });
 
-    it('should accept CONTAINED STATUS ', async () => {
+    it('should accept CONTAINED status', async () => {
       const agentIds = ['agent2'];
       const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
         CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
@@ -224,6 +231,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
     });
+
     it('should set isolated to false if host is pending isolate', async () => {
       const agentIds = ['agent2'];
       const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
@@ -256,6 +264,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
     });
+
     it('should set isolated to true if host is pending release', async () => {
       const agentIds = ['agent2'];
       const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
@@ -288,6 +297,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
     });
+
     it('should handle error and log it', async () => {
       const agentIds = ['agent1', 'agent2'];
       const error = new Error('ES search failed');
@@ -303,7 +313,8 @@ describe('CrowdstrikeAgentStatusClient', () => {
   describe('getAgentDetailsFromConnectorAction', () => {
     it('should get agent details from connector action', async () => {
       const agentIds = ['agent1', 'agent2'];
-      const mockExecute = jest.fn().mockResolvedValue({
+
+      executeMock.mockResolvedValue({
         data: {
           resources: [
             {
@@ -320,15 +331,10 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
 
-      (NormalizedExternalConnectorClient as jest.Mock).mockImplementation(() => ({
-        setup: jest.fn(),
-        execute: mockExecute,
-      }));
-
       // @ts-expect-error private method
       const result = await client.getAgentDetailsFromConnectorAction(agentIds);
 
-      expect(mockExecute).toHaveBeenCalledWith({
+      expect(executeMock).toHaveBeenCalledWith({
         params: {
           subAction: 'getAgentDetails',
           subActionParams: {
