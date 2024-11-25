@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook } from '@testing-library/react';
 import { useRuleTypeIdsByFeatureId } from './use_rule_type_ids_by_feature_id';
 import { ruleTypesIndex } from '../../../mock/rule_types_index';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
