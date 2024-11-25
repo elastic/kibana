@@ -362,6 +362,9 @@ export class SyntheticsService {
           })
           .then((res) => {
             this.syncErrors = res;
+          })
+          .catch((e) => {
+            this.logger.error(e);
           });
       }
       return this.syncErrors;
