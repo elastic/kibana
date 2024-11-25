@@ -432,7 +432,9 @@ describe('savedObjectToItem', () => {
       },
     };
 
-    const { item, error } = savedObjectToItem(input, true, ['title', 'description']);
+    const { item, error } = savedObjectToItem(input, true, {
+      allowedAttributes: ['title', 'description'],
+    });
     expect(error).toBeNull();
     expect(item).toEqual({
       ...commonSavedObject,
@@ -481,27 +483,33 @@ describe('savedObjectToItem', () => {
     };
 
     {
-      const { item } = savedObjectToItem(input, true, ['title', 'description']);
+      const { item } = savedObjectToItem(input, true, {
+        allowedAttributes: ['title', 'description'],
+      });
       expect(item?.references).toEqual(input.references);
     }
 
     {
-      const { item } = savedObjectToItem(input, true, ['title', 'description'], ['tag']);
+      const { item } = savedObjectToItem(input, true, {
+        allowedAttributes: ['title', 'description'],
+        allowedReferences: ['tag'],
+      });
       expect(item?.references).toEqual([input.references[0]]);
     }
 
     {
-      const { item } = savedObjectToItem(input, true, ['title', 'description'], []);
+      const { item } = savedObjectToItem(input, true, {
+        allowedAttributes: ['title', 'description'],
+        allowedReferences: [],
+      });
       expect(item?.references).toEqual([]);
     }
 
     {
-      const { item } = savedObjectToItem(
-        { ...input, references: undefined },
-        true,
-        ['title', 'description'],
-        []
-      );
+      const { item } = savedObjectToItem({ ...input, references: undefined }, true, {
+        allowedAttributes: ['title', 'description'],
+        allowedReferences: [],
+      });
       expect(item?.references).toBeUndefined();
     }
   });
