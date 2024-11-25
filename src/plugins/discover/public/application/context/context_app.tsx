@@ -102,7 +102,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     });
   }, [locator, referrer, services]);
 
-  // TODO: Remove this comment after testing
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'context',
