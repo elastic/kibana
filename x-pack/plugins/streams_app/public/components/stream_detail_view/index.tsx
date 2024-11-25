@@ -53,6 +53,7 @@ export function StreamDetailView() {
         defaultMessage: 'Overview',
       }),
     },
+    // TODO: Move that to the management tab
     {
       name: 'routing',
       content: <StreamDetailRouting definition={streamEntity} refreshDefinition={refresh} />,
@@ -65,6 +66,13 @@ export function StreamDetailView() {
       content: <></>,
       label: i18n.translate('xpack.streams.streamDetailView.processingTab', {
         defaultMessage: 'Processing',
+      }),
+    },
+    {
+      name: 'management',
+      content: <></>,
+      label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
+        defaultMessage: 'Management',
       }),
     },
   ];

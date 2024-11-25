@@ -47,20 +47,18 @@ export type MinimalApmPluginRequestHandlerContext = Omit<
 };
 
 export interface APMRouteCreateOptions {
-  options: {
-    tags: Array<
-      | 'access:apm'
-      | 'access:apm_write'
-      | 'access:apm_settings_write'
-      | 'access:ml:canGetJobs'
-      | 'access:ml:canCreateJob'
-      | 'access:ml:canCloseJob'
-      | 'access:ai_assistant'
-      | 'oas-tag:APM agent keys'
-      | 'oas-tag:APM annotations'
-    >;
-    disableTelemetry?: boolean;
-  };
+  tags: Array<
+    | 'access:apm'
+    | 'access:apm_write'
+    | 'access:apm_settings_write'
+    | 'access:ml:canGetJobs'
+    | 'access:ml:canCreateJob'
+    | 'access:ml:canCloseJob'
+    | 'access:ai_assistant'
+    | 'oas-tag:APM agent keys'
+    | 'oas-tag:APM annotations'
+  >;
+  disableTelemetry?: boolean;
 }
 
 export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;

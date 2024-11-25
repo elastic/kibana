@@ -9,7 +9,7 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public
 import { Logger } from '@kbn/logging';
 
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import { from, share, startWith } from 'rxjs';
+import { from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
 import { StreamsPluginClass, StreamsPluginSetup, StreamsPluginStart } from './types';
@@ -29,28 +29,34 @@ export class Plugin implements StreamsPluginClass {
   setup(core: CoreSetup<{}>, pluginSetup: {}): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
     return {
-      status$: createStatusObservable(this.repositoryClient),
+      status$: createStatusObservable(this.logger, this.repositoryClient),
     };
   }
 
   start(core: CoreStart, pluginsStart: {}): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStatusObservable(this.repositoryClient),
+      status$: createStatusObservable(this.logger, this.repositoryClient),
     };
   }
 
   stop() {}
 }
 
-const createStatusObservable = once((repositoryClient: StreamsRepositoryClient) => {
+const createStatusObservable = once((logger: Logger, repositoryClient: StreamsRepositoryClient) => {
   return from(
     repositoryClient
       .fetch('GET /api/streams/_status', {
         signal: new AbortController().signal,
       })
-      .then((response) => ({
-        status: response.enabled ? ('enabled' as const) : ('disabled' as const),
-      }))
-  ).pipe(startWith({ status: 'unknown' as const }), share());
+      .then(
+        (response) => ({
+          status: response.enabled ? ('enabled' as const) : ('disabled' as const),
+        }),
+        (error) => {
+          logger.error(error);
+          return { status: 'unknown' as const };
+        }
+      )
+  ).pipe(startWith({ status: 'unknown' as const }), shareReplay(1));
 });

@@ -107,6 +107,22 @@ createServerRouteFactory<{}, { tags: string[] }>()({
 createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_params',
   options: {
+    tags: [],
+    access: 'internal',
+  },
+  handler: async (resources) => {},
+});
+
+// specifying additional options makes them required
+// @ts-expect-error
+createServerRouteFactory<{}, { tags: string[] }>()({
+  endpoint: 'GET /api/endpoint_with_params 2023-10-31',
+  handler: async (resources) => {},
+});
+
+createServerRouteFactory<{}, { tags: string[] }>()({
+  endpoint: 'GET /api/endpoint_with_params 2023-10-31',
+  options: {
     access: 'internal',
   },
   tags: [],

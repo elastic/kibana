@@ -36,7 +36,7 @@ export function StreamsTable({
       return items;
     }
 
-    return items.filter((item) => item.id.toLowerCase().startsWith(query.toLowerCase()));
+    return items.filter((item) => item.id.toLowerCase().includes(query.toLowerCase()));
   }, [query, items]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<StreamDefinition>>>(() => {

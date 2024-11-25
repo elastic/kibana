@@ -120,7 +120,11 @@ export interface ReadStreamResponse {
   definition: StreamDefinition;
 }
 
-export async function readStream({ id, scopedClusterClient, skipAccessCheck }: ReadStreamParams) {
+export async function readStream({
+  id,
+  scopedClusterClient,
+  skipAccessCheck,
+}: ReadStreamParams): Promise<ReadStreamResponse> {
   try {
     const response = await scopedClusterClient.asInternalUser.get<StreamDefinition>({
       id,

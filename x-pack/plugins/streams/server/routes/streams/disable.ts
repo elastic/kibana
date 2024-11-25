@@ -7,19 +7,19 @@
 
 import { badRequest, internal } from '@hapi/boom';
 import { z } from '@kbn/zod';
-import { STREAMS_INDEX } from '../../../common/constants';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
+import { deleteStream } from './delete';
 
 export const disableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_disable',
   params: z.object({}),
   options: {
     access: 'internal',
-    security: {
-      authz: {
-        requiredPrivileges: ['streams_write'],
-      },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['streams_write'],
     },
   },
   handler: async ({
@@ -31,10 +31,7 @@ export const disableStreamsRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      await scopedClusterClient.asInternalUser.indices.delete({
-        index: STREAMS_INDEX,
-        allow_no_indices: true,
-      });
+      await deleteStream(scopedClusterClient, 'logs', logger);
 
       return { acknowledged: true };
     } catch (e) {

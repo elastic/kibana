@@ -9,7 +9,7 @@ import { excludeFrozenQuery } from '@kbn/observability-utils-common/es/queries/e
 import { kqlQuery } from '@kbn/observability-utils-common/es/queries/kql_query';
 import { rangeQuery } from '@kbn/observability-utils-common/es/queries/range_query';
 import {
-  EsqlQueryResponse,
+  UnparsedEsqlResponse,
   createObservabilityEsClient,
 } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { z } from '@kbn/zod';
@@ -28,7 +28,7 @@ export const executeEsqlRoute = createServerRoute({
       end: z.number().optional(),
     }),
   }),
-  handler: async ({ params, request, logger, getScopedClients }): Promise<EsqlQueryResponse> => {
+  handler: async ({ params, request, logger, getScopedClients }): Promise<UnparsedEsqlResponse> => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const observabilityEsClient = createObservabilityEsClient({
       client: scopedClusterClient.asCurrentUser,
@@ -55,7 +55,7 @@ export const executeEsqlRoute = createServerRoute({
           },
         },
       },
-      { asPlainObjects: false }
+      { transform: 'none' }
     );
 
     return response;

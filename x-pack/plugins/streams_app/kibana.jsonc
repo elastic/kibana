@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/streams-app-plugin",
-  "owner": "@elastic/observability-ui",
+  "owner": "@simianhacker @flash1293 @dgieselaar",
   "group": "observability",
   "visibility": "private",
   "plugin": {

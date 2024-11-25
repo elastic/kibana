@@ -17,6 +17,8 @@ import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { Required, ValuesType } from 'utility-types';
+import { DedotObject } from '@kbn/utility-types';
+import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
 import { esqlResultToPlainObjects } from '../esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
@@ -25,32 +27,52 @@ type SearchRequest = ESSearchRequest & {
   size: number | boolean;
 };
 
-interface EsqlOptions {
-  asPlainObjects?: boolean;
+export interface EsqlOptions {
+  transform?: 'none' | 'plain' | 'unflatten';
 }
 
-type EsqlValue = ScalarValue | ScalarValue[];
+export type EsqlValue = ScalarValue | ScalarValue[];
 
-type EsqlOutput = Record<string, EsqlValue>;
+export type EsqlOutput = Record<string, EsqlValue>;
 
-type InferEsqlResponseOf<
+type MaybeUnflatten<T extends Record<string, any>, TApply> = TApply extends true
+  ? DedotObject<T>
+  : T;
+
+interface UnparsedEsqlResponseOf<TOutput extends EsqlOutput> {
+  columns: Array<{ name: keyof TOutput; type: string }>;
+  values: Array<Array<ValuesType<TOutput>>>;
+}
+
+interface ParsedEsqlResponseOf<
   TOutput extends EsqlOutput,
-  TOptions extends EsqlOptions | undefined = { asPlainObjects: true }
-> = TOptions extends { asPlainObjects: true }
-  ? {
-      hits: Array<{
+  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+> {
+  hits: Array<
+    MaybeUnflatten<
+      {
         [key in keyof TOutput]: TOutput[key];
-      }>;
-    }
-  : {
-      columns: Array<{ name: keyof TOutput; type: string }>;
-      values: Array<Array<ValuesType<TOutput>>>;
-    };
-
-export interface EsqlQueryResponse {
-  columns: Array<{ name: string; type: string }>;
-  values: EsqlValue[][];
+      },
+      TOptions extends { transform: 'unflatten' } ? true : false
+    >
+  >;
 }
+
+export type InferEsqlResponseOf<
+  TOutput extends EsqlOutput,
+  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+> = TOptions extends { transform: 'plain' | 'unflatten' }
+  ? ParsedEsqlResponseOf<TOutput, TOptions>
+  : UnparsedEsqlResponseOf<TOutput>;
+
+export type ObservabilityESSearchRequest = SearchRequest;
+
+export type ObservabilityEsQueryRequest = Omit<EsqlQueryRequest, 'format' | 'columnar'>;
+
+export type ParsedEsqlResponse = ParsedEsqlResponseOf<EsqlOutput, EsqlOptions>;
+export type UnparsedEsqlResponse = UnparsedEsqlResponseOf<EsqlOutput>;
+
+export type EsqlQueryResponse = UnparsedEsqlResponse | ParsedEsqlResponse;
 
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
@@ -71,13 +93,17 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     request: Required<FieldCapsRequest, 'index_filter' | 'fields' | 'index'>
   ): Promise<FieldCapsResponse>;
+  esql<TOutput extends EsqlOutput = EsqlOutput>(
+    operationName: string,
+    parameters: ObservabilityEsQueryRequest
+  ): Promise<InferEsqlResponseOf<TOutput, { transform: 'none' }>>;
   esql<
     TOutput extends EsqlOutput = EsqlOutput,
-    TEsqlOptions extends EsqlOptions | undefined = { asPlainObjects: true }
+    TEsqlOptions extends EsqlOptions = { transform: 'none' }
   >(
     operationName: string,
-    parameters: EsqlQueryRequest,
-    options?: TEsqlOptions
+    parameters: ObservabilityEsQueryRequest,
+    options: TEsqlOptions
   ): Promise<InferEsqlResponseOf<TOutput, TEsqlOptions>>;
   client: ElasticsearchClient;
 }
@@ -123,14 +149,11 @@ export function createObservabilityEsClient({
         });
       });
     },
-    esql<
-      TOutput extends EsqlOutput = EsqlOutput,
-      TEsqlOptions extends EsqlOptions | undefined = { asPlainObjects: true }
-    >(
+    esql(
       operationName: string,
-      parameters: EsqlQueryRequest,
+      parameters: ObservabilityEsQueryRequest,
       options?: EsqlOptions
-    ): Promise<InferEsqlResponseOf<TOutput, TEsqlOptions>> {
+    ): Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>> {
       return callWithLogger(operationName, parameters, () => {
         return client.esql
           .query(
@@ -142,15 +165,24 @@ export function createObservabilityEsClient({
             }
           )
           .then((response) => {
-            const esqlResponse = response as unknown as EsqlQueryResponse;
+            const esqlResponse = response as unknown as UnparsedEsqlResponseOf<EsqlOutput>;
 
-            const shouldParseOutput = options?.asPlainObjects !== false;
-            const finalResponse = shouldParseOutput
-              ? { hits: esqlResultToPlainObjects<EsqlOutput>(esqlResponse) }
-              : esqlResponse;
+            const transform = options?.transform ?? 'none';
 
-            return finalResponse as InferEsqlResponseOf<TOutput, TEsqlOptions>;
-          });
+            if (transform === 'none') {
+              return esqlResponse;
+            }
+
+            const parsedResponse = { hits: esqlResultToPlainObjects(esqlResponse) };
+
+            if (transform === 'plain') {
+              return parsedResponse;
+            }
+
+            return {
+              hits: parsedResponse.hits.map((hit) => unflattenObject(hit)),
+            };
+          }) as Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>>;
       });
     },
     search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
