@@ -42,7 +42,9 @@
     "@kbn/deeplinks-analytics",
     "@kbn/custom-integrations-plugin",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-application-browser"
+    "@kbn/core-application-browser",
+    "@kbn/serverless",
+    "@kbn/core-plugins-server"
   ],
   "exclude": [
     "target/**/*"
