@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { isEqual } from 'lodash';
 import { SplitAccordion } from '../../../../../../common/components/split_accordion';
 import type {
   DiffableAllFields,
@@ -36,6 +37,13 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
   const { euiTheme } = useEuiTheme();
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
   const { finalDiffableRule } = useDiffableRuleContext();
+  const isFieldCustomized = useMemo(
+    () =>
+      fieldThreeWayDiff.has_base_version
+        ? !isEqual(fieldThreeWayDiff.base_version, fieldThreeWayDiff.current_version)
+        : false,
+    [fieldThreeWayDiff]
+  );
 
   return (
     <>
@@ -44,6 +52,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
           <FieldUpgradeConflictsResolverHeader
             fieldName={fieldName}
             fieldUpgradeState={fieldUpgradeState}
+            isCustomized={isFieldCustomized}
           />
         }
         initialIsOpen={hasConflict}

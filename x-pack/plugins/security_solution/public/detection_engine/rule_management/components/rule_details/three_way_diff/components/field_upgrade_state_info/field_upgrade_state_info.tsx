@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
 import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
 import { ReviewRequiredBadge } from '../badges/review_required_badge';
@@ -18,55 +19,50 @@ interface FieldUpgradeStateInfoProps {
 }
 
 export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JSX.Element {
-  switch (state) {
-    case FieldUpgradeState.NoConflict:
-      return (
-        <>
-          <EuiText color="success" size="xs">
-            <ReadyForUpgradeBadge />
-            &nbsp;&nbsp;
-            <strong>{i18n.NO_CONFLICT}</strong>
-            {i18n.SEPARATOR}
-            {i18n.NO_CONFLICT_DESCRIPTION}
-          </EuiText>
-        </>
-      );
+  const { color, badge, title, description } = useMemo(() => {
+    switch (state) {
+      case FieldUpgradeState.NoConflict:
+        return {
+          color: 'success',
+          badge: <ReadyForUpgradeBadge />,
+          title: i18n.NO_CONFLICT,
+          description: i18n.NO_CONFLICT_DESCRIPTION,
+        };
 
-    case FieldUpgradeState.Accepted:
-      return (
-        <>
-          <EuiText color="success" size="xs">
-            <ReadyForUpgradeBadge />
-            &nbsp;&nbsp;
-            {i18n.REVIEWED_AND_ACCEPTED}
-          </EuiText>
-        </>
-      );
+      case FieldUpgradeState.Accepted:
+        return {
+          color: 'success',
+          badge: <ReadyForUpgradeBadge />,
+          title: i18n.REVIEWED_AND_ACCEPTED,
+        };
 
-    case FieldUpgradeState.SolvableConflict:
-      return (
-        <>
-          <EuiText color="warning" size="xs">
-            <ReviewRequiredBadge />
-            &nbsp;&nbsp;
-            <strong>{i18n.SOLVABLE_CONFLICT}</strong>
-            {i18n.SEPARATOR}
-            {i18n.SOLVABLE_CONFLICT_DESCRIPTION}
-          </EuiText>
-        </>
-      );
+      case FieldUpgradeState.SolvableConflict:
+        return {
+          color: 'warning',
+          badge: <ReviewRequiredBadge />,
+          title: i18n.SOLVABLE_CONFLICT,
+          description: i18n.SOLVABLE_CONFLICT_DESCRIPTION,
+        };
 
-    case FieldUpgradeState.NonSolvableConflict:
-      return (
-        <>
-          <EuiText color="danger" size="xs">
-            <ActionRequiredBadge />
-            &nbsp;&nbsp;
-            <strong>{i18n.NON_SOLVABLE_CONFLICT}</strong>
-            {i18n.SEPARATOR}
-            {i18n.NON_SOLVABLE_CONFLICT_DESCRIPTION}
-          </EuiText>
-        </>
-      );
-  }
+      case FieldUpgradeState.NonSolvableConflict:
+        return {
+          color: 'danger',
+          badge: <ActionRequiredBadge />,
+          title: i18n.NON_SOLVABLE_CONFLICT,
+          description: i18n.NON_SOLVABLE_CONFLICT_DESCRIPTION,
+        };
+
+      default:
+        return assertUnreachable(state);
+    }
+  }, [state]);
+
+  return (
+    <>
+      <EuiText color={color} size="xs" component="span">
+        {badge}&nbsp;&nbsp;<strong>{title}</strong>
+        {description ? `${i18n.SEPARATOR} ${i18n.NO_CONFLICT_DESCRIPTION}` : null}
+      </EuiText>
+    </>
+  );
 }
