@@ -8,8 +8,7 @@
 
 import React, { type ComponentProps } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import userEvent from '@testing-library/user-event';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 
 import { urlServiceTestSetup } from '../../../../common/url_service/__tests__/setup';
 import { MockLocatorDefinition } from '../../../../common/url_service/mocks';
@@ -60,7 +59,6 @@ describe('LinkContent', () => {
   });
 
   it('uses the delegatedShareUrlHandler to generate the shareable URL when it is provided', async () => {
-    const user = userEvent.setup();
     const objectType = 'dashboard';
     const objectId = '123';
     const isDirty = false;
@@ -77,13 +75,12 @@ describe('LinkContent', () => {
       delegatedShareUrlHandler,
     });
 
-    await user.click(screen.getByTestId('copyShareUrlButton'));
+    fireEvent.click(screen.getByTestId('copyShareUrlButton'));
 
     expect(delegatedShareUrlHandler).toHaveBeenCalled();
   });
 
   it('returns the shareable URL when the delegatedShareUrlHandler is not provided and shortURLs are not allowed', async () => {
-    const user = userEvent.setup();
     const objectType = 'dashboard';
     const objectId = '123';
     const isDirty = false;
@@ -99,15 +96,14 @@ describe('LinkContent', () => {
 
     const copyButton = screen.getByTestId('copyShareUrlButton');
 
-    await user.click(copyButton);
+    fireEvent.click(copyButton);
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(copyButton.getAttribute('data-share-url')).toBe(shareableUrl);
     });
   });
 
   it('invokes the createWithLocator method on the shortURL service if a locator is present when the copy button is clicked', async () => {
-    const user = userEvent.setup();
     const objectType = 'dashboard';
     const objectId = '123';
     const isDirty = false;
@@ -143,16 +139,17 @@ describe('LinkContent', () => {
     const numberOfClicks = 4;
 
     for (const _click of Array.from({ length: numberOfClicks })) {
-      await user.click(copyButton);
+      fireEvent.click(copyButton);
     }
 
-    // should only invoke once no matter how many times the button is clicked
-    expect(createWithLocatorSpy).toHaveBeenCalledTimes(1);
-    expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
+    await waitFor(() => {
+      // should only invoke once no matter how many times the button is clicked
+      expect(createWithLocatorSpy).toHaveBeenCalledTimes(1);
+      expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
+    });
   });
 
   it('invokes the createFromLongUrl method on the shortURL service if a locator is not present when the copy button is clicked', async () => {
-    const user = userEvent.setup();
     const objectType = 'dashboard';
     const objectId = '123';
     const isDirty = false;
@@ -180,11 +177,13 @@ describe('LinkContent', () => {
     const numberOfClicks = 4;
 
     for (const _click of Array.from({ length: numberOfClicks })) {
-      await user.click(copyButton);
+      fireEvent.click(copyButton);
     }
 
-    // should only invoke once no matter how many times the button is clicked
-    expect(createFromLongUrlSpy).toHaveBeenCalledTimes(1);
-    expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
+    await waitFor(() => {
+      // should only invoke once no matter how many times the button is clicked
+      expect(createFromLongUrlSpy).toHaveBeenCalledTimes(1);
+      expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
+    });
   });
 });
