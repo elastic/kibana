@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core/server';
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 import {
   IntegrationFieldsExtractor,
@@ -23,7 +24,7 @@ export interface FieldsMetadataServiceSetup {
 }
 
 export interface FieldsMetadataServiceStart {
-  getClient(): IFieldsMetadataClient;
+  getClient(request: KibanaRequest): Promise<IFieldsMetadataClient>;
 }
 
 export interface FindFieldsMetadataOptions extends Partial<IntegrationFieldsSearchParams> {

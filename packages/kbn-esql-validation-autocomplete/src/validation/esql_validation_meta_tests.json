@@ -77,6 +77,10 @@
       "type": "counter_double"
     },
     {
+      "name": "unsupportedField",
+      "type": "unsupported"
+    },
+    {
       "name": "dateNanosField",
       "type": "date_nanos"
     },
@@ -2199,7 +2203,7 @@
       "warning": []
     },
     {
-      "query": "ROW a=1::LONG | LOOKUP t ON a",
+      "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
       "error": [],
       "warning": []
     },
@@ -9689,6 +9693,13 @@
         "Argument of [trim] must be [keyword], found value [doubleField] type [double]"
       ],
       "warning": []
+    },
+    {
+      "query": "from a_index | keep unsupportedField",
+      "error": [],
+      "warning": [
+        "Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null"
+      ]
     },
     {
       "query": "f",

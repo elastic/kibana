@@ -399,13 +399,6 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   discontinued?: string;
 
   /**
-   * Defines the security requirements for a route, including authorization and authentication.
-   *
-   * @remarks This will be surfaced in OAS documentation.
-   */
-  security?: RouteSecurity;
-
-  /**
    * Whether this endpoint is being used to serve generated or static HTTP resources
    * like JS, CSS or HTML. _Do not set to `true` for HTTP APIs._
    *
@@ -524,4 +517,13 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * Additional route options {@link RouteConfigOptions}.
    */
   options?: RouteConfigOptions<Method>;
+}
+
+/**
+ * Post Validation Route emitter metadata.
+ */
+export interface PostValidationMetadata {
+  deprecated?: RouteDeprecationInfo;
+  isInternalApiRequest: boolean;
+  isPublicAccess: boolean;
 }

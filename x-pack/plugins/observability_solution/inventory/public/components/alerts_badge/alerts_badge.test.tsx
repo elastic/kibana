@@ -8,10 +8,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { AlertsBadge } from './alerts_badge';
 import { useKibana } from '../../hooks/use_kibana';
-import type { Entity } from '../../../common/entities';
+import type { InventoryEntity } from '../../../common/entities';
 
 jest.mock('../../hooks/use_kibana');
 const useKibanaMock = useKibana as jest.Mock;
+
+const commonEntityFields: Partial<InventoryEntity> = {
+  entityLastSeenTimestamp: 'foo',
+  entityId: '1',
+};
 
 describe('AlertsBadge', () => {
   const mockAsKqlFilter = jest.fn();
@@ -40,16 +45,19 @@ describe('AlertsBadge', () => {
   });
 
   it('render alerts badge for a host entity', () => {
-    const entity: Entity = {
-      'entity.last_seen_timestamp': 'foo',
-      'entity.id': '1',
-      'entity.type': 'host',
-      'entity.display_name': 'foo',
-      'entity.identity_fields': 'host.name',
-      'host.name': 'foo',
-      'entity.definition_id': 'host',
-      'cloud.provider': null,
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityType: 'host',
+      entityDisplayName: 'foo',
+      entityIdentityFields: 'host.name',
+      entityDefinitionId: 'host',
       alertsCount: 1,
+      host: {
+        name: 'foo',
+      },
+      cloud: {
+        provider: null,
+      },
     };
     mockAsKqlFilter.mockReturnValue('host.name: foo');
 
@@ -60,16 +68,22 @@ describe('AlertsBadge', () => {
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('1');
   });
   it('render alerts badge for a service entity', () => {
-    const entity: Entity = {
-      'entity.last_seen_timestamp': 'foo',
-      'agent.name': 'node',
-      'entity.id': '1',
-      'entity.type': 'service',
-      'entity.display_name': 'foo',
-      'entity.identity_fields': 'service.name',
-      'service.name': 'bar',
-      'entity.definition_id': 'host',
-      'cloud.provider': null,
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityType: 'service',
+      entityDisplayName: 'foo',
+      entityIdentityFields: 'service.name',
+      entityDefinitionId: 'service',
+      service: {
+        name: 'bar',
+      },
+      agent: {
+        name: 'node',
+      },
+      cloud: {
+        provider: null,
+      },
+
       alertsCount: 5,
     };
     mockAsKqlFilter.mockReturnValue('service.name: bar');
@@ -81,17 +95,22 @@ describe('AlertsBadge', () => {
     expect(screen.queryByTestId('inventoryAlertsBadgeLink')?.textContent).toEqual('5');
   });
   it('render alerts badge for a service entity with multiple identity fields', () => {
-    const entity: Entity = {
-      'entity.last_seen_timestamp': 'foo',
-      'agent.name': 'node',
-      'entity.id': '1',
-      'entity.type': 'service',
-      'entity.display_name': 'foo',
-      'entity.identity_fields': ['service.name', 'service.environment'],
-      'service.name': 'bar',
-      'service.environment': 'prod',
-      'entity.definition_id': 'host',
-      'cloud.provider': null,
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityType: 'service',
+      entityDisplayName: 'foo',
+      entityIdentityFields: ['service.name', 'service.environment'],
+      entityDefinitionId: 'service',
+      service: {
+        name: 'bar',
+        environment: 'prod',
+      },
+      agent: {
+        name: 'node',
+      },
+      cloud: {
+        provider: null,
+      },
       alertsCount: 2,
     };
 

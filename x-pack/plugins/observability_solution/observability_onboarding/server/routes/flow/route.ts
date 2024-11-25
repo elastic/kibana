@@ -20,7 +20,7 @@ import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_o
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
-import { getAgentVersion } from '../../lib/get_agent_version';
+import { getAgentVersionInfo } from '../../lib/get_agent_version';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
@@ -220,21 +220,22 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
 
     const fleetPluginStart = await plugins.fleet.start();
 
-    const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersion] = await Promise.all([
-      saveObservabilityOnboardingFlow({
-        savedObjectsClient,
-        observabilityOnboardingState: {
-          type: 'autoDetect',
-          state: undefined,
-          progress: {},
-        },
-      }),
-      createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
-      (
-        await context.resolve(['core'])
-      ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
-      getAgentVersion(fleetPluginStart, kibanaVersion),
-    ]);
+    const [onboardingFlow, ingestApiKey, installApiKey, elasticAgentVersionInfo] =
+      await Promise.all([
+        saveObservabilityOnboardingFlow({
+          savedObjectsClient,
+          observabilityOnboardingState: {
+            type: 'autoDetect',
+            state: undefined,
+            progress: {},
+          },
+        }),
+        createShipperApiKey(client.asCurrentUser, `onboarding_ingest_${name}`),
+        (
+          await context.resolve(['core'])
+        ).core.security.authc.apiKeys.create(createInstallApiKey(`onboarding_install_${name}`)),
+        getAgentVersionInfo(fleetPluginStart, kibanaVersion),
+      ]);
 
     if (!installApiKey) {
       throw Boom.notFound('License does not allow API key creation.');
@@ -250,7 +251,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       onboardingFlow,
       ingestApiKey: ingestApiKey.encoded,
       installApiKey: installApiKey.encoded,
-      elasticAgentVersion,
+      elasticAgentVersionInfo,
       kibanaUrl,
       scriptDownloadUrl,
     };
@@ -263,8 +264,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  *
  * The request format is TSV (tab-separated values) to simplify parsing in bash.
  *
- * The response format is either a YAML file or a tar archive containing the Elastic Agent
- * configuration, depending on the `Accept` header.
+ * The response format is a tar archive containing the Elastic Agent configuration, depending on the
+ * `Accept` header.
  *
  * Errors during installation are ignore unless all integrations fail to install. When that happens
  * a 500 Internal Server Error is returned with the first error message.
@@ -300,7 +301,8 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
  *  --header "Accept: application/x-tar" \
  *  --header "Content-Type: text/tab-separated-values" \
  *  --header "kbn-xsrf: true" \
- *  --data $'system\tregistry\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
+ *  --header "x-elastic-internal-origin: Kibana" \
+ *  --data $'system\tregistry\twebserver01\nproduct_service\tcustom\t/path/to/access.log\ncheckout_service\tcustom\t/path/to/access.log' \
  *  --output - | tar -tvf -
  * ```
  */
@@ -348,7 +350,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
         }
         return acc;
       }, []);
-      // Errors during installation are ignore unless all integrations fail to install. When that happens
+      // Errors during installation are ignored unless all integrations fail to install. When that happens
       // a 500 Internal Server Error is returned with the first error message.
       if (!installedIntegrations.length) {
         throw (settledResults[0] as PromiseRejectedResult).reason;
@@ -383,20 +385,11 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
 
-    if (request.headers.accept === 'application/x-tar') {
-      return response.ok({
-        headers: {
-          'content-type': 'application/x-tar',
-        },
-        body: generateAgentConfigTar({ elasticsearchUrl, installedIntegrations }),
-      });
-    }
-
     return response.ok({
       headers: {
-        'content-type': 'application/yaml',
+        'content-type': 'application/x-tar',
       },
-      body: generateAgentConfigYAML({ elasticsearchUrl, installedIntegrations }),
+      body: generateAgentConfigTar({ elasticsearchUrl, installedIntegrations }),
     });
   },
 });
@@ -430,7 +423,7 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
+        const config = await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version);
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
         return {
@@ -438,7 +431,7 @@ async function ensureInstalledIntegrations(
           pkgName: pkg.name,
           pkgVersion: pkg.version,
           title: packageInfo.title,
-          inputs: inputs.filter((input) => input.type !== 'httpjson'),
+          config,
           dataStreams:
             packageInfo.data_streams?.map(({ type, dataset }) => ({ type, dataset })) ?? [],
           kibanaAssets: pkg.installed_kibana,
@@ -455,19 +448,31 @@ async function ensureInstalledIntegrations(
         pkgName,
         pkgVersion: '1.0.0', // Custom integrations are always installed as version `1.0.0`
         title: pkgName,
-        inputs: [
-          {
-            id: `filestream-${pkgName}`,
-            type: 'filestream',
-            streams: [
-              {
-                id: `filestream-${pkgName}`,
-                data_stream: dataStream,
-                paths: integration.logFilePaths,
-              },
-            ],
-          },
-        ],
+        config: safeDump({
+          inputs: [
+            {
+              id: `filestream-${pkgName}`,
+              type: 'filestream',
+              streams: [
+                {
+                  id: `filestream-${pkgName}`,
+                  data_stream: dataStream,
+                  paths: integration.logFilePaths,
+                  processors: [
+                    {
+                      add_fields: {
+                        target: 'service',
+                        fields: {
+                          name: pkgName,
+                        },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
         dataStreams: [dataStream],
         kibanaAssets: [],
       };
@@ -544,25 +549,6 @@ function parseIntegrationsTSV(tsv: string) {
   );
 }
 
-const generateAgentConfigYAML = ({
-  elasticsearchUrl,
-  installedIntegrations,
-}: {
-  elasticsearchUrl: string[];
-  installedIntegrations: InstalledIntegration[];
-}) => {
-  return safeDump({
-    outputs: {
-      default: {
-        type: 'elasticsearch',
-        hosts: elasticsearchUrl,
-        api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
-      },
-    },
-    inputs: installedIntegrations.map(({ inputs }) => inputs).flat(),
-  });
-};
-
 function parseRegistryIntegrationMetadata(
   pkgName: string,
   parameter: string
@@ -614,7 +600,7 @@ const generateAgentConfigTar = ({
       path: `inputs.d/${integration.pkgName}.yml`,
       mode: 0o644,
       mtime: now,
-      data: safeDump({ inputs: integration.inputs }),
+      data: integration.config,
     })),
   ]);
 };
