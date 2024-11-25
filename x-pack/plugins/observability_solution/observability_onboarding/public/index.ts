@@ -46,7 +46,7 @@ export interface ObservabilityOnboardingAppServices {
   config: ConfigSchema;
   docLinks: DocLinksStart;
   chrome: ChromeStart;
-  serverless: ServerlessPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export const plugin: PluginInitializer<

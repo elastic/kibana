@@ -13,8 +13,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { TSVBMetricModel } from '@kbn/metrics-data-access-plugin/common';
-import { InfraConfig } from '../../../plugin';
-import type { InfraPluginRequestHandlerContext } from '../../../types';
+import type { InfraConfig, InfraPluginRequestHandlerContext } from '../../../types';
 import {
   CallWithRequestParams,
   InfraDatabaseGetIndicesAliasResponse,
