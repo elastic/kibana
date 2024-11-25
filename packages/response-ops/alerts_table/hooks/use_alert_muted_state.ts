@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { Alert } from '@kbn/alerting-types';
-import { useAlertsTableContext } from '../../contexts/alerts_table_context';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 export const useAlertMutedState = (alert?: Alert) => {
   const { mutedAlerts } = useAlertsTableContext();

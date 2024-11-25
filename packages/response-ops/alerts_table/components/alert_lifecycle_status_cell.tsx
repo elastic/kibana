@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { DefaultCell } from './default_cell';
-import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
+import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import type { CellComponent } from '../types';
 
 const mutedBadgeStyle = css`
