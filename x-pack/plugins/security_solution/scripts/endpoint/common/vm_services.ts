@@ -10,6 +10,7 @@ import execa from 'execa';
 import chalk from 'chalk';
 import { userInfo } from 'os';
 import { join as pathJoin, dirname } from 'path';
+import { dump } from './utils';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -17,6 +18,8 @@ import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 const baseGenerator = new BaseDataGenerator();
 export const DEFAULT_VAGRANTFILE = pathJoin(__dirname, 'vagrant', 'Vagrantfile');
+
+const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
 export interface BaseVmCreateOptions {
   name: string;
@@ -75,9 +78,16 @@ export const createMultipassHostVmClient = (
   log: ToolingLog = createToolingLogger()
 ): HostVm => {
   const exec = async (command: string): Promise<HostVmExecResponse> => {
-    const execResponse = await execa.command(`multipass exec ${name} -- ${command}`);
+    const execResponse = await execa
+      .command(`multipass exec ${name} -- ${command}`, { maxBuffer: MAX_BUFFER })
+      .catch((e) => {
+        log.error(dump(e));
+        throw e;
+      });
 
-    log.verbose(execResponse);
+    log.verbose(
+      `exec response from host [${name}] for command [${command}]:\n${dump(execResponse)}`
+    );
 
     return {
       stdout: execResponse.stdout,
@@ -279,12 +289,18 @@ export const createVagrantHostVmClient = (
       VAGRANT_CWD,
     },
     stdio: ['inherit', 'pipe', 'pipe'],
+    maxBuffer: MAX_BUFFER,
   };
 
   log.debug(`Creating Vagrant VM client for [${name}] with vagrantfile [${vagrantFile}]`);
 
   const exec = async (command: string): Promise<HostVmExecResponse> => {
-    const execResponse = await execa.command(`vagrant ssh -- ${command}`, execaOptions);
+    const execResponse = await execa
+      .command(`vagrant ssh -- ${command}`, execaOptions)
+      .catch((e) => {
+        log.error(dump(e));
+        throw e;
+      });
 
     log.verbose(execResponse);
 

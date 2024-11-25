@@ -99,6 +99,11 @@ declare global {
         options?: Partial<{
           interval: number;
           timeout: number;
+          /**
+           *  A callback to be executed on failure. It will not change the outcome of the `waitUntil()` (will
+           *  still be failure). Useful for capturing data prior to (potentially) a test failing.
+           */
+          onFailure: () => void | Promise<void> | Cypress.Chainable<void>;
         }>,
         message?: string
       ): Chainable<Subject>;
