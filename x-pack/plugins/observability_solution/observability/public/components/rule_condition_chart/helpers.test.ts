@@ -79,6 +79,19 @@ const useCases = [
     {
       aggType: Aggregators.COUNT,
       field: '',
+      filter: `container.name:container's name-1`,
+      name: '',
+    },
+    {
+      operation: 'count',
+      operationWithField: `count(kql='container.name:container\\'s name-1')`,
+      sourceField: '',
+    },
+  ],
+  [
+    {
+      aggType: Aggregators.COUNT,
+      field: '',
       filter: 'host.name: host-*',
       name: '',
     },

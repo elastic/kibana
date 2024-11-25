@@ -18,10 +18,12 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   const { aggType, field, filter = '' } = metric;
   let operation: string = aggType;
   const operationArgs: string[] = [];
+  const escapedFilter = filter.replace(/'/g, "\\'");
+
   if (aggType === Aggregators.RATE) {
     return {
       operation: 'counter_rate',
-      operationWithField: `counter_rate(max(${field}), kql='${filter}')`,
+      operationWithField: `counter_rate(max(${field}), kql='${escapedFilter}')`,
       sourceField: field || '',
     };
   }
@@ -43,7 +45,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
     operationArgs.push('percentile=99');
   }
 
-  if (filter) operationArgs.push(`kql='${filter}'`);
+  if (escapedFilter) operationArgs.push(`kql='${escapedFilter}'`);
   return {
     operation,
     operationWithField: `${operation}(${operationArgs.join(', ')})`,
