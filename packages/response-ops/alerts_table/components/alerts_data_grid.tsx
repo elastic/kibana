@@ -634,7 +634,7 @@ export const AlertsDataGrid = typedMemo(
         <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
           <Suspense fallback={null}>
             {flyoutAlertIndex > -1 && (
-              <AlertsFlyout
+              <AlertsFlyout<AC>
                 {...renderContext}
                 alert={alerts[flyoutAlertIndex]}
                 alertsCount={alertsCount}

@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
 import { createCasesServiceMock } from '../mocks/cases.mock';
-import { BulkActionsVerbs } from '../types';
+import { BulkActionsVerbs, type PublicAlertsDataGridProps } from '../types';
 import { AdditionalContext, RenderContext } from '../types';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { testQueryClientConfig } from '../test_utils';
@@ -42,7 +42,10 @@ const wrapper = ({ children }: PropsWithChildren) => {
 };
 
 const caseId = 'test-case';
-const casesConfig = { featureId: 'test-feature-id', owner: ['test-owner'] };
+const casesConfig: PublicAlertsDataGridProps['casesConfiguration'] = {
+  featureId: 'test-feature-id',
+  owner: ['cases'],
+};
 
 describe('bulk action hooks', () => {
   beforeEach(() => {
@@ -472,6 +475,7 @@ describe('bulk action hooks', () => {
             http,
             notifications,
             application,
+            casesService: mockCasesService,
           }),
         {
           wrapper,
@@ -525,6 +529,7 @@ describe('bulk action hooks', () => {
             http,
             notifications,
             application,
+            casesService: mockCasesService,
           }),
         {
           wrapper,

@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/packages/response-ops/alerts_fields_browser'],
   setupFilesAfterEnv: ['<rootDir>/packages/response-ops/alerts_fields_browser/setup_tests.ts'],

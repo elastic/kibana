@@ -178,7 +178,6 @@ const mockSearchAlertsResponse: Awaited<ReturnType<typeof searchAlerts>> = {
   total: alerts.length,
   querySnapshot: { request: [], response: [] },
 };
-mockSearchAlerts.mockResolvedValue(mockSearchAlertsResponse);
 
 // Alerts fields mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields');
@@ -327,9 +326,18 @@ describe('AlertsTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSearchAlerts.mockResolvedValue(mockSearchAlertsResponse);
   });
 
   describe('Cases', () => {
+    const casesTableProps = {
+      ...tableProps,
+      services: {
+        ...tableProps.services,
+        cases: mockCaseService,
+      },
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
       mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
@@ -340,12 +348,12 @@ describe('AlertsTable', () => {
     });
 
     it('should show the cases column', async () => {
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
       expect(await screen.findByText('Cases')).toBeInTheDocument();
     });
 
     it('should show the cases titles correctly', async () => {
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
       expect(await screen.findByText('Test case')).toBeInTheDocument();
       expect(await screen.findByText('Test case 2')).toBeInTheDocument();
     });
@@ -353,12 +361,12 @@ describe('AlertsTable', () => {
     it('should show the loading skeleton when fetching cases', async () => {
       mockBulkGetCases.mockResolvedValue({ cases: mockCases, errors: [] });
 
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
       expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(3);
     });
 
     it('should pass the correct case ids to useBulkGetCases', async () => {
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
 
       await waitFor(() => {
         expect(mockBulkGetCases).toHaveBeenCalledWith(
@@ -375,7 +383,7 @@ describe('AlertsTable', () => {
         alerts: [...mockSearchAlertsResponse.alerts, ...mockSearchAlertsResponse.alerts],
       });
 
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
 
       await waitFor(() => {
         expect(mockBulkGetCases).toHaveBeenCalledWith(
@@ -398,7 +406,7 @@ describe('AlertsTable', () => {
         ],
       });
 
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
 
       await waitFor(() => {
         expect(mockBulkGetCases).toHaveBeenCalledWith(
@@ -414,7 +422,7 @@ describe('AlertsTable', () => {
         .fn()
         .mockReturnValue({ create: false, read: false });
 
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
 
       await waitFor(() => {
         expect(mockBulkGetCases).not.toHaveBeenCalled();
@@ -425,8 +433,8 @@ describe('AlertsTable', () => {
       mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
 
       const props: BaseAlertsTableProps = {
-        ...tableProps,
-        casesConfiguration: { featureId: 'test-feature-id', owner: ['test-owner'] },
+        ...casesTableProps,
+        casesConfiguration: { featureId: 'test-feature-id', owner: ['cases'] },
       };
 
       render(
@@ -446,18 +454,18 @@ describe('AlertsTable', () => {
     });
 
     it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
       expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith([]);
     });
 
     it('calls canUseCases with the case owner if defined', async () => {
       const props: BaseAlertsTableProps = {
-        ...tableProps,
-        casesConfiguration: { featureId: 'test-feature-id', owner: ['test-owner'] },
+        ...casesTableProps,
+        casesConfiguration: { featureId: 'test-feature-id', owner: ['cases'] },
       };
 
       render(<TestComponent {...props} />);
-      expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith(['test-owner']);
+      expect(mockCaseService.helpers.canUseCases).toHaveBeenCalledWith(['cases']);
     });
 
     it('calls canUseCases with an empty array if the case configuration is not defined', async () => {
@@ -467,8 +475,8 @@ describe('AlertsTable', () => {
 
     it('should call the cases context with the correct props', async () => {
       const props: BaseAlertsTableProps = {
-        ...tableProps,
-        casesConfiguration: { featureId: 'test-feature-id', owner: ['test-owner'] },
+        ...casesTableProps,
+        casesConfiguration: { featureId: 'test-feature-id', owner: ['cases'] },
       };
 
       const CasesContextMock = jest.fn().mockReturnValue(null);
@@ -479,7 +487,7 @@ describe('AlertsTable', () => {
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
-          owner: ['test-owner'],
+          owner: ['cases'],
           permissions: { create: true, read: true },
           features: { alerts: { sync: false } },
         },
@@ -491,7 +499,7 @@ describe('AlertsTable', () => {
       const CasesContextMock = jest.fn().mockReturnValue(null);
       mockCaseService.ui.getCasesContext = jest.fn().mockReturnValue(CasesContextMock);
 
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
@@ -510,7 +518,7 @@ describe('AlertsTable', () => {
         .fn()
         .mockReturnValue({ create: false, read: false });
 
-      render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...casesTableProps} />);
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
@@ -524,10 +532,10 @@ describe('AlertsTable', () => {
 
     it('should call the cases context with sync alerts turned on if defined in the cases config', async () => {
       const props: BaseAlertsTableProps = {
-        ...tableProps,
+        ...casesTableProps,
         casesConfiguration: {
           featureId: 'test-feature-id',
-          owner: ['test-owner'],
+          owner: ['cases'],
           syncAlerts: true,
         },
       };
@@ -539,7 +547,7 @@ describe('AlertsTable', () => {
       expect(CasesContextMock).toHaveBeenCalledWith(
         {
           children: expect.anything(),
-          owner: ['test-owner'],
+          owner: ['cases'],
           permissions: { create: true, read: true },
           features: { alerts: { sync: true } },
         },

@@ -19,8 +19,14 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import usePrevious from 'react-use/lib/usePrevious';
+import type { Alert } from '@kbn/alerting-types';
 import { DefaultAlertsFlyoutBody, DefaultAlertsFlyoutHeader } from './default_alerts_flyout';
-import { FlyoutSectionRenderer } from '../types';
+import {
+  AdditionalContext,
+  FlyoutSectionProps,
+  FlyoutSectionRenderer,
+  RenderContext,
+} from '../types';
 
 const PAGINATION_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.paginationLabel',
@@ -29,7 +35,16 @@ const PAGINATION_LABEL = i18n.translate(
   }
 );
 
-export const AlertsFlyout: FlyoutSectionRenderer = ({ alert, ...renderContext }) => {
+export const AlertsFlyout = <AC extends AdditionalContext>({
+  alert,
+  ...renderContext
+}: RenderContext<AC> & {
+  alert: Alert;
+  flyoutIndex: number;
+  isLoading: boolean;
+  onClose: () => void;
+  onPaginate: (pageIndex: number) => void;
+}) => {
   const {
     flyoutIndex,
     alertsCount,
@@ -38,15 +53,17 @@ export const AlertsFlyout: FlyoutSectionRenderer = ({ alert, ...renderContext })
     isLoading,
     renderFlyoutHeader: Header = DefaultAlertsFlyoutHeader,
     renderFlyoutBody: Body = DefaultAlertsFlyoutBody,
-    renderFlyoutFooter: Footer,
+    renderFlyoutFooter,
   } = renderContext;
+  const Footer: FlyoutSectionRenderer<AC> | undefined = renderFlyoutFooter;
   const prevAlert = usePrevious(alert);
   const props = useMemo(
-    () => ({
-      ...renderContext,
-      // Show the previous alert while loading the next one
-      alert: alert === undefined && prevAlert != null ? prevAlert : alert,
-    }),
+    () =>
+      ({
+        ...renderContext,
+        // Show the previous alert while loading the next one
+        alert: alert === undefined && prevAlert != null ? prevAlert : alert,
+      } as FlyoutSectionProps<AC>),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [alert, renderContext]
   );
@@ -55,7 +72,7 @@ export const AlertsFlyout: FlyoutSectionRenderer = ({ alert, ...renderContext })
     () =>
       Header ? (
         <Suspense fallback={null}>
-          <Header {...props} />
+          <Header<AC> {...props} />
         </Suspense>
       ) : null,
     [Header, props]
@@ -65,7 +82,7 @@ export const AlertsFlyout: FlyoutSectionRenderer = ({ alert, ...renderContext })
     () =>
       Body ? (
         <Suspense fallback={null}>
-          <Body {...props} />
+          <Body<AC> {...props} />
         </Suspense>
       ) : null,
     [Body, props]

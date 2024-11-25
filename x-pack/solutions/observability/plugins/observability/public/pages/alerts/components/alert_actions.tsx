@@ -22,6 +22,7 @@ import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
+import { AlertActionsProps } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../../common/typings';
 import type { GetObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
@@ -148,7 +149,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         resolveAlertPagePath={(alertId, currentPageId) =>
           currentPageId !== ALERT_DETAILS_PAGE_ID ? paths.observability.alertDetails(alertId) : null
         }
-        {...customActionsProps}
+        {...(customActionsProps as AlertActionsProps)}
       />
     ),
     [customActionsProps]

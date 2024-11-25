@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { Alert } from '@kbn/alerting-types';
 import { CasesCell } from './cases_cell';
 import { CellComponentProps } from '../types';
-import { getCasesMapMock } from '../mocks/cases.mock';
+import { createCasesServiceMock, getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
 
@@ -32,6 +32,7 @@ const props = {
   isLoading: false,
   alert,
   cases: casesMap,
+  casesService: createCasesServiceMock(),
   maintenanceWindows: maintenanceWindowsMap,
   columnId: 'kibana.alert.case_ids',
   showAlertStatusWithFlapping: false,

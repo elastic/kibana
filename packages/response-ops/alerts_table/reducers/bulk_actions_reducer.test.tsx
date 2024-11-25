@@ -299,10 +299,10 @@ describe('AlertsDataGrid bulk actions', () => {
 
       render(<TestComponent {...props} />);
 
-      userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+      await userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
       await waitForEuiPopoverOpen();
 
-      userEvent.click(await screen.findByText('Fake Bulk Action'));
+      await userEvent.click(await screen.findByText('Fake Bulk Action'));
 
       expect(mockOnClick.mock.calls[0][0]).toEqual([
         {
@@ -356,7 +356,7 @@ describe('AlertsDataGrid bulk actions', () => {
         expect(bulkActionsCells[0].checked).toBeFalsy();
         expect(bulkActionsCells[1].checked).toBeFalsy();
 
-        userEvent.click(screen.getByTestId('bulk-actions-header'));
+        await userEvent.click(screen.getByTestId('bulk-actions-header'));
 
         bulkActionsCells = screen.getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
         expect(bulkActionsCells[0].checked).toBeTruthy();
@@ -381,7 +381,7 @@ describe('AlertsDataGrid bulk actions', () => {
       });
 
       describe('and clicking on a single row', () => {
-        it('should uncheck the select all header column', () => {
+        it('should uncheck the select all header column', async () => {
           // State after having already clicked on select all before
           const props = {
             ...dataGridPropsWithBulkActions,
@@ -402,7 +402,7 @@ describe('AlertsDataGrid bulk actions', () => {
             (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
           ).toBeTruthy();
 
-          userEvent.click(bulkActionsCells[1]);
+          await userEvent.click(bulkActionsCells[1]);
           expect(
             (screen.getByTestId('bulk-actions-header') as HTMLInputElement).checked
           ).toBeFalsy();
@@ -463,7 +463,7 @@ describe('AlertsDataGrid bulk actions', () => {
           ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[1].checked
         ).toBeTruthy();
 
-        userEvent.click(await screen.findByTestId('bulk-actions-header'));
+        await userEvent.click(await screen.findByTestId('bulk-actions-header'));
 
         expect(
           ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0].checked
@@ -484,14 +484,14 @@ describe('AlertsDataGrid bulk actions', () => {
         const bulkActionsCells = screen.getAllByTestId(
           'bulk-actions-row-cell'
         ) as HTMLInputElement[];
-        userEvent.click(bulkActionsCells[0]);
+        await userEvent.click(bulkActionsCells[0]);
 
         expect(await screen.findByTestId('selectedShowBulkActionsButton')).toBeDefined();
         expect(await screen.findByTestId('selectAllAlertsButton')).toBeDefined();
       });
 
       describe('and the last remaining row is unchecked', () => {
-        it('should hide the toolbar', () => {
+        it('should hide the toolbar', async () => {
           // state after having already clicked on select all before
           const props = {
             ...dataGridPropsWithBulkActions,
@@ -508,7 +508,7 @@ describe('AlertsDataGrid bulk actions', () => {
           expect(getByTestId('selectAllAlertsButton')).toBeDefined();
 
           const bulkActionsCells = getAllByTestId('bulk-actions-row-cell') as HTMLInputElement[];
-          userEvent.click(bulkActionsCells[0]);
+          await userEvent.click(bulkActionsCells[0]);
 
           expect(queryByTestId('selectAllAlertsButton')).toBeNull();
           expect(queryByTestId('selectedShowBulkActionsButton')).toBeNull();
@@ -544,10 +544,10 @@ describe('AlertsDataGrid bulk actions', () => {
 
           render(<TestComponent {...props} />);
 
-          userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+          await userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
           await waitForEuiPopoverOpen();
 
-          userEvent.click(await screen.findByText('Fake Bulk Action'));
+          await userEvent.click(await screen.findByText('Fake Bulk Action'));
           expect(mockOnClick.mock.calls[0][0]).toEqual([
             {
               _id: 'alert1',
@@ -611,10 +611,10 @@ describe('AlertsDataGrid bulk actions', () => {
             };
             render(<TestComponent {...props} initialBulkActionsState={initialBulkActionsState} />);
 
-            userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+            await userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            userEvent.click(await screen.findByTestId('fake-bulk-action'));
+            await userEvent.click(await screen.findByTestId('fake-bulk-action'));
 
             // The callback given to our clients to run when they want to update the loading state
             act(() => {
@@ -638,10 +638,10 @@ describe('AlertsDataGrid bulk actions', () => {
               rowSelection: new Map([[1, { isLoading: true }]]),
             };
             render(<TestComponent {...props} initialBulkActionsState={initialBulkActionsState} />);
-            userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
+            await userEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            userEvent.click(await screen.findByText('Fake Bulk Action'));
+            await userEvent.click(await screen.findByText('Fake Bulk Action'));
 
             // the callback given to our clients to run when they want to update the loading state
             mockOnClick.mock.calls[0][2](false);
@@ -672,7 +672,7 @@ describe('AlertsDataGrid bulk actions', () => {
               .checked
           ).toBeFalsy();
 
-          userEvent.click(screen.getByTestId('selectAllAlertsButton'));
+          await userEvent.click(screen.getByTestId('selectAllAlertsButton'));
 
           expect(
             ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -710,7 +710,7 @@ describe('AlertsDataGrid bulk actions', () => {
                 .checked
             ).toBeTruthy();
 
-            userEvent.click(screen.getByTestId('selectAllAlertsButton'));
+            await userEvent.click(screen.getByTestId('selectAllAlertsButton'));
 
             expect(
               ((await screen.findAllByTestId('bulk-actions-row-cell')) as HTMLInputElement[])[0]
@@ -755,10 +755,10 @@ describe('AlertsDataGrid bulk actions', () => {
 
             render(<TestComponent {...props} />);
 
-            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            userEvent.click(screen.getByText('Fake Bulk Action'));
+            await userEvent.click(screen.getByText('Fake Bulk Action'));
             expect(mockOnClick.mock.calls[0][0]).toEqual([
               {
                 _id: 'alert0',
@@ -841,7 +841,7 @@ describe('AlertsDataGrid bulk actions', () => {
               'bulk-actions-row-cell'
             ) as HTMLInputElement[];
 
-            userEvent.click(screen.getByTestId('bulk-actions-header'));
+            await userEvent.click(screen.getByTestId('bulk-actions-header'));
 
             await waitFor(async () => {
               bulkActionsCells = screen.getAllByTestId(
@@ -852,10 +852,10 @@ describe('AlertsDataGrid bulk actions', () => {
               expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
             });
 
-            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            userEvent.click(screen.getByTestId('fake-bulk-action-loading'));
+            await userEvent.click(screen.getByTestId('fake-bulk-action-loading'));
 
             await waitFor(() => {
               expect(screen.queryAllByTestId('row-loader')).toHaveLength(2);
@@ -877,7 +877,7 @@ describe('AlertsDataGrid bulk actions', () => {
               'bulk-actions-row-cell'
             ) as HTMLInputElement[];
 
-            userEvent.click(screen.getByTestId('bulk-actions-header'));
+            await userEvent.click(screen.getByTestId('bulk-actions-header'));
 
             await waitFor(async () => {
               bulkActionsCells = screen.getAllByTestId(
@@ -888,12 +888,12 @@ describe('AlertsDataGrid bulk actions', () => {
               expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeDefined();
             });
 
-            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
             mockRefresh.mockClear();
             expect(mockRefresh.mock.calls.length).toBe(0);
-            userEvent.click(screen.getByTestId('fake-bulk-action-refresh'));
+            await userEvent.click(screen.getByTestId('fake-bulk-action-refresh'));
             expect(mockRefresh.mock.calls.length).toBeGreaterThan(0);
           });
 
@@ -913,14 +913,14 @@ describe('AlertsDataGrid bulk actions', () => {
               'bulk-actions-row-cell'
             ) as HTMLInputElement[];
 
-            userEvent.click(screen.getByTestId('bulk-actions-header'));
+            await userEvent.click(screen.getByTestId('bulk-actions-header'));
 
             expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeVisible();
 
-            userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+            await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
             await waitForEuiPopoverOpen();
 
-            userEvent.click(screen.getByTestId('fake-bulk-action-clear'));
+            await userEvent.click(screen.getByTestId('fake-bulk-action-clear'));
 
             // clear Selection happens after 150ms
             await waitFor(() => {

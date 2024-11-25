@@ -10,7 +10,7 @@
 import { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
 import { AlertsField, RowSelectionState } from '../types';
 import { AdditionalContext, AlertsDataGridProps, RenderContext } from '../types';
-import { getCasesMapMock } from '../mocks/cases.mock';
+import { createCasesServiceMock, getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMock } from '../mocks/maintenance_windows.mock';
 import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
@@ -26,6 +26,7 @@ import {
 import { FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID } from '../constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
 export type BaseAlertsDataGridProps = AlertsDataGridProps;
 export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'renderContext'>> & {
@@ -194,7 +195,6 @@ export const mockRenderContext = {
   mutedAlerts: {},
   pageIndex: 0,
   pageSize: 1,
-  fieldFormats: mockFieldFormatsRegistry,
   openAlertInFlyout: jest.fn(),
   bulkActionsStore: [
     mockBulkActionsState,
@@ -219,7 +219,10 @@ export const mockRenderContext = {
     </EuiFlexItem>
   ),
   http: httpServiceMock.createStartContract(),
+  fieldFormats: mockFieldFormatsRegistry,
   notifications: notificationServiceMock.createStartContract(),
+  application: applicationServiceMock.createStartContract(),
+  casesService: createCasesServiceMock(),
 } as RenderContext<AdditionalContext>;
 
 export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
@@ -254,5 +257,5 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   fieldsBrowserOptions: {
     createFieldButton: () => <EuiButton data-test-subj={FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID} />,
   },
-  casesConfiguration: { featureId: 'test-feature-id', owner: ['test-owner'] },
+  casesConfiguration: { featureId: 'test-feature-id', owner: ['cases'] },
 };

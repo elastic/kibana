@@ -13,11 +13,13 @@ import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { FlyoutSectionRenderer } from '../types';
+import { AdditionalContext, FlyoutSectionProps } from '../types';
 import { getAlertFormatters } from './render_cell_value';
 import { defaultAlertsTableColumns } from '../configuration';
 
-export const DefaultAlertsFlyoutHeader: FlyoutSectionRenderer = ({ alert }) => {
+export const DefaultAlertsFlyoutHeader = <AC extends AdditionalContext>({
+  alert,
+}: FlyoutSectionProps<AC>) => {
   return (
     <EuiTitle size="s">
       <h3>{alert[ALERT_RULE_NAME] ?? 'Unknown'}</h3>
@@ -27,12 +29,12 @@ export const DefaultAlertsFlyoutHeader: FlyoutSectionRenderer = ({ alert }) => {
 
 type TabId = 'overview' | 'table';
 
-export const DefaultAlertsFlyoutBody: FlyoutSectionRenderer = ({
+export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>({
   alert,
   fieldFormats,
   columns,
   http,
-}) => {
+}: FlyoutSectionProps<AC>) => {
   const formatColumnValue = useMemo(
     () => getAlertFormatters(fieldFormats, http),
     [fieldFormats, http]

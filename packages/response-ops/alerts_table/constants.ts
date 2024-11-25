@@ -123,6 +123,10 @@ export const queryKeys = {
   ],
 };
 
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
+export const INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window` as const;
+export const MAINTENANCE_WINDOW_DATE_FORMAT = 'MM/DD/YY hh:mm A';
 export const CELL_ACTIONS_POPOVER_TEST_ID = 'euiDataGridExpansionPopover';
 export const CELL_ACTIONS_EXPAND_TEST_ID = 'euiDataGridCellExpandButton';
 export const FIELD_BROWSER_TEST_ID = 'fields-browser-container';
