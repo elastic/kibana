@@ -192,7 +192,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           <>
             {selectedField && (
               <NameInput
-                value={selectedField.label}
+                value={selectedField.label || ''}
                 defaultValue={''}
                 onChange={(value) => {
                   updateLayer(updateColumnLabel({ layer: state.layers[layerId], columnId, value }));

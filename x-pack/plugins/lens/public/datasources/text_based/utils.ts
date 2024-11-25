@@ -52,7 +52,12 @@ export const getAllColumns = (
   });
   const allCols = [
     ...columns,
-    ...columnsFromQuery.map((c) => ({ columnId: c.id, fieldName: c.id, meta: c.meta })),
+    ...columnsFromQuery.map((c) => ({
+      columnId: c.id,
+      fieldName: c.id,
+      label: c.name,
+      meta: c.meta,
+    })),
   ];
   const uniqueIds: string[] = [];
 

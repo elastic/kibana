@@ -180,13 +180,13 @@ export const isColumn = (
 
 export function isColumnFormatted(
   column: GenericIndexPatternColumn | TextBasedLayerColumn
-): column is FormattedIndexPatternColumn {
+): column is FormattedIndexPatternColumn & { meta?: TextBasedLayerColumn['meta'] } {
   return (
     Boolean(
       'params' in column &&
         (column as FormattedIndexPatternColumn).params &&
         'format' in (column as FormattedIndexPatternColumn).params!
-    ) || Boolean('meta' in column && column.meta && 'params' in column.meta && column.meta.params)
+    ) || Boolean('meta' in column && (column as TextBasedLayerColumn).meta?.params)
   );
 }
 

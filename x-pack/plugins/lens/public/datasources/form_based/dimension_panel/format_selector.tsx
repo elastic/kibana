@@ -173,7 +173,7 @@ export function FormatSelector(props: FormatSelectorProps) {
   const { euiTheme } = useEuiTheme();
   const { selectedColumn, onChange, docLinks } = props;
   const currentFormat = isColumnFormatted(selectedColumn)
-    ? selectedColumn.params?.format || selectedColumn.meta?.params
+    ? selectedColumn.params?.format || (selectedColumn.meta?.params as unknown as ValueFormatConfig)
     : undefined;
 
   const [decimals, setDecimals] = useState(currentFormat?.params?.decimals ?? 2);
