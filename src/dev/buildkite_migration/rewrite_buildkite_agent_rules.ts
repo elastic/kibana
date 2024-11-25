@@ -210,7 +210,7 @@ function getFullAgentTargetingRule(queue: string): GobldGCPConfig {
 
   // Mapping based on expected fields in https://github.com/elastic/ci/blob/0df8430357109a19957dcfb1d867db9cfdd27937/docs/gobld/providers.mdx#L96
   return removeNullish({
-    image: 'family/kibana-ubuntu-2004',
+    image: 'kibana-ubuntu-2004-1732561171',
     imageProject: 'elastic-images-qa',
     provider: 'gcp',
     assignExternalIP: agent.disableExternalIp === true ? false : undefined,

@@ -3,7 +3,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2004
+      image: kibana-ubuntu-2004-1732561171
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
@@ -15,7 +15,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
-      image: family/kibana-ubuntu-2004
+      image: kibana-ubuntu-2004-1732561171
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-8
@@ -31,7 +31,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: kibana-ubuntu-2004-1732561171
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
@@ -48,7 +48,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
     label: 'Profiling Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: kibana-ubuntu-2004-1732561171
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
@@ -65,7 +65,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: kibana-ubuntu-2004-1732561171
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
@@ -84,7 +84,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/inventory_cypress.sh
     label: 'Inventory Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: kibana-ubuntu-2004-1732561171
       imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
