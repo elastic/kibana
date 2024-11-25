@@ -73,6 +73,11 @@ components:
         prebuilt_rule_id:
           description: The Elastic prebuilt rule id matched.
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        integration_ids:
+          type: array
+          items:
+            type: string
+          description: The Elastic integration IDs related to the rule.
         id:
           description: The Elastic rule id installed as a result.
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
