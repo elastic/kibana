@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
+
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import type { ObservableTypesProps } from '.';
@@ -30,5 +32,6 @@ describe('ObservableTypes', () => {
 
   it('renders correctly', async () => {
     appMock.render(<ObservableTypes {...props} />);
+    expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
   });
 });
