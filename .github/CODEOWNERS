@@ -1358,6 +1358,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
 
 # obs-ux-logs-team
+/x-pack/test/functional/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/config.* @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/landing_page.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/navigation.ts @elastic/obs-ux-logs-team
@@ -1779,6 +1781,15 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Kibana Platform Security
 # security
+/x-pack/test/functional/es_archives/security @elastic/kibana-security
+/x-pack/test/functional/fixtures/kbn_archiver/spaces @elastic/kibana-security
+/x-pack/test/functional/fixtures/kbn_archiver/security @elastic/kibana-security
+/x-pack/test/ftr_apis/common/lib @elastic/kibana-security
+/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/test/api_integration/apis/cloud @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/198444
+/test/plugin_functional/snapshots/baseline/hardening/prototype.json @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
+/test/functional/page_objects/login_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
 /x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
@@ -2341,7 +2352,8 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
 
 # Security Defend Workflows - OSQuery Ownership
-x-pack/plugins/osquery @elastic/security-defend-workflows
+/x-pack/test/osquery_cypress @elastic/security-defend-workflows
+/x-pack/plugins/osquery @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
