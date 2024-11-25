@@ -28,6 +28,14 @@ const setup = (props: any = { onUpdate() {} }, appDependencies?: any) => {
   return testBed;
 };
 
+const getContext = (sourceFieldEnabled: boolean = true, canUseSyntheticSource: boolean = true) =>
+  ({
+    config: {
+      enableMappingsSourceFieldSection: sourceFieldEnabled,
+    },
+    canUseSyntheticSource,
+  } as unknown as AppDependencies);
+
 describe('Mappings editor: configuration form', () => {
   let testBed: TestBed<TestSubjects>;
 
@@ -49,14 +57,8 @@ describe('Mappings editor: configuration form', () => {
 
   describe('_source field', () => {
     it('renders the _source field when it is enabled', async () => {
-      const ctx = {
-        config: {
-          enableMappingsSourceFieldSection: true,
-        },
-      } as unknown as AppDependencies;
-
       await act(async () => {
-        testBed = setup({ esNodesPlugins: [] }, ctx);
+        testBed = setup({ esNodesPlugins: [] }, getContext());
       });
       testBed.component.update();
       const { exists } = testBed;
@@ -65,19 +67,37 @@ describe('Mappings editor: configuration form', () => {
     });
 
     it("doesn't render the _source field when it is disabled", async () => {
-      const ctx = {
-        config: {
-          enableMappingsSourceFieldSection: false,
-        },
-      } as unknown as AppDependencies;
-
       await act(async () => {
-        testBed = setup({ esNodesPlugins: [] }, ctx);
+        testBed = setup({ esNodesPlugins: [] }, getContext(false));
       });
       testBed.component.update();
       const { exists } = testBed;
 
       expect(exists('sourceField')).toBe(false);
+    });
+
+    it('has synthetic option if `canUseSyntheticSource` is set to true', async () => {
+      await act(async () => {
+        testBed = setup({ esNodesPlugins: [] }, getContext(true, true));
+      });
+      testBed.component.update();
+      const { exists, find } = testBed;
+
+      // Clicking on the field to open the options dropdown
+      find('sourceValueField').simulate('click');
+      expect(exists('syntheticSourceFieldOption')).toBe(true);
+    });
+
+    it("doesn't have synthetic option if `canUseSyntheticSource` is set to false", async () => {
+      await act(async () => {
+        testBed = setup({ esNodesPlugins: [] }, getContext(true, false));
+      });
+      testBed.component.update();
+      const { exists, find } = testBed;
+
+      // Clicking on the field to open the options dropdown
+      find('sourceValueField').simulate('click');
+      expect(exists('syntheticSourceFieldOption')).toBe(false);
     });
   });
 });
