@@ -11,15 +11,15 @@ describe('space aware models', () => {
   it('should have the same mappings for space and non-space aware agent policies', () => {
     const soTypes = getSavedObjectTypes();
 
-    expect(Object.keys(soTypes['ingest-agent-policies'].mappings).sort()).toEqual(
-      Object.keys(soTypes['fleet-agent-policies'].mappings).sort()
+    expect(soTypes['ingest-agent-policies'].mappings).toEqual(
+      soTypes['fleet-agent-policies'].mappings
     );
   });
   it('should have the same mappings for space and non-space aware package policies', () => {
     const soTypes = getSavedObjectTypes();
 
-    expect(Object.keys(soTypes['ingest-package-policies'].mappings).sort()).toEqual(
-      Object.keys(soTypes['fleet-package-policies'].mappings).sort()
+    expect(soTypes['ingest-package-policies'].mappings).toEqual(
+      soTypes['fleet-package-policies'].mappings
     );
   });
 });
