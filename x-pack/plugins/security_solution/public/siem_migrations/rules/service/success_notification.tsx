@@ -16,16 +16,15 @@ import {
 import type { ToastInput } from '@kbn/core-notifications-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { RuleMigrationTaskStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
-
-type RuleMigrationStats = RuleMigrationTaskStats & { migration_id: string };
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { RuleMigrationStats } from '../types';
 
 export const getSuccessToast = (migration: RuleMigrationStats, core: CoreStart): ToastInput => ({
   color: 'success',
   iconType: 'check',
+  toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
   title: i18n.translate('xpack.securitySolution.siemMigrations.rulesService.polling.successTitle', {
-    defaultMessage: 'Rule migration completed.',
+    defaultMessage: 'Rules translation complete.',
   }),
   text: toMountPoint(
     <NavigationProvider core={core}>
@@ -36,8 +35,7 @@ export const getSuccessToast = (migration: RuleMigrationStats, core: CoreStart):
 });
 
 const SuccessToastContent: React.FC<{ migration: RuleMigrationStats }> = ({ migration }) => {
-  const { migration_id: path, rules } = migration;
-  const navigation = { deepLinkId: SecurityPageName.siemMigrationsRules, path };
+  const navigation = { deepLinkId: SecurityPageName.siemMigrationsRules, path: migration.id };
 
   const { navigateTo, getAppUrl } = useNavigation();
   const onClick: React.MouseEventHandler = (ev) => {
@@ -47,22 +45,22 @@ const SuccessToastContent: React.FC<{ migration: RuleMigrationStats }> = ({ migr
   const url = getAppUrl(navigation);
 
   return (
-    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+    <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="s">
       <EuiFlexItem>
         <FormattedMessage
           id="xpack.securitySolution.siemMigrations.rulesService.polling.successText"
-          defaultMessage="A migration of {totalRules} rules has finished."
-          values={{ totalRules: rules.total }}
+          defaultMessage="SIEM rules migration #{number} has finished translating. Results have been added to a dedicated page."
+          values={{ number: migration.number }}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-        <EuiButtonEmpty size="xs" flush="left" onClick={onClick} href={url}>
+        <EuiButton onClick={onClick} href={url} color="success">
           {i18n.translate(
             'xpack.securitySolution.siemMigrations.rulesService.polling.successLinkText',
-            { defaultMessage: 'Check results' }
+            { defaultMessage: 'Go to translated rules' }
           )}
-        </EuiButtonEmpty>
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
