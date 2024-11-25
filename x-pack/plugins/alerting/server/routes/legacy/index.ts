@@ -42,5 +42,5 @@ export function defineLegacyRoutes(opts: RouteOptions) {
   unmuteAllAlertRoute(router, licenseState, usageCounter, isServerless);
   muteAlertInstanceRoute(router, licenseState, usageCounter, isServerless);
   unmuteAlertInstanceRoute(router, licenseState, usageCounter, isServerless);
-  healthRoute(router, licenseState, encryptedSavedObjects, usageCounter, isServerless);
+  healthRoute(router, licenseState, encryptedSavedObjects, docLinks, usageCounter, isServerless);
 }
