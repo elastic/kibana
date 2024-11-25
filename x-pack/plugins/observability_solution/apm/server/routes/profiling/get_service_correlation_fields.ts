@@ -6,12 +6,25 @@
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import { HOST_HOSTNAME, HOST_NAME, SERVICE_NAME } from '../../../common/es_fields/apm';
+import {
+  CONTAINER_ID,
+  HOST_HOSTNAME,
+  HOST_NAME,
+  SERVICE_NAME,
+} from '../../../common/es_fields/apm';
 import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getServiceHostNames({
+const getBucketKeysAsString = (
+  buckets?: Array<{
+    doc_count: number;
+    key: string | number;
+    key_as_string?: string | undefined;
+  }>
+) => buckets?.map((bucket) => bucket.key as string) || [];
+
+export async function getServiceCorrelationFields({
   apmEventClient,
   serviceName,
   start,
@@ -57,15 +70,24 @@ export async function getServiceHostNames({
             size: 500,
           },
         },
+        containerIds: {
+          terms: {
+            field: CONTAINER_ID,
+            size: 500,
+          },
+        },
       },
     },
   });
 
   const allHostNames = [
-    ...(response.aggregations?.hostHostNames.buckets.map((bucket) => bucket.key as string) || []),
-    ...(response.aggregations?.hostNames.buckets.map((bucket) => bucket.key as string) || []),
+    ...getBucketKeysAsString(response.aggregations?.hostHostNames.buckets),
+    ...getBucketKeysAsString(response.aggregations?.hostNames.buckets),
   ];
   const hostNames = new Set<string>(allHostNames);
 
-  return Array.from(hostNames);
+  return {
+    hostNames: Array.from(hostNames),
+    containerIds: getBucketKeysAsString(response.aggregations?.containerIds.buckets),
+  };
 }
