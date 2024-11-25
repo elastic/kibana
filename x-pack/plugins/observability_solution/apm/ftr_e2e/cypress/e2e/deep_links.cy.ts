@@ -33,6 +33,8 @@ describe('Applications deep links', () => {
     cy.contains('Applications / Service groups');
     cy.contains('Applications / Traces');
     cy.contains('Applications / Service Map');
+    // scroll to the bottom because results are not rendering otherwise
+    scrollToBottomResults();
     cy.contains('Applications / Dependencies');
     cy.contains('Applications / Settings');
 
@@ -62,20 +64,29 @@ describe('Applications deep links', () => {
 
     cy.waitUntilPageContentIsLoaded();
     cy.getByTestSubj('nav-search-input').should('be.visible').type(keyword, { force: true });
+    scrollToBottomResults();
     // navigates to service maps
     cy.contains('Applications / Service Map').click({ force: true });
     cy.url().should('include', '/apm/service-map');
 
     cy.waitUntilPageContentIsLoaded();
     cy.getByTestSubj('nav-search-input').should('be.visible').type(keyword, { force: true });
+    // scroll to the bottom because results are not rendering otherwise
+    scrollToBottomResults();
     // navigates to dependencies page
     cy.contains('Applications / Dependencies').click({ force: true });
     cy.url().should('include', '/apm/dependencies/inventory');
 
     cy.waitUntilPageContentIsLoaded();
     cy.getByTestSubj('nav-search-input').should('be.visible').type(keyword, { force: true });
+    // scroll to the bottom because results are not rendering otherwise
+    scrollToBottomResults();
     // navigates to settings page
     cy.contains('Applications / Settings').click({ force: true });
     cy.url().should('include', '/apm/settings/general-settings');
   }
 });
+
+function scrollToBottomResults() {
+  cy.getByTestSubj('euiSelectableList').find('div > div').scrollTo('bottom');
+}
