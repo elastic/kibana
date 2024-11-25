@@ -45,6 +45,7 @@ export const aiopsLogRateAnalysisBase = schema.object({
   end: schema.number(),
   searchQuery: schema.string(),
   timeFieldName: schema.string(),
+  // when v2 is removed, includeFrozen should not carry over to v3+
   includeFrozen: schema.maybe(schema.boolean()),
   grouping: schema.maybe(schema.boolean()),
   /** Analysis selection time ranges */
