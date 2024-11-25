@@ -18,7 +18,6 @@ export type {
   EndpointOf,
   ReturnOf,
   RouteRepositoryClient,
-  RouteState,
   ClientRequestParamsOf,
   DecodedRequestParamsOf,
   ServerRouteRepository,
