@@ -29,7 +29,7 @@ export type CreateRuleMigrationInput = Omit<
 >;
 export type UpdateRuleMigrationInput = { elastic_rule?: Partial<ElasticRule> } & Pick<
   RuleMigration,
-  '@timestamp' | 'id' | 'translation_result' | 'comments'
+  'id' | 'translation_result' | 'comments'
 >;
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
@@ -229,7 +229,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         throw error;
       });
 
-    // const { pending, processing, completed, lastUpdatedAt, createdAt, failed }
     const bucket = result.aggregations ?? {};
     return {
       id: migrationId,

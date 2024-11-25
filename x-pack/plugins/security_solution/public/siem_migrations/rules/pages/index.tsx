@@ -21,7 +21,7 @@ import { useRulePreviewFlyout } from '../hooks/use_rule_preview_flyout';
 import { NoMigrations } from '../components/no_migrations';
 import { useLatestStats } from '../hooks/use_latest_stats';
 
-const RulesPage = React.memo(() => {
+export const RulesPage = React.memo(() => {
   const { data: ruleMigrationsStatsAll, isLoading: isLoadingMigrationsStats } = useLatestStats();
 
   const migrationsIds = useMemo(() => {
