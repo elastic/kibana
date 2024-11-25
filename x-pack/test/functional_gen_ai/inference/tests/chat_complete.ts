@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, toArray } from 'rxjs';
 import expect from '@kbn/expect';
 import { supertestToObservable } from '@kbn/sse-utils-server';
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -18,26 +18,91 @@ export const chatCompleteSuite = (
   const supertest = getService('supertest');
 
   describe('chatComplete API', () => {
-    it('returns a chat completion message for a simple prompt', async () => {
-      const response = supertest
-        .post(`/internal/inference/chat_complete/stream`)
-        .set('kbn-xsrf', 'kibana')
-        .send({
-          connectorId,
-          system: 'Please answer the user question',
-          messages: [{ role: 'user', content: '2+2 ?' }],
-        })
-        .expect(200);
+    describe('streaming disabled', () => {
+      it('returns a chat completion message for a simple prompt', async () => {
+        const response = await supertest
+          .post(`/internal/inference/chat_complete`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            connectorId,
+            system: 'Please answer the user question',
+            messages: [{ role: 'user', content: '2+2 ?' }],
+          })
+          .expect(200);
 
-      const observable = supertestToObservable(response);
+        const message = response.body;
 
-      const message = await lastValueFrom(observable);
+        expect(message.toolCalls.length).to.eql(0);
+        expect(message.content).to.contain('4');
+      });
 
-      expect({
-        ...message,
-        content: '',
-      }).to.eql({ type: 'chatCompletionMessage', content: '', toolCalls: [] });
-      expect(message.content).to.contain('4');
+      it('returns token counts', async () => {
+        const response = await supertest
+          .post(`/internal/inference/chat_complete`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            connectorId,
+            system: 'Please answer the user question',
+            messages: [{ role: 'user', content: '2+2 ?' }],
+          })
+          .expect(200);
+
+        const { tokens } = response.body;
+
+        expect(tokens.prompt).to.be.greaterThan(0);
+        expect(tokens.completion).to.be.greaterThan(0);
+        expect(tokens.total).eql(tokens.prompt + tokens.completion);
+      });
+    });
+
+    describe('streaming enabled', () => {
+      it('returns a chat completion message for a simple prompt', async () => {
+        const response = supertest
+          .post(`/internal/inference/chat_complete/stream`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            connectorId,
+            system: 'Please answer the user question',
+            messages: [{ role: 'user', content: '2+2 ?' }],
+          })
+          .expect(200);
+
+        const observable = supertestToObservable(response);
+
+        const message = await lastValueFrom(observable);
+
+        expect({
+          ...message,
+          content: '',
+        }).to.eql({ type: 'chatCompletionMessage', content: '', toolCalls: [] });
+        expect(message.content).to.contain('4');
+      });
+
+      it('returns a token count event', async () => {
+        const response = supertest
+          .post(`/internal/inference/chat_complete/stream`)
+          .set('kbn-xsrf', 'kibana')
+          .send({
+            connectorId,
+            system: 'Please answer the user question',
+            messages: [{ role: 'user', content: '2+2 ?' }],
+          })
+          .expect(200);
+
+        const observable = supertestToObservable(response);
+
+        const events = await lastValueFrom(observable.pipe(toArray()));
+        const tokenEvent = events[events.length - 2];
+
+        console.log(JSON.stringify(events));
+
+        expect(tokenEvent.type).to.eql('chatCompletionTokenCount');
+        expect(tokenEvent.tokens.prompt).to.be.greaterThan(0);
+        expect(tokenEvent.tokens.completion).to.be.greaterThan(0);
+        expect(tokenEvent.tokens.total).to.be(
+          tokenEvent.tokens.prompt + tokenEvent.tokens.completion
+        );
+      });
     });
   });
 };
