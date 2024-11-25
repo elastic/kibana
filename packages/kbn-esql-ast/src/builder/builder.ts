@@ -30,6 +30,8 @@ import {
   ESQLOrderExpression,
   ESQLSource,
   ESQLParamLiteral,
+  ESQLFunction,
+  ESQLAstItem,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -171,6 +173,32 @@ export namespace Builder {
         name: '',
       };
     };
+
+    export namespace func {
+      export const node = (
+        template: AstNodeTemplate<ESQLFunction>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        return {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'function',
+        };
+      };
+
+      export const binary = (
+        name: string,
+        args: [left: ESQLAstItem, right: ESQLAstItem],
+        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLFunction => {
+        const operator = Builder.identifier({ name });
+        return Builder.expression.func.node(
+          { ...template, name, operator, args, subtype: 'binary-expression' },
+          fromParser
+        );
+      };
+    }
 
     export namespace literal {
       /**
