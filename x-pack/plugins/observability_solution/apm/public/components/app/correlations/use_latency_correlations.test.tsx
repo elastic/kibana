@@ -262,7 +262,9 @@ describe('useLatencyCorrelations', () => {
       });
 
       try {
-        jest.advanceTimersByTime(150);
+        act(() => {
+          jest.advanceTimersByTime(150);
+        });
         await waitFor(() =>
           expect(result.current.progress).toEqual({
             error: 'Something went wrong',

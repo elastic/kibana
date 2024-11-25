@@ -22,15 +22,6 @@ function wrapper({ children }: React.PropsWithChildren) {
 }
 
 describe('useFetcher', () => {
-  // beforeAll(() => {
-
-  //   jest.useFakeTimers();
-  // });
-
-  // afterAll(() => {
-  //   jest.useRealTimers();
-  // });
-
   describe('when resolving after 500ms', () => {
     let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
 
