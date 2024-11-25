@@ -33,7 +33,10 @@ export default function ({ getService }: FtrProviderContext) {
       await svlDatastreamsHelpers.deleteDataStream(testDataStreamName);
     });
 
-    it('returns created data streams', async () => {
+    // skipped because we filter out data streams with 0 storage size,
+    // and metering api does not pick up indexed data here
+    // TODO: route should potentially not depend solely on metering API
+    it.skip('returns created data streams', async () => {
       const res = await supertestAdminWithCookieCredentials
         .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
         .set('elastic-api-version', '1');
