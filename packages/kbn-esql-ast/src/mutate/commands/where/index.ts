@@ -101,18 +101,18 @@ const matchNodeAgainstField = (node: ESQLProperNode, field: ESQLAstField): boole
 export const byField = (
   ast: ESQLAstQueryExpression,
   template: ESQLAstFieldTemplate
-): ESQLCommand | undefined => {
+): [command: ESQLCommand, field: ESQLProperNode] | undefined => {
   const field = fieldTemplateToField(template);
 
   for (const command of list(ast)) {
-    let found = false;
+    let found: ESQLProperNode | undefined;
 
     const matchNode = (node: ESQLProperNode) => {
       if (found) {
         return;
       }
       if (matchNodeAgainstField(node, field)) {
-        found = true;
+        found = node;
       }
     };
 
@@ -123,7 +123,7 @@ export const byField = (
     });
 
     if (found) {
-      return command;
+      return [command, found];
     }
   }
 

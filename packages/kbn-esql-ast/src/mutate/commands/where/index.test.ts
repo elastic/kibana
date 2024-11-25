@@ -94,10 +94,10 @@ describe('commands.where', () => {
       const src = 'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE 2 == b';
       const query = EsqlQuery.fromSrc(src);
 
-      const node1 = commands.where.byField(query.ast, 'b');
-      const node2 = commands.where.byField(query.ast, 'a');
+      const [command1] = commands.where.byField(query.ast, 'b')!;
+      const [command2] = commands.where.byField(query.ast, 'a')!;
 
-      expect(node1).toMatchObject({
+      expect(command1).toMatchObject({
         type: 'command',
         name: 'where',
         args: [
@@ -114,7 +114,7 @@ describe('commands.where', () => {
           },
         ],
       });
-      expect(node2).toMatchObject({
+      expect(command2).toMatchObject({
         type: 'command',
         name: 'where',
         args: [
@@ -137,9 +137,9 @@ describe('commands.where', () => {
       const src = 'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE 2 == a.b.c';
       const query = EsqlQuery.fromSrc(src);
 
-      const node = commands.where.byField(query.ast, ['a', 'b', 'c']);
+      const [command] = commands.where.byField(query.ast, ['a', 'b', 'c'])!;
 
-      expect(node).toMatchObject({
+      expect(command).toMatchObject({
         type: 'command',
         name: 'where',
         args: [
@@ -162,8 +162,8 @@ describe('commands.where', () => {
       const src = 'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE ?param == 123';
       const query = EsqlQuery.fromSrc(src);
 
-      const node1 = commands.where.byField(query.ast, ['?param']);
-      const node2 = commands.where.byField(query.ast, '?param');
+      const [command1] = commands.where.byField(query.ast, ['?param'])!;
+      const [command2] = commands.where.byField(query.ast, '?param')!;
 
       const expected = {
         type: 'command',
@@ -183,15 +183,15 @@ describe('commands.where', () => {
         ],
       };
 
-      expect(node1).toMatchObject(expected);
-      expect(node2).toMatchObject(expected);
+      expect(command1).toMatchObject(expected);
+      expect(command2).toMatchObject(expected);
     });
 
     it('can find command by nested param', () => {
       const src = 'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE a.b.?param == 123';
       const query = EsqlQuery.fromSrc(src);
 
-      const node = commands.where.byField(query.ast, ['a', 'b', '?param']);
+      const [command] = commands.where.byField(query.ast, ['a', 'b', '?param'])!;
 
       const expected = {
         type: 'command',
@@ -211,14 +211,14 @@ describe('commands.where', () => {
         ],
       };
 
-      expect(node).toMatchObject(expected);
+      expect(command).toMatchObject(expected);
     });
 
     it('can find command when field is used in function', () => {
       const src = 'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE 123 == fn(a.b.c)';
       const query = EsqlQuery.fromSrc(src);
 
-      const node = commands.where.byField(query.ast, ['a', 'b', 'c']);
+      const [command] = commands.where.byField(query.ast, ['a', 'b', 'c'])!;
 
       const expected = {
         type: 'command',
@@ -238,7 +238,7 @@ describe('commands.where', () => {
         ],
       };
 
-      expect(node).toMatchObject(expected);
+      expect(command).toMatchObject(expected);
     });
 
     it('can find command when various decorations are applied to the field', () => {
@@ -246,8 +246,8 @@ describe('commands.where', () => {
         'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE 123 == add(1 + fn(NOT -(a.b.c::ip)::INTEGER /* comment */))';
       const query = EsqlQuery.fromSrc(src);
 
-      const node1 = commands.where.byField(query.ast, ['a', 'b', 'c']);
-      const node2 = commands.where.byField(query.ast, 'a.b.c');
+      const [command1] = commands.where.byField(query.ast, ['a', 'b', 'c'])!;
+      const command2 = commands.where.byField(query.ast, 'a.b.c');
 
       const expected = {
         type: 'command',
@@ -267,8 +267,8 @@ describe('commands.where', () => {
         ],
       };
 
-      expect(node1).toMatchObject(expected);
-      expect(node2).toBe(undefined);
+      expect(command1).toMatchObject(expected);
+      expect(command2).toBe(undefined);
     });
 
     it('can construct field template using Builder', () => {
@@ -276,7 +276,7 @@ describe('commands.where', () => {
         'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE 123 == add(1 + fn(NOT -(a.b.c::ip)::INTEGER /* comment */))';
       const query = EsqlQuery.fromSrc(src);
 
-      const node = commands.where.byField(
+      const [command] = commands.where.byField(
         query.ast,
         Builder.expression.column({
           args: [
@@ -285,7 +285,7 @@ describe('commands.where', () => {
             Builder.identifier({ name: 'c' }),
           ],
         })
-      );
+      )!;
 
       const expected = {
         type: 'command',
@@ -305,7 +305,29 @@ describe('commands.where', () => {
         ],
       };
 
-      expect(node).toMatchObject(expected);
+      expect(command).toMatchObject(expected);
+    });
+
+    it('returns the found column node', () => {
+      const src =
+        'FROM index | LIMIT 1 | WHERE 1 == a | LIMIT 2 | WHERE 123 == add(1 + fn(NOT -(a.b.c::ip)::INTEGER /* comment */))';
+      const query = EsqlQuery.fromSrc(src);
+
+      const [_, column] = commands.where.byField(
+        query.ast,
+        Builder.expression.column({
+          args: [
+            Builder.identifier({ name: 'a' }),
+            Builder.identifier({ name: 'b' }),
+            Builder.identifier({ name: 'c' }),
+          ],
+        })
+      )!;
+
+      expect(column).toMatchObject({
+        type: 'column',
+        name: 'a.b.c',
+      });
     });
   });
 });
