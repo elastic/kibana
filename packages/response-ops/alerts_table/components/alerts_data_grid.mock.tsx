@@ -27,6 +27,7 @@ import { FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID } from '../constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 export type BaseAlertsDataGridProps = AlertsDataGridProps;
 export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'renderContext'>> & {
@@ -218,11 +219,14 @@ export const mockRenderContext = {
       />
     </EuiFlexItem>
   ),
-  http: httpServiceMock.createStartContract(),
-  fieldFormats: mockFieldFormatsRegistry,
-  notifications: notificationServiceMock.createStartContract(),
-  application: applicationServiceMock.createStartContract(),
-  casesService: createCasesServiceMock(),
+  services: {
+    http: httpServiceMock.createStartContract(),
+    fieldFormats: mockFieldFormatsRegistry,
+    notifications: notificationServiceMock.createStartContract(),
+    application: applicationServiceMock.createStartContract(),
+    casesService: createCasesServiceMock(),
+    settings: settingsServiceMock.createStartContract(),
+  },
 } as RenderContext<AdditionalContext>;
 
 export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {

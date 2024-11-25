@@ -183,6 +183,7 @@ const TriggersActionsUiExampleApp = ({
                     fieldFormats,
                     application,
                     licensing,
+                    settings,
                   }}
                 />
               </Page>

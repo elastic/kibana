@@ -14,6 +14,7 @@ import {
 import React, { lazy, memo, ReactNode, Suspense, useMemo } from 'react';
 import { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
 import { FieldBrowser, FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { AlertsCount } from '../components/alerts_count';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { BulkActionsPanelConfig, RowSelection } from '../types';
@@ -171,6 +172,7 @@ export const useGetToolbarVisibility = ({
   alertsQuerySnapshot,
   showInspectButton,
   toolbarVisibilityProp,
+  settings,
 }: {
   bulkActions: BulkActionsPanelConfig[];
   alertsCount: number;
@@ -189,6 +191,7 @@ export const useGetToolbarVisibility = ({
   alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
+  settings: SettingsStart;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibilityProps = useMemo(() => {
@@ -248,6 +251,7 @@ export const useGetToolbarVisibility = ({
                     setIsBulkActionsLoading={setIsBulkActionsLoading}
                     clearSelection={clearSelection}
                     refresh={refresh}
+                    settings={settings}
                   />
                 </Suspense>
               </>
@@ -258,18 +262,19 @@ export const useGetToolbarVisibility = ({
       };
     }
   }, [
-    alertsCount,
+    selectedRowsCount,
     bulkActions,
     defaultVisibility,
-    selectedRowsCount,
     toolbarVisibilityProp,
-    alerts,
-    clearSelection,
-    refresh,
-    setIsBulkActionsLoading,
     additionalToolbarControls,
     alertsQuerySnapshot,
     showInspectButton,
+    alertsCount,
+    alerts,
+    setIsBulkActionsLoading,
+    clearSelection,
+    refresh,
+    settings,
   ]);
 
   return options;

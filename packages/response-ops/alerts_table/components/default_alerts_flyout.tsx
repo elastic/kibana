@@ -31,9 +31,8 @@ type TabId = 'overview' | 'table';
 
 export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>({
   alert,
-  fieldFormats,
   columns,
-  http,
+  services: { http, fieldFormats },
 }: FlyoutSectionProps<AC>) => {
   const formatColumnValue = useMemo(
     () => getAlertFormatters(fieldFormats, http),
