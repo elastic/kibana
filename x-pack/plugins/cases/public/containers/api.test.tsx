@@ -1209,7 +1209,7 @@ describe('Cases API', () => {
         page: 0,
         perPage: 10,
       });
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/_similar/${mockCase.id}`, {
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${mockCase.id}/_similar`, {
         method: 'POST',
         body: JSON.stringify({
           page: 0,
