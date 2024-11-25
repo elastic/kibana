@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PaletteDefinition } from '@kbn/coloring';
-import { createColorPalette as createLegacyColorPalette } from '../..';
 import { buildPalettes } from './palettes';
-import { colorsServiceMock } from '../legacy_colors/mock';
 import { euiPaletteColorBlind, euiPaletteColorBlindBehindText } from '@elastic/eui';
 
 describe('palettes', () => {
-  const palettes: Record<string, PaletteDefinition> = buildPalettes(colorsServiceMock);
+  const palettes = buildPalettes();
+
   describe('default palette', () => {
     describe('syncColors: false', () => {
       it('should return different colors based on behind text flag', () => {
@@ -291,147 +289,6 @@ describe('palettes', () => {
       ]);
       expect(color1).toEqual(wholePalette[0]);
       expect(color2).toEqual(wholePalette[9]);
-    });
-  });
-
-  describe('legacy palette', () => {
-    const palette = palettes.kibana_palette;
-
-    beforeEach(() => {
-      (colorsServiceMock.mappedColors.mapKeys as jest.Mock).mockClear();
-      (colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock).mockReset();
-      (colorsServiceMock.mappedColors.get as jest.Mock).mockClear();
-    });
-
-    describe('syncColors: false', () => {
-      it('should not query legacy color service', () => {
-        palette.getCategoricalColor(
-          [
-            {
-              name: 'abc',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 10,
-            },
-          ],
-          {
-            syncColors: false,
-          }
-        );
-        expect(colorsServiceMock.mappedColors.mapKeys).not.toHaveBeenCalled();
-        expect(colorsServiceMock.mappedColors.get).not.toHaveBeenCalled();
-      });
-
-      it('should respect the advanced settings color mapping', () => {
-        const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
-        configColorGetter.mockImplementation(() => 'blue');
-        const result = palette.getCategoricalColor(
-          [
-            {
-              name: 'abc',
-              rankAtDepth: 2,
-              totalSeriesAtDepth: 10,
-            },
-            {
-              name: 'def',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 10,
-            },
-          ],
-          {
-            syncColors: false,
-          }
-        );
-        expect(result).toEqual('blue');
-        expect(configColorGetter).toHaveBeenCalledWith('abc');
-      });
-
-      it('should return a color from the legacy palette based on position of first series', () => {
-        const result = palette.getCategoricalColor(
-          [
-            {
-              name: 'abc',
-              rankAtDepth: 2,
-              totalSeriesAtDepth: 10,
-            },
-            {
-              name: 'def',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 10,
-            },
-          ],
-          {
-            syncColors: false,
-          }
-        );
-        expect(result).toEqual(createLegacyColorPalette(20)[2]);
-      });
-    });
-
-    describe('syncColors: true', () => {
-      it('should query legacy color service', () => {
-        palette.getCategoricalColor(
-          [
-            {
-              name: 'abc',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 10,
-            },
-          ],
-          {
-            syncColors: true,
-          }
-        );
-        expect(colorsServiceMock.mappedColors.mapKeys).toHaveBeenCalledWith(['abc']);
-        expect(colorsServiceMock.mappedColors.get).toHaveBeenCalledWith('abc');
-      });
-
-      it('should respect the advanced settings color mapping', () => {
-        const configColorGetter = colorsServiceMock.mappedColors.getColorFromConfig as jest.Mock;
-        configColorGetter.mockImplementation(() => 'blue');
-        const result = palette.getCategoricalColor(
-          [
-            {
-              name: 'abc',
-              rankAtDepth: 2,
-              totalSeriesAtDepth: 10,
-            },
-            {
-              name: 'def',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 10,
-            },
-          ],
-          {
-            syncColors: false,
-          }
-        );
-        expect(result).toEqual('blue');
-        expect(configColorGetter).toHaveBeenCalledWith('abc');
-      });
-
-      it('should always use root series', () => {
-        palette.getCategoricalColor(
-          [
-            {
-              name: 'abc',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 10,
-            },
-            {
-              name: 'def',
-              rankAtDepth: 0,
-              totalSeriesAtDepth: 10,
-            },
-          ],
-          {
-            syncColors: true,
-          }
-        );
-        expect(colorsServiceMock.mappedColors.mapKeys).toHaveBeenCalledTimes(1);
-        expect(colorsServiceMock.mappedColors.mapKeys).toHaveBeenCalledWith(['abc']);
-        expect(colorsServiceMock.mappedColors.get).toHaveBeenCalledTimes(1);
-        expect(colorsServiceMock.mappedColors.get).toHaveBeenCalledWith('abc');
-      });
     });
   });
 

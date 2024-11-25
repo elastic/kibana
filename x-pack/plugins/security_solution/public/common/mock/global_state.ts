@@ -349,7 +349,6 @@ export const mockGlobalState: State = {
         description: '',
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: '',
           timestampField: '@timestamp',
         },
         eventIdToNoteIds: { '1': ['1'] },

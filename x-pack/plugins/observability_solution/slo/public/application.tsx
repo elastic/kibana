@@ -13,7 +13,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -53,7 +52,7 @@ export const renderApp = ({
   experimentalFeatures,
   sloClient,
 }: Props) => {
-  const { element, history, theme$ } = appMountParameters;
+  const { element, history } = appMountParameters;
 
   // ensure all divs are .kbnAppWrappers
   element.classList.add(APP_WRAPPER_CLASS);
@@ -90,42 +89,40 @@ export const renderApp = ({
   ReactDOM.render(
     <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
-        <KibanaThemeProvider {...{ theme: { theme$ } }}>
-          <CloudProvider>
-            <KibanaContextProvider
-              services={{
-                ...core,
-                ...plugins,
-                storage: new Storage(localStorage),
+        <CloudProvider>
+          <KibanaContextProvider
+            services={{
+              ...core,
+              ...plugins,
+              storage: new Storage(localStorage),
+              isDev,
+              kibanaVersion,
+              isServerless,
+            }}
+          >
+            <PluginContext.Provider
+              value={{
                 isDev,
-                kibanaVersion,
                 isServerless,
+                appMountParameters,
+                ObservabilityPageTemplate,
+                observabilityRuleTypeRegistry,
+                experimentalFeatures,
+                sloClient,
               }}
             >
-              <PluginContext.Provider
-                value={{
-                  isDev,
-                  isServerless,
-                  appMountParameters,
-                  ObservabilityPageTemplate,
-                  observabilityRuleTypeRegistry,
-                  experimentalFeatures,
-                  sloClient,
-                }}
-              >
-                <Router history={history}>
-                  <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
-                    <PerformanceContextProvider>
-                      <QueryClientProvider client={queryClient}>
-                        <App />
-                      </QueryClientProvider>
-                    </PerformanceContextProvider>
-                  </RedirectAppLinks>
-                </Router>
-              </PluginContext.Provider>
-            </KibanaContextProvider>
-          </CloudProvider>
-        </KibanaThemeProvider>
+              <Router history={history}>
+                <RedirectAppLinks coreStart={core} data-test-subj="observabilityMainContainer">
+                  <PerformanceContextProvider>
+                    <QueryClientProvider client={queryClient}>
+                      <App />
+                    </QueryClientProvider>
+                  </PerformanceContextProvider>
+                </RedirectAppLinks>
+              </Router>
+            </PluginContext.Provider>
+          </KibanaContextProvider>
+        </CloudProvider>
       </ApplicationUsageTrackingProvider>
     </KibanaRenderContextProvider>,
     element
