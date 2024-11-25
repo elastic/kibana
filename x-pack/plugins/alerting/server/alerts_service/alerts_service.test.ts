@@ -149,7 +149,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
     body: {
       index_patterns: indexPatterns,
       composed_of: [
-        ...(useEcs ? ['.alerts-ecs-mappings'] : []),
+        ...(useEcs ? ['ecs@mappings'] : []),
         `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
         ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
         '.alerts-framework-mappings',
@@ -289,14 +289,12 @@ describe('Alerts Service', () => {
           if (!useDataStreamForAlerts) {
             expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
           }
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
 
           const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
           expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
           const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
-          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
         });
 
         test('should not initialize common resources if ES is not ready', async () => {
@@ -329,14 +327,12 @@ describe('Alerts Service', () => {
           if (!useDataStreamForAlerts) {
             expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
           }
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
 
           const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
           expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
           const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
-          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
         });
 
         test('should log error and set initialized to false if adding ILM policy throws error', async () => {
@@ -481,7 +477,7 @@ describe('Alerts Service', () => {
           );
           // 3x for framework, legacy-alert and ecs mappings, then 1 extra time to update component template
           // after updating index template field limit
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
         });
       });
 
@@ -516,14 +512,12 @@ describe('Alerts Service', () => {
             expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
           }
 
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
           expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
           const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
-          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
-          const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+          const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
           expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
@@ -576,15 +570,13 @@ describe('Alerts Service', () => {
             expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
           }
 
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
           expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
           const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
           const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
-          const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
-          expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
+          expect(componentTemplate3.name).toEqual('.alerts-test.alerts-mappings');
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
             getIndexTemplatePutBody({
@@ -639,15 +631,13 @@ describe('Alerts Service', () => {
             expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
           }
 
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
           expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
           const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
           const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
-          const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
-          expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
+          expect(componentTemplate3.name).toEqual('.alerts-test.alerts-mappings');
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
             getIndexTemplatePutBody({ useEcs: true, useDataStream: useDataStreamForAlerts })
@@ -698,7 +688,7 @@ describe('Alerts Service', () => {
             expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
           }
 
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
             1,
             getIndexTemplatePutBody({ useDataStream: useDataStreamForAlerts })
@@ -802,15 +792,13 @@ describe('Alerts Service', () => {
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
 
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
           expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
           const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
           const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
-          const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
-          expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
+          expect(componentTemplate3.name).toEqual('.alerts-test.alerts-mappings');
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
             getIndexTemplatePutBody({
@@ -853,13 +841,11 @@ describe('Alerts Service', () => {
             expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
           }
 
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
           const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
           expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
           const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
           expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
-          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
-          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
 
           const template = {
             name: `.alerts-empty.alerts-default-index-template`,
@@ -1002,7 +988,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           // putIndexTemplate is skipped but other operations are called as expected
           expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
@@ -1050,7 +1036,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
@@ -1081,7 +1067,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
@@ -1113,7 +1099,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
@@ -1137,7 +1123,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
@@ -1173,7 +1159,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).toHaveBeenCalled();
@@ -1207,7 +1193,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).toHaveBeenCalled();
@@ -1248,7 +1234,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).toHaveBeenCalled();
@@ -1279,7 +1265,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
@@ -1328,7 +1314,7 @@ describe('Alerts Service', () => {
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -1364,7 +1350,7 @@ describe('Alerts Service', () => {
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).toHaveBeenCalled();
@@ -1400,7 +1386,7 @@ describe('Alerts Service', () => {
           expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).toHaveBeenCalled();
@@ -1444,7 +1430,7 @@ describe('Alerts Service', () => {
           expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -1490,7 +1476,7 @@ describe('Alerts Service', () => {
           expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).toHaveBeenCalled();
@@ -2368,7 +2354,7 @@ describe('Alerts Service', () => {
             'alert service initialized',
             async () => alertsService.isInitialized() === true
           );
-          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(5);
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
         });
 
         test('should retry updating index template for transient ES errors', async () => {

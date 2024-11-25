@@ -8,7 +8,7 @@
 import { isEmpty, isEqual, omit } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { filter, firstValueFrom, Observable } from 'rxjs';
-import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
+import { alertFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
@@ -48,9 +48,9 @@ import { IAlertsClient } from '../alerts_client/types';
 import { setAlertsToUntracked, SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
+export const ECS_COMPONENT_TEMPLATE_NAME = 'ecs@mappings';
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
-export const ECS_CONTEXT = `ecs`;
-export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
+
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
@@ -348,17 +348,6 @@ export class AlertsService implements IAlertsService {
             }),
             totalFieldsLimit: TOTAL_FIELDS_LIMIT,
           }),
-        () =>
-          createOrUpdateComponentTemplate({
-            logger: this.options.logger,
-            esClient,
-            template: getComponentTemplate({
-              fieldMap: ecsFieldMap,
-              name: ECS_CONTEXT,
-              includeSettings: true,
-            }),
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-          }),
       ];
 
       // Install in parallel
@@ -414,9 +403,9 @@ export class AlertsService implements IAlertsService {
     // 4. Framework common component template, always included
     const componentTemplateRefs: string[] = [];
 
-    // If useEcs is set to true, add the ECS component template to the references
+    // If useEcs is set to true, add the ECS dynamic mapping template to the references
     if (useEcs) {
-      componentTemplateRefs.push(getComponentTemplateName({ name: ECS_CONTEXT }));
+      componentTemplateRefs.push(ECS_COMPONENT_TEMPLATE_NAME);
     }
 
     // If fieldMap is not empty, create a context specific component template and add to the references

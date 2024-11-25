@@ -148,13 +148,9 @@ describe('resourceInstaller', () => {
           expect(mockClusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
           );
-          expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+          expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
           expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
             1,
-            expect.objectContaining({ name: ECS_COMPONENT_TEMPLATE_NAME })
-          );
-          expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenNthCalledWith(
-            2,
             expect.objectContaining({ name: TECHNICAL_COMPONENT_TEMPLATE_NAME })
           );
         });
