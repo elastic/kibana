@@ -1941,7 +1941,6 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/fixtures/kbn_archiver/rollup @elastic/kibana-management # Assigned per only uses are in management tests
 /test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management # Assigned per only uses are in management tests
 /test/functional/fixtures/es_archiver/makelogs @elastic/kibana-management # Assigned per only uses are in management tests
-/test/functional/fixtures/es_archiver/large_fields @elastic/kibana-management # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/management/data_views/_test_huge_fields.ts#L25
 /test/api_integration/fixtures/kbn_archiver/management @elastic/kibana-management
 /x-pack/test/functional/services/ace_editor.js @elastic/kibana-management
 /x-pack/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
