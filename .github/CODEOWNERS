@@ -1664,6 +1664,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/deployment_agnostic/services/ @elastic/appex-qa
 
 # Core
+/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
 /x-pack/test/functional/es_archives/lists @elastic/kibana-core
 /test/functional/fixtures/kbn_archiver/saved_search.json @elastic/kibana-core # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/interpreter_functional/test_suites/run_pipeline/esaggs.ts#L100
 /test/functional/fixtures/kbn_archiver/saved_objects_management/show_relationships.json @elastic/kibana-core # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/saved_objects_management/show_relationships.ts#L20
