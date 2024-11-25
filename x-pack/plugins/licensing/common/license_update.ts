@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable, Subject, merge, firstValueFrom } from 'rxjs';
+import { type Observable, Subject, merge, firstValueFrom, defer } from 'rxjs';
 
 import {
   filter,
@@ -17,6 +17,8 @@ import {
   takeUntil,
   finalize,
   startWith,
+  retry,
+  timer
 } from 'rxjs';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';
@@ -25,13 +27,21 @@ export function createLicenseUpdate(
   triggerRefresh$: Observable<unknown>,
   stop$: Observable<unknown>,
   fetcher: () => Promise<ILicense>,
+  maxRetryDelay: number,
   initialValues?: ILicense
 ) {
   const manuallyRefresh$ = new Subject<void>();
 
   const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(
     takeUntil(stop$),
-    exhaustMap(fetcher),
+    exhaustMap(() =>
+      defer(() => fetcher()).pipe(
+        retry({
+          delay: (_, retryCount) => timer(Math.min(maxRetryDelay, 1000 * Math.pow(2, retryCount - 1))),
+          resetOnSuccess: true
+        })
+      )
+    ),
     share()
   );
 

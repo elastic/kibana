@@ -130,7 +130,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     const { license$, refreshManually } = createLicenseUpdate(
       intervalRefresh$,
       this.stop$,
-      licenseFetcher
+      licenseFetcher,
+      pollingFrequency 
     );
 
     this.loggingSubscription = license$.subscribe((license) =>

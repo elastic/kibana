@@ -14,6 +14,7 @@ import { licenseMock } from './licensing.mock';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const stop$ = new Subject<void>();
+const maxRetryDelay = 30 * 1000;
 describe('licensing update', () => {
   it('loads updates when triggered', async () => {
     const trigger$ = new Subject<void>();
@@ -22,7 +23,7 @@ describe('licensing update', () => {
       .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'basic' } }))
       .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'gold' } }));
 
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
 
     expect(fetcher).toHaveBeenCalledTimes(0);
 
@@ -41,7 +42,7 @@ describe('licensing update', () => {
     const trigger$ = new Subject<void>();
 
     const fetcher = jest.fn().mockResolvedValue(fetchedLicense);
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, initialLicense);
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay, initialLicense);
     trigger$.next();
     const [first, second] = await firstValueFrom(license$.pipe(take(2), toArray()));
 
@@ -59,7 +60,7 @@ describe('licensing update', () => {
       .mockResolvedValueOnce(licenseMock.createLicense())
       .mockResolvedValueOnce(licenseMock.createLicense({ license: { type: 'gold' } }));
 
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
     trigger$.next();
 
     const [first] = await firstValueFrom(license$.pipe(take(1), toArray()));
@@ -82,7 +83,7 @@ describe('licensing update', () => {
 
     const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
 
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
 
     license$.subscribe(() => {});
     license$.subscribe(() => {});
@@ -104,7 +105,7 @@ describe('licensing update', () => {
         })
     );
     const trigger$ = new Subject<void>();
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
     const values: ILicense[] = [];
     license$.subscribe((license) => values.push(license));
 
@@ -122,7 +123,7 @@ describe('licensing update', () => {
     const trigger$ = new Subject<void>();
     const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
 
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
     let completed = false;
     license$.subscribe({ complete: () => (completed = true) });
 
@@ -134,7 +135,7 @@ describe('licensing update', () => {
     const trigger$ = new Subject<void>();
     const fetcher = jest.fn().mockResolvedValue(licenseMock.createLicense());
 
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher);
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
     const values: ILicense[] = [];
     license$.subscribe((license) => values.push(license));
 
@@ -160,7 +161,7 @@ describe('licensing update', () => {
         return secondLicense;
       });
 
-    const { license$, refreshManually } = createLicenseUpdate(trigger$, stop$, fetcher);
+    const { license$, refreshManually } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
     let fromObservable;
     license$.subscribe((license) => (fromObservable = license));
 
@@ -172,4 +173,51 @@ describe('licensing update', () => {
     expect(secondResult.uid).toBe('second');
     expect(secondResult).toBe(fromObservable);
   });
+
+  it(`exponential backoff is working correctly`, async () => {
+    jest.useFakeTimers();
+
+    const trigger$ = new Subject<void>();
+    const license = licenseMock.createLicense({ license: { type: 'basic' } });
+    const fetcherFuncWithError = async () => { throw Error("forced error") };
+    const fetcherFunc = async () => { return license };
+
+    const fetcher = jest
+      .fn()
+      .mockImplementationOnce(fetcherFuncWithError)
+      .mockImplementationOnce(fetcherFuncWithError)
+      .mockImplementationOnce(fetcherFuncWithError)
+      .mockImplementationOnce(fetcherFuncWithError)
+      .mockImplementationOnce(fetcherFuncWithError)
+      .mockImplementationOnce(fetcherFunc);
+
+    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
+    const values: ILicense[] = [];
+    license$.subscribe((license) => {
+      values.push(license);
+    });
+
+    expect(fetcher).not.toHaveBeenCalled();
+
+    trigger$.next();
+
+    const advanceTimeAndCheck = async (timeToAdvance: number, expectedCallCount: number) => {
+      await jest.advanceTimersByTimeAsync(timeToAdvance);
+      expect(fetcher).toHaveBeenCalledTimes(expectedCallCount);
+    };
+    const offset = 100;    
+
+    await advanceTimeAndCheck(offset, 1);
+    await advanceTimeAndCheck(1000 + offset, 2);
+    await advanceTimeAndCheck(2000 + offset, 3);
+    await advanceTimeAndCheck(4000 + offset, 4);
+    await advanceTimeAndCheck(8000 + offset, 5);
+    await advanceTimeAndCheck(16000 + offset, 6);
+    
+    expect(values).toHaveLength(1);
+    expect(values[0].type).toBe('basic');
+
+    jest.useRealTimers();
+  });
+
 });

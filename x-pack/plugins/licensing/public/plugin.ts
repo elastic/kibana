@@ -75,11 +75,13 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
   public setup(core: CoreSetup) {
     const signatureUpdated$ = new Subject<void>();
+    const maxRetryDelay = 30 * 1000;
 
     const { license$, refreshManually } = createLicenseUpdate(
       signatureUpdated$,
       this.stop$,
       () => this.fetchLicense(core),
+      maxRetryDelay,
       this.getSaved()
     );
 
