@@ -10,8 +10,6 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
-import { SerializableRecord } from '@kbn/utility-types';
-
 export interface GridCoordinate {
   column: number;
   row: number;
@@ -104,18 +102,6 @@ export interface PanelInteractionEvent {
     right: number;
     bottom: number;
   };
-}
-
-/**
- * The external API provided through the GridLayout component
- */
-export interface GridLayoutApi {
-  addPanel: (panelId: string, placementSettings: PanelPlacementSettings) => void;
-  removePanel: (panelId: string) => void;
-  replacePanel: (oldPanelId: string, newPanelId: string) => void;
-
-  getPanelCount: () => number;
-  serializeState: () => GridLayoutData & SerializableRecord;
 }
 
 // TODO: Remove from Dashboard plugin as part of https://github.com/elastic/kibana/issues/190446

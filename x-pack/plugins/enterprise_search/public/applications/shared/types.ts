@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-
 import type { AppDeepLinkId, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../common/constants';
@@ -86,13 +84,4 @@ export interface GenerateNavLinkFromDeepLinkParameters {
 
 export interface BuildClassicNavParameters {
   productAccess: ProductAccess;
-}
-
-export interface ClassicNavItem {
-  'data-test-subj'?: string;
-  deepLink?: GenerateNavLinkFromDeepLinkParameters;
-  iconToString?: string;
-  id: string;
-  items?: ClassicNavItem[];
-  name?: ReactNode;
 }

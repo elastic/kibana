@@ -7,7 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { createOutputApi } from '../common/create_output_api';
+import { createOutputApi } from '../common/output';
 import type { GetConnectorsResponseBody } from '../common/http_apis';
 import { createChatCompleteApi } from './chat_complete';
 import type {
