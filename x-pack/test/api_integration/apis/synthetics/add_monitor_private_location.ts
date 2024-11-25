@@ -30,8 +30,7 @@ import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './add_monit
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
-  // skipped  until agnostic user auth is implemented
-  describe.skip('PrivateLocationAddMonitor', function () {
+  describe('PrivateLocationAddMonitor', function () {
     this.tags('skipCloud');
     const kibanaServer = getService('kibanaServer');
     const supertestAPI = getService('supertest');
