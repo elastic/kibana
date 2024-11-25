@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom, Subject } from 'rxjs';
+import { firstValueFrom, Subject, Observable } from 'rxjs';
 import { take, toArray } from 'rxjs';
 
 import { ILicense } from './types';
@@ -68,7 +68,7 @@ describe('licensing update', () => {
     expect(first.type).toBe('basic');
 
     trigger$.next();
-    // waiting on a promise gives the exhaustMap time to complete and not de-dupe these calls
+   
     await Promise.resolve();
     trigger$.next();
 
@@ -85,9 +85,9 @@ describe('licensing update', () => {
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
 
-    license$.subscribe(() => {});
-    license$.subscribe(() => {});
-    license$.subscribe(() => {});
+    license$.subscribe(() => { });
+    license$.subscribe(() => { });
+    license$.subscribe(() => { });
     trigger$.next();
 
     expect(fetcher).toHaveBeenCalledTimes(1);
@@ -174,50 +174,84 @@ describe('licensing update', () => {
     expect(secondResult).toBe(fromObservable);
   });
 
-  it(`exponential backoff is working correctly`, async () => {
-    jest.useFakeTimers();
+  describe('exponential backoff behavior working as expected (1s, 2s, 4s, ..., maxRetryDelay, ...)', () => {
+    let trigger$: Subject<void>;
+    let stop$: Subject<void>;
+    let license: ILicense;
+    let fetcher: jest.Mock;
+    let values: ILicense[];
+    let license$: Observable<ILicense>;
+    const offset = 100;
 
-    const trigger$ = new Subject<void>();
-    const license = licenseMock.createLicense({ license: { type: 'basic' } });
-    const fetcherFuncWithError = async () => { throw Error("forced error") };
-    const fetcherFunc = async () => { return license };
+    beforeAll(() => {
+      jest.useFakeTimers();
 
-    const fetcher = jest
-      .fn()
-      .mockImplementationOnce(fetcherFuncWithError)
-      .mockImplementationOnce(fetcherFuncWithError)
-      .mockImplementationOnce(fetcherFuncWithError)
-      .mockImplementationOnce(fetcherFuncWithError)
-      .mockImplementationOnce(fetcherFuncWithError)
-      .mockImplementationOnce(fetcherFunc);
+      trigger$ = new Subject<void>();
+      stop$ = new Subject<void>();
+      license = licenseMock.createLicense({ license: { type: 'basic' } });
+      values = [];
 
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
-    const values: ILicense[] = [];
-    license$.subscribe((license) => {
-      values.push(license);
+      const fetcherFuncWithError = async () => { throw Error("forced error"); };
+      fetcher = jest.fn().mockImplementation(fetcherFuncWithError);
+
+      const result = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
+      license$ = result.license$;
+      license$.subscribe((license) => values.push(license));
     });
 
-    expect(fetcher).not.toHaveBeenCalled();
-
-    trigger$.next();
+    afterAll(() => {
+      jest.useRealTimers();
+    });
 
     const advanceTimeAndCheck = async (timeToAdvance: number, expectedCallCount: number) => {
       await jest.advanceTimersByTimeAsync(timeToAdvance);
       expect(fetcher).toHaveBeenCalledTimes(expectedCallCount);
     };
-    const offset = 100;    
 
-    await advanceTimeAndCheck(offset, 1);
-    await advanceTimeAndCheck(1000 + offset, 2);
-    await advanceTimeAndCheck(2000 + offset, 3);
-    await advanceTimeAndCheck(4000 + offset, 4);
-    await advanceTimeAndCheck(8000 + offset, 5);
-    await advanceTimeAndCheck(16000 + offset, 6);
-    
-    expect(values).toHaveLength(1);
-    expect(values[0].type).toBe('basic');
+    it('fetcher has no calls innitially', async () => {
+      expect(fetcher).not.toHaveBeenCalled();
+    });
 
-    jest.useRealTimers();
+    it('calls fetcher after trigger', async () => {
+      trigger$.next();
+      await advanceTimeAndCheck(offset, 1);
+    });
+
+    it('retries after 1 second', async () => {
+      await advanceTimeAndCheck(1000 + offset, 2);
+    });
+
+    it('retries after 2 seconds', async () => {
+      await advanceTimeAndCheck(2 * 1000 + offset, 3);
+    });
+
+    it('retries after 4 seconds', async () => {
+      await advanceTimeAndCheck(4 * 1000 + offset, 4);
+    });
+
+    it('retries after 8 seconds', async () => {
+      await advanceTimeAndCheck(8 * 1000 + offset, 5);
+    });
+
+    it('another trigger now should have no effect thanks to the exhaustMap', async () => {
+      trigger$.next();
+      await advanceTimeAndCheck(offset, 5);
+    });
+
+    it('retries after 16 seconds', async () => {
+      await advanceTimeAndCheck(16 * 1000 + offset, 6);
+    });
+
+    it('retries after 30 seconds (not 32 because of the maxRetryDelay)', async () => {
+      await advanceTimeAndCheck(30 * 1000 + offset, 7);
+    });
+
+    it('succeeds after 30 seconds', async () => {
+      fetcher.mockImplementationOnce(async () => license);
+      await advanceTimeAndCheck(30 * 1000 + offset, 8);
+
+      expect(values).toHaveLength(1);
+      expect(values[0].type).toBe('basic');
+    });
   });
-
 });
