@@ -60,7 +60,7 @@ export const StepEditHosts: React.FunctionComponent<Props> = ({
     }
   }, [existingAgentPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return existingAgentPolicies.length > 0 ? (
+  return (
     <EuiFlexGroup direction="column" alignItems="flexStart">
       <EuiFlexItem>
         <EuiTitle size="xs">
@@ -141,13 +141,5 @@ export const StepEditHosts: React.FunctionComponent<Props> = ({
         </>
       )}
     </EuiFlexGroup>
-  ) : (
-    <AgentPolicyIntegrationForm
-      agentPolicy={newAgentPolicy}
-      updateAgentPolicy={updateNewAgentPolicy}
-      withSysMonitoring={withSysMonitoring}
-      updateSysMonitoring={updateSysMonitoring}
-      validation={validation}
-    />
   );
 };
