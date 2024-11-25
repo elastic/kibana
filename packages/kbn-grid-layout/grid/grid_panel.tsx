@@ -233,7 +233,7 @@ export const GridPanel = forwardRef<
                   cursor: grabbing;
                   opacity: 1 !important;
                 }
-                .kbnGrid--nonInteractive & {
+                .kbnGrid--static & {
                   opacity: 0 !important;
                   display: none;
                 }
@@ -265,7 +265,7 @@ export const GridPanel = forwardRef<
                   background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
                   cursor: se-resize;
                 }
-                .kbnGrid--nonInteractive & {
+                .kbnGrid--static & {
                   opacity: 0 !important;
                   display: none;
                 }

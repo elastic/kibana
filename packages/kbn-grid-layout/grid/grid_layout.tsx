@@ -141,7 +141,7 @@ export const GridLayout = ({
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
   const gridClassNames = classNames('kbnGrid', {
-    'kbnGrid--nonInteractive': expandedPanelId || accessMode === 'VIEW',
+    'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
   });
 
   return (
