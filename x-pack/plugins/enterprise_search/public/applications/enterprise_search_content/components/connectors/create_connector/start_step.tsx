@@ -20,6 +20,7 @@ import {
   EuiRadio,
   EuiSpacer,
   EuiText,
+  useIsWithinBreakpoints,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -53,6 +54,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   onSelfManagePreferenceChange,
   error,
 }) => {
+  const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
 
@@ -93,8 +95,8 @@ export const StartStep: React.FC<StartStepProps> = ({
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
+            <EuiFlexGroup direction={isMediumDevice ? 'column' : 'row'}>
+              <EuiFlexItem grow={7}>
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
@@ -105,7 +107,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   <ChooseConnectorSelectable selfManaged={selfManagePreference} />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={5}>
                 <EuiFormRow
                   fullWidth
                   isInvalid={!!error}
