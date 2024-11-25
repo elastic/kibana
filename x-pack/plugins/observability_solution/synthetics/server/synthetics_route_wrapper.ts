@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
@@ -20,8 +20,12 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 ) => ({
   ...uptimeRoute,
   options: {
-    tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
     ...(uptimeRoute.options ?? {}),
+  },
+  security: {
+    authz: {
+      requiredPrivileges: ['uptime-read', ...(uptimeRoute?.writeAccess ? ['uptime-write'] : [])],
+    },
   },
   handler: async (context, request, response) => {
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
@@ -56,7 +60,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         spaceId,
         syntheticsMonitorClient,
       });
-      if (res instanceof KibanaResponse) {
+      if (isKibanaResponse(res)) {
         return res;
       }
 

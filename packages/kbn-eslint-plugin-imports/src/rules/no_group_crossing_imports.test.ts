@@ -11,18 +11,22 @@ import { RuleTester } from 'eslint';
 import dedent from 'dedent';
 import { NoGroupCrossingImportsRule } from './no_group_crossing_imports';
 import { formatSuggestions } from '../helpers/report';
-import { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { KibanaPackageManifest } from '@kbn/repo-packages';
 
-const make = (
-  fromGroup: ModuleGroup,
-  fromVisibility: ModuleVisibility,
-  toGroup: ModuleGroup,
-  toVisibility: ModuleVisibility,
-  imp = 'import'
-) => ({
-  filename: `${fromGroup}.${fromVisibility}.ts`,
+interface ModuleInfo {
+  group: ModuleGroup;
+  visibility: ModuleVisibility;
+  type?: KibanaPackageManifest['type'];
+  devOnly?: boolean;
+}
+
+const make = (from: ModuleInfo, to: ModuleInfo, imp = 'import') => ({
+  filename: `${from.group}.${from.visibility}.${from.type ?? 'shared-common'}.${
+    from.devOnly ?? 'false'
+  }.ts`,
   code: dedent`
-    ${imp} '${toGroup}.${toVisibility}'
+    ${imp} '${to.group}.${to.visibility}.${to.type ?? 'shared-common'}.${to.devOnly ?? 'false'}'
   `,
 });
 
@@ -46,11 +50,15 @@ jest.mock('../helpers/repo_source_classifier', () => {
     getRepoSourceClassifier() {
       return {
         classify(r: string | [string, string]) {
-          const [group, visibility] =
+          const [group, visibility, type, devOnly] =
             typeof r === 'string' ? (r.endsWith('.ts') ? r.slice(0, -3) : r).split('.') : r;
           return {
             pkgInfo: {
               pkgId: 'aPackage',
+            },
+            manifest: {
+              type,
+              devOnly: devOnly !== 'false',
             },
             group,
             visibility,
@@ -94,19 +102,59 @@ for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
     tester.run('@kbn/imports/no_group_crossing_imports', NoGroupCrossingImportsRule, {
       valid: [
-        make('observability', 'private', 'observability', 'private'),
-        make('security', 'private', 'security', 'private'),
-        make('search', 'private', 'search', 'private'),
-        make('observability', 'private', 'platform', 'shared'),
-        make('security', 'private', 'common', 'shared'),
-        make('platform', 'shared', 'platform', 'shared'),
-        make('platform', 'shared', 'platform', 'private'),
-        make('common', 'shared', 'common', 'shared'),
+        make(
+          { group: 'observability', visibility: 'private' },
+          { group: 'observability', visibility: 'private' }
+        ),
+        make(
+          { group: 'security', visibility: 'private' },
+          { group: 'security', visibility: 'private' }
+        ),
+        make(
+          { group: 'search', visibility: 'private' },
+          { group: 'search', visibility: 'private' }
+        ),
+        make(
+          { group: 'observability', visibility: 'private' },
+          { group: 'platform', visibility: 'shared' }
+        ),
+        make(
+          { group: 'security', visibility: 'private' },
+          { group: 'common', visibility: 'shared' }
+        ),
+        make(
+          { group: 'platform', visibility: 'shared' },
+          { group: 'platform', visibility: 'shared' }
+        ),
+        make(
+          { group: 'platform', visibility: 'shared' },
+          { group: 'platform', visibility: 'private' }
+        ),
+        make(
+          { group: 'security', visibility: 'private' },
+          { group: 'platform', visibility: 'shared' }
+        ),
+        make(
+          { group: 'common', visibility: 'shared', devOnly: true },
+          { group: 'platform', visibility: 'private' }
+        ),
+        make(
+          { group: 'common', visibility: 'shared', type: 'functional-tests' },
+          { group: 'platform', visibility: 'private' }
+        ),
+        make(
+          { group: 'common', visibility: 'shared', type: 'test-helper' },
+          { group: 'platform', visibility: 'private' }
+        ),
+        make({ group: 'common', visibility: 'shared' }, { group: 'common', visibility: 'shared' }),
       ],
 
       invalid: [
         {
-          ...make('observability', 'private', 'security', 'private'),
+          ...make(
+            { group: 'observability', visibility: 'private' },
+            { group: 'security', visibility: 'private' }
+          ),
           errors: [
             {
               line: 1,
@@ -117,7 +165,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
                 importedPackage: 'aPackage',
                 importedGroup: 'security',
                 importedVisibility: 'private',
-                sourcePath: 'observability.private.ts',
+                sourcePath: 'observability.private.shared-common.false.ts',
                 suggestion: formatSuggestions([
                   `Please review the dependencies in your module's manifest (kibana.jsonc).`,
                   `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
@@ -128,7 +176,10 @@ for (const [name, tester] of [tsTester, babelTester]) {
           ],
         },
         {
-          ...make('security', 'private', 'platform', 'private'),
+          ...make(
+            { group: 'security', visibility: 'private' },
+            { group: 'platform', visibility: 'private' }
+          ),
           errors: [
             {
               line: 1,
@@ -139,7 +190,7 @@ for (const [name, tester] of [tsTester, babelTester]) {
                 importedPackage: 'aPackage',
                 importedGroup: 'platform',
                 importedVisibility: 'private',
-                sourcePath: 'security.private.ts',
+                sourcePath: 'security.private.shared-common.false.ts',
                 suggestion: formatSuggestions([
                   `Please review the dependencies in your module's manifest (kibana.jsonc).`,
                   `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
