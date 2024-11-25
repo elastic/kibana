@@ -65,7 +65,7 @@ Cypress.Commands.addQuery<'findByTestSubj'>(
 Cypress.Commands.add(
   'waitUntil',
   { prevSubject: 'optional' },
-  (subject, fn, { interval = 500, timeout = 30000 } = {}, msg = 'waitUntil()') => {
+  (subject, fn, { interval = 500, timeout = 30000, onFailure } = {}, msg = 'waitUntil()') => {
     let attempts = Math.floor(timeout / interval);
 
     const completeOrRetry = (result: boolean) => {
@@ -73,7 +73,23 @@ Cypress.Commands.add(
         return result;
       }
       if (attempts < 1) {
-        throw new Error(`${msg}: Timed out while retrying - last result was: [${result}]`);
+        const error = new Error(`${msg}: Timed out while retrying - last result was: [${result}]`);
+
+        if (onFailure) {
+          const onFailureReturnValue = onFailure();
+
+          if (!Cypress.isCy(onFailureReturnValue)) {
+            return cy.wrap(onFailureReturnValue).then((_) => {
+              throw error;
+            });
+          }
+
+          return onFailureReturnValue.then((_) => {
+            throw error;
+          });
+        }
+
+        throw error;
       }
       cy.wait(interval, { log: false }).then(() => {
         attempts--;
