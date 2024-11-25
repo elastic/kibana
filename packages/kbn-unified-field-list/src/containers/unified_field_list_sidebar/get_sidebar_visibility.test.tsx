@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { getSidebarVisibility } from './get_sidebar_visibility';
 
 const localStorageKey = 'test-sidebar-visibility';

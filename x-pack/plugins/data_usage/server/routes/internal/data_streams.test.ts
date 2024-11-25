@@ -84,6 +84,48 @@ describe('registerDataStreamsRoute', () => {
     });
   });
 
+  it('should not include data streams with 0 size', async () => {
+    mockGetMeteringStats.mockResolvedValue({
+      datastreams: [
+        {
+          name: 'datastream1',
+          size_in_bytes: 100,
+        },
+        {
+          name: 'datastream2',
+          size_in_bytes: 200,
+        },
+        {
+          name: 'datastream3',
+          size_in_bytes: 0,
+        },
+        {
+          name: 'datastream4',
+          size_in_bytes: 0,
+        },
+      ],
+    });
+    const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRouter = mockCore.http.createRouter.mock.results[0].value;
+    const [[, handler]] = mockRouter.versioned.get.mock.results[0].value.addVersion.mock.calls;
+    await handler(context, mockRequest, mockResponse);
+
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
+    expect(mockResponse.ok.mock.calls[0][0]).toEqual({
+      body: [
+        {
+          name: 'datastream2',
+          storageSizeBytes: 200,
+        },
+        {
+          name: 'datastream1',
+          storageSizeBytes: 100,
+        },
+      ],
+    });
+  });
+
   it('should return correct error if metering stats request fails', async () => {
     // using custom error for test here to avoid having to import the actual error class
     mockGetMeteringStats.mockRejectedValue(
@@ -105,7 +147,7 @@ describe('registerDataStreamsRoute', () => {
   it.each([
     ['no datastreams', {}, []],
     ['empty array', { datastreams: [] }, []],
-    ['an empty element', { datastreams: [{}] }, [{ name: undefined, storageSizeBytes: 0 }]],
+    ['an empty element', { datastreams: [{}] }, []],
   ])('should return empty array when no stats data with %s', async (_, stats, res) => {
     mockGetMeteringStats.mockResolvedValue(stats);
     const mockRequest = httpServerMock.createKibanaRequest({ body: {} });
