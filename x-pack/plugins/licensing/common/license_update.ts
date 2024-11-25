@@ -18,7 +18,7 @@ import {
   finalize,
   startWith,
   retry,
-  timer
+  timer,
 } from 'rxjs';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';
@@ -37,8 +37,9 @@ export function createLicenseUpdate(
     exhaustMap(() =>
       defer(() => fetcher()).pipe(
         retry({
-          delay: (_, retryCount) => timer(Math.min(maxRetryDelay, 1000 * Math.pow(2, retryCount - 1))),
-          resetOnSuccess: true
+          delay: (_, retryCount) =>
+            timer(Math.min(maxRetryDelay, 1000 * Math.pow(2, retryCount - 1))),
+          resetOnSuccess: true,
         })
       )
     ),

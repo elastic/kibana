@@ -42,7 +42,13 @@ describe('licensing update', () => {
     const trigger$ = new Subject<void>();
 
     const fetcher = jest.fn().mockResolvedValue(fetchedLicense);
-    const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay, initialLicense);
+    const { license$ } = createLicenseUpdate(
+      trigger$,
+      stop$,
+      fetcher,
+      maxRetryDelay,
+      initialLicense
+    );
     trigger$.next();
     const [first, second] = await firstValueFrom(license$.pipe(take(2), toArray()));
 
@@ -68,7 +74,7 @@ describe('licensing update', () => {
     expect(first.type).toBe('basic');
 
     trigger$.next();
-   
+
     await Promise.resolve();
     trigger$.next();
 
@@ -85,9 +91,9 @@ describe('licensing update', () => {
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
 
-    license$.subscribe(() => { });
-    license$.subscribe(() => { });
-    license$.subscribe(() => { });
+    license$.subscribe(() => {});
+    license$.subscribe(() => {});
+    license$.subscribe(() => {});
     trigger$.next();
 
     expect(fetcher).toHaveBeenCalledTimes(1);
@@ -161,7 +167,12 @@ describe('licensing update', () => {
         return secondLicense;
       });
 
-    const { license$, refreshManually } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
+    const { license$, refreshManually } = createLicenseUpdate(
+      trigger$,
+      stop$,
+      fetcher,
+      maxRetryDelay
+    );
     let fromObservable;
     license$.subscribe((license) => (fromObservable = license));
 
@@ -191,7 +202,9 @@ describe('licensing update', () => {
       license = licenseMock.createLicense({ license: { type: 'basic' } });
       values = [];
 
-      const fetcherFuncWithError = async () => { throw Error("forced error"); };
+      const fetcherFuncWithError = async () => {
+        throw Error('forced error');
+      };
       fetcher = jest.fn().mockImplementation(fetcherFuncWithError);
 
       const result = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
