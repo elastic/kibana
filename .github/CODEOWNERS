@@ -381,6 +381,7 @@ packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-pr
 packages/default-nav/devtools @elastic/kibana-management
 packages/default-nav/management @elastic/kibana-management
 packages/default-nav/ml @elastic/ml-ui
+packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-dev-cli-errors @elastic/kibana-operations
 packages/kbn-dev-cli-runner @elastic/kibana-operations
 packages/kbn-dev-proc-runner @elastic/kibana-operations
