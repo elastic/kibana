@@ -244,6 +244,7 @@ describe('SavedObjectsFinder', () => {
 
       const wrapper = shallow(
         <SavedObjectFinder
+          {...baseProps}
           services={{ uiSettings, contentClient, savedObjectsTagging }}
           savedObjectMetaData={searchMetaData}
         />
