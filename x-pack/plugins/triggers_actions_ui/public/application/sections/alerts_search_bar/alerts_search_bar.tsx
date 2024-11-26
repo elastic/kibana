@@ -57,6 +57,10 @@ export function AlertsSearchBar({
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
+
+  // eslint-disable-next-line no-console
+  console.log('AlertsSearchBar featureIds', JSON.stringify(featureIds, null, 4));
+
   const { dataView } = useAlertsDataView({
     featureIds,
     http,
