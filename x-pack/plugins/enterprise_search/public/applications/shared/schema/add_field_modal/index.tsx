@@ -22,7 +22,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
-  useGeneratedHtmlId
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { SchemaFieldTypeSelect } from '..';
