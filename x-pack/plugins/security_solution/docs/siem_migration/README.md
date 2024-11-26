@@ -1,0 +1,15 @@
+# SIEM Migration Library
+
+## Migration Process
+
+The SIEM migration library defines a set of UI components and services that are used to migrate third party SIEM resources like detection rules and translate them into resources that can be used in the Elastic Security app.
+
+## Graphs:
+
+Main agent graph:
+
+![Agent Graph](./img/agent_graph.png)
+
+Translate Rules Subgraph (Executed when no pre-built content is available):
+
+![Translate Rules Subgraph](./docs/img/translate_rule_graph.png)
