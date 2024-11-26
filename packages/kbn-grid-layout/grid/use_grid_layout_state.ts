@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, debounceTime } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import {
@@ -81,9 +81,7 @@ export const useGridLayoutState = ({
       runtimeSettings$,
       interactionEvent$,
       expandedPanelId$,
-      isMobileView$: new BehaviorSubject<boolean>(
-        accessMode$.getValue() === 'VIEW' && shouldShowMobileView()
-      ),
+      isMobileView$: new BehaviorSubject<boolean>(accessMode === 'VIEW' && shouldShowMobileView()),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -92,9 +90,9 @@ export const useGridLayoutState = ({
     /**
      * debounce width changes to avoid unnecessary column width recalculation.
      */
-    const resizeSubscription = gridLayoutStateManager.gridDimensions$
+    const resizeSubscription = combineLatest([gridLayoutStateManager.gridDimensions$, accessMode$])
       .pipe(debounceTime(250))
-      .subscribe((dimensions) => {
+      .subscribe(([dimensions, currentAccessMode]) => {
         const elementWidth = dimensions.width ?? 0;
         const columnPixelWidth =
           (elementWidth - gridSettings.gutterSize * (gridSettings.columnCount - 1)) /
@@ -102,7 +100,7 @@ export const useGridLayoutState = ({
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
         gridLayoutStateManager.isMobileView$.next(
-          accessMode$.getValue() === 'VIEW' && shouldShowMobileView()
+          currentAccessMode === 'VIEW' && shouldShowMobileView()
         );
       });
 
