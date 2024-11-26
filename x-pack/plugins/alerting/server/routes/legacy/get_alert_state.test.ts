@@ -198,7 +198,7 @@ describe('getAlertStateRoute', () => {
       Object {
         "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/breaking-changes-summary.html#breaking-201550",
         "reason": Object {
-          "type": "deprecate",
+          "type": "remove",
         },
         "severity": "warning",
       }
