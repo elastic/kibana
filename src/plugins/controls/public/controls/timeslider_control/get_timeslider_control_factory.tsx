@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 
 import { EuiInputPopover } from '@elastic/eui';
@@ -22,6 +22,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
+import { debounce } from 'lodash';
 import { TIME_SLIDER_CONTROL } from '../../../common';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlFactory } from '../types';
@@ -111,6 +112,10 @@ export const getTimesliderControlFactory = (): ControlFactory<
           : undefined;
         setSelectedRange(nextSelectedRange);
       }
+
+      const debouncedOnChange = debounce((updateTimeslice) => {
+        onChange(updateTimeslice);
+      }, 300);
 
       function onPrevious() {
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
@@ -270,7 +275,10 @@ export const getTimesliderControlFactory = (): ControlFactory<
         Component: (controlPanelClassNames) => {
           const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
             useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
-
+          const [localTimeslice, setLocalTimeslice] = useState<Timeslice>([
+            timeRangeMeta.timeRangeMin,
+            timeRangeMeta.timeRangeMax,
+          ]);
           useEffect(() => {
             return () => {
               cleanupTimeRangeSubscription();
@@ -306,8 +314,11 @@ export const getTimesliderControlFactory = (): ControlFactory<
               <TimeSliderPopoverContent
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
                 setIsAnchored={setIsAnchored}
-                value={[from, to]}
-                onChange={onChange}
+                value={localTimeslice}
+                onChange={(value) => {
+                  setLocalTimeslice(value as Timeslice);
+                  debouncedOnChange(value);
+                }}
                 stepSize={timeRangeMeta.stepSize}
                 ticks={timeRangeMeta.ticks}
                 timeRangeMin={timeRangeMeta.timeRangeMin}
