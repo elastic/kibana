@@ -215,6 +215,7 @@ export function Histogram({
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          forceDSL={true}
           abortController={abortController}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}

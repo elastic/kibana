@@ -189,6 +189,7 @@ export interface LensBaseEmbeddableInput extends EmbeddableInput {
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
   abortController?: AbortController;
+  forceDSL?: boolean;
   onBeforeBadgesRender?: (userMessages: UserMessage[]) => UserMessage[];
 }
 
@@ -219,7 +220,10 @@ export interface LensEmbeddableOutput extends EmbeddableOutput {
 export interface LensEmbeddableDeps {
   attributeService: LensAttributeService;
   data: DataPublicPluginStart;
-  documentToExpression: (doc: Document) => Promise<DocumentToExpressionReturnType>;
+  documentToExpression: (
+    doc: Document,
+    forceDSL?: boolean
+  ) => Promise<DocumentToExpressionReturnType>;
   injectFilterReferences: FilterManager['inject'];
   visualizationMap: VisualizationMap;
   datasourceMap: DatasourceMap;
@@ -299,10 +303,11 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
 
 const getExpressionFromDocument = async (
   document: Document,
-  documentToExpression: LensEmbeddableDeps['documentToExpression']
+  documentToExpression: LensEmbeddableDeps['documentToExpression'],
+  forceDSL?: boolean
 ) => {
   const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-    await documentToExpression(document);
+    await documentToExpression(document, forceDSL);
   return {
     ast: ast ? toExpression(ast) : null,
     indexPatterns,
@@ -664,6 +669,7 @@ export class Embeddable
     const mergedSearchContext = this.getMergedSearchContext();
 
     const framePublicAPI: FramePublicAPI = {
+      forceDSL: this.input.forceDSL,
       dataViews: {
         indexPatterns: this.indexPatterns,
         indexPatternRefs: this.indexPatternRefs,
@@ -955,7 +961,11 @@ export class Embeddable
 
     try {
       const { ast, indexPatterns, indexPatternRefs, activeVisualizationState } =
-        await getExpressionFromDocument(this.savedVis, this.deps.documentToExpression);
+        await getExpressionFromDocument(
+          this.savedVis,
+          this.deps.documentToExpression,
+          this.input.forceDSL
+        );
 
       this.expression = ast;
       this.indexPatterns = indexPatterns;
@@ -1463,7 +1473,8 @@ export class Embeddable
 
       const { ast } = await getExpressionFromDocument(
         this.savedVis,
-        this.deps.documentToExpression
+        this.deps.documentToExpression,
+        this.input.forceDSL
       );
 
       this.expression = ast;

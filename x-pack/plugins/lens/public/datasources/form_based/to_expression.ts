@@ -74,7 +74,8 @@ function getExpressionForLayer(
   featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
-  searchSessionId?: string
+  searchSessionId?: string,
+  forceDSL?: boolean
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -172,7 +173,7 @@ function getExpressionForLayer(
 
     // esql mode variables
     const lensESQLEnabled = featureFlags.getBooleanValue('lens.enable_esql', false);
-    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL); // read from a setting
+    const canUseESQL = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL; // read from a setting
     const esqlLayer =
       canUseESQL &&
       getESQLForLayer(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant);
@@ -556,7 +557,8 @@ export function toExpression(
   featureFlags: FeatureFlagsStart,
   dateRange: DateRange,
   nowInstant: Date,
-  searchSessionId?: string
+  searchSessionId?: string,
+  forceDSL?: boolean
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
@@ -566,7 +568,8 @@ export function toExpression(
       featureFlags,
       dateRange,
       nowInstant,
-      searchSessionId
+      searchSessionId,
+      forceDSL
     );
   }
 

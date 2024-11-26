@@ -366,6 +366,7 @@ export async function persistedStateToExpression(
     timefilter: TimefilterContract;
     nowProvider: DataPublicPluginStart['nowProvider'];
     eventAnnotationService: EventAnnotationServiceType;
+    forceDSL?: boolean;
   }
 ): Promise<DocumentToExpressionReturnType> {
   const {
@@ -451,6 +452,7 @@ export async function persistedStateToExpression(
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
+      forceDSL: services.forceDSL,
       nowInstant: services.nowProvider.get(),
     }),
     activeVisualizationState,

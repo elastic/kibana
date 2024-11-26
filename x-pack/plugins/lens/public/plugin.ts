@@ -361,13 +361,14 @@ export class LensPlugin {
         data: plugins.data,
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
-        documentToExpression: (doc) =>
+        documentToExpression: (doc, forceDSL?: boolean) =>
           this.editorFrameService!.documentToExpression(doc, {
             dataViews: plugins.dataViews,
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,
             timefilter: plugins.data.query.timefilter.timefilter,
             nowProvider: plugins.data.nowProvider,
+            forceDSL,
             eventAnnotationService,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
