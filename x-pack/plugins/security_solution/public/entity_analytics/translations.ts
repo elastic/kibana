@@ -302,3 +302,10 @@ export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
     defaultMessage: 'Entity risk score has been turned off',
   }
 );
+
+export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
+  'xpack.securitySolution.riskScore.moduleTurnedOff',
+  {
+    defaultMessage: 'Entity risk score engine ran successfully',
+  }
+);
