@@ -11,12 +11,25 @@ import React, { type FC } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
+import { DateHistogram } from '../../components/date_histogram';
 import { Esql } from '../../components/esql';
 import { Fields } from '../../components/fields';
 import { Logs } from '../../components/logs';
 import { State } from '../../components/state';
 
+import { useEventBusExampleState } from '../../hooks/use_event_bus_example_state';
+
 export const App: FC = () => {
+  const state = useEventBusExampleState();
+  // find all selectedFields of type date in allFields
+  const dateFields = state.useState((s) =>
+    Object.entries(s.allFields)
+      .filter(([name, type]) => {
+        return s.selectedFields.includes(name) && type === 'date';
+      })
+      .map((d) => d[0])
+  );
+
   return (
     <>
       <State />
@@ -30,7 +43,16 @@ export const App: FC = () => {
                 <Fields />
               </EuiFlexItem>
               <EuiFlexItem css={{ minWidth: 0, overflow: 'hidden' }}>
-                <Logs />
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  {dateFields.map((field) => (
+                    <EuiFlexItem key={field} grow={false}>
+                      <DateHistogram field={field} />
+                    </EuiFlexItem>
+                  ))}
+                  <EuiFlexItem>
+                    <Logs />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
