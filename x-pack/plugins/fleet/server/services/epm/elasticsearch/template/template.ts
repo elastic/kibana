@@ -65,6 +65,7 @@ export interface CurrentDataStream {
   dataStreamName: string;
   replicated: boolean;
   indexTemplate: IndexTemplate;
+  currentWriteIndex: string;
 }
 
 const DEFAULT_IGNORE_ABOVE = 1024;
@@ -954,6 +955,7 @@ const getDataStreams = async (
     dataStreamName: dataStream.name,
     replicated: dataStream.replicated,
     indexTemplate,
+    currentWriteIndex: dataStream.indices?.at(-1)?.index_name,
   }));
 };
 
@@ -989,6 +991,7 @@ const updateAllDataStreams = async (
       return updateExistingDataStream({
         esClient,
         logger,
+        currentWriteIndex: templateEntry.currentWriteIndex,
         dataStreamName: templateEntry.dataStreamName,
         options,
       });
@@ -1002,11 +1005,13 @@ const updateAllDataStreams = async (
 
 const updateExistingDataStream = async ({
   dataStreamName,
+  currentWriteIndex,
   esClient,
   logger,
   options,
 }: {
   dataStreamName: string;
+  currentWriteIndex: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   options?: {
@@ -1015,7 +1020,7 @@ const updateExistingDataStream = async ({
   };
 }) => {
   const existingDs = await esClient.indices.get({
-    index: dataStreamName,
+    index: currentWriteIndex,
   });
 
   const existingDsConfig = Object.values(existingDs);
