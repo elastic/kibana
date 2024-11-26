@@ -9,22 +9,16 @@ import { validateDateRangeWithinMinMax } from './utils';
 
 describe('validateDateRangeWithinMinMax', () => {
   it.each([
-    { start: 'now-1d', end: 'now' },
-    { start: 'now-8d', end: 'now-1s' },
-  ])(
-    'should return true if the date range is within the min and max date range',
-    ({ start, end }) => {
-      expect(validateDateRangeWithinMinMax(start, end)).toBe(true);
-    }
-  );
+    ['both start and end date is `now`', { start: 'now', end: 'now' }],
+    ['bounded within the min and max date range', { start: 'now-8d', end: 'now-1s' }],
+  ])('should return true if %s', (_, { start, end }) => {
+    expect(validateDateRangeWithinMinMax(start, end)).toBe(true);
+  });
 
   it.each([
-    { start: 'now-10d', end: 'now' },
-    { start: 'now-9d', end: 'now+2s' },
-  ])(
-    'should return false if the date range is not within the min and max date range',
-    ({ start, end }) => {
-      expect(validateDateRangeWithinMinMax(start, end)).toBe(false);
-    }
-  );
+    ['starts before the min date', { start: 'now-10d', end: 'now' }],
+    ['ends after the max date', { start: 'now-9d', end: 'now+2s' }],
+  ])('should return false if the date range %s', (_, { start, end }) => {
+    expect(validateDateRangeWithinMinMax(start, end)).toBe(false);
+  });
 });
