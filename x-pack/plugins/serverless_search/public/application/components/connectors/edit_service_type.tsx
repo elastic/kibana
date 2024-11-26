@@ -212,7 +212,9 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
           { defaultMessage: 'Choose a data source' }
         )}
         options={initialOptions}
-        selectedOptions={initialOptions.filter((option) => option.label === connector.name)}
+        selectedOptions={initialOptions.filter(
+          (option) => option.serviceType === connector.service_type
+        )}
         onChange={(selectedItem) => {
           onSelectedOptionChange(selectedItem);
         }}
