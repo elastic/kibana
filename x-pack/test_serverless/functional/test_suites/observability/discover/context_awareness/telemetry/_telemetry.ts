@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { ObservabilityTelemetryFtrProviderContext } from '../../../config.telemetry';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: ObservabilityTelemetryFtrProviderContext) {
   const { common, discover, unifiedFieldList, dashboard, header, timePicker, svlCommonPage } =
     getPageObjects([
       'common',

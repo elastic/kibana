@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { ObservabilityTelemetryFtrProviderContext } from '../../../config.telemetry';
 
-export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
+export default function ({
+  getService,
+  getPageObjects,
+  loadTestFile,
+}: ObservabilityTelemetryFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);

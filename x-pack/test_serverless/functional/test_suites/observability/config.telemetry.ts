@@ -6,7 +6,30 @@
  */
 
 import { resolve } from 'path';
+import type { GenericFtrProviderContext } from '@kbn/test';
+import {
+  KibanaEBTUIProvider,
+  KibanaEBTServerProvider,
+} from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import { services as inheritedServices } from '../../services';
+import { pageObjects } from '../../page_objects';
 import { createTestConfig } from '../../config.base';
+
+type ObservabilityTelemetryServices = typeof inheritedServices & {
+  kibana_ebt_server: typeof KibanaEBTServerProvider;
+  kibana_ebt_ui: typeof KibanaEBTUIProvider;
+};
+
+const services: ObservabilityTelemetryServices = {
+  ...inheritedServices,
+  kibana_ebt_server: KibanaEBTServerProvider,
+  kibana_ebt_ui: KibanaEBTUIProvider,
+};
+
+export type ObservabilityTelemetryFtrProviderContext = GenericFtrProviderContext<
+  ObservabilityTelemetryServices,
+  typeof pageObjects
+>;
 
 export default createTestConfig({
   serverlessProject: 'oblt',
@@ -15,6 +38,7 @@ export default createTestConfig({
     reportName: 'Serverless Observability Telemetry Functional Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
+  services,
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml

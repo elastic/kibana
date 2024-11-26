@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ObservabilityTelemetryFtrProviderContext } from './config.telemetry';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
+export default function ({ loadTestFile }: ObservabilityTelemetryFtrProviderContext) {
   describe('serverless observability UI - telemetry', function () {
     this.tags(['skipMKI', 'esGate']);
 
