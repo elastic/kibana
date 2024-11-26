@@ -82,7 +82,7 @@ describe('Processor: Script', () => {
 
     await act(async () => {
       find('paramsField').simulate('change', {
-        jsonContent: '{"sum_field":"""aaa(bbb"""}',
+        jsonContent: '{"sum_field":"""aaa"bbb"""}',
       });
 
       // advance timers to allow the form to validate
@@ -97,7 +97,8 @@ describe('Processor: Script', () => {
 
     expect(processors[0][SCRIPT_TYPE]).toEqual({
       source: 'ctx._source[params.sum_field]',
-      params: { sum_field: 'aaa(bbb' },
+      // eslint-disable-next-line prettier/prettier
+      params: { sum_field: 'aaa\"bbb' },
     });
   });
 });

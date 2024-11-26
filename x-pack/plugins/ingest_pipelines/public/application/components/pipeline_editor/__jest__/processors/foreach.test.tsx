@@ -95,7 +95,7 @@ describe('Processor: Foreach', () => {
 
     await act(async () => {
       find('processorField').simulate('change', {
-        jsonContent: '{"def_1":"""aaa(bbb""", "def_2":"aaa(bbb"}',
+        jsonContent: '{"def_1":"""aaa"bbb""", "def_2":"aaa(bbb"}',
       });
 
       // advance timers to allow the form to validate
@@ -110,7 +110,8 @@ describe('Processor: Foreach', () => {
 
     expect(processors[0][FOREACH_TYPE]).toEqual({
       field: 'test_foreach_processor',
-      processor: { def_1: 'aaa(bbb', def_2: 'aaa(bbb' },
+      // eslint-disable-next-line prettier/prettier
+      processor: { def_1: 'aaa\"bbb', def_2: 'aaa(bbb' },
     });
   });
 });
