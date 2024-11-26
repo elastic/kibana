@@ -10,6 +10,7 @@ import { type InfraMetricsClient } from '../../lib/helpers/get_infra_metrics_cli
 import { getDataStreamTypes } from './get_data_stream_types';
 import { getHasMetricsData } from './get_has_metrics_data';
 import { getLatestEntity } from './get_latest_entity';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('./get_has_metrics_data', () => ({
   getHasMetricsData: jest.fn(),
@@ -25,6 +26,7 @@ describe('getDataStreamTypes', () => {
   let infraMetricsClient: jest.Mocked<InfraMetricsClient>;
   let obsEsClient: jest.Mocked<ObservabilityElasticsearchClient>;
   let entityManagerClient: jest.Mocked<EntityClient>;
+  const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     infraMetricsClient = {} as jest.Mocked<InfraMetricsClient>;
@@ -43,6 +45,7 @@ describe('getDataStreamTypes', () => {
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
+      logger,
     };
 
     const result = await getDataStreamTypes(params);
@@ -65,6 +68,7 @@ describe('getDataStreamTypes', () => {
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
+      logger,
     };
 
     const result = await getDataStreamTypes(params);
@@ -84,6 +88,7 @@ describe('getDataStreamTypes', () => {
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
+      logger,
     };
 
     const result = await getDataStreamTypes(params);
@@ -95,6 +100,7 @@ describe('getDataStreamTypes', () => {
       entityId: 'entity123',
       entityType: 'host',
       entityManagerClient,
+      logger,
     });
   });
 
@@ -109,6 +115,7 @@ describe('getDataStreamTypes', () => {
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
+      logger,
     };
 
     const result = await getDataStreamTypes(params);
@@ -128,6 +135,7 @@ describe('getDataStreamTypes', () => {
       infraMetricsClient,
       obsEsClient,
       entityManagerClient,
+      logger,
     };
 
     const result = await getDataStreamTypes(params);

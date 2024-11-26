@@ -112,7 +112,18 @@ export class ObservabilityAIAssistantPlugin
             ];
           }),
       };
-    }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
+    }) as Pick<
+      ObservabilityAIAssistantRouteHandlerResources['plugins'],
+      keyof ObservabilityAIAssistantPluginStartDependencies
+    >;
+
+    const withCore = {
+      ...routeHandlerPlugins,
+      core: {
+        setup: core,
+        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+      },
+    };
 
     const service = (this.service = new ObservabilityAIAssistantService({
       logger: this.logger.get('service'),
@@ -140,7 +151,7 @@ export class ObservabilityAIAssistantPlugin
       core,
       logger: this.logger,
       dependencies: {
-        plugins: routeHandlerPlugins,
+        plugins: withCore,
         service: this.service,
       },
     });
