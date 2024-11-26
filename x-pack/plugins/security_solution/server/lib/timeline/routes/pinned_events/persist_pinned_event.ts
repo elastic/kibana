@@ -61,9 +61,7 @@ export const persistPinnedEventRoute = (router: SecuritySolutionPluginRouter) =>
           );
 
           return response.ok({
-            body: {
-              data: { persistPinnedEventOnTimeline: res },
-            },
+            body: res,
           });
         } catch (err) {
           const error = transformError(err);

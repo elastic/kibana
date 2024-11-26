@@ -8,7 +8,7 @@
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import type { PackageListItem } from '../../../../common/types/models';
 
