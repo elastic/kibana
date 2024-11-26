@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     ]);
   };
 
-  describe.only('Dataset quality summary', () => {
+  describe('Dataset quality summary', () => {
     afterEach(async () => {
       await synthtrace.clean();
     });
