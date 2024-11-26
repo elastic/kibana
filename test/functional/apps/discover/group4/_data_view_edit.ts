@@ -18,11 +18,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dataViews = getService('dataViews');
 
-  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
+  const { common, discover, timePicker, unifiedFieldList, header } = getPageObjects([
     'common',
     'discover',
     'timePicker',
     'unifiedFieldList',
+    'header',
   ]);
 
   describe('data view flyout', function () {
@@ -93,6 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         adHoc: false,
         hasTimeField: true,
       });
+      await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
       await retry.try(async () => {
