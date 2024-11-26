@@ -14,7 +14,6 @@ import { getPackageSavedObjects } from '../../packages/get';
 const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
 const MAX_CONCURRENT_INDEX_PATTERN_DELETIONS = 50;
 
-
 export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics];
 
 export function getIndexPatternSavedObjects() {
