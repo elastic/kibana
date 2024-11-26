@@ -17,7 +17,8 @@ import { PLUGIN_NAME } from '../../translations';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
-import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
+import { DEFAULT_DATE_RANGE_OPTIONS, validateDateRangeWithinMinMax } from '../../../common/utils';
+import { useDateRangePicker } from '../hooks/use_date_picker';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
 import { ChartsLoading } from './charts_loading';
 import { NoDataCallout } from './no_data_callout';
@@ -104,15 +105,26 @@ export const DataUsageMetrics = memo(
         ...prevState,
         metricTypes: metricTypesFromUrl?.length ? metricTypesFromUrl : prevState.metricTypes,
         dataStreams: dataStreamsFromUrl?.length ? dataStreamsFromUrl : prevState.dataStreams,
+        from: startDateFromUrl ?? prevState.from,
+        to: endDateFromUrl ?? prevState.to,
       }));
-    }, [metricTypesFromUrl, dataStreamsFromUrl]);
-
-    const enableFetchUsageMetricsData = useMemo(
-      () => metricsFilters.dataStreams.length > 0 && metricsFilters.metricTypes.length > 0,
-      [metricsFilters.dataStreams, metricsFilters.metricTypes]
-    );
+    }, [metricTypesFromUrl, dataStreamsFromUrl, startDateFromUrl, endDateFromUrl]);
 
     const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker();
+
+    const isValidDateRange = useMemo(
+      () =>
+        validateDateRangeWithinMinMax(dateRangePickerState.startDate, dateRangePickerState.endDate),
+      [dateRangePickerState.endDate, dateRangePickerState.startDate]
+    );
+
+    const enableFetchUsageMetricsData = useMemo(
+      () =>
+        isValidDateRange &&
+        metricsFilters.dataStreams.length > 0 &&
+        metricsFilters.metricTypes.length > 0,
+      [isValidDateRange, metricsFilters.dataStreams, metricsFilters.metricTypes]
+    );
 
     const {
       error: errorFetchingDataUsageMetrics,

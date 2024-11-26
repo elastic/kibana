@@ -7,7 +7,18 @@
 
 import dateMath from '@kbn/datemath';
 
-export const dateParser = (date: string) => dateMath.parse(date)?.toISOString();
+export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
+  autoRefreshOptions: {
+    enabled: false,
+    duration: 10000,
+  },
+  startDate: 'now-24h/h',
+  endDate: 'now',
+  maxDate: 'now+1s',
+  minDate: 'now-9d',
+  recentlyUsedDateRanges: [],
+});
+
 export const momentDateParser = (date: string) => dateMath.parse(date);
 export const transformToUTCtime = ({
   start,
@@ -25,4 +36,15 @@ export const transformToUTCtime = ({
     start: isISOString ? utcStart?.toISOString() : momentDateParser(start),
     end: isISOString ? utcEnd?.toISOString() : momentDateParser(end),
   };
+};
+
+export const validateDateRangeWithinMinMax = (start: string, end: string): boolean => {
+  const startDate = momentDateParser(start);
+  const endDate = momentDateParser(end);
+  if (!startDate || !endDate) {
+    return false;
+  }
+  const minDate = momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.minDate);
+  const maxDate = momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.maxDate);
+  return startDate.isSameOrAfter(minDate) && endDate.isSameOrBefore(maxDate);
 };
