@@ -252,6 +252,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 _.isArray(argv.ftrConfigFile) ? _.last(argv.ftrConfigFile) : argv.ftrConfigFile
               );
 
+              
               const config = await getFTRConfig({
                 log,
                 esPort,
