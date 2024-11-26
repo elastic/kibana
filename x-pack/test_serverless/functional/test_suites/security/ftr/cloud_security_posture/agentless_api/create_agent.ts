@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const agentCreationTimeout = 1000 * 60 * 5; // 5 minutes
+  const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
   const retry = getService('retry');
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
@@ -84,9 +84,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         integrationPolicyName
       );
 
-      // wait for eventually healthy status
+      // wait for eventually Pending or Healthy status
+      // purpose of this retry is to wait for the agent to be created and the status to be updated
+      // not to wait for the agent to be healthy
       await retry.tryForTime(agentCreationTimeout, async () => {
-        expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Healthy');
+        const resStatus = await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus();
+        expect(resStatus == 'Healthy' || resStatus == 'Pending').to.be(true);
       });      
     });
 
