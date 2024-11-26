@@ -170,7 +170,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
               }),
           'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': 2500,
-          'index.mapping.ignore_dynamic_beyond_limit': true,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
         mappings: {
           dynamic: true,
@@ -433,7 +433,7 @@ describe('Alerts Service', () => {
                     rollover_alias: `.alerts-empty-default`,
                   },
                   'index.mapping.total_fields.limit': 1800,
-                  'index.mapping.ignore_dynamic_beyond_limit': true,
+                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                 },
                 mappings: {
                   dynamic: true,
@@ -874,7 +874,7 @@ describe('Alerts Service', () => {
                       }),
                   'index.mapping.ignore_malformed': true,
                   'index.mapping.total_fields.limit': 2500,
-                  'index.mapping.ignore_dynamic_beyond_limit': true,
+                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                 },
                 mappings: {
                   _meta: {

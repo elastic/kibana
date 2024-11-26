@@ -50,7 +50,7 @@ const IndexTemplate = (namespace: string = 'default', useDataStream: boolean = f
             }),
         'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
-        'index.mapping.ignore_dynamic_beyond_limit': true,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
     },
     priority: namespace.length,
