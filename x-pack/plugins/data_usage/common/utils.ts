@@ -41,10 +41,15 @@ export const transformToUTCtime = ({
 export const validateDateRangeWithinMinMax = (start: string, end: string): boolean => {
   const startDate = momentDateParser(start);
   const endDate = momentDateParser(end);
+
   if (!startDate || !endDate) {
     return false;
   }
   const minDate = momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.minDate);
   const maxDate = momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.maxDate);
-  return startDate.isSameOrAfter(minDate) && endDate.isSameOrBefore(maxDate);
+  return (
+    startDate.isSameOrAfter(minDate, 's') &&
+    endDate.isSameOrBefore(maxDate, 's') &&
+    startDate <= endDate
+  );
 };
