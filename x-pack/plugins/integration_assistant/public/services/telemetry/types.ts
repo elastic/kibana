@@ -26,7 +26,7 @@ interface IntegrationAssistantOpenData {
   sessionId: string;
 }
 
-interface IntegrationAssistantStepCompleteData {
+interface IntegrationAssistantStepReadyToCompleteata {
   sessionId: string;
   step: number;
   stepName: string;
@@ -76,7 +76,7 @@ export type TelemetryEventTypeData<T extends TelemetryEventType> =
     : T extends TelemetryEventType.IntegrationAssistantOpen
     ? IntegrationAssistantOpenData
     : T extends TelemetryEventType.IntegrationAssistantStepComplete
-    ? IntegrationAssistantStepCompleteData
+    ? IntegrationAssistantStepReadyToCompleteata
     : T extends TelemetryEventType.IntegrationAssistantGenerationComplete
     ? IntegrationAssistantGenerationCompleteData
     : T extends TelemetryEventType.IntegrationAssistantCelGenerationComplete

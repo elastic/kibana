@@ -6,7 +6,7 @@
  */
 import type { State } from '../../state';
 
-export const isDataStreamStepCompleted = ({ integrationSettings }: State) =>
+export const isDataStreamStepReadyToComplete = ({ integrationSettings }: State) =>
   Boolean(
     integrationSettings?.name &&
       integrationSettings?.dataStreamTitle &&

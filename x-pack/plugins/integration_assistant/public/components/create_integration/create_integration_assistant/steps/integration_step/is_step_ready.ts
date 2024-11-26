@@ -7,5 +7,5 @@
 
 import type { State } from '../../state';
 
-export const isIntegrationStepCompleted = ({ integrationSettings }: State) =>
+export const isIntegrationStepReadyToComplete = ({ integrationSettings }: State) =>
   Boolean(integrationSettings?.title && integrationSettings?.description);

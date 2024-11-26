@@ -435,4 +435,5 @@ export const mockActions: Actions = {
   setHasCelInput: jest.fn(),
   setResult: jest.fn(),
   setCelInputResult: jest.fn(),
+  completeStep: jest.fn(),
 };
