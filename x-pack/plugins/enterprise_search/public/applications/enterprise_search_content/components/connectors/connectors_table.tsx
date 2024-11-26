@@ -16,6 +16,7 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -221,7 +222,18 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           columns={columns}
           onChange={onChange}
           tableLayout="fixed"
+          tableCaption={i18n.translate(
+            'xpack.enterpriseSearch.connectorsTable.table.availableConnectorsTableCaption',
+            { defaultMessage: 'Available connectors table' }
+          )}
           loading={isLoading}
+          noItemsMessage={
+            <EuiText aria-live="polite" size="s">
+              {i18n.translate('xpack.enterpriseSearch.connectorsTable.table.noResultsMessage', {
+                defaultMessage: 'No connectors found',
+              })}
+            </EuiText>
+          }
           pagination={{
             pageIndex: meta.page.from / (meta.page.size || 1),
             pageSize: meta.page.size,
