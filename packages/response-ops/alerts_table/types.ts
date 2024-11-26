@@ -125,16 +125,55 @@ export interface AlertWithLegacyFormats {
 
 export interface AlertsTableProps<AC extends AdditionalContext = AdditionalContext>
   extends PublicAlertsDataGridProps {
+  /**
+   * A unique identifier used to persist the table state in localStorage
+   */
   id: string;
+  /**
+   * The columns to be displayed in the table (row selection checkboxes
+   * and actions column are prepended automatically)
+   */
   columns?: EuiDataGridProps['columns'];
+  /**
+   * A boolean expression or list of ids to refine the alerts search query
+   */
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  /**
+   * The initial sort configuration
+   */
   initialSort?: SortCombinations[];
+  /**
+   * The initial page size. Allowed values are 10, 20, 50, 100
+   */
   initialPageSize?: number;
+  /**
+   * Alert document fields available to be displayed in the table as columns
+   *
+   * If provided, the table will not fetch fields from the alerts index and
+   * use these instead.
+   */
   browserFields?: BrowserFields;
+  /**
+   * Update callback fired when any render context prop is changed
+   *
+   * Suitable to extract updated alerts information and other context properties
+   */
   onUpdate?: (context: RenderContext<AC>) => void;
+  /**
+   * Callback fired when the alerts have been first loaded
+   */
   onLoaded?: (alerts: Alert[], columns: EuiDataGridColumn[]) => void;
+  /**
+   * Any runtime mappings to be applied to the alerts search request
+   */
   runtimeMappings?: MappingRuntimeFields;
+  /**
+   * Toggles the built-in alert status column visibility
+   */
   showAlertStatusWithFlapping?: boolean;
+  /**
+   * Customizations to the data grid toolbar
+   */
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
@@ -146,7 +185,8 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   dynamicRowHeight?: boolean;
   emptyStateHeight?: 'tall' | 'short';
   /**
-   * An object that will be passed along with the renderContext to all render functions.
+   * An object used to compose the render context passed to all render functions as part of their
+   * props
    */
   additionalContext?: AC;
   /**
@@ -156,22 +196,44 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     EuiDataGridProps['renderCellValue'],
     RenderContext<AC> & AlertWithLegacyFormats
   >;
+  /**
+   * Cell popover render function
+   */
   renderCellPopover?: MergeProps<
     EuiDataGridProps['renderCellPopover'],
     RenderContext<AC> & { alert: Alert }
   >;
+  /**
+   * Actions cell render function
+   */
   renderActionsCell?: MergeProps<
     EuiDataGridControlColumn['rowCellRender'],
     RenderContext<AC> &
       AlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
   >;
+  /**
+   * Additional toolbar controls render function
+   */
   renderAdditionalToolbarControls?: ComponentRenderer<AC>;
+  /**
+   * Flyout header render function
+   */
   renderFlyoutHeader?: FlyoutSectionRenderer<AC>;
+  /**
+   * Flyout body render function
+   */
   renderFlyoutBody?: FlyoutSectionRenderer<AC>;
+  /**
+   * Flyout footer render function
+   */
   renderFlyoutFooter?: FlyoutSectionRenderer<AC>;
-
+  /**
+   * Timestamp of the last data refetch request
+   */
   lastReloadRequestTime?: number;
-
+  /**
+   * Dependencies
+   */
   services: {
     data: DataPublicPluginStart;
     http: HttpStart;
@@ -180,6 +242,9 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     application: ApplicationStart;
     licensing: LicensingPluginStart;
     settings: SettingsStart;
+    /**
+     * The cases service is optional: cases features will be disabled if not provided
+     */
     cases?: CasesService;
   };
 }
@@ -300,20 +365,42 @@ export interface PublicAlertsDataGridProps
   > {
   ruleTypeIds: string[];
   consumers?: string[];
+  /**
+   * If true, shows a button in the table toolbar to inspect the search alerts request
+   */
   showInspectButton?: boolean;
+  /**
+   * Cases-specific configuration options
+   */
   casesConfiguration?: {
     featureId: string;
     owner: Parameters<CasesService['helpers']['canUseCases']>[0];
     appId?: string;
     syncAlerts?: boolean;
   };
+  /**
+   * If true, hides the bulk actions controls
+   */
   hideBulkActions?: boolean;
+  /**
+   * A getter to customize the bulk actions menu items
+   * based on the current alerts search query used
+   */
   getBulkActions?: (
     query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
     refresh: () => void
   ) => BulkActionsPanelConfig[];
+  /**
+   * Width of the actions column
+   */
   actionsColumnWidth?: number;
+  /**
+   * Options passed to the fields browser modal
+   */
   fieldsBrowserOptions?: FieldBrowserOptions;
+  /**
+   * Options to customize the actions menu for each cell
+   */
   cellActionsOptions?: CellActionsOptions;
 }
 
