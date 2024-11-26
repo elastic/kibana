@@ -386,7 +386,7 @@ kibana_vars=(
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
     xpack.security.encryptionKey
-    xpack.security.experimental.fipsMode.enabled
+    xpack.security.fipsMode.enabled
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
     xpack.security.sameSiteCookies

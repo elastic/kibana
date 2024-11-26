@@ -19,7 +19,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildRelatedIntegrationsDescription } from '../../../../detections/components/rules/related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
   AboutStepRiskScore,
@@ -275,7 +275,7 @@ export const getDescriptionItem = (
       return [];
     }
   } else if (field === 'eqlOptions') {
-    const eqlOptions: EqlOptionsSelected = get(field, data);
+    const eqlOptions: EqlOptions = get(field, data);
     return buildEqlOptionsDescription(eqlOptions);
   } else if (field === 'threat') {
     const threats: Threats = get(field, data);

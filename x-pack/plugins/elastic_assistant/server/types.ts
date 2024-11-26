@@ -38,7 +38,7 @@ import {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import {
-  ActionsClientBedrockChatModel,
+  ActionsClientChatBedrockConverse,
   ActionsClientChatOpenAI,
   ActionsClientChatVertexAI,
   ActionsClientGeminiChatModel,
@@ -215,7 +215,7 @@ export interface AssistantTool {
 }
 
 export type AssistantToolLlm =
-  | ActionsClientBedrockChatModel
+  | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
   | ActionsClientGeminiChatModel
   | ActionsClientChatVertexAI;
