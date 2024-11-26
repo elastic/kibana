@@ -11,9 +11,9 @@ export const CREATE_SEMANTIC_QUERY_PROMPT = ChatPromptTemplate.fromMessages([
   [
     'system',
     `You are a helpful assistant that helps in translating provided titles, descriptions and data sources into a single summary of keywords specifically crafted to be used as a semantic search query, which are usually short and includes keywords that are valid for the usecase.
-    The data provided are collected from SIEM detection rules, and it is trying to match the description of a list of data sources, so provide good keywords that match this usecase.
-    Try to also detect what sort of vendor, solution or technology is required and add these as keywords as well.
-    Some examples would be to identify if its cloud, which vendor, network, host, endpoint, etc.`,
+The data provided are collected from SIEM detection rules, and it is trying to match the description of a list of data sources, so provide good keywords that match this usecase.
+Try to also detect what sort of vendor, solution or technology is required and add these as keywords as well.
+Some examples would be to identify if its cloud, which vendor, network, host, endpoint, etc.`,
   ],
   [
     'human',
