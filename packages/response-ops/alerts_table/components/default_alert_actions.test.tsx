@@ -51,8 +51,10 @@ const notifications = notificationServiceMock.createStartContract();
 const props = {
   alert: {},
   refresh: jest.fn(),
-  http,
-  notifications,
+  services: {
+    http,
+    notifications,
+  },
 } as unknown as AlertActionsProps;
 
 describe('DefaultAlertActions component', () => {
