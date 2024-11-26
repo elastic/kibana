@@ -3,7 +3,9 @@
 We've got three ways of testing our code:
 
 - Unit testing with Jest
-- API testing
+- Integration Tests
+  - Deployment specific (stateful or serverless) API testing
+  - Deployment-agnostic (both stateful and serverless) testing
 - End-to-end testing (with Cypress)
 
 API tests are usually preferred. They're stable and reasonably quick, and give a good approximation of real-world usage.
@@ -73,7 +75,59 @@ node x-pack/plugins/observability_solution/apm/scripts/test/api --runner --basic
 
 #### API Test tips
 
-- For data generation in API tests have a look at the [kbn-apm-synthtrace](../../../../packages/kbn-apm-synthtrace/README.md) package
+- For data generation in API tests have a look at the [kbn-apm-synthtrace](../../../../../packages/kbn-apm-synthtrace/README.md) package
+- For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
+
+---
+
+## Deployment-agnostic Tests (dat)
+
+| Option       | Description                                     |
+| ------------ | ----------------------------------------------- |
+| --serverless | Loads serverless configuration                  |
+| --stateful   | Loads stateful configuration                    |
+| --server     | Only start ES and Kibana                        |
+| --runner     | Only run tests                                  |
+| --grep       | Specify the specs to run                        |
+| --grep-files | Specify the files to run                        |
+| --inspect    | Add --inspect-brk flag to the ftr for debugging |
+| --times      | Repeat the test n number of times               |
+
+Deployment-agnostic tests are located in [`x-pack/test/deployment_agnostic/apis/observability/apm/index.ts`](../../../../test/api_integration/deployment_agnostic/apis/observability/apm/index.ts).
+
+#### Start server and run test (single process)
+
+```
+node x-pack/plugins/observability_solution/apm/scripts/test/dat [--serverless/--stateful] [--help]
+```
+
+The above command will start an ES instance on http://localhost:9220, a Kibana instance on http://localhost:5620 and run the api tests.
+Once the tests finish, the instances will be terminated.
+
+#### Start server and run test (separate processes)
+
+```sh
+
+# start server
+node x-pack/plugins/observability_solution/apm/scripts/test/dat --server --stateful
+
+# run tests
+node x-pack/plugins/observability_solution/apm/scripts/test/dat --runner --stateful --grep-files=error_group_list
+```
+
+### Update snapshots (from Kibana root)
+
+To update snapshots append `--updateSnapshots` to the `--runner` command:
+
+```
+node x-pack/plugins/observability_solution/apm/scripts/test/dat --runner --stateful --updateSnapshots
+```
+
+(The test server needs to be running)
+
+#### API Test tips
+
+- For data generation in Deployment-agnostic tests have a look at the [kbn-apm-synthtrace](../../../../../packages/kbn-apm-synthtrace/README.md) package
 - For debugging access Elasticsearch on http://localhost:9220 and Kibana on http://localhost:5620 (`elastic` / `changeme`)
 
 ---

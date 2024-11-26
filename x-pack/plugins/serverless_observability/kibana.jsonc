@@ -25,7 +25,9 @@
       "discover",
       "security"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "streams"
+    ],
     "requiredBundles": []
   }
 }
