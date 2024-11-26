@@ -9,10 +9,7 @@
     "server/**/**/*",
     "common/**/*",
     "../../../typings/**/*",
-    "schema/oss_plugins.json",
-    "schema/oss_root.json",
-    "schema/oss_platform.json",
-    "schema/kbn_packages.json"
+    "schema/*.json",
   ],
   "kbn_references": [
     "@kbn/core",
