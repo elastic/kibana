@@ -143,6 +143,7 @@ pageLoadAssetSize:
   searchHomepage: 19831
   searchIndices: 20519
   searchInferenceEndpoints: 20470
+  searchNavigation: 19233
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
@@ -160,6 +161,7 @@ pageLoadAssetSize:
   spaces: 57868
   stackAlerts: 58316
   stackConnectors: 67227
+  streams: 16742
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586

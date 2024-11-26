@@ -2203,7 +2203,7 @@
       "warning": []
     },
     {
-      "query": "ROW a=1::LONG | LOOKUP t ON a",
+      "query": "ROW a=1::LONG | LOOKUP JOIN t ON a",
       "error": [],
       "warning": []
     },
