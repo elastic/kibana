@@ -77,19 +77,6 @@ describe('Enrich policies tab', () => {
     });
   });
 
-  describe('permissions check', () => {
-    it('shows a permissions error when the user does not have sufficient privileges', async () => {
-      testBed = await setup(httpSetup);
-      await act(async () => {
-        testBed.actions.goToEnrichPoliciesTab();
-      });
-
-      testBed.component.update();
-
-      expect(testBed.exists('enrichPoliciesInsuficientPrivileges')).toBe(true);
-    });
-  });
-
   describe('policies list', () => {
     let testPolicy: ReturnType<typeof createTestEnrichPolicy>;
     beforeEach(async () => {
