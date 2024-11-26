@@ -251,17 +251,21 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
       const setQuery = () => {
-        setPersistentEqlQuery(timelineQueryBar);
         setFieldValue('index', timelineIndex);
         setFieldValue('queryBar', timelineQueryBar);
       };
       if (timelineQueryBar.query.language === 'eql') {
         setFieldValue('ruleType', 'eql');
 
-        // Forms needs to be re-rendered with a new rule type first
-        // setTimeout is used to delay setting rule type specific values.
-        // Without that form turns out in an "impossible" state.
+        // Rule type change takes as minimum two re-renders. Since we render a specific
+        // query editor component depending on rule type we need to first render
+        // the rule type specific query editor component (using UseField under the hood) to
+        // be able to set query's field value.
+        //
+        // setTimeout provides a simple solution to wait until the rule type specific query
+        // editor component is rendered.
         setTimeout(() => {
+          setPersistentEqlQuery(timelineQueryBar);
           setPersistentEqlOptions(eqlOptions ?? {});
           setQuery();
           setFieldValue('eqlOptions', eqlOptions ?? {});
