@@ -34,7 +34,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { getIndexModeLabel } from '../../../../lib/index_mode_labels';
+import { indexModeLabels } from '../../../../lib/index_mode_labels';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { getLifecycleValue } from '../../../../lib/data_streams';
 import { SectionLoading, reactRouterNavigate } from '../../../../../shared_imports';
@@ -131,7 +131,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
 
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, dataStream?.ilmPolicyName);
-  const { history, config } = useAppContext();
+  const { history, config, core } = useAppContext();
   let indicesLink;
 
   let content;
@@ -193,7 +193,11 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             >
               <>
                 {ilmPolicyLink ? (
-                  <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
+                  <EuiLink
+                    data-test-subj={'ilmPolicyLink'}
+                    data-href={ilmPolicyLink}
+                    onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
+                  >
                     <EuiTextColor color="subdued">{ilmPolicyName}</EuiTextColor>
                   </EuiLink>
                 ) : (
@@ -204,7 +208,11 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           ) : (
             <>
               {ilmPolicyLink ? (
-                <EuiLink data-test-subj={'ilmPolicyLink'} href={ilmPolicyLink}>
+                <EuiLink
+                  data-test-subj={'ilmPolicyLink'}
+                  data-href={ilmPolicyLink}
+                  onClick={() => core.application.navigateToUrl(ilmPolicyLink)}
+                >
                   {ilmPolicyName}
                 </EuiLink>
               ) : (
@@ -355,7 +363,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
           defaultMessage:
             "The index mode applied to the data stream's backing indices, as defined in its associated index template.",
         }),
-        content: getIndexModeLabel(indexMode),
+        content: indexModeLabels[indexMode],
         dataTestSubj: 'indexModeDetail',
       },
       {
@@ -429,7 +437,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   defaultMessage="To edit data retention for this data stream, you must edit its associated {link}."
                   values={{
                     link: (
-                      <EuiLink href={ilmPolicyLink}>
+                      <EuiLink onClick={() => core.application.navigateToUrl(ilmPolicyLink)}>
                         <FormattedMessage
                           id="xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMButtonLabel"
                           defaultMessage="ILM policy"

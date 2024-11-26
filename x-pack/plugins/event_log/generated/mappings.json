@@ -337,15 +337,24 @@
                                         },
                                         "filled_intervals": {
                                             "type": "date_range",
-                                            "format": "strict_date_optional_time||epoch_millis"
+                                            "format": "strict_date_optional_time||epoch_millis",
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
                                         },
                                         "unfilled_intervals": {
                                             "format": "strict_date_optional_time||epoch_millis",
-                                            "type": "date_range"
+                                            "type": "date_range",
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
                                         },
                                         "in_progress_intervals": {
                                             "format": "strict_date_optional_time||epoch_millis",
-                                            "type": "date_range"
+                                            "type": "date_range",
+                                            "meta": {
+                                                "isArray": "true"
+                                            }
                                         },
                                         "total_gap_duration_ms": {
                                             "type": "long"

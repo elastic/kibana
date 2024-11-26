@@ -109,11 +109,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables new Knowledge Base Entries features, introduced in `8.15.0`.
-   */
-  assistantKnowledgeBaseByDefault: true,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -250,6 +245,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the siem migrations feature
    */
   siemMigrationsEnabled: false,
+
+  /**
+   * Enables the Defend Insights feature
+   */
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

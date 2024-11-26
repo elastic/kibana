@@ -247,7 +247,7 @@ describe('getTimelineItemsFromConversation', () => {
 
       expect(pick(items[3], 'actions', 'display')).toEqual({
         actions: {
-          canCopy: true,
+          canCopy: false,
           canEdit: false,
           canGiveFeedback: false,
           canRegenerate: false,

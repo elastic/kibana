@@ -36,8 +36,7 @@ export default function (providerContext: FtrProviderContext) {
     return res?._source?.['epm-packages'] as Installation;
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/199701
-  describe.skip('Installs a package using stream-based approach', () => {
+  describe('Installs a package using stream-based approach', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -50,7 +49,8 @@ export default function (providerContext: FtrProviderContext) {
         await uninstallPackage('security_detection_engine', '8.16.0');
       });
       it('should install security-rule assets from the package', async () => {
-        await installPackage('security_detection_engine', '8.16.0').expect(200);
+        // Force install to install an outdatded version
+        await installPackage('security_detection_engine', '8.16.0', { force: true }).expect(200);
         const installationSO = await getInstallationSavedObject('security_detection_engine');
         expect(installationSO?.installed_kibana).toEqual(
           expect.arrayContaining([

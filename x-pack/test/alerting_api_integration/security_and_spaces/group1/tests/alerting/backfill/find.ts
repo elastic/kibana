@@ -17,8 +17,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/196226
-  describe.skip('find backfill', () => {
+  describe('find backfill', () => {
     let backfillIds: Array<{ id: string; spaceId: string }> = [];
     const objectRemover = new ObjectRemover(supertest);
     const start1 = moment().utc().startOf('day').subtract(14, 'days').toISOString();
@@ -279,15 +278,12 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .auth(apiOptions.username, apiOptions.password);
 
           // find backfill with end time that is after one backfill ends
+          const findEnd = moment(end2).utc().add(1, 'hour').toISOString();
           const findWithEndOneRuleResponse = await supertestWithoutAuth
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?end=${moment()
-                .utc()
-                .startOf('day')
-                .subtract(9, 'days')
-                .toISOString()}`
+              )}/internal/alerting/rules/backfill/_find?end=${findEnd}`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);

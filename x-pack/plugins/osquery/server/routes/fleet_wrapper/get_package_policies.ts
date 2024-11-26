@@ -17,7 +17,11 @@ export const getPackagePoliciesRoute = (router: IRouter, osqueryContext: Osquery
     .get({
       access: 'internal',
       path: '/internal/osquery/fleet_wrapper/package_policies',
-      options: { tags: [`access:${PLUGIN_ID}-read`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-read`],
+        },
+      },
     })
     .addVersion(
       {

@@ -26,8 +26,10 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
     .patch({
       access: 'public',
       path: DETECTION_ENGINE_RULES_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

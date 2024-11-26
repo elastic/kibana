@@ -9,34 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const CUSTOM_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldRequiredError',
-  {
-    defaultMessage: 'A custom query is required.',
-  }
-);
-
-export const EQL_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
-  {
-    defaultMessage: 'An EQL query is required.',
-  }
-);
-
-export const ESQL_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError',
-  {
-    defaultMessage: 'An ES|QL query is required.',
-  }
-);
-
-export const INVALID_CUSTOM_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
-  {
-    defaultMessage: 'The KQL is invalid',
-  }
-);
-
 export const INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription',
   {
@@ -63,13 +35,6 @@ export const QUERY_BAR_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
   {
     defaultMessage: 'Custom query',
-  }
-);
-
-export const EQL_QUERY_BAR_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
-  {
-    defaultMessage: 'EQL query',
   }
 );
 
@@ -249,23 +214,16 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   }
 );
 
-export const GROUP_BY_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsTechPreviewLabelAppend',
+export const ALERT_SUPPRESSION_FIELDS_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionTechPreviewLabelAppend',
   {
     defaultMessage: 'Optional (Technical Preview)',
   }
 );
 
-export const GROUP_BY_GA_LABEL_APPEND = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsGALabelAppend',
+export const ALERT_SUPPRESSION_FIELDS_GA_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionGALabelAppend',
   {
     defaultMessage: 'Optional',
-  }
-);
-
-export const GROUP_BY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
-  {
-    defaultMessage: 'Suppress alerts by',
   }
 );

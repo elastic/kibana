@@ -14,6 +14,7 @@ import type {
   ESQLFunction,
   ESQLIntegerLiteral,
   ESQLLiteral,
+  ESQLParamLiteral,
   ESQLProperNode,
 } from '../types';
 import { BinaryExpressionGroup } from './constants';
@@ -47,6 +48,9 @@ export const isIntegerLiteral = (node: unknown): node is ESQLIntegerLiteral =>
 
 export const isDoubleLiteral = (node: unknown): node is ESQLIntegerLiteral =>
   isLiteral(node) && node.literalType === 'double';
+
+export const isParamLiteral = (node: unknown): node is ESQLParamLiteral =>
+  isLiteral(node) && node.literalType === 'param';
 
 export const isColumn = (node: unknown): node is ESQLColumn =>
   isProperNode(node) && node.type === 'column';

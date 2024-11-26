@@ -167,7 +167,11 @@ function generateSchemaLines(lineWriter, prop, mappings) {
   }
 
   if (mappings.type === 'date_range') {
-    lineWriter.addLine(`${propKey}: ecsDateRange(),`);
+    if (mappings.meta && mappings.meta.isArray === 'true') {
+      lineWriter.addLine(`${propKey}: ecsDateRangeMulti(),`);
+    } else {
+      lineWriter.addLine(`${propKey}: ecsDateRange(),`);
+    }
     return;
   }
 
@@ -338,14 +342,18 @@ function ecsBoolean() {
   return schema.maybe(schema.boolean());
 }
 
-function ecsDateRange() {
-  return schema.maybe(
-    schema.object({
-      gte: ecsDate(),
-      lte: ecsDate(),
-    })
-  );
+function ecsDateRangeBase() {
+  return schema.object({ gte: ecsDate(), lte: ecsDate() });
 }
+
+function ecsDateRange() {
+  return schema.maybe(ecsDateRangeBase());
+}
+
+function ecsDateRangeMulti() {
+  return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
+}
+
 
 const ISO_DATE_PATTERN = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/;
 

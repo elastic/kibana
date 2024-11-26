@@ -9,34 +9,24 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDetailViewRedirect } from './use_detail_view_redirect';
 import { useKibana } from './use_kibana';
 import {
-  AGENT_NAME,
-  CLOUD_PROVIDER,
   CONTAINER_ID,
-  ENTITY_DEFINITION_ID,
-  ENTITY_DISPLAY_NAME,
-  ENTITY_ID,
-  ENTITY_IDENTITY_FIELDS,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-  HOST_NAME,
   ENTITY_TYPES,
-  SERVICE_ENVIRONMENT,
+  HOST_NAME,
   SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
-import { unflattenEntity } from '../../common/utils/unflatten_entity';
-import type { Entity } from '../../common/entities';
+import type { InventoryEntity } from '../../common/entities';
 
 jest.mock('./use_kibana');
-jest.mock('../../common/utils/unflatten_entity');
 
 const useKibanaMock = useKibana as jest.Mock;
-const unflattenEntityMock = unflattenEntity as jest.Mock;
 
-const commonEntityFields: Partial<Entity> = {
-  [ENTITY_LAST_SEEN]: '2023-10-09T00:00:00Z',
-  [ENTITY_ID]: '1',
-  [ENTITY_DISPLAY_NAME]: 'entity_name',
-  [ENTITY_DEFINITION_ID]: 'entity_definition_id',
+const commonEntityFields: Partial<InventoryEntity> = {
+  entityLastSeenTimestamp: '2023-10-09T00:00:00Z',
+  entityId: '1',
+  entityDisplayName: 'entity_name',
+  entityDefinitionId: 'entity_definition_id',
+  entityDefinitionVersion: '1',
+  entitySchemaVersion: '1',
 };
 
 describe('useDetailViewRedirect', () => {
@@ -66,17 +56,19 @@ describe('useDetailViewRedirect', () => {
         },
       },
     });
-
-    unflattenEntityMock.mockImplementation((entity) => entity);
   });
 
   it('getEntityRedirectUrl should return the correct URL for host entity', () => {
-    const entity: Entity = {
-      ...(commonEntityFields as Entity),
-      [ENTITY_IDENTITY_FIELDS]: [HOST_NAME],
-      [ENTITY_TYPE]: 'host',
-      [HOST_NAME]: 'host-1',
-      [CLOUD_PROVIDER]: null,
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityType: 'host',
+      entityIdentityFields: ['host.name'],
+      host: {
+        name: 'host-1',
+      },
+      cloud: {
+        provider: null,
+      },
     };
 
     mockGetIdentityFieldsValue.mockReturnValue({ [HOST_NAME]: 'host-1' });
@@ -90,12 +82,16 @@ describe('useDetailViewRedirect', () => {
   });
 
   it('getEntityRedirectUrl should return the correct URL for container entity', () => {
-    const entity: Entity = {
-      ...(commonEntityFields as Entity),
-      [ENTITY_IDENTITY_FIELDS]: [CONTAINER_ID],
-      [ENTITY_TYPE]: 'container',
-      [CONTAINER_ID]: 'container-1',
-      [CLOUD_PROVIDER]: null,
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityType: 'container',
+      entityIdentityFields: ['container.id'],
+      container: {
+        id: 'container-1',
+      },
+      cloud: {
+        provider: null,
+      },
     };
 
     mockGetIdentityFieldsValue.mockReturnValue({ [CONTAINER_ID]: 'container-1' });
@@ -112,13 +108,17 @@ describe('useDetailViewRedirect', () => {
   });
 
   it('getEntityRedirectUrl should return the correct URL for service entity', () => {
-    const entity: Entity = {
-      ...(commonEntityFields as Entity),
-      [ENTITY_IDENTITY_FIELDS]: [SERVICE_NAME],
-      [ENTITY_TYPE]: 'service',
-      [SERVICE_NAME]: 'service-1',
-      [SERVICE_ENVIRONMENT]: 'prod',
-      [AGENT_NAME]: 'node',
+    const entity: InventoryEntity = {
+      ...(commonEntityFields as InventoryEntity),
+      entityType: 'service',
+      entityIdentityFields: ['service.name'],
+      agent: {
+        name: 'node',
+      },
+      service: {
+        name: 'service-1',
+        environment: 'prod',
+      },
     };
     mockGetIdentityFieldsValue.mockReturnValue({ [SERVICE_NAME]: 'service-1' });
     mockGetRedirectUrl.mockReturnValue('service-overview-url');
@@ -145,10 +145,13 @@ describe('useDetailViewRedirect', () => {
     [ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs, 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013'],
   ].forEach(([entityType, dashboardId]) => {
     it(`getEntityRedirectUrl should return the correct URL for ${entityType} entity`, () => {
-      const entity: Entity = {
-        ...(commonEntityFields as Entity),
-        [ENTITY_IDENTITY_FIELDS]: ['some.field'],
-        [ENTITY_TYPE]: entityType,
+      const entity: InventoryEntity = {
+        ...(commonEntityFields as InventoryEntity),
+        entityType,
+        entityIdentityFields: ['some.field'],
+        some: {
+          field: 'some-value',
+        },
       };
 
       mockAsKqlFilter.mockReturnValue('kql-query');

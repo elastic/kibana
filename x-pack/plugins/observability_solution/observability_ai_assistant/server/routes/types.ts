@@ -68,6 +68,7 @@ export interface ObservabilityAIAssistantRouteHandlerResources {
 export interface ObservabilityAIAssistantRouteCreateOptions {
   options: {
     timeout?: {
+      payload?: number;
       idleSocket?: number;
     };
     tags: Array<'access:ai_assistant'>;

@@ -58,7 +58,6 @@ export interface UsageStats {
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
   'observability:aiAssistantSearchConnectorIndexPattern': string;
   'visualization:heatmap:maxBuckets': number;
-  'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -108,6 +107,7 @@ export interface UsageStats {
   'timepicker:quickRanges': string;
   'theme:version': string;
   'theme:darkMode': boolean;
+  'theme:name': string;
   'state:storeInSessionStorage': boolean;
   'savedObjects:perPage': number;
   'search:queryLanguage': string;

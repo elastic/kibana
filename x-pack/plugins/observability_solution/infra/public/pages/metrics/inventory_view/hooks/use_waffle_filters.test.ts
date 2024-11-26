@@ -21,11 +21,11 @@ jest.mock('react-router-dom', () => ({
 
 const mockDataView = {
   id: 'mock-id',
-  title: 'mock-title',
   timeFieldName: TIMESTAMP_FIELD,
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
+  getIndexPattern: () => 'mock-title',
 } as jest.Mocked<DataView>;
 
 jest.mock('../../../../containers/metrics_source', () => ({

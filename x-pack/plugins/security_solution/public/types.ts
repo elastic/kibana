@@ -83,6 +83,7 @@ import type { EntityAnalytics } from './entity_analytics';
 import type { Assets } from './assets';
 import type { Investigations } from './investigations';
 import type { MachineLearning } from './machine_learning';
+import type { SiemMigrations } from './siem_migrations';
 
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
@@ -243,12 +244,13 @@ export interface SubPlugins {
   assets: Assets;
   investigations: Investigations;
   machineLearning: MachineLearning;
+  siemMigrations: SiemMigrations;
 }
 
 // TODO: find a better way to defined these types
 export interface StartedSubPlugins {
   [CASES_SUB_PLUGIN_KEY]: ReturnType<Cases['start']>;
-  alerts: ReturnType<Detections['start']>;
+  alerts: Awaited<ReturnType<Detections['start']>>;
   attackDiscovery: ReturnType<AttackDiscovery['start']>;
   cloudDefend: ReturnType<CloudDefend['start']>;
   cloudSecurityPosture: ReturnType<CloudSecurityPosture['start']>;
@@ -266,4 +268,5 @@ export interface StartedSubPlugins {
   assets: ReturnType<Assets['start']>;
   investigations: ReturnType<Investigations['start']>;
   machineLearning: ReturnType<MachineLearning['start']>;
+  siemMigrations: ReturnType<SiemMigrations['start']>;
 }

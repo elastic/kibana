@@ -6,20 +6,17 @@
  */
 import {
   ASSET_DETAILS_LOCATOR_ID,
-  AssetDetailsLocatorParams,
-  ENTITY_IDENTITY_FIELDS,
-  ENTITY_TYPE,
   ENTITY_TYPES,
-  SERVICE_ENVIRONMENT,
   SERVICE_OVERVIEW_LOCATOR_ID,
-  ServiceOverviewParams,
+  type AssetDetailsLocatorParams,
+  type ServiceOverviewParams,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { castArray } from 'lodash';
-import type { Entity } from '../../common/entities';
-import { unflattenEntity } from '../../common/utils/unflatten_entity';
+import { isBuiltinEntityOfType } from '../../common/utils/entity_type_guards';
+import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 
 const KUBERNETES_DASHBOARDS_IDS: Record<string, string> = {
@@ -44,52 +41,40 @@ export const useDetailViewRedirect = () => {
   const dashboardLocator = locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const serviceOverviewLocator = locators.get<ServiceOverviewParams>(SERVICE_OVERVIEW_LOCATOR_ID);
 
-  const getSingleIdentityFieldValue = useCallback(
-    (entity: Entity) => {
-      const identityFields = castArray(entity[ENTITY_IDENTITY_FIELDS]);
-      if (identityFields.length > 1) {
-        throw new Error(`Multiple identity fields are not supported for ${entity[ENTITY_TYPE]}`);
-      }
-
-      const identityField = identityFields[0];
-      return entityManager.entityClient.getIdentityFieldsValue(unflattenEntity(entity))[
-        identityField
-      ];
-    },
-    [entityManager.entityClient]
-  );
-
   const getDetailViewRedirectUrl = useCallback(
-    (entity: Entity) => {
-      const type = entity[ENTITY_TYPE];
-      const identityValue = getSingleIdentityFieldValue(entity);
+    (entity: InventoryEntity) => {
+      const identityFieldsValue = entityManager.entityClient.getIdentityFieldsValue({
+        entity: {
+          identity_fields: entity.entityIdentityFields,
+        },
+        ...entity,
+      });
+      const identityFields = castArray(entity.entityIdentityFields);
 
-      switch (type) {
-        case ENTITY_TYPES.HOST:
-        case ENTITY_TYPES.CONTAINER:
-          return assetDetailsLocator?.getRedirectUrl({
-            assetId: identityValue,
-            assetType: type,
-          });
-
-        case 'service':
-          return serviceOverviewLocator?.getRedirectUrl({
-            serviceName: identityValue,
-            // service.environemnt is not part of entity.identityFields
-            // we need to manually get its value
-            environment: [entity[SERVICE_ENVIRONMENT] || undefined].flat()[0],
-          });
-
-        default:
-          return undefined;
+      if (isBuiltinEntityOfType('host', entity) || isBuiltinEntityOfType('container', entity)) {
+        return assetDetailsLocator?.getRedirectUrl({
+          assetId: identityFieldsValue[identityFields[0]],
+          assetType: entity.entityType,
+        });
       }
+
+      if (isBuiltinEntityOfType('service', entity)) {
+        return serviceOverviewLocator?.getRedirectUrl({
+          serviceName: identityFieldsValue[identityFields[0]],
+          environment: entity.service?.environment
+            ? castArray(entity.service?.environment)[0]
+            : undefined,
+        });
+      }
+
+      return undefined;
     },
-    [assetDetailsLocator, getSingleIdentityFieldValue, serviceOverviewLocator]
+    [assetDetailsLocator, entityManager.entityClient, serviceOverviewLocator]
   );
 
   const getDashboardRedirectUrl = useCallback(
-    (entity: Entity) => {
-      const type = entity[ENTITY_TYPE];
+    (entity: InventoryEntity) => {
+      const type = entity.entityType;
       const dashboardId = KUBERNETES_DASHBOARDS_IDS[type];
 
       return dashboardId
@@ -97,7 +82,12 @@ export const useDetailViewRedirect = () => {
             dashboardId,
             query: {
               language: 'kuery',
-              query: entityManager.entityClient.asKqlFilter(unflattenEntity(entity)),
+              query: entityManager.entityClient.asKqlFilter({
+                entity: {
+                  identity_fields: entity.entityIdentityFields,
+                },
+                ...entity,
+              }),
             },
           })
         : undefined;
@@ -106,7 +96,8 @@ export const useDetailViewRedirect = () => {
   );
 
   const getEntityRedirectUrl = useCallback(
-    (entity: Entity) => getDetailViewRedirectUrl(entity) ?? getDashboardRedirectUrl(entity),
+    (entity: InventoryEntity) =>
+      getDetailViewRedirectUrl(entity) ?? getDashboardRedirectUrl(entity),
     [getDashboardRedirectUrl, getDetailViewRedirectUrl]
   );
 

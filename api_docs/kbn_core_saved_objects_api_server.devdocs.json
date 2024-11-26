@@ -2795,6 +2795,14 @@
             "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
           },
           {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },

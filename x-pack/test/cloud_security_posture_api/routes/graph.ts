@@ -399,7 +399,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('Should filter unknown targets', async () => {
+      it('should filter unknown targets', async () => {
         const response = await postGraph(supertest, {
           query: {
             eventIds: [],
@@ -424,7 +424,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
       });
 
-      it('Should return unknown targets', async () => {
+      it('should return unknown targets', async () => {
         const response = await postGraph(supertest, {
           showUnknownTarget: true,
           query: {
@@ -450,7 +450,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
       });
 
-      it('Should limit number of nodes', async () => {
+      it('should limit number of nodes', async () => {
         const response = await postGraph(supertest, {
           nodesLimit: 1,
           query: {
@@ -475,6 +475,20 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(2);
         expect(response.body).to.have.property('messages').length(1);
         expect(response.body.messages[0]).equal(ApiMessageCode.ReachedNodesLimit);
+      });
+
+      it('should support date math', async () => {
+        const response = await postGraph(supertest, {
+          query: {
+            eventIds: ['kabcd1234efgh5678'],
+            start: '2024-09-01T12:30:00.000Z||-30m',
+            end: '2024-09-01T12:30:00.000Z||+30m',
+          },
+        }).expect(result(200));
+
+        expect(response.body).to.have.property('nodes').length(3);
+        expect(response.body).to.have.property('edges').length(2);
+        expect(response.body).not.to.have.property('messages');
       });
     });
   });
