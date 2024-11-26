@@ -120,7 +120,8 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/presentation-containers",
-    "@kbn/object-utils"
+    "@kbn/object-utils",
+    "@kbn/event-bus-plugin"
   ],
   "exclude": ["target/**/*"]
 }
