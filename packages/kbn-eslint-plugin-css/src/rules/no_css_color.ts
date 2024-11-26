@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// import Color from 'color';
 import type { Rule } from 'eslint';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
@@ -29,30 +30,24 @@ const htmlElementColorDeclarationRegex = RegExp(
   String.raw`(${propertiesSupportingCssColor.join('|')})\:\s?(\'|\")?${cssColorRegex.source}`
 );
 
-const raiseReportIfPropertyHasCssColor = (
+const raiseReportIfPropertyHasInvalidCssColor = (
   context: Rule.RuleContext,
-  node: TSESTree.ObjectLiteralElement
+  propertyNode: TSESTree.ObjectLiteralElement,
+  messageToReport: Rule.ReportDescriptor
 ) => {
   let didReport: boolean;
 
   // checks if property value is a css color value for instances where style declaration is computed from an object
   if (
     (didReport = Boolean(
-      node.type === 'Property' &&
-        node.key.type === 'Identifier' &&
-        node.value.type === 'Literal' &&
-        propertiesSupportingCssColor.indexOf(node.key.name) > -1 &&
-        cssColorRegex.test(String(node.value.value) ?? '')
+      propertyNode.type === 'Property' &&
+        propertyNode.key.type === 'Identifier' &&
+        propertyNode.value.type === 'Literal' &&
+        propertiesSupportingCssColor.indexOf(propertyNode.key.name) > -1 &&
+        cssColorRegex.test(String(propertyNode.value.value) ?? '')
     ))
   ) {
-    context.report({
-      loc: node.loc,
-      messageId: 'noCssColorSpecific',
-      data: {
-        // @ts-expect-error the key name is always pretty else this code will not execute
-        property: node.key.name,
-      },
-    });
+    context.report(messageToReport);
   }
 
   return didReport;
@@ -68,8 +63,10 @@ export const NoCssColor: Rule.RuleModule = {
       url: 'https://eui.elastic.co/#/theming/colors/values',
     },
     messages: {
+      noCSSColorSpecificDeclaredVariable:
+        'Avoid using a literal CSS color value for "{{property}}", use an EUI theme color instead in declared variable {{variableName}} on line {{line}}',
       noCssColorSpecific:
-        'Avoid using a literal CSS color value for {{property}}, use an EUI theme color instead',
+        'Avoid using a literal CSS color value for "{{property}}", use an EUI theme color instead',
       noCssColor: 'Avoid using a literal CSS color value, use an EUI theme color instead',
     },
     schema: [],
@@ -83,28 +80,6 @@ export const NoCssColor: Rule.RuleModule = {
 
         if (node.name.name === 'style') {
           /**
-           * @example <EuiCode style={`{ color: '#dd4040' }`}>This is an example</EuiCode>
-           */
-          if (
-            node.value &&
-            node.value.type === 'JSXExpressionContainer' &&
-            node.value.expression.type === 'TemplateLiteral'
-          ) {
-            for (let i = 0; i < node.value.expression.quasis.length; i++) {
-              const declarationTemplateNode = node.value.expression.quasis[i];
-
-              if (htmlElementColorDeclarationRegex.test(declarationTemplateNode.value.raw)) {
-                context.report({
-                  loc: declarationTemplateNode.loc,
-                  messageId: 'noCssColor',
-                });
-
-                break;
-              }
-            }
-          }
-
-          /**
            * @example <EuiCode style={{ color: '#dd4040' }}>This is an example</EuiCode>
            */
           if (
@@ -112,19 +87,60 @@ export const NoCssColor: Rule.RuleModule = {
             node.value.type === 'JSXExpressionContainer' &&
             node.value.expression.type === 'ObjectExpression'
           ) {
-            const declarationTemplateNode = node.value.expression.properties;
+            const declarationPropertiesNode = node.value.expression.properties;
 
-            if (!declarationTemplateNode.length) {
+            declarationPropertiesNode?.forEach((property) => {
+              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+                loc: property.loc,
+                messageId: 'noCssColorSpecific',
+                data: {
+                  // @ts-expect-error the key name is always present else this code will not execute
+                  property: property.key.name,
+                },
+              });
+            });
+
+            return;
+          }
+
+          /**
+           * @example
+           *
+           * const codeStyle = { color: '#dd4040' };
+           *
+           * <EuiCode style={codeStyle}>This is an example</EuiCode>
+           */
+          if (
+            node.value &&
+            node.value.type === 'JSXExpressionContainer' &&
+            node.value.expression.type === 'Identifier'
+          ) {
+            const styleVariableName = node.value.expression.name;
+
+            const styleVariableDeclaration = context.sourceCode
+              .getScope(node.value.expression)
+              .variables.find((variable) => variable.name === styleVariableName);
+
+            if (!styleVariableDeclaration) {
               return;
             }
 
-            for (let i = 0; i < declarationTemplateNode.length; i++) {
-              const property = declarationTemplateNode[i];
+            // assuming there's only one definition of the variable
+            (
+              styleVariableDeclaration.defs[0].node as TSESTree.VariableDeclarator
+            ).init?.properties.forEach((property) => {
+              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+                loc: node.loc,
+                messageId: 'noCSSColorSpecificDeclaredVariable',
+                data: {
+                  property: property.key.name,
+                  variableName: styleVariableName,
+                  line: property.loc.start.line,
+                },
+              });
+            });
 
-              if (raiseReportIfPropertyHasCssColor(context, property)) {
-                break;
-              }
-            }
+            return;
           }
         }
 
@@ -159,22 +175,24 @@ export const NoCssColor: Rule.RuleModule = {
             node.value.type === 'JSXExpressionContainer' &&
             node.value.expression.type === 'ObjectExpression'
           ) {
-            const declarationTemplateNode = node.value.expression.properties;
+            const declarationPropertiesNode = node.value.expression.properties;
 
-            if (!declarationTemplateNode.length) {
-              return;
-            }
+            declarationPropertiesNode?.forEach((property) => {
+              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+                loc: property.loc,
+                messageId: 'noCssColorSpecific',
+                data: {
+                  // @ts-expect-error the key name is always present else this code will not execute
+                  property: property.key.name,
+                },
+              });
+            });
 
-            for (let i = 0; i < declarationTemplateNode.length; i++) {
-              const property = declarationTemplateNode[i];
-
-              if (raiseReportIfPropertyHasCssColor(context, property)) {
-                break;
-              }
-            }
+            return;
           }
 
           /**
+           * @description check if css prop is a tagged template literal from emotion
            * @example <EuiCode css={css`{ color: #dd4040 }`}>This is an example</EuiCode>
            */
           if (
@@ -196,6 +214,8 @@ export const NoCssColor: Rule.RuleModule = {
                 break;
               }
             }
+
+            return;
           }
 
           /**
@@ -231,13 +251,18 @@ export const NoCssColor: Rule.RuleModule = {
               return;
             }
 
-            for (let i = 0; i < declarationPropertiesNode.length; i++) {
-              const property = declarationPropertiesNode[i];
+            declarationPropertiesNode.forEach((property) => {
+              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+                loc: property.loc,
+                messageId: 'noCssColorSpecific',
+                data: {
+                  // @ts-expect-error the key name is always present else this code will not execute
+                  property: property.key.name,
+                },
+              });
+            });
 
-              if (raiseReportIfPropertyHasCssColor(context, property)) {
-                break;
-              }
-            }
+            return;
           }
         }
       },
