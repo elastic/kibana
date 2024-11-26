@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           bucketSizeInSeconds: 60,
           documentType: ApmDocumentType.TransactionMetric,
           rollupInterval: RollupInterval.OneMinute,
-          transactionType: 'request',
+          transactionType: 'test',
           useDurationSummary: false,
           latencyAggregationType: 'avg' as LatencyAggregationType,
           transactionNames: JSON.stringify(transactionNames),
@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             .rate(GO_PROD_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction({ transactionName })
+                .transaction({ transactionName, transactionType: 'test' })
                 .timestamp(timestamp)
                 .duration(1000)
                 .success()
@@ -108,7 +108,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             .rate(GO_PROD_ERROR_RATE)
             .generator((timestamp) =>
               serviceGoProdInstance
-                .transaction({ transactionName })
+                .transaction({ transactionName, transactionType: 'test' })
                 .duration(1000)
                 .timestamp(timestamp)
                 .failure()
