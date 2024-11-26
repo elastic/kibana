@@ -127,11 +127,11 @@ describe('useSearchAlertsQuery', () => {
   });
 
   it('calls searchAlerts with correct arguments', async () => {
-    const { result, waitForValueToChange } = renderHook(() => useSearchAlertsQuery(params), {
+    const { result } = renderHook(() => useSearchAlertsQuery(params), {
       wrapper,
     });
 
-    await waitForValueToChange(() => result.current.data);
+    await waitFor(() => expect(result.current.data).toBeDefined());
 
     expect(mockDataPlugin.search.search).toHaveBeenCalledWith(
       {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import {
   mockedAlertSummaryResponse,
