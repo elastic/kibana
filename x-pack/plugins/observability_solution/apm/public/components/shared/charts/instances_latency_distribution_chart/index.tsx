@@ -28,7 +28,6 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
 import { asTransactionRate, getDurationFormatter } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import * as urlHelpers from '../../links/url_helpers';
 import { ChartContainer } from '../chart_container';
@@ -54,7 +53,6 @@ export function InstancesLatencyDistributionChart({
   const history = useHistory();
   const hasData = items.length > 0;
 
-  const theme = useTheme();
   const { euiTheme } = useEuiTheme();
   const chartThemes = useChartThemes();
 
@@ -157,13 +155,13 @@ export function InstancesLatencyDistributionChart({
               xScaleType={ScaleType.Linear}
               yAccessors={[(item) => item.latency]}
               yScaleType={ScaleType.Linear}
-              color={theme.eui.euiColorMediumShade}
+              color={euiTheme.colors.mediumShade}
               bubbleSeriesStyle={{
                 point: {
                   shape: 'square',
                   radius: 4,
-                  fill: theme.eui.euiColorLightestShade,
-                  stroke: theme.eui.euiColorMediumShade,
+                  fill: euiTheme.colors.lightestShade,
+                  stroke: euiTheme.colors.mediumShade,
                   strokeWidth: 2,
                 },
               }}

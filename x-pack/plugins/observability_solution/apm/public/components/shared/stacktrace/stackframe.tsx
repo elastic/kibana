@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
+import { EuiAccordion, type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
@@ -16,14 +16,14 @@ import { Context } from './context';
 import { FrameHeading } from './frame_heading';
 import { Variables } from './variables';
 
-const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean }>`
+const ContextContainer = euiStyled.div<{ isLibraryFrame: boolean; euiTheme: EuiThemeComputed }>`
   position: relative;
-  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
-  background: ${({ isLibraryFrame, theme }) =>
-    isLibraryFrame ? theme.eui.euiColorEmptyShade : theme.eui.euiColorLightestShade};
+  font-family: ${({ euiTheme }) => euiTheme.font.familyCode};
+  font-size: ${({ euiTheme }) => euiTheme.size.s};
+  border: 1px solid ${({ euiTheme }) => euiTheme.colors.lightShade};
+  border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
+  background: ${({ isLibraryFrame, euiTheme }) =>
+    isLibraryFrame ? euiTheme.colors.emptyShade : euiTheme.colors.lightestShade};
 `;
 
 // Indent the non-context frames the same amount as the accordion control
@@ -46,6 +46,7 @@ export function Stackframe({
   initialIsOpen = false,
   isLibraryFrame = false,
 }: Props) {
+  const { euiTheme } = useEuiTheme();
   if (!hasLineContext(stackframe)) {
     return (
       <NoContextFrameHeadingWrapper>
@@ -72,7 +73,7 @@ export function Stackframe({
       id={id}
       initialIsOpen={initialIsOpen}
     >
-      <ContextContainer isLibraryFrame={isLibraryFrame}>
+      <ContextContainer euiTheme={euiTheme} isLibraryFrame={isLibraryFrame}>
         <Context
           stackframe={stackframe}
           codeLanguage={codeLanguage}

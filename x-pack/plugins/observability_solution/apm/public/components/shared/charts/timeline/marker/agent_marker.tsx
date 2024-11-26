@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { type EuiThemeComputed, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../hooks/use_theme';
 import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { Legend } from '../legend';
 
-const NameContainer = euiStyled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeS};
+const NameContainer = euiStyled.div<{ euiTheme: EuiThemeComputed }>`
+  border-bottom: 1px solid ${({ euiTheme }) => euiTheme.colors.mediumShade};
+  padding-bottom: ${({ euiTheme }) => euiTheme.size.s};
 `;
 
-const TimeContainer = euiStyled.div`
-  color: ${({ theme }) => theme.eui.euiColorMediumShade};
-  padding-top: ${({ theme }) => theme.eui.euiSizeS};
+const TimeContainer = euiStyled.div<{ euiTheme: EuiThemeComputed }>`
+  color: ${({ euiTheme }) => euiTheme.colors.mediumShade};
+  padding-top: ${({ euiTheme }) => euiTheme.size.s};
 `;
 
 interface Props {
@@ -28,7 +27,7 @@ interface Props {
 }
 
 export function AgentMarker({ mark }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
@@ -37,12 +36,12 @@ export function AgentMarker({ mark }: Props) {
         position="top"
         content={
           <div>
-            <NameContainer>{mark.id}</NameContainer>
-            <TimeContainer>{asDuration(mark.offset)}</TimeContainer>
+            <NameContainer euiTheme={euiTheme}>{mark.id}</NameContainer>
+            <TimeContainer euiTheme={euiTheme}>{asDuration(mark.offset)}</TimeContainer>
           </div>
         }
       >
-        <Legend clickable color={theme.eui.euiColorMediumShade} />
+        <Legend clickable color={euiTheme.colors.mediumShade} />
       </EuiToolTip>
     </>
   );

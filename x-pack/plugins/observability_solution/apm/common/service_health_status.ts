@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
@@ -35,7 +35,7 @@ export function getServiceHealthStatus({ severity }: { severity: ML_ANOMALY_SEVE
 }
 
 export function getServiceHealthStatusColor(
-  euiTheme: EuiThemeComputed<{}>,
+  euiTheme: EuiThemeComputed,
   status: ServiceHealthStatus
 ) {
   switch (status) {
@@ -51,7 +51,7 @@ export function getServiceHealthStatusColor(
 }
 
 export function getServiceHealthStatusBadgeColor(
-  euiTheme: EuiThemeComputed<{}>,
+  euiTheme: EuiThemeComputed,
   status: ServiceHealthStatus
 ) {
   switch (status) {

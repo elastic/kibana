@@ -7,8 +7,8 @@
 
 import { inRange } from 'lodash';
 import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { useTheme } from '../../../../hooks/use_theme';
 import { Mark } from '.';
 import { Marker } from './marker';
 import { PlotValues } from './plot_utils';
@@ -36,7 +36,7 @@ interface TimelineAxisProps {
 }
 
 export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: TimelineAxisProps) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { margins, tickValues, width, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
 
@@ -65,7 +65,7 @@ export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: Timel
               x={position}
               y={0}
               textAnchor="middle"
-              fill={theme.eui.euiColorDarkShade}
+              fill={euiTheme.colors.darkShade}
               fontSize={11}
             >
               {label}
@@ -76,7 +76,7 @@ export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: Timel
               key="topTrace"
               x={topTraceDurationPosition}
               y={0}
-              fill={theme.eui.euiTextColor}
+              fill={euiTheme.colors.text}
               textAnchor="middle"
             >
               {tickFormatter(topTraceDuration).formatted}

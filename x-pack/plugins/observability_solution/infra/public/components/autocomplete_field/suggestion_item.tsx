@@ -60,7 +60,7 @@ const SuggestionItemField = euiStyled.div`
 
 const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
   suggestionType: QuerySuggestionTypes;
-  euiTheme: EuiThemeComputed<{}>;
+  euiTheme: EuiThemeComputed;
 }>`
   background-color: ${(props) =>
     transparentize(0.9, getEuiIconColor(props.euiTheme, props.suggestionType))};

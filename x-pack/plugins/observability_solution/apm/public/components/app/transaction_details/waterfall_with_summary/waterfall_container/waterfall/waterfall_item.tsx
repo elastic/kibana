@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiIcon,
+  EuiText,
+  type EuiThemeComputed,
+  EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
@@ -30,6 +37,7 @@ interface IContainerStyleProps {
   timelineMargins: Margins;
   isSelected: boolean;
   hasToggle: boolean;
+  euiTheme: EuiThemeComputed;
 }
 
 interface IBarStyleProps {
@@ -41,19 +49,19 @@ const Container = euiStyled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
-  padding-top: ${({ theme }) => theme.eui.euiSizeS};
-  padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
+  padding-top: ${({ euiTheme }) => euiTheme.size.s};
+  padding-bottom: ${({ euiTheme }) => euiTheme.size.s};
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
       ? props.timelineMargins.left - 30 // fix margin if there is a toggle
       : props.timelineMargins.left}px ;
-  background-color: ${({ isSelected, theme }) =>
-    isSelected ? theme.eui.euiColorLightestShade : 'initial'};
+  background-color: ${({ isSelected, euiTheme }) =>
+    isSelected ? euiTheme.colors.lightestShade : 'initial'};
   cursor: pointer;
 
   &:hover {
-    background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+    background-color: ${({ euiTheme }) => euiTheme.colors.lightestShade};
   }
 `;
 
@@ -224,6 +232,7 @@ export function WaterfallItem({
   onClick,
   segments,
 }: IWaterfallItemProps) {
+  const { euiTheme } = useEuiTheme();
   const [widthFactor, setWidthFactor] = useState(1);
   const waterfallItemRef: React.RefObject<any> = useRef(null);
   useEffect(() => {
@@ -251,6 +260,7 @@ export function WaterfallItem({
     <Container
       ref={waterfallItemRef}
       type={item.docType}
+      euiTheme={euiTheme}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       hasToggle={hasToggle}
@@ -311,7 +321,7 @@ function RelatedErrors({
   errorCount: number;
 }) {
   const apmRouter = useApmRouter();
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
@@ -348,7 +358,7 @@ function RelatedErrors({
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <EuiBadge
           href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
-          color={theme.eui.euiColorDanger}
+          color={euiTheme.colors.danger}
           iconType="arrowRight"
         >
           {i18n.translate('xpack.apm.waterfall.errorCount', {

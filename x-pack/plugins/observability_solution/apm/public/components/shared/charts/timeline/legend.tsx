@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useEuiTheme } from '@elastic/eui';
+import { type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 
 export enum Shape {
   circle = 'circle',
@@ -18,13 +18,14 @@ interface ContainerProps {
   onClick: (e: Event) => void;
   clickable: boolean;
   disabled: boolean;
+  euiTheme: EuiThemeComputed;
 }
 
 const Container = euiStyled.div<ContainerProps>`
   display: flex;
   align-items: center;
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+  font-size: ${({ euiTheme }) => euiTheme.size.s};
+  color: ${({ euiTheme }) => euiTheme.colors.darkShade};
   cursor: ${(props) => (props.clickable ? 'pointer' : 'initial')};
   opacity: ${(props) => (props.disabled ? 0.4 : 1)};
   user-select: none;
@@ -73,6 +74,7 @@ export function Legend({
 
   return (
     <Container
+      euiTheme={euiTheme}
       onClick={onClick}
       disabled={disabled}
       clickable={clickable || Boolean(onClick)}

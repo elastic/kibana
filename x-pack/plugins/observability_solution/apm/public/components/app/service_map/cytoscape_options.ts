@@ -27,7 +27,7 @@ function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
 }
 
 function getBorderColorFn(
-  euiTheme: EuiThemeComputed<{}>
+  euiTheme: EuiThemeComputed
 ): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
   return (el: cytoscape.NodeSingular) => {
     const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
@@ -91,7 +91,7 @@ const zIndexEdge = 100;
 const zIndexEdgeHighlight = 110;
 const zIndexEdgeHover = 120;
 
-export const getNodeHeight = (euiTheme: EuiThemeComputed<{}>): number =>
+export const getNodeHeight = (euiTheme: EuiThemeComputed): number =>
   parseInt(euiTheme.size.xxl, 10);
 
 function isService(el: cytoscape.NodeSingular) {
@@ -99,7 +99,7 @@ function isService(el: cytoscape.NodeSingular) {
 }
 
 const getStyle = (
-  euiTheme: EuiThemeComputed<{}>,
+  euiTheme: EuiThemeComputed,
   isTraceExplorerEnabled: boolean
 ): cytoscape.Stylesheet[] => {
   const lineColor = euiTheme.colors.mediumShade;
@@ -236,7 +236,7 @@ const getStyle = (
 // The CSS styles for the div containing the cytoscape element. Makes a
 // background grid of dots.
 export const getCytoscapeDivStyle = (
-  euiTheme: EuiThemeComputed<{}>,
+  euiTheme: EuiThemeComputed,
   status: FETCH_STATUS
 ): CSSProperties => ({
   background: `linear-gradient(
@@ -259,7 +259,7 @@ ${euiTheme.colors.lightShade}`,
 });
 
 export const getCytoscapeOptions = (
-  euiTheme: EuiThemeComputed<{}>,
+  euiTheme: EuiThemeComputed,
   isTraceExplorerEnabled: boolean
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,

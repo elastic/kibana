@@ -40,19 +40,19 @@ const Description = euiStyled.div`
 `;
 
 const SuggestionItemContainer = euiStyled.div`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeS};
-  height: ${({ theme }) => theme.eui.euiSizeXL};
+  font-size: ${({ euiTheme }) => euiTheme.size.s};
+  height: ${({ euiTheme }) => euiTheme.size.xl};
   align-items: center;
   display: flex;
-  background: ${({ selected, theme }) =>
-    selected ? theme.eui.euiColorLightestShade : 'transparent'};
+  background: ${({ selected, euiTheme }) =>
+    selected ? euiTheme.colors.lightestShade : 'transparent'};
   cursor: pointer;
   border-radius: ${({ theme }) => theme.eui.euiBorderRadiusSmall};
 
   ${Description} {
     p span {
-      background: ${({ selected, theme }) =>
-        selected ? theme.eui.euiColorEmptyShade : theme.eui.euiColorLightestShade};
+      background: ${({ selected, euiTheme }) =>
+        selected ? euiTheme.colors.emptyShade : euiTheme.colors.lightestShade};
     }
   }
 `;
@@ -93,6 +93,7 @@ function Suggestion(props) {
   const { euiTheme } = useEuiTheme();
   return (
     <SuggestionItemContainer
+      euiTheme={euiTheme}
       selected={props.selected}
       onClick={() => props.onClick(props.suggestion)}
       onMouseEnter={props.onMouseEnter}

@@ -12,7 +12,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  type EuiThemeComputed,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { transparentize } from 'polished';
@@ -20,7 +22,6 @@ import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
 import { areEqual, ListChildComponentProps, VariableSizeList as List } from 'react-window';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
-import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
 import {
   IWaterfallNodeFlatten,
@@ -59,22 +60,23 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
   EuiAccordionProps & {
     marginLeftLevel: number;
     hasError: boolean;
+    euiTheme: EuiThemeComputed;
   }
 >`
 
-  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-top: 1px solid ${({ euiTheme }) => euiTheme.colors.lightShade};
 
   ${(props) => {
     const borderLeft = props.hasError
-      ? `2px solid ${props.theme.eui.euiColorDanger};`
-      : `1px solid ${props.theme.eui.euiColorLightShade};`;
+      ? `2px solid ${props.euiTheme.colors.danger};`
+      : `1px solid ${props.euiTheme.colors.lightShade};`;
     return `.button_${props.id} {
       width: 100%;
       height: ${ACCORDION_HEIGHT}px;
       margin-left: ${props.marginLeftLevel}px;
       border-left: ${borderLeft}
       &:hover {
-        background-color: ${props.theme.eui.euiColorLightestShade};
+        background-color: ${props.euiTheme.colors.lightestShade};
       }
     }`;
   }}
@@ -176,7 +178,7 @@ const VirtualRow = React.memo(
 );
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
   const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
     useWaterfallContext();
@@ -190,7 +192,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     ?.filter((segment) => segment.self)
     .map((segment) => ({
       id: segment.item.id,
-      color: theme.eui.euiColorAccent,
+      color: euiTheme.colors.accent,
       left: (segment.offset - node.item.offset - node.item.skew) / node.item.duration,
       width: segment.duration / node.item.duration,
     }));
@@ -206,6 +208,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   return (
     <StyledAccordion
       data-test-subj="waterfallItem"
+      euiTheme={euiTheme}
       style={{ position: 'relative' }}
       buttonClassName={`button_${node.item.id}`}
       id={node.item.id}

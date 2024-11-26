@@ -25,7 +25,7 @@ export function getChartAnomalyTimeseries({
   anomalyTimeseriesColor,
 }: {
   anomalyTimeseries?: ServiceAnomalyTimeseries;
-  euiTheme: EuiThemeComputed<{}>;
+  euiTheme: EuiThemeComputed;
   anomalyTimeseriesColor?: string;
 }):
   | {

@@ -12,7 +12,7 @@ import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 const Label = euiStyled.div<{
-  euiTheme: EuiThemeComputed<{}>;
+  euiTheme: EuiThemeComputed;
 }>`
   margin-bottom: ${({ euiTheme }) => euiTheme.size.xs};
   font-size: ${({ euiTheme }) => euiTheme.size.s};

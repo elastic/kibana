@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge } from '@elastic/eui';
-import { useTheme } from '../../../hooks/use_theme';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
 
 interface Props {
   count: number;
 }
 
 export function ErrorCountSummaryItemBadge({ count }: Props) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiBadge color={theme.eui.euiColorDanger} style={{ maxWidth: '200px' }}>
+    <EuiBadge color={euiTheme.colors.danger} style={{ maxWidth: '200px' }}>
       {i18n.translate('xpack.apm.transactionDetails.errorCount', {
         defaultMessage: '{errorCount, number} {errorCount, plural, one {Error} other {Errors}}',
         values: { errorCount: count },
