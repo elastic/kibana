@@ -57,7 +57,7 @@ export class GetSLOsOverview {
             filter: {
               range: {
                 summaryUpdatedAt: {
-                  lt: 'now-48h',
+                  lt: `now-${settings.staleThresholdInHours}h`,
                 },
               },
             },
@@ -66,7 +66,7 @@ export class GetSLOsOverview {
             filter: {
               range: {
                 summaryUpdatedAt: {
-                  gte: 'now-48h',
+                  gte: `now-${settings.staleThresholdInHours}h`,
                 },
               },
             },
