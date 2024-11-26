@@ -377,7 +377,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
     const localDefineStepData: DefineStepRule = defineFieldsTransform({
       ...defineStepData,
-      eqlOptions: eqlOptionsSelected,
     });
     const updatedRule = await updateRule({
       ...formatRule<RuleUpdateProps>(
@@ -401,7 +400,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     actionsStepData,
     defineStepData,
     defineFieldsTransform,
-    eqlOptionsSelected,
     addSuccess,
     navigateToApp,
     rule?.exceptions_list,
