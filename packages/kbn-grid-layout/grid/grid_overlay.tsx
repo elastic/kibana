@@ -48,7 +48,7 @@ const ScrollOnHover = ({
 
   useEffect(() => {
     gridLayoutStateManager.interactionEvent$.subscribe((interactionEvent) => {
-      if (interactionEvent) {
+      if (interactionEvent?.type === 'drag') {
         setIsHidden(false);
       } else {
         setIsHidden(true);

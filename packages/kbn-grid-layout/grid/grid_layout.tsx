@@ -154,7 +154,6 @@ export const GridLayout = ({
       <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
         <div
           ref={(divElement) => {
-            console.log('setDimensionsRef', divElement);
             setDimensionsRef(divElement);
           }}
           className={gridClassNames}
