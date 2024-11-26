@@ -50,7 +50,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     const license = await fetcher();
@@ -76,7 +76,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     let license = await fetcher();
@@ -96,7 +96,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     const licensePromise = fetcher();
@@ -125,7 +125,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     const licensePromise = fetcher();
@@ -148,13 +148,13 @@ describe('LicenseFetcher', () => {
       } as any)
       .mockResponseImplementation(() => {
         throw new Error('woups');
-      })
+      });
 
     const fetcher = getLicenseFetcher({
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     let license = await fetcher();
@@ -181,13 +181,13 @@ describe('LicenseFetcher', () => {
       } as any)
       .mockResponseImplementation(() => {
         throw new Error('woups');
-      })
+      });
 
     const fetcher = getLicenseFetcher({
       logger,
       clusterClient,
       cacheDurationMs: 1,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     let license = await fetcher();
@@ -209,7 +209,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     const license = await fetcher();
@@ -233,7 +233,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay
+      maxRetryDelay,
     });
 
     const license = await fetcher();
@@ -255,7 +255,7 @@ describe('LicenseFetcher', () => {
       logger,
       clusterClient,
       cacheDurationMs: 50_000,
-      maxRetryDelay: 10 * 1000
+      maxRetryDelay: 10 * 1000,
     });
     const sumOfRetryTimesUntilTen = (1 + 2 + 4 + 8) * 1000;
 

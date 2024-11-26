@@ -26,7 +26,7 @@ export const getLicenseFetcher = ({
   clusterClient,
   logger,
   cacheDurationMs,
-  maxRetryDelay 
+  maxRetryDelay,
 }: {
   clusterClient: MaybePromise<IClusterClient>;
   logger: Logger;
@@ -40,7 +40,9 @@ export const getLicenseFetcher = ({
   return async () => {
     const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
-      const response = await pRetry(() => client.asInternalUser.xpack.info(), {retries: maxRetries});
+      const response = await pRetry(() => client.asInternalUser.xpack.info(), {
+        retries: maxRetries,
+      });
       const normalizedLicense =
         response.license && response.license.type !== 'missing'
           ? normalizeServerLicense(response.license)
@@ -69,7 +71,7 @@ export const getLicenseFetcher = ({
       return currentLicense;
     } catch (err) {
       const error = err.originalError ?? err;
-      
+
       logger.warn(
         `License information could not be obtained from Elasticsearch due to ${error} error`
       );
