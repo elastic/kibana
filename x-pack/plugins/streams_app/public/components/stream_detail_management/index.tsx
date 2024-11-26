@@ -26,9 +26,11 @@ function isValidManagementSubTab(value: string): value is ManagementSubTabs {
 export function StreamDetailManagement({
   definition,
   refreshDefinition,
+  isLoadingDefinition,
 }: {
   definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
+  isLoadingDefinition: boolean;
 }) {
   const {
     path: { key, subtab },
@@ -66,7 +68,11 @@ export function StreamDetailManagement({
     },
     schemaEditor: {
       content: (
-        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+        <StreamDetailSchemaEditor
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          isLoadingDefinition={isLoadingDefinition}
+        />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
