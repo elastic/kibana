@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
+import { ResponsiveGroup, Operator } from './layout';
 import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
 
 const FIELD_COMBO_BOX_WIDTH = 410;
@@ -31,11 +31,8 @@ interface ThresholdInputProps {
   thresholdCardinalityField: FieldHook;
   thresholdCardinalityValue: FieldHook;
   browserFields: DataViewFieldBase[];
+  direction?: 'row' | 'column';
 }
-
-const OperatorWrapper = styled(EuiFlexItem)`
-  align-self: center;
-`;
 
 const fieldDescribedByIds = ['detectionEngineStepDefineRuleThresholdField'];
 const valueDescribedByIds = ['detectionEngineStepDefineRuleThresholdValue'];
@@ -48,6 +45,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
   browserFields,
   thresholdCardinalityField,
   thresholdCardinalityValue,
+  direction = 'row',
 }: ThresholdInputProps) => {
   const fieldEuiFieldProps = useMemo(
     () => ({
@@ -56,9 +54,9 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
       options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
+      style: direction === 'row' ? { width: `${FIELD_COMBO_BOX_WIDTH}px` } : {},
     }),
-    [browserFields]
+    [browserFields, direction]
   );
   const cardinalityFieldEuiProps = useMemo(
     () => ({
@@ -67,15 +65,15 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
       options: browserFields.map((field) => ({ label: field.name })),
       placeholder: THRESHOLD_FIELD_PLACEHOLDER,
       onCreateOption: undefined,
-      style: { width: `${FIELD_COMBO_BOX_WIDTH}px` },
+      style: direction === 'row' ? { width: `${FIELD_COMBO_BOX_WIDTH}px` } : {},
       singleSelection: { asPlainText: true },
     }),
-    [browserFields]
+    [browserFields, direction]
   );
 
   return (
     <EuiFlexGroup direction="column" style={{ marginLeft: 0 }}>
-      <EuiFlexGroup>
+      <ResponsiveGroup direction={direction}>
         <EuiFlexItem grow={false}>
           <Field
             field={thresholdField}
@@ -86,7 +84,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             euiFieldProps={fieldEuiFieldProps}
           />
         </EuiFlexItem>
-        <OperatorWrapper grow={false}>{'>='}</OperatorWrapper>
+        <Operator />
         <EuiFlexItem grow={false}>
           <Field
             field={thresholdValue}
@@ -96,8 +94,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdValue.type}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup>
+      </ResponsiveGroup>
+      <ResponsiveGroup direction={direction}>
         <EuiFlexItem grow={false}>
           <Field
             field={thresholdCardinalityField}
@@ -108,7 +106,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             euiFieldProps={cardinalityFieldEuiProps}
           />
         </EuiFlexItem>
-        <OperatorWrapper grow={false}>{'>='}</OperatorWrapper>
+        <Operator />
         <EuiFlexItem grow={false}>
           <Field
             field={thresholdCardinalityValue}
@@ -118,7 +116,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdCardinalityValue.type}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </ResponsiveGroup>
     </EuiFlexGroup>
   );
 };

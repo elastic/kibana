@@ -72,6 +72,7 @@ import {
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { THRESHOLD_VALUE_LABEL } from '../../../rule_creation/components/threshold_edit/translations';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -282,7 +283,7 @@ export const getDescriptionItem = (
     return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
   } else if (field === 'threshold') {
     const threshold = get(field, data);
-    return buildThresholdDescription(label, threshold);
+    return buildThresholdDescription(THRESHOLD_VALUE_LABEL, threshold);
   } else if (field === 'references') {
     const urls: string[] = get(field, data);
     return buildUrlsDescription(label, urls);

@@ -45,7 +45,6 @@ import { QueryBarDefineRule } from '../query_bar';
 import { SelectRuleType } from '../select_rule_type';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
-import { ThresholdInput } from '../threshold_input';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
   Field,
@@ -96,6 +95,8 @@ import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { MachineLearningJobIdEdit } from '../../../rule_creation/components/machine_learning_job_id_edit';
 import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_threshold';
+import { ThresholdEdit } from '../../../rule_creation/components/threshold_edit';
+import { usePersistentThresholdState } from './use_persistent_threshold_state';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -247,10 +248,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [form]
   );
 
-  const aggFields = useMemo(
-    () => (indexPattern.fields as FieldSpec[]).filter((field) => field.aggregatable === true),
-    [indexPattern.fields]
-  );
   const termsAggregationFields = useMemo(
     /**
      * Typecasting to FieldSpec because fields is
@@ -370,6 +367,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [ruleType, previousRuleType, getFields]);
 
   usePersistentAlertSuppressionState({ form });
+  usePersistentThresholdState({ form, ruleTypePath: 'ruleType', thresholdPath: 'threshold' });
 
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
@@ -396,24 +394,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const handleCloseTimelineSearch = useCallback(() => {
     setOpenTimelineSearch(false);
   }, []);
-
-  const ThresholdInputChildren = useCallback(
-    ({
-      thresholdField,
-      thresholdValue,
-      thresholdCardinalityField,
-      thresholdCardinalityValue,
-    }: Record<string, FieldHook>) => (
-      <ThresholdInput
-        browserFields={aggFields}
-        thresholdField={thresholdField}
-        thresholdValue={thresholdValue}
-        thresholdCardinalityField={thresholdCardinalityField}
-        thresholdCardinalityValue={thresholdCardinalityValue}
-      />
-    ),
-    [aggFields]
-  );
 
   const ThreatMatchInputChildren = useCallback(
     ({ threatMapping }: Record<string, FieldHook>) => (
@@ -809,32 +789,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <AnomalyThresholdEdit path="anomalyThreshold" />
             </>
           </RuleTypeEuiFormRow>
-          <RuleTypeEuiFormRow
-            $isVisible={isThresholdRule}
-            data-test-subj="thresholdInput"
-            fullWidth
-          >
-            <>
-              <UseMultiFields
-                fields={{
-                  thresholdField: {
-                    path: 'threshold.field',
-                  },
-                  thresholdValue: {
-                    path: 'threshold.value',
-                  },
-                  thresholdCardinalityField: {
-                    path: 'threshold.cardinality.field',
-                  },
-                  thresholdCardinalityValue: {
-                    path: 'threshold.cardinality.value',
-                  },
-                }}
-              >
-                {ThresholdInputChildren}
-              </UseMultiFields>
-            </>
-          </RuleTypeEuiFormRow>
+          {isThresholdRule && (
+            <EuiFormRow data-test-subj="thresholdInput" fullWidth>
+              <ThresholdEdit esFields={indexPattern.fields as FieldSpec[]} path="threshold" />
+            </EuiFormRow>
+          )}
           <RuleTypeEuiFormRow
             $isVisible={isThreatMatchRule(ruleType)}
             data-test-subj="threatMatchInput"
