@@ -25,6 +25,7 @@ import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 import { LogRateAnalysisPage } from './log_rate_analysis_page';
 import { timeSeriesDataViewWarning } from '../../application/utils/time_series_dataview_check';
+import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 
 const localStorage = new Storage(window.localStorage);
 
@@ -75,7 +76,9 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
             <LogRateAnalysisReduxProvider>
               <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
                 <DatePickerContextProvider {...datePickerDeps}>
-                  <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
+                  <FilterQueryContextProvider>
+                    <LogRateAnalysisPage showContextualInsights={showContextualInsights} />
+                  </FilterQueryContextProvider>
                 </DatePickerContextProvider>
               </StorageContextProvider>
             </LogRateAnalysisReduxProvider>

@@ -34,11 +34,15 @@ import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
+interface LogRateAnalysisAttachmentsMenuProps {
+  windowParameters?: WindowParameters;
+  hasSignificantItemsToAttach: boolean;
+}
+
 export const LogRateAnalysisAttachmentsMenu = ({
   windowParameters,
-}: {
-  windowParameters?: WindowParameters;
-}) => {
+  hasSignificantItemsToAttach,
+}: LogRateAnalysisAttachmentsMenuProps) => {
   const {
     application: { capabilities },
     cases,
@@ -110,6 +114,19 @@ export const LogRateAnalysisAttachmentsMenu = ({
                     defaultMessage: 'Add to case',
                   }),
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToCaseButton',
+                  disabled: !hasSignificantItemsToAttach,
+                  ...(!hasSignificantItemsToAttach
+                    ? {
+                        toolTipProps: { position: 'left' as const },
+                        toolTipContent: i18n.translate(
+                          'xpack.aiops.logRateAnalysis.attachToCaseTooltipContent',
+                          {
+                            defaultMessage:
+                              'Cannot add to case because the analysis did not produce any results',
+                          }
+                        ),
+                      }
+                    : {}),
                   onClick: () => {
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
@@ -168,6 +185,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
     canEditDashboards,
     canUpdateCase,
     canCreateCase,
+    hasSignificantItemsToAttach,
     applyTimeRange,
     openCasesModalCallback,
     dataView.id,
