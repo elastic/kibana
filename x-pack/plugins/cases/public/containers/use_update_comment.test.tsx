@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act, waitFor, renderHook } from '@testing-library/react';
 import { basicCase } from './mock';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
@@ -39,7 +39,7 @@ describe('useUpdateComment', () => {
   it('patch case and refresh the case page', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
 
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+    const { result } = renderHook(() => useUpdateComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -47,15 +47,15 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    await waitFor(() => {
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    });
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const patchCommentSpy = jest.spyOn(api, 'patchComment');
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+    const { result } = renderHook(() => useUpdateComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -63,18 +63,18 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
-
-    expect(patchCommentSpy).toHaveBeenCalledWith({
-      ...sampleUpdate,
-      owner: 'securitySolution',
-    });
+    await waitFor(() =>
+      expect(patchCommentSpy).toHaveBeenCalledWith({
+        ...sampleUpdate,
+        owner: 'securitySolution',
+      })
+    );
   });
 
   it('shows a toast error when the api return an error', async () => {
     jest.spyOn(api, 'patchComment').mockRejectedValue(new Error('useUpdateComment: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => useUpdateComment(), {
+    const { result } = renderHook(() => useUpdateComment(), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -82,8 +82,6 @@ describe('useUpdateComment', () => {
       result.current.mutate(sampleUpdate);
     });
 
-    await waitForNextUpdate();
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

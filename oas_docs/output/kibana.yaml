@@ -112,7 +112,7 @@ tags:
       description: Kibana role management
       url: https://www.elastic.co/guide/en/kibana/8.x/kibana-role-management.html
   - description: |
-      Export sets of saved objects that you want to import into {kib}, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
+      Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
 
       To manage a specific type of saved object, use the corresponding APIs.
       For example, use:
@@ -10848,6 +10848,42 @@ paths:
       summary: Release an isolated endpoint
       tags:
         - Security Endpoint Management API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -11155,6 +11191,26 @@ paths:
                   - total
           description: Entities returned successfully
       summary: List Entity Store Entities
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
   /api/exception_lists:
@@ -17984,7 +18040,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -18016,7 +18072,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -39165,6 +39221,14 @@ components:
         - index
         - description
         - category
+    Security_Entity_Analytics_API_StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     Security_Entity_Analytics_API_TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object

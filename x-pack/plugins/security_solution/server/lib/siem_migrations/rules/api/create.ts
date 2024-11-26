@@ -14,7 +14,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATIONS_PATH } from '../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_client';
+import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rules_client';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsCreateRoute = (

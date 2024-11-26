@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
+import type { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { getServiceNodeIds } from './get_service_node_ids';
 
@@ -27,39 +27,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     status: number;
     body: APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
   }
-
-  registry.when(
-    'Service overview instances detailed statistics when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      describe('when data is not loaded', () => {
-        it('handles the empty state', async () => {
-          const response = await apmApiClient.readUser({
-            endpoint:
-              'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
-            params: {
-              path: { serviceName },
-              query: {
-                latencyAggregationType: LatencyAggregationType.avg,
-                start,
-                end,
-                numBuckets: 20,
-                transactionType: 'request',
-                serviceNodeIds: JSON.stringify(
-                  await getServiceNodeIds({ apmApiClient, start, end })
-                ),
-                environment: 'ENVIRONMENT_ALL',
-                kuery: '',
-              },
-            },
-          });
-
-          expect(response.status).to.be(200);
-          expect(response.body).to.be.eql({ currentPeriod: {}, previousPeriod: {} });
-        });
-      });
-    }
-  );
 
   registry.when(
     'Service overview instances detailed statistics when data is loaded',

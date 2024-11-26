@@ -1204,11 +1204,11 @@ export const functions = {
   Performs a match query on the specified field. Returns true if the provided query matches the row.
 
   \`\`\`
-  from books 
-  | where match(author, "Faulkner")
-  | keep book_no, author 
-  | sort book_no 
-  | limit 5;
+  FROM books 
+  | WHERE MATCH(author, "Faulkner")
+  | KEEP book_no, author 
+  | SORT book_no 
+  | LIMIT 5;
   \`\`\`
   `,
               description:
@@ -1920,11 +1920,11 @@ export const functions = {
   Performs a query string query. Returns true if the provided query string matches the row.
 
   \`\`\`
-  from books 
-  | where qstr("author: Faulkner")
-  | keep book_no, author 
-  | sort book_no 
-  | limit 5;
+  FROM books 
+  | WHERE QSTR("author: Faulkner")
+  | KEEP book_no, author 
+  | SORT book_no 
+  | LIMIT 5;
   \`\`\`
   `,
             description:

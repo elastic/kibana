@@ -11,7 +11,7 @@ import type {
   RuleMigrationResource,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>> = {
+export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
   migration_id: { type: 'keyword', required: true },
   created_by: { type: 'keyword', required: true },
@@ -38,7 +38,9 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigration>>
   updated_by: { type: 'keyword', required: false },
 };
 
-export const ruleMigrationResourcesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationResource>> = {
+export const ruleMigrationResourcesFieldMap: FieldMap<
+  SchemaFieldMapKeys<Omit<RuleMigrationResource, 'id'>>
+> = {
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },
   name: { type: 'keyword', required: true },

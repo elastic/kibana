@@ -359,6 +359,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
+      restApis: `${KIBANA_DOCS}api.html`,
+      dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
@@ -720,6 +722,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
+      deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
@@ -1001,6 +1004,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       retrieval: `${KIBANA_DOCS}playground-query.html`,
       context: `${KIBANA_DOCS}playground-context.html`,
       hiddenFields: `${KIBANA_DOCS}playground-query.html#playground-hidden-fields`,
+    },
+    inferenceManagement: {
+      inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
     },
   });
 };
