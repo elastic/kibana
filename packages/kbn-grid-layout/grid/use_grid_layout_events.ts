@@ -39,7 +39,15 @@ export const useGridLayoutEvents = ({
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
 
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value) return;
+      if (!interactionEvent$.value) {
+        if (scrollInterval.current) {
+          // if there is a scroll happening without an interaction event, cancel it
+          clearInterval(scrollInterval.current);
+          scrollInterval.current = null;
+        }
+        // no interaction event is happening, so nothing about the layout needs to be updated
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
 
