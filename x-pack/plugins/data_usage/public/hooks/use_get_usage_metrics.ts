@@ -35,7 +35,7 @@ export const useGetDataUsageMetrics = (
   return useQuery<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>>({
     queryKey: ['get-data-usage-metrics', body],
     ...options,
-    enabled: !!(from && to),
+    enabled: !!(from && to) && options.enabled,
     keepPreviousData: true,
     queryFn: async ({ signal }) => {
       return http

@@ -52,8 +52,8 @@ describe('useGetDataUsageMetrics', () => {
       isISOString: true,
     });
   let defaultUsageMetricsRequestBody = {
-    from: '',
-    to: '',
+    from: 'now-15m',
+    to: 'now',
     metricTypes: ['ingest_rate'],
     dataStreams: ['ds-1'],
   };
@@ -83,7 +83,7 @@ describe('useGetDataUsageMetrics', () => {
     });
   });
 
-  it('should call the API if invalid date range', async () => {
+  it('should not call the API if invalid date range', async () => {
     const requestBody = {
       ...defaultUsageMetricsRequestBody,
       from: 'invalid-date',
