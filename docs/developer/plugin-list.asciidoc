@@ -909,6 +909,10 @@ routes, etc.
 |The stack_connectors plugin provides connector types shipped with Kibana, built on top of the framework provided in the actions plugin.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/streams/README.md[streams]
+|This plugin provides an interface to manage streams
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/synthetics/README.md[synthetics]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.
