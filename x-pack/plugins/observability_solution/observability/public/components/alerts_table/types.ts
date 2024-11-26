@@ -6,7 +6,7 @@
  */
 
 import { SetOptional } from 'type-fest';
-import { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
+import type { AlertsTablePropsWithRef } from '@kbn/response-ops-alerts-table/types';
 import type { ConfigSchema, ObservabilityRuleTypeRegistry } from '../..';
 
 export interface ObservabilityAlertsTableContext {
