@@ -551,7 +551,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('testQuerySuccess');
       await testSubjects.existOrFail('testQueryError');
       await testSubjects.setValue('queryJsonEditor', '');
-      await discardNewRuleCreation();
+
+      await testSubjects.click('rulePageFooterCancelButton');
+
+      const confirmRuleCloseModalExists = await testSubjects.exists('confirmRuleCloseModal');
+      if (confirmRuleCloseModalExists) {
+        await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('confirmRuleCloseModal');
+      }
     });
 
     // Related issue that this test is trying to prevent:
@@ -584,7 +591,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('testQuerySuccess');
       await testSubjects.missingOrFail('testQueryError');
 
-      await discardNewRuleCreation();
+      await testSubjects.click('rulePageFooterCancelButton');
+
+      const confirmRuleCloseModalExists = await testSubjects.exists('confirmRuleCloseModal');
+      if (confirmRuleCloseModalExists) {
+        await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('confirmRuleCloseModal');
+      }
     });
 
     it('should add filter', async () => {
