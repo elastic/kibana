@@ -44,213 +44,210 @@ export const getOverviewEmbeddableFactory = ({
   coreStart: CoreStart;
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
-}) => {
-  const factory: ReactEmbeddableFactory<
-    SloOverviewEmbeddableState,
-    SloOverviewEmbeddableState,
-    SloOverviewApi
-  > = {
-    type: SLO_OVERVIEW_EMBEDDABLE_ID,
-    deserializeState: (state) => {
-      return state.rawState as SloOverviewEmbeddableState;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const deps = { ...coreStart, ...pluginsStart };
+}): ReactEmbeddableFactory<
+  SloOverviewEmbeddableState,
+  SloOverviewEmbeddableState,
+  SloOverviewApi
+> => ({
+  type: SLO_OVERVIEW_EMBEDDABLE_ID,
+  deserializeState: (state) => {
+    return state.rawState as SloOverviewEmbeddableState;
+  },
+  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    const deps = { ...coreStart, ...pluginsStart };
 
-      const dynamicActionsApi = deps.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
-        uuid,
-        () => titlesApi.panelTitle.getValue(),
-        state
-      );
+    const dynamicActionsApi = deps.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+      uuid,
+      () => titlesApi.panelTitle.getValue(),
+      state
+    );
 
-      const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+    const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
-      const sloId$ = new BehaviorSubject(state.sloId);
-      const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
-      const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
-      const overviewMode$ = new BehaviorSubject(state.overviewMode);
-      const groupFilters$ = new BehaviorSubject(state.groupFilters);
-      const remoteName$ = new BehaviorSubject(state.remoteName);
-      const reload$ = new Subject<boolean>();
+    const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+    const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
+    const sloId$ = new BehaviorSubject(state.sloId);
+    const sloInstanceId$ = new BehaviorSubject(state.sloInstanceId);
+    const showAllGroupByInstances$ = new BehaviorSubject(state.showAllGroupByInstances);
+    const overviewMode$ = new BehaviorSubject(state.overviewMode);
+    const groupFilters$ = new BehaviorSubject(state.groupFilters);
+    const remoteName$ = new BehaviorSubject(state.remoteName);
+    const reload$ = new Subject<boolean>();
 
-      const api = buildApi(
-        {
-          ...titlesApi,
-          ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-          supportedTriggers: () => [],
-          defaultPanelTitle: defaultTitle$,
-          getTypeDisplayName: () =>
-            i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
-              defaultMessage: 'criteria',
-            }),
-          isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
-          onEdit: async function onEdit() {
-            try {
-              const { openSloConfiguration } = await import('./slo_overview_open_configuration');
-
-              const result = await openSloConfiguration(
-                coreStart,
-                pluginsStart,
-                sloClient,
-                api.getSloGroupOverviewConfig()
-              );
-              api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
-            } catch (e) {
-              return Promise.reject();
-            }
-          },
-          serializeState: () => {
-            return {
-              rawState: {
-                ...serializeTitles(),
-                sloId: sloId$.getValue(),
-                sloInstanceId: sloInstanceId$.getValue(),
-                showAllGroupByInstances: showAllGroupByInstances$.getValue(),
-                overviewMode: overviewMode$.getValue(),
-                groupFilters: groupFilters$.getValue(),
-                remoteName: remoteName$.getValue(),
-                ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
-              },
-            };
-          },
-          getSloGroupOverviewConfig: () => {
-            return {
-              groupFilters: groupFilters$.getValue(),
-              overviewMode: overviewMode$.getValue(),
-            };
-          },
-          updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
-            groupFilters$.next(update.groupFilters);
-          },
-        },
-        {
-          sloId: [sloId$, (value) => sloId$.next(value)],
-          sloInstanceId: [sloInstanceId$, (value) => sloInstanceId$.next(value)],
-          groupFilters: [groupFilters$, (value) => groupFilters$.next(value)],
-          showAllGroupByInstances: [
-            showAllGroupByInstances$,
-            (value) => showAllGroupByInstances$.next(value),
-          ],
-          remoteName: [remoteName$, (value) => remoteName$.next(value)],
-          overviewMode: [overviewMode$, (value) => overviewMode$.next(value)],
-          ...titleComparators,
-          ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-            enhancements: getUnchangingComparator(),
+    const api = buildApi(
+      {
+        ...titlesApi,
+        ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
+        supportedTriggers: () => [],
+        defaultPanelTitle: defaultTitle$,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
+            defaultMessage: 'criteria',
           }),
-        }
-      );
+        isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
+        onEdit: async function onEdit() {
+          try {
+            const { openSloConfiguration } = await import('./slo_overview_open_configuration');
 
-      const fetchSubscription = fetch$(api)
-        .pipe()
-        .subscribe((next) => {
-          reload$.next(next.isReload);
-        });
-
-      return {
-        api,
-        Component: () => {
-          const [
-            sloId,
-            sloInstanceId,
-            showAllGroupByInstances,
-            overviewMode,
-            groupFilters,
-            remoteName,
-          ] = useBatchedPublishingSubjects(
-            sloId$,
-            sloInstanceId$,
-            showAllGroupByInstances$,
-            overviewMode$,
-            groupFilters$,
-            remoteName$
-          );
-
-          useEffect(() => {
-            return () => {
-              fetchSubscription.unsubscribe();
-              maybeStopDynamicActions?.stopDynamicActions();
-            };
-          }, []);
-          const renderOverview = () => {
-            if (overviewMode === 'groups') {
-              const groupBy = groupFilters?.groupBy ?? 'status';
-              const kqlQuery = groupFilters?.kqlQuery ?? '';
-              const groups = groupFilters?.groups ?? [];
-              return (
-                <div
-                  css={({ euiTheme }: UseEuiTheme) => css`
-                    width: 100%;
-                    padding: ${euiTheme.size.xs} ${euiTheme.size.base};
-                    overflow: scroll;
-
-                    .euiAccordion__buttonContent {
-                      min-width: ${euiTheme.base * 6}px;
-                    }
-                  `}
-                >
-                  <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
-                    <EuiFlexItem
-                      css={({ euiTheme }: UseEuiTheme) => css`
-                        margin-top: ${euiTheme.base * 1.25}px;
-                      `}
-                    >
-                      <GroupSloView
-                        view="cardView"
-                        groupBy={groupBy}
-                        groups={groups}
-                        kqlQuery={kqlQuery}
-                        filters={groupFilters?.filters}
-                        reloadSubject={reload$}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </div>
-              );
-            } else {
-              return (
-                <SloOverview
-                  sloId={sloId}
-                  sloInstanceId={sloInstanceId}
-                  reloadSubject={reload$}
-                  showAllGroupByInstances={showAllGroupByInstances}
-                  remoteName={remoteName}
-                />
-              );
-            }
-          };
-
-          const queryClient = new QueryClient();
-
-          return (
-            <Router history={createBrowserHistory()}>
-              <EuiThemeProvider darkMode={true}>
-                <KibanaContextProvider services={deps}>
-                  <PluginContext.Provider
-                    value={{
-                      observabilityRuleTypeRegistry:
-                        pluginsStart.observability.observabilityRuleTypeRegistry,
-                      ObservabilityPageTemplate:
-                        pluginsStart.observabilityShared.navigation.PageTemplate,
-                      sloClient,
-                    }}
-                  >
-                    <QueryClientProvider client={queryClient}>
-                      {showAllGroupByInstances ? (
-                        <SloCardChartList sloId={sloId!} />
-                      ) : (
-                        renderOverview()
-                      )}
-                    </QueryClientProvider>
-                  </PluginContext.Provider>
-                </KibanaContextProvider>
-              </EuiThemeProvider>
-            </Router>
-          );
+            const result = await openSloConfiguration(
+              coreStart,
+              pluginsStart,
+              sloClient,
+              api.getSloGroupOverviewConfig()
+            );
+            api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+          } catch (e) {
+            return Promise.reject();
+          }
         },
-      };
-    },
-  };
-  return factory;
-};
+        serializeState: () => {
+          return {
+            rawState: {
+              ...serializeTitles(),
+              sloId: sloId$.getValue(),
+              sloInstanceId: sloInstanceId$.getValue(),
+              showAllGroupByInstances: showAllGroupByInstances$.getValue(),
+              overviewMode: overviewMode$.getValue(),
+              groupFilters: groupFilters$.getValue(),
+              remoteName: remoteName$.getValue(),
+              ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
+            },
+          };
+        },
+        getSloGroupOverviewConfig: () => {
+          return {
+            groupFilters: groupFilters$.getValue(),
+            overviewMode: overviewMode$.getValue(),
+          };
+        },
+        updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
+          groupFilters$.next(update.groupFilters);
+        },
+      },
+      {
+        sloId: [sloId$, (value) => sloId$.next(value)],
+        sloInstanceId: [sloInstanceId$, (value) => sloInstanceId$.next(value)],
+        groupFilters: [groupFilters$, (value) => groupFilters$.next(value)],
+        showAllGroupByInstances: [
+          showAllGroupByInstances$,
+          (value) => showAllGroupByInstances$.next(value),
+        ],
+        remoteName: [remoteName$, (value) => remoteName$.next(value)],
+        overviewMode: [overviewMode$, (value) => overviewMode$.next(value)],
+        ...titleComparators,
+        ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+          enhancements: getUnchangingComparator(),
+        }),
+      }
+    );
+
+    const fetchSubscription = fetch$(api)
+      .pipe()
+      .subscribe((next) => {
+        reload$.next(next.isReload);
+      });
+
+    return {
+      api,
+      Component: () => {
+        const [
+          sloId,
+          sloInstanceId,
+          showAllGroupByInstances,
+          overviewMode,
+          groupFilters,
+          remoteName,
+        ] = useBatchedPublishingSubjects(
+          sloId$,
+          sloInstanceId$,
+          showAllGroupByInstances$,
+          overviewMode$,
+          groupFilters$,
+          remoteName$
+        );
+
+        useEffect(() => {
+          return () => {
+            fetchSubscription.unsubscribe();
+            maybeStopDynamicActions?.stopDynamicActions();
+          };
+        }, []);
+        const renderOverview = () => {
+          if (overviewMode === 'groups') {
+            const groupBy = groupFilters?.groupBy ?? 'status';
+            const kqlQuery = groupFilters?.kqlQuery ?? '';
+            const groups = groupFilters?.groups ?? [];
+            return (
+              <div
+                css={({ euiTheme }: UseEuiTheme) => css`
+                  width: 100%;
+                  padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                  overflow: scroll;
+
+                  .euiAccordion__buttonContent {
+                    min-width: ${euiTheme.base * 6}px;
+                  }
+                `}
+              >
+                <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
+                  <EuiFlexItem
+                    css={({ euiTheme }: UseEuiTheme) => css`
+                      margin-top: ${euiTheme.base * 1.25}px;
+                    `}
+                  >
+                    <GroupSloView
+                      view="cardView"
+                      groupBy={groupBy}
+                      groups={groups}
+                      kqlQuery={kqlQuery}
+                      filters={groupFilters?.filters}
+                      reloadSubject={reload$}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </div>
+            );
+          } else {
+            return (
+              <SloOverview
+                sloId={sloId}
+                sloInstanceId={sloInstanceId}
+                reloadSubject={reload$}
+                showAllGroupByInstances={showAllGroupByInstances}
+                remoteName={remoteName}
+              />
+            );
+          }
+        };
+
+        const queryClient = new QueryClient();
+
+        return (
+          <Router history={createBrowserHistory()}>
+            <EuiThemeProvider darkMode={true}>
+              <KibanaContextProvider services={deps}>
+                <PluginContext.Provider
+                  value={{
+                    observabilityRuleTypeRegistry:
+                      pluginsStart.observability.observabilityRuleTypeRegistry,
+                    ObservabilityPageTemplate:
+                      pluginsStart.observabilityShared.navigation.PageTemplate,
+                    sloClient,
+                  }}
+                >
+                  <QueryClientProvider client={queryClient}>
+                    {showAllGroupByInstances ? (
+                      <SloCardChartList sloId={sloId!} />
+                    ) : (
+                      renderOverview()
+                    )}
+                  </QueryClientProvider>
+                </PluginContext.Provider>
+              </KibanaContextProvider>
+            </EuiThemeProvider>
+          </Router>
+        );
+      },
+    };
+  },
+});
