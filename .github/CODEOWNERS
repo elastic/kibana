@@ -1513,6 +1513,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/api_integration/services/transform.ts @elastic/ml-ui
 /x-pack/test/functional/apps/aiops @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
+/x-pack/test/functional/es_archives/large_arrays @elastic/ml-ui # Assigned per usages
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/aiops @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
