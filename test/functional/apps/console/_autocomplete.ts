@@ -377,5 +377,41 @@ GET _search
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);
       });
     });
+
+    describe('Autocomplete shouldnt trigger within a comment block', () => {
+      beforeEach(async () => {
+        await PageObjects.console.skipTourIfExists();
+        await PageObjects.console.clearEditorText();
+      });
+
+      it('shouldnt trigger with a hash comment', async () => {
+        await PageObjects.console.enterText(`# GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('shouldnt trigger with a simple double slash', async () => {
+        await PageObjects.console.enterText(`// GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('shouldnt trigger with a single line block comment', async () => {
+        await PageObjects.console.enterText(`/* GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('shouldnt trigger with a multi line block comment', async () => {
+        await PageObjects.console.enterText(`/*
+          GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+    });
   });
 }
