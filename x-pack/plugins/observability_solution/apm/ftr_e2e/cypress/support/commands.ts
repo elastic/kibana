@@ -87,8 +87,14 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.contains(value).click();
 });
 
-Cypress.Commands.add('visitKibana', (url: string) => {
-  cy.visit(url);
+Cypress.Commands.add('visitKibana', (url, options) => {
+  cy.visit(url, {
+    onBeforeLoad(win) {
+      if (options?.localStorageOptions && options.localStorageOptions.length > 0) {
+        options.localStorageOptions.forEach(([key, value]) => win.localStorage.setItem(key, value));
+      }
+    },
+  });
   cy.getByTestSubj('kbnLoadingMessage').should('exist');
   cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
     timeout: 50000,
