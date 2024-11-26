@@ -39,7 +39,7 @@ export const getAlertStateRoute = (
           documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
           severity: 'warning',
           reason: {
-            type: 'deprecate',
+            type: 'remove',
           },
         },
       },
