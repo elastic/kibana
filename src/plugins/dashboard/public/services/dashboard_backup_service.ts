@@ -18,6 +18,7 @@ import { backupServiceStrings } from '../dashboard_container/_dashboard_containe
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { coreServices, spacesService } from './kibana_services';
 import { DashboardState } from '../dashboard_api/types';
+import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 
 export const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 export const PANELS_CONTROL_GROUP_KEY = 'controlGroup';
@@ -66,7 +67,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
   }
 
   public getViewMode = (): ViewMode => {
-    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY);
+    return this.localStorage.get(DASHBOARD_VIEWMODE_LOCAL_KEY) ?? DEFAULT_DASHBOARD_INPUT.viewMode;
   };
 
   public storeViewMode = (viewMode: ViewMode) => {
