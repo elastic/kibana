@@ -49,7 +49,6 @@ export class CrowdStrikeSessionManager {
 
       // Start the refresh interval
       this.startRefreshInterval(connectorUsageCollector);
-      return this.currentBatchId;
     }
 
     // Reset the close session timeout
@@ -64,7 +63,7 @@ export class CrowdStrikeSessionManager {
     }
 
     this.refreshInterval = setInterval(() => {
-      this.refreshSession(connectorUsageCollector);
+      this.refreshSession(connectorUsageCollector).catch(() => {});
     }, 5 * 60 * 1000); // Refresh every 5 minutes
   }
 
@@ -88,7 +87,7 @@ export class CrowdStrikeSessionManager {
     }
 
     this.closeSessionTimeout = setTimeout(() => {
-      this.terminateSession();
+      this.terminateSession().catch(() => {});
     }, 10 * 60 * 1000); // Close session after 10 minutes of inactivity
   }
 
