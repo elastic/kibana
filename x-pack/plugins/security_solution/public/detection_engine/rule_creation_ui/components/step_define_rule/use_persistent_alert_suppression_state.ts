@@ -6,6 +6,7 @@
  */
 
 import { useEffect } from 'react';
+import usePrevious from 'react-use/lib/usePrevious';
 import { isThresholdRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useFormData } from '../../../../shared_imports';
@@ -51,8 +52,13 @@ export function usePersistentAlertSuppressionState({
       ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
     ],
   });
+  const previousRuleType = usePrevious(ruleType);
 
   useEffect(() => {
+    if (!ruleType || ruleType === previousRuleType) {
+      return;
+    }
+
     form.updateFieldValues({
       [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: thresholdAlertSuppressionEnabled,
       [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: suppressionFields,
@@ -68,6 +74,7 @@ export function usePersistentAlertSuppressionState({
   }, [
     form,
     ruleType,
+    previousRuleType,
     thresholdAlertSuppressionEnabled,
     suppressionFields,
     suppressionDurationType,
