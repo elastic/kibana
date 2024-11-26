@@ -376,6 +376,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     plugins.data.nowProvider,
     searchSessionId,
     addUserMessages,
+    framePublicAPI.forceDSL,
   ]);
 
   const isSaveable = Boolean(unappliedExpression);
