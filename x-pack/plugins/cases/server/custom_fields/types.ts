@@ -11,6 +11,9 @@ export enum CasesCustomFieldMappingType {
   TEXT = 'text',
   LONG = 'long',
   BOOLEAN = 'boolean',
+  // This is a custom mapping type indicating that the query utils should process these values differently instead
+  // of passing the mapping type literally to the query
+  // List options are stored in saved objects as { key: value } pairs
   LIST_OPTION = 'list-option',
 }
 
