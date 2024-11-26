@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'common',
@@ -68,7 +69,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessIntegration()).to.be(
         integrationPolicyName
       );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Healthy');
+
+      // wait for eventually healthy status
+      await retry.tryForTime(5000, async () => {
+        expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Healthy');
+      });            
     });
 
     it(`should show setup technology selector in edit mode`, async () => {

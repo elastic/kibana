@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'svlCommonPage',
@@ -81,7 +82,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessIntegration()).to.be(
         integrationPolicyName
       );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Pending');
+
+      // wait for eventually healthy status
+      await retry.tryForTime(5000, async () => {
+        expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Healthy');
+      });      
     });
 
     it(`should create default agent-based agent`, async () => {
