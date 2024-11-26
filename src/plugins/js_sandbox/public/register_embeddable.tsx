@@ -52,8 +52,8 @@ import {
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { dashboardCrossfilterSlice } from '@kbn/eventbus-slices';
 
-import { dashboardCrossfilterSlice } from './dashboard_crossfilter_slice';
 import { JsSandboxComponent } from './js_sandbox_component';
 import type { JsSandboxPluginStart, JsSandboxPluginStartDeps } from './types';
 

@@ -6008,7 +6008,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/event-log-fixture-plugin@link:x-pack/platform/test/plugin_api_integration/plugins/event_log":
+"@kbn/event-log-fixture-plugin@link:x-pack/test/plugin_api_integration/plugins/event_log":
   version "0.0.0"
   uid ""
 
@@ -6021,6 +6021,14 @@
   uid ""
 
 "@kbn/expandable-flyout@link:x-pack/solutions/security/packages/expandable-flyout":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eventbus-slices@link:packages/eventbus-slices":
+  version "0.0.0"
+  uid ""
+
+"@kbn/expandable-flyout@link:packages/kbn-expandable-flyout":
   version "0.0.0"
   uid ""
 
@@ -6457,6 +6465,10 @@
   uid ""
 
 "@kbn/journeys@link:src/platform/packages/private/kbn-journeys":
+  version "0.0.0"
+  uid ""
+
+"@kbn/js-sandbox-plugin@link:src/plugins/js_sandbox":
   version "0.0.0"
   uid ""
 
