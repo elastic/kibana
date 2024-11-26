@@ -257,7 +257,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (
                   <AnonymizationSettings
-                    defaultPageSize={5}
                     anonymizationFields={updatedAnonymizationData}
                     anonymizationFieldsBulkActions={anonymizationFieldsBulkActions}
                     setAnonymizationFieldsBulkActions={setAnonymizationFieldsBulkActions}

@@ -53,14 +53,14 @@ const defaultSearchQuery = {
 };
 
 const FALLBACK_ESQL_QUERY: ESQLQuery = { esql: '' };
-const DEFAULT_LIMIT_SIZE = '10000';
+const DEFAULT_LIMIT_SIZE = '5000';
 const defaults = getDefaultPageState();
 
 export const getDefaultESQLDataVisualizerListState = (
   overrides?: Partial<ESQLDataVisualizerIndexBasedAppState>
 ): Required<ESQLDataVisualizerIndexBasedAppState> => ({
   pageIndex: 0,
-  pageSize: 25,
+  pageSize: 10,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],
@@ -70,7 +70,7 @@ export const getDefaultESQLDataVisualizerListState = (
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
   filters: [],
-  showDistributions: true,
+  showDistributions: false,
   showAllFields: false,
   showEmptyFields: false,
   probability: null,
@@ -229,6 +229,21 @@ export const useESQLDataVisualizerData = (
           } as QueryDslQueryContainer;
         }
       }
+
+      // Ensure that we don't query frozen data
+      if (filter.bool === undefined) {
+        filter.bool = Object.create(null);
+      }
+
+      if (filter.bool && filter.bool.must_not === undefined) {
+        filter.bool.must_not = [];
+      }
+
+      if (filter.bool && Array.isArray(filter?.bool?.must_not)) {
+        filter.bool.must_not!.push({
+          term: { _tier: 'data_frozen' },
+        });
+      }
       return {
         id: input.id,
         earliest,
@@ -332,9 +347,25 @@ export const useESQLDataVisualizerData = (
 
   const visibleFieldTypes =
     dataVisualizerListState.visibleFieldTypes ?? restorableDefaults.visibleFieldTypes;
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
+
+  const onVisibilityChange = useCallback((visible: boolean, item: FieldVisConfig) => {
+    if (visible) {
+      setExpandedRows((prev) => [...prev, item.fieldName]);
+    } else {
+      setExpandedRows((prev) => prev.filter((fieldName) => fieldName !== item.fieldName));
+    }
+  }, []);
+
+  const hasExpandedRows = useMemo(() => expandedRows.length > 0, [expandedRows]);
 
   useEffect(
     function updateFieldStatFieldsToFetch() {
+      if (dataVisualizerListState?.showDistributions === false && !hasExpandedRows) {
+        setFieldStatFieldsToFetch(undefined);
+        return;
+      }
+
       const { sortField, sortDirection } = dataVisualizerListState;
 
       // Otherwise, sort the list of fields by the initial sort field and sort direction
@@ -376,6 +407,8 @@ export const useESQLDataVisualizerData = (
       dataVisualizerListState.sortDirection,
       nonMetricConfigs,
       metricConfigs,
+      dataVisualizerListState?.showDistributions,
+      hasExpandedRows,
     ]
   );
 
@@ -618,6 +651,7 @@ export const useESQLDataVisualizerData = (
               typeAccessor="secondaryType"
               timeFieldName={timeFieldName}
               onAddFilter={input.onAddFilter}
+              onVisibilityChange={onVisibilityChange}
             />
           );
         }
@@ -625,7 +659,7 @@ export const useESQLDataVisualizerData = (
       }, {} as ItemIdToExpandedRowMap);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentDataView, totalCount, query.esql, timeFieldName]
+    [currentDataView, totalCount, query.esql, timeFieldName, onVisibilityChange]
   );
 
   const combinedProgress = useMemo(

@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/timerange",
-  "owner": "@elastic/obs-ux-logs-team"
+  "owner": [
+    "@elastic/obs-ux-logs-team"
+  ],
+  "group": "observability",
+  "visibility": "private"
 }

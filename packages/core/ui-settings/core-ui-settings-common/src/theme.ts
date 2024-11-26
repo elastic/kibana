@@ -52,6 +52,11 @@ export function parseThemeTags(input?: unknown): ThemeTags {
     return DEFAULT_THEME_TAGS;
   }
 
+  // TODO: remove when Borealis is in public beta
+  if (input === 'experimental') {
+    return SUPPORTED_THEME_TAGS;
+  }
+
   let rawTags: string[];
   if (typeof input === 'string') {
     rawTags = input.split(',').map((tag) => tag.trim());

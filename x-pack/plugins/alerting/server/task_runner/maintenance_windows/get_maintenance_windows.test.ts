@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { maintenanceWindowCategoryIdTypes } from '../../application/maintenance_window/constants';
 import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
@@ -21,6 +20,7 @@ import {
 import { getFakeKibanaRequest } from '../rule_loader';
 import { TaskRunnerContext } from '../types';
 import { FilterStateStore } from '@kbn/es-query';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 const logger = loggingSystemMock.create().get();
 const mockBasePathService = { set: jest.fn() };
@@ -32,7 +32,7 @@ const ruleTypeId = mockedRule.alertTypeId;
 
 describe('getMaintenanceWindows', () => {
   let context: TaskRunnerContext;
-  let fakeRequest: CoreKibanaRequest;
+  let fakeRequest: KibanaRequest;
   let contextMock: ReturnType<typeof getTaskRunnerContext>;
 
   beforeEach(() => {
