@@ -28,7 +28,7 @@ import {
   ExternalReferenceStorageType,
   CustomFieldTypes,
 } from '../../common/types/domain';
-import type { ActionLicense, CaseUI, CasesStatus, UserActionUI } from './types';
+import type { ActionLicense, CaseUI, UserActionUI } from './types';
 
 import type {
   ResolvedCase,
@@ -61,7 +61,6 @@ import type {
 import type {
   CasesFindResponse,
   CasesSimilarResponse,
-  CasesStatusResponse,
   UserActionWithResponse,
 } from '../../common/types/api';
 
@@ -403,14 +402,13 @@ export const basicCaseCommentPatch = {
   comments: [basicCommentPatch],
 };
 
-export const casesStatus: CasesStatus = {
-  countOpenCases: 20,
-  countInProgressCases: 40,
-  countClosedCases: 130,
-};
-
 export const casesMetrics: CasesMetrics = {
   mttr: 12,
+  status: {
+    open: 20,
+    inProgress: 40,
+    closed: 130,
+  },
 };
 
 export const basicPush = {
@@ -466,7 +464,9 @@ export const allCases: CasesFindResponseUI = {
   page: 1,
   perPage: 5,
   total: 10,
-  ...casesStatus,
+  countOpenCases: 20,
+  countInProgressCases: 40,
+  countClosedCases: 130,
 };
 
 export const similarCases: CasesSimilarResponseUI = {
@@ -587,12 +587,6 @@ export const caseWithRegisteredAttachmentsSnake = {
   comments: [externalReferenceAttachmentSnake, persistableStateAttachmentSnake],
 };
 
-export const casesStatusSnake: CasesStatusResponse = {
-  count_closed_cases: 130,
-  count_in_progress_cases: 40,
-  count_open_cases: 20,
-};
-
 export const pushSnake = {
   connector_id: pushConnectorId,
   connector_name: 'My SN connector',
@@ -641,7 +635,9 @@ export const allCasesSnake: CasesFindResponse = {
   page: 1,
   per_page: 5,
   total: 10,
-  ...casesStatusSnake,
+  count_closed_cases: 130,
+  count_in_progress_cases: 40,
+  count_open_cases: 20,
 };
 
 export const similarCasesSnake: CasesSimilarResponse = {
