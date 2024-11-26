@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { ALERT_DURATION } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
 import { ObservabilityAlertsTableContext, ObservabilityAlertsTableProps } from './types';
@@ -21,10 +20,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getColumns } from './common/get_columns';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
 
-const AlertsTable = lazy(
-  () => import('@kbn/response-ops-alerts-table/components/alerts_table')
-) as typeof AlertsTableType;
-
 const columns = getColumns();
 const initialSort = [
   {
@@ -34,39 +29,39 @@ const initialSort = [
   },
 ];
 
-export function ObservabilityAlertsTable(
-  props: Omit<ObservabilityAlertsTableProps, 'services'> & { hideLazyLoader?: boolean }
-) {
+export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTableProps, 'services'>) {
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
-  const { hideLazyLoader, ...tableProps } = props;
 
   return (
-    <Suspense fallback={hideLazyLoader ? null : <EuiLoadingSpinner />}>
-      <AlertsTable<ObservabilityAlertsTableContext>
-        columns={columns}
-        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-        initialSort={initialSort}
-        casesConfiguration={{ featureId: casesFeatureId, owner: [observabilityFeatureId] }}
-        additionalContext={{ observabilityRuleTypeRegistry, config }}
-        renderCellValue={AlertsTableCellValue}
-        renderFlyoutHeader={AlertsFlyoutHeader}
-        renderFlyoutBody={AlertsFlyoutBody}
-        renderFlyoutFooter={AlertsFlyoutFooter}
-        showAlertStatusWithFlapping
-        services={{
-          data,
-          http,
-          notifications,
-          fieldFormats,
-          application,
-          licensing,
-          cases,
-          settings,
-        }}
-        {...tableProps}
-      />
-    </Suspense>
+    <AlertsTable<ObservabilityAlertsTableContext>
+      columns={columns}
+      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}initialSort={initialSort}
+      casesConfiguration={{ featureId: casesFeatureId, owner: [observabilityFeatureId] }}
+      additionalContext={{ observabilityRuleTypeRegistry, config }}
+      renderCellValue={AlertsTableCellValue}
+      renderFlyoutHeader={AlertsFlyoutHeader}
+      renderFlyoutBody={AlertsFlyoutBody}
+      renderFlyoutFooter={AlertsFlyoutFooter}
+      showAlertStatusWithFlapping
+      services={{
+        data,
+        http,
+        notifications,
+        fieldFormats,
+        application,
+        licensing,
+        cases,
+        settings,
+      }}
+      {...props}
+    />
   );
 }
+
+// Default export used for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default ObservabilityAlertsTable;
+
+export type ObservabilityAlertsTable = typeof ObservabilityAlertsTable;

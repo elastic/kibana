@@ -23,14 +23,14 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { AlertActionsProps } from '@kbn/response-ops-alerts-table/types';
-import type { EventNonEcsData } from '../../../../common/typings';
-import type { GetObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
-import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
-import { useKibana } from '../../../utils/kibana_react';
-import { parseAlert } from '../helpers/parse_alert';
-import { observabilityFeatureId } from '../../..';
-import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
+import type { EventNonEcsData } from '../../../common/typings';
+import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
+import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
+import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
+import { useKibana } from '../../utils/kibana_react';
+import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
+import { observabilityFeatureId } from '../..';
+import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 
 // eslint-disable-next-line react/function-component-definition
 export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
@@ -250,3 +250,9 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
     </>
   );
 };
+
+// Default export used for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default AlertActions;
+
+export type AlertActions = typeof AlertActions;
