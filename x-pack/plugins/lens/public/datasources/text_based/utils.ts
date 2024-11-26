@@ -11,7 +11,7 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import type {
@@ -216,7 +216,7 @@ export function updateColumnFormat({
 }: {
   layer: TextBasedLayer;
   columnId: string;
-  value: SerializedFieldFormat | undefined;
+  value: ValueFormatConfig | undefined;
 }): TextBasedLayer {
   const currentColumnIndex = layer.columns.findIndex((c) => c.columnId === columnId);
   const currentColumn = layer.columns[currentColumnIndex];
@@ -226,11 +226,7 @@ export function updateColumnFormat({
       ...layer.columns.slice(0, currentColumnIndex),
       {
         ...currentColumn,
-        meta: {
-          ...currentColumn.meta,
-          type: currentColumn.meta?.type || 'number',
-          params: value,
-        },
+        format: value,
       },
       ...layer.columns.slice(currentColumnIndex + 1),
     ],

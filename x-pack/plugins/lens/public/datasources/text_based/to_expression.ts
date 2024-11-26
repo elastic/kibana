@@ -8,8 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
-import type { OriginalColumn } from '../../../common/types';
+import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
+import type { OriginalColumn } from '../../../common/types';
 
 function getExpressionForLayer(
   layer: TextBasedLayer,
@@ -27,7 +28,6 @@ function getExpressionForLayer(
         // ...col,
         id: col.columnId,
         label: col.customLabel ? col.label : col.fieldName,
-        format: col.meta?.params,
       } as OriginalColumn);
     } else {
       idMapper = {
@@ -37,13 +37,52 @@ function getExpressionForLayer(
             // ...col,
             id: col.columnId,
             label: col.customLabel ? col.label : col.fieldName,
-            format: col.meta?.params,
           } as OriginalColumn,
         ],
       };
     }
   });
   const timeFieldName = layer.timeField ?? undefined;
+
+  const formatterOverrides: ExpressionAstFunction[] = layer.columns
+    .filter((col) => col.format)
+    .map((col) => {
+      // TODO: improve the type handling here
+      const format = col.format!;
+
+      const base: ExpressionAstFunction = {
+        type: 'function',
+        function: 'lens_format_column',
+        arguments: {
+          format: format ? [format.id] : [''],
+          columnId: [col.columnId],
+          decimals: typeof format?.params?.decimals === 'number' ? [format.params.decimals] : [],
+          suffix:
+            format?.params && 'suffix' in format.params && format.params.suffix
+              ? [format.params.suffix]
+              : [],
+          compact:
+            format?.params && 'compact' in format.params && format.params.compact
+              ? [format.params.compact]
+              : [],
+          pattern:
+            format?.params && 'pattern' in format.params && format.params.pattern
+              ? [format.params.pattern]
+              : [],
+          fromUnit:
+            format?.params && 'fromUnit' in format.params && format.params.fromUnit
+              ? [format.params.fromUnit]
+              : [],
+          toUnit:
+            format?.params && 'toUnit' in format.params && format.params.toUnit
+              ? [format.params.toUnit]
+              : [],
+          parentFormat: [],
+        },
+      };
+
+      return base;
+    });
 
   if (!layer.table) {
     const textBasedQueryToAst = textBasedQueryStateToExpressionAst({
@@ -66,6 +105,7 @@ function getExpressionForLayer(
         isTextBased: [true],
       },
     });
+    textBasedQueryToAst.chain.push(...formatterOverrides);
     return textBasedQueryToAst;
   } else {
     return {
@@ -85,6 +125,7 @@ function getExpressionForLayer(
             idMap: [JSON.stringify(idMapper)],
           },
         },
+        ...formatterOverrides,
       ],
     };
   }
