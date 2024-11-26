@@ -8,10 +8,11 @@
 import * as Rx from 'rxjs';
 import { map, take } from 'rxjs';
 
-import type {
+import {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
+  Headers,
   IBasePath,
   IClusterClient,
   KibanaRequest,
@@ -35,7 +36,7 @@ import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import { HTTPAuthorizationHeader, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
@@ -81,6 +82,21 @@ export interface ReportingInternalStart {
   screenshotting?: ScreenshottingStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
+}
+
+/**
+ * HTTP headers extracted from the user request that will be used to generate the report.
+ */
+export interface ReportHeaders {
+  /**
+   * HTTP headers to be used for the report generation (unencrypted).
+   */
+  headers: Headers;
+
+  /**
+   * Whether the report generation should use a dedicated API key instead of the user's bearer token.
+   */
+  usesDedicatedApiKey: boolean;
 }
 
 /**
@@ -203,6 +219,100 @@ export class ReportingCore {
   public setConfig(config: ReportingConfigType) {
     this.config = config;
     this.pluginSetup$.next(true);
+  }
+
+  /**
+   * Prepares the request headers for the report job to rely on while generating report.
+   * @param req The user request that triggered report generation.
+   */
+  public async prepareReportHeaders(req: KibanaRequest): Promise<ReportHeaders> {
+    // If there is no authorization header, or it isn't a bearer token, we don't need to replace it with an API key
+    // since the user credentials ether cannot expire (basic credentials) or the expiration is controlled by the
+    // client (api key).
+    const reportHeaders = { headers: req.headers, usesDedicatedApiKey: false };
+    const authorization = HTTPAuthorizationHeader.parseFromRequest(req);
+    if (!authorization || authorization.scheme.toLowerCase() !== 'bearer') {
+      return reportHeaders;
+    }
+
+    // If the API keys are not enabled, we cannot replace the bearer token with an API key.
+    const authc = this.pluginStartDeps?.securityService.authc;
+    if (!authc || !(await authc.apiKeys.areAPIKeysEnabled())) {
+      this.logger.debug(
+        'API keys are not enabled, cannot replace the bearer token with an API key.'
+      );
+      return reportHeaders;
+    }
+
+    // If user isn't an interactive user, we don't need to replace the bearer token with an API key, since client is
+    // responsible for the expiration of the credentials they use.
+    const reportOwner = authc.getCurrentUser(req);
+    if (!reportOwner || reportOwner.authentication_provider.type === 'http') {
+      this.logger.debug(
+        'Cannot replace the bearer token with an API key for a non-interactive client.'
+      );
+      return reportHeaders;
+    }
+
+    // QUESTION #1: Can we estimate how many keys we'll have to generate on average? In this case we only care about
+    // interactive/browser users, so we can probably assume that the number of keys will be relatively low?
+    const apiKey = await authc.apiKeys.grantAsInternalUser(req, {
+      // QUESTION #2: Should we use the user's name as the API key name, or is there any other useful information we can
+      // include into the API key name or metadata (e.g., job ID or something along these lines)?
+      name: 'reporting-job',
+      // QUESTION #3: Should it be configurable? If yes, what should be the default expiration time? If not, what should
+      // be the maximum expiration time? We should make it as small as reasonable.
+      expiration: '1h',
+      // Retain the same privileges.
+      role_descriptors: {},
+      // Mark the key as managed by the Kibana (can be filtered out in the UI).
+      metadata: { managed: true },
+    });
+
+    // If for some reason we failed to create an API key, we shouldn't fail and use the original bearer token instead.
+    if (!apiKey) {
+      this.logger.error(
+        'Failed to create an API key for the reporting job, using the original bearer token.'
+      );
+      return reportHeaders;
+    }
+
+    this.logger.debug(
+      'Successfully replaced user bearer token with an API key for the reporting job.'
+    );
+
+    return {
+      usesDedicatedApiKey: true,
+      headers: {
+        ...reportHeaders.headers,
+        authorization: `ApiKey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString('base64')}`,
+      },
+    };
+  }
+
+  /**
+   * Disposes the API key used for the report job, if it was created.
+   * @param reportHeaders The HTTP request headers that were used to generate report with a flag indicating whether the
+   * Reporting generated dedicated API key that needs to be invalidated.
+   * @param headers The headers used for the report job.
+   */
+  public async disposeReportHeaders({ usesDedicatedApiKey, headers }: ReportHeaders) {
+    if (!usesDedicatedApiKey) {
+      return;
+    }
+
+    const authorization = HTTPAuthorizationHeader.parseFromRequest({ headers });
+    if (!authorization || authorization.scheme.toLowerCase() !== 'apikey') {
+      throw new Error(
+        'The API key is expected to be used for the report job was not found in headers.'
+      );
+    }
+
+    // API keys are invalidated by their ID, that is encoded in the API key value.
+    const apiKeys = this.pluginStartDeps?.securityService?.authc.apiKeys;
+    await apiKeys?.invalidateAsInternalUser({
+      ids: [Buffer.from(authorization.credentials, 'base64').toString().split(':')[0]],
+    });
   }
 
   /**

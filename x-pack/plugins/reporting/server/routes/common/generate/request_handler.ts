@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import moment from 'moment';
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import type { BaseParams } from '@kbn/reporting-common/types';
@@ -55,10 +55,17 @@ export class RequestHandler {
     private logger: Logger
   ) {}
 
-  private async encryptHeaders() {
-    const { encryptionKey } = this.reporting.getConfig();
-    const crypto = cryptoFactory(encryptionKey);
-    return await crypto.encrypt(this.req.headers);
+  private async encryptHeaders(): Promise<{
+    encryptedHeaders: string;
+    usesDedicatedApiKey: boolean;
+  }> {
+    const { headers, usesDedicatedApiKey } = await this.reporting.prepareReportHeaders(this.req);
+    return {
+      usesDedicatedApiKey,
+      encryptedHeaders: await cryptoFactory(this.reporting.getConfig().encryptionKey).encrypt(
+        headers
+      ),
+    };
   }
 
   public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
@@ -80,14 +87,18 @@ export class RequestHandler {
     jobParams.version = checkParamsVersion(jobParams, logger);
 
     // 2. Encrypt request headers to store for the running report job to authenticate itself with Kibana
-    const headers = await this.encryptHeaders();
+    // IMPORTANT: We need to store `usesDedicatedApiKey` flag in the report so we can determine if we need to invalidate
+    // the API key after the report is completed:
+    // const decryptedHeaders = ....;
+    // await this.reporting.disposeHeaders({ usesDedicatedApiKey, headers: decryptedHeaders });
+    const { usesDedicatedApiKey, encryptedHeaders } = await this.encryptHeaders();
 
     // 3. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
     const job = await exportType.createJob(jobParams, context, req);
 
     const payload = {
       ...job,
-      headers,
+      headers: encryptedHeaders,
       title: job.title,
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
