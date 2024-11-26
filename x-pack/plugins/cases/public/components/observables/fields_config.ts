@@ -7,7 +7,7 @@
 
 import { type ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { OBSERVABLE_TYPE_EMAIL } from '../../../common/constants';
+import { OBSERVABLE_TYPE_DOMAIN, OBSERVABLE_TYPE_EMAIL } from '../../../common/constants';
 
 export const normalizeValueType = (value: string): keyof typeof fieldsConfig.value | 'generic' => {
   if (value in fieldsConfig.value) {
@@ -17,6 +17,7 @@ export const normalizeValueType = (value: string): keyof typeof fieldsConfig.val
   return 'generic';
 };
 
+const DOMAIN_REGEX = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\]+$/;
 
@@ -60,6 +61,22 @@ export const genericValidator: ValidationFunc = (...args: Parameters<ValidationF
   }
 };
 
+export const domainValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
+  const [{ value, path }] = args;
+
+  if (typeof value !== 'string') {
+    return notStringError(path);
+  }
+
+  if (!DOMAIN_REGEX.test(value)) {
+    return {
+      code: 'ERR_NOT_VALID',
+      message: 'Value is invalid',
+      path,
+    };
+  }
+};
+
 export const fieldsConfig = {
   value: {
     generic: {
@@ -83,6 +100,17 @@ export const fieldsConfig = {
         },
       ],
       label: 'Email',
+    },
+    [OBSERVABLE_TYPE_DOMAIN.key]: {
+      validations: [
+        {
+          validator: emptyField('Value is required'),
+        },
+        {
+          validator: domainValidator,
+        },
+      ],
+      label: 'Domain',
     },
   },
   typeKey: {

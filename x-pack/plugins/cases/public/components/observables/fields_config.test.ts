@@ -6,7 +6,7 @@
  */
 
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
-import { emailValidator, genericValidator } from './fields_config';
+import { domainValidator, emailValidator, genericValidator } from './fields_config';
 
 describe('emailValidator', () => {
   it('should return an error if the value is not a string', () => {
@@ -74,5 +74,51 @@ describe('genericValidator', () => {
       path: 'generic',
     } as Parameters<ValidationFunc>[0]);
     expect(result).toBeUndefined();
+  });
+});
+
+describe('domainValidator', () => {
+  it('should return undefined for a valid domain', () => {
+    const result = domainValidator({
+      value: 'example.com',
+      path: 'domain',
+    } as Parameters<ValidationFunc>[0]);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return an error for an invalid domain', () => {
+    const result = domainValidator({
+      value: '-invalid.com',
+      path: 'domain',
+    } as Parameters<ValidationFunc>[0]);
+    expect(result).toEqual({
+      code: 'ERR_NOT_VALID',
+      message: 'Value is invalid',
+      path: 'domain',
+    });
+  });
+
+  it('should return an error for hyphen-spaced strings', () => {
+    const result = domainValidator({
+      value: 'test-test',
+      path: 'domain',
+    } as Parameters<ValidationFunc>[0]);
+    expect(result).toEqual({
+      code: 'ERR_NOT_VALID',
+      message: 'Value is invalid',
+      path: 'domain',
+    });
+  });
+
+  it('should return an error for a non-string value', () => {
+    const result = domainValidator({
+      value: 12345,
+      path: 'domain',
+    } as Parameters<ValidationFunc>[0]);
+    expect(result).toEqual({
+      code: 'ERR_NOT_STRING',
+      message: 'Value should be a string',
+      path: 'domain',
+    });
   });
 });

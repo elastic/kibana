@@ -282,6 +282,11 @@ export const OBSERVABLE_TYPE_EMAIL = {
   key: 'observable-type-email',
 } as const;
 
+export const OBSERVABLE_TYPE_DOMAIN = {
+  label: 'Domain',
+  key: 'observable-type-domain',
+} as const;
+
 export const OBSERVABLE_TYPE_IPV4 = {
   label: 'IPv4',
   key: 'observable-type-ipv4',
@@ -300,10 +305,6 @@ export const OBSERVABLE_TYPES_BUILTIN = [
     key: 'observable-type-url',
   },
   {
-    label: 'Domain',
-    key: 'observable-type-domain',
-  },
-  {
     label: 'Hostname',
     key: 'observable-type-hostname',
   },
@@ -317,5 +318,8 @@ export const OBSERVABLE_TYPES_BUILTIN = [
   },
   {
     ...OBSERVABLE_TYPE_EMAIL,
+  },
+  {
+    ...OBSERVABLE_TYPE_DOMAIN,
   },
 ];
