@@ -10,7 +10,7 @@
 import { Schema } from '..';
 import { K8sEntity } from '.';
 
-export function k8sJobSetEntity({
+export function k8sJobEntity({
   schema,
   name,
   uid,
@@ -27,9 +27,9 @@ export function k8sJobSetEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
+      'entity.definition_id': 'job',
       'entity.type': 'job',
       'kubernetes.job.name': name,
-      'kubernetes.job.uid': uid,
       'kubernetes.namespace': clusterName,
       'entity.id': entityId,
       ...others,
@@ -37,6 +37,7 @@ export function k8sJobSetEntity({
   }
 
   return new K8sEntity(schema, {
+    'entity.definition_id': 'job',
     'entity.type': 'job',
     'k8s.job.name': name,
     'k8s.job.uid': uid,
