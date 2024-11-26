@@ -15,7 +15,7 @@ import {
   EuiLink,
   EuiPageBody,
   EuiPageSection,
-  EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -37,6 +37,7 @@ type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
     featureSet: { migrateSystemIndices },
+    kibanaVersionInfo: { currentVersion },
     services: {
       breadcrumbs,
       core: { docLinks },
@@ -76,7 +77,9 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
+            defaultMessage:
+              'This is version {currentVersion} of the Elastic Stack, get ready for the next version!',
+            values: { currentVersion },
           })}
           rightSideItems={[
             <EuiButtonEmpty
@@ -92,18 +95,10 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             </EuiButtonEmpty>,
           ]}
         >
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajor',
-              {
-                defaultMessage:
-                  'You need to upgrade to the last minor version before you can safely proceed to the next major',
-              }
-            )}
-          >
+          <EuiText>
             <FormattedMessage
-              id="xpack.upgradeAssistant.overview.whatsNewMessage"
-              defaultMessage="Check the {link}"
+              id="xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajorMessage"
+              defaultMessage="Check the {link}. To safely proceed to the next major ensure you are on the latest minor of version."
               values={{
                 link: (
                   <EuiLink
@@ -112,14 +107,14 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.overview.whatsNewLink"
+                      id="xpack.upgradeAssistant.overview.minorOfLatestMajorReleaseNotes"
                       defaultMessage="latest release highlights"
                     />
                   </EuiLink>
                 ),
               }}
             />
-          </EuiCallOut>
+          </EuiText>
         </EuiPageHeader>
         <EuiSpacer size="l" />
         <EuiSteps

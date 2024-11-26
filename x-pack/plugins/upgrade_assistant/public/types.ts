@@ -17,6 +17,8 @@ import { ApiService } from './application/lib/api';
 import type { FeatureSet } from '../common/types';
 
 export interface KibanaVersionContext {
+  /** A string formatted like major.minor.patch of the current stack version */
+  currentVersion: string;
   currentMajor: number;
   prevMajor: number;
   nextMajor: number;
