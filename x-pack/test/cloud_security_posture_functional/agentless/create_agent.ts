@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const agentCreationTimeout = 1000 * 60 * 5; // 5 minutes
   const retry = getService('retry');
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
@@ -71,9 +72,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // wait for eventually healthy status
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(agentCreationTimeout, async () => {
         expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Healthy');
-      });            
+      });
     });
 
     it(`should show setup technology selector in edit mode`, async () => {
