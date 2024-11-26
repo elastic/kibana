@@ -188,6 +188,10 @@ export const RuleMigration = z
 export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
 export const RuleMigrationTaskStats = z.object({
   /**
+   * The migration id
+   */
+  id: NonEmptyString,
+  /**
    * Indicates if the migration task status.
    */
   status: z.enum(['ready', 'running', 'stopped', 'finished']),
@@ -217,22 +221,14 @@ export const RuleMigrationTaskStats = z.object({
     failed: z.number().int(),
   }),
   /**
+   * The moment the migration was created.
+   */
+  created_at: z.string(),
+  /**
    * The moment of the last update.
    */
-  last_updated_at: z.string().optional(),
+  last_updated_at: z.string(),
 });
-
-export type RuleMigrationAllTaskStats = z.infer<typeof RuleMigrationAllTaskStats>;
-export const RuleMigrationAllTaskStats = z.array(
-  RuleMigrationTaskStats.merge(
-    z.object({
-      /**
-       * The migration id
-       */
-      migration_id: NonEmptyString,
-    })
-  )
-);
 
 /**
  * The type of the rule migration resource.

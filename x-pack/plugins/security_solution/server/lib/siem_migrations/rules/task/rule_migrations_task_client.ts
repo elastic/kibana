@@ -9,10 +9,7 @@ import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
-import type {
-  RuleMigrationAllTaskStats,
-  RuleMigrationTaskStats,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type {
@@ -226,10 +223,10 @@ export class RuleMigrationsTaskClient {
   }
 
   /** Returns the stats of all migrations */
-  async getAllStats(): Promise<RuleMigrationAllTaskStats> {
+  async getAllStats(): Promise<RuleMigrationTaskStats[]> {
     const allDataStats = await this.data.rules.getAllStats();
     return allDataStats.map((dataStats) => {
-      const status = this.getTaskStatus(dataStats.migration_id, dataStats.rules);
+      const status = this.getTaskStatus(dataStats.id, dataStats.rules);
       return { status, ...dataStats };
     });
   }
