@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type { UseGraphPreviewParams, UseGraphPreviewResult } from './use_graph_preview';
 import { useGraphPreview } from './use_graph_preview';
 import type { GetFieldsData } from './use_get_fields_data';
@@ -25,7 +25,7 @@ const mockGetFieldsData: GetFieldsData = (field: string) => {
 };
 
 describe('useGraphPreview', () => {
-  let hookResult: RenderHookResult<UseGraphPreviewParams, UseGraphPreviewResult>;
+  let hookResult: RenderHookResult<UseGraphPreviewResult, UseGraphPreviewParams>;
 
   it(`should return false when missing actor`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {

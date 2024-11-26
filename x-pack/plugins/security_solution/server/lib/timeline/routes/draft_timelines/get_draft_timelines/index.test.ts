@@ -90,13 +90,7 @@ describe('get draft timelines', () => {
         });
 
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
-          data: {
-            persistTimeline: {
-              timeline: createTimelineWithTimelineId,
-            },
-          },
-        });
+        expect(response.body).toEqual(createTimelineWithTimelineId);
       });
 
       test('should return an existing draft if available', async () => {
@@ -110,13 +104,7 @@ describe('get draft timelines', () => {
         );
         expect(mockPersistTimeline).not.toHaveBeenCalled();
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual({
-          data: {
-            persistTimeline: {
-              timeline: mockGetDraftTimelineValue,
-            },
-          },
-        });
+        expect(response.body).toEqual(mockGetDraftTimelineValue);
       });
     });
   });
