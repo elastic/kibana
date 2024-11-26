@@ -33,7 +33,7 @@ test.describe('Discover app - value suggestions: useTimeRange enabled', () => {
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsPrivilegedUser();
+    await browserAuth.loginAsViewer();
     await pageObjects.discover.goto();
   });
 
