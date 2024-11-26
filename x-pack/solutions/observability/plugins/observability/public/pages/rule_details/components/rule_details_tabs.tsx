@@ -30,7 +30,7 @@ import {
 } from '../constants';
 import type { TabId } from '../rule_details';
 import { getColumns } from '../../../components/alerts_table/common/get_columns';
-import { AlertActions } from '../../alerts/components/alert_actions';
+import { AlertActions } from '../../../components/alert_actions/alert_actions';
 
 interface Props {
   activeTabId: TabId;
