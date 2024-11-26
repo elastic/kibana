@@ -44,7 +44,7 @@ describe('getEntityInstancesQuery', () => {
           'WHERE entity.id IS NOT NULL | ' +
           'WHERE (is_source_0 AND (@timestamp >= "2024-11-20T19:00:00.000Z" AND @timestamp <= "2024-11-20T20:00:00.000Z")) OR ' +
           '(is_source_1 AND (custom_timestamp_field >= "2024-11-20T19:00:00.000Z" AND custom_timestamp_field <= "2024-11-20T20:00:00.000Z")) | ' +
-          'STATS entity.last_seen_timestamp=MAX(entity.timestamp), service.name=TOP(service.name, 1, "desc"), custom.service.name=TOP(custom.service.name, 1, "desc"), metadata.host.name=VALUES(host.name), metadata.owner=VALUES(owner) BY entity.id | ' +
+          'STATS service.name=TOP(service.name, 1, "desc"), custom.service.name=TOP(custom.service.name, 1, "desc"), metadata.host.name=VALUES(host.name), metadata.owner=VALUES(owner), entity.last_seen_timestamp=MAX(entity.timestamp) BY entity.id | ' +
           'SORT entity.last_seen_timestamp DESC | ' +
           'LIMIT 5'
       );
