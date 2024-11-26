@@ -6,7 +6,7 @@
  */
 
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
-import { domainValidator, emailValidator, genericValidator } from './fields_config';
+import { domainValidator, emailValidator, genericValidator, ipv4Validator } from './fields_config';
 
 describe('emailValidator', () => {
   it('should return an error if the value is not a string', () => {
@@ -119,6 +119,28 @@ describe('domainValidator', () => {
       code: 'ERR_NOT_STRING',
       message: 'Value should be a string',
       path: 'domain',
+    });
+  });
+});
+
+describe('ipv4Validator', () => {
+  it('should return undefined for a valid ipv4', () => {
+    const result = ipv4Validator({
+      value: '127.0.0.1',
+      path: 'ipv4',
+    } as Parameters<ValidationFunc>[0]);
+    expect(result).toBeUndefined();
+  });
+
+  it('should return an error for invalid ipv4', () => {
+    const result = domainValidator({
+      value: 'invalid ip',
+      path: 'ipv4',
+    } as Parameters<ValidationFunc>[0]);
+    expect(result).toEqual({
+      code: 'ERR_NOT_VALID',
+      message: 'Value is invalid',
+      path: 'ipv4',
     });
   });
 });

@@ -7,7 +7,12 @@
 
 import { type ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { OBSERVABLE_TYPE_DOMAIN, OBSERVABLE_TYPE_EMAIL } from '../../../common/constants';
+import {
+  OBSERVABLE_TYPE_DOMAIN,
+  OBSERVABLE_TYPE_EMAIL,
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_TYPE_IPV6,
+} from '../../../common/constants';
 
 export const normalizeValueType = (value: string): keyof typeof fieldsConfig.value | 'generic' => {
   if (value in fieldsConfig.value) {
@@ -21,6 +26,11 @@ const DOMAIN_REGEX = /^(?!-)[A-Za-z0-9-]{1,63}(?<!-)\.[A-Za-z]{2,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const GENERIC_REGEX = /^[a-zA-Z0-9._:/\\]+$/;
 
+// NOTE: consider if making this more sophisitcated makes sense
+const IPV4_SIMPLIFIED = /^(\d{1,3}\.){3}\d{1,3}$/;
+// NOTE: consider if making this more sophisitcated makes sense
+const IPV6_SIMPLIFIED = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+
 const notStringError = (path: string) => ({
   code: 'ERR_NOT_STRING',
   message: 'Value should be a string',
@@ -29,53 +39,38 @@ const notStringError = (path: string) => ({
 
 const { emptyField } = fieldValidators;
 
-export const emailValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
-  const [{ value, path }] = args;
+const validatorFactory =
+  (
+    regex: RegExp,
+    message: string = 'Value is invalid',
+    code: string = 'ERR_NOT_VALID'
+  ): ValidationFunc =>
+  (...args: Parameters<ValidationFunc>) => {
+    const [{ value, path }] = args;
 
-  if (typeof value !== 'string') {
-    return notStringError(path);
-  }
+    if (typeof value !== 'string') {
+      return notStringError(path);
+    }
 
-  if (!EMAIL_REGEX.test(value)) {
-    return {
-      code: 'ERR_NOT_EMAIL',
-      message: 'Value should be an email',
-      path,
-    };
-  }
-};
+    if (!regex.test(value)) {
+      return {
+        code,
+        message,
+        path,
+      };
+    }
+  };
 
-export const genericValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
-  const [{ value, path }] = args;
+export const emailValidator = validatorFactory(
+  EMAIL_REGEX,
+  'Value should be an email',
+  'ERR_NOT_EMAIL'
+);
 
-  if (typeof value !== 'string') {
-    return notStringError(path);
-  }
-
-  if (!GENERIC_REGEX.test(value)) {
-    return {
-      code: 'ERR_NOT_VALID',
-      message: 'Value is invalid',
-      path,
-    };
-  }
-};
-
-export const domainValidator: ValidationFunc = (...args: Parameters<ValidationFunc>) => {
-  const [{ value, path }] = args;
-
-  if (typeof value !== 'string') {
-    return notStringError(path);
-  }
-
-  if (!DOMAIN_REGEX.test(value)) {
-    return {
-      code: 'ERR_NOT_VALID',
-      message: 'Value is invalid',
-      path,
-    };
-  }
-};
+export const genericValidator = validatorFactory(GENERIC_REGEX);
+export const domainValidator = validatorFactory(DOMAIN_REGEX);
+export const ipv4Validator = validatorFactory(IPV4_SIMPLIFIED);
+export const ipv6Validator = validatorFactory(IPV6_SIMPLIFIED);
 
 export const fieldsConfig = {
   value: {
@@ -111,6 +106,28 @@ export const fieldsConfig = {
         },
       ],
       label: 'Domain',
+    },
+    [OBSERVABLE_TYPE_IPV4.key]: {
+      validations: [
+        {
+          validator: emptyField('Value is required'),
+        },
+        {
+          validator: ipv4Validator,
+        },
+      ],
+      label: 'IPv4',
+    },
+    [OBSERVABLE_TYPE_IPV6.key]: {
+      validations: [
+        {
+          validator: emptyField('Value is required'),
+        },
+        {
+          validator: ipv6Validator,
+        },
+      ],
+      label: 'IPv6',
     },
   },
   typeKey: {
