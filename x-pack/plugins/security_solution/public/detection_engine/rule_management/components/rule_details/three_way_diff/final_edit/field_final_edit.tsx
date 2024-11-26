@@ -7,13 +7,6 @@
 
 import React from 'react';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { useDiffableRuleContext } from '../diffable_rule_context';
-import { CommonRuleFieldEdit } from './common_rule_field_edit';
-import { CustomQueryRuleFieldEdit } from './custom_query_rule_field_edit';
-import { SavedQueryRuleFieldEdit } from './saved_query_rule_field_edit';
-import { ThreatMatchRuleFieldEdit } from './threat_match_rule_field_edit';
-import { ThresholdRuleFieldEdit } from './threshold_rule_field_edit';
-import { NewTermsRuleFieldEdit } from './new_terms_rule_field_edit';
 import type {
   UpgradeableCustomQueryFields,
   UpgradeableSavedQueryFields,
@@ -26,12 +19,19 @@ import type {
 } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { useFieldFinalSideContext } from '../field_final_side';
+import { useFinalRuleContext } from '../final_rule_context';
+import { CommonRuleFieldEdit } from './common_rule_field_edit';
+import { CustomQueryRuleFieldEdit } from './custom_query_rule_field_edit';
+import { SavedQueryRuleFieldEdit } from './saved_query_rule_field_edit';
+import { ThreatMatchRuleFieldEdit } from './threat_match_rule_field_edit';
+import { ThresholdRuleFieldEdit } from './threshold_rule_field_edit';
+import { NewTermsRuleFieldEdit } from './new_terms_rule_field_edit';
 import { EqlRuleFieldEdit } from './eql_rule_field_edit';
 import { EsqlRuleFieldEdit } from './esql_rule_field_edit';
 import { MachineLearningRuleFieldEdit } from './machine_learning_rule_field_edit';
 
 export function FieldFinalEdit(): JSX.Element {
-  const { finalDiffableRule } = useDiffableRuleContext();
+  const { finalDiffableRule } = useFinalRuleContext();
   const { type } = finalDiffableRule;
 
   const {

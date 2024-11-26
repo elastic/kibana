@@ -10,41 +10,36 @@ import type { DiffableRule } from '../../../../../../common/api/detection_engine
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { SetRuleFieldResolvedValueFn } from '../../../model/prebuilt_rule_upgrade/set_rule_field_resolved_value';
 
-interface DiffableRuleContextType {
+interface FinalRuleContextType {
   finalDiffableRule: DiffableRule;
   setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
 }
 
-const DiffableRuleContext = createContext<DiffableRuleContextType | null>(null);
+const FinalRuleContext = createContext<FinalRuleContextType | null>(null);
 
-interface DiffableRuleContextProviderProps {
+interface FinalRuleContextProviderProps {
   finalDiffableRule: DiffableRule;
   setRuleFieldResolvedValue: SetRuleFieldResolvedValueFn;
   children: React.ReactNode;
 }
 
-export function DiffableRuleContextProvider({
+export function FinalRuleContextProvider({
   finalDiffableRule,
   setRuleFieldResolvedValue,
   children,
-}: DiffableRuleContextProviderProps) {
+}: FinalRuleContextProviderProps) {
   const contextValue = {
     finalDiffableRule,
     setRuleFieldResolvedValue,
   };
 
-  return (
-    <DiffableRuleContext.Provider value={contextValue}>{children}</DiffableRuleContext.Provider>
-  );
+  return <FinalRuleContext.Provider value={contextValue}>{children}</FinalRuleContext.Provider>;
 }
 
-export function useDiffableRuleContext() {
-  const context = useContext(DiffableRuleContext);
+export function useFinalRuleContext() {
+  const context = useContext(FinalRuleContext);
 
-  invariant(
-    context !== null,
-    'useDiffableRuleContext must be used inside a DiffableRuleContextProvider'
-  );
+  invariant(context !== null, 'useFinalRuleContext must be used inside a FinalRuleContextProvider');
 
   return context;
 }

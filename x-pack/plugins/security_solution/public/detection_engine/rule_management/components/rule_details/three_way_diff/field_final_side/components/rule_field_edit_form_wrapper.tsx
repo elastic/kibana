@@ -18,7 +18,7 @@ import type {
   DiffableRule,
 } from '../../../../../../../../common/api/detection_engine';
 import { useFieldFinalSideContext } from '../context/field_final_side_context';
-import { useDiffableRuleContext } from '../../diffable_rule_context';
+import { useFinalRuleContext } from '../../final_rule_context';
 import { useFieldEditFormContext } from '../context/field_edit_form_context';
 import type { RuleFieldEditComponentProps } from './rule_field_edit_component_props';
 import { useConfirmValidationErrorsModal } from '../../../../../../../common/hooks/use_confirm_validation_errors_modal';
@@ -61,7 +61,7 @@ export function RuleFieldEditFormWrapper({
     state: { fieldName },
     actions: { setReadOnlyMode },
   } = useFieldFinalSideContext();
-  const { finalDiffableRule, setRuleFieldResolvedValue } = useDiffableRuleContext();
+  const { finalDiffableRule, setRuleFieldResolvedValue } = useFinalRuleContext();
 
   const deserialize = useCallback(
     (defaultValue: FormData): FormData =>

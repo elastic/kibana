@@ -16,7 +16,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { UpgradeableDiffableFields } from '../../../../../model/prebuilt_rule_upgrade/fields';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
-import { DiffableRuleContextProvider } from '../../diffable_rule_context';
+import { FinalRuleContextProvider } from '../../final_rule_context';
 import type { DiffableRule } from '../../../../../../../../common/api/detection_engine';
 import { FieldFinalSideContextProvider } from '../../field_final_side/context/field_final_side_context';
 import { mockCustomQueryRule } from './mocks';
@@ -100,7 +100,7 @@ export function ThreeWayDiffStorybookProviders({
       <ReactQueryClientProvider>
         <ReduxStoreProvider store={store}>
           <UpsellingProvider upsellingService={kibanaServicesMock.upsellingService}>
-            <DiffableRuleContextProvider
+            <FinalRuleContextProvider
               finalDiffableRule={finalDiffableRule}
               setRuleFieldResolvedValue={setRuleFieldResolvedValueMock}
             >
@@ -110,7 +110,7 @@ export function ThreeWayDiffStorybookProviders({
               >
                 {children}
               </FieldFinalSideContextProvider>
-            </DiffableRuleContextProvider>
+            </FinalRuleContextProvider>
           </UpsellingProvider>
         </ReduxStoreProvider>
       </ReactQueryClientProvider>

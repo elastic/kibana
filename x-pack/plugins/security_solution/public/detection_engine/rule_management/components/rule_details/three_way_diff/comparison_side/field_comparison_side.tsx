@@ -17,7 +17,7 @@ import type {
 } from '../../../../../../../common/api/detection_engine';
 import { getSubfieldChanges } from './get_subfield_changes';
 import { SubfieldChanges } from './subfield_changes';
-import { SideHeader } from '../components/side_header';
+import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
 import { ComparisonSideHelpInfo } from './comparison_side_help_info';
 import * as i18n from './translations';
 
@@ -46,7 +46,7 @@ export function FieldComparisonSide<FieldName extends keyof DiffableAllFields>({
 
   return (
     <>
-      <SideHeader>
+      <FieldUpgradeSideHeader>
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiTitle size="xxs">
             <h3>
@@ -60,7 +60,7 @@ export function FieldComparisonSide<FieldName extends keyof DiffableAllFields>({
             onChange={setSelectedVersions}
           />
         </EuiFlexGroup>
-      </SideHeader>
+      </FieldUpgradeSideHeader>
       <SubfieldChanges fieldName={fieldName} subfieldChanges={subfieldChanges} />
     </>
   );

@@ -19,24 +19,24 @@ import { ThreeWayDiffConflict } from '../../../../../../../common/api/detection_
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { FieldComparisonSide } from '../comparison_side/field_comparison_side';
 import { FieldFinalSide } from '../field_final_side';
-import { FieldUpgradeConflictsResolverHeader } from './field_upgrade_conflicts_resolver_header';
-import { useDiffableRuleContext } from '../diffable_rule_context';
+import { FieldUpgradeHeader } from './field_upgrade_header';
+import { useFinalRuleContext } from '../final_rule_context';
 import type { UpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 
-interface FieldUpgradeConflictsResolverProps<FieldName extends UpgradeableDiffableFields> {
+interface FieldUpgradeProps<FieldName extends UpgradeableDiffableFields> {
   fieldName: FieldName;
   fieldUpgradeState: FieldUpgradeState;
   fieldThreeWayDiff: RuleFieldsDiff[FieldName];
 }
 
-export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffableFields>({
+export function FieldUpgrade<FieldName extends UpgradeableDiffableFields>({
   fieldName,
   fieldUpgradeState,
   fieldThreeWayDiff,
-}: FieldUpgradeConflictsResolverProps<FieldName>): JSX.Element {
+}: FieldUpgradeProps<FieldName>): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const hasConflict = fieldThreeWayDiff.conflict !== ThreeWayDiffConflict.NONE;
-  const { finalDiffableRule } = useDiffableRuleContext();
+  const { finalDiffableRule } = useFinalRuleContext();
   const isFieldCustomized = useMemo(
     () =>
       fieldThreeWayDiff.has_base_version
@@ -49,7 +49,7 @@ export function FieldUpgradeConflictsResolver<FieldName extends UpgradeableDiffa
     <>
       <SplitAccordion
         header={
-          <FieldUpgradeConflictsResolverHeader
+          <FieldUpgradeHeader
             fieldName={fieldName}
             fieldUpgradeState={fieldUpgradeState}
             isCustomized={isFieldCustomized}

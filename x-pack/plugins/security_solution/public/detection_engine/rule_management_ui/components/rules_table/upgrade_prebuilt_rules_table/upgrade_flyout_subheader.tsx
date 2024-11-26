@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { camelCase, startCase } from 'lodash';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
-import { ModifiedBadge } from '../../../../rule_management/components/rule_details/three_way_diff/components/badges/modified_badge';
+import { ModifiedBadge } from '../../../../rule_management/components/rule_details/three_way_diff/badges/modified_badge';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { fieldToDisplayNameMap } from '../../../../rule_management/components/rule_details/diff_components/translations';
 import * as i18n from './translations';
