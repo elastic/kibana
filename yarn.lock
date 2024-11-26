@@ -31680,6 +31680,11 @@ vega-label@~1.3.1:
     vega-scenegraph "^4.13.1"
     vega-util "^1.17.3"
 
+vega-lite-api@^5.5.0:
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/vega-lite-api/-/vega-lite-api-5.6.0.tgz#4029e038db8fbfd9d507f84d612f62c518f78fc5"
+  integrity sha512-8es9NUcbhqHnyMvUNtejbzR5pt3Kk0PNN+sng+CoKefQJkej4p648CmEXG1PiPpkfMlykDsIKMmBrQG3KVqyeQ==
+
 vega-lite@^5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-5.5.0.tgz#07345713d538cd63278748ec119c261722be66ff"
