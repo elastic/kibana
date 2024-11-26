@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiCheckboxGroup, EuiForm, EuiPanel } from '@elastic/eui';
 
@@ -21,32 +21,17 @@ export const Fields: FC = () => {
     id: d,
     label: d,
   }));
-  const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
-    {}
-  );
+
+  const checkboxIdToSelectedMap = state.useState((s) => {
+    return s.selectedFields.reduce((acc, field) => {
+      acc[field] = true;
+      return acc;
+    }, {});
+  });
 
   const onCheckboxChange = (optionId: string) => {
-    const newCheckboxIdToSelectedMap = {
-      ...checkboxIdToSelectedMap,
-      ...{
-        [optionId]: !checkboxIdToSelectedMap[optionId],
-      },
-    };
-
-    state.actions.setSelectedFields(
-      Object.entries(newCheckboxIdToSelectedMap)
-        .filter(([, v]) => v)
-        .map(([k]) => k)
-    );
-    setCheckboxIdToSelectedMap(newCheckboxIdToSelectedMap);
+    state.actions.toggleSelectedFields(optionId);
   };
-
-  useEffect(() => {
-    if (data.includes('@timestamp')) {
-      onCheckboxChange('@timestamp');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
 
   return (
     <EuiPanel paddingSize="s" hasBorder>
