@@ -28,11 +28,17 @@ import { isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
 import { usePanel } from './panel';
 
-const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
+const getStyles = (euiTheme: EuiThemeComputed<{}>, hasArrowRightIcon = false) => css`
   * {
     // EuiListGroupItem changes the links font-weight, we need to override it
     font-weight: ${euiTheme.font.weight.regular};
   }
+  ${hasArrowRightIcon
+    ? `&.sideNavItem {
+      border-top-right-radius: 0; /* when we use the arrow icon, we don't want any space between the nav item and the icon */
+      border-bottom-right-radius: 0;
+    }`
+    : ''}
   &.sideNavItem:hover {
     background-color: transparent;
   }
@@ -60,14 +66,26 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const href = deepLink?.url ?? item.href;
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
-  const isActive = isActiveFromUrl(item.path, activeNodes);
   const hasLandingPage = Boolean(href);
+  const buttonIconType = hasLandingPage ? 'spaces' : 'arrowRight';
+  const isExpanded = selectedNode?.path === path;
+  const isActive =
+    isActiveFromUrl(item.path, activeNodes) || (buttonIconType === 'arrowRight' && isExpanded);
 
   const itemClassNames = classNames(
     'sideNavItem',
     { 'sideNavItem--isActive': isActive },
-    getStyles(euiTheme)
+    getStyles(euiTheme, buttonIconType === 'arrowRight')
   );
+
+  const iconClassNames =
+    buttonIconType === 'arrowRight'
+      ? css`
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          transform: none !important; /* don't translateY 1px */
+        `
+      : undefined;
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -105,10 +123,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     togglePanel();
   }, [togglePanel]);
 
-  const isExpanded = selectedNode?.path === path;
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
+    <EuiFlexGroup alignItems="center" gutterSize={buttonIconType === 'spaces' ? 'xs' : 'none'}>
       <EuiFlexItem style={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
         <EuiListGroup gutterSize="none">
           <EuiListGroupItem
@@ -130,7 +146,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
             size="s"
             color="text"
             onClick={onIconClick}
-            iconType={hasLandingPage ? 'spaces' : 'arrowRight'}
+            iconType={buttonIconType}
             iconSize="m"
             aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
               defaultMessage: 'Toggle "{title}" panel navigation',
@@ -138,6 +154,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
             })}
             aria-expanded={isExpanded}
             data-test-subj={buttonDataTestSubj}
+            className={iconClassNames}
           />
         </EuiFlexItem>
       )}
