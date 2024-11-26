@@ -1484,6 +1484,7 @@
     "@kbn/repo-path": "link:packages/kbn-repo-path",
     "@kbn/repo-source-classifier": "link:packages/kbn-repo-source-classifier",
     "@kbn/repo-source-classifier-cli": "link:packages/kbn-repo-source-classifier-cli",
+    "@kbn/scout": "link:packages/kbn-scout",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
     "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
     "@kbn/some-dev-log": "link:packages/kbn-some-dev-log",

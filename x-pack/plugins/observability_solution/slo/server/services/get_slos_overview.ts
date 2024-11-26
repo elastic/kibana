@@ -53,19 +53,6 @@ export class GetSLOsOverview {
       },
       body: {
         aggs: {
-          worst: {
-            top_hits: {
-              sort: {
-                errorBudgetRemaining: {
-                  order: 'asc',
-                },
-              },
-              _source: {
-                includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
-              },
-              size: 1,
-            },
-          },
           stale: {
             filter: {
               range: {
@@ -75,31 +62,42 @@ export class GetSLOsOverview {
               },
             },
           },
-          violated: {
+          not_stale: {
             filter: {
-              term: {
-                status: 'VIOLATED',
+              range: {
+                summaryUpdatedAt: {
+                  gte: `now-${settings.staleThresholdInHours}h`,
+                },
               },
             },
-          },
-          healthy: {
-            filter: {
-              term: {
-                status: 'HEALTHY',
+            aggs: {
+              violated: {
+                filter: {
+                  term: {
+                    status: 'VIOLATED',
+                  },
+                },
               },
-            },
-          },
-          degrading: {
-            filter: {
-              term: {
-                status: 'DEGRADING',
+              healthy: {
+                filter: {
+                  term: {
+                    status: 'HEALTHY',
+                  },
+                },
               },
-            },
-          },
-          noData: {
-            filter: {
-              term: {
-                status: 'NO_DATA',
+              degrading: {
+                filter: {
+                  term: {
+                    status: 'DEGRADING',
+                  },
+                },
+              },
+              noData: {
+                filter: {
+                  term: {
+                    status: 'NO_DATA',
+                  },
+                },
               },
             },
           },
@@ -131,15 +129,11 @@ export class GetSLOsOverview {
     const aggs = response.aggregations;
 
     return {
-      violated: aggs?.violated.doc_count ?? 0,
-      degrading: aggs?.degrading.doc_count ?? 0,
-      healthy: aggs?.healthy.doc_count ?? 0,
-      noData: aggs?.noData.doc_count ?? 0,
+      violated: aggs?.not_stale?.violated.doc_count ?? 0,
+      degrading: aggs?.not_stale?.degrading.doc_count ?? 0,
+      healthy: aggs?.not_stale?.healthy?.doc_count ?? 0,
+      noData: aggs?.not_stale?.noData.doc_count ?? 0,
       stale: aggs?.stale.doc_count ?? 0,
-      worst: {
-        value: 0,
-        id: 'id',
-      },
       burnRateRules: rules.total,
       burnRateActiveAlerts: alerts.activeAlertCount,
       burnRateRecoveredAlerts: alerts.recoveredAlertCount,

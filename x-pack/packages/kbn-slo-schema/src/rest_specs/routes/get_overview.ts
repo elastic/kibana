@@ -18,10 +18,6 @@ const getOverviewResponseSchema = t.type({
   degrading: t.number,
   stale: t.number,
   healthy: t.number,
-  worst: t.type({
-    value: t.number,
-    id: t.string,
-  }),
   noData: t.number,
   burnRateRules: t.number,
   burnRateActiveAlerts: t.number,

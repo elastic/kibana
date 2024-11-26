@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/dev-cli-runner",
+    "@kbn/dev-cli-errors",
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-info",
+    "@kbn/es",
+    "@kbn/dev-proc-runner",
+    "@kbn/test",
+    "@kbn/es-archiver",
+    "@kbn/dev-utils",
+    "@kbn/mock-idp-utils",
+    "@kbn/test-suites-xpack",
+    "@kbn/test-subj-selector",
+  ]
+}
