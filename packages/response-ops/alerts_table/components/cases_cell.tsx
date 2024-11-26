@@ -29,7 +29,13 @@ const formatCase = (theCase: Case): CaseTooltipContentProps => ({
 });
 
 export const CasesCell: CellComponent = memo((props) => {
-  const { isLoading, alert, cases, caseAppId, application } = props;
+  const {
+    isLoading,
+    alert,
+    cases,
+    caseAppId,
+    services: { application },
+  } = props;
   const { navigateToCaseView } = useCaseViewNavigation(application, caseAppId);
 
   const caseIds = (alert && alert[ALERT_CASE_IDS]) ?? [];
