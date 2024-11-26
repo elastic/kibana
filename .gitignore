@@ -82,6 +82,7 @@ report.asciidoc
 # Ignore gihub folder to avoid pings on backports
 .github/*
 !.github/workflows/
+!.github/CODEOWNERS
 
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
