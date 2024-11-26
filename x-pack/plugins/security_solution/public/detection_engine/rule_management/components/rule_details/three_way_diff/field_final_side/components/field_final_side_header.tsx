@@ -11,26 +11,28 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { DiffableAllFields } from '../../../../../../../../common/api/detection_engine';
 import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
 import { FieldUpgradeSideHeader } from '../../field_upgrade_side_header';
-import { useFieldFinalSideContext } from '../context/field_final_side_context';
-import { FieldFinalSideMode } from '../field_final_side_mode';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
+import {
+  FieldFinalSideMode,
+  useFieldUpgradeContext,
+} from '../../rule_upgrade/field_upgrade_context';
 import { useFieldEditFormContext } from '../context/field_edit_form_context';
-import { useFinalRuleContext } from '../../final_rule_context';
 import { FieldFinalSideHelpInfo } from './field_final_side_help_info';
 import * as i18n from './translations';
 
-interface FieldFinalSideHeaderProps {
-  fieldUpgradeState: FieldUpgradeState;
-}
-
-export function FieldFinalSideHeader({
-  fieldUpgradeState,
-}: FieldFinalSideHeaderProps): JSX.Element {
+export function FieldFinalSideHeader(): JSX.Element {
   const {
-    state: { fieldName, mode },
-  } = useFieldFinalSideContext();
+    fieldName,
+    fieldUpgradeState,
+    rightSideMode,
+    finalDiffableRule,
+    setRuleFieldResolvedValue,
+  } = useFieldUpgradeContext();
   const { form } = useFieldEditFormContext();
-  const { finalDiffableRule, setRuleFieldResolvedValue } = useFinalRuleContext();
+  const isFieldReadyForUpgrade =
+    fieldUpgradeState === FieldUpgradeState.NoConflict ||
+    fieldUpgradeState === FieldUpgradeState.Accepted;
+
   const handleAccept = useCallback(
     () =>
       setRuleFieldResolvedValue({
@@ -42,12 +44,12 @@ export function FieldFinalSideHeader({
   );
   const handleSave = useCallback(() => form?.submit(), [form]);
 
-  switch (mode) {
+  switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
       return (
         <FieldUpgradeSideHeader>
           <StaticHeaderContent>
-            {fieldUpgradeState !== FieldUpgradeState.Accepted && (
+            {!isFieldReadyForUpgrade && (
               <EuiButton iconType="checkInCircleFilled" size="s" onClick={handleAccept}>
                 {i18n.ACCEPT}
               </EuiButton>
@@ -65,13 +67,13 @@ export function FieldFinalSideHeader({
               disabled={!form?.isValid}
               onClick={handleSave}
             >
-              {fieldUpgradeState !== FieldUpgradeState.Accepted ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
+              {!isFieldReadyForUpgrade ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}
             </EuiButton>
           </StaticHeaderContent>
         </FieldUpgradeSideHeader>
       );
     default:
-      return assertUnreachable(mode);
+      return assertUnreachable(rightSideMode);
   }
 }
 

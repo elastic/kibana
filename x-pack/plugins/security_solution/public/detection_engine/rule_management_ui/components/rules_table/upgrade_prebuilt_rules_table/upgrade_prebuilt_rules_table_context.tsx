@@ -19,7 +19,7 @@ import type {
   RuleUpgradeState,
   RulesUpgradeState,
 } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import { RuleUpgradeTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_tab';
+import { RuleUpgradeTab } from '../../../../rule_management/components/rule_details/three_way_diff';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type {

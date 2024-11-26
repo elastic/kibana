@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from './field_final_side_mode';
 export * from './components/field_final_side';
 export type * from './components/rule_field_edit_component_props';
 export * from './components/rule_field_edit_form_wrapper';
-export { useFieldFinalSideContext } from './context/field_final_side_context';

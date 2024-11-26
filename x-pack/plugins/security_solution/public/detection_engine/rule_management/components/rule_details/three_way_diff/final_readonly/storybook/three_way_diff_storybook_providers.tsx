@@ -16,11 +16,12 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { UpgradeableDiffableFields } from '../../../../../model/prebuilt_rule_upgrade/fields';
 import { ReactQueryClientProvider } from '../../../../../../../common/containers/query_client/query_client_provider';
 import { UpsellingProvider } from '../../../../../../../common/components/upselling_provider';
-import { FinalRuleContextProvider } from '../../final_rule_context';
-import type { DiffableRule } from '../../../../../../../../common/api/detection_engine';
-import { FieldFinalSideContextProvider } from '../../field_final_side/context/field_final_side_context';
+import { FieldUpgradeContextProvider } from '../../rule_upgrade/field_upgrade_context';
+import type {
+  DiffableRule,
+  RuleResponse,
+} from '../../../../../../../../common/api/detection_engine';
 import { mockCustomQueryRule } from './mocks';
-import { FieldFinalSideMode } from '../../field_final_side';
 
 function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
   const baseMock = {
@@ -95,22 +96,35 @@ export function ThreeWayDiffStorybookProviders({
 
   const store = createMockStore();
 
+  const ruleUpgradeStateMock = {
+    id: 'test-id',
+    rule_id: 'test-id',
+    current_rule: {} as RuleResponse,
+    target_rule: {} as RuleResponse,
+    diff: {
+      fields: {},
+      num_fields_with_updates: 0,
+      num_fields_with_conflicts: 0,
+      num_fields_with_non_solvable_conflicts: 0,
+    },
+    revision: 1,
+    finalRule: finalDiffableRule,
+    hasUnresolvedConflicts: false,
+    fieldsUpgradeState: {},
+  };
+
   return (
     <KibanaReactContext.Provider>
       <ReactQueryClientProvider>
         <ReduxStoreProvider store={store}>
           <UpsellingProvider upsellingService={kibanaServicesMock.upsellingService}>
-            <FinalRuleContextProvider
-              finalDiffableRule={finalDiffableRule}
+            <FieldUpgradeContextProvider
+              ruleUpgradeState={ruleUpgradeStateMock}
+              fieldName={fieldName as UpgradeableDiffableFields}
               setRuleFieldResolvedValue={setRuleFieldResolvedValueMock}
             >
-              <FieldFinalSideContextProvider
-                fieldName={fieldName as UpgradeableDiffableFields}
-                initialMode={FieldFinalSideMode.Readonly}
-              >
-                {children}
-              </FieldFinalSideContextProvider>
-            </FinalRuleContextProvider>
+              {children}
+            </FieldUpgradeContextProvider>
           </UpsellingProvider>
         </ReduxStoreProvider>
       </ReactQueryClientProvider>

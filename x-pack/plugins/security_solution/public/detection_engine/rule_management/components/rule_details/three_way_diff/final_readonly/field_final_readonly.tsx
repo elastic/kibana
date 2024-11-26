@@ -18,8 +18,7 @@ import type {
   DiffableMachineLearningFields,
 } from '../../../../../../../common/api/detection_engine';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { useFinalRuleContext } from '../final_rule_context';
-import { useFieldFinalSideContext } from '../field_final_side';
+import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { CustomQueryRuleFieldReadOnly } from './custom_query_rule_field_readonly';
 import { SavedQueryRuleFieldReadOnly } from './saved_query_rule_field_readonly';
 import { EqlRuleFieldReadOnly } from './eql_rule_field_readonly';
@@ -31,10 +30,7 @@ import { NewTermsRuleFieldReadOnly } from './new_terms_rule_field_readonly';
 import { CommonRuleFieldReadOnly } from './common_rule_field_readonly';
 
 export function FieldFinalReadOnly(): JSX.Element {
-  const { finalDiffableRule } = useFinalRuleContext();
-  const {
-    state: { fieldName },
-  } = useFieldFinalSideContext();
+  const { fieldName, finalDiffableRule } = useFieldUpgradeContext();
 
   const { data: commonField } = useMemo(
     () => DiffableCommonFields.keyof().safeParse(fieldName),

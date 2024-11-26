@@ -10,37 +10,27 @@ import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { VersionsPicker } from '../versions_picker/versions_picker';
 import type { Version } from '../versions_picker/constants';
 import { SelectedVersions } from '../versions_picker/constants';
+import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
+import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { pickFieldValueForVersion } from './utils';
-import type {
-  DiffableAllFields,
-  ThreeWayDiff,
-} from '../../../../../../../common/api/detection_engine';
 import { getSubfieldChanges } from './get_subfield_changes';
 import { SubfieldChanges } from './subfield_changes';
-import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
 import { ComparisonSideHelpInfo } from './comparison_side_help_info';
 import * as i18n from './translations';
 
-interface FieldComparisonSideProps<FieldName extends keyof DiffableAllFields> {
-  fieldName: FieldName;
-  fieldThreeWayDiff: ThreeWayDiff<DiffableAllFields[FieldName]>;
-  resolvedValue: DiffableAllFields[FieldName];
-}
+export function FieldComparisonSide(): JSX.Element {
+  const { fieldName, fieldDiff, finalDiffableRule } = useFieldUpgradeContext();
+  const resolvedValue = finalDiffableRule[fieldName];
 
-export function FieldComparisonSide<FieldName extends keyof DiffableAllFields>({
-  fieldName,
-  fieldThreeWayDiff,
-  resolvedValue,
-}: FieldComparisonSideProps<FieldName>) {
   const [selectedVersions, setSelectedVersions] = useState<SelectedVersions>(
     SelectedVersions.CurrentFinal
   );
 
   const [oldVersionType, newVersionType] = selectedVersions.split('_') as [Version, Version];
 
-  const oldFieldValue = pickFieldValueForVersion(oldVersionType, fieldThreeWayDiff, resolvedValue);
+  const oldFieldValue = pickFieldValueForVersion(oldVersionType, fieldDiff, resolvedValue);
 
-  const newFieldValue = pickFieldValueForVersion(newVersionType, fieldThreeWayDiff, resolvedValue);
+  const newFieldValue = pickFieldValueForVersion(newVersionType, fieldDiff, resolvedValue);
 
   const subfieldChanges = getSubfieldChanges(fieldName, oldFieldValue, newFieldValue);
 
@@ -55,7 +45,7 @@ export function FieldComparisonSide<FieldName extends keyof DiffableAllFields>({
             </h3>
           </EuiTitle>
           <VersionsPicker
-            hasBaseVersion={fieldThreeWayDiff.has_base_version}
+            hasBaseVersion={fieldDiff.has_base_version}
             selectedVersions={selectedVersions}
             onChange={setSelectedVersions}
           />

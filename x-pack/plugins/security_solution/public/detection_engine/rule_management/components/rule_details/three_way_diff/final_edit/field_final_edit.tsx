@@ -18,8 +18,7 @@ import type {
   UpgradeableMachineLearningFields,
 } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { isCommonFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
-import { useFieldFinalSideContext } from '../field_final_side';
-import { useFinalRuleContext } from '../final_rule_context';
+import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { CommonRuleFieldEdit } from './common_rule_field_edit';
 import { CustomQueryRuleFieldEdit } from './custom_query_rule_field_edit';
 import { SavedQueryRuleFieldEdit } from './saved_query_rule_field_edit';
@@ -31,18 +30,16 @@ import { EsqlRuleFieldEdit } from './esql_rule_field_edit';
 import { MachineLearningRuleFieldEdit } from './machine_learning_rule_field_edit';
 
 export function FieldFinalEdit(): JSX.Element {
-  const { finalDiffableRule } = useFinalRuleContext();
-  const { type } = finalDiffableRule;
-
   const {
-    state: { fieldName },
-  } = useFieldFinalSideContext();
+    fieldName,
+    finalDiffableRule: { type: ruleType },
+  } = useFieldUpgradeContext();
 
   if (isCommonFieldName(fieldName)) {
     return <CommonRuleFieldEdit fieldName={fieldName} />;
   }
 
-  switch (type) {
+  switch (ruleType) {
     case 'query':
       return <CustomQueryRuleFieldEdit fieldName={fieldName as UpgradeableCustomQueryFields} />;
     case 'saved_query':
@@ -62,6 +59,6 @@ export function FieldFinalEdit(): JSX.Element {
     case 'new_terms':
       return <NewTermsRuleFieldEdit fieldName={fieldName as UpgradeableNewTermsFields} />;
     default:
-      return assertUnreachable(type);
+      return assertUnreachable(ruleType);
   }
 }

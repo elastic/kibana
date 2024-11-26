@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export enum FieldFinalSideMode {
-  Readonly = 'readonly',
-  Edit = 'edit',
-}
+export { RuleUpgrade as RuleUpgradeTab } from './rule_upgrade';

@@ -44,14 +44,8 @@ interface TemplateProps<FieldName extends keyof DiffableAllFields> {
   resolvedValue?: DiffableAllFields[FieldName];
 }
 
-const Template: Story<TemplateProps<keyof DiffableAllFields>> = (args) => {
-  return (
-    <FieldComparisonSide
-      fieldName={args.fieldName}
-      fieldThreeWayDiff={args.fieldThreeWayDiff}
-      resolvedValue={args.resolvedValue}
-    />
-  );
+const Template: Story<TemplateProps<keyof DiffableAllFields>> = () => {
+  return <FieldComparisonSide />;
 };
 
 export const NoBaseVersion = Template.bind({});
