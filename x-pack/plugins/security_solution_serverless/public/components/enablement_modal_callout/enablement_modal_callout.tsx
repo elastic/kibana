@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-/**
- * TODO: add in an enablement modal callout component here which you can use
- * in the same way the dashboard landing callout is used.
- */
-import type React from 'react';
+import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { ADDITIONAL_CHARGES_MESSAGE } from '../../upselling/translations';
 
-export const EnablementModalCallout: React.FC = () => {};
+export const EnablementModalCallout: React.FC = () => {
+  return (
+    <div>
+      <EuiText>{ADDITIONAL_CHARGES_MESSAGE}</EuiText>
+    </div>
+  );
+};
+
+// eslint-disable-next-line import/no-default-export
+export default EnablementModalCallout;

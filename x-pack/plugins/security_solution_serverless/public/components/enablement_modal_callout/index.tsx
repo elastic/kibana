@@ -7,9 +7,10 @@
 import React from 'react';
 import type { Services } from '../../common/services';
 import { ServicesProvider } from '../../common/services';
+import { EnablementModalCallout } from './lazy';
 
 export const getEnablementModalCallout = (services: Services): React.ComponentType =>
-  function EnablementModalCallout() {
+  function EnablementModalCalloutComponent() {
     return (
       <ServicesProvider services={services}>
         <EnablementModalCallout />
