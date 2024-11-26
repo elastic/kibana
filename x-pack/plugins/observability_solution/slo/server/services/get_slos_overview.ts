@@ -134,10 +134,6 @@ export class GetSLOsOverview {
       healthy: aggs?.not_stale?.healthy?.doc_count ?? 0,
       noData: aggs?.not_stale?.noData.doc_count ?? 0,
       stale: aggs?.stale.doc_count ?? 0,
-      worst: {
-        value: 0,
-        id: 'id',
-      },
       burnRateRules: rules.total,
       burnRateActiveAlerts: alerts.activeAlertCount,
       burnRateRecoveredAlerts: alerts.recoveredAlertCount,
