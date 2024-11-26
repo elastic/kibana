@@ -29,10 +29,10 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
-        security: {
-          authz: {
-            requiredPrivileges: ['manage_llm_product_doc'],
-          },
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_llm_product_doc'],
         },
       },
     },
@@ -56,12 +56,12 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
-        security: {
-          authz: {
-            requiredPrivileges: ['manage_llm_product_doc'],
-          },
-        },
         timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_llm_product_doc'],
+        },
       },
     },
     async (ctx, req, res) => {
@@ -90,10 +90,10 @@ export const registerInstallationRoutes = ({
       validate: false,
       options: {
         access: 'internal',
-        security: {
-          authz: {
-            requiredPrivileges: ['manage_llm_product_doc'],
-          },
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_llm_product_doc'],
         },
       },
     },

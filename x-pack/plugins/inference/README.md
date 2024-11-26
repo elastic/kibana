@@ -77,6 +77,25 @@ class MyPlugin {
 }
 ```
 
+### Binding common parameters
+
+It is also possible to bind a client to its configuration parameters, to avoid passing connectorId
+to every call, for example, using the `bindTo` parameter when creating the client.
+
+```ts
+const inferenceClient = myStartDeps.inference.getClient({
+  request,
+  bindTo: {
+   connectorId: 'my-connector-id',
+   functionCalling: 'simulated',
+  }
+});
+
+const chatResponse = inferenceClient.chatComplete({
+  messages: [{ role: MessageRole.User, content: 'Do something' }],
+});
+```
+
 ## APIs
 
 ### `chatComplete` API:

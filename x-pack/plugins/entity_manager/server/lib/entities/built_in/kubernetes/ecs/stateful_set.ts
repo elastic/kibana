@@ -13,7 +13,7 @@ import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
 export const builtInKubernetesStatefulSetEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_stateful_set_ecs`,
-    filter: 'kubernetes.statefulset.uid : *',
+    filter: 'kubernetes.statefulset.name : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes StatefulSet from ECS data',
@@ -21,7 +21,7 @@ export const builtInKubernetesStatefulSetEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes stateful set entities from the Kubernetes integration data streams',
     type: 'k8s.statefulset.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.statefulset.uid'],
+    identityFields: ['kubernetes.statefulset.name'],
     displayNameTemplate: '{{kubernetes.statefulset.name}}',
     latest: {
       timestampField: '@timestamp',
