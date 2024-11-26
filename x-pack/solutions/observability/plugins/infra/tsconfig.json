@@ -117,7 +117,10 @@
     "@kbn/response-ops-rule-params",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/deeplinks-management",
-    "@kbn/traced-es-client"
+    "@kbn/traced-es-client",
+    "@kbn/event-bus-plugin"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
