@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
+import pMap from 'p-map';
 
 import { partition } from 'lodash';
 
@@ -40,6 +41,7 @@ const ONE_MONTH_IN_MS = 2592000000;
 export const NO_EXPIRATION = 'NONE';
 
 const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE']);
+const MAX_CONCURRENT_CREATE_ACTIONS = 100;
 
 export async function createAgentAction(
   esClient: ElasticsearchClient,
@@ -110,40 +112,47 @@ export async function bulkCreateAgentActions(
   }
 
   const messageSigningService = appContextService.getMessageSigningService();
+
+  const fleetServerAgentActions = await pMap(
+    actions,
+    async (action) => {
+      const body: FleetServerAgentAction = {
+        '@timestamp': new Date().toISOString(),
+        expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
+        start_time: action.start_time,
+        rollout_duration_seconds: action.rollout_duration_seconds,
+        agents: action.agents,
+        action_id: action.id,
+        data: action.data,
+        type: action.type,
+        traceparent: apm.currentTraceparent,
+      };
+
+      if (SIGNED_ACTIONS.has(action.type) && messageSigningService) {
+        const signedBody = await messageSigningService.sign(body);
+        body.signed = {
+          data: signedBody.data.toString('base64'),
+          signature: signedBody.signature,
+        };
+      }
+
+      return [
+        {
+          create: {
+            _id: action.id,
+          },
+        },
+        body,
+      ].flat();
+    },
+    {
+      concurrency: MAX_CONCURRENT_CREATE_ACTIONS,
+    }
+  );
+
   await esClient.bulk({
     index: AGENT_ACTIONS_INDEX,
-    body: await Promise.all(
-      actions.flatMap(async (action) => {
-        const body: FleetServerAgentAction = {
-          '@timestamp': new Date().toISOString(),
-          expiration: action.expiration ?? new Date(Date.now() + ONE_MONTH_IN_MS).toISOString(),
-          start_time: action.start_time,
-          rollout_duration_seconds: action.rollout_duration_seconds,
-          agents: action.agents,
-          action_id: action.id,
-          data: action.data,
-          type: action.type,
-          traceparent: apm.currentTraceparent,
-        };
-
-        if (SIGNED_ACTIONS.has(action.type) && messageSigningService) {
-          const signedBody = await messageSigningService.sign(body);
-          body.signed = {
-            data: signedBody.data.toString('base64'),
-            signature: signedBody.signature,
-          };
-        }
-
-        return [
-          {
-            create: {
-              _id: action.id,
-            },
-          },
-          body,
-        ];
-      })
-    ),
+    body: fleetServerAgentActions,
   });
 
   for (const action of actions) {
