@@ -192,10 +192,10 @@ describe('Service Overview', () => {
       cy.wait(aliasNames);
 
       cy.getByTestSubj('environmentFilter').find('input').click();
-      cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
+        .should('be.visible')
         .contains('button', 'production')
-        .click();
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,
