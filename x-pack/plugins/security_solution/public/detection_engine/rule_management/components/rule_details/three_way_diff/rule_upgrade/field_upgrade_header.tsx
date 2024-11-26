@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { camelCase, startCase } from 'lodash';
-import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { fieldToDisplayNameMap } from '../../diff_components/translations';
 import type { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ModifiedBadge } from '../badges/modified_badge';
@@ -28,20 +28,19 @@ export function FieldUpgradeHeader({
   isCustomized,
 }: FieldUpgradeHeaderProps): JSX.Element {
   return (
-    <EuiFlexGroup direction="row" alignItems="center">
+    <EuiFlexGroup alignItems="center">
       <EuiTitle data-test-subj="ruleUpgradeFieldDiffLabel" size="xs">
         <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
       </EuiTitle>
 
-      <span>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         {isCustomized && (
-          <>
+          <EuiFlexItem grow={false}>
             <ModifiedBadge />
-            &nbsp;
-          </>
+          </EuiFlexItem>
         )}
         <FieldUpgradeStateInfo state={fieldUpgradeState} />
-      </span>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

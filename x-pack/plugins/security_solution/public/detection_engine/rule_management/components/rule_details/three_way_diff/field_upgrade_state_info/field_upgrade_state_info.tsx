@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
@@ -59,9 +59,19 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
 
   return (
     <>
-      <EuiText color={color} size="xs" component="span">
-        {badge}&nbsp;&nbsp;<strong>{title}</strong>
-        {description ? `${i18n.SEPARATOR} ${i18n.NO_CONFLICT_DESCRIPTION}` : null}
+      <EuiText color={color} size="xs">
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <strong>{title}</strong>
+          </EuiFlexItem>
+
+          {description ? (
+            <EuiFlexItem grow={false}>
+              {i18n.SEPARATOR} {i18n.NO_CONFLICT_DESCRIPTION}
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiText>
     </>
   );
