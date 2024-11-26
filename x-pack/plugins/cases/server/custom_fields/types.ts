@@ -12,7 +12,7 @@ export interface ICasesCustomField {
   isSortable: boolean;
   savedObjectMappingType: string;
   validateFilteringValues: (values: CustomFieldValue[]) => void;
-  getDefaultValue?: () => CustomFieldValue[];
+  getDefaultValue?: () => CustomFieldValue;
 }
 
 export interface CasesCustomFieldsMap {
