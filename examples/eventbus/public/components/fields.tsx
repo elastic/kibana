@@ -17,7 +17,7 @@ export const Fields: FC = () => {
   const state = useEventBusExampleState();
   const data = state.useState((s) => s.allFields);
 
-  const checkboxes = data.map((d) => ({
+  const checkboxes = Object.keys(data).map((d) => ({
     id: d,
     label: d,
   }));

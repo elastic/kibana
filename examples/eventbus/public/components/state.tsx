@@ -25,15 +25,23 @@ export const State: FC = () => {
         const index = esql.split('|')[0].trim().split(' ')[1];
         const resp = await dataPlugin.dataViews.find(index);
         const dataView = resp[0];
-        const fields = dataView.fields.filter((d) => !d.spec.runtimeField).map((d) => d.spec.name);
+        console.log('dataView.fields', dataView.fields);
+        const fields = dataView.fields
+          .filter((d) => !d.spec.runtimeField)
+          .reduce<Record<string, string>>((acc, d) => {
+            // reduce to Record<string, string>
+            acc[d.spec.name] = d.spec.type;
+            return acc;
+          }, {});
 
         state.actions.setAllFields(fields);
 
-        if (fields.includes('@timestamp') && fields.includes('message')) {
+        // refactor from includes to work with record
+        if (fields['@timestamp'] && fields.message) {
           state.actions.setSelectedFields(['@timestamp', 'message']);
-        } else if (fields.includes('@timestamp')) {
+        } else if (fields['@timestamp']) {
           state.actions.setSelectedFields(['@timestamp']);
-        } else if (fields.includes('message')) {
+        } else if (fields.message) {
           state.actions.setSelectedFields(['message']);
         }
       } catch (e) {

@@ -11,45 +11,20 @@ import React, { useCallback, useEffect, useMemo, useState, type FC } from 'react
 
 import { EuiDataGrid, EuiPanel } from '@elastic/eui';
 
-import { getESQLResults } from '@kbn/esql-utils';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-
-import { useDeps } from '../hooks/use_deps';
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
+import { useFetchESQL } from '../hooks/use_fetch_esql';
 
 export const Logs: FC = () => {
-  const { plugins } = useDeps();
-  const { data: dataPlugin } = plugins;
   const state = useEventBusExampleState();
   const esql = state.useState((s) => s.esql);
   const selectedFields = state.useState((s) => s.selectedFields);
 
-  const [data, setData] = useState<ESQLSearchResponse>();
   const esqlWithFilters = useMemo(() => {
     if (esql === '' || selectedFields.length === 0) return null;
     return `${esql} | LIMIT 100 | KEEP ${selectedFields.join(',')}`;
   }, [esql, selectedFields]);
 
-  // fetch data from ES
-  useEffect(() => {
-    const fetchData = async () => {
-      console.log('esqlWithFilters', esqlWithFilters);
-      if (esqlWithFilters === null) return;
-
-      const resultCrossfilter = await getESQLResults({
-        esqlQuery: esqlWithFilters,
-        // filter,
-        search: dataPlugin.search.search,
-        // signal: abortController?.signal,
-        // timeRange: { from: fromDate, to: toDate },
-      });
-
-      setData(resultCrossfilter.response);
-    };
-
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [esqlWithFilters]);
+  const data = useFetchESQL(esqlWithFilters);
 
   const { columns, rows } = useMemo(() => {
     if (data) {
