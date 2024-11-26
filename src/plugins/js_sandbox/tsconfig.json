@@ -15,5 +15,19 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
+    "@kbn/ui-actions-plugin",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/data-plugin",
+    "@kbn/event-bus-plugin",
+    "@kbn/esql-utils",
+    "@kbn/eventbus-slices",
+    "@kbn/code-editor",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/embeddable-plugin",
+    "@kbn/react-kibana-mount",
   ]
 }

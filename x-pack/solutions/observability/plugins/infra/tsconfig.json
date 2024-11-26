@@ -121,6 +121,8 @@
     "@kbn/shared-ux-card-no-data-types",
     "@kbn/licensing-types",
     "@kbn/apm-types",
+    "@kbn/object-utils",
+    "@kbn/event-bus-plugin"
   ],
   "exclude": ["target/**/*"]
 }

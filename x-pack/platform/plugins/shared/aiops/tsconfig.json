@@ -80,6 +80,7 @@
     "@kbn/licensing-types",
     "@kbn/aiops-context",
     "@kbn/event-bus-plugin",
+    "@kbn/eventbus-slices",
   ],
   "exclude": [
     "target/**/*",
