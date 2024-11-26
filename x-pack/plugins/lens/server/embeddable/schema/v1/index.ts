@@ -13,6 +13,6 @@ export const getSchema = () =>
   schema.object({
     attributes: schema.oneOf([
       getLensAttributesSchema('lnsDatatable', datatableVisualizationStateSchema),
-      lensGenericAttributesSchema,
+      // lensGenericAttributesSchema,
     ]),
   });

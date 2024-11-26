@@ -62,7 +62,7 @@ export function registerAPIRoutes({
   createRoute.addVersion(
     {
       version: PUBLIC_API_VERSION,
-      validate: {
+      validate: () => ({
         request: {
           params: schema.object({
             id: schema.maybe(schema.string()),
@@ -78,7 +78,7 @@ export function registerAPIRoutes({
             body: () => getDashboardCreateResultSchema(embeddable),
           },
         },
-      },
+      }),
     },
     async (ctx, req, res) => {
       const { id } = req.params;

@@ -97,6 +97,13 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
         }
         return factory.getSchema;
       },
+      getAllValidationSchemas: () => {
+        const schemas = Array.from(this.embeddableFactories.values())
+          .filter((factory) => factory.getSchema)
+          .map((factory) => factory.getSchema);
+        return schemas;
+      },
+      getRegisteredEmbeddableFactories: () => Array.from(this.embeddableFactories.keys()),
     };
   }
 

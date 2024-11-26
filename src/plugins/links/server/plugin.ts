@@ -9,6 +9,8 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { schema } from '@kbn/config-schema';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
@@ -25,6 +27,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     core: CoreSetup,
     plugins: {
       contentManagement: ContentManagementServerSetup;
+      embeddable: EmbeddableSetup;
     }
   ) {
     plugins.contentManagement.register({
@@ -36,6 +39,30 @@ export class LinksServerPlugin implements Plugin<object, object> {
       version: {
         latest: LATEST_VERSION,
       },
+    });
+
+    plugins.embeddable.registerEmbeddableFactory({
+      id: CONTENT_ID,
+      getSchema: () =>
+        schema.object({
+          attributes: schema.object({
+            layout: schema.maybe(
+              schema.oneOf([schema.literal('horizontal'), schema.literal('vertical')])
+            ),
+            links: schema.arrayOf(
+              schema.object({
+                type: schema.oneOf([
+                  schema.literal('dashboardLink'),
+                  schema.literal('externalLink'),
+                ]),
+                id: schema.string(),
+                order: schema.number(),
+                destinationRefName: schema.maybe(schema.string()),
+                destination: schema.maybe(schema.string()),
+              })
+            ),
+          }),
+        }),
     });
 
     core.savedObjects.registerType<LinksAttributes>(linksSavedObjectType);

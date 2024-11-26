@@ -251,88 +251,78 @@ export const gridDataSchema = schema.object({
   }),
 });
 
-const genericPanelConfig = schema.object(
-  {
-    type: schema.maybe(schema.string()),
+const genericPanelConfig = schema.object({
+  // type: schema.maybe(schema.string()),
+  version: schema.maybe(
+    schema.string({
+      meta: { description: 'The version of the embeddable in the panel.' },
+    })
+  ),
+  viewMode: schema.maybe(
+    schema.oneOf(
+      Object.values(ViewMode)
+        .filter((value): value is ViewMode => typeof value === 'string')
+        .map((value) => schema.literal(value)) as [Type<ViewMode>]
+    )
+  ),
+  title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
+  description: schema.maybe(
+    schema.string({ meta: { description: 'The description of the panel' } })
+  ),
+  savedObjectId: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'The unique id of the library item to construct the embeddable.',
+      },
+    })
+  ),
+  hidePanelTitles: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: { description: 'Set to true to hide the panel title in its container.' },
+    })
+  ),
+  enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  disabledActions: schema.maybe(schema.arrayOf(schema.string())),
+  disableTriggers: schema.maybe(schema.boolean()),
+  timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
+});
+
+const generatePanelConfig = (getValidationSchema: () => ObjectType<any>) => {
+  if (getValidationSchema) {
+    const validationSchema = getValidationSchema();
+    const panelConfig = schema.intersection([genericPanelConfig, validationSchema]);
+    return panelConfig;
+  }
+  return genericPanelConfig;
+};
+
+export const getPanelSchema = (embeddableId: string, embeddable: EmbeddableStart) => {
+  const panelConfigSchema = generatePanelConfig(embeddable.getValidationSchema(embeddableId));
+  return schema.object({
+    panelConfig: panelConfigSchema.extendsDeep({ unknowns: 'ignore' }),
+    id: schema.maybe(
+      schema.string({ meta: { description: 'The saved object id for by reference panels' } })
+    ),
+    type: schema.literal(embeddableId),
+    panelRefName: schema.maybe(schema.string()),
+    gridData: gridDataSchema,
+    panelIndex: schema.string({
+      meta: { description: 'The unique ID of the panel.' },
+      defaultValue: schema.siblingRef('gridData.i'),
+    }),
+    title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
     version: schema.maybe(
       schema.string({
-        meta: { description: 'The version of the embeddable in the panel.' },
-      })
-    ),
-    viewMode: schema.maybe(
-      schema.oneOf(
-        Object.values(ViewMode)
-          .filter((value): value is ViewMode => typeof value === 'string')
-          .map((value) => schema.literal(value)) as [Type<ViewMode>]
-      )
-    ),
-    title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
-    description: schema.maybe(
-      schema.string({ meta: { description: 'The description of the panel' } })
-    ),
-    savedObjectId: schema.maybe(
-      schema.string({
         meta: {
-          description: 'The unique id of the library item to construct the embeddable.',
+          description:
+            "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+          deprecated: true,
         },
       })
     ),
-    hidePanelTitles: schema.maybe(
-      schema.boolean({
-        defaultValue: false,
-        meta: { description: 'Set to true to hide the panel title in its container.' },
-      })
-    ),
-    enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    disabledActions: schema.maybe(schema.arrayOf(schema.string())),
-    disableTriggers: schema.maybe(schema.boolean()),
-    timeRange: schema.maybe(schema.object({ from: schema.string(), to: schema.string() })),
-  },
-  {
-    unknowns: 'allow',
-  }
-);
-
-export const getPanelSchema = (embeddable: EmbeddableStart) =>
-  schema.object(
-    {
-      panelConfig: genericPanelConfig,
-      id: schema.maybe(
-        schema.string({ meta: { description: 'The saved object id for by reference panels' } })
-      ),
-      type: schema.string({ meta: { description: 'The embeddable type' } }),
-      panelRefName: schema.maybe(schema.string()),
-      gridData: gridDataSchema,
-      panelIndex: schema.string({
-        meta: { description: 'The unique ID of the panel.' },
-        defaultValue: schema.siblingRef('gridData.i'),
-      }),
-      title: schema.maybe(schema.string({ meta: { description: 'The title of the panel' } })),
-      version: schema.maybe(
-        schema.string({
-          meta: {
-            description:
-              "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
-            deprecated: true,
-          },
-        })
-      ),
-    },
-    {
-      validate(value) {
-        const { type, panelConfig } = value;
-        const getConfigSchema = embeddable.getValidationSchema(
-          type
-        ) as unknown as () => ObjectType<any>;
-        if (getConfigSchema) {
-          const configSchema = getConfigSchema();
-          const panelConfigSchema = schema.intersection([genericPanelConfig, configSchema]);
-          return panelConfigSchema.validate(panelConfig);
-        }
-        return value;
-      },
-    }
-  );
+  });
+};
 
 export const optionsSchema = schema.object({
   hidePanelTitles: schema.boolean({
@@ -367,8 +357,14 @@ export const searchResultsAttributesSchema = schema.object({
   }),
 });
 
-export const getDashboardAttributesSchema = (embeddable: EmbeddableStart) =>
-  searchResultsAttributesSchema.extends({
+export const getDashboardAttributesSchema = (embeddable: EmbeddableStart) => {
+  const panelSchemas = schema.oneOf(
+    embeddable
+      .getRegisteredEmbeddableFactories()
+      .map((embeddableId: string) => getPanelSchema(embeddableId, embeddable))
+  );
+
+  return searchResultsAttributesSchema.extends({
     // Search
     kibanaSavedObjectMeta: schema.object(
       {
@@ -430,10 +426,11 @@ export const getDashboardAttributesSchema = (embeddable: EmbeddableStart) =>
 
     // Dashboard Content
     controlGroupInput: schema.maybe(controlGroupInputSchema),
-    panels: schema.arrayOf(getPanelSchema(embeddable), { defaultValue: [] }),
+    panels: schema.arrayOf(panelSchemas, { defaultValue: [] }),
     options: optionsSchema,
     version: schema.maybe(schema.number({ meta: { deprecated: true } })),
   });
+};
 
 export const referenceSchema = schema.object(
   {

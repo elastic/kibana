@@ -178,8 +178,7 @@ export const sortingStateSchema = schema.object({
 });
 
 export const lensGenericAttributesSchema = schema.object({
-  type: schema.maybe(schema.string()),
-  visualizationType: schema.nullable(schema.string()),
+  visualizationType: schema.string(),
   title: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
   state: lensGenericAttributesStateSchema,
