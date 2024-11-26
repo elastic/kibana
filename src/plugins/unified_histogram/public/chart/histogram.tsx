@@ -10,18 +10,15 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import {
-  EmbeddableComponentProps,
-  LensEmbeddableInput,
-  LensEmbeddableOutput,
-} from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -58,32 +55,6 @@ export interface HistogramProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
-
-/**
- * To prevent flakiness in the chart, we need to ensure that the data view config is valid.
- * This requires that there are not multiple different data view ids in the given configuration.
- * @param dataView
- * @param visContext
- * @param adHocDataViews
- */
-const checkValidDataViewConfig = (
-  dataView: DataView,
-  visContext: UnifiedHistogramVisContext,
-  adHocDataViews: { [key: string]: DataViewSpec } | undefined
-) => {
-  if (!dataView.id) {
-    return false;
-  }
-
-  if (!dataView.isPersisted() && !adHocDataViews?.[dataView.id]) {
-    return false;
-  }
-
-  if (dataView.id !== visContext.requestData.dataViewId) {
-    return false;
-  }
-  return true;
-};
 
 const computeTotalHits = (
   hasLensSuggestions: boolean,
@@ -147,7 +118,7 @@ export function Histogram({
     (
       isLoading: boolean,
       adapters: Partial<DefaultInspectorAdapters> | undefined,
-      lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+      dataLoading$?: PublishingSubject<boolean | undefined>
     ) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatus.ERROR;
@@ -190,7 +161,7 @@ export function Histogram({
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ adapters: adapters ?? {}, embeddableOutput$: lensEmbeddableOutput$ });
+      onChartLoad?.({ adapters: adapters ?? {}, dataLoading$ });
     }
   );
 
@@ -233,10 +204,6 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
-
-  if (!checkValidDataViewConfig(dataView, visContext, lensProps.attributes.state.adHocDataViews)) {
-    return <></>;
-  }
 
   return (
     <>
