@@ -18,12 +18,10 @@ export const useBodyConfig = (): OnboardingGroupConfig[] => {
   const { config } = useOnboardingContext();
   const topicBodyConfig = useMemo(() => {
     let bodyConfig: OnboardingGroupConfig[] = [];
-    if (topicId) {
-      // The selected topic should always exist in the config, but we check just in case
-      const topicConfig = config.get(topicId);
-      if (topicConfig) {
-        bodyConfig = topicConfig.body;
-      }
+    const topicConfig = config.get(topicId);
+    // The selected topic should always exist in the config, but we check just in case
+    if (topicConfig) {
+      bodyConfig = topicConfig.body;
     }
     return bodyConfig;
   }, [config, topicId]);

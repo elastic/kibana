@@ -18,9 +18,8 @@ import { DEFAULT_TAB } from './constants';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 jest.mock('../../../onboarding_context');
-jest.mock('../../../../hooks/use_stored_state');
-jest.mock('../../../../common/lib/telemetry');
-
+jest.mock('../../../hooks/use_stored_state');
+jest.mock('../../../lib/telemetry');
 jest.mock('../../../../../common/lib/kibana', () => ({
   ...jest.requireActual('../../../../../common/lib/kibana'),
   useNavigation: jest.fn().mockReturnValue({

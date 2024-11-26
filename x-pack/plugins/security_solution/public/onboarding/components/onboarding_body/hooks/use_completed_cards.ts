@@ -129,7 +129,6 @@ export const useCompletedCards = (bodyConfig: OnboardingGroupConfig[]) => {
 
   useEffect(() => {
     // Initial auto-check for all body cards, it should run once per `bodyConfig` (topic) change.
-    // The cardsWithAutoCheck is empty when the topic is still undefined (reading from the url hash).
     cardsWithAutoCheck.map((card) =>
       card
         .checkComplete?.(services)

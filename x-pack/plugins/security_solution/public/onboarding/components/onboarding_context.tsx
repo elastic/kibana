@@ -14,12 +14,12 @@ import { useLicense } from '../../common/hooks/use_license';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 import { hasCapabilities } from '../../common/lib/capabilities';
-import { onboardingConfig } from '../config';
 import type {
   OnboardingConfigAvailabilityProps,
   OnboardingGroupConfig,
   TopicConfig,
 } from '../types';
+import { onboardingConfig } from '../config';
 
 export interface OnboardingTelemetry {
   reportCardOpen: (cardId: OnboardingCardId, options?: { auto?: boolean }) => void;

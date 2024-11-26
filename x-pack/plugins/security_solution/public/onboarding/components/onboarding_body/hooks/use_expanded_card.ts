@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { HEIGHT_ANIMATION_DURATION } from '../onboarding_card_panel.styles';
 import { type OnboardingCardId } from '../../../constants';
@@ -29,20 +29,20 @@ const scrollToCard = (cardId: OnboardingCardId) => {
  */
 export const useExpandedCard = () => {
   const { setCardDetail } = useUrlDetail();
-
-  // The hash in the url is the Single Source of Truth for the expanded card id
   const { hash } = useLocation();
-  const cardIdFromHash = getCardIdFromHash(hash);
+  const cardIdFromHash = useMemo(() => getCardIdFromHash(hash), [hash]);
 
-  const [cardId, setCardId] = useState<OnboardingCardId | null>(cardIdFromHash);
+  const [cardId, setCardId] = useState<OnboardingCardId | null>(null);
 
-  // This effect implements auto-scroll in the initial render, it only needs to be executed once per page load.
+  // This effect implements auto-scroll in the initial render.
   useEffect(() => {
-    if (cardId) {
-      scrollToCard(cardId);
+    if (cardIdFromHash) {
+      setCardId(cardIdFromHash);
+      scrollToCard(cardIdFromHash);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // cardIdFromHash is only defined once on page load
+    // it does not change with subsequent url hash changes since history.replaceState is used
+  }, [cardIdFromHash]);
 
   const setExpandedCardId = useCallback<SetExpandedCardId>(
     (newCardId, options) => {

@@ -17,7 +17,7 @@ import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { trackOnboardingLinkClick } from '../../../../lib/telemetry';
 
 jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../../../../../common/lib/telemetry');
+jest.mock('../../../../lib/telemetry');
 
 describe('EndpointCallout', () => {
   beforeEach(() => {

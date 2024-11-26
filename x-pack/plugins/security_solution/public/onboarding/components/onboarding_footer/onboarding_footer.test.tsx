@@ -11,7 +11,7 @@ import { trackOnboardingLinkClick } from '../lib/telemetry';
 import { FooterLinkItem } from './onboarding_footer';
 import { OnboardingFooterLinkItemId, TELEMETRY_FOOTER_LINK } from './constants';
 
-jest.mock('../../common/lib/telemetry');
+jest.mock('../lib/telemetry');
 
 describe('OnboardingFooterComponent', () => {
   beforeEach(() => {

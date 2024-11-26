@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../../common/lib/kibana';
 import { trackOnboardingLinkClick } from '../../../../lib/telemetry';
 
 jest.mock('../../../../../../common/lib/kibana');
-jest.mock('../../../../../common/lib/telemetry');
+jest.mock('../../../../lib/telemetry');
 
 describe('AgentlessAvailableCallout', () => {
   const mockUseKibana = useKibana as jest.Mock;

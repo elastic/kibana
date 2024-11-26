@@ -11,7 +11,7 @@ import { LinkCard } from './link_card';
 import { OnboardingHeaderCardId, TELEMETRY_HEADER_CARD } from '../../constants';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
-jest.mock('../../../../common/lib/telemetry');
+jest.mock('../../../lib/telemetry');
 
 describe('DataIngestionHubHeaderCardComponent', () => {
   beforeEach(() => {
