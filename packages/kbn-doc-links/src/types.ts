@@ -680,7 +680,7 @@ export interface DocLinks {
     readonly inferenceAPIDocumentation: string;
   };
   readonly cases: {
-    readonly legacyDeprecations: string;
+    readonly legacyApiDeprecations: string;
   };
 }
 

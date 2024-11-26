@@ -15,6 +15,16 @@ describe('getAllCommentsRoute', () => {
     const router = getAllCommentsRoute({ isServerless: true, docLinks });
 
     expect(router.routerOptions?.access).toBe('internal');
+  });
+
+  it('marks the endpoint public in non-serverless', async () => {
+    const router = getAllCommentsRoute({ isServerless: false, docLinks });
+
+    expect(router.routerOptions?.access).toBe('public');
+  });
+
+  it('should be deprecated', () => {
+    const router = getAllCommentsRoute({ docLinks });
     expect(router.routerOptions?.deprecated).toMatchInlineSnapshot(`
       Object {
         "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/breaking-changes-summary.html#breaking-201004",
@@ -26,11 +36,5 @@ describe('getAllCommentsRoute', () => {
         "severity": "warning",
       }
     `);
-  });
-
-  it('marks the endpoint public in non-serverless', async () => {
-    const router = getAllCommentsRoute({ isServerless: false, docLinks });
-
-    expect(router.routerOptions?.access).toBe('public');
   });
 });

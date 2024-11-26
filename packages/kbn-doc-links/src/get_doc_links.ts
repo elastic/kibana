@@ -1005,7 +1005,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
     },
     cases: {
-      legacyDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
+      legacyApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
     },
   });
 };

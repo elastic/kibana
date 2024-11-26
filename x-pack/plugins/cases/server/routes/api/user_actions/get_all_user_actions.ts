@@ -39,7 +39,7 @@ export const getUserActionsRoute = ({
       // You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       tags: ['oas-tag:cases'],
       deprecated: {
-        documentationUrl: docLinks.links.cases.legacyDeprecations,
+        documentationUrl: docLinks.links.cases.legacyApiDeprecations,
         severity: 'warning',
         reason: {
           type: 'migrate',
