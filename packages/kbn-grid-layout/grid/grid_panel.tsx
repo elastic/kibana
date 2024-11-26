@@ -51,6 +51,14 @@ export const GridPanel = forwardRef<
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+        &.kbnGridPanel--isExpanded {
+          transform: translate(9999px, 9999px);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
@@ -65,11 +73,11 @@ export const GridPanel = forwardRef<
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe(([activePanel, gridLayout, runtimeSettings]) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const allPanels = gridLayout[rowIndex].panels;
-            const panel = allPanels[panelId];
+            const panel = gridLayout[rowIndex].panels[panelId];
             if (!ref || !panel) return;
 
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+
             if (panelId === activePanel?.id) {
               // if the current panel is active, give it fixed positioning depending on the interaction event
               const { position: draggingPosition } = activePanel;
@@ -105,6 +113,7 @@ export const GridPanel = forwardRef<
                 ref.style.gridColumnEnd = ``;
                 ref.style.gridRowEnd = ``;
               }
+              return;
             } else {
               ref.style.zIndex = '0';
 
@@ -134,50 +143,56 @@ export const GridPanel = forwardRef<
     useEffect(
       () => {
         /** Update the styles of the panel via a subscription to prevent re-renders */
-        const styleSubscription = combineLatest([
-          gridLayoutStateManager.gridLayout$,
-          gridLayoutStateManager.expandedPanelId$,
-          gridLayoutStateManager.isMobileView$,
-        ])
+        const styleSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([gridLayout, expandedPanelId, isMobileView]) => {
+          .subscribe((expandedPanelId) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+            const panel = gridLayout[rowIndex].panels[panelId];
+            if (!ref || !panel) return;
+
+            if (expandedPanelId && expandedPanelId === panelId) {
+              ref.classList.add('kbnGridPanel--isExpanded');
+              return;
+            } else {
+              ref.classList.remove('kbnGridPanel--isExpanded');
+            }
+          });
+
+        return () => {
+          styleSubscription.unsubscribe();
+        };
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
+
+    useEffect(
+      () => {
+        /** Update the styles of the panel via a subscription to prevent re-renders */
+        const styleSubscription = gridLayoutStateManager.isMobileView$
+          .pipe(skip(1))
+          .subscribe((isMobileView) => {
+            if (!isMobileView) {
+              return;
+            }
+            const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
             const allPanels = gridLayout[rowIndex].panels;
             const panel = allPanels[panelId];
             if (!ref || !panel) return;
 
-            if (expandedPanelId && expandedPanelId === panelId) {
-              // Translate the expanded panel back to its initial position
-              // since all other GridRow elements have been moved off-screen
-              ref.style.transform = 'translate(9999px, 9999px)';
-
-              // Stretch the expanded panel to occupy the remaining available space in the viewport.
-              ref.style.position = `absolute`;
-              ref.style.top = `0`;
-              ref.style.left = `0`;
-              ref.style.width = `100%`;
-              ref.style.height = `100%`;
-              return;
-            } else {
-              ref.style.position = ``;
-              ref.style.transform = ``;
-            }
-
-            if (isMobileView) {
-              const sortedKeys = getKeysInOrder(gridLayout[rowIndex]);
-              const currentPanelPosition = sortedKeys.indexOf(panelId);
-              const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
-              const responsiveGridRowStart = sortedKeysBefore.reduce(
-                (acc, key) => acc + allPanels[key].height,
-                1
-              );
-              ref.style.gridColumnStart = `1`;
-              ref.style.gridColumnEnd = `-1`;
-              ref.style.gridRowStart = `${responsiveGridRowStart}`;
-              ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
-              // we shouldn't allow interactions on mobile view so we can return early
-              return;
-            }
+            const sortedKeys = getKeysInOrder(gridLayout[rowIndex]);
+            const currentPanelPosition = sortedKeys.indexOf(panelId);
+            const sortedKeysBefore = sortedKeys.slice(0, currentPanelPosition);
+            const responsiveGridRowStart = sortedKeysBefore.reduce(
+              (acc, key) => acc + allPanels[key].height,
+              1
+            );
+            ref.style.gridColumnStart = `1`;
+            ref.style.gridColumnEnd = `-1`;
+            ref.style.gridRowStart = `${responsiveGridRowStart}`;
+            ref.style.gridRowEnd = `${responsiveGridRowStart + panel.height}`;
           });
 
         return () => {
