@@ -65,7 +65,7 @@ import { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
 import { getAccessQuery } from '../util/get_access_query';
 import { getSystemMessageFromInstructions } from '../util/get_system_message_from_instructions';
 import { replaceSystemMessage } from '../util/replace_system_message';
-import { failOnNonExistingFunctionCall } from './adapters/fail_on_non_existing_function_call';
+import { failOnNonExistingFunctionCall } from './operators/fail_on_non_existing_function_call';
 import { getContextFunctionRequestIfNeeded } from './get_context_function_request_if_needed';
 import { LangTracer } from './instrumentation/lang_tracer';
 import { continueConversation } from './operators/continue_conversation';
@@ -74,10 +74,6 @@ import { extractMessages } from './operators/extract_messages';
 import { extractTokenCount } from './operators/extract_token_count';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
-import {
-  LangtraceServiceProvider,
-  withLangtraceChatCompleteSpan,
-} from './operators/with_langtrace_chat_complete_span';
 import {
   runSemanticTextKnowledgeBaseMigration,
   scheduleSemanticTextMigration,

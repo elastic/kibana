@@ -11,12 +11,6 @@ export enum ObservabilityAIAssistantConnectorType {
   Gemini = '.gemini',
 }
 
-export const SUPPORTED_CONNECTOR_TYPES = [
-  ObservabilityAIAssistantConnectorType.OpenAI,
-  ObservabilityAIAssistantConnectorType.Bedrock,
-  ObservabilityAIAssistantConnectorType.Gemini,
-];
-
 export function isSupportedConnectorType(
   type: string
 ): type is ObservabilityAIAssistantConnectorType {

@@ -28,9 +28,16 @@ import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';
-import type { CreateChatCompletionResponseChunk } from './adapters/process_openai_stream';
 import type { ObservabilityAIAssistantConfig } from '../../config';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+
+type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
+  choices: Array<
+    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
+      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
+    }
+  >;
+};
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
