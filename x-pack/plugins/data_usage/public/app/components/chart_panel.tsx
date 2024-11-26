@@ -20,7 +20,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendAction } from './legend_action';
-import { MetricTypes, MetricSeries } from '../../../common/rest_types';
+import { type MetricTypes, type MetricSeries } from '../../../common/rest_types';
 import { formatBytes } from '../../utils/format_bytes';
 
 // TODO: Remove this when we have a title for each metric type
