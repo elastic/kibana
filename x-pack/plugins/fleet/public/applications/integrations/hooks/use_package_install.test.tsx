@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, type WrapperComponent } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { createIntegrationsTestRendererMock } from '../../../mock';
@@ -48,9 +48,10 @@ describe('usePackageInstall', () => {
         throw error;
       }) as any);
 
-      const wrapper: WrapperComponent<any> = ({ children }) => (
+      const wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
         <PackageInstallProvider startServices={coreStart}>{children}</PackageInstallProvider>
       );
+
       const { result } = renderer.renderHook(() => useInstallPackage(), wrapper);
 
       const installPackage = result.current;

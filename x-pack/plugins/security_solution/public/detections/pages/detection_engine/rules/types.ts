@@ -50,7 +50,7 @@ import type {
   RequiredFieldInput,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
-import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../../common/search_strategy';
 import type {
   RuleResponseAction,
   ResponseAction,
@@ -164,7 +164,7 @@ export interface DefineStepRule {
   threatIndex: ThreatIndex;
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
-  eqlOptions: EqlOptionsSelected;
+  eqlOptions: EqlOptions;
   dataSourceType: DataSourceType;
   newTermsFields: string[];
   historyWindowSize: string;
