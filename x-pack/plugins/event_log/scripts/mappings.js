@@ -372,4 +372,7 @@ exports.EcsEventLogMultiValuedProperties = [
   'rule.author',
   'kibana.space_ids',
   'kibana.alert.maintenance_window_ids',
+  'kibana.alert.rule.gap.in_progress_intervals',
+  'kibana.alert.rule.gap.filled_intervals',
+  'kibana.alert.rule.gap.unfilled_intervals',
 ];

@@ -150,9 +150,9 @@ export const EventSchema = schema.maybe(
                   schema.object({
                     status: ecsString(),
                     range: ecsDateRange(),
-                    filled_intervals: ecsDateRange(),
-                    unfilled_intervals: ecsDateRange(),
-                    in_progress_intervals: ecsDateRange(),
+                    filled_intervals: ecsDateRangeMulti(),
+                    unfilled_intervals: ecsDateRangeMulti(),
+                    in_progress_intervals: ecsDateRangeMulti(),
                     total_gap_duration_ms: ecsStringOrNumber(),
                     filled_duration_ms: ecsStringOrNumber(),
                     unfilled_duration_ms: ecsStringOrNumber(),
@@ -280,14 +280,18 @@ function ecsBoolean() {
   return schema.maybe(schema.boolean());
 }
 
-function ecsDateRange() {
-  return schema.maybe(
-    schema.object({
-      gte: ecsDate(),
-      lte: ecsDate(),
-    })
-  );
+function ecsDateRangeBase() {
+  return schema.object({ gte: ecsDate(), lte: ecsDate() });
 }
+
+function ecsDateRange() {
+  return schema.maybe(ecsDateRangeBase());
+}
+
+function ecsDateRangeMulti() {
+  return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
+}
+
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
