@@ -499,6 +499,11 @@ ${Object.entries(process.env)
 
 
 
+WHERE AM I:
+      ${(await execa.command('pwd').catch((e) => ({ stdout: `ERROR: ${e.message}` }))).stdout}
+
+
+
 WHATS INSIDE OF ./target:
 
 ${(await execa.command(`find ./target`).catch((e) => ({ stdout: `ERROR: ${e.message}` }))).stdout}
@@ -511,6 +516,16 @@ ${(await execa.command(`find ./target`).catch((e) => ({ stdout: `ERROR: ${e.mess
 
       await getHostVmClient(hostname).exec(`echo ${content} > ${path}`);
       return null;
+    },
+
+    captureHostVmAgentDiagnostics: async ({ hostname: string }) => {
+      const { log } = await stackServicesPromise;
+      const vmClient = getHostVmClient(hostname, undefined, undefined, log);
+      const vmDiagnosticsFile = `/tmp/elastic-agent-diagnostics-${hostname}-${new Date().toISOString()}.zip`;
+
+      // generate diagnostics file on the host
+      await vmClient.exec(`sudo /var/Elastic/Agent diagnostics --file ${vmDiagnosticsFile}`);
+      return vmClient.download(vmDiagnosticsFile, '');
     },
 
     uploadFileToEndpoint: async ({
