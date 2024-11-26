@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import {
@@ -190,7 +189,7 @@ describe('useBulkActions', () => {
     it('change the status of cases', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -219,7 +218,7 @@ describe('useBulkActions', () => {
         pointerEventsCheck: 0,
       });
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -227,7 +226,7 @@ describe('useBulkActions', () => {
     it('change the severity of cases', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -257,7 +256,7 @@ describe('useBulkActions', () => {
         pointerEventsCheck: 0,
       });
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -266,7 +265,7 @@ describe('useBulkActions', () => {
       it('delete a case', async () => {
         const deleteSpy = jest.spyOn(api, 'deleteCases');
 
-        const { result, waitFor: waitForHook } = renderHook(
+        const { result } = renderHook(
           () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
           {
             wrapper: appMockRender.AppWrapper,
@@ -299,7 +298,7 @@ describe('useBulkActions', () => {
 
         await userEvent.click(res.getByTestId('confirmModalConfirmButton'));
 
-        await waitForHook(() => {
+        await waitFor(() => {
           expect(deleteSpy).toHaveBeenCalled();
         });
       });
@@ -355,7 +354,7 @@ describe('useBulkActions', () => {
     it('change the tags of the case', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -394,7 +393,7 @@ describe('useBulkActions', () => {
       await userEvent.click(res.getByText('coke'));
       await userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -402,7 +401,7 @@ describe('useBulkActions', () => {
     it('change the assignees of the case', async () => {
       const updateCasesSpy = jest.spyOn(api, 'updateCases');
 
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -441,7 +440,7 @@ describe('useBulkActions', () => {
       await userEvent.click(res.getByText('Damaged Raccoon'));
       await userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
       });
     });
@@ -450,7 +449,7 @@ describe('useBulkActions', () => {
   describe('Permissions', () => {
     it('shows the correct actions with all permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: allCasesPermissions() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -467,7 +466,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.getByTestId('bulk-actions-separator')).toBeInTheDocument();
@@ -476,7 +475,7 @@ describe('useBulkActions', () => {
 
     it('shows the correct actions with no delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: noDeleteCasesPermissions() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -493,7 +492,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
         expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
         expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
@@ -502,7 +501,7 @@ describe('useBulkActions', () => {
 
     it('shows the correct actions with only delete permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -519,7 +518,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.queryByTestId('case-bulk-action-status')).toBeFalsy();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
@@ -528,7 +527,7 @@ describe('useBulkActions', () => {
 
     it('shows the correct actions with no reopen permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: noReopenCasesPermissions() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCaseClosed] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -545,12 +544,12 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.queryByTestId('case-bulk-action-status')).toBeInTheDocument();
         res.queryByTestId('case-bulk-action-status')?.click();
       });
 
-      await waitForHook(() => {
+      await waitFor(() => {
         expect(res.queryByTestId('cases-bulk-action-status-open')).toBeDisabled();
         expect(res.queryByTestId('cases-bulk-action-status-in-progress')).toBeDisabled();
         expect(res.queryByTestId('cases-bulk-action-status-closed')).toBeDisabled();
