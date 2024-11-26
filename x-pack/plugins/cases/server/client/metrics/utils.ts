@@ -16,6 +16,7 @@ import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import type { GetCaseMetricsParams, MetricsHandler } from './types';
 import { MTTR } from './all_cases/mttr';
+import { Status } from './all_cases/status';
 
 const isSingleCaseMetrics = (
   params: GetCaseMetricsParams | CasesMetricsRequest
@@ -33,7 +34,7 @@ export const buildHandlers = (
       (ClassName) => new ClassName({ caseId: params.caseId, casesClient, clientArgs })
     );
   } else {
-    handlers = [MTTR].map(
+    handlers = [MTTR, Status].map(
       (ClassName) =>
         new ClassName({
           owner: params.owner,

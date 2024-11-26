@@ -31,7 +31,6 @@ export type {
   CaseViewRefreshPropInterface,
   CasesPermissions,
   CasesCapabilities,
-  CasesStatus,
 } from './ui/types';
 
 export { CaseSeverity } from './types/domain';

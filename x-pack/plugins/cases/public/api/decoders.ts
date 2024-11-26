@@ -11,13 +11,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import type {
   CasesFindResponse,
-  CasesStatusResponse,
   CasesBulkGetResponse,
   CasesMetricsResponse,
 } from '../../common/types/api';
 import {
   CasesFindResponseRt,
-  CasesStatusResponseRt,
   CasesBulkGetResponseRt,
   CasesMetricsResponseRt,
 } from '../../common/types/api';
@@ -26,13 +24,6 @@ import { throwErrors } from '../../common';
 
 export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
   pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
-
-export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
-  pipe(
-    CasesStatusResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
-
 export const decodeCasesMetricsResponse = (metrics?: CasesMetricsResponse) =>
   pipe(
     CasesMetricsResponseRt.decode(metrics),

@@ -31,15 +31,10 @@ export interface IndexErrorProps {
 }
 
 interface SemanticTextProperty extends MappingPropertyBase {
-  inference_id?: string;
+  inference_id: string;
   type: 'semantic_text';
 }
 
-/*  
-  This will be repalce once we add default elser inference_id 
-  with the index mapping response.
-*/
-const ELSER_PRECONFIGURED_ENDPOINTS = '.elser-2-elasticsearch';
 const isInferencePreconfigured = (inferenceId: string) => inferenceId.startsWith('.');
 
 const parseMapping = (mappings: MappingTypeMapping) => {
@@ -56,11 +51,6 @@ const getSemanticTextFields = (
 ): Array<{ path: string; source: SemanticTextProperty }> => {
   return Object.entries(fields).flatMap(([key, value]) => {
     const currentPath: string = path ? `${path}.${key}` : key;
-    if (value.type === 'semantic_text') {
-      value = value.inference_id
-        ? value
-        : { ...value, inference_id: ELSER_PRECONFIGURED_ENDPOINTS };
-    }
     const currentField: Array<{ path: string; source: SemanticTextProperty }> =
       value.type === 'semantic_text' ? [{ path: currentPath, source: value }] : [];
     if (hasProperties(value)) {
