@@ -10,11 +10,10 @@
 import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { Profiler, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridOverlay } from './grid_overlay';
 import { GridRow } from './grid_row';
 import { GridAccessMode, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
@@ -158,13 +157,14 @@ export const GridLayout = ({
           }}
           className={gridClassNames}
           css={css`
-            height: 100%;
+            &.kbnGrid--hasExpandedPanel {
+              height: 100%;
+            }
           `}
         >
           {children}
         </div>
       </GridHeightSmoother>
-      <GridOverlay gridLayoutStateManager={gridLayoutStateManager} />
     </>
   );
 };
