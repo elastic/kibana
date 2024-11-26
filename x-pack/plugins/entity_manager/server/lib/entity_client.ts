@@ -234,7 +234,12 @@ export class EntityClient {
     limit?: number;
   }) {
     const [mandatory, metadata] = [
-      uniq(sources.flatMap((source) => [source.timestamp_field, ...source.identity_fields])),
+      uniq(
+        sources.flatMap((source) => [
+          ...(source.timestamp_field ? [source.timestamp_field] : []),
+          ...source.identity_fields,
+        ])
+      ),
       uniq([...metadataFields, ...sources.flatMap((source) => source.metadata_fields)]),
     ];
 

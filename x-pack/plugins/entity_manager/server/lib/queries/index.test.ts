@@ -36,11 +36,14 @@ describe('getEntityInstancesQuery', () => {
       });
 
       expect(query).toEqual(
-        'FROM logs-*, other-sources* | ' +
-          'EVAL entity.id = CASE(service.name IS NOT NULL, service.name, custom.service.name IS NOT NULL, custom.service.name) | ' +
-          'EVAL entity.timestamp = CASE(@timestamp IS NOT NULL, @timestamp, custom_timestamp_field IS NOT NULL, custom_timestamp_field) | ' +
-          'WHERE entity.id IS NOT NULL AND entity.timestamp IS NOT NULL | ' +
-          'WHERE (@timestamp >= "2024-11-20T19:00:00.000Z" AND @timestamp <= "2024-11-20T20:00:00.000Z") OR (custom_timestamp_field >= "2024-11-20T19:00:00.000Z" AND custom_timestamp_field <= "2024-11-20T20:00:00.000Z") | ' +
+        'FROM logs-*, other-sources* METADATA _index | ' +
+          'EVAL is_source_0 = (_index LIKE "*logs-**") AND (service.name IS NOT NULL) AND (@timestamp IS NOT NULL) | ' +
+          'EVAL is_source_1 = (_index LIKE "*other-sources**") AND (custom.service.name IS NOT NULL) AND (custom_timestamp_field IS NOT NULL) | ' +
+          'EVAL entity.id = CASE(is_source_0, service.name, is_source_1, custom.service.name) | ' +
+          'EVAL entity.timestamp = CASE(is_source_0, @timestamp, is_source_1, custom_timestamp_field) | ' +
+          'WHERE entity.id IS NOT NULL | ' +
+          'WHERE (is_source_0 AND (@timestamp >= "2024-11-20T19:00:00.000Z" AND @timestamp <= "2024-11-20T20:00:00.000Z")) OR ' +
+          '(is_source_1 AND (custom_timestamp_field >= "2024-11-20T19:00:00.000Z" AND custom_timestamp_field <= "2024-11-20T20:00:00.000Z")) | ' +
           'STATS entity.last_seen_timestamp=MAX(entity.timestamp), service.name=TOP(service.name, 1, "desc"), custom.service.name=TOP(custom.service.name, 1, "desc"), metadata.host.name=VALUES(host.name), metadata.owner=VALUES(owner) BY entity.id | ' +
           'SORT entity.last_seen_timestamp DESC | ' +
           'LIMIT 5'

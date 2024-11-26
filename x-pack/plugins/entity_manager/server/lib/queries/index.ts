@@ -6,11 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import { uniq } from 'lodash';
+import { last, uniq } from 'lodash';
 
 export const entitySourceSchema = z.object({
   type: z.string(),
-  timestamp_field: z.optional(z.string()).default('@timestamp'),
+  timestamp_field: z.optional(z.string()),
   index_patterns: z.array(z.string()),
   identity_fields: z.array(z.string()),
   metadata_fields: z.array(z.string()),
@@ -26,20 +26,38 @@ const sourceCommand = ({
   sources: EntitySource[];
   metadataFields: string[];
 }) => {
-  let command = `FROM ${sources.flatMap((source) => source.index_patterns).join(', ')}`;
+  const indexPatterns = sources.flatMap((source) => source.index_patterns).join(', ');
+  const esMetadataFields = ['_index', ...metadataFields.filter((field) => ['_id'].includes(field))];
 
-  const esMetadataFields = metadataFields.filter((field) => ['_index', '_id'].includes(field));
-  if (esMetadataFields.length) {
-    command += ` METADATA ${esMetadataFields.join(',')}`;
-  }
+  return `FROM ${indexPatterns} METADATA ${esMetadataFields.join(', ')}`;
+};
 
-  return command;
+const sourcesEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
+  const evals = sources.map((source, index) => {
+    const conditions = [
+      source.index_patterns
+        .map((pattern) => `_index LIKE "*${last(pattern.split(':'))}*"`)
+        .join(' OR '),
+
+      source.identity_fields.map((field) => `${field} IS NOT NULL`).join(' AND '),
+    ];
+
+    if (source.timestamp_field) {
+      conditions.push(`${source.timestamp_field} IS NOT NULL`);
+    }
+
+    return `EVAL is_source_${index} = ${conditions
+      .map((condition) => '(' + condition + ')')
+      .join(' AND ')}`;
+  });
+
+  return evals.join(' | ');
 };
 
 const idEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
-  const conditions = sources.flatMap((source) => {
+  const conditions = sources.flatMap((source, index) => {
     return [
-      source.identity_fields.map((field) => `${field} IS NOT NULL`).join(' AND '),
+      `is_source_${index}`,
       source.identity_fields.length === 1
         ? source.identity_fields[0]
         : `CONCAT(${source.identity_fields.join(', ":", ')})`,
@@ -49,8 +67,9 @@ const idEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
 };
 
 const timestampEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
-  const conditions = uniq(sources.map((source) => source.timestamp_field)).flatMap((field) => {
-    return [`${field} IS NOT NULL`, field];
+  const conditions = sources.flatMap((source, index) => {
+    if (!source.timestamp_field) return [];
+    return [`is_source_${index}`, source.timestamp_field];
   });
   return `EVAL entity.timestamp = CASE(${conditions.join(', ')})`;
 };
@@ -65,9 +84,18 @@ const filterCommands = ({
   end: string;
 }) => {
   const conditions = [
-    'entity.id IS NOT NULL AND entity.timestamp IS NOT NULL',
-    uniq(sources.map((source) => source.timestamp_field))
-      .map((field) => `(${field} >= "${start}" AND ${field} <= "${end}")`)
+    'entity.id IS NOT NULL',
+    sources
+      .map((source, index) => {
+        const filters = [`is_source_${index}`, ...source.filters.map((filter) => `(${filter})`)];
+        if (source.timestamp_field) {
+          filters.push(
+            `(${source.timestamp_field} >= "${start}" AND ${source.timestamp_field} <= "${end}")`
+          );
+        }
+
+        return '(' + filters.join(' AND ') + ')';
+      })
       .join(' OR '),
   ];
 
@@ -111,6 +139,7 @@ export function getEntityInstancesQuery({
 }): string {
   const commands = [
     sourceCommand({ sources, metadataFields }),
+    sourcesEvalCommand({ sources }),
     idEvalCommand({ sources }),
     timestampEvalCommand({ sources }),
     filterCommands({ sources, start, end }),
