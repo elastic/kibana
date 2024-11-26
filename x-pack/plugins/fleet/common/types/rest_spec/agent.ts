@@ -234,6 +234,8 @@ export interface GetAgentStatusResponse {
 export interface GetAgentIncomingDataRequest {
   query: {
     agentsIds: string[];
+    pkgName?: string;
+    pkgVersion?: string;
     previewData?: boolean;
   };
 }
