@@ -9,6 +9,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import moment from 'moment';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -55,34 +56,39 @@ export class KnowledgeBaseService {
   }): Promise<RecalledEntry[]> {
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
-    >({
-      index: [resourceNames.aliases.kb],
-      query: {
-        bool: {
-          should: queries.map(({ text, boost = 1 }) => ({
-            semantic: {
-              field: 'semantic_text',
-              query: text,
-              boost,
-            },
-          })),
-          filter: [
-            ...getAccessQuery({
-              user,
-              namespace,
-            }),
-            ...getCategoryQuery({ categories }),
+    >(
+      {
+        index: [resourceNames.aliases.kb],
+        query: {
+          bool: {
+            should: queries.map(({ text, boost = 1 }) => ({
+              semantic: {
+                field: 'semantic_text',
+                query: text,
+                boost,
+              },
+            })),
+            filter: [
+              ...getAccessQuery({
+                user,
+                namespace,
+              }),
+              ...getCategoryQuery({ categories }),
 
-            // exclude user instructions
-            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
-          ],
+              // exclude user instructions
+              { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
+            ],
+          },
+        },
+        size: 20,
+        _source: {
+          includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
         },
       },
-      size: 20,
-      _source: {
-        includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
-      },
-    });
+      {
+        requestTimeout: moment.duration(1, 'minutes').asMilliseconds(), // inference can potentially take long if no ML nodes are available
+      }
+    );
 
     return response.hits.hits.map((hit) => ({
       text: hit._source?.text!,
@@ -307,39 +313,6 @@ export class KnowledgeBaseService {
     return res.hits.hits[0]?._id;
   };
 
-  getUuidFromDocId = async ({
-    docId,
-    user,
-    namespace,
-  }: {
-    docId: string;
-    user?: { name: string; id?: string };
-    namespace?: string;
-  }) => {
-    const query = {
-      bool: {
-        filter: [
-          { term: { doc_id: docId } },
-
-          // exclude user instructions
-          { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
-
-          // restrict access to user's own entries
-          ...getAccessQuery({ user, namespace }),
-        ],
-      },
-    };
-
-    const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-      size: 1,
-      index: resourceNames.aliases.kb,
-      query,
-      _source: false,
-    });
-
-    return response.hits.hits[0]?._id;
-  };
-
   addEntry = async ({
     entry: { id, ...doc },
     user,
@@ -353,18 +326,23 @@ export class KnowledgeBaseService {
       return;
     }
 
-    await this.dependencies.esClient.asInternalUser.index({
-      index: resourceNames.aliases.kb,
-      id,
-      document: {
-        '@timestamp': new Date().toISOString(),
-        ...doc,
-        semantic_text: doc.text,
-        user,
-        namespace,
+    await this.dependencies.esClient.asInternalUser.index(
+      {
+        index: resourceNames.aliases.kb,
+        id,
+        document: {
+          '@timestamp': new Date().toISOString(),
+          ...doc,
+          semantic_text: doc.text,
+          user,
+          namespace,
+        },
+        refresh: 'wait_for',
       },
-      refresh: 'wait_for',
-    });
+      {
+        requestTimeout: moment.duration(1, 'minutes').asMilliseconds(), // inference can potentially take long if no ML nodes are available
+      }
+    );
   };
 
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
