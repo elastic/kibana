@@ -373,22 +373,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
     }, [enabledRowRenderers.length, trailingControlColumns]);
 
-    /**
-     * When user changes the page of Unified Data Table
-     *
-     * One thing to note is that this `pageIndex` is shared between `Query`, `Pinned` and `EQL` tabs.
-     * So, when we change the page index in one tab, the shared property is being changed.
-     *
-     * We need to define a behaviour to distinguish the table state in each tab.
-     *
-     */
-    const onDataGridPageChange = useCallback(
-      (newPageIndex: number) => {
-        onChangePage?.(newPageIndex);
-      },
-      [onChangePage]
-    );
-
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
@@ -442,7 +426,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
-            onChangePage={onDataGridPageChange}
+            onChangePage={onChangePage}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>
