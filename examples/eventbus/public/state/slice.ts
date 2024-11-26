@@ -10,9 +10,11 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
+type AllFields = Record<string, string>;
+
 interface EventBusExampleState {
   esql: string;
-  allFields: string[];
+  allFields: AllFields;
   selectedFields: string[];
   filters: Record<string, string>;
 }
@@ -25,7 +27,7 @@ interface SetCrossfilterActionPayload {
 function getDefaultState(): EventBusExampleState {
   return {
     esql: 'FROM kibana_sample_data_logs',
-    allFields: [],
+    allFields: {},
     selectedFields: [],
     filters: {},
   };
@@ -38,7 +40,7 @@ export const eventBusExampleSlice = createSlice({
     setESQL: (state: EventBusExampleState, action: PayloadAction<string>) => {
       state.esql = action.payload;
     },
-    setAllFields: (state: EventBusExampleState, action: PayloadAction<string[]>) => {
+    setAllFields: (state: EventBusExampleState, action: PayloadAction<AllFields>) => {
       state.allFields = action.payload;
     },
     setSelectedFields: (state: EventBusExampleState, action: PayloadAction<string[]>) => {
