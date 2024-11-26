@@ -15,10 +15,7 @@ import { isGridDataEqual } from './utils/equality_checks';
 
 const scrollOnInterval = (direction: 'up' | 'down') => {
   const interval = setInterval(() => {
-    window.scroll({
-      top: window.scrollY + (direction === 'down' ? 50 : -50),
-      behavior: 'smooth',
-    });
+    window.scrollBy({ top: direction === 'down' ? 50 : -50, behavior: 'smooth' });
   }, 100);
   return interval;
 };
