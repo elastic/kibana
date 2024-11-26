@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dataset: degradedDatasetName,
           }),
         ]);
-        await PageObjects.svlCommonPage.loginAsAdmin();
+        await PageObjects.svlCommonPage.loginAsViewer();
       });
 
       after(async () => {
@@ -322,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 );
             }),
         ]);
-        await PageObjects.svlCommonPage.loginAsAdmin();
+        await PageObjects.svlCommonPage.loginAsViewer();
       });
 
       describe('current quality issues', () => {
@@ -826,7 +826,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await testSubjects.existOrFail('datasetQualityDetailsNewFieldLimitErrorCallout');
           });
 
-          await PageObjects.svlCommonPage.loginAsAdmin();
+          await PageObjects.svlCommonPage.loginAsViewer();
         });
 
         it('should let user increase the field limit for integrations', async () => {
