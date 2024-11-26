@@ -8,8 +8,9 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import chalk from 'chalk';
+import path from 'path';
 import { userInfo } from 'os';
-import { join as pathJoin, dirname } from 'path';
+import { unlink as deleteFile } from 'fs/promises';
 import { dump } from './utils';
 import type { DownloadedAgentInfo } from './agent_downloads_service';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
@@ -17,7 +18,7 @@ import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils
 import type { HostVm, HostVmExecResponse, SupportedVmManager } from './types';
 
 const baseGenerator = new BaseDataGenerator();
-export const DEFAULT_VAGRANTFILE = pathJoin(__dirname, 'vagrant', 'Vagrantfile');
+export const DEFAULT_VAGRANTFILE = path.join(__dirname, 'vagrant', 'Vagrantfile');
 
 const MAX_BUFFER = 1024 * 1024 * 5; // 5MB
 
@@ -135,16 +136,31 @@ export const createMultipassHostVmClient = (
     log.verbose(`multipass stop response:\n`, response);
   };
 
-  const transfer: HostVm['transfer'] = async (localFilePath, destFilePath) => {
+  const upload: HostVm['upload'] = async (localFilePath, destFilePath) => {
     const response = await execa.command(
       `multipass transfer ${localFilePath} ${name}:${destFilePath}`
     );
-    log.verbose(`Transferred file to VM [${name}]:`, response);
+    log.verbose(`Uploaded file to VM [${name}]:`, response);
 
     return {
       filePath: destFilePath,
       delete: async () => {
         return exec(`rm ${destFilePath}`);
+      },
+    };
+  };
+
+  const download: HostVm['download'] = async (vmFilePath: string, localFilePath: string) => {
+    const localFileAbsolutePath = path.resolve(localFilePath);
+    const response = await execa.command(
+      `multipass transfer ${name}:${vmFilePath} ${localFilePath}`
+    );
+    log.verbose(`Downloaded file from VM [${name}]:`, response);
+
+    return {
+      filePath: localFileAbsolutePath,
+      delete: async () => {
+        return deleteFile(localFileAbsolutePath);
       },
     };
   };
@@ -157,7 +173,9 @@ export const createMultipassHostVmClient = (
     info,
     mount,
     unmount,
-    transfer,
+    transfer: upload,
+    upload,
+    download,
     start,
     stop,
   };
@@ -227,7 +245,7 @@ const createVagrantVm = async ({
 }: CreateVagrantVmOptions): Promise<HostVm> => {
   log.debug(`Using Vagrantfile: ${vagrantFile}`);
 
-  const VAGRANT_CWD = dirname(vagrantFile);
+  const VAGRANT_CWD = path.dirname(vagrantFile);
 
   // Destroy the VM running (if any) with the provided vagrant file before re-creating it
   try {
@@ -283,7 +301,7 @@ export const createVagrantHostVmClient = (
   vagrantFile: string = DEFAULT_VAGRANTFILE,
   log: ToolingLog = createToolingLogger()
 ): HostVm => {
-  const VAGRANT_CWD = dirname(vagrantFile);
+  const VAGRANT_CWD = path.dirname(vagrantFile);
   const execaOptions: execa.Options = {
     env: {
       VAGRANT_CWD,
@@ -344,17 +362,39 @@ export const createVagrantHostVmClient = (
     log.verbose('vagrant suspend response:\n', response);
   };
 
-  const transfer: HostVm['transfer'] = async (localFilePath, destFilePath) => {
+  const upload: HostVm['upload'] = async (localFilePath, destFilePath) => {
     const response = await execa.command(
       `vagrant upload ${localFilePath} ${destFilePath}`,
       execaOptions
     );
-    log.verbose(`Transferred file to VM [${name}]:`, response);
+    log.verbose(`Uploaded file to VM [${name}]:`, response);
 
     return {
       filePath: destFilePath,
       delete: async () => {
         return exec(`rm ${destFilePath}`);
+      },
+    };
+  };
+
+  const download: HostVm['download'] = async (vmFilePath, localFilePath) => {
+    const localFileAbsolutePath = path.resolve(localFilePath);
+
+    // Vagrant will auto-mount the directory that includes the Vagrant file to the VM under `/vagrant`,
+    // and it keeps that sync'd to the local system. So we first copy the file in the VM there so we
+    // can retrieve it from the local machine
+    await exec(`cp ${vmFilePath} /vagrant`).catch((e) => {
+      log.error(`Error while attempting to copy file on VM:\n${dump(e)}`);
+      throw e;
+    });
+
+    // Now move the file from the local vagrant directory to the desired location
+    await execa.command(`mv ${VAGRANT_CWD}/${path.basename(vmFilePath)} ${localFileAbsolutePath}`);
+
+    return {
+      filePath: localFileAbsolutePath,
+      delete: async () => {
+        return deleteFile(localFileAbsolutePath);
       },
     };
   };
@@ -367,7 +407,9 @@ export const createVagrantHostVmClient = (
     info,
     mount,
     unmount,
-    transfer,
+    transfer: upload,
+    upload,
+    download,
     start,
     stop,
   };
