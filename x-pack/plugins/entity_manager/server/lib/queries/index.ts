@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { last, uniq } from 'lodash';
+import { compact, last, uniq } from 'lodash';
 
 export const entitySourceSchema = z.object({
   type: z.string(),
@@ -18,6 +18,10 @@ export const entitySourceSchema = z.object({
 });
 
 export type EntitySource = z.infer<typeof entitySourceSchema>;
+
+const hasEntityTimestamp = (sources: EntitySource[]) => {
+  return sources.some((source) => source.timestamp_field);
+};
 
 const sourceCommand = ({
   sources,
@@ -69,8 +73,12 @@ const idEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
 const timestampEvalCommand = ({ sources }: { sources: EntitySource[] }) => {
   const conditions = sources.flatMap((source, index) => {
     if (!source.timestamp_field) return [];
+
     return [`is_source_${index}`, source.timestamp_field];
   });
+
+  if (!conditions.length) return '';
+
   return `EVAL entity.timestamp = CASE(${conditions.join(', ')})`;
 };
 
@@ -110,18 +118,25 @@ const statsCommand = ({
   metadataFields: string[];
 }) => {
   const aggs = [
-    'entity.last_seen_timestamp=MAX(entity.timestamp)',
     ...uniq(sources.flatMap((source) => source.identity_fields)).map(
       (field) => `${field}=TOP(${field}, 1, "desc")`
     ),
     ...metadataFields.map((field) => `metadata.${field}=VALUES(${field})`),
   ];
 
+  if (hasEntityTimestamp(sources)) {
+    aggs.push('entity.last_seen_timestamp=MAX(entity.timestamp)');
+  }
+
   return `STATS ${aggs.join(', ')} BY entity.id`;
 };
 
-const sortCommand = () => {
-  return 'SORT entity.last_seen_timestamp DESC';
+const sortCommand = ({ sources }: { sources: EntitySource[] }) => {
+  if (hasEntityTimestamp(sources)) {
+    return 'SORT entity.last_seen_timestamp DESC';
+  }
+
+  return 'SORT entity.id DESC';
 };
 
 export function getEntityInstancesQuery({
@@ -137,16 +152,16 @@ export function getEntityInstancesQuery({
   end: string;
   metadataFields?: string[];
 }): string {
-  const commands = [
+  const commands = compact([
     sourceCommand({ sources, metadataFields }),
     sourcesEvalCommand({ sources }),
     idEvalCommand({ sources }),
     timestampEvalCommand({ sources }),
     filterCommands({ sources, start, end }),
     statsCommand({ sources, metadataFields }),
-    sortCommand(),
+    sortCommand({ sources }),
     `LIMIT ${limit}`,
-  ];
+  ]);
 
   return commands.join(' | ');
 }
