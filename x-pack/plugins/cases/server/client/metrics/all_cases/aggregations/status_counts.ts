@@ -26,16 +26,17 @@ export class StatusCounts implements AggregationBuilder<CasesMetricsResponse> {
   formatResponse(aggregations: AggregationResponse) {
     const aggs = aggregations as StatusAggregate;
     const buckets = aggs?.status?.buckets ?? [];
+    const status: Partial<Record<CasePersistedStatus, number>> = {};
 
-    const open = buckets.find(({ key }) => key === CasePersistedStatus.OPEN);
-    const inProgress = buckets.find(({ key }) => key === CasePersistedStatus.IN_PROGRESS);
-    const closed = buckets.find(({ key }) => key === CasePersistedStatus.CLOSED);
+    for (const bucket of buckets) {
+      status[bucket.key] = bucket.doc_count;
+    }
 
     return {
       status: {
-        open: open?.doc_count ?? 0,
-        inProgress: inProgress?.doc_count ?? 0,
-        closed: closed?.doc_count ?? 0,
+        open: status[CasePersistedStatus.OPEN] ?? 0,
+        inProgress: status[CasePersistedStatus.IN_PROGRESS] ?? 0,
+        closed: status[CasePersistedStatus.CLOSED] ?? 0,
       },
     };
   }
@@ -50,7 +51,7 @@ type StatusAggregate = StatusAggregateResponse | undefined;
 interface StatusAggregateResponse {
   status: {
     buckets: Array<{
-      key: number;
+      key: CasePersistedStatus;
       doc_count: number;
     }>;
   };
