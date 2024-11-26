@@ -38,7 +38,7 @@ export const getStatusRoute = ({
         documentationUrl: docLinks.links.cases.legacyApiDeprecations,
         severity: 'warning',
         reason: {
-          type: 'deprecate',
+          type: 'remove',
         },
       },
     },
