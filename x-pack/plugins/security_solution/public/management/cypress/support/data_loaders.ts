@@ -485,6 +485,30 @@ ${s1Info.status}
       path: string;
       content: string;
     }): Promise<null> => {
+      // --------- FIXME:PT DO NOT COMMIT TO MAIN - dev debug only
+      const { log } = await stackServicesPromise;
+
+      log.info(`---------------------------
+
+
+NODE RUNTIME ENV.:
+
+${Object.entries(process.env)
+  .map(([key, value]) => `${key}=${value}`)
+  .join('\n')}
+
+
+
+WHATS INSIDE OF ./target:
+
+${(await execa.command(`find ./target`)).stdout}
+
+
+---------------------------
+`);
+
+      // --------- FIXME:PT DO NOT COMMIT TO MAIN - dev debug only
+
       await getHostVmClient(hostname).exec(`echo ${content} > ${path}`);
       return null;
     },
