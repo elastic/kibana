@@ -127,7 +127,10 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
           if (!_.isObject(term)) {
             term = { name: term };
           }
-          autoCompleteSet.push(term);
+          // Make sure we don't have duplicates
+          if (!_.find(autoCompleteSet, { name: term.name })) {
+            autoCompleteSet.push(term);
+          }
         });
       });
     });
