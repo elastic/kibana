@@ -18,9 +18,9 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { useState } from 'react';
-import type { UserMessage } from '../types';
-import './embeddable_info_badges.scss';
-import { getLongMessage } from '../user_messages_utils';
+import type { UserMessage } from '../../types';
+import './info_badges.scss';
+import { getLongMessage } from '../../user_messages_utils';
 
 export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
   const { euiTheme } = useEuiTheme();
@@ -31,7 +31,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
   if (!messages.length) {
     return null;
   }
-  const iconTitle = i18n.translate('xpack.lens.embeddable.featureBadge.iconDescription', {
+  const iconTitle = i18n.translate('xpack.lens.featureBadge.iconDescription', {
     defaultMessage: `{count} visualization {count, plural, one {modifier} other {modifiers}}`,
     values: {
       count: messages.length,
@@ -51,7 +51,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
         <EuiToolTip content={iconTitle}>
           <EuiButtonEmpty
             data-test-subj="lns-feature-badges-trigger"
-            className="lnsEmbeddablePanelFeatureList_button"
+            className="lnsPanelFeatureList_button"
             color={'text'}
             onClick={onButtonClick}
             title={iconTitle}
@@ -63,6 +63,9 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
               padding-inline: ${euiTheme.size.xs};
               .euiButtonEmpty__content {
                 gap: ${euiTheme.size.xs};
+              }
+              &:hover {
+                color: ${euiTheme.colors.text};
               }
             `}
             iconType="wrench"
@@ -98,7 +101,7 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
                 <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
-                <ul className="lnsEmbeddablePanelFeatureList">
+                <ul className="lnsPanelFeatureList">
                   {messageGroup.map((message, i) => (
                     <Fragment key={`${uniqueId}-${i}`}>{getLongMessage(message)}</Fragment>
                   ))}
