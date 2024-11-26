@@ -120,6 +120,27 @@ export class ServerlessSearchPlugin
       },
     });
 
+    const webCrawlersTitle = i18n.translate('xpack.serverlessSearch.app.webCrawlers.title', {
+      defaultMessage: 'Web Crawlers',
+    });
+
+    core.application.register({
+      id: 'serverlessWebCrawlers',
+      title: webCrawlersTitle,
+      appRoute: '/app/web_crawlers',
+      euiIconType: 'logoElastic',
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      visibleIn: [],
+      async mount({ element, history }: AppMountParameters) {
+        const { renderApp } = await import('./application/web_crawlers');
+        const [coreStart, services] = await core.getStartServices();
+        coreStart.chrome.docTitle.change(webCrawlersTitle);
+        docLinks.setDocLinks(coreStart.docLinks.links);
+
+        return await renderApp(element, coreStart, { history, ...services }, queryClient);
+      },
+    });
+
     const { searchIndices } = setupDeps;
     core.application.register({
       id: 'serverlessHomeRedirect',

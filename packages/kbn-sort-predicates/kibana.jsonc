@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/sort-predicates",
-  "owner": "@elastic/kibana-visualizations"
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

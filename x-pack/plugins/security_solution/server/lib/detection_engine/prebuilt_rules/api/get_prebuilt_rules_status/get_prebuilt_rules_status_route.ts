@@ -20,8 +20,10 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
     .get({
       access: 'internal',
       path: GET_PREBUILT_RULES_STATUS_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
     })
     .addVersion(

@@ -1,5 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/ml-nested-property",
-  "owner": "@elastic/ml-ui"
+  "owner": "@elastic/ml-ui",
+  "group": "platform",
+  "visibility": "private"
 }

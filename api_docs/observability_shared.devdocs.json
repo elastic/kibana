@@ -340,7 +340,7 @@
         "label": "allCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1157,7 +1157,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -3772,7 +3772,7 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCases\""
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
         "deprecated": false,
@@ -6934,7 +6934,7 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCases\""
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
         "deprecated": false,

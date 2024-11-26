@@ -56,38 +56,16 @@ export const COLUMN_ENTRIES = i18n.translate(
   }
 );
 
-export const COLUMN_SPACE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.columnSpaceLabel',
-  {
-    defaultMessage: 'Space',
-  }
-);
-
 export const COLUMN_CREATED = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.columnCreatedLabel',
   {
     defaultMessage: 'Created',
   }
 );
-
-export const COLUMN_ACTIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.columnActionsLabel',
-  {
-    defaultMessage: 'Actions',
-  }
-);
-
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.searchPlaceholder',
   {
     defaultMessage: 'Search for an entry',
-  }
-);
-
-export const DEFAULT_FLYOUT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.defaultFlyoutTitle',
-  {
-    defaultMessage: 'Knowledge Base',
   }
 );
 
@@ -123,27 +101,6 @@ export const MANUAL = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.manualButtonLabel',
   {
     defaultMessage: 'Manual',
-  }
-);
-
-export const CREATE_INDEX_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.createIndexTitle',
-  {
-    defaultMessage: 'New Index entry',
-  }
-);
-
-export const NEW_ENTRY_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newEntryTitle',
-  {
-    defaultMessage: 'New entry',
-  }
-);
-
-export const DELETE_ENTRY_DEFAULT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.deleteEntryDefaultTitle',
-  {
-    defaultMessage: 'Delete item',
   }
 );
 
@@ -306,13 +263,6 @@ export const ENTRY_OUTPUT_FIELDS_HELP_LABEL = i18n.translate(
   {
     defaultMessage:
       'What fields should be sent to the LLM. Leave empty to send the entire document.',
-  }
-);
-
-export const ENTRY_INPUT_PLACEHOLDER = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.entryInputPlaceholder',
-  {
-    defaultMessage: 'Input',
   }
 );
 

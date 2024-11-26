@@ -37,6 +37,7 @@ export interface ResultProps {
   compactCard?: boolean;
   onDocumentClick?: () => void;
   onDocumentDelete?: () => void;
+  hasDeleteDocumentsPrivilege?: boolean;
 }
 
 export const Result: React.FC<ResultProps> = ({
@@ -47,6 +48,7 @@ export const Result: React.FC<ResultProps> = ({
   showScore = false,
   onDocumentClick,
   onDocumentDelete,
+  hasDeleteDocumentsPrivilege,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const tooltipText =
@@ -97,6 +99,7 @@ export const Result: React.FC<ResultProps> = ({
                 metaData={{
                   ...metaData,
                   onDocumentDelete,
+                  hasDeleteDocumentsPrivilege,
                 }}
               />
             )}
