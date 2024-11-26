@@ -1548,6 +1548,8 @@
       "@kbn/saved-search-component/*": ["packages/kbn-saved-search-component/*"],
       "@kbn/saved-search-plugin": ["src/plugins/saved_search"],
       "@kbn/saved-search-plugin/*": ["src/plugins/saved_search/*"],
+      "@kbn/scout": ["packages/kbn-scout"],
+      "@kbn/scout/*": ["packages/kbn-scout/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
       "@kbn/screenshot-mode-example-plugin/*": ["examples/screenshot_mode_example/*"],
       "@kbn/screenshot-mode-plugin": ["src/plugins/screenshot_mode"],
