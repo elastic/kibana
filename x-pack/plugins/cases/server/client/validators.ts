@@ -93,9 +93,7 @@ export const validateDuplicatedObservablesInRequest = ({
   });
 
   if (duplicatedObservables.size > 0) {
-    throw Boom.badRequest(
-      `Invalid duplicated observables in request: ${Array.from(duplicatedObservables.values())}`
-    );
+    throw Boom.badRequest(`Invalid duplicated observables in request.`);
   }
 };
 

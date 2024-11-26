@@ -130,9 +130,7 @@ describe('validators', () => {
             },
           ],
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid duplicated observables in request: typeKey,value"`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid duplicated observables in request."`);
     });
 
     it('does not throw if no fields in request have duplicated observables', () => {
