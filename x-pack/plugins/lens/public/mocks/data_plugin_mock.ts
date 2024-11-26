@@ -48,13 +48,13 @@ export function mockDataPlugin(
   function createMockSearchService() {
     let sessionIdCounter = initialSessionId ? 1 : 0;
     let currentSessionId: string | undefined = initialSessionId;
-    const start = () => {
-      currentSessionId = `sessionId-${++sessionIdCounter}`;
-      return currentSessionId;
-    };
+
     return {
       session: {
-        start: jest.fn(start),
+        start: jest.fn(() => {
+          currentSessionId = `sessionId-${++sessionIdCounter}`;
+          return currentSessionId;
+        }),
         clear: jest.fn(),
         getSessionId: jest.fn(() => currentSessionId),
         getSession$: jest.fn(() => sessionIdSubject.asObservable()),
@@ -146,5 +146,6 @@ export function mockDataPlugin(
     fieldFormats: {
       deserialize: jest.fn(),
     },
+    datatableUtilities: { getDateHistogramMeta: jest.fn(() => true) },
   } as unknown as DataPublicPluginStart;
 }
