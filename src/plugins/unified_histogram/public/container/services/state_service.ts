@@ -8,8 +8,8 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
@@ -43,7 +43,7 @@ export interface UnifiedHistogramState {
   /**
    * Lens embeddable output observable
    */
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
   /**
    * The current time interval of the chart
    */
@@ -114,9 +114,7 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens adapters
    */
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
-  setLensEmbeddableOutput$: (
-    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-  ) => void;
+  setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -193,10 +191,8 @@ export const createStateService = (
     setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
       updateState({ lensAdapters });
     },
-    setLensEmbeddableOutput$: (
-      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-    ) => {
-      updateState({ lensEmbeddableOutput$ });
+    setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => {
+      updateState({ dataLoading$ });
     },
 
     setTotalHits: (totalHits: {

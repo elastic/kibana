@@ -27,6 +27,10 @@ export const BETA_LABEL = i18n.translate('xpack.enterpriseSearch.betaLabel', {
   defaultMessage: 'Beta',
 });
 
+export const TECH_PREVIEW_LABEL = i18n.translate('xpack.enterpriseSearch.techPreviewLabel', {
+  defaultMessage: 'Tech preview',
+});
+
 export const NATIVE_LABEL = i18n.translate('xpack.enterpriseSearch.nativeLabel', {
   defaultMessage: 'Elastic managed',
 });
