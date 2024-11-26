@@ -15,7 +15,7 @@ import {
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataTableColumnHeader } from './data_table_column_header';
-import { waitFor }  from "@testing-library/react";
+import { waitFor } from '@testing-library/react';
 
 const stubDataViewWithNested = createStubDataView({
   spec: {
