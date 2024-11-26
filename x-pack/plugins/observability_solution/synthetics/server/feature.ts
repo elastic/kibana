@@ -63,7 +63,7 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
       includeIn: 'all',
       savedObject: {
         all: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
-        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
+        read: [],
       },
       ui: ['canManagePrivateLocations'],
     },
