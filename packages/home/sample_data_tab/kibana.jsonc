@@ -1,5 +1,10 @@
 {
   "type": "shared-common",
   "id": "@kbn/home-sample-data-tab",
-  "owner": "@elastic/appex-sharedux"
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  // 'home' plugin depends on it
+  "group": "platform",
+  "visibility": "shared"
 }

@@ -83,32 +83,44 @@ createServerRouteFactory<{ context: { getSpaceId: () => string } }, {}>()({
 });
 
 // Create options are available when registering a route.
-createServerRouteFactory<{}, { options: { tags: string[] } }>()({
+createServerRouteFactory<{}, {}>()({
   endpoint: 'GET /internal/endpoint_with_params',
   params: t.type({
     path: t.type({
       serviceName: t.string,
     }),
   }),
-  options: {
-    tags: [],
-  },
   handler: async (resources) => {
     assertType<{ params: { path: { serviceName: string } } }>(resources);
   },
 });
 
 // Public APIs should be versioned
-createServerRouteFactory<{}, { options: { tags: string[] } }>()({
+createServerRouteFactory<{}, { tags: string[] }>()({
   // @ts-expect-error
+  endpoint: 'GET /api/endpoint_with_params',
+  tags: [],
+  handler: async (resources) => {},
+});
+
+// `access` is respected
+createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_params',
   options: {
     tags: [],
+    access: 'internal',
   },
   handler: async (resources) => {},
 });
 
-createServerRouteFactory<{}, { options: { tags: string[] } }>()({
+// specifying additional options makes them required
+// @ts-expect-error
+createServerRouteFactory<{}, { tags: string[] }>()({
+  endpoint: 'GET /api/endpoint_with_params 2023-10-31',
+  handler: async (resources) => {},
+});
+
+createServerRouteFactory<{}, { tags: string[] }>()({
   endpoint: 'GET /api/endpoint_with_params 2023-10-31',
   options: {
     tags: [],
