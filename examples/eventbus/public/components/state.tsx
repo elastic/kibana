@@ -29,8 +29,12 @@ export const State: FC = () => {
 
         state.actions.setAllFields(fields);
 
-        if (fields.includes('@timestamp')) {
+        if (fields.includes('@timestamp') && fields.includes('message')) {
+          state.actions.setSelectedFields(['@timestamp', 'message']);
+        } else if (fields.includes('@timestamp')) {
           state.actions.setSelectedFields(['@timestamp']);
+        } else if (fields.includes('message')) {
+          state.actions.setSelectedFields(['message']);
         }
       } catch (e) {
         // eslint-disable-next-line no-console
