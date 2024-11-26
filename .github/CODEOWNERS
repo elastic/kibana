@@ -1430,6 +1430,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### END Observability Plugins
 
 # Presentation
+/x-pack/test/upgrade/screenshots @elastic/kibana-presentation
+/x-pack/test/functional/screenshots @elastic/kibana-presentation
 /test/functional/fixtures/kbn_archiver/legacy.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/200934#discussion_r1856407606
 /x-pack/test/functional/fixtures/kbn_archiver/maps.json @elastic/kibana-presentation
 /x-pack/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
