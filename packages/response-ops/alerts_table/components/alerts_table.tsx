@@ -155,6 +155,27 @@ const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
   );
 };
 
+/**
+ * An `EuiDataGrid` abstraction to render alert documents.
+ *
+ * It manages the paginated and cached fetching of alerts based on the
+ * provided `featureIds` (the final query can be refined through the
+ * `query` and `initialSort` props). The `id` prop is required in order
+ * to persist the table state in `localStorage`
+ *
+ * @example
+ * ```tsx
+ * <AlertsTable
+ *   id="my-alerts-table"
+ *   featureIds={featureIds}
+ *   query={esQuery}
+ *   initialSort={defaultAlertsTableSort}
+ *   renderCellValue={renderCellValue}
+ *   renderActionsCell={AlertActionsCell}
+ *   services={{ ... }}
+ * />
+ * ```
+ */
 export const AlertsTable = memo(
   forwardRef((props, ref) => {
     return (
