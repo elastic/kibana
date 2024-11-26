@@ -81,6 +81,16 @@ export const useBreadcrumbs = (pageDeepLink: MaintenanceWindowDeepLinkIds) => {
 
   useEffect(() => {
     const breadcrumbs = [
+      ...(!serverless
+        ? [
+            {
+              text: i18n.translate('xpack.alerting.breadcrumbs.stackManagementLinkText', {
+                defaultMessage: 'Stack Management',
+              }),
+              href: getAppUrl(),
+            },
+          ]
+        : []),
       ...(topLevelBreadcrumb[pageDeepLink]
         ? [
             {

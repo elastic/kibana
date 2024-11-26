@@ -51,7 +51,10 @@ describe('useBreadcrumbs', () => {
     renderHook(() => useBreadcrumbs(MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows), {
       wrapper: appMockRenderer.AppWrapper,
     });
-    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ text: 'Maintenance Windows' }]);
+    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
+      { text: 'Maintenance Windows' },
+    ]);
   });
 
   test('set create maintenance windows breadcrumbs', () => {
@@ -59,6 +62,7 @@ describe('useBreadcrumbs', () => {
       wrapper: appMockRenderer.AppWrapper,
     });
     expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
       {
         href: MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
         onClick: expect.any(Function),
@@ -73,6 +77,7 @@ describe('useBreadcrumbs', () => {
       wrapper: appMockRenderer.AppWrapper,
     });
     expect(mockSetBreadcrumbs).toHaveBeenCalledWith([
+      { href: '/test', onClick: expect.any(Function), text: 'Stack Management' },
       {
         href: MAINTENANCE_WINDOW_DEEP_LINK_IDS.maintenanceWindows,
         onClick: expect.any(Function),
