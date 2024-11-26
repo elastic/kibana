@@ -403,34 +403,36 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
         </div>
 
         {shouldShowPreview ? (
-          <EuiFormRow
-            fullWidth
-            hasEmptyLabelSpace={true}
-            className={cx(filterBadgeStyle, filterPreviewLabelStyle)}
-            label={
-              <>
-                <EuiSpacer size="m" />
-                <strong>
-                  <FormattedMessage
-                    id="unifiedSearch.filter.filterBar.preview"
-                    defaultMessage="{icon} Preview"
-                    values={{
-                      icon: <EuiIcon type="inspect" size="s" />,
-                    }}
-                  />
-                </strong>
-              </>
-            }
-          >
-            <EuiText size="s" data-test-subj="filter-preview" css={{ overflowWrap: 'break-word' }}>
-              <FilterBadgeGroup
-                filters={[localFilter]}
-                dataViews={this.state.indexPatterns}
-                booleanRelation={BooleanRelation.AND}
-                shouldShowBrackets={false}
-              />
-            </EuiText>
-          </EuiFormRow>
+          <>
+            <EuiSpacer size="m" />
+            <EuiFormRow
+              fullWidth
+              hasEmptyLabelSpace={true}
+              className={cx(filterBadgeStyle, filterPreviewLabelStyle)}
+              label={
+                <FormattedMessage
+                  id="unifiedSearch.filter.filterBar.preview"
+                  defaultMessage="{icon} Preview"
+                  values={{
+                    icon: <EuiIcon type="inspect" size="s" />,
+                  }}
+                />
+              }
+            >
+              <EuiText
+                size="s"
+                data-test-subj="filter-preview"
+                css={{ overflowWrap: 'break-word' }}
+              >
+                <FilterBadgeGroup
+                  filters={[localFilter]}
+                  dataViews={this.state.indexPatterns}
+                  booleanRelation={BooleanRelation.AND}
+                  shouldShowBrackets={false}
+                />
+              </EuiText>
+            </EuiFormRow>
+          </>
         ) : null}
       </>
     );
