@@ -849,16 +849,6 @@ describe('ConfigureCases', () => {
                       : null,
                   })),
                   {
-                    key: customFieldsConfigurationMock[4].key,
-                    type: customFieldsConfigurationMock[4].type,
-                    value: customFieldsConfigurationMock[4].defaultValue,
-                  },
-                  {
-                    key: customFieldsConfigurationMock[5].key,
-                    type: customFieldsConfigurationMock[5].type,
-                    value: null,
-                  },
-                  {
                     key: expect.anything(),
                     type: CustomFieldTypes.TEXT as const,
                     value: 'This is a default value',
@@ -1075,17 +1065,26 @@ describe('ConfigureCases', () => {
                 settings: {
                   syncAlerts: true,
                 },
-                customFields: customFieldsConfigurationMock.map(
-                  ({ key, type, defaultValue, required }) => ({
+                customFields: customFieldsConfigurationMock.map((configuration) => {
+                  const { key, type, defaultValue, required } = configuration;
+                  const computedDefaultValue =
+                    defaultValue && type === CustomFieldTypes.LIST
+                      ? {
+                          [defaultValue]: configuration.options?.find(
+                            (option) => option.key === defaultValue
+                          )?.label,
+                        }
+                      : defaultValue;
+                  return {
                     key,
                     type,
                     value: required
-                      ? defaultValue
+                      ? computedDefaultValue
                       : type === CustomFieldTypes.TOGGLE
                       ? false
                       : null,
-                  })
-                ),
+                  };
+                }),
               },
             },
           ],

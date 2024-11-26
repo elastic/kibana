@@ -396,8 +396,8 @@ describe('CommonFlyout ', () => {
             type: CustomFieldTypes.TEXT,
             label: 'First custom field',
             required: true,
-          },
-        ] as CustomFieldConfiguration[],
+          } as CustomFieldConfiguration,
+        ],
       };
 
       appMockRender = createAppMockRenderer({ license });
@@ -597,13 +597,41 @@ describe('CommonFlyout ', () => {
                 type: 'text',
                 value: 'this is a sample text!',
               },
-              ...customFieldsConfigurationMock
-                .slice(1)
-                .map(({ key, type, defaultValue, required }) => ({
-                  key,
-                  type,
-                  value: required ? defaultValue : type === CustomFieldTypes.TOGGLE ? false : null,
-                })),
+              {
+                key: 'test_key_2',
+                type: 'toggle',
+                value: true,
+              },
+              {
+                key: 'test_key_3',
+                type: 'text',
+                value: null,
+              },
+              {
+                key: 'test_key_4',
+                type: 'toggle',
+                value: false,
+              },
+              {
+                key: 'test_key_5',
+                type: 'number',
+                value: 123,
+              },
+              {
+                key: 'test_key_6',
+                type: 'number',
+                value: null,
+              },
+              {
+                key: 'test_key_7',
+                type: 'list',
+                value: { option_1: 'Option 1' },
+              },
+              {
+                key: 'test_key_8',
+                type: 'list',
+                value: null,
+              },
             ],
           },
         });
@@ -682,8 +710,8 @@ describe('CommonFlyout ', () => {
             type: CustomFieldTypes.TEXT,
             label: 'First custom field',
             required: true,
-          },
-        ] as CustomFieldConfiguration[],
+          } as CustomFieldConfiguration,
+        ],
         connector: {
           id: 'servicenow-1',
           name: 'My SN connector',
