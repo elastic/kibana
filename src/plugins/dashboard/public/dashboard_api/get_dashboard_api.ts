@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { omit } from 'lodash';
 import { v4 } from 'uuid';
 import type { Reference } from '@kbn/content-management-utils';
@@ -178,7 +178,7 @@ export function getDashboardApi({
     reload$: merge(
       unifiedSearchManager.internalApi.controlGroupReload$,
       unifiedSearchManager.internalApi.panelsReload$
-    ),
+    ).pipe(debounceTime(0)),
     runInteractiveSave: async () => {
       trackOverlayApi.clearOverlays();
       const saveResult = await openSaveModal({
