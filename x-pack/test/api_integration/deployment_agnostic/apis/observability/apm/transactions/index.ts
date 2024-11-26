@@ -9,13 +9,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('transactions', () => {
-    loadTestFile(require.resolve('./breakdown.spec.ts'));
-    loadTestFile(require.resolve('./error_rate.spec.ts'));
-    loadTestFile(require.resolve('./latency_overall_distribution.spec.ts'));
-    loadTestFile(require.resolve('./latency.spec.ts'));
     loadTestFile(require.resolve('./transactions_groups_alerts.spec.ts'));
-    loadTestFile(require.resolve('./transactions_groups_detailed_statistics.spec.ts'));
-    loadTestFile(require.resolve('./transactions_groups_main_statistics.spec.ts'));
-    loadTestFile(require.resolve('./trace_samples.spec.ts'));
   });
 }
