@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useFindCaseUserActions } from './use_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
@@ -43,33 +43,32 @@ describe('UseFindCaseUserActions', () => {
   });
 
   it('returns proper state on findCaseUserActions', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
-      { wrapper: appMockRender.AppWrapper }
-    );
+    const { result } = renderHook(() => useFindCaseUserActions(basicCase.id, params, isEnabled), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
-    await waitForNextUpdate();
-
-    expect(result.current).toEqual(
-      expect.objectContaining({
-        ...initialData,
-        data: {
-          userActions: [...findCaseUserActionsResponse.userActions],
-          total: 30,
-          perPage: 10,
-          page: 1,
-        },
-        isError: false,
-        isLoading: false,
-        isFetching: false,
-      })
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          ...initialData,
+          data: {
+            userActions: [...findCaseUserActionsResponse.userActions],
+            total: 30,
+            perPage: 10,
+            page: 1,
+          },
+          isError: false,
+          isLoading: false,
+          isFetching: false,
+        })
+      )
     );
   });
 
   it('calls the API with correct parameters', async () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () =>
         useFindCaseUserActions(
           basicCase.id,
@@ -84,12 +83,12 @@ describe('UseFindCaseUserActions', () => {
       { wrapper: appMockRender.AppWrapper }
     );
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith(
-      basicCase.id,
-      { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
-      expect.any(AbortSignal)
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
+        expect.any(AbortSignal)
+      )
     );
   });
 
@@ -120,20 +119,17 @@ describe('UseFindCaseUserActions', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const { waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
+    renderHook(() => useFindCaseUserActions(basicCase.id, params, isEnabled), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith(
-      basicCase.id,
-      { type: filterActionType, sortOrder, page: 1, perPage: 10 },
-      expect.any(AbortSignal)
-    );
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(spy).toHaveBeenCalledWith(
+        basicCase.id,
+        { type: filterActionType, sortOrder, page: 1, perPage: 10 },
+        expect.any(AbortSignal)
+      );
+      expect(addError).toHaveBeenCalled();
+    });
   });
 });

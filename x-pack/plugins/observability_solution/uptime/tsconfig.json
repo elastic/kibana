@@ -68,7 +68,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-http-server",
-    "@kbn/core-http-router-server-internal",
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/observability-ai-assistant-plugin",
