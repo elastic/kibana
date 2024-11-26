@@ -120,9 +120,11 @@ describe('StepEditHosts', () => {
 
     render();
 
-    expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
-    expect(renderResult.getByText('For existing hosts:')).toBeInTheDocument();
-    expect(renderResult.getByText('For a new host:')).toBeInTheDocument();
+    waitFor(() => {
+      expect(renderResult.queryByRole('tablist')).not.toBeInTheDocument();
+      expect(renderResult.getByText('For existing hosts:')).toBeInTheDocument();
+      expect(renderResult.getByText('For a new host:')).toBeInTheDocument();
+    });
   });
 
   it('should display new policy button and existing policies when agent policies exist', () => {

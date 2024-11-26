@@ -63,13 +63,13 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   const existingAgentPolicies: AgentPolicy[] = useAllNonManagedAgentPolicies();
 
   useEffect(() => {
-    if (existingAgentPolicies && existingAgentPolicies.length > 0) {
+    if (existingAgentPolicies.length > 0) {
       updateNewAgentPolicy({
         ...newAgentPolicy,
         name: incrementPolicyName(existingAgentPolicies),
       });
     }
-  }, [existingAgentPolicies, newAgentPolicy, updateNewAgentPolicy]);
+  }, [existingAgentPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const tabs = [
     {
