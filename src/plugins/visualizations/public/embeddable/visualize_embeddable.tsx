@@ -179,6 +179,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         defaultPanelTitle,
         dataLoading: dataLoading$,
         dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+        rendered$: hasRendered$,
         supportedTriggers: () => [
           ACTION_CONVERT_TO_LENS,
           APPLY_FILTER_TRIGGER,
@@ -397,7 +398,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
                 if (hasRendered$.getValue() === true) return;
                 hasRendered$.next(true);
-                hasRendered$.complete();
               },
               onEvent: async (event) => {
                 // Visualize doesn't respond to sizing events, so ignore.
