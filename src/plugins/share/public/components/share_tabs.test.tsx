@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
-import { ShareTabsContext } from './context';
+import { ShareMenuProvider } from './context';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../common/url_service';
 import {
@@ -76,9 +76,9 @@ describe('Share modal tabs', () => {
       },
     ];
     const wrapper = mountWithIntl(
-      <ShareTabsContext.Provider value={{ ...mockShareContext, shareMenuItems: testItem }}>
+      <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItem }}>
         <ShareMenuTabs />
-      </ShareTabsContext.Provider>
+      </ShareMenuProvider>
     );
     expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
   });
@@ -99,9 +99,9 @@ describe('Share modal tabs', () => {
       },
     ];
     const wrapper = mountWithIntl(
-      <ShareTabsContext.Provider value={{ ...mockShareContext, shareMenuItems: testItem }}>
+      <ShareMenuProvider shareContext={{ ...mockShareContext, shareMenuItems: testItem }}>
         <ShareMenuTabs />
-      </ShareTabsContext.Provider>
+      </ShareMenuProvider>
     );
     expect(wrapper.find('[data-test-subj="export"]').exists()).toBeTruthy();
   });
