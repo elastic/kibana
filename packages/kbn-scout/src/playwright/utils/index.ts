@@ -8,3 +8,7 @@
  */
 
 export const serviceLoadedMsg = (name: string) => `scout service loaded: ${name}`;
+
+export const isValidUTCDate = (date: string): boolean => {
+  return !isNaN(Date.parse(date)) && new Date(date).toISOString() === date;
+};

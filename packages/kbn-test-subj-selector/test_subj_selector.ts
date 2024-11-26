@@ -22,6 +22,8 @@ function termToCssSelector(term: string) {
       return '[data-test-subj~="' + term.substring(1).replace(/\s/g, '') + '"]';
     } else if (term.startsWith('*')) {
       return '[data-test-subj*="' + term.substring(1).replace(/\s/g, '') + '"]';
+    } else if (term.startsWith('^')) {
+      return '[data-test-subj^="' + term.substring(1).replace(/\s/g, '') + '"]';
     } else {
       return '[data-test-subj="' + term + '"]';
     }

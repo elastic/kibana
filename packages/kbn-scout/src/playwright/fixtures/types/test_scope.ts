@@ -59,9 +59,19 @@ export type ScoutPage = Page & {
       selector: string,
       options?: Parameters<Page['isHidden']>[1]
     ) => ReturnType<Page['isHidden']>;
+    isVisible: (
+      selector: string,
+      options?: Parameters<Page['isVisible']>[1]
+    ) => ReturnType<Page['isVisible']>;
     locator: (
       selector: string,
       options?: Parameters<Page['locator']>[1]
     ) => ReturnType<Page['locator']>;
+    waitForSelector: (
+      selector: string,
+      options?: Parameters<Page['waitForSelector']>[1]
+    ) => ReturnType<Page['waitForSelector']>;
+    // custom methods
+    typeSlowly: (selector: string, text: string) => Promise<void>;
   };
 };

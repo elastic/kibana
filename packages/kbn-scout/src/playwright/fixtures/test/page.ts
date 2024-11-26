@@ -28,10 +28,14 @@ function extendPageWithTestSubject(page: Page) {
     'innerText',
     'isChecked',
     'isHidden',
+    'isVisible',
     'locator',
+    'waitForSelector',
   ];
 
-  const extendedMethods: Partial<Record<keyof Page, Function>> = {};
+  const extendedMethods: Partial<Record<keyof Page, Function>> & {
+    typeSlowly?: (selector: string, text: string) => Promise<void>;
+  } = {};
 
   for (const method of methods) {
     extendedMethods[method] = (...args: any[]) => {
@@ -41,7 +45,19 @@ function extendPageWithTestSubject(page: Page) {
     };
   }
 
-  return extendedMethods as Record<keyof Page, any>;
+  // custom method to type text slowly
+  extendedMethods.typeSlowly = async (selector: string, text: string) => {
+    for (const char of text) {
+      const testSubjSelector = subj(selector);
+      await page.locator(testSubjSelector).click();
+      await page.keyboard.press(char);
+      await page.waitForTimeout(25); // Delay in milliseconds
+    }
+  };
+
+  return extendedMethods as Record<keyof Page, any> & {
+    typeSlowly: ScoutPage['testSubj']['typeSlowly'];
+  };
 }
 
 /**

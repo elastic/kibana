@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './config';
-export * from './cli';
-export * from './servers';
-export * from './services';
+import { ScoutPage } from '../fixtures/types';
+
+export class DashboardApp {
+  constructor(private readonly page: ScoutPage) {}
+
+  async goto() {
+    await this.page.gotoApp('dashboards');
+  }
+}

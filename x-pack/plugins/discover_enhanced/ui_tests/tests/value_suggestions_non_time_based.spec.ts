@@ -7,24 +7,20 @@
 
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
+import { ES_ARCHIVES, KBN_ARCHIVES } from '../fixtures/constants';
 
 test.describe('Discover app - value suggestions non-time based', () => {
-  test.beforeAll(async ({ esArchiver, kbnClient }) => {
-    await esArchiver.loadIfNeeded(
-      'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
-    );
-    await kbnClient.importExport.load(
-      'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
-    );
-    await kbnClient.uiSettings.update({
+  test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
+    await esArchiver.loadIfNeeded(ES_ARCHIVES.NO_TIME_FIELD);
+    await kbnClient.importExport.load(KBN_ARCHIVES.NO_TIME_FIELD);
+    await uiSettings.set({
       defaultIndex: 'without-timefield',
       'doc_table:legacy': false,
     });
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.unset('doc_table:legacy');
-    await kbnClient.uiSettings.unset('defaultIndex');
+  test.afterAll(async ({ kbnClient, uiSettings }) => {
+    await uiSettings.unset('doc_table:legacy', 'defaultIndex');
     await kbnClient.savedObjects.cleanStandardList();
   });
 

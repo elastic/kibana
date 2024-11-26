@@ -8,6 +8,7 @@
  */
 
 import { ScoutPage } from '../fixtures/types';
+import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
 import { createLazyPageObject } from './utils';
@@ -15,6 +16,7 @@ import { createLazyPageObject } from './utils';
 export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
+  dashboard: DashboardApp;
 }
 
 /**
@@ -26,6 +28,7 @@ export interface PageObjects {
 export function createCorePageObjects(page: ScoutPage): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, page),
+    dashboard: createLazyPageObject(DashboardApp, page),
     discover: createLazyPageObject(DiscoverApp, page),
     // Add new page objects here
   };
