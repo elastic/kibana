@@ -10,31 +10,29 @@
 import { Schema } from '..';
 import { K8sEntity } from '.';
 
-export function k8sContainerEntity({
+export function k8sServiceEntity({
   schema,
-  id,
+  name,
+  uid,
+  clusterName,
   entityId,
   ...others
 }: {
   schema: Schema;
-  id: string;
+  name: string;
+  uid?: string;
+  clusterName?: string;
   entityId: string;
   [key: string]: any;
 }) {
-  if (schema === 'ecs') {
-    return new K8sEntity(schema, {
-      'entity.definition_id': 'container',
-      'entity.type': 'container',
-      'kubernetes.container.id': id,
-      'entity.id': entityId,
-      ...others,
-    });
+  if (schema !== 'ecs') {
+    throw new Error('Schema not supported for service entity: ' + schema);
   }
-
   return new K8sEntity(schema, {
-    'entity.definition_id': 'container',
-    'entity.type': 'container',
-    'container.id': id,
+    'entity.definition_id': 'service',
+    'entity.type': 'service',
+    'kubernetes.service.name': name,
+    'kubernetes.namespace': clusterName,
     'entity.id': entityId,
     ...others,
   });
