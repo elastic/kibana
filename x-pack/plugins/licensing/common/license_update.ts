@@ -39,7 +39,7 @@ export function createLicenseUpdate(
         retry({
           delay: (_, retryCount) =>
             maxRetryDelay > Math.pow(2, retryCount - 1) * 1000
-              ? timer(Math.pow(2, retryCount - 1) * 1000) 
+              ? timer(Math.pow(2, retryCount - 1) * 1000)
               : EMPTY,
           resetOnSuccess: true,
         })

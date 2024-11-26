@@ -91,9 +91,9 @@ describe('licensing update', () => {
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
 
-    license$.subscribe(() => { });
-    license$.subscribe(() => { });
-    license$.subscribe(() => { });
+    license$.subscribe(() => {});
+    license$.subscribe(() => {});
+    license$.subscribe(() => {});
     trigger$.next();
 
     expect(fetcher).toHaveBeenCalledTimes(1);
