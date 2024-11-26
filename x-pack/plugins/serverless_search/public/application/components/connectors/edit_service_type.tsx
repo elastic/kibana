@@ -64,10 +64,14 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   const { isLoading, mutate } = useMutation({
     mutationFn: async (inputServiceType: string) => {
       const body = { service_type: inputServiceType };
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/service_type`, {
-        body: JSON.stringify(body),
-      });
-      return inputServiceType;
+      if (connector.service_type === null || connector.service_type === '') {
+        return inputServiceType;
+      } else {
+        await http.post(`/internal/serverless_search/connectors/${connector.id}/service_type`, {
+          body: JSON.stringify(body),
+        });
+        return inputServiceType;
+      }
     },
     onSuccess: (successData) => {
       queryClient.setQueryData(queryKey, {
