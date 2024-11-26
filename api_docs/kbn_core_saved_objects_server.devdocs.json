@@ -6324,6 +6324,14 @@
             "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
           },
           {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
@@ -10738,10 +10746,6 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
-              },
-              {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
               },
               {
                 "plugin": "graph",

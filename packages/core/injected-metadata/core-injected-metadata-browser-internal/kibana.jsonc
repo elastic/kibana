@@ -1,5 +1,9 @@
 {
   "type": "shared-browser",
   "id": "@kbn/core-injected-metadata-browser-internal",
-  "owner": "@elastic/kibana-core"
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "private"
 }

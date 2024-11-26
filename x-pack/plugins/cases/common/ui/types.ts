@@ -38,7 +38,6 @@ import type {
 import type {
   CasePatchRequest,
   CasesFindResponse,
-  CasesStatusResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -106,7 +105,6 @@ export type CasesUI = CaseUI[];
 export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
   cases: CasesUI;
 };
-export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;

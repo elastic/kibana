@@ -7,7 +7,7 @@
 
 import { isEqual, intersection, union } from 'lodash';
 import { FilterManager } from '@kbn/data-plugin/public';
-import { Document } from '../persistence/saved_object_store';
+import { LensDocument } from '../persistence/saved_object_store';
 import { AnnotationGroups, DatasourceMap, VisualizationMap } from '../types';
 import { removePinnedFilters } from './save_modal_container';
 
@@ -15,8 +15,8 @@ const removeNonSerializable = (obj: Parameters<JSON['stringify']>[0]) =>
   JSON.parse(JSON.stringify(obj));
 
 export const isLensEqual = (
-  doc1In: Document | undefined,
-  doc2In: Document | undefined,
+  doc1In: LensDocument | undefined,
+  doc2In: LensDocument | undefined,
   injectFilterReferences: FilterManager['inject'],
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
@@ -54,6 +54,7 @@ export const isLensEqual = (
         }
       })()
     : isEqual(doc1.state.visualization, doc2.state.visualization);
+
   if (!visualizationStateIsEqual) {
     return false;
   }
@@ -68,16 +69,14 @@ export const isLensEqual = (
 
   if (datasourcesEqual) {
     // equal so far, so actually check
-    datasourcesEqual = availableDatasourceTypes1
-      .map((type) =>
-        datasourceMap[type].isEqual(
-          doc1.state.datasourceStates[type],
-          [...doc1.references, ...(doc1.state.internalReferences || [])],
-          doc2.state.datasourceStates[type],
-          [...doc2.references, ...(doc2.state.internalReferences || [])]
-        )
+    datasourcesEqual = availableDatasourceTypes1.every((type) =>
+      datasourceMap[type].isEqual(
+        doc1.state.datasourceStates[type],
+        doc1.references.concat(doc1.state.internalReferences || []),
+        doc2.state.datasourceStates[type],
+        doc2.references.concat(doc2.state.internalReferences || [])
       )
-      .every((res) => res);
+    );
   }
 
   if (!datasourcesEqual) {
@@ -96,7 +95,7 @@ export const isLensEqual = (
 
 function injectDocFilterReferences(
   injectFilterReferences: FilterManager['inject'],
-  doc?: Document
+  doc?: LensDocument
 ) {
   if (!doc) return undefined;
   return {
