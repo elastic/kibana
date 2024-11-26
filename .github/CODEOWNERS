@@ -1238,8 +1238,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### Observability Plugins
 
 # Observability AI Assistant
-/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant
-/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
