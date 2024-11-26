@@ -20,6 +20,7 @@ export default createTestConfig({
   esServerArgs: ['xpack.ml.dfa.enabled=false'],
   kbnServerArgs: [
     '--xpack.dataUsage.enabled=true',
+    '--xpack.dataUsage.enableExperimental=[]',
     // dataUsage.autoops* config is set in kibana controller
     '--xpack.dataUsage.autoops.enabled=true',
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
