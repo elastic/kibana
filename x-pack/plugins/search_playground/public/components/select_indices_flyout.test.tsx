@@ -49,6 +49,7 @@ describe('SelectIndicesFlyout', () => {
     mockedUseQueryIndices.mockReturnValue({
       indices: ['index1', 'index2', 'index3'],
       isLoading: false,
+      isFetched: true,
     });
   });
 
