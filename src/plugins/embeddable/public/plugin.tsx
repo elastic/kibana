@@ -110,17 +110,6 @@ export interface EmbeddableSetup {
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
   /**
-   * @deprecated use {@link registerReactEmbeddableFactory} instead.
-   */
-  registerEmbeddableFactory: <
-    I extends EmbeddableInput,
-    O extends EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
-  >(
-    id: string,
-    factory: EmbeddableFactoryDefinition<I, O, E>
-  ) => () => EmbeddableFactory<I, O, E>;
-  /**
    * @deprecated
    */
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
@@ -195,7 +184,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerSavedObjectToPanelMethod,
       registerReactEmbeddableSavedObject,
 
-      registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
       setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
         if (this.customEmbeddableFactoryProvider) {
@@ -312,26 +300,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private getEmbeddableFactories = () => {
     this.ensureFactoriesExist();
     return this.embeddableFactories.values();
-  };
-
-  private registerEmbeddableFactory = <
-    I extends EmbeddableInput = EmbeddableInput,
-    O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
-  >(
-    embeddableFactoryId: string,
-    factory: EmbeddableFactoryDefinition<I, O, E>
-  ): (() => EmbeddableFactory<I, O, E>) => {
-    if (this.embeddableFactoryDefinitions.has(embeddableFactoryId)) {
-      throw new Error(
-        `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] already registered in Embeddables API.`
-      );
-    }
-    this.embeddableFactoryDefinitions.set(embeddableFactoryId, factory);
-
-    return () => {
-      return this.getEmbeddableFactory(embeddableFactoryId);
-    };
   };
 
   private getEmbeddableFactory = <
