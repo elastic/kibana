@@ -805,7 +805,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                         description: (
                           <span data-test-subj={item.testSubj}>
                             {item.description || (
-                              <EuiText color={euiTheme.colors.disabledText} size="s">
+                              <EuiText color={euiTheme.colors.textDisabled} size="s">
                                 <FormattedMessage
                                   id="xpack.security.accountManagement.userProfile.noneProvided"
                                   defaultMessage="None provided"

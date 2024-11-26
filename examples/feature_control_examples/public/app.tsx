@@ -52,7 +52,7 @@ export const MyPluginComponent: React.FC = () => {
         ).map(([capability, value]) => {
           return value === true ? (
             <div key={capability}>
-              <EuiHealth color="success">{capability}</EuiHealth>
+              <EuiHealth color="accentSecondary">{capability}</EuiHealth>
               <EuiSpacer />
             </div>
           ) : null;
