@@ -16,7 +16,7 @@ export function getDataTierFilterCombined({
   excludedDataTiers?: DataTier[];
 }): QueryDslQueryContainer | undefined {
   if (!filter) {
-    return excludedDataTiers.length > 0 ? excludeTiersQuery(excludedDataTiers)[0] : undefined;
+    return excludedDataTiers?.length ? excludeTiersQuery(excludedDataTiers)[0] : undefined;
   }
 
   return !excludedDataTiers
