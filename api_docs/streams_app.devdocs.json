@@ -1,0 +1,148 @@
+{
+  "id": "streamsApp",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "streamsApp",
+      "id": "def-public.StreamsAppPublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppPublicSetup",
+      "description": [],
+      "path": "x-pack/plugins/streams_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "streamsApp",
+      "id": "def-public.StreamsAppPublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppPublicStart",
+      "description": [],
+      "path": "x-pack/plugins/streams_app/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "streamsApp",
+      "id": "def-server.StreamsAppServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppServerSetup",
+      "description": [],
+      "path": "x-pack/plugins/streams_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "streamsApp",
+      "id": "def-server.StreamsAppServerStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "StreamsAppServerStart",
+      "description": [],
+      "path": "x-pack/plugins/streams_app/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-common.EntityTypeDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "EntityTypeDefinition",
+        "description": [],
+        "path": "x-pack/plugins/streams_app/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-common.EntityTypeDefinition.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [],
+            "path": "x-pack/plugins/streams_app/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-common.Entity",
+        "type": "Type",
+        "tags": [],
+        "label": "Entity",
+        "description": [],
+        "signature": [
+          "EntityBase & { type: \"stream\"; properties: { id: string; children: { id: string; condition?: ",
+          "Condition",
+          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "Condition",
+          "; }[]; }; }"
+        ],
+        "path": "x-pack/plugins/streams_app/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-common.StreamEntity",
+        "type": "Type",
+        "tags": [],
+        "label": "StreamEntity",
+        "description": [],
+        "signature": [
+          "EntityBase & { type: \"stream\"; properties: { id: string; children: { id: string; condition?: ",
+          "Condition",
+          "; }[]; fields: { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; name: string; }[]; processing: { config: { type: \"grok\"; field: string; patterns: string[]; pattern_definitions?: Record<string, string> | undefined; } | { type: \"dissect\"; field: string; pattern: string; }; condition?: ",
+          "Condition",
+          "; }[]; }; }"
+        ],
+        "path": "x-pack/plugins/streams_app/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
