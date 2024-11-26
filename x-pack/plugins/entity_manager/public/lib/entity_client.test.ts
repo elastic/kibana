@@ -39,7 +39,22 @@ describe('EntityClient', () => {
       };
 
       const result = entityClient.asKqlFilter(entityLatest);
-      expect(result).toEqual('service.name: my-service');
+      expect(result).toEqual('service.name: "my-service"');
+    });
+
+    it('should return the kql filter when an indentity field value contain special characters', () => {
+      const entityLatest: EntityInstance = {
+        entity: {
+          ...commonEntityFields.entity,
+          identity_fields: ['host.name', 'foo.bar'],
+        },
+        host: {
+          name: 'my-host:some-value:some-other-value',
+        },
+      };
+
+      const result = entityClient.asKqlFilter(entityLatest);
+      expect(result).toEqual('host.name: "my-host:some-value:some-other-value"');
     });
 
     it('should return the kql filter when indentity_fields is composed by multiple fields', () => {
@@ -56,7 +71,7 @@ describe('EntityClient', () => {
       };
 
       const result = entityClient.asKqlFilter(entityLatest);
-      expect(result).toEqual('(service.name: my-service AND service.environment: staging)');
+      expect(result).toEqual('(service.name: "my-service" AND service.environment: "staging")');
     });
 
     it('should ignore fields that are not present in the entity', () => {
@@ -71,7 +86,7 @@ describe('EntityClient', () => {
       };
 
       const result = entityClient.asKqlFilter(entityLatest);
-      expect(result).toEqual('host.name: my-host');
+      expect(result).toEqual('host.name: "my-host"');
     });
   });
 

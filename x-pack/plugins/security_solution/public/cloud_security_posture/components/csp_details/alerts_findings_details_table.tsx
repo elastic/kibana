@@ -60,7 +60,7 @@ interface AlertsDetailsFields {
 }
 
 export const AlertsDetailsTable = memo(
-  ({ fieldName, queryName }: { fieldName: 'host.name' | 'user.name'; queryName: string }) => {
+  ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -90,7 +90,7 @@ export const AlertsDetailsTable = memo(
     const { to, from } = useGlobalTime();
     const { signalIndexName } = useSignalIndex();
     const { data } = useQueryAlerts({
-      query: buildEntityAlertsQuery(fieldName, to, from, queryName, 500),
+      query: buildEntityAlertsQuery(field, to, from, value, 500),
       queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
       indexName: signalIndexName,
     });
@@ -216,11 +216,11 @@ export const AlertsDetailsTable = memo(
           [
             {
               title:
-                fieldName === 'host.name'
+                field === 'host.name'
                   ? OPEN_IN_ALERTS_TITLE_HOSTNAME
                   : OPEN_IN_ALERTS_TITLE_USERNAME,
-              selectedOptions: [queryName],
-              fieldName,
+              selectedOptions: [value],
+              fieldName: field,
             },
             {
               title: OPEN_IN_ALERTS_TITLE_STATUS,
@@ -230,7 +230,7 @@ export const AlertsDetailsTable = memo(
           ],
           true
         ),
-      [fieldName, openAlertsPageWithFilters, queryName]
+      [field, openAlertsPageWithFilters, value]
     );
 
     return (

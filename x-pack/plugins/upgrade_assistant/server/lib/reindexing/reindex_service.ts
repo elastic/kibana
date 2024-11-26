@@ -159,8 +159,9 @@ export const reindexServiceFactory = (
   // ------ Functions used to process the state machine
 
   /**
-   * Sets the original index as readonly so new data can be indexed until the reindex
-   * is completed.
+   * Sets a write-block on the original index. New data cannot be indexed until
+   * the reindex is completed; there will be downtime for indexing until the
+   * reindex is completed.
    * @param reindexOp
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
@@ -330,6 +331,9 @@ export const reindexServiceFactory = (
 
   /**
    * Creates an alias that points the old index to the new index, deletes the old index.
+   * If old index was closed, the new index will also be closed.
+   *
+   * @note indexing/writing to the new index is effectively enabled after this action!
    * @param reindexOp
    */
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
