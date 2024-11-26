@@ -7,4 +7,5 @@
 
 export * from './host';
 export * from './user';
+export * from './universal';
 export { getCommonUnitedFieldDefinitions } from './common';

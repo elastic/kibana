@@ -24,10 +24,7 @@ import {
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
-import {
-  getAvailableEntityTypes,
-  getUnitedEntityDefinitionVersion,
-} from '../united_entity_definitions';
+import { getAvailableEntityTypes } from '../united_entity_definitions';
 import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
 
 import { getEntitiesIndexName } from '../utils';
@@ -35,6 +32,7 @@ import {
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
 } from '../../../telemetry/event_based/events';
+import { VERSIONS_BY_ENTITY_TYPE } from '../united_entity_definitions/constants';
 
 const logFactory =
   (logger: Logger, taskId: string) =>
@@ -81,7 +79,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
     const [coreStart, _] = await getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const unitedDefinitionVersion = getUnitedEntityDefinitionVersion(entityType);
+    const unitedDefinitionVersion = VERSIONS_BY_ENTITY_TYPE[entityType];
 
     return executeFieldRetentionEnrichPolicy({
       unitedDefinition: { namespace, entityType, version: unitedDefinitionVersion },

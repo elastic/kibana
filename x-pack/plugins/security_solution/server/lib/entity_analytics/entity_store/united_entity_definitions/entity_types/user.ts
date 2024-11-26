@@ -6,6 +6,7 @@
  */
 import { collectValuesWithLength } from '../definition_utils';
 import type { UnitedDefinitionBuilder } from '../types';
+import { getCommonUnitedFieldDefinitions } from './common';
 
 export const USER_DEFINITION_VERSION = '1.0.0';
 export const getUserUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLength: number) => {
@@ -30,6 +31,7 @@ export const getUserUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLen
       collect({ field: 'user.hash' }),
       collect({ field: 'user.id' }),
       collect({ field: 'user.roles' }),
+      ...getCommonUnitedFieldDefinitions({ entityType: 'user', fieldHistoryLength }),
     ],
   };
 };

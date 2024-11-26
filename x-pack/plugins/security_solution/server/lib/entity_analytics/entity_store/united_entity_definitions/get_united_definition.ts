@@ -6,18 +6,15 @@
  */
 import { memoize } from 'lodash';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
-import {
-  getHostUnitedDefinition,
-  getUserUnitedDefinition,
-  getCommonUnitedFieldDefinitions,
-  USER_DEFINITION_VERSION,
-  HOST_DEFINITION_VERSION,
-} from './entity_types';
+import { getHostUnitedDefinition, getUserUnitedDefinition } from './entity_types';
 import type { UnitedDefinitionBuilder } from './types';
 import { UnitedEntityDefinition } from './united_entity_definition';
+import { getUniversalUnitedDefinition } from './entity_types/universal';
+
 const unitedDefinitionBuilders: Record<EntityType, UnitedDefinitionBuilder> = {
   host: getHostUnitedDefinition,
   user: getUserUnitedDefinition,
+  universal: getUniversalUnitedDefinition,
 };
 
 interface Options {
@@ -40,13 +37,6 @@ export const getUnitedEntityDefinition = memoize(
   }: Options): UnitedEntityDefinition => {
     const unitedDefinition = unitedDefinitionBuilders[entityType](fieldHistoryLength);
 
-    unitedDefinition.fields.push(
-      ...getCommonUnitedFieldDefinitions({
-        entityType,
-        fieldHistoryLength,
-      })
-    );
-
     return new UnitedEntityDefinition({
       ...unitedDefinition,
       namespace,
@@ -56,9 +46,6 @@ export const getUnitedEntityDefinition = memoize(
     });
   }
 );
-
-export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>
-  entityType === 'host' ? HOST_DEFINITION_VERSION : USER_DEFINITION_VERSION;
 
 export const getAvailableEntityTypes = (): EntityType[] =>
   Object.keys(unitedDefinitionBuilders) as EntityType[];

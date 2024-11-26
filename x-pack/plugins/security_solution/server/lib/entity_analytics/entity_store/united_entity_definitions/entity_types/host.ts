@@ -7,6 +7,7 @@
 
 import { collectValuesWithLength } from '../definition_utils';
 import type { UnitedDefinitionBuilder } from '../types';
+import { getCommonUnitedFieldDefinitions } from './common';
 
 export const HOST_DEFINITION_VERSION = '1.0.0';
 export const getHostUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLength: number) => {
@@ -39,6 +40,7 @@ export const getHostUnitedDefinition: UnitedDefinitionBuilder = (fieldHistoryLen
       collect({ field: 'host.mac' }),
       collect({ field: 'host.type' }),
       collect({ field: 'host.architecture' }),
+      ...getCommonUnitedFieldDefinitions({ entityType: 'host', fieldHistoryLength }),
     ],
   };
 };
