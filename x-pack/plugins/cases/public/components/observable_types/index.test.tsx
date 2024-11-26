@@ -12,6 +12,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import type { ObservableTypesProps } from '.';
 import { ObservableTypes } from '.';
+import { observableTypesMock } from '../../containers/mock';
 
 describe('ObservableTypes', () => {
   let appMock: AppMockRenderer;
@@ -30,8 +31,15 @@ describe('ObservableTypes', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly', async () => {
+  it('renders correctly when there are no observable types', async () => {
     appMock.render(<ObservableTypes {...props} />);
     expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+    expect(screen.queryByTestId('observable-types-list')).not.toBeInTheDocument();
+  });
+
+  it('renders correctly when there are observable types', async () => {
+    appMock.render(<ObservableTypes {...{ ...props, observableTypes: observableTypesMock }} />);
+    expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+    expect(await screen.findByTestId('observable-types-list')).toBeInTheDocument();
   });
 });
