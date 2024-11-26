@@ -1028,8 +1028,6 @@
       "@kbn/eventbus-example-plugin/*": ["examples/eventbus/*"],
       "@kbn/eventbus-slices": ["packages/eventbus-slices"],
       "@kbn/eventbus-slices/*": ["packages/eventbus-slices/*"],
-      "@kbn/eventbus-slices": ["packages/eventbus-slices"],
-      "@kbn/eventbus-slices/*": ["packages/eventbus-slices/*"],
       "@kbn/expandable-flyout": ["x-pack/solutions/security/packages/expandable-flyout"],
       "@kbn/expandable-flyout/*": ["x-pack/solutions/security/packages/expandable-flyout/*"],
       "@kbn/expect": ["src/platform/packages/shared/kbn-expect"],
