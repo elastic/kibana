@@ -378,34 +378,34 @@ GET _search
       });
     });
 
-    describe('Autocomplete shouldnt trigger within a comment block', () => {
+    describe('Autocomplete shouldnt trigger within', () => {
       beforeEach(async () => {
         await PageObjects.console.skipTourIfExists();
         await PageObjects.console.clearEditorText();
       });
 
-      it('shouldnt trigger with a hash comment', async () => {
+      it('a hash comment', async () => {
         await PageObjects.console.enterText(`# GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
 
         expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
 
-      it('shouldnt trigger with a simple double slash', async () => {
+      it('a simple double slash comment', async () => {
         await PageObjects.console.enterText(`// GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
 
         expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
 
-      it('shouldnt trigger with a single line block comment', async () => {
+      it('a single line block comment', async () => {
         await PageObjects.console.enterText(`/* GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
 
         expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
 
-      it('shouldnt trigger with a multi line block comment', async () => {
+      it('a multiline block comment', async () => {
         await PageObjects.console.enterText(`/*
           GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
