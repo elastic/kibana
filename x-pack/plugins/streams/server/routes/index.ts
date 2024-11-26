@@ -17,7 +17,7 @@ import { readStreamRoute } from './streams/read';
 import { resyncStreamsRoute } from './streams/resync';
 import { streamsStatusRoutes } from './streams/settings';
 
-export const StreamsRouteRepository = {
+export const streamsRouteRepository = {
   ...enableStreamsRoute,
   ...resyncStreamsRoute,
   ...forkStreamsRoute,
@@ -31,4 +31,4 @@ export const StreamsRouteRepository = {
   ...assetsRoutes,
 };
 
-export type StreamsRouteRepository = typeof StreamsRouteRepository;
+export type StreamsRouteRepository = typeof streamsRouteRepository;

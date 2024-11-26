@@ -16,8 +16,7 @@ import {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { StreamsRouteRepository } from './routes';
-import { RouteDependencies } from './routes/types';
+import { streamsRouteRepository } from './routes';
 import {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
@@ -64,8 +63,8 @@ export class StreamsPlugin
 
     const assetService = new AssetService(core, this.logger);
 
-    registerRoutes<RouteDependencies>({
-      repository: StreamsRouteRepository,
+    registerRoutes({
+      repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
         server: this.server,

@@ -50,6 +50,7 @@ export function registerRoutes({
         path: pathname,
         validate: passThroughValidationObject,
         options,
+        security: route.security,
       },
       async (context, request, response) => {
         try {

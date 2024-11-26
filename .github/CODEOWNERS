@@ -977,7 +977,7 @@ x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
 x-pack/plugins/stack_connectors @elastic/response-ops
 x-pack/plugins/streams @simianhacker @flash1293 @dgieselaar
-x-pack/plugins/streams_app @elastic/observability-ui
+x-pack/plugins/streams_app @simianhacker @flash1293 @dgieselaar
 x-pack/plugins/task_manager @elastic/response-ops
 x-pack/plugins/telemetry_collection_xpack @elastic/kibana-core
 x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations

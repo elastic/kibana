@@ -36,7 +36,7 @@ export interface RegisterRoutesDependencies {
 export function registerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
   registerServerRoutes({
     core,
-    dependencies,
+    dependencies: { dependencies },
     logger,
     repository,
   });
