@@ -24,7 +24,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 
 const createDates = (start: string, duration: number, isEnd?: boolean) => {
   const started = new Date(start);

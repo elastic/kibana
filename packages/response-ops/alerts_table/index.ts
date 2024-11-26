@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AlertsTable } from './components/alerts_table';
+export * from './components/alerts_table';

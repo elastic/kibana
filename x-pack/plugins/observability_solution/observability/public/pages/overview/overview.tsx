@@ -42,7 +42,7 @@ import {
   HasDataMap,
   appLabels,
 } from '../../context/has_data_context/has_data_context';
-import { AlertActions } from '../alerts/components/alert_actions';
+import { AlertActions } from '../../components/alert_actions/alert_actions';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';

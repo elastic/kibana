@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutProps } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
