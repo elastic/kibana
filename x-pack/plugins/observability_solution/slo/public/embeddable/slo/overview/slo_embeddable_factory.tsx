@@ -14,6 +14,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   fetch$,
+  getUnchangingComparator,
   initializeTitles,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -55,21 +56,15 @@ export const getOverviewEmbeddableFactory = ({
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const deps = { ...coreStart, ...pluginsStart };
-      async function onEdit() {
-        try {
-          const { openSloConfiguration } = await import('./slo_overview_open_configuration');
 
-          const result = await openSloConfiguration(
-            coreStart,
-            pluginsStart,
-            sloClient,
-            api.getSloGroupOverviewConfig()
-          );
-          api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
-        } catch (e) {
-          return Promise.reject();
-        }
-      }
+      const dynamicActionsApi = deps.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+        uuid,
+        () => titlesApi.panelTitle.getValue(),
+        state
+      );
+
+      const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const sloId$ = new BehaviorSubject(state.sloId);
@@ -83,14 +78,28 @@ export const getOverviewEmbeddableFactory = ({
       const api = buildApi(
         {
           ...titlesApi,
+          ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
+          supportedTriggers: () => [],
           defaultPanelTitle: defaultTitle$,
           getTypeDisplayName: () =>
             i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
               defaultMessage: 'criteria',
             }),
           isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
-          onEdit: async () => {
-            onEdit();
+          onEdit: async function onEdit() {
+            try {
+              const { openSloConfiguration } = await import('./slo_overview_open_configuration');
+
+              const result = await openSloConfiguration(
+                coreStart,
+                pluginsStart,
+                sloClient,
+                api.getSloGroupOverviewConfig()
+              );
+              api.updateSloGroupOverviewConfig(result as GroupSloCustomInput);
+            } catch (e) {
+              return Promise.reject();
+            }
           },
           serializeState: () => {
             return {
@@ -102,6 +111,7 @@ export const getOverviewEmbeddableFactory = ({
                 overviewMode: overviewMode$.getValue(),
                 groupFilters: groupFilters$.getValue(),
                 remoteName: remoteName$.getValue(),
+                ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
               },
             };
           },
@@ -126,6 +136,9 @@ export const getOverviewEmbeddableFactory = ({
           remoteName: [remoteName$, (value) => remoteName$.next(value)],
           overviewMode: [overviewMode$, (value) => overviewMode$.next(value)],
           ...titleComparators,
+          ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+            enhancements: getUnchangingComparator(),
+          }),
         }
       );
 
@@ -157,6 +170,7 @@ export const getOverviewEmbeddableFactory = ({
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
+              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
           const renderOverview = () => {
