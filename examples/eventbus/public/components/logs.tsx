@@ -26,13 +26,16 @@ export const Logs: FC = () => {
 
   const [data, setData] = useState<ESQLSearchResponse>();
   const esqlWithFilters = useMemo(() => {
-    const queryFields = [...selectedFields, 'message'];
-    return `${esql} | LIMIT 100 | KEEP ${queryFields.join(',')}`;
+    if (esql === '' || selectedFields.length === 0) return null;
+    return `${esql} | LIMIT 100 | KEEP ${selectedFields.join(',')}`;
   }, [esql, selectedFields]);
 
   // fetch data from ES
   useEffect(() => {
     const fetchData = async () => {
+      console.log('esqlWithFilters', esqlWithFilters);
+      if (esqlWithFilters === null) return;
+
       const resultCrossfilter = await getESQLResults({
         esqlQuery: esqlWithFilters,
         // filter,
@@ -44,11 +47,9 @@ export const Logs: FC = () => {
       setData(resultCrossfilter.response);
     };
 
-    if (esql !== '') {
-      fetchData();
-    }
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [esql, esqlWithFilters]);
+  }, [esqlWithFilters]);
 
   const { columns, rows } = useMemo(() => {
     if (data) {
@@ -67,7 +68,7 @@ export const Logs: FC = () => {
     return { columns: [], rows: [] };
   }, [data]);
 
-  const [pagination, setPagination] = useState({ pageIndex: 0 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 25 });
 
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 

@@ -44,6 +44,16 @@ export const eventBusExampleSlice = createSlice({
     setSelectedFields: (state: EventBusExampleState, action: PayloadAction<string[]>) => {
       state.selectedFields = action.payload;
     },
+    toggleSelectedFields: (state: EventBusExampleState, action: PayloadAction<string>) => {
+      const idx = state.selectedFields.indexOf(action.payload);
+      if (idx === -1) {
+        state.selectedFields.push(action.payload);
+      } else {
+        state.selectedFields.splice(idx, 1);
+      }
+      // sort fields
+      state.selectedFields.sort();
+    },
     setCrossfilter: (
       state: EventBusExampleState,
       action: PayloadAction<SetCrossfilterActionPayload>
