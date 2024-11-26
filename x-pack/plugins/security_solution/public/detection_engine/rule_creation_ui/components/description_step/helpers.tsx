@@ -499,8 +499,12 @@ export const buildThresholdDescription = (
     : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
         Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
       } >= ${threshold.value}`;
-  if (threshold.cardinality) {
-    thresholdDescription = `${thresholdDescription} ${i18n.THRESHOLD_CARDINALITY} ${threshold.cardinality.field} >= ${threshold.cardinality.value}`;
+  if (
+    threshold.cardinality &&
+    threshold.cardinality.value &&
+    threshold.cardinality.field.length > 0
+  ) {
+    thresholdDescription = `${thresholdDescription} ${i18n.THRESHOLD_CARDINALITY} ${threshold.cardinality.field[0]} >= ${threshold.cardinality.value}`;
   }
   return [
     {
