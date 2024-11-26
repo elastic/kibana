@@ -221,7 +221,7 @@ describe('licensing update', () => {
       expect(fetcher).toHaveBeenCalledTimes(expectedCallCount);
     };
 
-    it('fetcher has no calls innitially', async () => {
+    it('fetcher has no calls initially, async () => {
       expect(fetcher).not.toHaveBeenCalled();
     });
 
