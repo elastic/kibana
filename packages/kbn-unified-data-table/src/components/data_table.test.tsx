@@ -1454,6 +1454,6 @@ describe('UnifiedDataTable', () => {
       });
 
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
-    }, 10000);
+    });
   });
 });
