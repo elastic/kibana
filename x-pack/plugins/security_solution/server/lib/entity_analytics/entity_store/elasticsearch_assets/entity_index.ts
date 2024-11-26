@@ -6,8 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EntityStoreResource } from '../../../../../common/entity_analytics/entity_store/constants';
-import type { EngineComponentStatus, EntityType } from '../../../../../common/api/entity_analytics';
+import {
+  EngineComponentResourceEnum,
+  type EngineComponentStatus,
+  type EntityType,
+} from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 
@@ -53,5 +56,5 @@ export const getEntityIndexStatus = async ({
     }
   );
 
-  return { id: index, installed: exists, resource: EntityStoreResource.INDEX };
+  return { id: index, installed: exists, resource: EngineComponentResourceEnum.index };
 };

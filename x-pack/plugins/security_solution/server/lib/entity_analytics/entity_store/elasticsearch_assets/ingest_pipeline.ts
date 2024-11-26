@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
-import { EntityStoreResource } from '../../../../../common/entity_analytics/entity_store/constants';
+import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { type FieldRetentionDefinition } from '../field_retention_definition';
 import {
   debugDeepCopyContextStep,
@@ -183,6 +183,6 @@ export const getPlatformPipelineStatus = async ({
   return {
     id: pipelineId,
     installed: !!pipeline[pipelineId],
-    resource: EntityStoreResource.INGEST_PIPELINE,
+    resource: EngineComponentResourceEnum.ingest_pipeline,
   };
 };

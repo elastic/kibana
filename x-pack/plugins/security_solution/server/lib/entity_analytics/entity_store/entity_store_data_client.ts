@@ -31,9 +31,8 @@ import type {
   InitEntityStoreRequestBody,
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
-import { EntityStoreResource } from '../../../../common/entity_analytics/entity_store/constants';
 import type { AppClient } from '../../..';
-import { EntityType } from '../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum, EntityType } from '../../../../common/api/entity_analytics';
 import type {
   Entity,
   EngineDataviewUpdateResult,
@@ -42,6 +41,7 @@ import type {
   InspectQuery,
   ListEntityEnginesResponse,
   EngineComponentStatus,
+  EngineComponentResource,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
@@ -299,7 +299,7 @@ export class EntityStoreDataClient {
     this.log('info', entityType, `Initializing entity store`);
     this.audit(
       EntityEngineActions.INIT,
-      EntityStoreResource.ENTITY_ENGINE,
+      EngineComponentResourceEnum.entity_engine,
       entityType,
       'Initializing entity engine'
     );
@@ -428,7 +428,7 @@ export class EntityStoreDataClient {
 
       this.audit(
         EntityEngineActions.INIT,
-        EntityStoreResource.ENTITY_ENGINE,
+        EngineComponentResourceEnum.entity_engine,
         entityType,
         'Failed to initialize entity engine resources',
         err
@@ -460,7 +460,7 @@ export class EntityStoreDataClient {
         {
           id,
           installed: false,
-          resource: EntityStoreResource.ENTITY_DEFINITION,
+          resource: EngineComponentResourceEnum.entity_definition,
         },
       ];
     }
@@ -470,11 +470,11 @@ export class EntityStoreDataClient {
         {
           id: definition.id,
           installed: definition.state.installed,
-          resource: EntityStoreResource.ENTITY_DEFINITION,
+          resource: EngineComponentResourceEnum.entity_definition,
         },
         ...definition.state.components.transforms.map(({ installed, running, stats }) => ({
           id,
-          resource: EntityStoreResource.TRANSFORM,
+          resource: EngineComponentResourceEnum.transform,
           installed,
           errors: (stats?.health as TransformHealth)?.issues?.map(({ issue, details }) => ({
             title: issue,
@@ -482,13 +482,13 @@ export class EntityStoreDataClient {
           })),
         })),
         ...definition.state.components.ingestPipelines.map((pipeline) => ({
-          resource: EntityStoreResource.INGEST_PIPELINE,
+          resource: EngineComponentResourceEnum.ingest_pipeline,
           ...pipeline,
         })),
         ...definition.state.components.indexTemplates.map(({ installed }) => ({
           id,
           installed,
-          resource: EntityStoreResource.INDEX_TEMPLATE,
+          resource: EngineComponentResourceEnum.index_template,
         })),
       ];
     }
@@ -527,7 +527,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     this.audit(
       EntityEngineActions.START,
-      EntityStoreResource.ENTITY_DEFINITION,
+      EngineComponentResourceEnum.entity_definition,
       entityType,
       'Starting entity definition'
     );
@@ -554,7 +554,7 @@ export class EntityStoreDataClient {
     const fullEntityDefinition = await this.getExistingEntityDefinition(entityType);
     this.audit(
       EntityEngineActions.STOP,
-      EntityStoreResource.ENTITY_DEFINITION,
+      EngineComponentResourceEnum.entity_definition,
       entityType,
       'Stopping entity definition'
     );
@@ -597,7 +597,7 @@ export class EntityStoreDataClient {
     this.log('info', entityType, `Deleting entity store`);
     this.audit(
       EntityEngineActions.DELETE,
-      EntityStoreResource.ENTITY_ENGINE,
+      EngineComponentResourceEnum.entity_engine,
       entityType,
       'Deleting entity engine'
     );
@@ -665,7 +665,7 @@ export class EntityStoreDataClient {
 
       this.audit(
         EntityEngineActions.DELETE,
-        EntityStoreResource.ENTITY_ENGINE,
+        EngineComponentResourceEnum.entity_engine,
         entityType,
         'Failed to delete entity engine',
         err
@@ -812,7 +812,7 @@ export class EntityStoreDataClient {
 
   private audit(
     action: EntityEngineActions,
-    resource: EntityStoreResource,
+    resource: EngineComponentResource,
     entityType: EntityType,
     msg: string,
     error?: Error

@@ -6,8 +6,10 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EngineComponentStatus } from '../../../../../common/api/entity_analytics';
-import { EntityStoreResource } from '../../../../../common/entity_analytics/entity_store/constants';
+import {
+  EngineComponentResourceEnum,
+  type EngineComponentStatus,
+} from '../../../../../common/api/entity_analytics';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
 const getComponentTemplateName = (definitionId: string) => `${definitionId}-latest@platform`;
@@ -61,6 +63,6 @@ export const getEntityIndexComponentTemplateStatus = async ({
   return {
     id: name,
     installed: componentTemplate?.component_templates?.length > 0,
-    resource: EntityStoreResource.COMPONENT_TEMPLATE,
+    resource: EngineComponentResourceEnum.component_template,
   };
 };

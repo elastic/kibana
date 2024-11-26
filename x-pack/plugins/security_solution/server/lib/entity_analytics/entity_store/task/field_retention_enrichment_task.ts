@@ -13,8 +13,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EntityStoreResource } from '../../../../../common/entity_analytics/entity_store/constants';
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store';
+import {
+  EngineComponentResourceEnum,
+  type EntityType,
+} from '../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -290,7 +292,7 @@ export const getEntityStoreFieldRetentionEnrichTaskState = async ({
 
     return {
       id: taskState.id,
-      resource: EntityStoreResource.TASK,
+      resource: EngineComponentResourceEnum.task,
       installed: true,
       enabled: taskState.enabled,
       status: taskState.status,
@@ -304,7 +306,7 @@ export const getEntityStoreFieldRetentionEnrichTaskState = async ({
       return {
         id: taskId,
         installed: false,
-        resource: EntityStoreResource.TASK,
+        resource: EngineComponentResourceEnum.task,
       };
     }
     throw e;

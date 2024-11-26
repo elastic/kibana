@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EnrichPutPolicyRequest } from '@elastic/elasticsearch/lib/api/types';
-import { EntityStoreResource } from '../../../../../common/entity_analytics/entity_store/constants';
+import { EngineComponentResourceEnum } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
 import type { UnitedEntityDefinition } from '../united_entity_definitions';
 
@@ -121,6 +121,6 @@ export const getFieldRetentionEnrichPolicyStatus = async ({
   return {
     installed: policies.length > 0,
     id: name,
-    resource: EntityStoreResource.ENRICH_POLICY,
+    resource: EngineComponentResourceEnum.enrich_policy,
   };
 };

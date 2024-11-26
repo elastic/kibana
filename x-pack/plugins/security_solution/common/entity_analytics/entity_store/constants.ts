@@ -23,17 +23,3 @@ export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
 
 // The index pattern for the entity store has to support '.entities.v1.latest.noop' index
 export const ENTITY_STORE_INDEX_PATTERN = '.entities.v1.latest.*';
-
-export const EntityStoreResource = {
-  ENTITY_ENGINE: 'entity_engine',
-  ENTITY_DEFINITION: 'entity_definition',
-  INDEX: 'index',
-  COMPONENT_TEMPLATE: 'component_template',
-  INDEX_TEMPLATE: 'index_template',
-  INGEST_PIPELINE: 'ingest_pipeline',
-  ENRICH_POLICY: 'enrich_policy',
-  TASK: 'task',
-  TRANSFORM: 'transform',
-} as const;
-
-export type EntityStoreResource = (typeof EntityStoreResource)[keyof typeof EntityStoreResource];
