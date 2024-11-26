@@ -2018,6 +2018,15 @@ module.exports = {
         '@kbn/imports/no_group_crossing_imports': 'warn',
       },
     },
+    {
+      files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
+        // disabling it since package is marked as module and it requires extension for files written
+        '@kbn/imports/uniform_imports': 'off',
+      },
+    },
   ],
 };
 

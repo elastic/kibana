@@ -76,6 +76,14 @@ export const forkStreamsRoute = createServerRoute({
         params.body.stream.fields
       );
 
+      // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
+      await syncStream({
+        scopedClusterClient,
+        definition: childDefinition,
+        rootDefinition,
+        logger,
+      });
+
       rootDefinition.children.push({
         id: params.body.stream.id,
         condition: params.body.condition,
