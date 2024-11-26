@@ -9,17 +9,17 @@ import type { EntityType } from '../../../../../common/api/entity_analytics';
 import {
   getHostUnitedDefinition,
   getUserUnitedDefinition,
-  getCommonUnitedFieldDefinitions,
-  USER_DEFINITION_VERSION,
-  HOST_DEFINITION_VERSION,
   getServiceUnitedDefinition,
 } from './entity_types';
 import type { UnitedDefinitionBuilder } from './types';
 import { UnitedEntityDefinition } from './united_entity_definition';
+import { getUniversalUnitedDefinition } from './entity_types/universal';
+
 const unitedDefinitionBuilders: Record<EntityType, UnitedDefinitionBuilder> = {
   host: getHostUnitedDefinition,
   user: getUserUnitedDefinition,
   service: getServiceUnitedDefinition,
+  universal: getUniversalUnitedDefinition,
 };
 
 interface Options {
@@ -42,13 +42,6 @@ export const getUnitedEntityDefinition = memoize(
   }: Options): UnitedEntityDefinition => {
     const unitedDefinition = unitedDefinitionBuilders[entityType](fieldHistoryLength);
 
-    unitedDefinition.fields.push(
-      ...getCommonUnitedFieldDefinitions({
-        entityType,
-        fieldHistoryLength,
-      })
-    );
-
     return new UnitedEntityDefinition({
       ...unitedDefinition,
       namespace,
@@ -58,15 +51,6 @@ export const getUnitedEntityDefinition = memoize(
     });
   }
 );
-
-const versionByEntityType: Record<EntityType, string> = {
-  host: HOST_DEFINITION_VERSION,
-  user: USER_DEFINITION_VERSION,
-  service: USER_DEFINITION_VERSION,
-};
-
-export const getUnitedEntityDefinitionVersion = (entityType: EntityType): string =>
-  versionByEntityType[entityType];
 
 export const getAvailableEntityTypes = (): EntityType[] =>
   Object.keys(unitedDefinitionBuilders) as EntityType[];

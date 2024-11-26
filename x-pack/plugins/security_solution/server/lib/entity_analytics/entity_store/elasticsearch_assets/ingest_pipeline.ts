@@ -93,6 +93,11 @@ const buildIngestPipeline = ({
           },
         ]
       : []),
+    {
+      pipeline: {
+        name: 'entity_metadata_extractor_entity_store_poc',
+      },
+    },
   ];
 };
 
