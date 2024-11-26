@@ -8,14 +8,13 @@
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
+import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
 import '../../__mocks__/react_router';
 
 jest.mock('../react_router_helpers/link_events', () => ({
   letBrowserHandleEvent: jest.fn(),
 }));
-
-import { ClassicNavItem } from '../types';
 
 import { generateSideNavItems } from './classic_nav_helpers';
 

@@ -9,8 +9,7 @@
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { renderHook } from '@testing-library/react-hooks';
-import { act } from 'react-test-renderer';
+import { waitFor, renderHook, act } from '@testing-library/react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionContext } from '../../types';
@@ -491,7 +490,7 @@ describe('useStateProps', () => {
     `);
   });
 
-  it('should execute callbacks correctly', () => {
+  it('should execute callbacks correctly', async () => {
     const stateService = getStateService({ initialState });
     const { result } = renderHook(() =>
       useStateProps({
@@ -503,6 +502,21 @@ describe('useStateProps', () => {
         columns: undefined,
       })
     );
+
+    await waitFor(() =>
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          onTopPanelHeightChange: expect.any(Function),
+          onTimeIntervalChange: expect.any(Function),
+          onTotalHitsChange: expect.any(Function),
+          onChartHiddenChange: expect.any(Function),
+          onChartLoad: expect.any(Function),
+          onBreakdownFieldChange: expect.any(Function),
+          onSuggestionContextChange: expect.any(Function),
+        })
+      )
+    );
+
     const {
       onTopPanelHeightChange,
       onTimeIntervalChange,

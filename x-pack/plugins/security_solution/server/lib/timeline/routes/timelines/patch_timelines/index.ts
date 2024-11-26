@@ -73,13 +73,16 @@ export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
               timelineVersion: version,
             });
 
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: updatedTimeline,
-                },
-              },
-            });
+            if (updatedTimeline.code === 200) {
+              return response.ok({
+                body: updatedTimeline.timeline,
+              });
+            } else {
+              return siemResponse.error({
+                statusCode: updatedTimeline.code,
+                body: updatedTimeline.message,
+              });
+            }
           } else {
             const error = compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.update);
             return siemResponse.error(
