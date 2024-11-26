@@ -340,7 +340,7 @@
         "label": "allCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1157,7 +1157,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1430,7 +1430,7 @@
         "label": "shouldHandleLinkEvent",
         "description": [],
         "signature": [
-          "(e: React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => boolean"
+          "(e: React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>) => boolean"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_link_props.ts",
         "deprecated": false,
@@ -1444,7 +1444,7 @@
             "label": "e",
             "description": [],
             "signature": [
-              "React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>"
+              "React.MouseEvent<Element, MouseEvent> | React.MouseEvent<HTMLButtonElement | HTMLAnchorElement, MouseEvent>"
             ],
             "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_link_props.ts",
             "deprecated": false,
@@ -1718,6 +1718,69 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useControlPanels",
+        "type": "Function",
+        "tags": [],
+        "label": "useControlPanels",
+        "description": [],
+        "signature": [
+          "(controlPanelConfigs: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }) => void]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useControlPanels.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "controlPanelConfigs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useControlPanels.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2008,6 +2071,30 @@
           "InspectorContextValue"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/contexts/inspector/use_inspector_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useKibanaQuerySettings",
+        "type": "Function",
+        "tags": [],
+        "label": "useKibanaQuerySettings",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_kibana_query_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2336,6 +2423,179 @@
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_track_metric.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useUrlState",
+        "type": "Function",
+        "tags": [],
+        "label": "useUrlState",
+        "description": [],
+        "signature": [
+          "<State>({ defaultState, decodeUrlState, encodeUrlState, urlStateKey, writeDefaultState, }: { defaultState: State; decodeUrlState: (value: ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          },
+          " | undefined) => State | undefined; encodeUrlState: (value: State) => ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          },
+          " | undefined; urlStateKey: string; writeDefaultState?: boolean | undefined; }) => [State, (patch: State | ((prevState: State) => State) | undefined) => void]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useUrlState.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  defaultState,\n  decodeUrlState,\n  encodeUrlState,\n  urlStateKey,\n  writeDefaultState = false,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.defaultState",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultState",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.decodeUrlState",
+                "type": "Function",
+                "tags": [],
+                "label": "decodeUrlState",
+                "description": [],
+                "signature": [
+                  "(value: ",
+                  {
+                    "pluginId": "@kbn/rison",
+                    "scope": "common",
+                    "docId": "kibKbnRisonPluginApi",
+                    "section": "def-common.RisonValue",
+                    "text": "RisonValue"
+                  },
+                  " | undefined) => State | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.useUrlState.$1.decodeUrlState.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "value",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/rison",
+                        "scope": "common",
+                        "docId": "kibKbnRisonPluginApi",
+                        "section": "def-common.RisonValue",
+                        "text": "RisonValue"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.encodeUrlState",
+                "type": "Function",
+                "tags": [],
+                "label": "encodeUrlState",
+                "description": [],
+                "signature": [
+                  "(value: State) => ",
+                  {
+                    "pluginId": "@kbn/rison",
+                    "scope": "common",
+                    "docId": "kibKbnRisonPluginApi",
+                    "section": "def-common.RisonValue",
+                    "text": "RisonValue"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.useUrlState.$1.encodeUrlState.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "value",
+                    "description": [],
+                    "signature": [
+                      "State"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.urlStateKey",
+                "type": "string",
+                "tags": [],
+                "label": "urlStateKey",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.writeDefaultState",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "writeDefaultState",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3512,9 +3772,24 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCases\""
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.ControlPanels",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlPanels",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3597,7 +3872,7 @@
         "signature": [
           "Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -3666,7 +3941,7 @@
           "ObservabilityPageTemplateDependencies",
           ", \"isSidebarEnabled$\"> & Pick<",
           "KibanaPageTemplateProps",
-          ", \"children\" | \"data-test-subj\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
+          ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
@@ -6659,7 +6934,7 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCases\""
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
         "deprecated": false,

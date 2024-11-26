@@ -73,7 +73,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(JSON.parse(goodPkgInfoResponse.text).item.status).to.be('installed');
       expect(JSON.parse(goodPkgInfoResponse.text).item.version).to.be('0.1.0');
       const latestInstallFailedAttempts =
-        goodPkgInfoResponse.body.item.savedObject.attributes.latest_install_failed_attempts;
+        goodPkgInfoResponse.body.item.installationInfo.latest_install_failed_attempts;
       expect(latestInstallFailedAttempts).to.have.length(1);
       expect(latestInstallFailedAttempts[0].target_version).to.be('0.2.0');
       expect(latestInstallFailedAttempts[0].error.message).to.contain(
@@ -90,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
       expect(JSON.parse(goodPkgInfoResponse.text).item.status).to.be('installed');
       expect(JSON.parse(goodPkgInfoResponse.text).item.version).to.be('0.3.0');
       const latestInstallFailedAttempts =
-        goodPkgInfoResponse.body.item.savedObject.attributes.latest_install_failed_attempts;
+        goodPkgInfoResponse.body.item.installationInfo.latest_install_failed_attempts;
       expect(latestInstallFailedAttempts).to.have.length(0);
     });
   });

@@ -16,7 +16,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { createAddChangePointChartAction } from './create_change_point_chart';
 import { createOpenChangePointInMlAppAction } from './open_change_point_ml';
 import type { AiopsPluginStartDeps } from '../types';
-import { createCategorizeFieldAction } from '../components/log_categorization';
+import { createCategorizeFieldAction } from '../components/log_categorization/categorize_field_actions';
 import { createAddPatternAnalysisEmbeddableAction } from './create_pattern_analysis_action';
 import { createAddLogRateAnalysisEmbeddableAction } from './create_log_rate_analysis_actions';
 

@@ -40,6 +40,13 @@ export function initUpdateObjectsSpacesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_update_objects_spaces',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route delegates authorization to the spaces service via a scoped spaces client',
+        },
+      },
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: `Update saved objects in spaces`,

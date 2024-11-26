@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks/dom';
+import { renderHook, act } from '@testing-library/react';
 import { useNavigateVulnerabilities, useNavigateFindings } from './use_navigate_findings';
 import { useHistory } from 'react-router-dom';
 

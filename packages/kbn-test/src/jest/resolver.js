@@ -58,6 +58,13 @@ module.exports = (request, options) => {
     });
   }
 
+  // This is a workaround to run tests with React 17 and the latest @testing-library/react
+  // This will be removed once we upgrade to React 18 and start transitioning to the Concurrent Mode
+  // Tracking issue to clean this up https://github.com/elastic/kibana/issues/199100
+  if (request === 'react-dom/client') {
+    return Path.resolve(__dirname, 'mocks/react_dom_client_mock.ts');
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }

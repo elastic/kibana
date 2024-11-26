@@ -73,7 +73,7 @@ export const CorrelationsOverview: React.FC = () => {
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
   useEffect(() => {
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase) {
+    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
       goToCorrelationsTab();
     }
   }, [activeStep, goToCorrelationsTab, isTourShown]);

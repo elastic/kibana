@@ -14,11 +14,12 @@ import {
 } from '../../../../screens/rule_details';
 
 import {
-  ALERT_SUPPRESSION_DURATION_INPUT,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
   ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
   ALERT_SUPPRESSION_FIELDS,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
 } from '../../../../screens/create_new_rule';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -54,7 +55,7 @@ describe(
         editFirstRule();
 
         // suppression fields are hidden since threshold fields used for suppression
-        cy.get(ALERT_SUPPRESSION_FIELDS).should('not.be.visible');
+        cy.get(ALERT_SUPPRESSION_FIELDS).should('not.exist');
 
         enablesAndPopulatesThresholdSuppression(60, 'm');
 
@@ -89,12 +90,10 @@ describe(
 
         // ensures enable suppression checkbox is checked and suppression options displayed correctly
         cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.enabled').should('be.checked');
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(0)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
           .should('be.enabled')
           .should('have.value', 360);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 's');
 

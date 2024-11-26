@@ -45,7 +45,7 @@ export function getSystemMessageFromInstructions({
 
   const adHocInstructionsWithId = adHocInstructions.map((adHocInstruction) => ({
     ...adHocInstruction,
-    doc_id: adHocInstruction?.doc_id ?? v4(),
+    id: adHocInstruction?.id ?? v4(),
   }));
 
   // split ad hoc instructions into user instructions and application instructions
@@ -55,15 +55,16 @@ export function getSystemMessageFromInstructions({
   );
 
   // all adhoc instructions and KB instructions.
-  // adhoc instructions will be prioritized over Knowledge Base instructions if the doc_id is the same
+  // adhoc instructions will be prioritized over Knowledge Base instructions if the id is the same
   const allUserInstructions = withTokenBudget(
-    uniqBy([...adHocUserInstructions, ...kbUserInstructions], (i) => i.doc_id),
+    uniqBy([...adHocUserInstructions, ...kbUserInstructions], (i) => i.id),
     1000
   );
 
   return [
     // application instructions
-    ...allApplicationInstructions.concat(adHocApplicationInstructions),
+    ...allApplicationInstructions,
+    ...adHocApplicationInstructions,
 
     // user instructions
     ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),

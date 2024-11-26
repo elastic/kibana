@@ -148,6 +148,9 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | Creating trained model.
 | `failure` | Failed to create trained model.
 
+.1+| `product_documentation_create`
+| `unknown` | User requested to install the product documentation for use in AI Assistants.
+
 3+a|
 ====== Type: change
 
@@ -334,6 +337,9 @@ Refer to the corresponding {es} logs for potential write errors.
 | `success` | Updating trained model deployment.
 | `failure` | Failed to update trained model deployment.
 
+.1+| `product_documentation_update`
+| `unknown` | User requested to update the product documentation for use in AI Assistants.
+
 3+a|
 ====== Type: deletion
 
@@ -424,6 +430,9 @@ Refer to the corresponding {es} logs for potential write errors.
 .2+| `ml_delete_trained_model`
 | `success` | Deleting trained model.
 | `failure` | Failed to delete trained model.
+
+.1+| `product_documentation_delete`
+| `unknown` | User requested to delete the product documentation for use in AI Assistants.
 
 3+a|
 ====== Type: access

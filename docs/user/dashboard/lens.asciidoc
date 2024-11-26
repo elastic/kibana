@@ -96,13 +96,37 @@ All columns that belong to the same layer pane group are sorted in the table.
 
 * *Text alignment* &mdash; Aligns the values in the cell to the *Left*, *Center*, or *Right*.
 
+* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click the *Edit colors* icon. 
+
 * *Hide column* &mdash; Hides the column for the field.
 
 * *Directly filter on click* &mdash; Turns column values into clickable links that allow you to filter or drill down into the data.
 
 * *Summary row* &mdash; Adds a row that displays the summary value. When specified, allows you to enter a *Summary label*.
 
-* *Color by value* &mdash; Applies color to the cell or text values. To change the color, click *Edit*. 
+[float]
+[[assign-colors-to-terms]]
+===== Assign colors to terms
+
+preview::[]
+
+For term-based metrics, assign a color to each term with color mapping. 
+
+. Create a custom table.
+ 
+. In the layer pane, select a *Rows* or *Metrics* field. 
+
+. In the *Color by value* option, select *Cell* or *Text*.
+
+. Click the *Edit colors* icon.
+
+. Toggle the button to use the Color Mapping feature.
+
+. Select a color palette and mode.
+
+. Click *Add assignment* to assign a color to a specific term, or click *Add all unassigned terms* to assign colors to all terms. Assigning colors to dates is unsupported.
+
+. Configure color assignments. You can also select whether unassigned terms should be mapped to the selected color palette or a single color. 
 
 [float]
 [[drag-and-drop-keyboard-navigation]]

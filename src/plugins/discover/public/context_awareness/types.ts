@@ -20,10 +20,11 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { PropsWithChildren, ReactElement } from 'react';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
-import { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 
 /**
  * Supports extending the Discover app menu
@@ -256,6 +257,14 @@ export interface Profile {
   /**
    * Lifecycle
    */
+
+  /**
+   * Render a custom wrapper component around the Discover application,
+   * e.g. to allow using profile specific context providers
+   * @param props The app wrapper props
+   * @returns The custom app wrapper component
+   */
+  getRenderAppWrapper: (props: PropsWithChildren<{}>) => ReactElement;
 
   /**
    * Gets default Discover app state that should be used when the profile is resolved

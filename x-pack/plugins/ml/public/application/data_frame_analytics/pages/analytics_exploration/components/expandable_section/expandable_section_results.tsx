@@ -337,7 +337,12 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             anchorPosition="upCenter"
             button={
               <EuiButtonIcon
-                aria-label="Show actions"
+                aria-label={i18n.translate(
+                  'xpack.ml.dataframe.analytics.exploration.dataGridActions.showActionsAriaLabel',
+                  {
+                    defaultMessage: 'Show actions',
+                  }
+                )}
                 iconType="gear"
                 color="text"
                 onClick={() => setIsPopoverVisible(!isPopoverVisible)}

@@ -14,7 +14,7 @@ import { withPackageSpan } from '../../utils';
 
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
-import { MANIFEST_NAME } from '../../../archive/parse';
+import { isKibanaAssetType } from '../../../kibana/assets/install';
 
 export async function stepSaveArchiveEntries(context: InstallContext) {
   const { packageInstallContext, savedObjectsClient, installSource, useStreaming } = context;
@@ -28,7 +28,8 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
   if (useStreaming) {
     assetsMap = new Map();
     await archiveIterator.traverseEntries(async (entry) => {
-      if (entry.path.endsWith(MANIFEST_NAME)) {
+      // Skip only kibana assets type
+      if (!isKibanaAssetType(entry.path)) {
         assetsMap.set(entry.path, entry.buffer);
       }
     });

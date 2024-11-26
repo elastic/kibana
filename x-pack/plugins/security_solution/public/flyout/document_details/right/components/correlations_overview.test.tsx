@@ -127,7 +127,7 @@ describe('<CorrelationsOverview />', () => {
     jest.mocked(useTourContext).mockReturnValue({
       hidden: false,
       setAllTourStepsHidden: jest.fn(),
-      activeStep: AlertsCasesTourSteps.viewCase,
+      activeStep: AlertsCasesTourSteps.submitCase,
       endTourStep: jest.fn(),
       incrementStep: jest.fn(),
       isTourShown: jest.fn(),

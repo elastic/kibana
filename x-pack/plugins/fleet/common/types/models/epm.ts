@@ -311,6 +311,7 @@ export type RegistrySearchResult = Pick<
   | 'icons'
   | 'internal'
   | 'data_streams'
+  | 'policy_templates_behavior'
   | 'policy_templates'
   | 'categories'
 >;
@@ -546,8 +547,8 @@ export type PackageList = PackageListItem[];
 export type PackageListItem = Installable<RegistrySearchResult> & {
   id: string;
   integration?: string;
-  installationInfo?: InstallationInfo;
   savedObject?: InstallableSavedObject;
+  installationInfo?: InstallationInfo;
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =

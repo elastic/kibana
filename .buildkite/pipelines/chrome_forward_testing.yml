@@ -20,9 +20,9 @@ steps:
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh
-    label: Build Kibana Distribution and Plugins
+    label: Build Kibana Distribution
     agents:
-      machineType: n2-standard-16
+      machineType: n2-standard-8
       preemptible: true
     key: build
     timeout_in_minutes: 60

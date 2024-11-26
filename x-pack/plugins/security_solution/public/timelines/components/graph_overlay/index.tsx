@@ -29,12 +29,12 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import { isFullScreen } from '../timeline/body/column_headers';
 import { inputsActions } from '../../../common/store/actions';
 import { Resolver } from '../../../resolver/view';
 import { useTimelineDataFilters } from '../../containers/use_timeline_data_filters';
 import { timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
+import { isFullScreen } from '../timeline/helpers';
 
 const SESSION_VIEW_FULL_SCREEN = 'sessionViewFullScreen';
 

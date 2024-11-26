@@ -39,6 +39,7 @@ const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
  * This function takes the current space's disabled features and the space solution and returns
  * the updated array of disabled features.
  *
+ * @param features The list of all Kibana registered features.
  * @param spaceDisabledFeatures The current space's disabled features
  * @param spaceSolution The current space's solution (es, oblt, security or classic)
  * @returns The updated array of disabled features
@@ -61,7 +62,6 @@ export function withSpaceSolutionDisabledFeatures(
     ]).filter((featureId) => !enabledFeaturesPerSolution.es.includes(featureId));
   } else if (spaceSolution === 'oblt') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
-      'enterpriseSearch',
       'securitySolution',
     ]).filter((featureId) => !enabledFeaturesPerSolution.oblt.includes(featureId));
   } else if (spaceSolution === 'security') {

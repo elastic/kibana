@@ -22,13 +22,14 @@ export interface IsDisabledResult {
 }
 
 export const checkActionTypeEnabled = (
-  actionType?: ActionType
+  actionType?: ActionType,
+  isPreconfiguredConnector: boolean = false
 ): IsEnabledResult | IsDisabledResult => {
   if (actionType?.enabledInLicense === false) {
     return getLicenseCheckResult(actionType);
   }
 
-  if (actionType?.enabledInConfig === false) {
+  if (actionType?.enabledInConfig === false && isPreconfiguredConnector === false) {
     return configurationCheckResult;
   }
 

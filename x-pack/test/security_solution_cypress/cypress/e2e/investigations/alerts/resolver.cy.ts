@@ -18,7 +18,7 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-describe.skip('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
+describe('Analyze events view for alerts', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
     createRule(getNewRule());
