@@ -68,15 +68,6 @@ const streamsAppRoutes = {
               }),
             }),
           },
-          '/{key}/{tab}/{subtab}': {
-            element: <StreamDetailView />,
-            params: t.type({
-              path: t.type({
-                tab: t.string,
-                subtab: t.string,
-              }),
-            }),
-          },
         },
       },
       '/': {
