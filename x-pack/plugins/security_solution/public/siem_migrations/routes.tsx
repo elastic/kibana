@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SIEM_MIGRATIONS_RULES_PATH, SecurityPageName } from '../../common/constants';
@@ -17,7 +18,9 @@ export const RulesRoutes = () => {
   return (
     <PluginTemplateWrapper>
       <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsRules}>
-        <RulesPage />
+        <Routes>
+          <Route path={`${SIEM_MIGRATIONS_RULES_PATH}/:migrationId?`} component={RulesPage} />
+        </Routes>
       </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>
   );
