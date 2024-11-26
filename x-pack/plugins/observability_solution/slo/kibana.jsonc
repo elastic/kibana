@@ -39,7 +39,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
-      "usageCollection",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
@@ -47,6 +47,7 @@
       "observabilityAIAssistant",
       "serverless",
       "spaces",
+      "security"
     ],
     "requiredBundles": [
       "controls",
@@ -54,7 +55,7 @@
       "ingestPipelines",
       "kibanaReact",
       "kibanaUtils",
-      "unifiedSearch",
+      "unifiedSearch"
     ]
   }
 }
