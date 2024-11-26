@@ -32,6 +32,8 @@ const UPTIME_RULE_TYPES = [
   'xpack.uptime.alerts.durationAnomaly',
 ];
 
+export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+
 const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
@@ -61,6 +63,7 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
         defaultMessage: 'Can manage private locations',
       }),
       includeIn: 'all',
+      api: [PRIVATE_LOCATION_WRITE_API],
       savedObject: {
         all: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
         read: [],

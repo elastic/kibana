@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
-import { validatePrivateLocationPermissions } from '../../monitor_cruds/edit_monitor';
+import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
 import { getMonitorsByLocation } from './get_location_monitors';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
@@ -26,16 +26,12 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       }),
     },
   },
+  requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
     const { savedObjectsClient, syntheticsMonitorClient, request, response, server } = routeContext;
     const internalSOClient = server.coreStart.savedObjects.createInternalRepository();
 
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
-
-    const error = await validatePrivateLocationPermissions(routeContext);
-    if (error) {
-      return response.forbidden({ body: { message: error } });
-    }
 
     const { locationId } = request.params as { locationId: string };
 

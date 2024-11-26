@@ -320,13 +320,6 @@ export const validatePermissions = async (
   }
 };
 
-export const validatePrivateLocationPermissions = async (routeContext: RouteContext) => {
-  const { canManagePrivateLocations } = await validateLocationPermissions(routeContext);
-  if (!canManagePrivateLocations) {
-    return NO_MANAGE_PRIVATE_LOCATIONS;
-  }
-};
-
 export const validateLocationPermissions = async ({ server, request }: RouteContext) => {
   const uptimeFeature = await server.coreStart?.capabilities.resolveCapabilities(request, {
     capabilityPath: 'uptime.*',
