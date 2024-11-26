@@ -7,11 +7,12 @@
 
 import Boom from '@hapi/boom';
 import type { CustomFieldValue } from '../../common/types/domain';
+import { CasesCustomFieldMappingType } from './types';
 
 export const getCasesNumberCustomField = () => ({
   isFilterable: false,
   isSortable: false,
-  savedObjectMappingType: 'long',
+  savedObjectMappingType: CasesCustomFieldMappingType.LONG,
   validateFilteringValues: (values: CustomFieldValue[]) => {
     values.forEach((value) => {
       if (value !== null && !Number.isSafeInteger(value)) {

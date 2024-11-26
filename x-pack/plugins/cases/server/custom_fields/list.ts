@@ -8,11 +8,12 @@
 import Boom from '@hapi/boom';
 import { isString } from 'lodash';
 import type { CustomFieldValue } from '../../common/types/domain';
+import { CasesCustomFieldMappingType } from './types';
 
 export const getCasesListCustomField = () => ({
   isFilterable: true,
   isSortable: false,
-  savedObjectMappingType: 'string',
+  savedObjectMappingType: CasesCustomFieldMappingType.LIST_OPTION,
   validateFilteringValues: (values: CustomFieldValue[]) => {
     values.forEach((value) => {
       if (value !== null && !isString(value)) {

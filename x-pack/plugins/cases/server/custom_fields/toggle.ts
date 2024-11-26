@@ -8,11 +8,12 @@
 import Boom from '@hapi/boom';
 import { isBoolean } from 'lodash';
 import type { CustomFieldValue } from '../../common/types/domain';
+import { CasesCustomFieldMappingType } from './types';
 
 export const getCasesToggleCustomField = () => ({
   isFilterable: true,
   isSortable: false,
-  savedObjectMappingType: 'boolean',
+  savedObjectMappingType: CasesCustomFieldMappingType.BOOLEAN,
   validateFilteringValues: (values: CustomFieldValue[]) => {
     values.forEach((value) => {
       if (value !== null && !isBoolean(value)) {

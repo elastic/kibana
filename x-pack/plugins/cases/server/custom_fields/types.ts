@@ -7,10 +7,17 @@
 
 import type { CustomFieldTypes, CustomFieldValue } from '../../common/types/domain';
 
+export enum CasesCustomFieldMappingType {
+  TEXT = 'text',
+  LONG = 'long',
+  BOOLEAN = 'boolean',
+  LIST_OPTION = 'list-option',
+}
+
 export interface ICasesCustomField {
   isFilterable: boolean;
   isSortable: boolean;
-  savedObjectMappingType: string;
+  savedObjectMappingType: CasesCustomFieldMappingType;
   validateFilteringValues: (values: CustomFieldValue[]) => void;
   getDefaultValue?: () => CustomFieldValue;
 }

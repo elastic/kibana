@@ -42,7 +42,7 @@ import type {
 } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import { throwErrors } from '../../common/api';
-import type { CaseUI, CaseUICustomField, FilterOptions, UpdateByKey } from './types';
+import type { CaseUI, FilterOptions, UpdateByKey } from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
 
@@ -182,7 +182,7 @@ export const constructCustomFieldsFilter = (
   }
 
   const valuesByCustomFieldKey: {
-    [key in string]: Array<CustomFieldFactoryFilterOption<CaseUICustomField>['value']>;
+    [key in string]: Array<CustomFieldFactoryFilterOption['value']>;
   } = {};
 
   for (const [customFieldKey, customField] of Object.entries(optionKeysByCustomFieldKey)) {
@@ -198,9 +198,7 @@ export const constructCustomFieldsFilter = (
           );
           return filterOptionConfig ? filterOptionConfig.value : undefined;
         })
-        .filter((option) => option !== undefined) as Array<
-        CustomFieldFactoryFilterOption<CaseUICustomField>['value']
-      >;
+        .filter((option) => option !== undefined) as Array<CustomFieldFactoryFilterOption['value']>;
 
       if (values.length > 0) {
         valuesByCustomFieldKey[customFieldKey] = values;

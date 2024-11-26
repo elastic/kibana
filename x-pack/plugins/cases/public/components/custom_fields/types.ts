@@ -36,10 +36,10 @@ export interface CustomFieldType<T extends CaseUICustomField, I = CasesConfigura
   }>;
 }
 
-export interface CustomFieldFactoryFilterOption<T extends CaseUICustomField> {
+export interface CustomFieldFactoryFilterOption {
   key: string;
   label: string;
-  value: T['value'];
+  value: string | boolean | null;
 }
 
 export type CustomFieldEuiTableColumn<T> = Pick<
@@ -57,7 +57,7 @@ export type CustomFieldFactory<
   label: string;
   getEuiTableColumn: (params: I) => CustomFieldEuiTableColumn<T>;
   build: () => CustomFieldType<T, I>;
-  getFilterOptions?: (configuration: I) => Array<CustomFieldFactoryFilterOption<T>>;
+  getFilterOptions?: (configuration: I) => CustomFieldFactoryFilterOption[];
   getDefaultValue?: () => T['value'];
   convertNullToEmpty?: (value: T['value']) => string;
   convertValueToDisplayText?: (value: T['value'], configuration: I) => string;
