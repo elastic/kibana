@@ -248,7 +248,6 @@ export function OverviewPage() {
               id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
               consumers={observabilityAlertFeatureIds}
-              hideLazyLoader
               query={esQuery}
               initialPageSize={ALERTS_PER_PAGE}
               columns={tableColumns}

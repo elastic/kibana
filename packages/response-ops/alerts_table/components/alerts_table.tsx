@@ -48,6 +48,7 @@ import deepEqual from 'fast-deep-equal';
 import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/constants';
+import { defaultAlertsTableColumns } from '../configuration';
 import { Storage } from '../utils/storage';
 import { queryKeys } from '../constants';
 import { AlertsDataGrid } from './alerts_data_grid';
@@ -184,7 +185,7 @@ const AlertsTableContent = typedForwardRef(
       leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
       trailingControlColumns,
       rowHeightsOptions,
-      columns: initialColumns,
+      columns: initialColumns = defaultAlertsTableColumns,
       gridStyle,
       browserFields: propBrowserFields,
       onUpdate,

@@ -22,10 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
-import {
-  defaultAlertsTableColumns,
-  defaultAlertsTableSort,
-} from '@kbn/response-ops-alerts-table/configuration';
+import { defaultAlertsTableSort } from '@kbn/response-ops-alerts-table/configuration';
 import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
 import { renderCellValue } from '@kbn/response-ops-alerts-table/components/render_cell_value';
 import { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
@@ -264,7 +261,6 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             query={esQuery}
             initialSort={defaultAlertsTableSort}
             showAlertStatusWithFlapping
-            columns={defaultAlertsTableColumns}
             initialPageSize={20}
             renderCellValue={renderCellValue}
             renderActionsCell={AlertActionsCell}
