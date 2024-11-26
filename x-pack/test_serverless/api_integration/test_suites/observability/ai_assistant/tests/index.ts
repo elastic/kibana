@@ -13,7 +13,7 @@ const cwd = path.join(__dirname);
 export default function observabilityAIAssistantApiIntegrationTests({
   loadTestFile,
 }: FtrProviderContext) {
-  describe('Observability AI Assistant API tests', function () {
+  describe('Observability AI Assistant Serverless API tests', function () {
     const filePattern = '**/*.spec.ts';
     const tests = globby.sync(filePattern, { cwd });
 

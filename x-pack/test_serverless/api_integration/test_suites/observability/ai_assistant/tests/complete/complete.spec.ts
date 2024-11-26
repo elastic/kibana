@@ -42,8 +42,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  const COMPLETE_API_URL = `/internal/observability_ai_assistant/chat/complete`;
-
   const messages: Message[] = [
     {
       '@timestamp': new Date().toISOString(),
@@ -83,7 +81,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
       const responsePromise = new Promise<Response>((resolve, reject) => {
         supertestWithoutAuth
-          .post(COMPLETE_API_URL)
+          .post(`/internal/observability_ai_assistant/chat/complete`)
           .set(roleAuthc.apiKeyHeader)
           .set(internalReqHeader)
           .send({
@@ -156,7 +154,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const passThrough = new PassThrough();
 
       supertestWithoutAuth
-        .post(COMPLETE_API_URL)
+        .post(`/internal/observability_ai_assistant/chat/complete`)
         .set(roleAuthc.apiKeyHeader)
         .set(internalReqHeader)
         .send({
@@ -226,6 +224,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             role: MessageRole.User,
             name: 'context',
             content: JSON.stringify({ screen_description: '', learnings: [] }),
+            data: JSON.stringify({ scores: [], suggestions: [] }),
           },
         },
       });
@@ -252,6 +251,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       });
     });
+
     describe('when creating a new conversation', () => {
       let events: StreamingChatResponseEvent[];
 
