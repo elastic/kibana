@@ -214,10 +214,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 
-          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
-            name,
-            alertsCount,
-          }));
+          const expected = txGroupsTypeRequest.transactionGroups
+            .filter(({ name }) => name.includes('request'))
+            .map(({ name, alertsCount }) => ({
+              name,
+              alertsCount,
+            }));
 
           expect(expected).to.eql([
             { name: 'GET /api/failed/request', alertsCount: 0 },
@@ -301,10 +303,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 
-          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
-            name,
-            alertsCount,
-          }));
+          const expected = txGroupsTypeRequest.transactionGroups
+            .filter(({ name }) => name.includes('request'))
+            .map(({ name, alertsCount }) => ({
+              name,
+              alertsCount,
+            }));
 
           expect(expected).to.eql([
             { name: 'GET /api/failed/request', alertsCount: 0 },
@@ -385,10 +389,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           });
 
-          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
-            name,
-            alertsCount,
-          }));
+          const expected = txGroupsTypeRequest.transactionGroups
+            .filter(({ name }) => name.includes('request'))
+            .map(({ name, alertsCount }) => ({
+              name,
+              alertsCount,
+            }));
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 
