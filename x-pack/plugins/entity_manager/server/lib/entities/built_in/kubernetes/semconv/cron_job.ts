@@ -30,5 +30,12 @@ export const builtInKubernetesCronJobSemConvEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: commonOtelMetadata,
+    metadata: [
+      ...commonOtelMetadata,
+      {
+        source: 'k8s.cronjob.name',
+        destination: 'k8s.cronjob.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });

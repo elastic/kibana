@@ -22,7 +22,7 @@ export const builtInKubernetesNodeSemConvEntityDefinition: EntityDefinition =
     type: 'k8s.node.otel',
     indexPatterns: commonOtelIndexPatterns,
     identityFields: ['k8s.node.uid'],
-    displayNameTemplate: '{{k8s.node.uid}}',
+    displayNameTemplate: '{{k8s.node.name}}',
     latest: {
       timestampField: '@timestamp',
       lookbackPeriod: '10m',
@@ -30,5 +30,12 @@ export const builtInKubernetesNodeSemConvEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: commonOtelMetadata,
+    metadata: [
+      ...commonOtelMetadata,
+      {
+        source: 'k8s.node.name',
+        destination: 'k8s.node.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });

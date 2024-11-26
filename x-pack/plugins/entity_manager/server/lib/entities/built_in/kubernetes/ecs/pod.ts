@@ -21,7 +21,7 @@ export const builtInKubernetesPodEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes pod entities from the Kubernetes integration data streams',
     type: 'k8s.pod.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.pod.name'],
+    identityFields: ['kubernetes.pod.uid'],
     displayNameTemplate: '{{kubernetes.pod.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -30,5 +30,12 @@ export const builtInKubernetesPodEcsEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: commonEcsMetadata,
+    metadata: [
+      ...commonEcsMetadata,
+      {
+        source: 'kubernetes.pod.name',
+        destination: 'kubernetes.pod.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });

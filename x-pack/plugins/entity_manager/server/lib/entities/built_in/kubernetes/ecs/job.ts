@@ -13,7 +13,7 @@ import { commonEcsMetadata } from '../common/ecs_metadata';
 export const builtInKubernetesJobEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_job_ecs`,
-    filter: 'kubernetes.job.uid : *',
+    filter: 'kubernetes.job.name : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Job from ECS data',
@@ -21,7 +21,7 @@ export const builtInKubernetesJobEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes job entities from the Kubernetes integration data streams',
     type: 'k8s.job.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.job.uid'],
+    identityFields: ['kubernetes.job.name'],
     displayNameTemplate: '{{kubernetes.job.name}}',
     latest: {
       timestampField: '@timestamp',

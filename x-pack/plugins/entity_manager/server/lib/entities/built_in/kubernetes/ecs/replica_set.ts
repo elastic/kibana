@@ -13,6 +13,7 @@ import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
 export const builtInKubernetesReplicaSetEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_replica_set_ecs`,
+    filer: 'kubernetes.replicaset.name : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes ReplicaSet from ECS data',
@@ -20,7 +21,7 @@ export const builtInKubernetesReplicaSetEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes replica set entities from the Kubernetes integration data streams',
     type: 'k8s.replicaset.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.replicaset.uid'],
+    identityFields: ['kubernetes.replicaset.name'],
     displayNameTemplate: '{{kubernetes.replicaset.name}}',
     latest: {
       timestampField: '@timestamp',

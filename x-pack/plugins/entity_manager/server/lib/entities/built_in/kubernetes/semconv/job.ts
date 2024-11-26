@@ -30,5 +30,12 @@ export const builtInKubernetesJobSemConvEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: commonOtelMetadata,
+    metadata: [
+      ...commonOtelMetadata,
+      {
+        source: 'k8s.job.name',
+        destination: 'k8s.job.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });

@@ -13,7 +13,7 @@ import { commonEcsMetadata } from '../common/ecs_metadata';
 export const builtInKubernetesNodeEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_node_ecs`,
-    filer: 'kubernetes.node.uid : *',
+    filer: 'kubernetes.node.name : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Node from ECS data',
@@ -21,7 +21,7 @@ export const builtInKubernetesNodeEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes node entities from the Kubernetes integration data streams',
     type: 'k8s.node.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.node.uid'],
+    identityFields: ['kubernetes.node.name'],
     displayNameTemplate: '{{kubernetes.node.name}}',
     latest: {
       timestampField: '@timestamp',
