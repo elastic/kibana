@@ -108,7 +108,7 @@ describe('useHostIsolationAction', () => {
     expect(hookProps.closePopover).toHaveBeenCalled();
   });
 
-  it('should NOT return the menu item for Events', async () => {
+  it('should NOT return the menu item for Events', () => {
     hookProps.detailsData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
       'kibana.alert.rule.uuid': undefined,
     });
