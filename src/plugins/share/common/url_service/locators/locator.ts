@@ -19,7 +19,13 @@ import type {
   LocatorNavigationParams,
   LocatorGetUrlParams,
 } from './types';
-import { formatSearchParams, FormatSearchParamsOptions, RedirectOptions } from './redirect';
+import {
+  formatSearchParams,
+  FormatSearchParamsOptions,
+  RedirectOptions,
+  GetRedirectUrlOptions,
+  addSpaceIdToPath,
+} from './redirect';
 
 export interface LocatorDependencies {
   /**
@@ -92,7 +98,7 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     return url;
   }
 
-  public getRedirectUrl(params: P, options: FormatSearchParamsOptions = {}): string {
+  public getRedirectUrl(params: P, options: GetRedirectUrlOptions = {}): string {
     const { baseUrl = '', version = '0.0.0' } = this.deps;
     const redirectOptions: RedirectOptions = {
       id: this.definition.id,
@@ -100,12 +106,11 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
       params,
     };
     const formatOptions: FormatSearchParamsOptions = {
-      ...options,
       lzCompress: options.lzCompress ?? true,
     };
     const search = formatSearchParams(redirectOptions, formatOptions).toString();
 
-    return baseUrl + '/app/r?' + search;
+    return addSpaceIdToPath(baseUrl, options.spaceId, '/app/r?' + search);
   }
 
   public async navigate(

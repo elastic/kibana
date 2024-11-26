@@ -13,8 +13,9 @@ import { KibanaLocation } from '../../../public';
 import { LocatorGetUrlParams } from '.';
 import { decompressFromBase64 } from 'lz-string';
 
-const setup = () => {
-  const baseUrl = 'http://localhost:5601';
+const setup = (
+  { baseUrl = 'http://localhost:5601' }: { baseUrl: string } = { baseUrl: 'http://localhost:5601' }
+) => {
   const version = '1.2.3';
   const deps: LocatorDependencies = {
     baseUrl,
@@ -87,6 +88,39 @@ describe('Locator', () => {
         foo: 'a',
         baz: 'b',
       });
+    });
+
+    test('returns URL of the redirect endpoint with custom spaceid', async () => {
+      const { locator } = setup();
+      const url = await locator.getRedirectUrl(
+        { foo: 'a', baz: 'b' },
+        { spaceId: 'custom-space-id' }
+      );
+
+      expect(url).toBe(
+        'http://localhost:5601/s/custom-space-id/app/r?l=TEST_LOCATOR&v=1.2.3&lz=N4IgZg9hIFwghiANCARvAXrNIC%2BQ'
+      );
+    });
+
+    test('returns URL of the redirect endpoint with replaced spaceid', async () => {
+      const { locator } = setup({ baseUrl: 'http://localhost:5601/s/space-id' });
+      const url = await locator.getRedirectUrl(
+        { foo: 'a', baz: 'b' },
+        { spaceId: 'custom-space-id' }
+      );
+
+      expect(url).toBe(
+        'http://localhost:5601/s/custom-space-id/app/r?l=TEST_LOCATOR&v=1.2.3&lz=N4IgZg9hIFwghiANCARvAXrNIC%2BQ'
+      );
+    });
+
+    test('returns URL of the redirect endpoint without spaceid', async () => {
+      const { locator } = setup({ baseUrl: 'http://localhost:5601/s/space-id' });
+      const url = await locator.getRedirectUrl({ foo: 'a', baz: 'b' }, { spaceId: 'default' });
+
+      expect(url).toBe(
+        'http://localhost:5601/app/r?l=TEST_LOCATOR&v=1.2.3&lz=N4IgZg9hIFwghiANCARvAXrNIC%2BQ'
+      );
     });
   });
 
