@@ -15,7 +15,3 @@ yarn graphs:draw
 Main agent graph:
 
 ![Agent Graph](./img/agent_graph.png)
-
-Translate Rules Subgraph (Executed when no pre-built content is available):
-
-![Translate Rules Subgraph](./docs/img/translate_rule_graph.png)

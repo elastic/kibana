@@ -16,7 +16,6 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
-import { getTranslateRuleGraph } from '../../server/lib/siem_migrations/rules/task/agent/sub_graphs/translate_rule';
 import type { IntegrationRetriever } from '../../server/lib/siem_migrations/rules/task/util/integration_retriever';
 import type { PrebuiltRulesMapByName } from '../../server/lib/siem_migrations/rules/task/util/prebuilt_rules';
 import type { RuleResourceRetriever } from '../../server/lib/siem_migrations/rules/task/util/rule_resource_retriever';
@@ -50,20 +49,7 @@ async function getAgentGraph(logger: Logger): Promise<Drawable> {
     connectorId,
     logger,
   });
-  return graph.getGraphAsync();
-}
-
-async function getTranslateRuleSubGraph(logger: Logger): Promise<Drawable> {
-  const model = createLlmInstance();
-  const graph = getTranslateRuleGraph({
-    model,
-    inferenceClient,
-    resourceRetriever,
-    integrationRetriever,
-    connectorId,
-    logger,
-  });
-  return graph.getGraphAsync();
+  return graph.getGraphAsync({ xray: true });
 }
 
 export const drawGraph = async ({
@@ -90,9 +76,5 @@ export const draw = async () => {
   await drawGraph({
     getGraphAsync: getAgentGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',
-  });
-  await drawGraph({
-    getGraphAsync: getTranslateRuleSubGraph,
-    outputFilename: '../../docs/siem_migration/img/translate_rule_graph.png',
   });
 };
