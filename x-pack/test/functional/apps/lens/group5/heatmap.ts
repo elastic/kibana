@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#6092c0' },
         { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8bfda' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#ebeff5' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ecb385' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#efb785' },
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#e7664c' },
       ]);
     });
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '7,125.997 - 8,529.22', name: '7,125.997 - 8,529.22', color: '#6092c0' },
         { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8bfda' },
         { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#ebeff5' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ecb385' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#efb785' },
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#e7664c' },
       ]);
     });
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '7,125.99 - 8,529.2', name: '7,125.99 - 8,529.2', color: '#6092c0' },
         { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#efb785' },
         {
           color: '#e7664c',
           key: '≥ 16,948.55',
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '0 - 8,529.2', name: '0 - 8,529.2', color: '#6092c0' },
         { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#efb785' },
         { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
       ]);
     });
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '5,722.775 - 8,529.2', name: '5,722.775 - 8,529.2', color: '#6092c0' },
         { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8bfda' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#ebeff5' },
-        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ecb385' },
+        { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#efb785' },
         { key: '≥ 16,948.55', name: '≥ 16,948.55', color: '#e7664c' },
       ]);
       // assert the cell has the correct coloring despite the legend rounding

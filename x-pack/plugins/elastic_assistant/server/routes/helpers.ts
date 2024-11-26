@@ -20,6 +20,7 @@ import {
   Message,
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
+  DEFEND_INSIGHTS_TOOL_ID,
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -263,9 +264,11 @@ export const langChainExecute = async ({
     logger,
   });
   const assistantContext = context.elasticAssistant;
+  // We don't (yet) support invoking these tools interactively
+  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
-    .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
+    .filter((tool) => !unsupportedTools.has(tool.id));
 
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;

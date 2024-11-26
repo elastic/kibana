@@ -63,8 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/197175
-  describe.skip('/internal/observability_ai_assistant/chat/complete', function () {
+  describe('/internal/observability_ai_assistant/chat/complete', function () {
     // TODO: https://github.com/elastic/kibana/issues/192751
     this.tags(['skipMKI']);
     let proxy: LlmProxy;
@@ -186,7 +185,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       const parsedEvents = decodeEvents(receivedChunks.join(''));
 
-      expect(parsedEvents.map((event) => event.type)).to.eql([
+      expect(
+        parsedEvents
+          .map((event) => event.type)
+          .filter((eventType) => eventType !== StreamingChatResponseEventType.BufferFlush)
+      ).to.eql([
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.MessageAdd,
         StreamingChatResponseEventType.ChatCompletionChunk,

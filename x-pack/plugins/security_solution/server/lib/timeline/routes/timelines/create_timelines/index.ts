@@ -32,8 +32,10 @@ export const createTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .post({
       path: TIMELINE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })
@@ -79,13 +81,16 @@ export const createTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
               timelineVersion: version,
             });
 
-            return response.ok({
-              body: {
-                data: {
-                  persistTimeline: newTimeline,
-                },
-              },
-            });
+            if (newTimeline.code === 200) {
+              return response.ok({
+                body: newTimeline.timeline,
+              });
+            } else {
+              return siemResponse.error({
+                statusCode: newTimeline.code,
+                body: newTimeline.message,
+              });
+            }
           } else {
             return siemResponse.error(
               compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.create) || {

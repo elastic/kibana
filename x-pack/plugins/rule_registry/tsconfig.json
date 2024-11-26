@@ -24,7 +24,6 @@
     "@kbn/spaces-plugin",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-types",
-    "@kbn/securitysolution-io-ts-list-types",
     "@kbn/es-types",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/logging-mocks",

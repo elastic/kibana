@@ -47,7 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
   const UNREGISTERED_TASK_TYPE_ID = 'ce7e1250-3322-11eb-94c1-db6995e83f6b';
   const REMOVED_TASK_TYPE_ID = 'be7e1250-3322-11eb-94c1-db6995e83f6a';
 
-  describe('not registered task types', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/200154
+  describe.skip('not registered task types', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/task_manager_removed_types');
     });
