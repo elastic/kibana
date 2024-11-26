@@ -11,14 +11,22 @@ import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
 import { resourceNames } from '.';
+import { ObservabilityAIAssistantConfig } from '../config';
 
 export async function setupConversationAndKbIndexAssets({
   logger,
   core,
+  config,
 }: {
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  config: ObservabilityAIAssistantConfig;
 }) {
+  if (!config.autoCreateKnowledgeBaseAssets) {
+    logger.debug('Skpping setup of index assets because `autoCreateKnowledgeBaseAssets = false`');
+    return false;
+  }
+
   try {
     logger.debug('Setting up index assets');
     const [coreStart] = await core.getStartServices();
@@ -101,8 +109,10 @@ export async function setupConversationAndKbIndexAssets({
     });
 
     logger.info('Successfully set up index assets');
+    return true;
   } catch (error) {
     logger.error(`Failed setting up index assets: ${error.message}`);
     logger.debug(error);
+    return false;
   }
 }
