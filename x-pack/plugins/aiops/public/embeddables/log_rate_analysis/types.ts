@@ -38,4 +38,7 @@ export interface LogRateAnalysisEmbeddableInitialState
   dataViewId?: string;
 }
 
-export type LogRateAnalysisEmbeddableRuntimeState = LogRateAnalysisEmbeddableState;
+export type LogRateAnalysisEmbeddableRuntimeState = Omit<
+  LogRateAnalysisEmbeddableState,
+  'windowParameters'
+>;
