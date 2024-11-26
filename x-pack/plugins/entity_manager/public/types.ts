@@ -10,7 +10,6 @@ import type { EntityClient } from './lib/entity_client';
 export interface EntityManagerPublicPluginSetup {
   entityClient: EntityClient;
 }
-
 export interface EntityManagerPublicPluginStart {
   entityClient: EntityClient;
 }

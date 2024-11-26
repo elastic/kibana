@@ -17,7 +17,6 @@ import {
 } from '../../../../common/search_strategy';
 import { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
 import { inspectStringifyObject } from '../../../utils/build_query';
-import { TIMELINE_EVENTS_FIELDS } from '../factory/helpers/constants';
 import { formatTimelineData } from '../factory/helpers/format_timeline_data';
 
 export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, unknown> => {
@@ -68,38 +67,38 @@ export const buildEqlDsl = (options: TimelineEqlRequestOptions): Record<string, 
     },
   };
 };
-const parseSequences = async (sequences: Array<EqlSequence<unknown>>, fieldRequested: string[]) =>
-  sequences.reduce<Promise<TimelineEdges[]>>(async (acc, sequence, sequenceIndex) => {
+const parseSequences = async (sequences: Array<EqlSequence<unknown>>, fieldRequested: string[]) => {
+  let result: TimelineEdges[] = [];
+
+  for (const [sequenceIndex, sequence] of sequences.entries()) {
     const sequenceParentId = sequence.events[0]?._id ?? null;
-    const data = await acc;
-    const allData = await Promise.all(
-      sequence.events.map(async (event, eventIndex) => {
-        const item = await formatTimelineData(
-          fieldRequested,
-          TIMELINE_EVENTS_FIELDS,
-          event as EventHit
-        );
-        return Promise.resolve({
-          ...item,
-          node: {
-            ...item.node,
-            ecs: {
-              ...item.node.ecs,
-              ...(sequenceParentId != null
-                ? {
-                    eql: {
-                      parentId: sequenceParentId,
-                      sequenceNumber: `${sequenceIndex}-${eventIndex}`,
-                    },
-                  }
-                : {}),
-            },
-          },
-        });
-      })
+    const formattedEvents = await formatTimelineData(
+      sequence.events as EventHit[],
+      fieldRequested,
+      false
     );
-    return Promise.resolve([...data, ...allData]);
-  }, Promise.resolve([]));
+
+    const eventsWithEql = formattedEvents.map((item, eventIndex) => ({
+      ...item,
+      node: {
+        ...item.node,
+        ecs: {
+          ...item.node.ecs,
+          ...(sequenceParentId && {
+            eql: {
+              parentId: sequenceParentId,
+              sequenceNumber: `${sequenceIndex}-${eventIndex}`,
+            },
+          }),
+        },
+      },
+    }));
+
+    result = result.concat(eventsWithEql);
+  }
+
+  return result;
+};
 
 export const parseEqlResponse = async (
   options: TimelineEqlRequestOptions,
@@ -116,10 +115,10 @@ export const parseEqlResponse = async (
   if (response.rawResponse.hits.sequences !== undefined) {
     edges = await parseSequences(response.rawResponse.hits.sequences, options.fieldRequested);
   } else if (response.rawResponse.hits.events !== undefined) {
-    edges = await Promise.all(
-      response.rawResponse.hits.events.map(async (event) =>
-        formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, event as EventHit)
-      )
+    edges = await formatTimelineData(
+      response.rawResponse.hits.events as EventHit[],
+      options.fieldRequested,
+      false
     );
   }
 
