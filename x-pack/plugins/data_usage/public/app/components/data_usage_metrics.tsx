@@ -164,8 +164,11 @@ export const DataUsageMetrics = memo(
     }, [isFetching, hasFetchedDataUsageMetricsData]);
 
     const onRefresh = useCallback(() => {
+      if (!enableFetchUsageMetricsData) {
+        return;
+      }
       refetchDataUsageMetrics();
-    }, [refetchDataUsageMetrics]);
+    }, [enableFetchUsageMetricsData, refetchDataUsageMetrics]);
 
     const onChangeDataStreamsFilter = useCallback(
       (selectedDataStreams: string[]) => {
