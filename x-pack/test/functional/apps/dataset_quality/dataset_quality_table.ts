@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       const degradedDocsCol = cols['Degraded docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
-      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
+      expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%', '0%']);
     });
 
     it('shows failed docs percentage', async () => {
