@@ -183,7 +183,7 @@ export class EntityManagerServerPlugin
       .catch((err) => this.logger.error(err));
 
     // Setup v2 definitions index
-    setupEntityDefinitionsIndex(core.elasticsearch.client).catch((error) => {
+    setupEntityDefinitionsIndex(core.elasticsearch.client, this.logger).catch((error) => {
       this.logger.error(error);
     });
 

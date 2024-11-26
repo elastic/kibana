@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IClusterClient } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
+import { IClusterClient, Logger } from '@kbn/core/server';
 import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
 
 const definitionsIndexTemplate = {
@@ -36,21 +37,31 @@ const definitionsIndexTemplate = {
 
 const CURRENT_INDEX = `${DEFINITIONS_ALIAS}-${TEMPLATE_VERSION}` as const;
 
-export async function setupEntityDefinitionsIndex(clusterClient: IClusterClient) {
+export async function setupEntityDefinitionsIndex(clusterClient: IClusterClient, logger: Logger) {
   const esClient = clusterClient.asInternalUser;
+  try {
+    logger.debug(`Installing entity definitions index template for version ${TEMPLATE_VERSION}`);
+    await esClient.indices.putIndexTemplate(definitionsIndexTemplate);
 
-  await esClient.indices.putIndexTemplate(definitionsIndexTemplate);
+    await esClient.indices.get({
+      index: CURRENT_INDEX,
+    });
 
-  const indices = await esClient.indices.get({
-    index: `${DEFINITIONS_ALIAS}-*`,
-  });
-  const indexNames = Object.keys(indices);
+    logger.debug(`Entity definitions index already exists (${CURRENT_INDEX})`);
+  } catch (error) {
+    if (
+      error instanceof errors.ResponseError &&
+      error.message.includes('index_not_found_exception')
+    ) {
+      logger.debug(`Creating entity definitions index (${CURRENT_INDEX})`);
 
-  if (indexNames.includes(CURRENT_INDEX)) {
-    return;
+      await esClient.indices.create({
+        index: CURRENT_INDEX,
+      });
+
+      return;
+    }
+
+    throw error;
   }
-
-  await esClient.indices.create({
-    index: CURRENT_INDEX,
-  });
 }
