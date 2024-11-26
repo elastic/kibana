@@ -6024,6 +6024,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eventbus-example-plugin@link:examples/eventbus":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eventbus-slices@link:packages/eventbus-slices":
   version "0.0.0"
   uid ""

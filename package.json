@@ -563,6 +563,7 @@
     "@kbn/event-log-fixture-plugin": "link:x-pack/platform/test/plugin_api_integration/plugins/event_log",
     "@kbn/event-log-plugin": "link:x-pack/platform/plugins/shared/event_log",
     "@kbn/event-stacktrace": "link:x-pack/platform/packages/shared/kbn-event-stacktrace",
+    "@kbn/eventbus-example-plugin": "link:examples/eventbus",
     "@kbn/eventbus-slices": "link:packages/eventbus-slices",
     "@kbn/expandable-flyout": "link:x-pack/solutions/security/packages/expandable-flyout",
     "@kbn/exploratory-view-example-plugin": "link:x-pack/examples/exploratory_view_example",
