@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.existOrFail('noDataViewsPrompt');
       await testSubjects.click('tryESQLLink');
+      await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.dashboard.expectOnDashboard('New Dashboard');
       expect(await testSubjects.exists('lnsVisualizationContainer')).to.be(true);
