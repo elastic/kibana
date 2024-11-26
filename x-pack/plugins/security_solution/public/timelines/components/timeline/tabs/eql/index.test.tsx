@@ -232,7 +232,7 @@ describe('EQL Tab', () => {
             },
           };
 
-          const { container } = render(
+          render(
             <TestProviders
               store={createMockStore({
                 ...structuredClone(mockStateWithNoteInTimeline),

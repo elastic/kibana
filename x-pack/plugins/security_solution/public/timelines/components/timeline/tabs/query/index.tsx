@@ -190,8 +190,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     sort: timelineQuerySortField,
     startDate: start,
     timerangeKind,
-    pageIndex,
-    pageSize: itemsPerPage,
   });
 
   const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
