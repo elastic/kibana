@@ -24,11 +24,6 @@
       "previousMajor": true
     },
     {
-      "version": "8.15.5",
-      "branch": "8.15",
-      "previousMajor": true
-    },
-    {
       "version": "7.17.26",
       "branch": "7.17"
     }
