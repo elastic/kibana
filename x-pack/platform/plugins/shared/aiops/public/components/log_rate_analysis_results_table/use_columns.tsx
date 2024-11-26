@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, type FC } from 'react';
 import {
   useEuiTheme,
   type EuiBasicTableColumn,
   EuiBadge,
+  EuiCheckbox,
   EuiCode,
   EuiIcon,
   EuiIconTip,
@@ -33,6 +34,8 @@ import {
   LOG_RATE_ANALYSIS_TYPE,
 } from '@kbn/aiops-log-rate-analysis';
 import { useAiopsAppContext } from '@kbn/aiops-context';
+import { dashboardCrossfilterSlice } from '@kbn/eventbus-slices';
+
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -40,6 +43,58 @@ import { useViewInDiscoverAction } from './use_view_in_discover_action';
 import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { MiniHistogram } from '../mini_histogram';
+
+const selectedKeys: Record<string, { fieldName: string; fieldValue: string | number }> = {};
+
+const SelectCheckbox: FC<{ itemKey: string; fieldName: string; fieldValue: string | number }> = ({
+  fieldName,
+  fieldValue,
+  itemKey,
+}) => {
+  const { eventBus } = useAiopsAppContext();
+
+  if (eventBus) {
+    try {
+      eventBus.register(dashboardCrossfilterSlice);
+    } catch (e) {
+      // console.error('Failed to register event bus', e);
+    }
+  }
+
+  const crossfilter = eventBus.get(dashboardCrossfilterSlice);
+
+  const [checked, setChecked] = React.useState(false);
+
+  const handleOnChange = () => {
+    setChecked(!checked);
+
+    // update the hacky singleton
+    if (selectedKeys[itemKey]) {
+      delete selectedKeys[itemKey];
+    } else {
+      selectedKeys[itemKey] = { fieldName, fieldValue };
+    }
+
+    // push to event bus
+    console.log('LRA crossfilter', selectedKeys);
+
+    const query = `WHERE ${Object.values(selectedKeys)
+      .map(
+        ({ fieldName: mFieldName, fieldValue: mFieldValue }) => `${mFieldName} == "${mFieldValue}"`
+      )
+      .join(' AND ')}`;
+    crossfilter.actions.setCrossfilter({ id: 'lra', filter: query });
+  };
+
+  return (
+    <EuiCheckbox
+      id={`select-${fieldName}-${fieldValue}`}
+      data-test-subj="aiopsLogRateAnalysisResultsTableSelectCheckbox"
+      checked={checked}
+      onChange={handleOnChange}
+    />
+  );
+};
 
 const TRUNCATE_TEXT_LINES = 3;
 const UNIQUE_COLUMN_WIDTH = '40px';
@@ -236,6 +291,15 @@ export const useColumns = (
     EuiBasicTableColumn<SignificantItem>
   > = useMemo(
     () => ({
+      ['Select']: {
+        'data-test-subj': 'aiopsLogRateAnalysisResultsTableSelector',
+        field: 'key',
+        width: '24px',
+        name: 'Select',
+        render: (_, { fieldName, fieldValue, key: itemKey }) => (
+          <SelectCheckbox fieldName={fieldName} fieldValue={fieldValue} itemKey={itemKey} />
+        ),
+      },
       ['Field name']: {
         'data-test-subj': 'aiopsLogRateAnalysisResultsTableColumnFieldName',
         field: 'fieldName',
