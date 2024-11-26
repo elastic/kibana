@@ -9,18 +9,17 @@ import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { FieldFinalReadOnly } from '../../final_readonly';
 import { FieldFinalEdit } from '../../final_edit';
-import { FieldFinalSideMode } from '../field_final_side_mode';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
-import { useFieldFinalSideContext } from '../context/field_final_side_context';
+import {
+  FieldFinalSideMode,
+  useFieldUpgradeContext,
+} from '../../rule_upgrade/field_upgrade_context';
 import * as i18n from './translations';
 
 export function FieldFinalSideContent(): JSX.Element {
-  const {
-    state: { mode },
-    actions: { setEditMode, setReadOnlyMode },
-  } = useFieldFinalSideContext();
+  const { rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
 
-  switch (mode) {
+  switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
       return (
         <>
@@ -44,6 +43,6 @@ export function FieldFinalSideContent(): JSX.Element {
         </>
       );
     default:
-      return assertUnreachable(mode);
+      return assertUnreachable(rightSideMode);
   }
 }
