@@ -1799,6 +1799,9 @@
           }
         }
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "updated_at": {
         "type": "date"
       },
@@ -2386,6 +2389,9 @@
             "type": "keyword"
           }
         }
+      },
+      "supports_agentless": {
+        "type": "boolean"
       },
       "updated_at": {
         "type": "date"
