@@ -5600,15 +5600,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/js-sandbox-plugin@link:src/plugins/js_sandbox":
-  version "0.0.0"
-  uid ""
-
 "@kbn/event-log-fixture-plugin@link:x-pack/test/plugin_api_integration/plugins/event_log":
   version "0.0.0"
   uid ""
 
 "@kbn/event-log-plugin@link:x-pack/plugins/event_log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/eventbus-slices@link:packages/eventbus-slices":
   version "0.0.0"
   uid ""
 
@@ -6033,6 +6033,10 @@
   uid ""
 
 "@kbn/journeys@link:packages/kbn-journeys":
+  version "0.0.0"
+  uid ""
+
+"@kbn/js-sandbox-plugin@link:src/plugins/js_sandbox":
   version "0.0.0"
   uid ""
 

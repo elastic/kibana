@@ -896,6 +896,8 @@
       "@kbn/event-log-fixture-plugin/*": ["x-pack/test/plugin_api_integration/plugins/event_log/*"],
       "@kbn/event-log-plugin": ["x-pack/plugins/event_log"],
       "@kbn/event-log-plugin/*": ["x-pack/plugins/event_log/*"],
+      "@kbn/eventbus-slices": ["packages/eventbus-slices"],
+      "@kbn/eventbus-slices/*": ["packages/eventbus-slices/*"],
       "@kbn/expandable-flyout": ["packages/kbn-expandable-flyout"],
       "@kbn/expandable-flyout/*": ["packages/kbn-expandable-flyout/*"],
       "@kbn/expect": ["packages/kbn-expect"],
