@@ -14,7 +14,6 @@ import { useAiopsAppContext } from '@kbn/aiops-context';
 import { i18n } from '@kbn/i18n';
 import {
   clearAllRowState,
-  setGroupResults,
   useAppDispatch,
   useAppSelector,
   logRateAnalysisSlice,
@@ -95,6 +94,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const dispatch = useAppDispatch();
 
+  const { setGroupResults } = logRateAnalysis.actions;
   const groupResults = logRateAnalysis.useState((s) => s.groupResults);
   const { isRunning } = useAppSelector((s) => s.stream);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
@@ -105,7 +105,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   const toggleIdSelected = groupResults ? resultsGroupedOnId : resultsGroupedOffId;
 
   const onGroupResultsToggle = (optionId: string) => {
-    dispatch(setGroupResults(optionId === resultsGroupedOnId));
+    setGroupResults(optionId === resultsGroupedOnId);
     // When toggling the group switch, clear all row selections
     dispatch(clearAllRowState());
   };
