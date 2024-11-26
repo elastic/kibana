@@ -23,7 +23,7 @@ interface UsePersistentNewTermsStateParams {
   historyWindowStartPath: string;
 }
 
-interface LastNewTermsStateState {
+interface LastNewTermsState {
   newTermsFields: NewTermsFields;
   historyWindowStart: HistoryWindowStart;
 }
@@ -34,7 +34,7 @@ export function usePersistentNewTermsState({
   newTermsFieldsPath,
   historyWindowStartPath,
 }: UsePersistentNewTermsStateParams): void {
-  const lastNewTermsState = useRef<LastNewTermsStateState | undefined>();
+  const lastNewTermsState = useRef<LastNewTermsState | undefined>();
   const [formData] = useFormData({ form, watch: [newTermsFieldsPath, historyWindowStartPath] });
 
   const {
