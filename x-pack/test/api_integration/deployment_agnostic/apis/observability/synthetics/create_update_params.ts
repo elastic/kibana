@@ -32,7 +32,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       value: 'test',
     };
     const testPrivateLocations = new PrivateLocationTestService(getService);
-    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     before(async () => {
       await testPrivateLocations.installSyntheticsPackage();
