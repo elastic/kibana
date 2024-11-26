@@ -557,11 +557,6 @@ export class AlertsClient<
       );
 
       try {
-        // eslint-disable-next-line no-console
-        console.log(
-          '*** Refresh value when indexing alerts:',
-          this.isServerless ? true : 'wait_for'
-        );
         const response = await esClient.bulk({
           // On serverless we can force a refresh to we don't wait for the longer refresh interval
           // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch

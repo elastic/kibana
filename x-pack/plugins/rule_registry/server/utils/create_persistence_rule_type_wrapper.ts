@@ -568,17 +568,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   currentTimeOverride,
                 });
 
-                // eslint-disable-next-line no-console
-                console.log(
-                  '*** Rule registry - refresh value when indexing alerts:',
-                  options.isServerless ? true : 'wait_for'
-                );
-
                 const bulkResponse = await ruleDataClientWriter.bulk({
                   body: [...duplicateAlertUpdates, ...mapAlertsToBulkCreate(augmentedAlerts)],
-                  // On serverless we can force a refresh to we don't wait for the longer refresh interval
-                  // When too many refresh calls are done in a short period of time, they are throttled by stateless Elasticsearch
-                  refresh: options.isServerless ? true : 'wait_for',
+                  refresh: true,
                 });
 
                 if (bulkResponse == null) {
