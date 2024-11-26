@@ -194,6 +194,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           message: {
             role: MessageRole.User,
             name: 'context',
+            data: '{"scores":[],"suggestions":[]}',
             content: JSON.stringify({ screen_description: '', learnings: [] }),
           },
         },
