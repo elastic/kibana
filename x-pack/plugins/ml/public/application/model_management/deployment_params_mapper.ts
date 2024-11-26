@@ -25,7 +25,7 @@ type VCPUBreakpoints = Record<
     max: number;
     /**
      * Static value is used for the number of vCPUs when the adaptive resources are disabled.
-     * Not allowed in certain environments.
+     * Not allowed in certain environments, Obs and Security serverless projects.
      */
     static?: number;
   }
@@ -89,6 +89,7 @@ export class DeploymentParamsMapper {
   ) {
     /**
      * Initial value can be different for serverless and ESS with autoscaling.
+     * Also not available with 0 ML active nodes.
      */
     const maxSingleMlNodeProcessors = this.mlServerLimits.max_single_ml_node_processors;
 
@@ -236,18 +237,25 @@ export class DeploymentParamsMapper {
         ? input.adaptive_allocations!.max_number_of_allocations!
         : input.number_of_allocations);
 
+    // The deployment can be created via API with a number of allocations that do not exactly match our vCPU ranges.
+    // In this case, we should find the closest vCPU range that does not exceed the max or static value of the range.
     const [vCPUUsage] = Object.entries(this.vCpuBreakpoints)
-      .reverse()
-      .find(([key, val]) => vCPUs >= val.min) as [
-      DeploymentParamsUI['vCPUUsage'],
-      { min: number; max: number }
-    ];
+      .filter(([, range]) => vCPUs <= (adaptiveResources ? range.max : range.static!))
+      .reduce(
+        (prev, curr) => {
+          const prevValue = adaptiveResources ? prev[1].max : prev[1].static!;
+          const currValue = adaptiveResources ? curr[1].max : curr[1].static!;
+          return Math.abs(vCPUs - prevValue) <= Math.abs(vCPUs - currValue) ? prev : curr;
+        },
+        // in case allocation params exceed the max value of the high range
+        ['high', this.vCpuBreakpoints.high]
+      );
 
     return {
       deploymentId: input.deployment_id,
       optimized,
       adaptiveResources,
-      vCPUUsage,
+      vCPUUsage: vCPUUsage as DeploymentParamsUI['vCPUUsage'],
     };
   }
 }
