@@ -27,6 +27,7 @@ import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LensAppState } from '../../../state_management';
 import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { LayerPanelProps } from './types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('../../../id_generator');
 
@@ -117,6 +118,7 @@ describe('LayerPanel', () => {
       getUserMessages: () => [],
       displayLayerSettings: true,
       onDropToDimension,
+      data: dataPluginMock.createStartContract(),
     };
   }
   let props: LayerPanelProps;

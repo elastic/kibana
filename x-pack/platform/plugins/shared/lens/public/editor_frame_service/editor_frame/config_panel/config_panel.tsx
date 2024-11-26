@@ -264,6 +264,11 @@ export function LayerPanels(
           !hidden && (
             <LayerPanel
               {...props}
+              attributes={props.attributes}
+              data={props.data}
+              setCurrentAttributes={props.setCurrentAttributes}
+              updateSuggestion={props.updateSuggestion}
+              dataLoading$={props.dataLoading$}
               onDropToDimension={handleDimensionDrop}
               registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
               dimensionGroups={groups}
@@ -327,6 +332,9 @@ export function LayerPanels(
               }}
               toggleFullscreen={toggleFullscreen}
               indexPatternService={indexPatternService}
+              panelId={props.panelId}
+              parentApi={props.parentApi}
+              closeFlyout={props.closeFlyout}
             />
           )
         );
