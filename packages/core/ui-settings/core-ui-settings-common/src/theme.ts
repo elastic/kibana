@@ -35,8 +35,7 @@ export type ThemeTags = readonly ThemeTag[];
  * An array of theme tags available in Kibana by default when not customized
  * using KBN_OPTIMIZER_THEMES environment variable.
  */
-export const DEFAULT_THEME_TAGS: ThemeTags = SUPPORTED_THEME_TAGS; // TODO: (Viduni) remove after design QA on deployment
-// export const DEFAULT_THEME_TAGS: ThemeTags = ThemeAmsterdamTags; // TODO: (Viduni) uncomment after design QA on deployment
+export const DEFAULT_THEME_TAGS: ThemeTags = ThemeAmsterdamTags;
 
 export const FALLBACK_THEME_TAG: ThemeTag = 'v8light';
 

@@ -104,10 +104,9 @@ export const getThemeSettings = (
         }),
       },
       value: 'amsterdam',
-      // TODO: (Viduni) Remove after design QA on deployment
-      // readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
-      //   ? !options.isThemeSwitcherEnabled
-      //   : true,
+      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
+        ? !options.isThemeSwitcherEnabled
+        : true,
       requiresPageReload: true,
       schema: schema.oneOf([
         schema.literal('amsterdam'),
