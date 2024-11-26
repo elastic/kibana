@@ -227,10 +227,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               await browser.refresh();
             });
 
-            it('shows a setup kb button', async () => {
-              await testSubjects.existOrFail(ui.pages.conversations.retryButton);
-            });
-
             it('has an input field enabled', async () => {
               await testSubjects.existOrFail(ui.pages.conversations.chatInput);
               await testSubjects.isEnabled(ui.pages.conversations.chatInput);

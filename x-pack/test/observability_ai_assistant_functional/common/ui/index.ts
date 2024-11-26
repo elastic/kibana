@@ -35,7 +35,6 @@ const pages = {
   conversations: {
     setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
-    retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
     connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
