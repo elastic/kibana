@@ -52,13 +52,11 @@ import { canDeleteEntityDefinition } from '../../lib/auth/privileges';
  */
 export const deleteEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'DELETE /internal/entities/definition/{id}',
-  options: {
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
-      },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
     },
   },
   params: z.object({

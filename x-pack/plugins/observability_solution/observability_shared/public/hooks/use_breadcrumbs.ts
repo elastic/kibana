@@ -97,7 +97,7 @@ export const useBreadcrumbs = (
   const setBreadcrumbs = useMemo(() => {
     if (!serverless?.setBreadcrumbs) {
       return (breadcrumbs: ChromeBreadcrumb[]) =>
-        chromeSetBreadcrumbs(
+        chromeSetBreadcrumbs?.(
           breadcrumbs,
           !classicOnly
             ? {
