@@ -80,6 +80,7 @@
     "@kbn/shared-ux-router",
     "@kbn/aiops-context",
     "@kbn/event-bus-plugin",
+    "@kbn/eventbus-slices",
   ],
   "exclude": [
     "target/**/*",
