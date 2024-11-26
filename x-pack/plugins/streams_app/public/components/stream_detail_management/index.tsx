@@ -30,7 +30,7 @@ export function StreamDetailManagement({
 }) {
   const {
     path: { key, subtab },
-  } = useStreamsAppParams('/{key}/{tab}/{subtab}');
+  } = useStreamsAppParams('/{key}/management/{subtab}');
   const router = useStreamsAppRouter();
 
   const tabs = {
@@ -62,10 +62,7 @@ export function StreamDetailManagement({
 
   if (!isValidManagementSubTab(subtab)) {
     return (
-      <RedirectTo
-        path="/{key}/{tab}/{subtab}"
-        params={{ path: { key, tab: 'management', subtab: 'route' } }}
-      />
+      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'route' } }} />
     );
   }
 
@@ -78,8 +75,8 @@ export function StreamDetailManagement({
           legend="Management tabs"
           idSelected={subtab}
           onChange={(optionId) => {
-            router.push('/{key}/{tab}/{subtab}', {
-              path: { key, tab: 'management', subtab: optionId },
+            router.push('/{key}/management/{subtab}', {
+              path: { key, subtab: optionId },
               query: {},
             });
           }}

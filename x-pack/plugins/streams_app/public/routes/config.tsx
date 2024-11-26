@@ -47,8 +47,8 @@ const streamsAppRoutes = {
           '/{key}/management': {
             element: (
               <RedirectTo
-                path="/{key}/{tab}/{subtab}"
-                params={{ path: { tab: 'management', subtab: 'route' } }}
+                path="/{key}/management/{subtab}"
+                params={{ path: { subtab: 'route' } }}
               />
             ),
           },
@@ -60,11 +60,10 @@ const streamsAppRoutes = {
               }),
             }),
           },
-          '/{key}/{tab}/{subtab}': {
+          '/{key}/management/{subtab}': {
             element: <StreamDetailView />,
             params: t.type({
               path: t.type({
-                tab: t.string,
                 subtab: t.string,
               }),
             }),

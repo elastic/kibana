@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import { StreamDefinition } from '@kbn/streams-plugin/common';
 import React from 'react';
 
@@ -15,11 +14,5 @@ export function StreamDetailRouting({
   definition?: StreamDefinition;
   refreshDefinition: () => void;
 }) {
-  return (
-    <>
-      {i18n.translate('xpack.streams.streamDetailRouting.streamRoutingLabel', {
-        defaultMessage: 'Stream routing',
-      })}
-    </>
-  );
+  return <>{'TODO'}</>;
 }
