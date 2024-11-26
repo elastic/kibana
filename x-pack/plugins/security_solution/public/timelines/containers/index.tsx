@@ -106,8 +106,6 @@ export interface UseTimelineEventsProps {
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
   fetchNotes?: boolean;
-  pageIndex?: number;
-  pageSize?: number;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
