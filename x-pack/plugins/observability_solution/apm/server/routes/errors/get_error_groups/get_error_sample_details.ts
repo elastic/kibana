@@ -130,8 +130,6 @@ export async function getErrorSampleDetails({
 
   const errorFromFields = unflattenKnownApmEventFields(hit.fields, requiredFields);
 
-  console.log('errorFromFields', errorFromFields);
-
   const transactionId = errorFromFields.transaction?.id ?? errorFromFields.span?.id;
   const traceId = errorFromFields.trace?.id;
 
