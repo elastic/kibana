@@ -10,7 +10,6 @@ import type {
   CasesFindResponseUI,
   CaseUI,
   CasesUI,
-  CasesStatus,
   FetchCasesProps,
   FindCaseUserActions,
   CaseUICustomField,
@@ -24,7 +23,6 @@ import {
   basicCaseCommentPatch,
   basicCasePost,
   basicResolvedCase,
-  casesStatus,
   pushedCase,
   tags,
   categories,
@@ -68,9 +66,6 @@ export const getSingleCaseMetrics = async (
   caseId: string,
   signal: AbortSignal
 ): Promise<SingleCaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
-
-export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> =>
-  Promise.resolve(casesStatus);
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
