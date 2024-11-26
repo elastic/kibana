@@ -36,6 +36,7 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
 }) => {
   const {
     core: { executionContext },
+    privs,
   } = useAppContext();
   const redirectTo = useRedirectPath(history);
 
@@ -78,7 +79,7 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
     return <ErrorState error={error} resendRequest={reloadPolicies} />;
   }
 
-  if (policies?.length === 0) {
+  if (privs.manageEnrich && policies?.length === 0) {
     return <EmptyState />;
   }
 

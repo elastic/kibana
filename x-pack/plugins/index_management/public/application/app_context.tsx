@@ -43,7 +43,6 @@ export interface AppDependencies {
     http: HttpSetup;
     i18n: I18nStart;
     theme: ThemeServiceStart;
-    capabilities: ApplicationStart['capabilities'];
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
@@ -81,6 +80,11 @@ export interface AppDependencies {
   kibanaVersion: SemVer;
   overlays: OverlayStart;
   canUseSyntheticSource: boolean;
+  privs: {
+    monitor: boolean;
+    manageEnrich: boolean;
+    monitorEnrich: boolean;
+  };
 }
 
 export const AppContextProvider = ({

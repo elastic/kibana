@@ -41,7 +41,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 }) => {
   const {
     plugins: { console: consolePlugin },
-    core: { capabilities },
+    privs,
   } = useAppContext();
   const tabs = [
     {
@@ -77,7 +77,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     },
   ];
 
-  if (capabilities.index_management.manageEnrichPolicies) {
+  if (privs.monitorEnrich) {
     tabs.push({
       id: Section.EnrichPolicies,
       name: (
@@ -147,7 +147,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           ]}
           component={ComponentTemplateList}
         />
-        {capabilities.index_management.manageEnrichPolicies && (
+        {privs.monitorEnrich && (
           <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
         )}
       </Routes>
