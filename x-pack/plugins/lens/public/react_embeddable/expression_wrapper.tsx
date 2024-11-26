@@ -17,7 +17,7 @@ import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin/co
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { LensInspector } from '../lens_inspector_service';
-import { AddUserMessages } from '../types';
+import { UserMessage } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -31,7 +31,7 @@ export interface ExpressionWrapperProps {
     data: unknown,
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
-  onRender$: () => void;
+  onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncTooltips?: boolean;
@@ -40,7 +40,7 @@ export interface ExpressionWrapperProps {
   getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
   style?: React.CSSProperties;
   className?: string;
-  addUserMessages: AddUserMessages;
+  addUserMessages: (messages: UserMessage[]) => void;
   onRuntimeError: (error: Error) => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
@@ -75,7 +75,11 @@ export function ExpressionWrapper({
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
-    <div className={classNames('lnsExpressionRenderer', className)} style={style}>
+    <div
+      className={classNames('lnsExpressionRenderer', className)}
+      style={style}
+      data-test-subj="lens-embeddable"
+    >
       <ExpressionRendererComponent
         className="lnsExpressionRenderer__component"
         padding={noPadding ? undefined : 's'}
@@ -88,7 +92,7 @@ export function ExpressionWrapper({
         // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRender$}
-        inspectorAdapters={lensInspector.adapters}
+        inspectorAdapters={lensInspector.getInspectorAdapters()}
         renderMode={renderMode}
         syncColors={syncColors}
         syncTooltips={syncTooltips}
@@ -98,12 +102,7 @@ export function ExpressionWrapper({
         renderError={(errorMessage, error) => {
           const messages = getOriginalRequestErrorMessages(error || null);
           addUserMessages(messages);
-          if (error?.original) {
-            onRuntimeError(error.original);
-          } else {
-            onRuntimeError(new Error(errorMessage ? errorMessage : ''));
-          }
-
+          onRuntimeError(error?.original || new Error(errorMessage ? errorMessage : ''));
           return <></>; // the embeddable will take care of displaying the messages
         }}
         onEvent={handleEvent}
