@@ -616,3 +616,4 @@ const AlertsTableContent = typedForwardRef(
 
 // eslint-disable-next-line import/no-default-export
 export { AlertsTable as default };
+export type AlertsTable = typeof AlertsTable;

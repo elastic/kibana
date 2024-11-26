@@ -7,13 +7,13 @@
 import React, { ComponentProps } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { kibanaStartMock } from '../../../utils/kibana_react.mock';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { AlertActions } from './alert_actions';
-import { inventoryThresholdAlertEs } from '../../../rules/fixtures/example_alerts';
-import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import * as pluginContext from '../../../hooks/use_plugin_context';
-import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../../plugin';
+import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
+import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
+import * as pluginContext from '../../hooks/use_plugin_context';
+import { ConfigSchema, ObservabilityPublicPluginsStart } from '../../plugin';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
@@ -22,9 +22,9 @@ import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/da
 import { waitFor, act } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import type { GetObservabilityAlertsTableProp } from '../../../components/alerts_table/types';
+import type { GetObservabilityAlertsTableProp } from '../alerts_table/types';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -48,7 +48,7 @@ mockUseKibanaReturnValue.services.cases.helpers.canUseCases.mockReturnValue(allC
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();
 
-jest.mock('../../../utils/kibana_react', () => ({
+jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
