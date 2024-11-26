@@ -33,7 +33,7 @@
  * otherwise the height is set inline.
  */
 .dshLayout-isMaximizedPanel {
-  height: 100% !important; /* 1. */
+  height: auto !important; /* 1. */
 
   .embPanel__hoverActionsLeft {
     visibility: hidden;
@@ -65,7 +65,6 @@
   top: 0 !important; /* 1 */
   left: 0 !important; /* 1 */
   transform: none !important;
-  padding: $euiSizeS;
 
   // Altered panel styles can be found in ../panel
 }

@@ -165,9 +165,10 @@ export const DashboardGrid = () => {
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
+        accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
       />
     );
-  }, [currentLayout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId]);
+  }, [currentLayout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, viewMode]);
 
   // // in print mode, dashboard layout is not controlled by React Grid Layout
   // if (viewMode === ViewMode.PRINT) {

@@ -157,9 +157,9 @@ export const GridLayout = ({
             setDimensionsRef(divElement);
           }}
           className={gridClassNames}
-          // css={css`
-          //   height: 100%;
-          // `}
+          css={css`
+            height: 100%;
+          `}
         >
           {children}
         </div>

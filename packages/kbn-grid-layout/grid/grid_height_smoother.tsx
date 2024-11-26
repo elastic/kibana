@@ -26,9 +26,26 @@ export const GridHeightSmoother = ({
     const heightSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
-      // gridLayoutStateManager.expandedPanelId$,
+      gridLayoutStateManager.expandedPanelId$,
     ]).subscribe(([dimensions, interactionEvent, expandedPanelId]) => {
       if (!smoothHeightRef.current) return;
+
+      if (expandedPanelId) {
+        const { gutterSize } = gridLayoutStateManager.runtimeSettings$.getValue();
+
+        // const viewPortHeight = getViewportHeight();
+        const smoothHeightRefY =
+          smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
+
+        // When panel is expanded, ensure the page occupies the full viewport height, no more, no less, so
+        // smoothHeight height = viewport height - smoothHeight position - EuiPanel padding.
+        // const height = viewPortHeight - smoothHeightRefY - gutterSize;
+        smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY}px - ${gutterSize}px)`;
+        smoothHeightRef.current.style.transition = 'none';
+        return;
+      } else {
+        smoothHeightRef.current.style.transition = '';
+      }
 
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
@@ -47,29 +64,6 @@ export const GridHeightSmoother = ({
       )}px`;
       smoothHeightRef.current.style.userSelect = 'none';
     });
-
-    // const expandPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
-    //   (expandedPanelId) => {
-    //     if (!smoothHeightRef.current) return;
-
-    //     if (expandedPanelId) {
-    //       const { gutterSize } = gridLayoutStateManager.runtimeSettings$.getValue();
-
-    //       const viewPortHeight = getViewportHeight();
-    //       const smoothHeightRefY =
-    //         smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
-
-    //       // When panel is expanded, ensure the page occupies the full viewport height, no more, no less, so
-    //       // smoothHeight height = viewport height - smoothHeight position - EuiPanel padding.
-    //       const height = viewPortHeight - smoothHeightRefY - gutterSize;
-    //       smoothHeightRef.current.style.height = height + 'px';
-    //       smoothHeightRef.current.style.transition = 'none';
-    //       return;
-    //     } else {
-    //       smoothHeightRef.current.style.transition = '';
-    //     }
-    //   }
-    // );
 
     const marginSubscription = gridLayoutStateManager.runtimeSettings$
       .pipe(
