@@ -169,17 +169,20 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   iconType="lettering"
                   color="text"
                   onClick={() => {}}
-                  aria-label={`Select a text color for item ${item.index}`}
+                  aria-label={
+                    i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
+                      defaultMessage: 'Select a text color for item {index}',
+                      values: {
+                        index: item.index
+                      }
+                    })
+                  }
                 >
                   <EuiIcon
                     aria-label={color}
                     color={color}
                     size="l"
                     type="stopFilled"
-                    css={{
-                      stroke: 'var(--euiColorFullShade)',
-                      strokeWidth: 2,
-                    }}
                     data-test-subj={'buttonColorSwatchIcon'}
                   />
                 </EuiButton>
@@ -216,17 +219,19 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   iconType="color"
                   color="text"
                   onClick={() => {}}
-                  aria-label={`Select a background color for item ${item.index}`}
+                  aria-label={
+                    i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
+                      defaultMessage: 'Select a background color for item {index}',
+                      values: {
+                        index: item.index
+                      }
+                    })}
                 >
                   <EuiIcon
                     aria-label={color}
                     color={color}
                     size="l"
                     type="stopFilled"
-                    css={{
-                      stroke: 'var(--euiColorFullShade)',
-                      strokeWidth: 2,
-                    }}
                     data-test-subj={'buttonColorSwatchIcon'}
                   />
                 </EuiButton>
