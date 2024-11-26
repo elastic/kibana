@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { useCallback, useState, type FC } from 'react';
+import { throttle } from 'lodash';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+  EuiResizeObserver,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { DateHistogram } from '../../components/date_histogram';
 import { Esql } from '../../components/esql';
@@ -19,8 +26,11 @@ import { State } from '../../components/state';
 
 import { useEventBusExampleState } from '../../hooks/use_event_bus_example_state';
 
+const RESIZE_THROTTLE_TIME_MS = 50;
+
 export const App: FC = () => {
   const state = useEventBusExampleState();
+
   // find all selectedFields of type date in allFields
   const dateFields = state.useState((s) =>
     Object.entries(s.allFields)
@@ -28,6 +38,15 @@ export const App: FC = () => {
         return s.selectedFields.includes(name) && type === 'date';
       })
       .map((d) => d[0])
+  );
+  const [chartWidth, setChartWidth] = useState<number>(0);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resizeHandler = useCallback(
+    throttle((e: { width: number; height: number }) => {
+      setChartWidth(Math.round(e.width));
+    }, RESIZE_THROTTLE_TIME_MS),
+    [chartWidth]
   );
 
   return (
@@ -43,16 +62,29 @@ export const App: FC = () => {
                 <Fields />
               </EuiFlexItem>
               <EuiFlexItem css={{ minWidth: 0, overflow: 'hidden' }}>
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  {dateFields.map((field) => (
-                    <EuiFlexItem key={field} grow={false}>
-                      <DateHistogram field={field} />
-                    </EuiFlexItem>
-                  ))}
-                  <EuiFlexItem>
-                    <Logs />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiResizeObserver onResize={resizeHandler}>
+                  {(resizeRef) => (
+                    <EuiFlexGroup
+                      gutterSize={'s'}
+                      direction={'column'}
+                      ref={resizeRef}
+                      css={{
+                        width: '100%',
+                        height: '100%',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {dateFields.map((field) => (
+                        <EuiFlexItem key={field} grow={false}>
+                          <DateHistogram field={field} width={chartWidth} height={100} />
+                        </EuiFlexItem>
+                      ))}
+                      <EuiFlexItem>
+                        <Logs />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
+                </EuiResizeObserver>
               </EuiFlexItem>
             </EuiFlexGroup>
           </div>
