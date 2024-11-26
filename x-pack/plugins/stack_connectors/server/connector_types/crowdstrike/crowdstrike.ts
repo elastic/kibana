@@ -10,7 +10,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CrowdstrikeSessionManager } from './rtr_session_manager';
+import { CrowdStrikeSessionManager } from './rtr_session_manager';
 import { ExperimentalFeatures } from '../../../common/experimental_features';
 import { isAggregateError, NodeSystemError } from './types';
 import type {
@@ -61,6 +61,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
   private static base64encodedToken: string;
   private experimentalFeatures: ExperimentalFeatures;
 
+  private crowdStrikeSessionManager: CrowdStrikeSessionManager;
   private urls: {
     getToken: string;
     agents: string;
@@ -91,9 +92,9 @@ export class CrowdstrikeConnector extends SubActionConnector<
       ).toString('base64');
     }
 
-    this.sessionManager = new CrowdstrikeSessionManager(
+    this.crowdStrikeSessionManager = new CrowdStrikeSessionManager(
       this.urls,
-      this.crowdstrikeApiRequest.bind(this)
+      this.crowdstrikeApiRequest
     );
     this.registerSubActions();
   }
@@ -278,7 +279,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     payload: { command: string; endpoint_ids: string[] },
     connectorUsageCollector: ConnectorUsageCollector
   ) {
-    const batchId = await this.sessionManager.initializeSession(
+    const batchId = await this.crowdStrikeSessionManager.initializeSession(
       { endpoint_ids: payload.endpoint_ids },
       connectorUsageCollector
     );

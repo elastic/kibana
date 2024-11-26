@@ -8,16 +8,19 @@
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdstrikeInitRTRResponseSchema } from '../../../common/crowdstrike/schema';
-import { CrowdstrikeInitRTRParams } from '../../../common/crowdstrike/types';
+import {
+  CrowdstrikeInitRTRParams,
+  RelaxedCrowdstrikeBaseApiResponse,
+} from '../../../common/crowdstrike/types';
 
-export class CrowdstrikeSessionManager {
-  private currentBatchId: string | null = null;
-  private refreshInterval: NodeJS.Timeout | null = null;
-  private closeSessionTimeout: NodeJS.Timeout | null = null;
+export class CrowdStrikeSessionManager {
+  protected currentBatchId: string | null = null;
+  protected refreshInterval: NodeJS.Timeout | null = null;
+  protected closeSessionTimeout: NodeJS.Timeout | null = null;
 
   constructor(
-    private urls: { batchInitRTRSession: string },
-    private apiRequest: <R>(
+    private urls: { batchInitRTRSession: string; batchRefreshRTRSession: string },
+    private apiRequest: <R extends RelaxedCrowdstrikeBaseApiResponse>(
       req: SubActionRequestParams<R>,
       connectorUsageCollector: ConnectorUsageCollector,
       retried?: boolean
@@ -42,10 +45,11 @@ export class CrowdstrikeSessionManager {
         connectorUsageCollector
       );
 
-      this.currentBatchId = response.batch_id;
+      this.currentBatchId = response.batch_id!;
 
       // Start the refresh interval
       this.startRefreshInterval(connectorUsageCollector);
+      return this.currentBatchId;
     }
 
     // Reset the close session timeout
@@ -54,7 +58,7 @@ export class CrowdstrikeSessionManager {
     return this.currentBatchId;
   }
 
-  private startRefreshInterval(connectorUsageCollector: ConnectorUsageCollector) {
+  protected startRefreshInterval(connectorUsageCollector: ConnectorUsageCollector) {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
@@ -64,7 +68,7 @@ export class CrowdstrikeSessionManager {
     }, 5 * 60 * 1000); // Refresh every 5 minutes
   }
 
-  private async refreshSession(connectorUsageCollector: ConnectorUsageCollector): Promise<void> {
+  protected async refreshSession(connectorUsageCollector: ConnectorUsageCollector): Promise<void> {
     await this.apiRequest(
       {
         url: this.urls.batchRefreshRTRSession,
@@ -78,7 +82,7 @@ export class CrowdstrikeSessionManager {
     );
   }
 
-  private resetCloseSessionTimeout() {
+  protected resetCloseSessionTimeout() {
     if (this.closeSessionTimeout) {
       clearTimeout(this.closeSessionTimeout);
     }
@@ -88,7 +92,7 @@ export class CrowdstrikeSessionManager {
     }, 10 * 60 * 1000); // Close session after 10 minutes of inactivity
   }
 
-  private async terminateSession(): Promise<void> {
+  protected async terminateSession(): Promise<void> {
     // Clear intervals and timeouts
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
