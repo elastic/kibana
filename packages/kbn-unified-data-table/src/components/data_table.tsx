@@ -620,8 +620,6 @@ export const UnifiedDataTable = ({
 
     const onChangePage = (pageIndex: number) => {
       setPagination((paginationData) => ({ ...paginationData, pageIndex }));
-
-      onChangePageProp?.(pageIndex);
     };
 
     return isPaginationEnabled
@@ -640,16 +638,38 @@ export const UnifiedDataTable = ({
     pageCount,
     rowsPerPageOptions,
     onUpdateRowsPerPage,
-    onChangePageProp,
   ]);
 
   useEffect(() => {
+    /*
+     * Only for pageSize
+     * Sync pageSize with consumer provided pageSize
+     */
     setPagination((paginationData) =>
       paginationData.pageSize === currentPageSize
         ? paginationData
         : { ...paginationData, pageSize: currentPageSize }
     );
-  }, [currentPageSize, setPagination]);
+  }, [currentPageSize]);
+
+  useEffect(() => {
+    /*
+     * Only for pageIndex
+     * Sync pagination with EUI calculated pageIndex
+     *
+     */
+    setPagination((prevPagination) => ({
+      ...prevPagination,
+      pageIndex: paginationObj?.pageIndex ?? 0,
+    }));
+  }, [paginationObj?.pageIndex]);
+
+  useEffect(() => {
+    /*
+     * Propagate new pageIndex to the consumer
+     */
+    onChangePageProp?.(pagination.pageIndex);
+  }, [pagination.pageIndex, onChangePageProp]);
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
