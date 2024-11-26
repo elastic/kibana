@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
 import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import type { RuleSource } from '../../../../../common/api/detection_engine';
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type {
   RuleStepProps,
@@ -55,6 +56,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   timestampOverride: string;
   form: FormHook<AboutStepRule>;
   esqlQuery?: string | undefined;
+  ruleSource?: RuleSource;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -85,6 +87,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   isLoading,
   form,
   esqlQuery,
+  ruleSource,
 }) => {
   const { data } = useKibana().services;
 
@@ -287,7 +290,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleAuthor',
                 euiFieldProps: {
                   fullWidth: true,
-                  isDisabled: isLoading,
+                  isDisabled: isLoading || (ruleSource && ruleSource.type === 'external'), // We don't allow "author" customization if this is a prebuilt rule
                   placeholder: '',
                 },
               }}
@@ -300,7 +303,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 'data-test-subj': 'detectionEngineStepAboutRuleLicense',
                 euiFieldProps: {
                   fullWidth: true,
-                  disabled: isLoading,
+                  disabled: isLoading || (ruleSource && ruleSource.type === 'external'), // We don't allow "license" customization if this is a prebuilt rule
                   placeholder: '',
                 },
               }}
