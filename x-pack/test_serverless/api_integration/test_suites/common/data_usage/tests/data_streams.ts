@@ -14,11 +14,11 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const es = getService('es');
+  const retry = getService('retry');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
   const testDataStreamName = 'test-data-stream';
   describe(`GET ${DATA_USAGE_DATA_STREAMS_API_ROUTE}`, function () {
-    // due to the plugin depending on yml config (xpack.dataUsage.enabled), we cannot test in MKI until it is on by default
-    this.tags(['skipMKI']);
     before(async () => {
       await svlDatastreamsHelpers.createDataStream(testDataStreamName);
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
@@ -28,23 +28,45 @@ export default function ({ getService }: FtrProviderContext) {
           withInternalHeaders: true,
         }
       );
+      // index some data into the data stream to prevent from api filtering it out
+      await es.bulk({
+        refresh: true,
+        body: [
+          { create: { _index: testDataStreamName } },
+          {
+            '@timestamp': new Date().toISOString(),
+            field1: `bulk-doc-1}`,
+            field2: 1,
+          },
+        ],
+      });
     });
     after(async () => {
       await svlDatastreamsHelpers.deleteDataStream(testDataStreamName);
     });
 
-    // skipped because we filter out data streams with 0 storage size,
-    // and metering api does not pick up indexed data here
-    // TODO: route should potentially not depend solely on metering API
-    it.skip('returns created data streams', async () => {
-      const res = await supertestAdminWithCookieCredentials
-        .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
-        .set('elastic-api-version', '1');
-      const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
-      const foundStream = dataStreams.find((stream) => stream.name === testDataStreamName);
-      expect(foundStream?.name).to.be(testDataStreamName);
-      expect(foundStream?.storageSizeBytes).to.be(0);
-      expect(res.statusCode).to.be(200);
+    it('returns created data streams', async () => {
+      // can take some time for metering api to update with storage size and do ccount
+      await retry.tryForTime(60000, async () => {
+        const res = await supertestAdminWithCookieCredentials
+          .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
+          .set('elastic-api-version', '1');
+
+        const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
+
+        const foundStream = dataStreams.find((stream) => stream.name === testDataStreamName);
+        if (!foundStream || foundStream.storageSizeBytes <= 0) {
+          throw new Error(
+            `Data stream "${testDataStreamName}" not found or has zero storage size. Retrying...`
+          );
+        }
+
+        expect(res.statusCode).to.be(200);
+        expect(foundStream.name).to.be(testDataStreamName);
+        expect(foundStream.storageSizeBytes).to.be.greaterThan(0);
+
+        return true;
+      });
     });
   });
 }
