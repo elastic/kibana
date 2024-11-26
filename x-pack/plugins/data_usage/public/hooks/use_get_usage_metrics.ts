@@ -8,7 +8,6 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { transformToUTCtime } from '../../common/utils';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import type {
   UsageMetricsRequestBody,
@@ -27,7 +26,6 @@ export const useGetDataUsageMetrics = (
 ): UseQueryResult<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> => {
   const { http } = useKibanaContextForPlugin().services;
 
-  const utcDateRange = transformToUTCtime({ start: body.from, end: body.to, isISOString: true });
   return useQuery<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>>({
     queryKey: ['get-data-usage-metrics', body],
     ...options,
@@ -38,8 +36,8 @@ export const useGetDataUsageMetrics = (
           signal,
           version: '1',
           body: JSON.stringify({
-            from: utcDateRange.start,
-            to: utcDateRange.end,
+            from: body.from,
+            to: body.to,
             metricTypes: body.metricTypes,
             dataStreams: body.dataStreams,
           }),
