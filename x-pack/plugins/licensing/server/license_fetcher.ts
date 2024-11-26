@@ -7,6 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createHash } from 'crypto';
+import pRetry from 'p-retry';
 import stringify from 'json-stable-stringify';
 import type { MaybePromise } from '@kbn/utility-types';
 import { isPromise } from '@kbn/std';
@@ -25,18 +26,21 @@ export const getLicenseFetcher = ({
   clusterClient,
   logger,
   cacheDurationMs,
+  maxRetryDelay 
 }: {
   clusterClient: MaybePromise<IClusterClient>;
   logger: Logger;
   cacheDurationMs: number;
+  maxRetryDelay: number;
 }): LicenseFetcher => {
   let currentLicense: ILicense | undefined;
   let lastSuccessfulFetchTime: number | undefined;
+  const maxRetries = Math.floor(Math.log2(maxRetryDelay / 1000)) + 1;
 
   return async () => {
     const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
-      const response = await client.asInternalUser.xpack.info();
+      const response = await pRetry(() => client.asInternalUser.xpack.info(), {retries: maxRetries});
       const normalizedLicense =
         response.license && response.license.type !== 'missing'
           ? normalizeServerLicense(response.license)
@@ -63,7 +67,9 @@ export const getLicenseFetcher = ({
       lastSuccessfulFetchTime = Date.now();
 
       return currentLicense;
-    } catch (error) {
+    } catch (err) {
+      const error = err.originalError ?? err;
+      
       logger.warn(
         `License information could not be obtained from Elasticsearch due to ${error} error`
       );
