@@ -39,7 +39,7 @@ export const mlAppLink: LinkItem = {
   id: SecurityPageName.mlLanding,
   title: i18n.ML_TITLE,
   path: MACHINE_LEARNING_PATH,
-  capabilities: [[`${SERVER_APP_ID}.show`, `ml.canGetMlInfo`]],
+  capabilities: [[`${SERVER_APP_ID}.show`, `ml.canGetJobs`]],
   globalSearchKeywords: [i18n.ML_KEYWORD],
   hideTimeline: true,
   skipUrlState: true,
