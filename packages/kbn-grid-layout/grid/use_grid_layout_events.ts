@@ -38,14 +38,17 @@ export const useGridLayoutEvents = ({
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
 
+    const stopAutoScrollIfNecessary = () => {
+      if (scrollInterval.current) {
+        clearInterval(scrollInterval.current);
+        scrollInterval.current = null;
+      }
+    };
+
     const calculateUserEvent = (e: Event) => {
       if (!interactionEvent$.value) {
-        if (scrollInterval.current) {
-          // if there is a scroll happening without an interaction event, cancel it
-          clearInterval(scrollInterval.current);
-          scrollInterval.current = null;
-        }
-        // no interaction event is happening, so nothing about the layout needs to be updated
+        // if no interaction event, stop auto scroll (if necessary) and return early
+        stopAutoScrollIfNecessary();
         return;
       }
       e.preventDefault();
@@ -152,10 +155,8 @@ export const useGridLayoutEvents = ({
           // only start scrolling if it's not already happening
           scrollInterval.current = scrollOnInterval(startScrollingUp ? 'up' : 'down');
         }
-      } else if (scrollInterval.current) {
-        // if the event happens outside of the targetted area, stop the auto-scroll
-        clearInterval(scrollInterval.current);
-        scrollInterval.current = null;
+      } else {
+        stopAutoScrollIfNecessary();
       }
 
       // resolve the new grid layout
