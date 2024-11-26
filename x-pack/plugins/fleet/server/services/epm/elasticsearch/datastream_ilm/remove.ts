@@ -7,9 +7,17 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import pMap from 'p-map';
+
+import { appContextService } from '../../../app_context';
+const MAX_CONCURRENT_ILM_POLICIES_DELETIONS = 50;
+
 export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: string[]) => {
-  await Promise.all(
-    ilmPolicyIds.map(async (ilmPolicyId) => {
+  const logger = appContextService.getLogger();
+
+  await pMap(
+    ilmPolicyIds,
+    async (ilmPolicyId) => {
       await esClient.transport.request(
         {
           method: 'DELETE',
@@ -19,6 +27,10 @@ export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: st
           ignore: [404, 400],
         }
       );
-    })
+      logger.debug(`Deleted ilm policy with id: ${ilmPolicyId}`);
+    },
+    {
+      concurrency: MAX_CONCURRENT_ILM_POLICIES_DELETIONS,
+    }
   );
 };

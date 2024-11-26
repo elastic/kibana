@@ -7,11 +7,15 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import pMap from 'p-map';
+
 import { appContextService } from '../../..';
 import { ElasticsearchAssetType } from '../../../../types';
 import { FleetError } from '../../../../errors';
 import type { EsAssetReference } from '../../../../../common/types';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
+
+const MAX_CONCURRENT_PIPELINES_DELETIONS = 50;
 
 export const deletePreviousPipelines = async (
   esClient: ElasticsearchClient,
@@ -26,10 +30,15 @@ export const deletePreviousPipelines = async (
       type === ElasticsearchAssetType.ingestPipeline && id.includes(previousPkgVersion)
   );
   try {
-    await Promise.all(
-      installedPipelines.map(({ type, id }) => {
+    await pMap(
+      installedPipelines,
+      ({ type, id }) => {
+        logger.debug(`Deleting pipeline with id: ${id}`);
         return deletePipeline(esClient, id);
-      })
+      },
+      {
+        concurrency: MAX_CONCURRENT_PIPELINES_DELETIONS,
+      }
     );
   } catch (e) {
     logger.error(e);

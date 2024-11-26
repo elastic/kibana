@@ -10,6 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import { load } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
+import pMap from 'p-map';
 
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 
@@ -47,6 +48,7 @@ import { isUserSettingsTemplate } from '../template/utils';
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
+import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from './transform_utils';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -573,17 +575,21 @@ const installTransformsAssets = async (
       }
     } else {
       // Else, create & start all the transforms at once for speed
-      const transformsPromises = transforms.map(async (transform) => {
-        return handleTransformInstall({
-          esClient,
-          logger,
-          transform,
-          startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
-          secondaryAuth: transform.runAsKibanaSystem !== false ? undefined : secondaryAuth,
-        });
-      });
-
-      installedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
+      installedTransforms = await pMap(
+        transforms,
+        async (transform) => {
+          return handleTransformInstall({
+            esClient,
+            logger,
+            transform,
+            startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+            secondaryAuth: transform.runAsKibanaSystem !== false ? undefined : secondaryAuth,
+          });
+        },
+        {
+          concurrency: MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
+        }
+      ).then((results) => results.flat());
     }
 
     // If user does not have sufficient permissions to start the transforms,

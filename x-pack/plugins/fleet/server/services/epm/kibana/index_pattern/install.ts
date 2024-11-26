@@ -6,11 +6,14 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
 
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { appContextService } from '../../..';
 import { getPackageSavedObjects } from '../../packages/get';
 const INDEX_PATTERN_SAVED_OBJECT_TYPE = 'index-pattern';
+const MAX_CONCURRENT_INDEX_PATTERN_DELETIONS = 50;
+
 
 export const indexPatternTypes = [dataTypes.Logs, dataTypes.Metrics];
 
@@ -72,9 +75,9 @@ export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjects
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const idsToDelete = resolvedObjects.map(({ saved_object }) => saved_object.id);
-
-  return Promise.all(
-    idsToDelete.map(async (id) => {
+  await pMap(
+    idsToDelete,
+    async (id) => {
       try {
         logger.debug(`deleting index pattern ${id}`);
         await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, id);
@@ -83,6 +86,9 @@ export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjects
         logger.debug(`Non fatal error encountered deleting index pattern ${id} : ${err}`);
       }
       return;
-    })
+    },
+    {
+      concurrency: MAX_CONCURRENT_INDEX_PATTERN_DELETIONS,
+    }
   );
 }
