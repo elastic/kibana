@@ -3,7 +3,6 @@ info:
   title: SIEM Rules Migration API
   version: '1'
 paths:
-
   # Rule migrations APIs
 
   /internal/siem_migrations/rules:
@@ -33,8 +32,52 @@ paths:
                   - migration_id
                 properties:
                   migration_id:
-                    type: string
                     description: The migration id created.
+                    $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+
+    put:
+      summary: Updates rules migrations
+      operationId: UpdateRuleMigration
+      x-codegen-enabled: true
+      description: Updates rules migrations attributes
+      tags:
+        - SIEM Rule Migrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    description: The rule migration id
+                    $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+                  elastic_rule:
+                    description: The migrated elastic rule attributes to update.
+                    $ref: '../../rule_migration.schema.yaml#/components/schemas/ElasticRulePartial'
+                  translation_result:
+                    description: The rule translation result.
+                    $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTranslationResult'
+                  comments:
+                    description: The comments for the migration including a summary from the LLM in markdown.
+                    $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationComments'
+      responses:
+        200:
+          description: Indicates rules migrations have been updated correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - updated
+                properties:
+                  updated:
+                    type: boolean
+                    description: Indicates rules migrations have been updated.
 
   /internal/siem_migrations/rules/stats:
     get:
@@ -50,7 +93,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationAllTaskStats'
+                type: array
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskStats'
 
   ## Specific rule migration APIs
 
@@ -67,8 +112,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
             description: The migration id to start
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates rule migration have been retrieved correctly.
@@ -94,8 +139,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
             description: The migration id to start
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -106,9 +151,9 @@ paths:
                 - connector_id
               properties:
                 connector_id:
-                  $ref: '../common.schema.yaml#/components/schemas/ConnectorId'
+                  $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
                 langsmith_options:
-                  $ref: '../common.schema.yaml#/components/schemas/LangSmithOptions'
+                  $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
       responses:
         200:
           description: Indicates the migration start request has been processed successfully.
@@ -138,8 +183,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
             description: The migration id to start
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates the migration stats has been retrieved correctly.
@@ -163,8 +208,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
             description: The migration id to stop
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates migration task stop has been processed successfully.
@@ -197,8 +242,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
             description: The migration id to attach the resources
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -206,7 +251,15 @@ paths:
             schema:
               type: array
               items:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
+                allOf:
+                  - $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
+                  - type: object
+                    required:
+                      - id
+                    properties:
+                      id:
+                        description: The rule resource migration id
+                        $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates migration resources have been created or updated correctly.
@@ -234,8 +287,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
             description: The migration id to attach the resources
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
         - name: type
           in: query
           required: false
