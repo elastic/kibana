@@ -169,14 +169,15 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   iconType="lettering"
                   color="text"
                   onClick={() => {}}
-                  aria-label={
-                    i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
+                  aria-label={i18n.translate(
+                    'indexPatternFieldEditor.color.letteringButtonAriaLabel',
+                    {
                       defaultMessage: 'Select a text color for item {index}',
                       values: {
-                        index: item.index
-                      }
-                    })
-                  }
+                        index: item.index,
+                      },
+                    }
+                  )}
                 >
                   <EuiIcon
                     aria-label={color}
@@ -219,13 +220,15 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
                   iconType="color"
                   color="text"
                   onClick={() => {}}
-                  aria-label={
-                    i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
+                  aria-label={i18n.translate(
+                    'indexPatternFieldEditor.color.letteringButtonAriaLabel',
+                    {
                       defaultMessage: 'Select a background color for item {index}',
                       values: {
-                        index: item.index
-                      }
-                    })}
+                        index: item.index,
+                      },
+                    }
+                  )}
                 >
                   <EuiIcon
                     aria-label={color}
