@@ -43,7 +43,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
           <EuiIcon type="logoElasticsearch" css={iconCss} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
-            { defaultMessage: 'Search' }
+            { defaultMessage: 'Elasticsearch' }
           )}
         </>
       ),

@@ -11,9 +11,18 @@ export { convertSecurityApi } from './convert_security_api';
 export { getDefaultSecurityImplementation } from './default_implementation';
 
 export interface SecurityServiceConfigType {
-  experimental?: {
-    fipsMode?: {
-      enabled: boolean;
+  fipsMode?: {
+    enabled: boolean;
+  };
+}
+
+export interface PKCS12ConfigType {
+  ssl?: {
+    keystore?: {
+      path?: string;
+    };
+    truststore?: {
+      path?: string;
     };
   };
 }

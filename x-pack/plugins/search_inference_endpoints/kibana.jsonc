@@ -24,6 +24,7 @@
     "optionalPlugins": [
       "cloud",
       "console",
+      "serverless"
     ],
     "requiredBundles": [
       "kibanaReact"

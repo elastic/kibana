@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils/es/client/create_observability_es_client';
+import { type ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { getBuiltinEntityDefinitionIdESQLWhereClause } from '../entities/query_helper';
 import { ENTITIES_LATEST_ALIAS } from '../../../common/entities';
 

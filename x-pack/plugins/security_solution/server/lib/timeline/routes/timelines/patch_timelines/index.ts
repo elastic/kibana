@@ -26,8 +26,10 @@ export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       path: TIMELINE_URL,
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
       },
       access: 'public',
     })

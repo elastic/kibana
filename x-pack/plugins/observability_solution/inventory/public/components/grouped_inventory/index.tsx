@@ -8,7 +8,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { ENTITY_TYPE } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import { flattenObject } from '@kbn/observability-utils/object/flatten_object';
+import { flattenObject } from '@kbn/observability-utils-common/object/flatten_object';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';

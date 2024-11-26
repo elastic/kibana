@@ -160,7 +160,7 @@ export function EntitiesGrid({
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.inventory.entitiesGrid.euiDataGrid.headerLeft"
-                  defaultMessage="Showing {currentItems} of {total} {boldEntites}"
+                  defaultMessage="Showing {currentItems} of {total} {boldEntities}"
                   values={{
                     currentItems: (
                       <strong>
@@ -169,10 +169,10 @@ export function EntitiesGrid({
                       </strong>
                     ),
                     total: entities.length,
-                    boldEntites: (
+                    boldEntities: (
                       <strong>
                         {i18n.translate(
-                          'xpack.inventory.entitiesGrid.euiDataGrid.headerLeft.entites',
+                          'xpack.inventory.entitiesGrid.euiDataGrid.headerLeft.entities',
                           { defaultMessage: 'Entities' }
                         )}
                       </strong>
