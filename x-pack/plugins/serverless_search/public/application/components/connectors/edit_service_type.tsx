@@ -17,9 +17,12 @@ import {
   EuiComboBoxOptionOption,
   EuiText,
   useEuiTheme,
+  EuiTextTruncate,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Connector as BaseConnector } from '@kbn/search-connectors';
+import { css } from '@emotion/react';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 interface Connector extends BaseConnector {
@@ -36,6 +39,15 @@ interface EditServiceTypeProps {
 interface OptionData {
   secondaryContent?: string;
 }
+
+// TODO move these constants to a common file in Serverless as we have in Stack
+const BETA_LABEL = i18n.translate('xpack.serverlessSearch.betaLabel', {
+  defaultMessage: 'Beta',
+});
+
+const TECH_PREVIEW_LABEL = i18n.translate('xpack.serverlessSearch.techPreviewLabel', {
+  defaultMessage: 'Tech preview',
+});
 
 export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isDisabled }) => {
   const { http } = useKibanaServices();
@@ -68,19 +80,26 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
   const getInitialOptions = () => {
     return allConnectors.map((conn, key) => {
       const _append: React.ReactNode[] = [];
+      let _ariaLabelAppend = '';
       if (conn.isTechPreview) {
         _append.push(
-          <EuiBadge key={key + '-preview'} iconType="beaker" color="hollow">
+          <EuiBadge
+            aria-label={TECH_PREVIEW_LABEL}
+            key={key + '-preview'}
+            iconType="beaker"
+            color="hollow"
+          >
             {i18n.translate(
               'xpack.serverlessSearch.connectors.chooseConnectorSelectable.thechPreviewBadgeLabel',
               { defaultMessage: 'Tech preview' }
             )}
           </EuiBadge>
         );
+        _ariaLabelAppend += `, ${TECH_PREVIEW_LABEL}`;
       }
       if (conn.isBeta) {
         _append.push(
-          <EuiBadge key={key + '-beta'} iconType={'beta'} color="hollow">
+          <EuiBadge aria-label={BETA_LABEL} key={key + '-beta'} iconType={'beta'} color="hollow">
             {i18n.translate(
               'xpack.serverlessSearch.connectors.chooseConnectorSelectable.BetaBadgeLabel',
               {
@@ -89,10 +108,12 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
             )}
           </EuiBadge>
         );
+        _ariaLabelAppend += `, ${BETA_LABEL}`;
       }
       return {
         _append,
         _prepend: <EuiIcon size="l" type={conn.iconPath} />,
+        'aria-label': conn.name + _ariaLabelAppend,
         key: key.toString(),
         label: conn.name,
         serviceType: conn.serviceType,
@@ -116,23 +137,27 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       };
     return (
       <EuiFlexGroup
-        gutterSize="m"
-        key={key + '-span'}
-        justifyContent="spaceBetween"
         className={contentClassName}
+        key={key + '-span'}
+        gutterSize="m"
+        responsive={false}
+        direction="row"
       >
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={false}>{_prepend}</EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            data-test-subj={`serverlessSearchConnectorServiceType-${serviceType}`}
-          >
-            <EuiText size="s" textAlign="left">
-              {label}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem grow={false}>{_append}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{_prepend}</EuiFlexItem>
+        <EuiFlexItem
+          css={css`
+            overflow: auto;
+          `}
+          grow
+          data-test-subj={`serverlessSearchConnectorServiceType-${serviceType}`}
+        >
+          <EuiText textAlign="left" size="s">
+            <EuiTextTruncate text={label} truncation="end" />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadgeGroup gutterSize="xs">{_append}</EuiBadgeGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
