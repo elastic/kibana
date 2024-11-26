@@ -527,6 +527,8 @@ export const GetAgentStatusResponseSchema = schema.object({
 export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    pkgName: schema.maybe(schema.string()),
+    pkgVersion: schema.maybe(schema.string()),
     previewData: schema.boolean({ defaultValue: false }),
   }),
 };

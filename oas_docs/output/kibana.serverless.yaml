@@ -9909,6 +9909,11 @@ paths:
                                       required:
                                         - id
                                     type: array
+                                  supports_agentless:
+                                    default: false
+                                    description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
                                   updated_at:
                                     type: string
                                   updated_by:
@@ -10618,6 +10623,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -11167,6 +11177,11 @@ paths:
                                       required:
                                         - id
                                     type: array
+                                  supports_agentless:
+                                    default: false
+                                    description: Indicates whether the package policy belongs to an agentless agent policy.
+                                    nullable: true
+                                    type: boolean
                                   updated_at:
                                     type: string
                                   updated_by:
@@ -11696,6 +11711,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -12404,6 +12424,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -12953,6 +12978,11 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                supports_agentless:
+                                  default: false
+                                  description: Indicates whether the package policy belongs to an agentless agent policy.
+                                  nullable: true
+                                  type: boolean
                                 updated_at:
                                   type: string
                                 updated_by:
@@ -13891,6 +13921,16 @@ paths:
                   type: string
                 type: array
               - type: string
+        - in: query
+          name: pkgName
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: pkgVersion
+          required: false
+          schema:
+            type: string
         - in: query
           name: previewData
           required: false
@@ -25537,6 +25577,11 @@ paths:
                           items:
                             type: string
                           type: array
+                        supports_agentless:
+                          default: false
+                          description: Indicates whether the package policy belongs to an agentless agent policy.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -25865,6 +25910,11 @@ paths:
                         description: Agent policy IDs where that package policy will be added
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -26015,6 +26065,11 @@ paths:
                       items:
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         anyOf:
@@ -26366,6 +26421,11 @@ paths:
                         items:
                           type: string
                         type: array
+                      supports_agentless:
+                        default: false
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -26826,6 +26886,11 @@ paths:
                           items:
                             type: string
                           type: array
+                        supports_agentless:
+                          default: false
+                          description: Indicates whether the package policy belongs to an agentless agent policy.
+                          nullable: true
+                          type: boolean
                         updated_at:
                           type: string
                         updated_by:
@@ -27325,6 +27390,11 @@ paths:
                         items:
                           type: string
                         type: array
+                      supports_agentless:
+                        default: false
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -27655,6 +27725,11 @@ paths:
                         description: Agent policy IDs where that package policy will be added
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         additionalProperties: false
@@ -27804,6 +27879,11 @@ paths:
                       items:
                         type: string
                       type: array
+                    supports_agentless:
+                      default: false
+                      description: Indicates whether the package policy belongs to an agentless agent policy.
+                      nullable: true
+                      type: boolean
                     vars:
                       additionalProperties:
                         anyOf:
@@ -28154,6 +28234,11 @@ paths:
                         items:
                           type: string
                         type: array
+                      supports_agentless:
+                        default: false
+                        description: Indicates whether the package policy belongs to an agentless agent policy.
+                        nullable: true
+                        type: boolean
                       updated_at:
                         type: string
                       updated_by:
@@ -28931,6 +29016,11 @@ paths:
                                 items:
                                   type: string
                                 type: array
+                              supports_agentless:
+                                default: false
+                                description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
                               updated_at:
                                 type: string
                               updated_by:
@@ -29210,6 +29300,11 @@ paths:
                                   description: Agent policy IDs where that package policy will be added
                                   type: string
                                 type: array
+                              supports_agentless:
+                                default: false
+                                description: Indicates whether the package policy belongs to an agentless agent policy.
+                                nullable: true
+                                type: boolean
                               vars:
                                 additionalProperties:
                                   additionalProperties: false
