@@ -10,7 +10,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 import { getSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from '../types';
 import type { DataViewsState } from '../state_management';
-import type { TypedLensByValueInput } from '../embeddable/embeddable_component';
+import type { TypedLensByValueInput } from '../react_embeddable/types';
 import { mergeSuggestionWithVisContext } from './helpers';
 
 interface SuggestionsApiProps {
