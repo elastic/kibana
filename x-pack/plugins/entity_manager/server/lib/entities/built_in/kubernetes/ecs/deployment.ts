@@ -13,7 +13,7 @@ import { commonEcsIndexPatterns } from '../common/ecs_index_patterns';
 export const builtInKubernetesDeploymentEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_deployment_ecs`,
-    filter: 'kubernetes.deployment.uid : *',
+    filter: 'kubernetes.deployment.name : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes Deployment from ECS data',
@@ -21,7 +21,7 @@ export const builtInKubernetesDeploymentEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes deployment entities from the Kubernetes integration data streams',
     type: 'k8s.deployment.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.deployment.uid'],
+    identityFields: ['kubernetes.deployment.name'],
     displayNameTemplate: '{{kubernetes.deployment.name}}',
     latest: {
       timestampField: '@timestamp',

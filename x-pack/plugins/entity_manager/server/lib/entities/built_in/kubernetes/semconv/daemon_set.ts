@@ -30,5 +30,12 @@ export const builtInKubernetesDaemonSetSemConvEntityDefinition: EntityDefinition
         frequency: '5m',
       },
     },
-    metadata: commonOtelMetadata,
+    metadata: [
+      ...commonOtelMetadata,
+      {
+        source: 'k8s.daemonset.name',
+        destination: 'k8s.daemonset.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });

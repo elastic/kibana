@@ -45,7 +45,7 @@ export function EntityIcon({ entity }: EntityIconProps) {
     return <AgentIcon agentName={castArray(entity.agent?.name)[0]} role="presentation" />;
   }
 
-  if (entity.entityType.startsWith('kubernetes')) {
+  if (entity.entityType.startsWith('k8s')) {
     return <EuiIcon type="logoKubernetes" size="l" />;
   }
 

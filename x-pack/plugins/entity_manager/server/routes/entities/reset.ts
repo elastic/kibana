@@ -25,13 +25,11 @@ import { stopTransforms } from '../../lib/entities/stop_transforms';
 
 export const resetEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/definition/{id}/_reset',
-  options: {
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
-      },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
     },
   },
   params: z.object({

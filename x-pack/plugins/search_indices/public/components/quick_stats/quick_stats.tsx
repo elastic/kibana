@@ -28,6 +28,7 @@ export interface QuickStatsProps {
   index: Index;
   mappings: Mappings;
   indexDocuments: IndexDocuments;
+  tooltipContent?: string;
 }
 
 export const SetupAISearchButton: React.FC = () => {
@@ -107,6 +108,10 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDo
                 description: index.size ?? '0b',
               },
             ]}
+            tooltipContent={i18n.translate('xpack.searchIndices.quickStats.documentCountTooltip', {
+              defaultMessage:
+                'This excludes nested documents, which Elasticsearch uses internally to store chunks of vectors.',
+            })}
             first
           />
         </EuiFlexItem>

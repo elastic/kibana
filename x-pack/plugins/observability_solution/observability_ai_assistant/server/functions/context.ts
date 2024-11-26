@@ -34,7 +34,7 @@ export function registerContextFunction({
       visibility: FunctionVisibility.Internal,
     },
     async ({ messages, screenContexts, chat }, signal) => {
-      const { analytics } = (await resources.context.core).coreStart;
+      const { analytics } = await resources.plugins.core.start();
 
       async function getContext() {
         const screenDescription = compact(

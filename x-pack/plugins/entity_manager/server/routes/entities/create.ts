@@ -50,13 +50,11 @@ import { canManageEntityDefinition } from '../../lib/auth';
  */
 export const createEntityDefinitionRoute = createEntityManagerServerRoute({
   endpoint: 'POST /internal/entities/definition',
-  options: {
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
-      },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This endpoint mainly manages Elasticsearch resources using the requesting users credentials',
     },
   },
   params: z.object({

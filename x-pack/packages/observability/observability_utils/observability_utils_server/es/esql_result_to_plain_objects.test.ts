@@ -27,40 +27,15 @@ describe('esqlResultToPlainObjects', () => {
     expect(output).toEqual([{ name: 'Foo Bar' }]);
   });
 
-  it('should return columns without "text" or "keyword" in their names', () => {
+  it('should not unflatten objects', () => {
     const result: ESQLSearchResponse = {
       columns: [
-        { name: 'name.text', type: 'text' },
-        { name: 'age', type: 'keyword' },
+        { name: 'name', type: 'keyword' },
+        { name: 'name.nested', type: 'keyword' },
       ],
-      values: [
-        ['Foo Bar', 30],
-        ['Foo Qux', 25],
-      ],
+      values: [['Foo Bar', 'Bar Foo']],
     };
     const output = esqlResultToPlainObjects(result);
-    expect(output).toEqual([
-      { name: 'Foo Bar', age: 30 },
-      { name: 'Foo Qux', age: 25 },
-    ]);
-  });
-
-  it('should handle mixed columns correctly', () => {
-    const result: ESQLSearchResponse = {
-      columns: [
-        { name: 'name', type: 'text' },
-        { name: 'name.text', type: 'text' },
-        { name: 'age', type: 'keyword' },
-      ],
-      values: [
-        ['Foo Bar', 'Foo Bar', 30],
-        ['Foo Qux', 'Foo Qux', 25],
-      ],
-    };
-    const output = esqlResultToPlainObjects(result);
-    expect(output).toEqual([
-      { name: 'Foo Bar', age: 30 },
-      { name: 'Foo Qux', age: 25 },
-    ]);
+    expect(output).toEqual([{ name: 'Foo Bar', 'name.nested': 'Bar Foo' }]);
   });
 });

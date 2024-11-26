@@ -19,7 +19,9 @@ import { getFips } from 'crypto';
 
 const logFilePath = join(__dirname, 'read_batch_size.log');
 
-describe('migration v2 - read batch size', () => {
+// Failing ES promotion: https://github.com/elastic/kibana/issues/163254
+// Failing ES promotion: https://github.com/elastic/kibana/issues/163255
+describe.skip('migration v2 - read batch size', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let logs: string;

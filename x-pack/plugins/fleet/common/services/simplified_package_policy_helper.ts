@@ -49,6 +49,7 @@ export interface SimplifiedPackagePolicy {
   description?: string;
   vars?: SimplifiedVars;
   inputs?: SimplifiedInputs;
+  supports_agentless?: boolean | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -154,18 +155,19 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     description,
     inputs = {},
     vars: packageLevelVars,
+    supports_agentless: supportsAgentless,
   } = data;
-  const packagePolicy = packageToPackagePolicy(
-    packageInfo,
-    policyId && isEmpty(policyIds) ? policyId : policyIds,
-    namespace,
-    name,
-    description
-  );
-
-  if (outputId) {
-    packagePolicy.output_id = outputId;
-  }
+  const packagePolicy = {
+    ...packageToPackagePolicy(
+      packageInfo,
+      policyId && isEmpty(policyIds) ? policyId : policyIds,
+      namespace,
+      name,
+      description
+    ),
+    supports_agentless: supportsAgentless,
+    output_id: outputId,
+  };
 
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =

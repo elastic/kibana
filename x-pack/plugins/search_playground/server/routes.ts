@@ -198,17 +198,17 @@ export function defineRoutes({
         query: schema.object({
           search_query: schema.maybe(schema.string()),
           size: schema.number({ defaultValue: 10, min: 0 }),
+          exact: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
     errorHandler(logger)(async (context, request, response) => {
-      const { search_query: searchQuery, size } = request.query;
+      const { search_query: searchQuery, exact, size } = request.query;
       const {
         client: { asCurrentUser },
       } = (await context.core).elasticsearch;
 
-      const { indexNames } = await fetchIndices(asCurrentUser, searchQuery);
-
+      const { indexNames } = await fetchIndices(asCurrentUser, searchQuery, { exact });
       const indexNameSlice = indexNames.slice(0, size).filter(isNotNullish);
 
       return response.ok({

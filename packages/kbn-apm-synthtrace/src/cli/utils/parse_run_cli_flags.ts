@@ -74,7 +74,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'concurrency',
       'versionOverride',
       'clean',
-      'assume-package-version'
+      'assume-package-version',
+      'liveBucketSize'
     ),
     logLevel: parsedLogLevel,
     file: parsedFile,

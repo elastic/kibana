@@ -248,7 +248,7 @@ If available, include the link of the conversation at the end of your answer.`
       isPublic: true,
       connectorId: execOptions.params.connector,
       signal: new AbortController().signal,
-      kibanaPublicUrl: (await resources.context.core).coreStart.http.basePath.publicBaseUrl,
+      kibanaPublicUrl: (await resources.plugins.core.start()).http.basePath.publicBaseUrl,
       instructions: [backgroundInstruction],
       messages: [
         {

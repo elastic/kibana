@@ -131,11 +131,11 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   setAgentDataConfirmed,
   troubleshootLink,
 }) => {
-  const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData(
+  const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData({
     agentIds,
-    true,
-    MAX_AGENT_DATA_PREVIEW_COUNT
-  );
+    previewData: true,
+    stopPollingAfterPreviewLength: MAX_AGENT_DATA_PREVIEW_COUNT,
+  });
   const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(incomingData, packageInfo);
 
   const isGuidedOnboardingActive = useIsGuidedOnboardingActive(packageInfo?.name);

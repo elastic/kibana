@@ -172,6 +172,16 @@ export const PackagePolicyBaseSchema = {
       ),
     ])
   ),
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
+      })
+    )
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -286,6 +296,16 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: SimplifiedPackagePolicyInputsSchema,
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
+      })
+    )
+  ),
 });
 
 export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolicyBaseSchema.extends(

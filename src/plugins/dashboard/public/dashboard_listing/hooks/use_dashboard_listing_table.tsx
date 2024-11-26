@@ -213,6 +213,10 @@ export const useDashboardListingTable = ({
           size: listingLimit,
           hasReference: references,
           hasNoReference: referencesToExclude,
+          options: {
+            // include only tags references in the response to save bandwidth
+            includeReferences: ['tag'],
+          },
         })
         .then(({ total, hits }) => {
           const searchEndTime = window.performance.now();

@@ -194,7 +194,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
 
     const response$ = from(
       recallAndScore({
-        analytics: (await resources.context.core).coreStart.analytics,
+        analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
           client
             .chat(name, {

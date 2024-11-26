@@ -12,6 +12,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
+import { Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { type DataView, DataViewField, FieldSpec } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -42,7 +43,7 @@ import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
 
 export type FormBasedDataPanelProps = Omit<
-  DatasourceDataPanelProps<FormBasedPrivateState>,
+  DatasourceDataPanelProps<FormBasedPrivateState, Query>,
   'core' | 'onChangeIndexPattern'
 > & {
   data: DataPublicPluginStart;
@@ -185,7 +186,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   showNoDataPopover,
   activeIndexPatterns,
 }: Omit<
-  DatasourceDataPanelProps,
+  DatasourceDataPanelProps<unknown, Query>,
   'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
 > & {
   data: DataPublicPluginStart;

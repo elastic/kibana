@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { ExistsFilter, Filter, isExistsFilter } from '@kbn/es-query';
+import { type ExistsFilter, type Query, type Filter, isExistsFilter } from '@kbn/es-query';
 import {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
@@ -1300,7 +1300,7 @@ export class LensAttributes {
     visualizationType: 'lnsXY' | 'lnsLegacyMetric' | 'lnsHeatmap' = 'lnsXY',
     lastRefresh?: number
   ): TypedLensByValueInput['attributes'] {
-    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
+    const query: Query | undefined = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 
     const { internalReferences, adHocDataViews } = this.getReferences();
 

@@ -180,7 +180,15 @@
                 "section": "def-common.ClientRequestParamsOf",
                 "text": "ClientRequestParamsOf"
               },
-              "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions>) => Promise<",
+              "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpFetchOptions",
+                "text": "HttpFetchOptions"
+              },
+              ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -225,7 +233,15 @@
                     "section": "def-common.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
-                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions>"
+                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-public.HttpFetchOptions",
+                    "text": "HttpFetchOptions"
+                  },
+                  ">"
                 ],
                 "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
@@ -251,7 +267,15 @@
                 "section": "def-common.ClientRequestParamsOf",
                 "text": "ClientRequestParamsOf"
               },
-              "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions>) => ",
+              "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpFetchOptions",
+                "text": "HttpFetchOptions"
+              },
+              ">) => ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -300,7 +324,15 @@
                     "section": "def-common.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
-                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions>"
+                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-public.HttpFetchOptions",
+                    "text": "HttpFetchOptions"
+                  },
+                  ">"
                 ],
                 "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
@@ -348,7 +380,7 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          "> ? TRouteParamsRT extends ",
+          " | undefined> ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

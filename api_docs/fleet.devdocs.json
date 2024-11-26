@@ -20134,6 +20134,57 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.createOutputClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createOutputClient",
+          "description": [
+            "\nCreate a Fleet Output Client instance"
+          ],
+          "signature": [
+            "(request: ",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => Promise<",
+            "OutputClientInterface",
+            ">"
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.createOutputClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/plugins/fleet/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

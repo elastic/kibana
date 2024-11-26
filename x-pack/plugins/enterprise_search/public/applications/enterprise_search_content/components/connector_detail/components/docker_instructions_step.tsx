@@ -58,7 +58,10 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
     host: elasticsearchUrl,
   });
 
-  const escapedConfigYamlContent = configYamlContent.replace(/"/g, '\\"').replace(/\$/g, '\\$');
+  const escapedConfigYamlContent = configYamlContent
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\$/g, '\\$');
 
   const createConfigCommand = `mkdir -p "$HOME/elastic-connectors" && echo "${escapedConfigYamlContent}" > "$HOME/elastic-connectors/config.yml"`;
 

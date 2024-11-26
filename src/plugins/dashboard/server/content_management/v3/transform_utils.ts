@@ -304,24 +304,35 @@ type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
+export interface SavedObjectToItemOptions {
+  /**
+   * attributes to include in the output item
+   */
+  allowedAttributes?: string[];
+  /**
+   * references to include in the output item
+   */
+  allowedReferences?: string[];
+}
+
 export function savedObjectToItem(
   savedObject: SavedObject<DashboardSavedObjectAttributes>,
   partial: false,
-  allowedAttributes?: string[]
+  opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<DashboardItem>;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
   partial: true,
-  allowedAttributes?: string[]
+  opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<PartialDashboardItem>;
 
 export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
-  partial: boolean,
-  allowedAttributes?: string[]
+  partial: boolean /* partial arg is used to enforce the correct savedObject type */,
+  { allowedAttributes, allowedReferences }: SavedObjectToItemOptions = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
@@ -342,6 +353,12 @@ export function savedObjectToItem(
     const attributesOut = allowedAttributes
       ? pick(dashboardAttributesOut(attributes), allowedAttributes)
       : dashboardAttributesOut(attributes);
+
+    // if includeReferences is provided, only include references of those types
+    const referencesOut = allowedReferences
+      ? references?.filter((reference) => allowedReferences.includes(reference.type))
+      : references;
+
     return {
       item: {
         id,
@@ -353,7 +370,7 @@ export function savedObjectToItem(
         attributes: attributesOut,
         error,
         namespaces,
-        references,
+        references: referencesOut,
         version,
         managed,
       },

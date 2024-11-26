@@ -112,7 +112,9 @@
     "xpack.observabilityLogsOverview": [
       "packages/observability/logs_overview/src/components"
     ],
-    "xpack.osquery": ["plugins/osquery"],
+    "xpack.osquery": [
+      "plugins/osquery"
+    ],
     "xpack.painlessLab": "plugins/painless_lab",
     "xpack.profiling": [
       "plugins/observability_solution/profiling"
@@ -148,6 +150,9 @@
     "xpack.securitySolutionEss": "plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "plugins/security_solution_serverless",
     "xpack.sessionView": "plugins/session_view",
+    "xpack.streams": [
+      "plugins/streams_app"
+    ],
     "xpack.slo": "plugins/observability_solution/slo",
     "xpack.snapshotRestore": "plugins/snapshot_restore",
     "xpack.spaces": "plugins/spaces",

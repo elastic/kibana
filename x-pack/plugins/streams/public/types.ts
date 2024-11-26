@@ -6,11 +6,16 @@
  */
 
 import type { Plugin as PluginClass } from '@kbn/core/public';
+import { Observable } from 'rxjs';
+import type { StreamsRepositoryClient } from './api';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginSetup {}
+export interface StreamsPluginSetup {
+  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginStart {}
+export interface StreamsPluginStart {
+  streamsRepositoryClient: StreamsRepositoryClient;
+  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+}
 
-export type StreamsPluginClass = PluginClass<{}, {}, StreamsPluginSetup, StreamsPluginStart>;
+export type StreamsPluginClass = PluginClass<StreamsPluginSetup, StreamsPluginStart, {}, {}>;

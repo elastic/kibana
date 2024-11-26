@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDetailViewRedirect } from './use_detail_view_redirect';
 import { useKibana } from './use_kibana';
 import {
   CONTAINER_ID,
-  ENTITY_TYPES,
+  BUILT_IN_ENTITY_TYPES,
   HOST_NAME,
   SERVICE_NAME,
 } from '@kbn/observability-shared-plugin/common';
@@ -134,15 +134,30 @@ describe('useDetailViewRedirect', () => {
   });
 
   [
-    [ENTITY_TYPES.KUBERNETES.CLUSTER.ecs, 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'],
-    [ENTITY_TYPES.KUBERNETES.CLUSTER.semconv, 'kubernetes_otel-cluster-overview'],
-    [ENTITY_TYPES.KUBERNETES.CRONJOB.ecs, 'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013'],
-    [ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs, 'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013'],
-    [ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs, 'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013'],
-    [ENTITY_TYPES.KUBERNETES.JOB.ecs, 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013'],
-    [ENTITY_TYPES.KUBERNETES.NODE.ecs, 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013'],
-    [ENTITY_TYPES.KUBERNETES.POD.ecs, 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013'],
-    [ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs, 'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013'],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.ecs,
+      'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c',
+    ],
+    [BUILT_IN_ENTITY_TYPES.KUBERNETES.CLUSTER.semconv, 'kubernetes_otel-cluster-overview'],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES.CRONJOB.ecs,
+      'kubernetes-0a672d50-bcb1-11ec-b64f-7dd6e8e82013',
+    ],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES.DAEMONSET.ecs,
+      'kubernetes-85879010-bcb1-11ec-b64f-7dd6e8e82013',
+    ],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES.DEPLOYMENT.ecs,
+      'kubernetes-5be46210-bcb1-11ec-b64f-7dd6e8e82013',
+    ],
+    [BUILT_IN_ENTITY_TYPES.KUBERNETES.JOB.ecs, 'kubernetes-9bf990a0-bcb1-11ec-b64f-7dd6e8e82013'],
+    [BUILT_IN_ENTITY_TYPES.KUBERNETES.NODE.ecs, 'kubernetes-b945b7b0-bcb1-11ec-b64f-7dd6e8e82013'],
+    [BUILT_IN_ENTITY_TYPES.KUBERNETES.POD.ecs, 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013'],
+    [
+      BUILT_IN_ENTITY_TYPES.KUBERNETES.STATEFULSET.ecs,
+      'kubernetes-21694370-bcb2-11ec-b64f-7dd6e8e82013',
+    ],
   ].forEach(([entityType, dashboardId]) => {
     it(`getEntityRedirectUrl should return the correct URL for ${entityType} entity`, () => {
       const entity: InventoryEntity = {

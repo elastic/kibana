@@ -917,6 +917,10 @@ routes, etc.
 |This plugin provides an interface to manage streams
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/streams_app/README.md[streamsApp]
+|Home of the Streams app plugin, which allows users to manage Streams via the UI.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/synthetics/README.md[synthetics]
 |The purpose of this plugin is to provide users of Heartbeat more visibility of what's happening
 in their infrastructure.

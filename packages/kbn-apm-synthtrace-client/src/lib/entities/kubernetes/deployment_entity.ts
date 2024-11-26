@@ -27,9 +27,9 @@ export function k8sDeploymentEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
+      'entity.definition_id': 'deployment',
       'entity.type': 'deployment',
       'kubernetes.deployment.name': name,
-      'kubernetes.deployment.uid': uid,
       'kubernetes.namespace': clusterName,
       'entity.id': entityId,
       ...others,
@@ -37,6 +37,7 @@ export function k8sDeploymentEntity({
   }
 
   return new K8sEntity(schema, {
+    'entity.definition_id': 'deployment',
     'entity.type': 'deployment',
     'k8s.deployment.name': name,
     'k8s.deployment.uid': uid,

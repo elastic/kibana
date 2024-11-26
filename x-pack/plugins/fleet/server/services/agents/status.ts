@@ -177,11 +177,17 @@ export async function getAgentStatusForAgentPolicy(
   };
 }
 
-export async function getIncomingDataByAgentsId(
-  esClient: ElasticsearchClient,
-  agentsIds: string[],
-  returnDataPreview: boolean = false
-) {
+export async function getIncomingDataByAgentsId({
+  esClient,
+  agentsIds,
+  dataStreamPattern = DATA_STREAM_INDEX_PATTERN,
+  returnDataPreview = false,
+}: {
+  esClient: ElasticsearchClient;
+  agentsIds: string[];
+  dataStreamPattern?: string;
+  returnDataPreview?: boolean;
+}) {
   const logger = appContextService.getLogger();
 
   try {
@@ -189,7 +195,7 @@ export async function getIncomingDataByAgentsId(
       body: {
         index: [
           {
-            names: [DATA_STREAM_INDEX_PATTERN],
+            names: [dataStreamPattern],
             privileges: ['read'],
           },
         ],
@@ -203,7 +209,7 @@ export async function getIncomingDataByAgentsId(
     const searchResult = await retryTransientEsErrors(
       () =>
         esClient.search({
-          index: DATA_STREAM_INDEX_PATTERN,
+          index: dataStreamPattern,
           allow_partial_search_results: true,
           _source: returnDataPreview,
           timeout: '5s',
@@ -244,9 +250,9 @@ export async function getIncomingDataByAgentsId(
     if (!searchResult.aggregations?.agent_ids) {
       return {
         items: agentsIds.map((id) => {
-          return { items: { [id]: { data: false } } };
+          return { [id]: { data: false } };
         }),
-        data: [],
+        dataPreview: [],
       };
     }
 

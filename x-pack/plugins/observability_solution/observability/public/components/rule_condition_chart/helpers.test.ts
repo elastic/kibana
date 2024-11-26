@@ -77,6 +77,32 @@ const useCases = [
   ],
   [
     {
+      aggType: Aggregators.COUNT,
+      field: '',
+      filter: `container.name:container's name-1`,
+      name: '',
+    },
+    {
+      operation: 'count',
+      operationWithField: `count(kql='container.name:container\\'s name-1')`,
+      sourceField: '',
+    },
+  ],
+  [
+    {
+      aggType: Aggregators.COUNT,
+      field: '',
+      filter: 'host.name: host-*',
+      name: '',
+    },
+    {
+      operation: 'count',
+      operationWithField: `count(kql='host.name: host-*')`,
+      sourceField: '',
+    },
+  ],
+  [
+    {
       aggType: Aggregators.CARDINALITY,
       field: 'system.cpu.user.pct',
       filter: '',
@@ -136,7 +162,7 @@ const useCases = [
     },
     {
       operation: 'counter_rate',
-      operationWithField: `counter_rate(max(system.network.in.bytes), kql='host.name : foo')`,
+      operationWithField: `counter_rate(max(system.network.in.bytes), kql='host.name : "foo"')`,
       sourceField: 'system.network.in.bytes',
     },
   ],
