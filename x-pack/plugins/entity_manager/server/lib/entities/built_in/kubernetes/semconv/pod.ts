@@ -30,5 +30,12 @@ export const builtInKubernetesPodSemConvEntityDefinition: EntityDefinition =
         frequency: '5m',
       },
     },
-    metadata: commonOtelMetadata,
+    metadata: [
+      ...commonOtelMetadata,
+      {
+        source: 'k8s.pod.name',
+        destination: 'k8s.pod.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });
