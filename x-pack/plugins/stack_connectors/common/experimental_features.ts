@@ -16,7 +16,7 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneConnectorOn: true,
   crowdstrikeConnectorOn: true,
   inferenceConnectorOn: false,
-  crowdstrikeConnectorRTROn: true,
+  crowdstrikeConnectorRTROn: false,
 });
 
 export type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
