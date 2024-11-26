@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// import Color from 'color';
 import type { Rule } from 'eslint';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
 /**
- * @description Regex to match css color values,
+ * @description Regex to match css color values when used in a template string declarations,
  * see {@link https://developer.mozilla.org/en-US/docs/Web/CSS/color_value} for  definitions of valid css color values
  */
 const cssColorRegex = /(#|rgb|hsl|hwb|lab|lch|oklab).*/;
@@ -20,7 +19,7 @@ const cssColorRegex = /(#|rgb|hsl|hwb|lab|lch|oklab).*/;
 /**
  * @description List of css properties that can that can apply color to html box element and text node
  */
-const propertiesSupportingCssColor = ['color', 'background', 'backgroundColor', 'border'];
+const propertiesSupportingCssColor = ['color', 'background', 'backgroundColor', 'borderColor'];
 
 /**
  * @description Builds off the existing color definition regex to match css declarations that can apply color to
@@ -30,6 +29,7 @@ const htmlElementColorDeclarationRegex = RegExp(
   String.raw`(${propertiesSupportingCssColor.join('|')})\:\s?(\'|\")?${cssColorRegex.source}`
 );
 
+// in trying to keep this rule simple, if a string is used to define a color, we mark it as invalid for this particular use case
 const raiseReportIfPropertyHasInvalidCssColor = (
   context: Rule.RuleContext,
   propertyNode: TSESTree.ObjectLiteralElement,
@@ -37,20 +37,61 @@ const raiseReportIfPropertyHasInvalidCssColor = (
 ) => {
   let didReport: boolean;
 
-  // checks if property value is a css color value for instances where style declaration is computed from an object
   if (
     (didReport = Boolean(
       propertyNode.type === 'Property' &&
         propertyNode.key.type === 'Identifier' &&
         propertyNode.value.type === 'Literal' &&
-        propertiesSupportingCssColor.indexOf(propertyNode.key.name) > -1 &&
-        cssColorRegex.test(String(propertyNode.value.value) ?? '')
+        propertiesSupportingCssColor.indexOf(propertyNode.key.name) > -1
     ))
   ) {
     context.report(messageToReport);
   }
 
   return didReport;
+};
+
+/**
+ *
+ * @description style object declaration have a depth of 1, this function handles the properties of the object
+ */
+const handleObjectProperties = (
+  context: Rule.RuleContext,
+  propertyParentNode: TSESTree.JSXAttribute,
+  property: TSESTree.ObjectLiteralElement,
+  reportMessage: Rule.ReportDescriptor
+) => {
+  if (property.type === 'Property') {
+    raiseReportIfPropertyHasInvalidCssColor(context, property, reportMessage);
+  } else if (property.type === 'SpreadElement') {
+    const spreadElementIdentifierName = (property.argument as TSESTree.Identifier).name;
+
+    const spreadElementDeclaration = context.sourceCode
+      // @ts-expect-error
+      .getScope(propertyParentNode!.value.expression!)
+      .variables.find((variable) => variable.name === spreadElementIdentifierName);
+
+    if (!spreadElementDeclaration) {
+      return;
+    }
+
+    reportMessage = {
+      loc: propertyParentNode.loc,
+      messageId: 'noCSSColorSpecificDeclaredVariable',
+      data: {
+        // @ts-expect-error the key name is always present else this code will not execute
+        property: String(property.argument.name),
+        variableName: spreadElementIdentifierName,
+        line: String(property.loc.start.line),
+      },
+    };
+
+    (spreadElementDeclaration.defs[0].node.init as TSESTree.ObjectExpression).properties.forEach(
+      (spreadProperty) => {
+        handleObjectProperties(context, propertyParentNode, spreadProperty, reportMessage);
+      }
+    );
+  }
 };
 
 export const NoCssColor: Rule.RuleModule = {
@@ -90,7 +131,7 @@ export const NoCssColor: Rule.RuleModule = {
             const declarationPropertiesNode = node.value.expression.properties;
 
             declarationPropertiesNode?.forEach((property) => {
-              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+              handleObjectProperties(context, node, property, {
                 loc: property.loc,
                 messageId: 'noCssColorSpecific',
                 data: {
@@ -125,17 +166,22 @@ export const NoCssColor: Rule.RuleModule = {
               return;
             }
 
-            // assuming there's only one definition of the variable
+            // assuming there's only one definition of the variable, eslint would catch other occurrences of this
             (
-              styleVariableDeclaration.defs[0].node as TSESTree.VariableDeclarator
-            ).init?.properties.forEach((property) => {
-              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+              styleVariableDeclaration.defs[0].node.init as TSESTree.ObjectExpression
+            )?.properties.forEach((property) => {
+              handleObjectProperties(context, node, property, {
                 loc: node.loc,
                 messageId: 'noCSSColorSpecificDeclaredVariable',
                 data: {
-                  property: property.key.name,
+                  property:
+                    property.type === 'SpreadElement'
+                      ? // @ts-expect-error the key name is always present else this code will not execute
+                        String(property.argument.name)
+                      : // @ts-expect-error the key name is always present else this code will not execute
+                        String(property.key.name),
                   variableName: styleVariableName,
-                  line: property.loc.start.line,
+                  line: String(property.loc.start.line),
                 },
               });
             });
@@ -178,7 +224,7 @@ export const NoCssColor: Rule.RuleModule = {
             const declarationPropertiesNode = node.value.expression.properties;
 
             declarationPropertiesNode?.forEach((property) => {
-              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+              handleObjectProperties(context, node, property, {
                 loc: property.loc,
                 messageId: 'noCssColorSpecific',
                 data: {
@@ -252,7 +298,7 @@ export const NoCssColor: Rule.RuleModule = {
             }
 
             declarationPropertiesNode.forEach((property) => {
-              raiseReportIfPropertyHasInvalidCssColor(context, property, {
+              handleObjectProperties(context, node, property, {
                 loc: property.loc,
                 messageId: 'noCssColorSpecific',
                 data: {
