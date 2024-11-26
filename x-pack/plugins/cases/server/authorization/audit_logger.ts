@@ -82,15 +82,18 @@ export class AuthorizationAuditLogger {
     operation,
   }: {
     owners: string[];
-    operation: OperationDetails;
+    operation: OperationDetails | OperationDetails[];
   }) {
     const ownerMsg = owners.length <= 0 ? 'of any owner' : `with owners: "${owners.join(', ')}"`;
+    const operations = Array.isArray(operation) ? operation : [operation];
+    const operationVerbs = [...new Set(operations.map((op) => op.verbs.present))].join(', ');
+    const operationDocTypes = [...new Set(operations.map((op) => op.docType))].join(', ');
     /**
      * This will take the form:
      * `Unauthorized to create case with owners: "securitySolution, observability"`
      * `Unauthorized to access cases of any owner`
      */
-    return `Unauthorized to ${operation.verbs.present} ${operation.docType} ${ownerMsg}`;
+    return `Unauthorized to ${operationVerbs} ${operationDocTypes} ${ownerMsg}`;
   }
 
   /**

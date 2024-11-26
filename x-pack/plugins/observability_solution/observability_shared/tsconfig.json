@@ -45,6 +45,7 @@
     "@kbn/rule-data-utils",
     "@kbn/es-query",
     "@kbn/serverless",
+    "@kbn/data-views-plugin",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

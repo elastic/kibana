@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/ingest-pipelines-plugin",
   "owner": "@elastic/kibana-management",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "ingestPipelines",
     "server": true,

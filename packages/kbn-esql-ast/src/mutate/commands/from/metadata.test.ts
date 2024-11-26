@@ -28,7 +28,13 @@ describe('commands.from.metadata', () => {
 
       expect(column).toMatchObject({
         type: 'column',
-        parts: ['a'],
+        args: [
+          {
+            type: 'identifier',
+            name: 'a',
+          },
+        ],
+        // parts: ['a'],
       });
     });
 
@@ -40,19 +46,39 @@ describe('commands.from.metadata', () => {
       expect(columns).toMatchObject([
         {
           type: 'column',
-          parts: ['a'],
+          args: [
+            {
+              type: 'identifier',
+              name: 'a',
+            },
+          ],
         },
         {
           type: 'column',
-          parts: ['b'],
+          args: [
+            {
+              type: 'identifier',
+              name: 'b',
+            },
+          ],
         },
         {
           type: 'column',
-          parts: ['_id'],
+          args: [
+            {
+              type: 'identifier',
+              name: '_id',
+            },
+          ],
         },
         {
           type: 'column',
-          parts: ['_lang'],
+          args: [
+            {
+              type: 'identifier',
+              name: '_lang',
+            },
+          ],
         },
       ]);
     });
@@ -156,7 +182,6 @@ describe('commands.from.metadata', () => {
     it('return inserted `column` node, and parent `option` node', () => {
       const src1 = 'FROM index METADATA a';
       const { root } = parse(src1);
-
       const tuple = commands.from.metadata.insert(root, 'b');
 
       expect(tuple).toMatchObject([

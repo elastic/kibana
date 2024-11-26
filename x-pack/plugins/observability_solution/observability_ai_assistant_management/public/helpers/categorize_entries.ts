@@ -9,21 +9,30 @@ import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/
 
 export interface KnowledgeBaseEntryCategory {
   '@timestamp': string;
-  categoryName: string;
+  categoryKey: string;
+  title: string;
   entries: KnowledgeBaseEntry[];
 }
 
-export function categorizeEntries({ entries }: { entries: KnowledgeBaseEntry[] }) {
+export function categorizeEntries({
+  entries,
+}: {
+  entries: KnowledgeBaseEntry[];
+}): KnowledgeBaseEntryCategory[] {
   return entries.reduce((acc, entry) => {
-    const categoryName = entry.labels?.category ?? entry.id;
+    const categoryKey = entry.labels?.category ?? entry.id;
 
-    const index = acc.findIndex((item) => item.categoryName === categoryName);
-
-    if (index > -1) {
-      acc[index].entries.push(entry);
+    const existingEntry = acc.find((item) => item.categoryKey === categoryKey);
+    if (existingEntry) {
+      existingEntry.entries.push(entry);
       return acc;
-    } else {
-      return acc.concat({ categoryName, entries: [entry], '@timestamp': entry['@timestamp'] });
     }
-  }, [] as Array<{ categoryName: string; entries: KnowledgeBaseEntry[]; '@timestamp': string }>);
+
+    return acc.concat({
+      categoryKey,
+      title: entry.labels?.category ?? entry.title ?? 'No title',
+      entries: [entry],
+      '@timestamp': entry['@timestamp'],
+    });
+  }, [] as Array<{ categoryKey: string; title: string; entries: KnowledgeBaseEntry[]; '@timestamp': string }>);
 }

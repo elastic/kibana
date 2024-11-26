@@ -25,8 +25,10 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
     .post({
       path: '/internal/data_visualizer/test_grok_pattern',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -78,8 +80,10 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
     .get({
       path: '/internal/data_visualizer/inference_endpoints',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(
@@ -96,13 +100,57 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
 
           const filteredInferenceEndpoints = endpoints.filter((endpoint) => {
             return (
-              (endpoint.task_type === 'sparse_embedding' ||
-                endpoint.task_type === 'text_embedding') &&
-              endpoint.service_settings.num_allocations >= 0
+              endpoint.task_type === 'sparse_embedding' || endpoint.task_type === 'text_embedding'
             );
           });
 
           return response.ok({ body: filteredInferenceEndpoints });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup DataVisualizer
+   *
+   * @api {get} /internal/data_visualizer/inference/{inferenceId} Runs inference on a given inference endpoint with the provided input
+   * @apiName inference
+   * @apiDescription Runs inference on a given inference endpoint with the provided input.
+   */
+  router.versioned
+    .post({
+      path: '/internal/data_visualizer/inference/{inferenceId}',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            params: schema.object({
+              inferenceId: schema.string(),
+            }),
+            body: schema.object({
+              input: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const inferenceId = request.params.inferenceId;
+          const input = request.body.input;
+          const esClient = (await context.core).elasticsearch.client;
+          const body = await esClient.asCurrentUser.inference.inference({
+            inference_id: inferenceId,
+            input,
+          });
+
+          return response.ok({ body });
         } catch (e) {
           return response.customError(wrapError(e));
         }

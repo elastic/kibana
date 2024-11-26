@@ -17,7 +17,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../../../common/constants';
 import { SLOOverviewAlerts } from './slo_overview_alerts';
-import { useGetSettings } from '../../../slo_settings/use_get_settings';
+import { useGetSettings } from '../../../slo_settings/hooks/use_get_settings';
 import { useFetchSLOsOverview } from '../../hooks/use_fetch_slos_overview';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { OverViewItem } from './overview_item';

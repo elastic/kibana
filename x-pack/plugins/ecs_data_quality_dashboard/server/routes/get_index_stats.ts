@@ -85,7 +85,7 @@ export const getIndexStatsRoute = (router: IRouter, logger: Logger) => {
             const meteringStatsIndices = parseMeteringStats(meteringStats.indices);
 
             const availableIndices = await fetchAvailableIndices(esClient, {
-              indexPattern: decodedIndexName,
+              indexNameOrPattern: decodedIndexName,
               startDate: decodedStartDate,
               endDate: decodedEndDate,
             });

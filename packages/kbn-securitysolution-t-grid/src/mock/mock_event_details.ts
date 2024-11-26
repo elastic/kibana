@@ -293,6 +293,29 @@ export const eventDetailsFormattedFields = [
   },
   {
     category: 'threat',
+    field: 'threat.enrichments',
+    isObjectArray: true,
+    originalValue: [
+      '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
+      '{"matched.field":["matched_field_2"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["other_you"],"indicator.type":["custom"],"matched.atomic":["matched_atomic_2"],"lazer":[{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}]}',
+      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["FFEtSYIBZ61VHL7LvV2j"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+      '{"matched.field":["host.architecture"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["x86_64"]}',
+      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["CFErSYIBZ61VHL7LIV1N"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+    ],
+    values: [
+      '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
+      '{"matched.field":["matched_field_2"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["other_you"],"indicator.type":["custom"],"matched.atomic":["matched_atomic_2"],"lazer":[{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}]}',
+      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["FFEtSYIBZ61VHL7LvV2j"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+      '{"matched.field":["host.architecture"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["x86_64"]}',
+      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["CFErSYIBZ61VHL7LIV1N"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
+    ],
+  },
+  {
+    category: 'threat',
     field: 'threat.enrichments.matched.field',
     isObjectArray: false,
     originalValue: [
@@ -375,28 +398,5 @@ export const eventDetailsFormattedFields = [
     isObjectArray: false,
     originalValue: ['FFEtSYIBZ61VHL7LvV2j', 'E1EtSYIBZ61VHL7Ltl3m', 'CFErSYIBZ61VHL7LIV1N'],
     values: ['FFEtSYIBZ61VHL7LvV2j', 'E1EtSYIBZ61VHL7Ltl3m', 'CFErSYIBZ61VHL7LIV1N'],
-  },
-  {
-    category: 'threat',
-    field: 'threat.enrichments',
-    isObjectArray: true,
-    originalValue: [
-      '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
-      '{"matched.field":["matched_field_2"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["other_you"],"indicator.type":["custom"],"matched.atomic":["matched_atomic_2"],"lazer":[{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}]}',
-      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["FFEtSYIBZ61VHL7LvV2j"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-      '{"matched.field":["host.architecture"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["x86_64"]}',
-      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["CFErSYIBZ61VHL7LIV1N"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-    ],
-    values: [
-      '{"matched.field":["matched_field","other_matched_field"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["yourself"],"indicator.type":["custom"],"matched.atomic":["matched_atomic"],"lazer":[{"great.field":["grrrrr"]},{"great.field":["grrrrr_2"]}]}',
-      '{"matched.field":["matched_field_2"],"indicator.first_seen":["2021-02-22T17:29:25.195Z"],"indicator.provider":["other_you"],"indicator.type":["custom"],"matched.atomic":["matched_atomic_2"],"lazer":[{"great.field":[{"wowoe":[{"fooooo":["grrrrr"]}],"astring":"cool","aNumber":1,"neat":true}]}]}',
-      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["FFEtSYIBZ61VHL7LvV2j"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-      '{"matched.field":["host.architecture"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["x86_64"]}',
-      '{"matched.field":["host.name"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["E1EtSYIBZ61VHL7Ltl3m"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-      '{"matched.field":["host.hostname"],"matched.index":["im"],"matched.type":["indicator_match_rule"],"matched.id":["CFErSYIBZ61VHL7LIV1N"],"matched.atomic":["MacBook-Pro-de-Gloria.local"]}',
-    ],
   },
 ];

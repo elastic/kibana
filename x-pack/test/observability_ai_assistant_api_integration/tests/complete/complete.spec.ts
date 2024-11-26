@@ -290,7 +290,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )[0]?.conversation.id;
 
         await observabilityAIAssistantAPIClient
-          .adminUser({
+          .admin({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -366,7 +366,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(0);
 
         const conversations = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -396,7 +396,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .completeAfterIntercept();
 
         const createResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -415,7 +415,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.editorUser({
+        const fullConversation = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -429,7 +429,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .completeAfterIntercept();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -460,7 +460,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .editorUser({
+          .editor({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {

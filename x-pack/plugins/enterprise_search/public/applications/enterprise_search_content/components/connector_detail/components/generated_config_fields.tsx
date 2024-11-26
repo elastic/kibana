@@ -156,6 +156,10 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                       data-test-subj="enterpriseSearchConnectorDeploymentButton"
                       iconType="copyClipboard"
                       onClick={copy}
+                      aria-label={i18n.translate(
+                        'xpack.enterpriseSearch.connectorDeployment.copyConnectorId',
+                        { defaultMessage: 'Copy connector ID' }
+                      )}
                     />
                   )}
                 </EuiCopy>
@@ -237,6 +241,10 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                               isLoading={isGenerateLoading}
                               onClick={refreshButtonClick}
                               disabled={!connector.index_name}
+                              aria-label={i18n.translate(
+                                'xpack.enterpriseSearch.connectorDeployment.refreshAPIKey',
+                                { defaultMessage: 'Refresh an Elasticsearch API key' }
+                              )}
                             />
                           </EuiFlexItem>
                         )}
@@ -246,6 +254,10 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                             data-test-subj="enterpriseSearchConnectorDeploymentButton"
                             iconType="copyClipboard"
                             onClick={copy}
+                            aria-label={i18n.translate(
+                              'xpack.enterpriseSearch.connectorDeployment.copyIndexName',
+                              { defaultMessage: 'Copy index name' }
+                            )}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

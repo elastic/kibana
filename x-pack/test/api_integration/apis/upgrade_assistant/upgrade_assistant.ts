@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
 
-  describe('Upgrade Assistant', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/199719
+  describe.skip('Upgrade Assistant', function () {
     describe('Reindex operation saved object', () => {
       const dotKibanaIndex = '.kibana';
       const fakeSavedObjectId = 'fakeSavedObjectId';

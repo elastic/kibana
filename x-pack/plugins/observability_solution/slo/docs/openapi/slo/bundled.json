@@ -559,7 +559,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Successful request"
           },
           "400": {
@@ -625,7 +625,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Successful request",
             "content": {
               "application/json": {

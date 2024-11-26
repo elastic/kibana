@@ -24,53 +24,69 @@ const ConfirmTitle = () => (
 
 interface ConfirmDescriptionProps {
   output: Output;
-  agentCount: number;
-  agentPolicyCount: number;
+  agentCount?: number;
+  agentPolicyCount?: number;
 }
 
 const ConfirmDescription: React.FunctionComponent<ConfirmDescriptionProps> = ({
   output,
   agentCount,
   agentPolicyCount,
-}) => (
-  <FormattedMessage
-    id="xpack.fleet.settings.deleteOutput.confirmModalText"
-    defaultMessage="This action will delete {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
-    values={{
-      outputName: <strong>{output.name}</strong>,
-      agents: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.deleteOutput.agentsCount"
-            defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
-            values={{
-              agentCount,
-            }}
-          />
-        </strong>
-      ),
-      policies: (
-        <strong>
-          <FormattedMessage
-            id="xpack.fleet.settings.deleteOutput.agentPolicyCount"
-            defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
-            values={{
-              agentPolicyCount,
-            }}
-          />
-        </strong>
-      ),
-    }}
-  />
-);
+}) =>
+  agentCount !== undefined && agentPolicyCount !== undefined ? (
+    <FormattedMessage
+      id="xpack.fleet.settings.deleteOutput.confirmModalText"
+      defaultMessage="This action will delete {outputName} output. It will update {policies} and {agents}. This action can not be undone. Are you sure you wish to continue?"
+      values={{
+        outputName: <strong>{output.name}</strong>,
+        agents: (
+          <strong>
+            <FormattedMessage
+              id="xpack.fleet.settings.deleteOutput.agentsCount"
+              defaultMessage="{agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
+            />
+          </strong>
+        ),
+        policies: (
+          <strong>
+            <FormattedMessage
+              id="xpack.fleet.settings.deleteOutput.agentPolicyCount"
+              defaultMessage="{agentPolicyCount, plural, one {# agent policy} other {# agent policies}}"
+              values={{
+                agentPolicyCount,
+              }}
+            />
+          </strong>
+        ),
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.settings.deleteOutput.confirmModalTextWithCount"
+      defaultMessage="This action will delete {outputName} output. It will update related policies and agents. This action can not be undone. Are you sure you wish to continue?"
+      values={{
+        outputName: <strong>{output.name}</strong>,
+      }}
+    />
+  );
 
 export function useDeleteOutput(onSuccess: () => void) {
   const { confirm } = useConfirmModal();
   const { notifications } = useStartServices();
+
   const deleteOutput = useCallback(
     async (output: Output) => {
       try {
-        const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(output);
+        const { agentCount, agentPolicyCount } = await getAgentAndPolicyCountForOutput(
+          output
+        ).catch(() => ({
+          // Fail gracefully if count are not available
+          agentCount: undefined,
+          agentPolicyCount: undefined,
+        }));
 
         const isConfirmed = await confirm(
           <ConfirmTitle />,

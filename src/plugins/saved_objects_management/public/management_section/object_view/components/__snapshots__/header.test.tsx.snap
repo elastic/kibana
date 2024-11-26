@@ -23,7 +23,7 @@ exports[`Intro component renders correctly 1`] = `
         class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
       >
         <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
         >
           <button
             class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
@@ -42,7 +42,7 @@ exports[`Intro component renders correctly 1`] = `
           </button>
         </div>
         <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
         >
           <a
             class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"

@@ -168,7 +168,7 @@ export function _buildStatusRuntimeField(opts: {
 // pathPrefix is used by the endpoint team currently to run
 // agent queries against the endpoint metadata index
 export async function buildAgentStatusRuntimeField(
-  soClient: SavedObjectsClientContract, // Deprecated, it's now using an internal client
+  soClient?: SavedObjectsClientContract, // Deprecated, it's now using an internal client
   pathPrefix?: string
 ) {
   const config = appContextService.getConfig();

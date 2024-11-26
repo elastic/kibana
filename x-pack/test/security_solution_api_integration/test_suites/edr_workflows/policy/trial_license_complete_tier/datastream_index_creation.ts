@@ -28,8 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const isServerless = config.get('serverless');
 
-  // FIXME:PT Remove @skipInServerlessMKI and enable it for MKI
-  describe('@ess @serverless @skipInServerlessMKI Creation of DOT indices for elastic defend policies', function () {
+  describe('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
     let testData: PolicyTestResourceInfo;
 
     const getExpectedIndexList = (namespace: string): string[] => {

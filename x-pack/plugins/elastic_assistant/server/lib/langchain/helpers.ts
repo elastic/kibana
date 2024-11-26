@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core-http-server';
-import type { Message } from '@kbn/elastic-assistant-common';
+import type { DefendInsightsPostRequestBody, Message } from '@kbn/elastic-assistant-common';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import {
   AttackDiscoveryPostRequestBody,
@@ -36,7 +36,7 @@ export const requestHasRequiredAnonymizationParams = (
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
+    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
   >
 ): boolean => {
   const { replacements } = request?.body ?? {};

@@ -10,7 +10,7 @@ The *Search* space in the {kib} UI contains the following GUI features:
 * https://www.elastic.co/guide/en/elasticsearch/reference/current/search-application-overview.html[Search Applications]
 * https://www.elastic.co/guide/en/elasticsearch/reference/current/behavioral-analytics-overview.html[Behavioral Analytics]
 * <<inference-endpoints,Inference Endpoints UI>>
-* <<search-assistant,AI Assistant for Search>>
+* <<search-ai-assistant,AI Assistant for Search>>
 * Dev Tools <<console-kibana, Console>>
 
 [float]

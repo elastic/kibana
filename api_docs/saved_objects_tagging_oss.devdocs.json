@@ -1297,7 +1297,7 @@
             "section": "def-common.Tag",
             "text": "Tag"
           },
-          " | { type: \"__create_option__\"; }>, \"options\" | \"selectedOptions\" | \"optionMatcher\" | \"async\" | \"compressed\" | \"fullWidth\" | \"isClearable\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          " | { type: \"__create_option__\"; }>, \"options\" | \"prepend\" | \"append\" | \"async\" | \"isClearable\" | \"compressed\" | \"fullWidth\" | \"selectedOptions\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "common",

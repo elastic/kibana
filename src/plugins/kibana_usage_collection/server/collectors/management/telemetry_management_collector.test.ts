@@ -54,10 +54,15 @@ describe('telemetry_application_usage_collector', () => {
 
   test('fetch()', async () => {
     uiSettingsClient.getUserProvided.mockImplementationOnce(async () => ({
-      'visualization:colorMapping': { userValue: 'red' },
+      'timepicker:timeDefaults': {
+        userValue: {
+          from: 'now-7d',
+          to: 'now-6d',
+        },
+      },
     }));
     await expect(collector.fetch(mockedFetchContext)).resolves.toEqual({
-      'visualization:colorMapping': 'red',
+      'timepicker:timeDefaults': { from: 'now-7d', to: 'now-6d' },
     });
   });
 

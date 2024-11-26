@@ -14,13 +14,6 @@ export const SETTINGS = i18n.translate(
   }
 );
 
-export const SETTINGS_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsTooltip',
-  {
-    defaultMessage: 'Settings',
-  }
-);
-
 export const SECURITY_AI_SETTINGS = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.securityAiSettingsTitle',
   {

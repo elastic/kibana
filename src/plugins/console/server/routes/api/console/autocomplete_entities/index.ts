@@ -43,7 +43,10 @@ const getAliases = async (settings: SettingsToRetrieve, esClient: IScopedCluster
 
 const getDataStreams = async (settings: SettingsToRetrieve, esClient: IScopedClusterClient) => {
   if (settings.dataStreams) {
-    const dataStreams = await esClient.asCurrentUser.indices.getDataStream();
+    const dataStreams = await esClient.asCurrentUser.indices.getDataStream({
+      name: '*',
+      expand_wildcards: 'all',
+    });
     return dataStreams;
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
