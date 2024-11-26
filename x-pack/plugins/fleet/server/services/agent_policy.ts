@@ -1649,6 +1649,27 @@ class AgentPolicyService {
     );
   }
 
+  public async bumpAgentPoliciesByIds(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentPolicyIds: string[],
+    options?: { user?: AuthenticatedUser }
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
+    const internalSoClientWithoutSpaceExtension =
+      appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const savedObjectType = await getAgentPolicySavedObjectType();
+
+    const objects = agentPolicyIds.map((id: string) => ({ id, type: savedObjectType }));
+    const bulkGetResponse = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
+
+    return this._bumpPolicies(
+      internalSoClientWithoutSpaceExtension,
+      esClient,
+      bulkGetResponse.saved_objects,
+      options
+    );
+  }
+
   public async getInactivityTimeouts(): Promise<
     Array<{ policyIds: string[]; inactivityTimeout: number }>
   > {
