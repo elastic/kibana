@@ -51,6 +51,7 @@ export const CertType = t.intersection([
     '@timestamp': t.string,
     serviceName: t.string,
     errorMessage: t.string,
+    errorStackTrace: t.union([t.string, t.null]),
     labels: t.record(t.string, t.string),
     tags: t.array(t.string),
   }),

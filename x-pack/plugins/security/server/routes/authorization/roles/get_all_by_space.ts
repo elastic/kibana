@@ -24,8 +24,10 @@ export function defineGetAllRolesBySpaceRoutes({
   router.get(
     {
       path: '/internal/security/roles/{spaceId}',
-      options: {
-        tags: ['access:manage_spaces'],
+      security: {
+        authz: {
+          requiredPrivileges: ['manage_spaces'],
+        },
       },
       validate: {
         params: schema.object({ spaceId: schema.string({ minLength: 1 }) }),

@@ -39,7 +39,7 @@ export type SamlAuthProviderType = ProvidedType<typeof SamlAuthProvider>;
 export type { FtrProviderContext } from './services/ftr_provider_context';
 export { runSavedObjInfoSvc } from './services/saved_object_info';
 
-export type { BsearchService, SendOptions } from './services/bsearch';
+export type { SearchService, SendOptions } from './services/search';
 export { SavedObjectInfoService } from './services/saved_object_info';
 export { DeploymentService } from './services/deployment';
 export { IndexPatternsService } from './services/index_patterns';

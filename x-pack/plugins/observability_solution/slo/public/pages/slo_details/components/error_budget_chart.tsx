@@ -12,7 +12,7 @@ import numeral from '@elastic/numeral';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { TimeBounds } from '../types';
 import { SloTabId } from './slo_details';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '../../../hooks/use_kibana';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';
 import { WideChart } from './wide_chart';

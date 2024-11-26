@@ -242,6 +242,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             });
           }}
           isValid={aggConfigDef.isValid()}
+          errorMessages={aggConfigDef.getErrorMessages?.()}
         />
       ) : null}
       {isUnsupportedAgg && (

@@ -24,7 +24,11 @@ export const postIndexResultsRoute = (
     .post({
       path: POST_INDEX_RESULTS,
       access: 'internal',
-      options: { tags: ['access:securitySolution'] },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {

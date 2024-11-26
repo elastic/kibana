@@ -20,12 +20,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
@@ -256,6 +256,21 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
 
+  const canSetBreakdownField = useMemo(
+    () =>
+      isOfAggregateQueryType(query)
+        ? dataView?.isTimeBased() && !hasTransformationalCommand(query.esql)
+        : true,
+    [dataView, query]
+  );
+
+  const onAddBreakdownField = useCallback(
+    (field: DataViewField | undefined) => {
+      stateContainer.appState.update({ breakdownField: field?.name });
+    },
+    [stateContainer]
+  );
+
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
       if (removedFieldName && currentColumns.includes(removedFieldName)) {
@@ -423,18 +438,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                documents$={stateContainer.dataState.data$.documents$}
-                onAddField={onAddColumnWithTracking}
-                onRemoveField={onRemoveColumnWithTracking}
+                additionalFilters={customFilters}
                 columns={currentColumns}
+                documents$={stateContainer.dataState.data$.documents$}
+                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
+                onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
-                selectedDataView={dataView}
-                trackUiMetric={trackUiMetric}
-                onFieldEdited={onFieldEdited}
                 onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                onFieldEdited={onFieldEdited}
+                onRemoveField={onRemoveColumnWithTracking}
+                selectedDataView={dataView}
                 sidebarToggleState$={sidebarToggleState$}
-                additionalFilters={customFilters}
+                trackUiMetric={trackUiMetric}
               />
             }
             mainPanel={

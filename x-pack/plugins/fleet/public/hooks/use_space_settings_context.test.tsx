@@ -23,7 +23,7 @@ describe('useSpaceSettingsContext', () => {
   function renderHook() {
     return createFleetTestRendererMock().renderHook(
       () => useSpaceSettingsContext(),
-      ({ children }: { children: any }) => (
+      ({ children }: React.PropsWithChildren) => (
         <SpaceSettingsContextProvider>{children}</SpaceSettingsContextProvider>
       )
     );

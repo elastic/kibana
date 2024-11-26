@@ -281,6 +281,14 @@ export function getWebpackConfig(
           },
         },
         {
+          test: /node_modules[\/\\]launchdarkly[^\/\\]+[\/\\].*.js$/,
+          loaders: 'babel-loader',
+          options: {
+            envName: worker.dist ? 'production' : 'development',
+            presets: [BABEL_PRESET],
+          },
+        },
+        {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',

@@ -7,7 +7,7 @@
 
 import { useHostMetricsTable } from './use_host_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createMetricsClientMock } from '../test_helpers';
 
 jest.mock('../shared', () => ({
@@ -39,6 +39,12 @@ describe('useHostMetricsTable hook', () => {
         filter: [{ term: { 'event.module': 'system' } }, { ...filterClauseDsl }],
       },
     };
+
+    // include this to prevent rendering error in test
+    useInfrastructureNodeMetricsMock.mockReturnValue({
+      isLoading: true,
+      data: { state: 'empty-indices' },
+    });
 
     renderHook(() =>
       useHostMetricsTable({

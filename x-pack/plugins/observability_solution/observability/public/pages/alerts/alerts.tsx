@@ -159,13 +159,18 @@ function InternalAlertsPage() {
     [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize, esQuery]
   );
 
-  useBreadcrumbs([
+  useBreadcrumbs(
+    [
+      {
+        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+          defaultMessage: 'Alerts',
+        }),
+      },
+    ],
     {
-      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-        defaultMessage: 'Alerts',
-      }),
-    },
-  ]);
+      classicOnly: true,
+    }
+  );
 
   async function loadRuleStats() {
     setRuleStatsLoading(true);

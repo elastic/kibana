@@ -30,7 +30,7 @@ import type {
   CasesServerStartDependencies,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import { getCasesKibanaFeature } from './features';
+import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
@@ -92,7 +92,11 @@ export class CasePlugin
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
     if (this.caseConfig.stack.enabled) {
-      plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+      // V1 is deprecated, but has to be maintained for the time being
+      // https://github.com/elastic/kibana/pull/186800#issue-2369812818
+      const casesFeatures = getCasesKibanaFeatures();
+      plugins.features.registerKibanaFeature(casesFeatures.v1);
+      plugins.features.registerKibanaFeature(casesFeatures.v2);
     }
 
     registerSavedObjects({
@@ -122,9 +126,14 @@ export class CasePlugin
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
 
+    const isServerless = plugins.cloud?.isServerlessEnabled;
+
     registerRoutes({
       router,
-      routes: [...getExternalRoutes(), ...getInternalRoutes(this.userProfileService)],
+      routes: [
+        ...getExternalRoutes({ isServerless }),
+        ...getInternalRoutes(this.userProfileService),
+      ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       telemetryUsageCounter,

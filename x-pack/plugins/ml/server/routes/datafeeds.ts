@@ -25,8 +25,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDatafeeds'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDatafeeds'],
+        },
       },
       summary: 'Gets all datafeeds',
       description: 'Retrieves configuration information for datafeeds.',
@@ -52,8 +54,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDatafeeds'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDatafeeds'],
+        },
       },
       summary: 'Get datafeed for given datafeed id',
       description: 'Retrieves configuration information for a datafeed.',
@@ -85,8 +89,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDatafeeds'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDatafeeds'],
+        },
       },
       summary: 'Gets stats for all datafeeds',
       description: 'Retrieves usage information for datafeeds.',
@@ -112,8 +118,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stats`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetDatafeeds'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetDatafeeds'],
+        },
       },
       summary: 'Get datafeed stats for given datafeed id',
       description: 'Retrieves usage information for a datafeed.',
@@ -147,8 +155,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateDatafeed'],
+        },
       },
       summary: 'Creates a datafeed',
       description: 'Instantiates a datafeed.',
@@ -188,8 +198,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_update`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canUpdateDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canUpdateDatafeed'],
+        },
       },
       summary: 'Updates a datafeed',
       description: 'Updates certain properties of a datafeed.',
@@ -229,8 +241,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .delete({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canDeleteDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canDeleteDatafeed'],
+        },
       },
       summary: 'Deletes a datafeed',
       description: 'Deletes an existing datafeed.',
@@ -270,8 +284,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_start`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDatafeed'],
+        },
       },
       summary: 'Starts a datafeed',
       description: 'Starts one or more datafeeds',
@@ -312,8 +328,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_stop`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canStartStopDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canStartStopDatafeed'],
+        },
       },
       summary: 'Stops a datafeed',
       description: 'Stops one or more datafeeds',
@@ -348,8 +366,10 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/datafeeds/{datafeedId}/_preview`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canPreviewDatafeed'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canPreviewDatafeed'],
+        },
       },
       summary: 'Previews a datafeed',
       description: 'Previews a datafeed',

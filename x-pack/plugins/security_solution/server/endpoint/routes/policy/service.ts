@@ -68,38 +68,6 @@ export async function getPolicyResponseByAgentId(
   return undefined;
 }
 
-const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: string]: number } => {
-  const data: { [key: string]: number } = {};
-  versionMap.forEach((value, key) => {
-    data[key] = value;
-  });
-  return data;
-};
-
-export async function getAgentPolicySummary(
-  endpointAppContext: EndpointAppContext,
-  request: KibanaRequest,
-  packageName: string,
-  policyId?: string,
-  pageSize: number = 1000
-): Promise<{ [key: string]: number }> {
-  const agentQuery = `packages:"${packageName}"`;
-  if (policyId) {
-    return transformAgentVersionMap(
-      await agentVersionsMap(
-        endpointAppContext,
-        request,
-        `${agentQuery} AND policy_id:${policyId}`,
-        pageSize
-      )
-    );
-  }
-
-  return transformAgentVersionMap(
-    await agentVersionsMap(endpointAppContext, request, agentQuery, pageSize)
-  );
-}
-
 export async function agentVersionsMap(
   endpointAppContext: EndpointAppContext,
   request: KibanaRequest,

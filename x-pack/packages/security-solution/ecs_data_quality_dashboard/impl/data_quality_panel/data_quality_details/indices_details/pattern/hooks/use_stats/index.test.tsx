@@ -69,6 +69,8 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       },
     ]}
     setSelectedIlmPhaseOptions={jest.fn()}
+    defaultStartTime={'now-7d'}
+    defaultEndTime={'now'}
   >
     {children}
   </DataQualityProvider>
@@ -119,6 +121,8 @@ const ContextWrapperILMNotAvailable: FC<PropsWithChildren<unknown>> = ({ childre
       },
     ]}
     setSelectedIlmPhaseOptions={jest.fn()}
+    defaultStartTime={'now-7d'}
+    defaultEndTime={'now'}
   >
     {children}
   </DataQualityProvider>

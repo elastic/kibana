@@ -57,7 +57,7 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
       }
       const createdActions = await Promise.all(actionPromises);
       createdActions.forEach((createdAction) =>
-        objectRemover.add(Spaces.space1.id, createdAction.body.id, 'action', 'actions')
+        objectRemover.add(Spaces.space1.id, createdAction.body.id, 'connector', 'actions')
       );
 
       const pattern = {

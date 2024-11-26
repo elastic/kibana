@@ -18,7 +18,7 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
-import { AIOPS_ANALYSIS_RUN_ORIGIN } from '@kbn/aiops-common/constants';
+import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import datemath from '@elastic/datemath';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -354,12 +354,19 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     [lastReloadRequestTime]
   );
 
-  const actions = [...getActions(false), ...getActions(true)];
+  const isCasesEmbeddable = embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.CASES;
+
+  // When in cases, we can only show the "Filter for pattern in Discover" actions as Cases does not have full filter management.
+  const actions = isCasesEmbeddable
+    ? getActions(true)
+    : [...getActions(false), ...getActions(true)];
 
   return (
     <>
       <FieldValidationCallout validationResults={fieldValidationResult} />
-      {(loading ?? true) === true ? <LoadingCategorization onCancel={cancelRequest} /> : null}
+      {(loading ?? true) === true ? (
+        <LoadingCategorization {...(!isCasesEmbeddable ? { onCancel: cancelRequest } : {})} />
+      ) : null}
 
       <InformationText
         loading={loading ?? true}

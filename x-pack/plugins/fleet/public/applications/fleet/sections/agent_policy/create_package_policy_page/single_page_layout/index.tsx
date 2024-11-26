@@ -238,8 +238,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       let count = 0;
       for (const policyId of agentPolicyIds) {
         const { data } = await sendGetAgentStatus({ policyId });
-        if (data?.results.total) {
-          count += data.results.total;
+        if (data?.results.active) {
+          count += data.results.active;
         }
       }
       setAgentCount(count);
@@ -355,6 +355,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     newAgentPolicy,
     setNewAgentPolicy,
     updateAgentPolicies,
+    updatePackagePolicy,
     setSelectedPolicyTab,
     packageInfo,
     packagePolicy,

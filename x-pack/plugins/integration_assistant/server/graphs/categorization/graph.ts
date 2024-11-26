@@ -233,6 +233,6 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
       }
     );
 
-  const compiledCategorizationGraph = workflow.compile().withConfig({ runName: 'Categorization' });
+  const compiledCategorizationGraph = workflow.compile();
   return compiledCategorizationGraph;
 }

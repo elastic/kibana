@@ -20,6 +20,7 @@ import {
   EuiRadio,
   EuiSpacer,
   EuiText,
+  useIsWithinBreakpoints,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -27,12 +28,13 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import * as Constants from '../../../../shared/constants';
+import { isValidIndexName } from '../../../utils/validate_index_name';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
 
 import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
-import { ChooseConnectorSelectable } from './components/choose_connector_selectable';
+import { ChooseConnector } from './components/choose_connector';
 import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
 import { SelfManagePreference } from './create_connector';
@@ -52,6 +54,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   onSelfManagePreferenceChange,
   error,
 }) => {
+  const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
   const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
 
@@ -63,12 +66,25 @@ export const StartStep: React.FC<StartStepProps> = ({
     isGenerateLoading,
     isCreateLoading,
   } = useValues(NewConnectorLogic);
-  const { setRawName, createConnector, generateConnectorName } = useActions(NewConnectorLogic);
+  const { setRawName, createConnector, generateConnectorName, setFormDirty } =
+    useActions(NewConnectorLogic);
   const { connector } = useValues(ConnectorViewLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
   };
+
+  const formError = isValidIndexName(rawName)
+    ? error
+    : i18n.translate(
+        'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.nameInputHelpText.lineOne',
+        {
+          defaultMessage: '{connectorName} is an invalid index name',
+          values: {
+            connectorName: rawName,
+          },
+        }
+      );
 
   return (
     <EuiForm component="form" id="enterprise-search-create-connector">
@@ -79,8 +95,8 @@ export const StartStep: React.FC<StartStepProps> = ({
               <h3>{title}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFlexGroup>
-              <EuiFlexItem>
+            <EuiFlexGroup direction={isMediumDevice ? 'column' : 'row'}>
+              <EuiFlexItem grow={7}>
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
@@ -88,10 +104,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                     { defaultMessage: 'Connector' }
                   )}
                 >
-                  <ChooseConnectorSelectable selfManaged={selfManagePreference} />
+                  <ChooseConnector selfManaged={selfManagePreference} />
                 </EuiFormRow>
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={5}>
                 <EuiFormRow
                   fullWidth
                   isInvalid={!!error}
@@ -99,6 +115,22 @@ export const StartStep: React.FC<StartStepProps> = ({
                     'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.connectorNameLabel',
                     { defaultMessage: 'Connector name' }
                   )}
+                  helpText={
+                    <>
+                      <EuiText size="xs" grow={false} color="danger">
+                        {formError}
+                      </EuiText>
+                      <EuiText size="xs" grow={false}>
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.startStep.namesShouldBeLowercaseTextLabel',
+                          {
+                            defaultMessage:
+                              'The connector name should be lowercase and cannot contain spaces or special characters.',
+                          }
+                        )}
+                      </EuiText>
+                    </>
+                  }
                 >
                   <EuiFieldText
                     data-test-subj="enterpriseSearchStartStepFieldText"
@@ -127,6 +159,14 @@ export const StartStep: React.FC<StartStepProps> = ({
                   'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.descriptionLabel',
                   { defaultMessage: 'Description' }
                 )}
+                labelAppend={
+                  <EuiText size="xs">
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.startStep.euiFormRow.descriptionLabelAppend',
+                      { defaultMessage: 'Optional' }
+                    )}
+                  </EuiText>
+                }
               >
                 <EuiFieldText
                   data-test-subj="enterpriseSearchStartStepFieldText"
@@ -204,9 +244,17 @@ export const StartStep: React.FC<StartStepProps> = ({
               hasShadow={false}
               hasBorder
               paddingSize="l"
-              color={selectedConnector?.name ? 'plain' : 'subdued'}
+              color={
+                selectedConnector?.name && isValidIndexName(rawName) && !error ? 'plain' : 'subdued'
+              }
             >
-              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'}>
+              <EuiText
+                color={
+                  selectedConnector?.name && isValidIndexName(rawName) && !error
+                    ? 'default'
+                    : 'subdued'
+                }
+              >
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.h4.deploymentLabel',
@@ -217,7 +265,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </h3>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'} size="s">
+              <EuiText
+                color={selectedConnector?.name && isValidIndexName(rawName) ? 'default' : 'subdued'}
+                size="s"
+              >
                 <p>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.p.youWillStartTheLabel',
@@ -236,11 +287,12 @@ export const StartStep: React.FC<StartStepProps> = ({
                     createConnector({
                       isSelfManaged: true,
                     });
+                    setFormDirty(true);
                     setCurrentStep('deployment');
                   }
                 }}
                 fill
-                disabled={!canConfigureConnector}
+                disabled={!canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)}
                 isLoading={isCreateLoading || isGenerateLoading}
               >
                 {Constants.NEXT_BUTTON_LABEL}
@@ -250,12 +302,20 @@ export const StartStep: React.FC<StartStepProps> = ({
         ) : (
           <EuiFlexItem>
             <EuiPanel
-              color={selectedConnector?.name ? 'plain' : 'subdued'}
+              color={
+                selectedConnector?.name && isValidIndexName(rawName) && !error ? 'plain' : 'subdued'
+              }
               hasShadow={false}
               hasBorder
               paddingSize="l"
             >
-              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'}>
+              <EuiText
+                color={
+                  selectedConnector?.name && isValidIndexName(rawName) && !error
+                    ? 'default'
+                    : 'subdued'
+                }
+              >
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.h4.configureIndexAndAPILabel',
@@ -266,7 +326,14 @@ export const StartStep: React.FC<StartStepProps> = ({
                 </h3>
               </EuiText>
               <EuiSpacer size="m" />
-              <EuiText color={selectedConnector?.name ? 'default' : 'subdued'} size="s">
+              <EuiText
+                color={
+                  selectedConnector?.name && isValidIndexName(rawName) && !error
+                    ? 'default'
+                    : 'subdued'
+                }
+                size="s"
+              >
                 <p>
                   {i18n.translate(
                     'xpack.enterpriseSearch.createConnector.startStep.p.thisProcessWillCreateLabel',
@@ -294,7 +361,9 @@ export const StartStep: React.FC<StartStepProps> = ({
                   <EuiButton
                     data-test-subj="enterpriseSearchStartStepGenerateConfigurationButton"
                     fill
-                    onClick={() => setCurrentStep('configure')}
+                    onClick={() => {
+                      setCurrentStep('configure');
+                    }}
                   >
                     {Constants.NEXT_BUTTON_LABEL}
                   </EuiButton>
@@ -305,11 +374,14 @@ export const StartStep: React.FC<StartStepProps> = ({
                     <EuiButton
                       data-test-subj="entSearchContent-connector-configuration-generateConfigButton"
                       data-telemetry-id="entSearchContent-connector-configuration-generateConfigButton"
-                      disabled={!canConfigureConnector}
+                      disabled={
+                        !canConfigureConnector || !isValidIndexName(rawName) || Boolean(error)
+                      }
                       fill
                       iconType="sparkles"
                       isLoading={isGenerateLoading || isCreateLoading}
                       onClick={() => {
+                        setFormDirty(true);
                         createConnector({
                           isSelfManaged: false,
                         });
@@ -325,7 +397,13 @@ export const StartStep: React.FC<StartStepProps> = ({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <ManualConfiguration
-                      isDisabled={isGenerateLoading || isCreateLoading || !canConfigureConnector}
+                      isDisabled={
+                        isGenerateLoading ||
+                        isCreateLoading ||
+                        !canConfigureConnector ||
+                        !isValidIndexName(rawName) ||
+                        Boolean(error)
+                      }
                       selfManagePreference={selfManagePreference}
                     />
                   </EuiFlexItem>

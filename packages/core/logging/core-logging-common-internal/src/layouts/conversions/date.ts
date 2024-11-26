@@ -12,7 +12,7 @@ import { last } from 'lodash';
 import { LogRecord } from '@kbn/logging';
 import { Conversion } from './types';
 
-const dateRegExp = /%date({(?<format>[^}]+)})?({(?<timezone>[^}]+)})?/g;
+const dateRegExp = /%date(?:\{(?<format>[^}]+)\})?(?:\{(?<timezone>[A-Za-z/_+-]+)\})?/g;
 
 const formats = {
   ISO8601: 'ISO8601',
@@ -29,7 +29,6 @@ function formatDate(
 ): string {
   const momentDate = moment(date);
   momentDate.tz(timezone ?? moment.tz.guess());
-
   switch (dateFormat) {
     case formats.ISO8601:
       return momentDate.toISOString();

@@ -44,8 +44,16 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings, modalMode = false }) => {
-    const { http, toasts } = useAssistantContext();
-    const { data: kbStatus, isLoading, isFetching } = useKnowledgeBaseStatus({ http });
+    const {
+      http,
+      toasts,
+      assistantAvailability: { isAssistantEnabled },
+    } = useAssistantContext();
+    const {
+      data: kbStatus,
+      isLoading,
+      isFetching,
+    } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
     const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
     // Resource enabled state
@@ -53,9 +61,9 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isSecurityLabsEnabled = kbStatus?.security_labs_exists ?? false;
     const isKnowledgeBaseSetup =
       (isElserEnabled &&
-        isSecurityLabsEnabled &&
         kbStatus?.index_exists &&
-        kbStatus?.pipeline_exists) ??
+        kbStatus?.pipeline_exists &&
+        (isSecurityLabsEnabled || kbStatus?.user_data_exists)) ??
       false;
     const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
     const isSetupAvailable = kbStatus?.is_setup_available ?? false;
@@ -141,7 +149,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         <EuiHorizontalRule margin={'s'} />
 
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.KNOWLEDGE_BASE_LABEL}
           css={css`
             .euiFormRow__labelWrapper {

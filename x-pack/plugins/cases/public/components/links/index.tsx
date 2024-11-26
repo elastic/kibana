@@ -8,11 +8,11 @@
 import type { EuiButtonProps, EuiLinkProps, PropsForAnchor, PropsForButton } from '@elastic/eui';
 import { EuiButton, EuiLink, EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation';
+import { useCaseViewNavigation, useConfigureCasesNavigation } from '../../common/navigation/hooks';
 import * as i18n from './translations';
 
 export interface CasesNavigation<T = React.MouseEvent | MouseEvent | null, K = null> {
-  href: K extends 'configurable' ? (arg: T) => string : string;
+  href?: K extends 'configurable' ? (arg: T) => string : string;
   onClick: K extends 'configurable'
     ? (arg: T, arg2: React.MouseEvent | MouseEvent) => Promise<void> | void
     : (arg: T) => Promise<void> | void;

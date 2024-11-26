@@ -286,7 +286,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;
       const ESQueryFlyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
-        threshold: threshold.join(' AND '),
+        threshold: [threshold].flat().join(' AND '),
         comparator: thresholdComparator,
         pctAboveThreshold: getPctAboveThreshold(
           threshold,

@@ -65,9 +65,12 @@ function getBareElement(el, includeId = false) {
 
 export const elementLayer = createAction('elementLayer');
 
-export const setMultiplePositions = createAction('setMultiplePosition', (repositionedElements) => ({
-  repositionedElements,
-}));
+export const setMultiplePositions = createAction(
+  'setMultiplePositions',
+  (repositionedElements) => ({
+    repositionedElements,
+  })
+);
 
 export const flushContext = createAction('flushContext');
 export const flushContextAfterIndex = createAction('flushContextAfterIndex');

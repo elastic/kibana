@@ -29,6 +29,7 @@ import { createFleetActionsClientMock } from '../services/actions/mocks';
 import { createFleetFilesClientFactoryMock } from '../services/files/mocks';
 
 import { createArtifactsClientMock } from '../services/artifacts/mocks';
+import { createOutputClientMock } from '../services/output_client.mock';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
@@ -81,6 +82,7 @@ export const createAppContextStartContractMock = (
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
     agentIdVerificationEnabled: true,
+    eventIngestedEnabled: false,
     ...configOverrides,
   };
 
@@ -113,12 +115,14 @@ export const createAppContextStartContractMock = (
     experimentalFeatures: {
       agentTamperProtectionEnabled: true,
       diagnosticFileUploadEnabled: true,
+      enableReusableIntegrationPolicies: true,
     } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentIdVerificationEnabled: true,
+      eventIngestedEnabled: false,
     },
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
@@ -300,6 +304,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     uninstallTokenService: createUninstallTokenServiceMock(),
     createFleetActionsClient: jest.fn((_) => fleetActionsClient),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
+    createOutputClient: jest.fn(async (_) => createOutputClientMock()),
   };
 
   return startContract;

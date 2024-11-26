@@ -12,6 +12,7 @@ import {
   entityDefinitionDeletionPrivileges,
   entityDefinitionRuntimePrivileges,
 } from '@kbn/entityManager-plugin/server/lib/auth/privileges';
+import { BUILT_IN_ALLOWED_INDICES } from '@kbn/entityManager-plugin/server/lib/entities/built_in/constants';
 
 export const createAdmin = async ({
   esClient,
@@ -25,7 +26,7 @@ export const createAdmin = async ({
   const privileges = mergeWith(
     { application: [], index: [], cluster: [] },
     apiKeyCreationPrivileges,
-    entityDefinitionRuntimePrivileges,
+    entityDefinitionRuntimePrivileges(BUILT_IN_ALLOWED_INDICES),
     entityDefinitionDeletionPrivileges,
     (src, other) => uniq(src.concat(other))
   );
@@ -51,7 +52,7 @@ export const createRuntimeUser = async ({
   username?: string;
   password?: string;
 }) => {
-  const privileges = entityDefinitionRuntimePrivileges;
+  const privileges = entityDefinitionRuntimePrivileges(BUILT_IN_ALLOWED_INDICES);
   const role = 'entities_runtime';
 
   await esClient.security.putRole({

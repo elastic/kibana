@@ -46,6 +46,7 @@ import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 import type { TimeRange } from '../../../rule_gaps/types';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -233,6 +234,35 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
+const MODIFIED_COLUMN: TableColumn = {
+  field: 'rule_source',
+  name: <RulesTableEmptyColumnName name={i18n.COLUMN_MODIFIED} />,
+  align: 'center',
+  render: (ruleSource: Rule['rule_source']) => {
+    if (
+      ruleSource == null ||
+      ruleSource.type === 'internal' ||
+      (ruleSource.type === 'external' && ruleSource.is_customized === false)
+    ) {
+      return null;
+    }
+
+    return (
+      <EuiToolTip content={i18n.MODIFIED_TOOLTIP}>
+        <EuiBadge
+          color="hollow"
+          data-test-subj="rulesTableModifiedColumnBadge"
+          aria-label={i18n.MODIFIED_LABEL}
+        >
+          {i18n.MODIFIED_LABEL}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  },
+  width: '90px',
+  truncateText: true,
+};
+
 const useActionsColumn = ({
   showExceptionsDuplicateConfirmation,
   showManualRuleRunConfirmation,
@@ -265,6 +295,7 @@ export const useRulesColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -279,9 +310,15 @@ export const useRulesColumns = ({
   });
   const snoozeColumn = useRuleSnoozeColumn();
 
+  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
+  if (isPrebuiltRulesCustomizationEnabled) {
+    INTEGRATIONS_COLUMN.width = '70px';
+  }
+
   return useMemo(
     () => [
       ruleNameColumn,
+      ...(isPrebuiltRulesCustomizationEnabled ? [MODIFIED_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -352,13 +389,14 @@ export const useRulesColumns = ({
       ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
-      actionsColumn,
-      enabledColumn,
+      ruleNameColumn,
+      isPrebuiltRulesCustomizationEnabled,
+      showRelatedIntegrations,
       executionStatusColumn,
       snoozeColumn,
+      enabledColumn,
       hasCRUDPermissions,
-      ruleNameColumn,
-      showRelatedIntegrations,
+      actionsColumn,
     ]
   );
 };
@@ -380,6 +418,7 @@ export const useMonitoringColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
     isLoadingJobs,
@@ -393,12 +432,18 @@ export const useMonitoringColumns = ({
     mlJobs,
   });
 
+  // TODO: move this change to the `INTEGRATIONS_COLUMN` when `prebuiltRulesCustomizationEnabled` feature flag is removed
+  if (isPrebuiltRulesCustomizationEnabled) {
+    INTEGRATIONS_COLUMN.width = '70px';
+  }
+
   return useMemo(
     () => [
       {
         ...ruleNameColumn,
         width: '28%',
       },
+      ...(isPrebuiltRulesCustomizationEnabled ? [MODIFIED_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -503,6 +548,7 @@ export const useMonitoringColumns = ({
       enabledColumn,
       executionStatusColumn,
       hasCRUDPermissions,
+      isPrebuiltRulesCustomizationEnabled,
       ruleNameColumn,
       showRelatedIntegrations,
     ]

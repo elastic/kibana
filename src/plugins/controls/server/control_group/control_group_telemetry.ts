@@ -9,31 +9,15 @@
 
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
-import type { ControlGroupSerializedState } from '../../common';
 import {
-  type SerializableControlGroupState,
-  controlGroupSerializedStateToSerializableRuntimeState,
+  controlGroupSavedObjectStateToSerializableRuntimeState,
   getDefaultControlGroupState,
 } from './control_group_persistence';
-
-export interface ControlGroupTelemetry {
-  total: number;
-  chaining_system: {
-    [key: string]: number;
-  };
-  label_position: {
-    [key: string]: number;
-  };
-  ignore_settings: {
-    [key: string]: number;
-  };
-  by_type: {
-    [key: string]: {
-      total: number;
-      details: { [key: string]: number };
-    };
-  };
-}
+import {
+  ControlGroupSavedObjectState,
+  ControlGroupTelemetry,
+  SerializableControlGroupState,
+} from './types';
 
 export const initializeControlGroupTelemetry = (
   statsSoFar: Record<string, unknown>
@@ -113,8 +97,8 @@ export const controlGroupTelemetry: PersistableStateService['telemetry'] = (
   const controlGroupStats = initializeControlGroupTelemetry(stats);
   const controlGroupState = {
     ...getDefaultControlGroupState(),
-    ...controlGroupSerializedStateToSerializableRuntimeState(
-      state as unknown as ControlGroupSerializedState
+    ...controlGroupSavedObjectStateToSerializableRuntimeState(
+      state as unknown as ControlGroupSavedObjectState
     ),
   };
   if (!controlGroupState) return controlGroupStats;

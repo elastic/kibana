@@ -1,0 +1,22 @@
+type: object
+properties:
+  agentKey:
+    type: object
+    description: Agent key
+    required:
+      - id
+      - name
+      - api_key
+      - encoded
+    properties:
+      expiration:
+        type: integer
+        format: int64
+      id:
+        type: string
+      name:
+        type: string
+      api_key:
+        type: string
+      encoded:
+        type: string

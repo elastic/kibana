@@ -14,9 +14,8 @@ poorly performing queries much faster.
 [[search-profiler-getting-started]]
 === Get started
 
-*{searchprofiler}* is automatically enabled in {kib}. Open the main menu,
-click *Dev Tools*, and then click *{searchprofiler}*
-to get started.
+. Find the *{searchprofiler}* by navigating to the *Developer tools* page using the
+navigation menu or the <<kibana-navigation-search,global search field>>.
 
 *{searchprofiler}* displays the names of the indices searched, the shards in each index,
 and how long it took for the query to complete. To try it out, replace the default `match_all` query

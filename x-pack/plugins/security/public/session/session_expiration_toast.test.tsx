@@ -40,10 +40,25 @@ describe('createSessionExpirationToast', () => {
 });
 
 describe('SessionExpirationToast', () => {
-  it('renders session expiration time', () => {
+  it('renders session expiration time in minutes when >= 60s remaining', () => {
     const sessionState$ = of<SessionState>({
       lastExtensionTime: Date.now(),
-      expiresInMs: 60 * 1000,
+      expiresInMs: 60 * 2000,
+      canBeExtended: true,
+    });
+
+    const { getByText } = render(
+      <I18nProvider>
+        <SessionExpirationToast sessionState$={sessionState$} onExtend={jest.fn()} />
+      </I18nProvider>
+    );
+    getByText(/You will be logged out in [0-9]+ minutes/);
+  });
+
+  it('renders session expiration time in seconds when < 60s remaining', () => {
+    const sessionState$ = of<SessionState>({
+      lastExtensionTime: Date.now(),
+      expiresInMs: 60 * 900,
       canBeExtended: true,
     });
 

@@ -11,6 +11,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import {
   createMockStore,
+  mockDataViewSpec,
   mockGlobalState,
   mockIndexPattern,
   TestProviders,
@@ -109,7 +110,7 @@ describe('body', () => {
               setQuery={jest.fn()}
               hostDetailsPagePath={hostDetailsPagePath}
               indexNames={[]}
-              indexPattern={mockIndexPattern}
+              dataViewSpec={mockDataViewSpec}
               type={HostsType.details}
               hostDetailsFilter={mockHostDetailsPageFilters}
               filterQuery={filterQuery}
@@ -128,34 +129,32 @@ describe('body', () => {
         startDate: '2020-07-07T08:20:18.966Z',
         type: 'details',
         indexPattern: {
-          fields: [
-            { name: '@timestamp', searchable: true, type: 'date', aggregatable: true },
-            { name: '@version', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.ephemeral_id', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.hostname', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.id', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test1', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test2', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test3', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test4', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test5', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test6', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test7', searchable: true, type: 'string', aggregatable: true },
-            { name: 'agent.test8', searchable: true, type: 'string', aggregatable: true },
-            { name: 'host.name', searchable: true, type: 'string', aggregatable: true },
-            {
+          fields: {
+            '@timestamp': { searchable: true, type: 'date', aggregatable: true },
+            '@version': { searchable: true, type: 'string', aggregatable: true },
+            'agent.ephemeral_id': { searchable: true, type: 'string', aggregatable: true },
+            'agent.hostname': { searchable: true, type: 'string', aggregatable: true },
+            'agent.id': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test1': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test2': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test3': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test4': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test5': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test6': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test7': { searchable: true, type: 'string', aggregatable: true },
+            'agent.test8': { searchable: true, type: 'string', aggregatable: true },
+            'host.name': { searchable: true, type: 'string', aggregatable: true },
+            'nestedField.firstAttributes': {
               aggregatable: false,
-              name: 'nestedField.firstAttributes',
               searchable: true,
               type: 'string',
             },
-            {
+            'nestedField.secondAttributes': {
               aggregatable: false,
-              name: 'nestedField.secondAttributes',
               searchable: true,
               type: 'string',
             },
-          ],
+          },
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
         hostName: 'host-1',
