@@ -351,7 +351,7 @@ ${JSON.stringify(
                   extraKbnOpts:
                     options?.installDir || options?.ci || !isOpen
                       ? []
-                      : ['--dev', '--no-dev-config', '--no-dev-credentials'],
+                      : ['--dev', '--no-dev-credentials'],
                   onEarlyExit,
                   inspect: argv.inspect,
                 });
