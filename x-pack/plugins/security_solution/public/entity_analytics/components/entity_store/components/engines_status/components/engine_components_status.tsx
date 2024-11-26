@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ReactNode } from 'react';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, Fragment } from 'react';
 import { EuiSpacer, EuiHealth, EuiCodeBlock } from '@elastic/eui';
 import { BasicTable } from '../../../../../../common/components/ml/tables/basic_table';
 import { useColumns } from '../hooks/use_columns';
@@ -63,12 +63,12 @@ const TransformExtendedData = ({ errors }: { errors: EngineComponentStatus['erro
   return (
     <>
       {errors?.map(({ title, message }) => (
-        <>
+        <Fragment key={title}>
           <EuiSpacer size="m" />
           <EuiHealth color="danger">{title}</EuiHealth>
           <EuiSpacer size="s" />
           <EuiCodeBlock>{message}</EuiCodeBlock>
-        </>
+        </Fragment>
       ))}
     </>
   );

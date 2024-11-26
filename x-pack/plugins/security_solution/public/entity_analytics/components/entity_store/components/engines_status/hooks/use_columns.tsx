@@ -102,9 +102,9 @@ export const useColumns = (
         align: 'center',
         render: (value: boolean) =>
           value ? (
-            <EuiIcon type="check" color="success" size="l" />
+            <EuiIcon data-test-subj="installation-status" type="check" color="success" size="l" />
           ) : (
-            <EuiIcon type="cross" color="danger" size="l" />
+            <EuiIcon data-test-subj="installation-status" type="cross" color="danger" size="l" />
           ),
       },
       {
@@ -142,9 +142,7 @@ export const useColumns = (
         render: (component: EngineComponentStatus) => {
           const isItemExpanded = expandedItems.includes(component);
 
-          return component.resource === EngineComponentResourceEnum.transform &&
-            component.errors &&
-            component.errors.length > 0 ? (
+          return component.errors && component.errors.length > 0 ? (
             <EuiButtonIcon
               onClick={() => onToggleExpandedItem(component)}
               aria-label={isItemExpanded ? 'Collapse' : 'Expand'}
