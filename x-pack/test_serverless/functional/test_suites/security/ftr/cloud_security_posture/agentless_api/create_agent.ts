@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // wait for eventually healthy status
       await retry.tryForTime(agentCreationTimeout, async () => {
         expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Healthy');
-      });      
+      });
     });
 
     it(`should create default agent-based agent`, async () => {
