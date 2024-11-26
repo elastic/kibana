@@ -104,5 +104,7 @@
     "@kbn/response-ops-rule-params",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/security-plugin",
+    "@kbn/server-route-repository-utils",
+    "@kbn/event-bus-plugin"
   ]
 }
