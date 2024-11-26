@@ -456,7 +456,7 @@ describe('description_step', () => {
         );
       });
 
-      test('returns threshold description when threshold exist and field is set and cardinality is omitted', () => {
+      test('returns threshold description when threshold exist, field is set, and cardinality is not set', () => {
         const mockThreshold = {
           threshold: {
             field: ['user.name'],

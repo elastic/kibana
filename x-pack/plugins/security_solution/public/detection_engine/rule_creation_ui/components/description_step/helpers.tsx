@@ -496,16 +496,16 @@ export const buildThresholdDescription = (
 ): ListItems[] => {
   let thresholdDescription = isEmpty(threshold.field[0])
     ? `${i18n.THRESHOLD_RESULTS_ALL} >= ${threshold.value}`
-    : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${
-        Array.isArray(threshold.field) ? threshold.field.join(',') : threshold.field
-      } >= ${threshold.value}`;
-  if (
-    threshold.cardinality &&
-    threshold.cardinality.value &&
-    threshold.cardinality.field.length > 0
-  ) {
-    thresholdDescription = `${thresholdDescription} ${i18n.THRESHOLD_CARDINALITY} ${threshold.cardinality.field[0]} >= ${threshold.cardinality.value}`;
+    : `${i18n.THRESHOLD_RESULTS_AGGREGATED_BY} ${threshold.field.join(',')} >= ${threshold.value}`;
+
+  if (threshold.cardinality?.value && threshold.cardinality?.field.length > 0) {
+    thresholdDescription = i18n.THRESHOLD_CARDINALITY(
+      thresholdDescription,
+      threshold.cardinality.field[0],
+      threshold.cardinality.value
+    );
   }
+
   return [
     {
       title: label,

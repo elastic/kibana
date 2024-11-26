@@ -41,18 +41,3 @@ Default.args = {
     },
   }),
 };
-
-export const WithMoreCardinalityFields = Template.bind({});
-WithMoreCardinalityFields.args = {
-  finalDiffableRule: mockThresholdRule({
-    threshold: {
-      field: ['Responses.process.pid'],
-      value: 100,
-      cardinality: [
-        { field: 'host.id', value: 2 },
-        { field: 'host.some_value', value: 3 },
-        { field: 'host.other_value', value: 4 },
-      ],
-    },
-  }),
-};

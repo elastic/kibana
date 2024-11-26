@@ -126,19 +126,23 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
   }
 );
 
-export const THRESHOLD_CARDINALITY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsCardinalityDescription',
-  {
-    defaultMessage: 'when unique value count of',
-  }
-);
-
-export const THRESHOLD_AND_JOINER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAndJoiner',
-  {
-    defaultMessage: 'and',
-  }
-);
+export const THRESHOLD_CARDINALITY = (
+  thresholdFieldsGroupedBy: string,
+  cardinalityField: string,
+  cardinalityValue: string | number
+) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsCardinalityDescription',
+    {
+      defaultMessage:
+        '{thresholdFieldsGroupedBy} when unique values count of {cardinalityField} >= {cardinalityValue}',
+      values: {
+        thresholdFieldsGroupedBy,
+        cardinalityField,
+        cardinalityValue,
+      },
+    }
+  );
 
 export const EQL_EVENT_CATEGORY_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel',
