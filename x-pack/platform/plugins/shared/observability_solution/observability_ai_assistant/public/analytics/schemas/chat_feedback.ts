@@ -6,33 +6,22 @@
  */
 
 import type { EventTypeOpts } from '@kbn/core/public';
-import type { Message, Conversation } from '../../../common';
+import type { Conversation } from '../../../common';
 import type { Feedback } from '../../components/buttons/feedback_buttons';
 import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_type';
-import { messageSchema } from './common';
 
 export interface ChatFeedback {
-  messageWithFeedback: {
-    message: Message;
-    feedback: Feedback;
-  };
-  conversation: Conversation;
+  feedback: Feedback;
+  conversation: Omit<Conversation, 'messages'>;
 }
 
 export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
   eventType: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
   schema: {
-    messageWithFeedback: {
-      properties: {
-        message: {
-          properties: messageSchema,
-        },
-        feedback: {
-          type: 'text',
-          _meta: {
-            description: 'Whether the user has deemed this response useful or not',
-          },
-        },
+    feedback: {
+      type: 'text',
+      _meta: {
+        description: 'Whether the user has deemed this response useful or not',
       },
     },
     conversation: {
@@ -102,15 +91,6 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
                 },
               },
             },
-          },
-        },
-        messages: {
-          type: 'array',
-          items: {
-            properties: messageSchema,
-          },
-          _meta: {
-            description: 'The messages in the conversation.',
           },
         },
         labels: {

@@ -185,11 +185,16 @@ export function ChatBody({
 
   const handleFeedback = (message: Message, feedback: Feedback) => {
     if (conversation.value?.conversation && 'user' in conversation.value) {
+      const conversationWithoutMessages = {
+        ...conversation.value,
+        messages: undefined,
+      } as Omit<Conversation, 'messages'>;
+
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
-          messageWithFeedback: { message, feedback },
-          conversation: conversation.value,
+          feedback,
+          conversation: conversationWithoutMessages,
         },
       });
     }

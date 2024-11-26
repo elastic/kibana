@@ -6,12 +6,10 @@
  */
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { AssistantScope } from '@kbn/ai-assistant-common';
-import type { Message } from '../../common';
 import { chatFeedbackEventSchema, ChatFeedback } from './schemas/chat_feedback';
 import { insightFeedbackEventSchema, InsightFeedback } from './schemas/insight_feedback';
 import { insightResponseEventSchema, InsightResponse } from './schemas/insight_response';
-import { userSentPromptEventSchema } from './schemas/user_sent_prompt';
+import { userSentPromptEventSchema, UserSentPrompt } from './schemas/user_sent_prompt';
 import { ObservabilityAIAssistantTelemetryEventType } from './telemetry_event_type';
 
 const schemas = [
@@ -26,7 +24,7 @@ export type TelemetryEventTypeWithPayload =
   | { type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback; payload: InsightFeedback }
   | {
       type: ObservabilityAIAssistantTelemetryEventType.UserSentPromptInChat;
-      payload: Message & { scopes: AssistantScope[] };
+      payload: UserSentPrompt;
     }
   | {
       type: ObservabilityAIAssistantTelemetryEventType.InsightResponse;
