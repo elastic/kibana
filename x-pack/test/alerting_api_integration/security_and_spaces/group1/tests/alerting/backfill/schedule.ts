@@ -63,7 +63,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         rule_type_id: 'test.patternFiringAutoRecoverFalse',
         params: {
           pattern: {
-            instance: [true, false, true],
+            instance: ['run_long', 'run_long', 'run_long'],
           },
         },
         schedule: { interval: '12h' },
@@ -85,7 +85,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         expect(result.rule.tags).to.eql(['foo']);
         expect(result.rule.params).to.eql({
           pattern: {
-            instance: [true, false, true],
+            instance: ['run_long', 'run_long', 'run_long'],
           },
         });
         expect(result.rule.enabled).to.eql(true);
@@ -103,7 +103,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         expect(result.rule.tags).to.eql(['foo']);
         expect(result.rule.params).to.eql({
           pattern: {
-            instance: [true, false, true],
+            instance: ['run_long', 'run_long', 'run_long'],
           },
         });
         expect(result.rule.enabled).to.eql(true);
@@ -759,7 +759,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
         });
 
         it('should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
-          const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
+          const start = moment().utc().startOf('day').subtract(14, 'days').toISOString();
           const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
           // create 2 rules
           const rresponse1 = await supertest

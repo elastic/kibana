@@ -159,22 +159,22 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       {
         caseId,
         space = 'default',
-        includeComments = false,
         expectedHttpCode = 200,
+        includeComments,
       }: {
         caseId: string;
         space?: string;
-        includeComments?: boolean;
         expectedHttpCode?: number;
+        includeComments?: boolean;
       },
       roleAuthc: RoleCredentials
     ): Promise<Case> {
+      const basePath = `${this.getSpaceUrlPrefix(space)}${CASES_URL}/${caseId}`;
+      const path =
+        includeComments != null ? `${basePath}?includeComments=${includeComments}` : basePath;
+
       const { body: theCase } = await supertestWithoutAuth
-        .get(
-          `${this.getSpaceUrlPrefix(
-            space
-          )}${CASES_URL}/${caseId}?includeComments=${includeComments}`
-        )
+        .get(path)
         .set(svlCommonApi.getInternalRequestHeader())
         .set(roleAuthc.apiKeyHeader)
         .expect(expectedHttpCode);

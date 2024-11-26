@@ -22,7 +22,7 @@ export interface BulkOperationError {
   };
 }
 
-interface WriterBulkResponse {
+export interface WriterBulkResponse {
   errors: BulkOperationError[];
   docs_created: string[];
   docs_deleted: string[];
@@ -34,7 +34,10 @@ interface BulkParams<TUpdateParams extends { id: string }, TCreateParams> {
   documentsToCreate?: TCreateParams[];
   documentsToUpdate?: TUpdateParams[];
   documentsToDelete?: string[];
-  getUpdateScript?: (document: TUpdateParams, updatedAt: string) => Script;
+  getUpdateScript?: (
+    document: TUpdateParams,
+    updatedAt: string
+  ) => { script?: Script; doc?: TUpdateParams };
   authenticatedUser?: AuthenticatedUser;
 }
 
@@ -73,7 +76,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           body: await this.buildBulkOperations(params),
         },
         {
-          // Increasing timout to 2min as KB docs were failing to load after 30s
+          // Increasing timeout to 2min as KB docs were failing to load after 30s
           requestTimeout: 120000,
         }
       );
@@ -151,7 +154,10 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
 
   private getUpdateDocumentsQuery = async <TUpdateParams extends { id: string }>(
     documentsToUpdate: TUpdateParams[],
-    getUpdateScript: (document: TUpdateParams, updatedAt: string) => Script,
+    getUpdateScript: (
+      document: TUpdateParams,
+      updatedAt: string
+    ) => { script?: Script; doc?: TUpdateParams },
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
@@ -196,10 +202,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           _source: true,
         },
       },
-      {
-        script: getUpdateScript(document, updatedAt),
-        upsert: { counter: 1 },
-      },
+      getUpdateScript(document, updatedAt),
     ]);
   };
 

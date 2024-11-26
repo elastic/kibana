@@ -24,7 +24,7 @@ export const GridHeightSmoother = ({
       gridLayoutStateManager.interactionEvent$,
     ]).subscribe(([dimensions, interactionEvent]) => {
       if (!smoothHeightRef.current) return;
-      if (!interactionEvent || interactionEvent.type === 'drop') {
+      if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
         return;
       }

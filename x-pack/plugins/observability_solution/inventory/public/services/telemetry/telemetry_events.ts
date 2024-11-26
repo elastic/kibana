@@ -49,43 +49,10 @@ const searchQuerySubmittedEventType: TelemetryEvent = {
         },
       },
     },
-    entity_types: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'Entity types used in the search.',
-        },
-      },
-    },
     action: {
       type: 'keyword',
       _meta: {
         description: 'Action performed: submit or refresh.',
-      },
-    },
-  },
-};
-
-const entityInventoryEntityTypeFilteredEventType: TelemetryEvent = {
-  eventType: TelemetryEventTypes.ENTITY_INVENTORY_ENTITY_TYPE_FILTERED,
-  schema: {
-    entity_types: {
-      type: 'array',
-      items: {
-        type: 'keyword',
-        _meta: {
-          description: 'Entity types used in the filter.',
-        },
-      },
-    },
-    kuery_fields: {
-      type: 'array',
-      items: {
-        type: 'text',
-        _meta: {
-          description: 'Kuery fields used in the filter.',
-        },
       },
     },
   },
@@ -113,6 +80,5 @@ export const inventoryTelemetryEventBasedTypes = [
   inventoryAddDataEventType,
   entityInventoryViewedEventType,
   searchQuerySubmittedEventType,
-  entityInventoryEntityTypeFilteredEventType,
   entityViewClickedEventType,
 ];

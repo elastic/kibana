@@ -52,7 +52,9 @@
     "@kbn/core-logging-browser-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-application-browser-mocks",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-lifecycle-server"
   ],
   "exclude": [
     "target/**/*",

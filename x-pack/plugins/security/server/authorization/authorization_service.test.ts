@@ -145,12 +145,9 @@ describe('#start', () => {
       customBranding: mockCoreSetup.customBranding,
     });
 
-    const featuresStart = featuresPluginMock.createStart();
-    featuresStart.getKibanaFeatures.mockReturnValue([]);
-
     authorizationService.start({
       clusterClient: mockClusterClient,
-      features: featuresStart,
+      features: featuresPluginMock.createStart(),
       online$: statusSubject.asObservable(),
     });
 
@@ -217,12 +214,9 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     customBranding: mockCoreSetup.customBranding,
   });
 
-  const featuresStart = featuresPluginMock.createStart();
-  featuresStart.getKibanaFeatures.mockReturnValue([]);
-
   authorizationService.start({
     clusterClient: mockClusterClient,
-    features: featuresStart,
+    features: featuresPluginMock.createStart(),
     online$: statusSubject.asObservable(),
   });
 

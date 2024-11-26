@@ -56,6 +56,7 @@ export function SvlTemplatesHelpers({ getService }: FtrProviderContext) {
     const baseTemplate: TemplateDeserialized = {
       name,
       indexPatterns,
+      indexMode: 'standard',
       version: 1,
       template: { ...getTemplateMock(isMappingsSourceFieldEnabled) },
       _kbnMeta: {

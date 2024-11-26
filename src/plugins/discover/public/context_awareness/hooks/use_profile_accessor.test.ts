@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { ComposableProfile, getMergedAccessor } from '../composable_profile';
+import { renderHook } from '@testing-library/react';
+import { AppliedProfile, getMergedAccessor } from '../composable_profile';
 import { useProfileAccessor } from './use_profile_accessor';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { useProfiles } from './use_profiles';
 import { DataGridDensity } from '@kbn/unified-data-table';
 
-let mockProfiles: ComposableProfile[] = [];
+let mockProfiles: AppliedProfile[] = [];
 
 jest.mock('./use_profiles', () => ({
   useProfiles: jest.fn(() => mockProfiles),

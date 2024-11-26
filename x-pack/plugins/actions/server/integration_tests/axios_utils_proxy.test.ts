@@ -20,7 +20,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
-import { ActionsConfig } from '../config';
+import { ActionsConfig, DEFAULT_USAGE_API_URL } from '../config';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
 import {
@@ -366,7 +366,6 @@ async function rejectUnauthorizedTargetProxyTest(opts: RunTestOptions) {
   await runWithSetup(opts, async (target, proxyInstance, axiosDefaults) => {
     const acu = getACUfromConfig({
       proxyUrl: proxyInstance.url,
-      rejectUnauthorized: false,
       customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
     });
 
@@ -582,14 +581,12 @@ const BaseActionsConfig: ActionsConfig = {
   preconfigured: {},
   proxyUrl: undefined,
   proxyHeaders: undefined,
-  proxyRejectUnauthorizedCertificates: true,
   ssl: {
     proxyVerificationMode: 'full',
     verificationMode: 'full',
   },
   proxyBypassHosts: undefined,
   proxyOnlyHosts: undefined,
-  rejectUnauthorized: true,
   maxResponseContentLength: ByteSizeValue.parse('1mb'),
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
@@ -597,6 +594,9 @@ const BaseActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+  usage: {
+    url: DEFAULT_USAGE_API_URL,
+  },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

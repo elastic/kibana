@@ -6,7 +6,7 @@
  */
 
 import { mockTimelineData } from '../../../../../common/mock';
-import { defaultUdtHeaders } from '../../unified_components/default_headers';
+import { defaultUdtHeaders } from '../column_headers/default_headers';
 import { getFormattedFields } from './formatted_field_udt';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 

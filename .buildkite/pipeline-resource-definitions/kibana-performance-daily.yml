@@ -26,7 +26,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/performance/daily.yml
-      skip_intermediate_builds: false
       provider_settings:
         trigger_mode: none
         build_branches: true

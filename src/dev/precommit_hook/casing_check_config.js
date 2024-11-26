@@ -172,4 +172,5 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
   'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
   'x-pack/plugins/screenshotting/server/assets/img/logo-grey.png',
+  'oas_docs/package-lock.json',
 ];

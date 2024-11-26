@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiTextArea, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
@@ -37,21 +37,20 @@ export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onC
   return (
     <EuiFormRow
       label={
-        <EuiToolTip
-          content={i18n.translate('xpack.searchPlayground.sidebar.instructionsField.help', {
-            defaultMessage:
-              'These preliminary instructions and guidelines define the behavior of the model. Be clear and specific for best results.',
+        <span>
+          {i18n.translate('xpack.searchPlayground.sidebar.instructionsField.label', {
+            defaultMessage: 'Instructions',
           })}
-        >
-          <>
-            <span>
-              {i18n.translate('xpack.searchPlayground.sidebar.instructionsField.label', {
-                defaultMessage: 'Instructions',
-              })}
-            </span>
-            <EuiIcon type="questionInCircle" color="subdued" />
-          </>
-        </EuiToolTip>
+          &nbsp;
+          <EuiIconTip
+            type="questionInCircle"
+            color="subdued"
+            content={i18n.translate('xpack.searchPlayground.sidebar.instructionsField.help', {
+              defaultMessage:
+                'These preliminary instructions and guidelines define the behavior of the model. Be clear and specific for best results.',
+            })}
+          />
+        </span>
       }
       fullWidth
     >

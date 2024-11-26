@@ -47,20 +47,20 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the list of agents when requesting as admin', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.eql(4);
     });
 
     it('should return 200 if the passed kuery is valid', async () => {
       await supertest
-        .get(`/api/fleet/agent_status?kuery=fleet-agents.local_metadata.host.hostname:test`)
+        .get(`/api/fleet/agents?kuery=fleet-agents.local_metadata.host.hostname:test`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
 
     it('should return 200 also if the passed kuery does not have prefix fleet-agents', async () => {
       await supertest
-        .get(`/api/fleet/agent_status?kuery=local_metadata.host.hostname:test`)
+        .get(`/api/fleet/agents?kuery=local_metadata.host.hostname:test`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/api/fleet/agents?withMetrics=true`)
         .expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.eql(4);
 
       const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');

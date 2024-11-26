@@ -32,6 +32,10 @@ export const uptimeRuleFieldMap: FieldMap = {
     type: 'text',
     required: false,
   },
+  'error.stack_trace': {
+    type: 'wildcard',
+    required: false,
+  },
   'agent.name': {
     type: 'keyword',
     required: false,

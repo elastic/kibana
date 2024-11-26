@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { fieldSupportsBreakdown } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { useCreateDataView } from './use_create_dataview';
 import { useKibanaContextForPlugin } from '../utils';

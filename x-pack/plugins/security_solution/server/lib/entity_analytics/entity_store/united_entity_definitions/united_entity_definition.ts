@@ -94,6 +94,11 @@ export class UnitedEntityDefinition {
       ...BASE_ENTITY_INDEX_MAPPING,
       [identityField]: {
         type: 'keyword',
+        fields: {
+          text: {
+            type: 'match_only_text',
+          },
+        },
       },
     };
 
@@ -107,6 +112,11 @@ export class UnitedEntityDefinition {
 
     properties[identityField] = {
       type: 'keyword',
+      fields: {
+        text: {
+          type: 'match_only_text',
+        },
+      },
     };
 
     return {

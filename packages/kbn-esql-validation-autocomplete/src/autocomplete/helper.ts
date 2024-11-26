@@ -15,18 +15,22 @@ import type {
   ESQLSource,
 } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
-import type {
-  FunctionDefinition,
-  FunctionReturnType,
-  SupportedDataType,
+import {
+  isParameterType,
+  type FunctionDefinition,
+  type FunctionReturnType,
+  type SupportedDataType,
+  isReturnType,
 } from '../definitions/types';
 import {
   findFinalWord,
   getColumnForASTNode,
   getFunctionDefinition,
+  isArrayType,
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isIdentifier,
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
@@ -35,12 +39,15 @@ import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   TIME_SYSTEM_PARAMS,
   buildVariablesDefinitions,
-  getCompatibleFunctionDefinition,
+  getFunctionSuggestions,
   getCompatibleLiterals,
   getDateLiterals,
+  getOperatorSuggestions,
 } from './factories';
 import { EDITOR_MARKER } from '../shared/constants';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { listCompleteItem } from './complete_items';
+import { removeMarkerArgFromArgsList } from '../shared/context';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -207,9 +214,10 @@ export function getOverlapRange(
     }
   }
 
+  // add one since Monaco columns are 1-based
   return {
-    start: Math.min(query.length - overlapLength + 1, query.length),
-    end: query.length,
+    start: query.length - overlapLength + 1,
+    end: query.length + 1,
   };
 }
 
@@ -417,7 +425,14 @@ export async function getFieldsOrFunctionsSuggestions(
 
   const suggestions = filteredFieldsByType.concat(
     displayDateSuggestions ? getDateLiterals() : [],
-    functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
+    functions
+      ? getFunctionSuggestions({
+          command: commandName,
+          option: optionName,
+          returnTypes: types,
+          ignored: ignoreFn,
+        })
+      : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
       : [],
@@ -437,6 +452,7 @@ export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], should
   }));
 }
 
+/** @deprecated — use getExpressionType instead (packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
 export function extractTypeFromASTArg(
   arg: ESQLAstItem,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
@@ -450,15 +466,13 @@ export function extractTypeFromASTArg(
   if (Array.isArray(arg)) {
     return extractTypeFromASTArg(arg[0], references);
   }
-  if (isColumnItem(arg) || isLiteralItem(arg)) {
-    if (isLiteralItem(arg)) {
-      return arg.literalType;
-    }
-    if (isColumnItem(arg)) {
-      const hit = getColumnForASTNode(arg, references);
-      if (hit) {
-        return hit.type;
-      }
+  if (isLiteralItem(arg)) {
+    return arg.literalType;
+  }
+  if (isColumnItem(arg) || isIdentifier(arg)) {
+    const hit = getColumnForASTNode(arg, references);
+    if (hit) {
+      return hit.type;
     }
   }
   if (isTimeIntervalItem(arg)) {
@@ -472,4 +486,183 @@ export function extractTypeFromASTArg(
       return fnDef.signatures[0].returnType;
     }
   }
+}
+
+// @TODO: refactor this to be shared with validation
+export function checkFunctionInvocationComplete(
+  func: ESQLFunction,
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): {
+  complete: boolean;
+  reason?: 'tooFewArgs' | 'wrongTypes';
+} {
+  const fnDefinition = getFunctionDefinition(func.name);
+  if (!fnDefinition) {
+    return { complete: false };
+  }
+  const cleanedArgs = removeMarkerArgFromArgsList(func)!.args;
+  const argLengthCheck = fnDefinition.signatures.some((def) => {
+    if (def.minParams && cleanedArgs.length >= def.minParams) {
+      return true;
+    }
+    if (cleanedArgs.length === def.params.length) {
+      return true;
+    }
+    return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
+  });
+  if (!argLengthCheck) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+  if (fnDefinition.name === 'in' && Array.isArray(func.args[1]) && !func.args[1].length) {
+    return { complete: false, reason: 'tooFewArgs' };
+  }
+  const hasCorrectTypes = fnDefinition.signatures.some((def) => {
+    return func.args.every((a, index) => {
+      return (
+        (fnDefinition.name.endsWith('null') && def.params[index].type === 'any') ||
+        def.params[index].type === getExpressionType(a)
+      );
+    });
+  });
+  if (!hasCorrectTypes) {
+    return { complete: false, reason: 'wrongTypes' };
+  }
+  return { complete: true };
+}
+
+/**
+ * This function is used to
+ * - suggest the next argument for an incomplete or incorrect binary operator expression (e.g. field > <suggest>)
+ * - suggest an operator to the right of a complete binary operator expression (e.g. field > 0 <suggest>)
+ * - suggest an operator to the right of a complete unary operator (e.g. field IS NOT NULL <suggest>)
+ *
+ * TODO — is this function doing too much?
+ */
+export async function getSuggestionsToRightOfOperatorExpression({
+  queryText,
+  commandName,
+  optionName,
+  rootOperator: operator,
+  preferredExpressionType,
+  getExpressionType,
+  getColumnsByType,
+}: {
+  queryText: string;
+  commandName: string;
+  optionName?: string;
+  rootOperator: ESQLFunction;
+  preferredExpressionType?: SupportedDataType;
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
+  getColumnsByType: GetColumnsByTypeFn;
+}) {
+  const suggestions = [];
+  const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
+  if (isFnComplete.complete) {
+    // i.e. ... | <COMMAND> field > 0 <suggest>
+    // i.e. ... | <COMMAND> field + otherN <suggest>
+    const operatorReturnType = getExpressionType(operator);
+    suggestions.push(
+      ...getOperatorSuggestions({
+        command: commandName,
+        option: optionName,
+        // here we use the operator return type because we're suggesting operators that could
+        // accept the result of the existing operator as a left operand
+        leftParamType:
+          operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
+            ? 'any'
+            : operatorReturnType,
+        ignored: ['='],
+      })
+    );
+  } else {
+    // i.e. ... | <COMMAND> field >= <suggest>
+    // i.e. ... | <COMMAND> field + <suggest>
+    // i.e. ... | <COMMAND> field and <suggest>
+
+    // Because it's an incomplete function, need to extract the type of the current argument
+    // and suggest the next argument based on types
+
+    // pick the last arg and check its type to verify whether is incomplete for the given function
+    const cleanedArgs = removeMarkerArgFromArgsList(operator)!.args;
+    const leftArgType = getExpressionType(operator.args[cleanedArgs.length - 1]);
+
+    if (isFnComplete.reason === 'tooFewArgs') {
+      const fnDef = getFunctionDefinition(operator.name);
+      if (
+        fnDef?.signatures.every(({ params }) =>
+          params.some(({ type }) => isArrayType(type as string))
+        )
+      ) {
+        suggestions.push(listCompleteItem);
+      } else {
+        const finalType = leftArgType || leftArgType || 'any';
+        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType as string);
+
+        // this is a special case with AND/OR
+        // <COMMAND> expression AND/OR <suggest>
+        // technically another boolean value should be suggested, but it is a better experience
+        // to actually suggest a wider set of fields/functions
+        const typeToUse =
+          finalType === 'boolean' && getFunctionDefinition(operator.name)?.type === 'builtin'
+            ? ['any']
+            : (supportedTypes as string[]);
+
+        // TODO replace with fields callback + function suggestions
+        suggestions.push(
+          ...(await getFieldsOrFunctionsSuggestions(
+            typeToUse,
+            commandName,
+            optionName,
+            getColumnsByType,
+            {
+              functions: true,
+              fields: true,
+            }
+          ))
+        );
+      }
+    }
+
+    /**
+     * If the caller has supplied a preferred expression type, we can suggest operators that
+     * would move the user toward that expression type.
+     *
+     * e.g. if we have a preferred type of boolean and we have `timestamp > "2002" AND doubleField`
+     * this is an incorrect signature for AND because the left side is boolean and the right side is double
+     *
+     * Knowing that we prefer boolean expressions, we suggest operators that would accept doubleField as a left operand
+     * and also return a boolean value.
+     *
+     * I believe this is only used in WHERE and probably bears some rethinking.
+     */
+    if (isFnComplete.reason === 'wrongTypes') {
+      if (leftArgType && preferredExpressionType) {
+        // suggest something to complete the operator
+        if (
+          leftArgType !== preferredExpressionType &&
+          isParameterType(leftArgType) &&
+          isReturnType(preferredExpressionType)
+        ) {
+          suggestions.push(
+            ...getOperatorSuggestions({
+              command: commandName,
+              leftParamType: leftArgType,
+              returnTypes: [preferredExpressionType],
+            })
+          );
+        }
+      }
+    }
+  }
+  return suggestions.map<SuggestionRawDefinition>((s) => {
+    const overlap = getOverlapRange(queryText, s.text);
+    const offset = overlap.start === overlap.end ? 1 : 0;
+    return {
+      ...s,
+      rangeToReplace: {
+        start: overlap.start + offset,
+        end: overlap.end + offset,
+      },
+    };
+  });
 }

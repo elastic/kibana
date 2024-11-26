@@ -9,22 +9,22 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 
-export function canProvideStatsForField(field: DataViewField, isTextBased: boolean): boolean {
-  if (isTextBased) {
-    return canProvideStatsForFieldTextBased(field);
+export function canProvideStatsForField(field: DataViewField, isEsqlQuery: boolean): boolean {
+  if (isEsqlQuery) {
+    return false;
   }
   return (
-    (field.aggregatable && canProvideAggregatedStatsForField(field, isTextBased)) ||
+    (field.aggregatable && canProvideAggregatedStatsForField(field, isEsqlQuery)) ||
     ((!field.aggregatable || field.type === 'geo_point' || field.type === 'geo_shape') &&
-      canProvideExamplesForField(field, isTextBased))
+      canProvideExamplesForField(field, isEsqlQuery))
   );
 }
 
 export function canProvideAggregatedStatsForField(
   field: DataViewField,
-  isTextBased: boolean
+  isEsqlQuery: boolean
 ): boolean {
-  if (isTextBased) {
+  if (isEsqlQuery) {
     return false;
   }
   return !(
@@ -39,20 +39,17 @@ export function canProvideAggregatedStatsForField(
 
 export function canProvideNumberSummaryForField(
   field: DataViewField,
-  isTextBased: boolean
+  isEsqlQuery: boolean
 ): boolean {
-  if (isTextBased) {
+  if (isEsqlQuery) {
     return false;
   }
   return field.timeSeriesMetric === 'counter';
 }
 
-export function canProvideExamplesForField(field: DataViewField, isTextBased: boolean): boolean {
-  if (isTextBased) {
-    return (
-      (field.type === 'string' && !canProvideTopValuesForFieldTextBased(field)) ||
-      ['geo_point', 'geo_shape'].includes(field.type)
-    );
+export function canProvideExamplesForField(field: DataViewField, isEsqlQuery: boolean): boolean {
+  if (isEsqlQuery) {
+    return false;
   }
   if (field.name === '_score') {
     return false;
@@ -69,17 +66,6 @@ export function canProvideExamplesForField(field: DataViewField, isTextBased: bo
   ].includes(field.type);
 }
 
-export function canProvideTopValuesForFieldTextBased(field: DataViewField): boolean {
-  if (field.name === '_id') {
-    return false;
-  }
-  const esTypes = field.esTypes?.[0];
-  return (
-    Boolean(field.type === 'string' && esTypes && ['keyword', 'version'].includes(esTypes)) ||
-    ['keyword', 'version', 'ip', 'number', 'boolean'].includes(field.type)
-  );
-}
-
-export function canProvideStatsForFieldTextBased(field: DataViewField): boolean {
-  return canProvideTopValuesForFieldTextBased(field) || canProvideExamplesForField(field, true);
+export function canProvideStatsForEsqlField(field: DataViewField): boolean {
+  return false;
 }

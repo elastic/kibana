@@ -8,9 +8,9 @@
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { FlyoutLoading } from '@kbn/security-solution-common';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useTabs } from './tabs';
+import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import type {
   EntityDetailsLeftPanelTab,
   LeftPanelTabsType,
@@ -29,6 +29,7 @@ export interface UserDetailsPanelProps extends Record<string, unknown> {
   path?: PanelPath;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
+  hasNonClosedAlerts?: boolean;
 }
 export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'user_details';
@@ -42,6 +43,7 @@ export const UserDetailsPanel = ({
   path,
   scopeId,
   hasMisconfigurationFindings,
+  hasNonClosedAlerts,
 }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
   const tabs = useTabs(
@@ -49,7 +51,8 @@ export const UserDetailsPanel = ({
     user.name,
     isRiskScoreExist,
     scopeId,
-    hasMisconfigurationFindings
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts
   );
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
@@ -57,7 +60,8 @@ export const UserDetailsPanel = ({
     user,
     tabs,
     path,
-    hasMisconfigurationFindings
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts
   );
 
   if (managedUser.isLoading) return <FlyoutLoading />;
@@ -83,7 +87,8 @@ const useSelectedTab = (
   user: UserParam,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
-  hasMisconfigurationFindings?: boolean
+  hasMisconfigurationFindings?: boolean,
+  hasNonClosedAlerts?: boolean
 ) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -101,6 +106,7 @@ const useSelectedTab = (
         user,
         isRiskScoreExist,
         hasMisconfigurationFindings,
+        hasNonClosedAlerts,
         path: {
           tab: tabId,
         },
