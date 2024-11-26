@@ -15,6 +15,7 @@ import {
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataTableColumnHeader } from './data_table_column_header';
+import { waitFor }  from "@testing-library/react";
 
 const stubDataViewWithNested = createStubDataView({
   spec: {
@@ -71,7 +72,7 @@ describe('DataTableColumnHeader', function () {
       />
     );
     expect(component.find(FieldIcon).first().prop('type')).toBe('number');
-    expect(component.text()).toBe('NumberbytesDisplayName');
+    await waitFor(() => expect(component.text()).toBe('NumberbytesDisplayName'));
   });
 
   it('should render a correct token for a custom column type (in case of text-based queries)', async () => {
