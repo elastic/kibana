@@ -11,6 +11,11 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import findUp from 'find-up';
+// eslint-disable-next-line import/no-nodejs-modules
+import { mkdir } from 'node:fs/promises';
+// eslint-disable-next-line import/no-nodejs-modules
+import path from 'path';
 import type { HostVmExecResponse } from '../../../../scripts/endpoint/common/types';
 import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import {
@@ -478,7 +483,7 @@ ${s1Info.status}
 
     createFileOnEndpoint: async ({
       hostname,
-      path,
+      path: filePath,
       content,
     }: {
       hostname: string;
@@ -537,18 +542,35 @@ ${
 
       // --------- FIXME:PT DO NOT COMMIT TO MAIN - dev debug only
 
-      await getHostVmClient(hostname).exec(`echo ${content} > ${path}`);
+      await getHostVmClient(hostname).exec(`echo ${content} > ${filePath}`);
       return null;
     },
 
     captureHostVmAgentDiagnostics: async ({ hostname }) => {
       const { log } = await stackServicesPromise;
-      const vmClient = getHostVmClient(hostname, undefined, undefined, log);
-      const vmDiagnosticsFile = `/tmp/elastic-agent-diagnostics-${hostname}-${new Date().toISOString()}.zip`;
 
-      // generate diagnostics file on the host
-      await vmClient.exec(`sudo /var/Elastic/Agent diagnostics --file ${vmDiagnosticsFile}`);
-      return vmClient.download(vmDiagnosticsFile, ''); // FIXME:PT need calculate the destination directory for CI
+      log.info(`Capturing agent diagnostics for host VM [${hostname}]`);
+
+      const vmClient = getHostVmClient(hostname, undefined, undefined, log);
+      const fileName = `elastic-agent-diagnostics-${hostname}-${new Date()
+        .toISOString()
+        .replace(/:/g, '.')}.zip`;
+      const vmDiagnosticsFile = `/tmp/${fileName}`;
+      const kibanaDir = process.env.KIBANA_DIR ?? (await findUp('kibana', { type: 'directory' }));
+      const localDiagnosticsFile = `${kibanaDir}/target/test_failures/${fileName}`;
+
+      await mkdir(path.dirname(localDiagnosticsFile), { recursive: true });
+
+      // generate diagnostics file on the host and then download it
+      await vmClient.exec(
+        `sudo /opt/Elastic/Agent/elastic-agent diagnostics --file ${vmDiagnosticsFile}`
+      );
+      return vmClient.download(vmDiagnosticsFile, localDiagnosticsFile).then((response) => {
+        log.info(`Agent diagnostic file for host [${hostname}] has been downloaded and is available at:
+  ${response.filePath}
+`);
+        return response;
+      });
     },
 
     uploadFileToEndpoint: async ({
@@ -584,7 +606,7 @@ ${
 
     readZippedFileContentOnEndpoint: async ({
       hostname,
-      path,
+      path: filePath,
       password,
     }: {
       hostname: string;
@@ -592,7 +614,9 @@ ${
       password?: string;
     }): Promise<string> => {
       return (
-        await getHostVmClient(hostname).exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`)
+        await getHostVmClient(hostname).exec(
+          `unzip -p ${password ? `-P ${password} ` : ''}${filePath}`
+        )
       ).stdout;
     },
 

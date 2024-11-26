@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { logger } from './logger';
-import type { HostVm } from '../../../../scripts/endpoint/common/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
 
 // only used in "real" endpoint tests not in mocked ones
@@ -50,18 +48,4 @@ export const createEndpointHost = (
         },
       };
     });
-};
-
-export const captureHostEndpointLog = (hostVm: HostVm): Cypress.Chainable => {
-  logger.info(`Capturing Endpoint host VM log for VM [${hostVm.name}]`);
-
-  const logFile = '/opt/Elastic/Endpoint/state/log/endpoint-000000.log';
-  const nLines = 500;
-
-  return hostVm.exec(`sudo tail -n ${nLines} ${logFile}`).then((response) => {
-    logger.verbose(
-      `Last ${nLines} lines from Endpoint log on host [${hostVm.name}]:\n----------------\n${response.stdout}\n----------------\n`
-    );
-    return response.stdout;
-  });
 };

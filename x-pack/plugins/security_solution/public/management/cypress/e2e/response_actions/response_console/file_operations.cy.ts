@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { logger } from '../../../tasks/logger';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 import { waitForActionToComplete } from '../../../tasks/response_actions';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
@@ -68,6 +67,12 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       }
     });
 
+    afterEach(function () {
+      if (this.currentTest.isFailed() && createdHost) {
+        cy.task('captureHostVmAgentDiagnostics', { hostname: createdHost.hostname });
+      }
+    });
+
     it('"get-file --path" - should retrieve a file', () => {
       const downloadsFolder = Cypress.config('downloadsFolder');
 
@@ -85,16 +90,17 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       submitCommand();
       cy.wait('@getFileAction', { timeout: 60000 }).then((interception) => {
         return waitForActionToComplete(interception.response?.body.data.id, 20000, () => {
-          return cy
-            .task('execCommandOnHost', {
-              hostname: createdHost.hostname,
-              command: `sudo tail -n 50 /opt/Elastic/Endpoint/state/log/endpoint-000000.log`,
-            })
-            .then<void>((output) => {
-              logger.info(
-                `Endpoint log from host [${createdHost.hostname}] after action failed to complete:\n${output.stdout}`
-              );
-            });
+          // return cy.task('captureHostVmAgentDiagnostics', { hostname: createdHost.hostname });
+          // return cy
+          //   .task('execCommandOnHost', {
+          //     hostname: createdHost.hostname,
+          //     command: `sudo tail -n 50 /opt/Elastic/Endpoint/state/log/endpoint-000000.log`,
+          //   })
+          //   .then<void>((output) => {
+          //     logger.info(
+          //       `Endpoint log from host [${createdHost.hostname}] after action failed to complete:\n${output.stdout}`
+          //     );
+          //   });
         });
       });
 
