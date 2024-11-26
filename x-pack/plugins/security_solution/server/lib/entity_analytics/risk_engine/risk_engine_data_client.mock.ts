@@ -9,7 +9,6 @@ import type { RiskEngineDataClient } from './risk_engine_data_client';
 
 const createRiskEngineDataClientMock = () =>
   ({
-    disableLegacyRiskEngine: jest.fn(),
     disableRiskEngine: jest.fn(),
     enableRiskEngine: jest.fn(),
     getConfiguration: jest.fn(),

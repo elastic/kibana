@@ -34,24 +34,15 @@ export const enrichEvents: EnrichEventsFunction = async ({
     const enrichments: Array<Promise<EventsMapByEnrichments>> = [];
 
     logger.debug('Alert enrichments started');
-    const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
-
-    let isNewRiskScoreModuleInstalled = false;
-    if (isNewRiskScoreModuleAvailable) {
-      isNewRiskScoreModuleInstalled = await isIndexExist({
-        services,
-        index: getHostRiskIndex(spaceId, true, true),
-      });
-    }
 
     const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
       isIndexExist({
         services,
-        index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+        index: getHostRiskIndex(spaceId, true),
       }),
       isIndexExist({
         services,
-        index: getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+        index: getUserRiskIndex(spaceId, true),
       }),
     ]);
 
@@ -62,7 +53,6 @@ export const enrichEvents: EnrichEventsFunction = async ({
           logger,
           events,
           spaceId,
-          isNewRiskScoreModuleInstalled,
         })
       );
     }
@@ -74,7 +64,6 @@ export const enrichEvents: EnrichEventsFunction = async ({
           logger,
           events,
           spaceId,
-          isNewRiskScoreModuleInstalled,
         })
       );
     }

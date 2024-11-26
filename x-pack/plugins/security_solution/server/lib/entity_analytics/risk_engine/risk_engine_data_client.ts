@@ -10,15 +10,12 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
   deleteSavedObjects,
 } from './utils/saved_object_configuration';
-import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
 import { RiskEngineAuditActions } from './audit';
@@ -50,28 +47,11 @@ export class RiskEngineDataClient {
 
   public async init({ namespace, taskManager, riskScoreDataClient }: InitOpts) {
     const result: InitRiskEngineResult = {
-      legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
       riskEngineConfigurationCreated: false,
       riskEngineEnabled: false,
       errors: [] as string[],
     };
-
-    try {
-      result.legacyRiskEngineDisabled = await this.disableLegacyRiskEngine({ namespace });
-      this.options.auditLogger?.log({
-        message: 'System disabled the legacy risk engine.',
-        event: {
-          action: RiskEngineAuditActions.RISK_ENGINE_DISABLE_LEGACY_ENGINE,
-          category: AUDIT_CATEGORY.DATABASE,
-          type: AUDIT_TYPE.CHANGE,
-          outcome: AUDIT_OUTCOME.SUCCESS,
-        },
-      });
-    } catch (e) {
-      result.legacyRiskEngineDisabled = false;
-      result.errors.push(e.message);
-    }
 
     try {
       await riskScoreDataClient.init();
@@ -117,7 +97,6 @@ export class RiskEngineDataClient {
     taskManager?: TaskManagerStartContract;
   }) {
     const riskEngineStatus = await this.getCurrentStatus();
-    const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
     const taskStatus =
       riskEngineStatus === 'ENABLED' && taskManager
@@ -136,7 +115,6 @@ export class RiskEngineDataClient {
 
     return {
       riskEngineStatus,
-      legacyRiskEngineStatus,
       taskStatus,
     };
   }
@@ -262,34 +240,6 @@ export class RiskEngineDataClient {
     return errors.concat(riskScoreErrors);
   }
 
-  public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
-    const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
-
-    if (legacyRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
-      return true;
-    }
-
-    await removeLegacyTransforms({
-      esClient: this.options.esClient,
-      namespace,
-    });
-
-    const deleteDashboardsPromises = [RiskScoreEntity.host, RiskScoreEntity.user].map((entity) =>
-      bulkDeleteSavedObjects({
-        deleteAll: true,
-        savedObjectsClient: this.options.soClient,
-        spaceId: namespace,
-        savedObjectTemplate: `${entity}RiskScoreDashboards`,
-      })
-    );
-
-    await Promise.all(deleteDashboardsPromises);
-
-    const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
-
-    return newlegacyRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED;
-  }
-
   private async getCurrentStatus() {
     const configuration = await this.getConfiguration();
 
@@ -298,25 +248,5 @@ export class RiskEngineDataClient {
     }
 
     return RiskEngineStatusEnum.NOT_INSTALLED;
-  }
-
-  private async getLegacyStatus({ namespace }: { namespace: string }) {
-    const transforms = await getLegacyTransforms({ namespace, esClient: this.options.esClient });
-
-    this.options.auditLogger?.log({
-      message: 'System checked if the legacy risk engine is enabled',
-      event: {
-        action: RiskEngineAuditActions.RISK_ENGINE_GET_LEGACY_ENGINE_STATUS_GET,
-        category: AUDIT_CATEGORY.DATABASE,
-        type: AUDIT_TYPE.ACCESS,
-        outcome: AUDIT_OUTCOME.SUCCESS,
-      },
-    });
-
-    if (transforms.length === 0) {
-      return RiskEngineStatusEnum.NOT_INSTALLED;
-    }
-
-    return RiskEngineStatusEnum.ENABLED;
   }
 }

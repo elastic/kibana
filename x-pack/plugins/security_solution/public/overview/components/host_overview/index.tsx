@@ -10,6 +10,7 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
@@ -37,7 +38,6 @@ import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
-import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
 import { RiskScoreDocTooltip } from '../common';
 
 interface HostSummaryProps {

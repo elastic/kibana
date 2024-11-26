@@ -21,8 +21,6 @@ import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { InspectButtonContainer } from '../../../common/components/inspect';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { StyledBasicTable } from '../styled_basic_table';
-import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
-import { RiskScoresNoDataDetected } from '../risk_score_onboarding/risk_score_no_data_detected';
 import { useRefetchQueries } from '../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../common/components/loader';
 import { Panel } from '../../../common/components/panel';
@@ -39,6 +37,8 @@ import { UserPanelKey } from '../../../flyout/entity_details/user_right';
 import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../hooks/use_missing_risk_engine_privileges';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
+import { RiskScoreHeaderTitle } from '../risk_score_header_title';
 
 export const ENTITY_RISK_SCORE_TABLE_ID = 'entity-risk-score-table';
 
@@ -131,9 +131,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     loading: isTableLoading,
     inspect,
     refetch,
-    isDeprecated,
     isAuthorized,
-    isModuleEnabled,
+    isEngineEnabled,
   } = useRiskScore({
     filterQuery,
     skip: !toggleStatus,
@@ -167,10 +166,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     return null;
   }
 
-  const status = {
-    isDisabled: !isModuleEnabled && !isTableLoading,
-    isDeprecated: isDeprecated && !isTableLoading,
-  };
+  const isDisabled = !isEngineEnabled && !isTableLoading;
 
   if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
     return (
@@ -180,10 +176,10 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     );
   }
 
-  if (status.isDisabled || status.isDeprecated) {
+  if (isDisabled) {
     return (
       <EnableRiskScore
-        {...status}
+        isDisabled={isDisabled}
         entityType={riskEntity}
         refetch={refreshPage}
         timerange={timerange}
@@ -191,8 +187,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     );
   }
 
-  if (isModuleEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={riskEntity} refetch={refreshPage} />;
+  if (isEngineEnabled && selectedSeverity.length === 0 && data && data.length === 0) {
+    return <RiskScoresNoDataDetected entityType={riskEntity} />;
   }
 
   return (

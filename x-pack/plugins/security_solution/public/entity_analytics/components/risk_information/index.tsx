@@ -28,6 +28,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
+import { BETA } from '../../../common/translations';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
@@ -37,9 +38,8 @@ import {
   CriticalityLevels,
   CriticalityModifiers,
 } from '../../../../common/entity_analytics/asset_criticality';
-import { EntityAnalyticsLearnMoreLink } from '../risk_score_onboarding/entity_analytics_doc_link';
-import { BETA } from '../risk_score_onboarding/translations';
 import { AssetCriticalityBadge } from '../asset_criticality';
+import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
 
 const SpacedOrderedList = styled.ol`
   li {

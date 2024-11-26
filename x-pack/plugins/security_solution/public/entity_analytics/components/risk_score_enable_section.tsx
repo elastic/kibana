@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,14 +16,6 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiLoadingSpinner,
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiText,
   EuiCallOut,
   EuiAccordion,
@@ -71,74 +63,6 @@ const RiskScoreErrorPanel = ({ errors }: { errors: string[] }) => (
     </EuiCallOut>
   </>
 );
-
-interface RiskScoreUpdateModalParams {
-  isLoading: boolean;
-  isVisible: boolean;
-  closeModal: () => void;
-  onConfirm: () => void;
-}
-
-const RiskScoreUpdateModal = ({
-  closeModal,
-  isLoading,
-  onConfirm,
-  isVisible,
-}: RiskScoreUpdateModalParams) => {
-  if (!isVisible) return null;
-
-  return (
-    <EuiModal onClose={closeModal}>
-      {isLoading ? (
-        <EuiModalHeader>
-          <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiLoadingSpinner size="m" />
-            <EuiModalHeaderTitle>{i18n.UPDATING_RISK_ENGINE}</EuiModalHeaderTitle>
-          </EuiFlexGroup>
-        </EuiModalHeader>
-      ) : (
-        <>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>{i18n.UPDATE_RISK_ENGINE_MODAL_TITLE}</EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            <EuiText>
-              <p>
-                <b>{i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_1}</b>
-                {i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_USER_HOST_2}
-              </p>
-              <EuiSpacer size="s" />
-              <p>
-                <b>{i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_1}</b>
-                {i18n.UPDATE_RISK_ENGINE_MODAL_EXISTING_DATA_2}
-              </p>
-            </EuiText>
-            <EuiSpacer />
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              color="primary"
-              data-test-subj="risk-score-update-cancel"
-              onClick={closeModal}
-            >
-              {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_NO}
-            </EuiButtonEmpty>
-            <EuiButton
-              color="primary"
-              data-test-subj="risk-score-update-confirm"
-              onClick={onConfirm}
-              fill
-            >
-              {i18n.UPDATE_RISK_ENGINE_MODAL_BUTTON_YES}
-            </EuiButton>
-          </EuiModalFooter>
-        </>
-      )}
-    </EuiModal>
-  );
-};
 
 const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | null }> = ({
   currentRiskEngineStatus,
@@ -194,14 +118,10 @@ export const RiskScoreEnableSection: React.FC<{
   privileges: RiskEngineMissingPrivilegesResponse;
 }> = ({ privileges }) => {
   const { addSuccess } = useAppToasts();
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
     onSuccess: () => {
       addSuccess(i18n.RISK_SCORE_MODULE_TURNED_ON, toastOptions);
-    },
-    onSettled: () => {
-      setIsModalVisible(false);
     },
   });
 
@@ -218,9 +138,6 @@ export const RiskScoreEnableSection: React.FC<{
 
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
 
-  const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
-
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   const isLoading =
@@ -229,8 +146,6 @@ export const RiskScoreEnableSection: React.FC<{
     disableRiskEngineMutation.isLoading ||
     privileges.isLoading ||
     isStatusLoading;
-
-  const isUpdateAvailable = riskEngineStatus?.isUpdateAvailable;
 
   const onSwitchClick = () => {
     if (!currentRiskEngineStatus || isLoading) {
@@ -267,47 +182,21 @@ export const RiskScoreEnableSection: React.FC<{
 
         <EuiSpacer size="m" />
         <EuiFlexItem grow={0}>
-          <RiskScoreUpdateModal
-            isVisible={isModalVisible}
-            onConfirm={() => initRiskEngineMutation.mutate()}
-            isLoading={initRiskEngineMutation.isLoading}
-            closeModal={closeModal}
-          />
           <EuiHorizontalRule margin="s" />
 
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems={'baseline'}>
                 {i18n.ENTITY_RISK_SCORING}
-                {isUpdateAvailable && <EuiBadge color="success">{i18n.UPDATE_AVAILABLE}</EuiBadge>}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {isUpdateAvailable && (
-                <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-                  <EuiFlexItem>
-                    {initRiskEngineMutation.isLoading && !isModalVisible && (
-                      <EuiLoadingSpinner size="m" />
-                    )}
-                  </EuiFlexItem>
-                  <EuiButtonEmpty
-                    disabled={initRiskEngineMutation.isLoading}
-                    color={'primary'}
-                    onClick={showModal}
-                    data-test-subj="risk-score-update-button"
-                  >
-                    {i18n.START_UPDATE}
-                  </EuiButtonEmpty>
-                </EuiFlexGroup>
-              )}
-              {!isUpdateAvailable && (
-                <RiskEngineStatusRow
-                  currentRiskEngineStatus={currentRiskEngineStatus}
-                  onSwitchClick={onSwitchClick}
-                  isLoading={isLoading}
-                  privileges={privileges}
-                />
-              )}
+              <RiskEngineStatusRow
+                currentRiskEngineStatus={currentRiskEngineStatus}
+                onSwitchClick={onSwitchClick}
+                isLoading={isLoading}
+                privileges={privileges}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="s" />

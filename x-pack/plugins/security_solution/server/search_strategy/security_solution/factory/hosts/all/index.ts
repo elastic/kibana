@@ -72,13 +72,7 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
     const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
 
     const enhancedEdges = deps?.spaceId
-      ? await enhanceEdges(
-          edges,
-          hostNames,
-          deps.spaceId,
-          deps.esClient,
-          options.isNewRiskScoreModuleInstalled
-        )
+      ? await enhanceEdges(edges, hostNames, deps.spaceId, deps.esClient)
       : edges;
 
     return {
@@ -99,11 +93,10 @@ async function enhanceEdges(
   edges: HostsEdges[],
   hostNames: string[],
   spaceId: string,
-  esClient: IScopedClusterClient,
-  isNewRiskScoreModuleInstalled: boolean
+  esClient: IScopedClusterClient
 ): Promise<HostsEdges[]> {
   const [riskByHostName, criticalityByHostName] = await Promise.all([
-    getHostRiskData(esClient, spaceId, hostNames, isNewRiskScoreModuleInstalled).then(
+    getHostRiskData(esClient, spaceId, hostNames).then(
       buildRecordFromAggs('host.name', 'host.risk.calculated_level')
     ),
     getHostCriticalityData(esClient, hostNames).then(
@@ -124,13 +117,12 @@ async function enhanceEdges(
 export async function getHostRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
-  hostNames: string[],
-  isNewRiskScoreModuleInstalled: boolean
+  hostNames: string[]
 ) {
   try {
     const hostRiskResponse = await esClient.asCurrentUser.search<HostRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
+        defaultIndex: [getHostRiskIndex(spaceId, true)],
         filterQuery: buildHostNamesFilter(hostNames),
         riskScoreEntity: RiskScoreEntity.host,
         factoryQueryType: RiskQueries.hostsRiskScore,

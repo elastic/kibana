@@ -131,14 +131,14 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = (
       adHocDataViews: {
         [internalReferenceId]: {
           id: internalReferenceId,
-          title: `ml_${stackByField}_risk_score_latest_${extraOptions.spaceId}`,
+          title: `ea_${stackByField}_risk_score_latest_${extraOptions.spaceId}`,
           timeFieldName: '',
           sourceFilters: [],
           fieldFormats: {},
           runtimeFieldMap: {},
           fieldAttrs: {},
           allowNoIndex: false,
-          name: `ml_${stackByField}_risk_score_latest_${extraOptions.spaceId}_no_timestamp`,
+          name: `ea_${stackByField}_risk_score_latest_${extraOptions.spaceId}_no_timestamp`,
         },
       },
     },

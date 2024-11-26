@@ -8,7 +8,7 @@
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../common/lib/kibana';
 
 const EntityAnalyticsLearnMoreLinkComponent = ({ title }: { title?: string | React.ReactNode }) => {
   const { docLinks } = useKibana().services;

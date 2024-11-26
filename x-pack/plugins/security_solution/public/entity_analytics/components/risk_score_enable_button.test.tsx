@@ -6,8 +6,8 @@
  */
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../common/search_strategy';
-import { TestProviders } from '../../../common/mock';
+import { RiskScoreEntity } from '../../../common/search_strategy';
+import { TestProviders } from '../../common/mock';
 
 import { RiskScoreEnableButton } from './risk_score_enable_button';
 

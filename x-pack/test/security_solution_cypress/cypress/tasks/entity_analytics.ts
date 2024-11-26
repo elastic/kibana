@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  RISK_ENGINE_STATUS_URL,
-  RISK_SCORE_INDEX_STATUS_API_URL,
-} from '@kbn/security-solution-plugin/common/constants';
+import { RISK_ENGINE_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { BASIC_TABLE_LOADING } from '../screens/common';
 import {
   ANOMALIES_TABLE_ROWS,
@@ -67,15 +64,6 @@ export const mockRiskEngineEnabled = () => {
       legacy_risk_engine_status: 'INSTALLED',
     },
   }).as('riskEngineStatus');
-
-  // mock the risk index status
-  cy.intercept('GET', `${RISK_SCORE_INDEX_STATUS_API_URL}?indexName=*&entity=*`, {
-    statusCode: 200,
-    body: {
-      isDeprecated: false,
-      isEnabled: true,
-    },
-  }).as('riskIndexStatus');
 };
 
 /**

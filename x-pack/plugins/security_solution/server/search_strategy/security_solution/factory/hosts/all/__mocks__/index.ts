@@ -31,7 +31,6 @@ export const mockOptions: HostsRequestOptions = {
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   timerange: { interval: '12h', from: '2020-09-03T09:15:21.415Z', to: '2020-09-04T09:15:21.415Z' },
   sort: { direction: Direction.desc, field: HostsFields.lastSeen },
-  isNewRiskScoreModuleInstalled: false,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {

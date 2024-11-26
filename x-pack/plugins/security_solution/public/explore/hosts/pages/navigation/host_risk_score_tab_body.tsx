@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { noop } from 'lodash/fp';
+import { RiskScoresNoDataDetected } from '../../../../entity_analytics/components/risk_score_no_data_detected';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { RiskEnginePrivilegesCallOut } from '../../../../entity_analytics/components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hooks/use_missing_risk_engine_privileges';
@@ -23,9 +24,6 @@ import { hostsModel, hostsSelectors } from '../../store';
 import type { State } from '../../../../common/store';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../../../common/search_strategy';
-import { RiskScoresNoDataDetected } from '../../../../entity_analytics/components/risk_score_onboarding/risk_score_no_data_detected';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
-import { RiskScoreUpdatePanel } from '../../../../entity_analytics/components/risk_score_update_panel';
 
 const HostRiskScoreTableManage = manageQuery(HostRiskScoreTable);
 
@@ -50,8 +48,6 @@ export const HostRiskScoreQueryTabBody = ({
     getHostRiskScoreFilterQuerySelector(state, hostsModel.HostsType.page)
   );
 
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-
   const pagination = useMemo(
     () => ({
       cursorStart: activePage * limit,
@@ -68,23 +64,15 @@ export const HostRiskScoreQueryTabBody = ({
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
   const privileges = useMissingRiskEnginePrivileges();
-  const {
-    data,
-    inspect,
-    isDeprecated,
-    isInspected,
-    isModuleEnabled,
-    loading,
-    refetch,
-    totalCount,
-  } = useRiskScore({
-    filterQuery,
-    pagination,
-    riskEntity: RiskScoreEntity.host,
-    skip: querySkip,
-    sort,
-    timerange,
-  });
+  const { data, inspect, isInspected, isEngineEnabled, loading, refetch, totalCount } =
+    useRiskScore({
+      filterQuery,
+      pagination,
+      riskEntity: RiskScoreEntity.host,
+      skip: querySkip,
+      sort,
+      timerange,
+    });
 
   const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
@@ -92,11 +80,7 @@ export const HostRiskScoreQueryTabBody = ({
     riskEntity: RiskScoreEntity.host,
   });
 
-  const status = {
-    isDisabled: !isModuleEnabled && !loading,
-    isDeprecated: isDeprecated && !loading,
-  };
-
+  const isDisabled = !isEngineEnabled && !loading;
   const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
 
   if (RiskScoreUpsell) {
@@ -111,11 +95,11 @@ export const HostRiskScoreQueryTabBody = ({
     );
   }
 
-  if (status.isDisabled || status.isDeprecated) {
+  if (isDisabled) {
     return (
       <EuiPanel hasBorder>
         <EnableRiskScore
-          {...status}
+          isDisabled={isDisabled}
           entityType={RiskScoreEntity.host}
           refetch={refetch}
           timerange={timerange}
@@ -126,17 +110,16 @@ export const HostRiskScoreQueryTabBody = ({
 
   if (
     !loading &&
-    isModuleEnabled &&
+    isEngineEnabled &&
     severitySelectionRedux.length === 0 &&
     data &&
     data.length === 0
   ) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} refetch={refetch} />;
+    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.host} />;
   }
 
   return (
     <>
-      {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
       <HostRiskScoreTableManage
         deleteQuery={deleteQuery}
         data={data ?? []}
