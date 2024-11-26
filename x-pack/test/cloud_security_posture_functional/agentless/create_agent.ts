@@ -8,6 +8,7 @@
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import expect from '@kbn/expect';
+import equals from 'fast-deep-equal';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 // eslint-disable-next-line import/no-default-export
@@ -76,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // not to wait for the agent to be healthy
       await retry.tryForTime(agentCreationTimeout, async () => {
         const resStatus = await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus();
-        expect(resStatus == 'Healthy' || resStatus == 'Pending').to.be(true);
+        expect(equals(resStatus, 'Healthy') || equals(resStatus, 'Pending')).to.be(true);
       });
     });
 
