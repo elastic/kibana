@@ -50,7 +50,7 @@ export const CreateIntegrationAssistant = React.memo(() => {
       ? stepNames.cel_review
       : state.step === celInputStepIndex
       ? stepNames.cel_input
-      : stepNames[state.step.toString() as StepName];
+      : stepNames[state.step.toString() as StepName] || 'Unknown Step';
 
   const telemetry = useTelemetry();
   useEffect(() => {
