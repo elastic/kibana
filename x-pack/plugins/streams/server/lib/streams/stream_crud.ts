@@ -112,6 +112,7 @@ export async function listStreams({
 
 interface ReadStreamParams extends BaseParams {
   id: string;
+  skipAccessCheck?: boolean;
 }
 
 export interface ReadStreamResponse {
@@ -121,6 +122,7 @@ export interface ReadStreamResponse {
 export async function readStream({
   id,
   scopedClusterClient,
+  skipAccessCheck,
 }: ReadStreamParams): Promise<ReadStreamResponse> {
   try {
     const response = await scopedClusterClient.asInternalUser.get<StreamDefinition>({
@@ -128,6 +130,12 @@ export async function readStream({
       index: STREAMS_INDEX,
     });
     const definition = response._source as StreamDefinition;
+    if (!skipAccessCheck) {
+      const hasAccess = await checkReadAccess({ id, scopedClusterClient });
+      if (!hasAccess) {
+        throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+      }
+    }
     return {
       definition,
     };
@@ -249,6 +257,21 @@ export async function checkStreamExists({ id, scopedClusterClient }: ReadStreamP
   }
 }
 
+interface CheckReadAccessParams extends BaseParams {
+  id: string;
+}
+
+export async function checkReadAccess({
+  id,
+  scopedClusterClient,
+}: CheckReadAccessParams): Promise<boolean> {
+  try {
+    return await scopedClusterClient.asCurrentUser.indices.exists({ index: id });
+  } catch (e) {
+    return false;
+  }
+}
+
 interface SyncStreamParams {
   scopedClusterClient: IScopedClusterClient;
   definition: StreamDefinition;
@@ -262,10 +285,11 @@ export async function syncStream({
   rootDefinition,
   logger,
 }: SyncStreamParams) {
+  const componentTemplate = generateLayer(definition.id, definition);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    component: generateLayer(definition.id, definition),
+    component: componentTemplate,
   });
   await upsertIngestPipeline({
     esClient: scopedClusterClient.asCurrentUser,
@@ -308,5 +332,6 @@ export async function syncStream({
     esClient: scopedClusterClient.asCurrentUser,
     name: definition.id,
     logger,
+    mappings: componentTemplate.template.mappings?.properties,
   });
 }
