@@ -170,9 +170,10 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
               }),
           'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': 2500,
+          'index.mapping.ignore_dynamic_beyond_limit': true,
         },
         mappings: {
-          dynamic: false,
+          dynamic: true,
           _meta: {
             kibana: { version: '8.8.0' },
             managed: true,
@@ -432,9 +433,10 @@ describe('Alerts Service', () => {
                     rollover_alias: `.alerts-empty-default`,
                   },
                   'index.mapping.total_fields.limit': 1800,
+                  'index.mapping.ignore_dynamic_beyond_limit': true,
                 },
                 mappings: {
-                  dynamic: false,
+                  dynamic: true,
                 },
               },
             },
@@ -872,6 +874,7 @@ describe('Alerts Service', () => {
                       }),
                   'index.mapping.ignore_malformed': true,
                   'index.mapping.total_fields.limit': 2500,
+                  'index.mapping.ignore_dynamic_beyond_limit': true,
                 },
                 mappings: {
                   _meta: {
@@ -879,7 +882,7 @@ describe('Alerts Service', () => {
                     managed: true,
                     namespace: 'default',
                   },
-                  dynamic: false,
+                  dynamic: true,
                 },
               },
               _meta: {

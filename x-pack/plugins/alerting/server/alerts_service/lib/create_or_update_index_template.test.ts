@@ -35,7 +35,7 @@ const IndexTemplate = (namespace: string = 'default', useDataStream: boolean = f
           managed: true,
           namespace,
         },
-        dynamic: false,
+        dynamic: true,
       },
       settings: {
         auto_expand_replicas: '0-1',
@@ -50,6 +50,7 @@ const IndexTemplate = (namespace: string = 'default', useDataStream: boolean = f
             }),
         'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
+        'index.mapping.ignore_dynamic_beyond_limit': true,
       },
     },
     priority: namespace.length,

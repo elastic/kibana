@@ -70,9 +70,10 @@ export const getIndexTemplate = ({
               }),
           'index.mapping.ignore_malformed': true,
           'index.mapping.total_fields.limit': totalFieldsLimit,
+          'index.mapping.ignore_dynamic_beyond_limit': true,
         },
         mappings: {
-          dynamic: false,
+          dynamic: true,
           _meta: indexMetadata,
         },
         ...(indexPatterns.secondaryAlias
