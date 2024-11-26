@@ -17,12 +17,22 @@ import { useFetchESQL } from '../hooks/use_fetch_esql';
 export const Logs: FC = () => {
   const state = useEventBusExampleState();
   const esql = state.useState((s) => s.esql);
+  const crossfilter = state.useState((s) => s.filters);
   const selectedFields = state.useState((s) => s.selectedFields);
 
   const esqlWithFilters = useMemo(() => {
     if (esql === '' || selectedFields.length === 0) return null;
-    return `${esql} | LIMIT 100 | KEEP ${selectedFields.join(',')}`;
-  }, [esql, selectedFields]);
+
+    const els = esql.split('|').map((d) => d.trim());
+    Object.values(crossfilter).forEach((filter) => {
+      els.splice(1, 0, filter);
+    });
+
+    els.push('LIMIT 100');
+    els.push(`KEEP ${selectedFields.join(',')}`);
+
+    return els.join('\n| ');
+  }, [crossfilter, esql, selectedFields]);
 
   const data = useFetchESQL(esqlWithFilters);
 
