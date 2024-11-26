@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { withEuiTheme } from '@elastic/eui';
 import React from 'react';
-import type { LayoutPropsWithChildren } from '../../types';
+import type { LayoutPropsWithTheme } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { MetadataDetails } from '../metadata_details';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 
-export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
-  const { euiTheme } = useEuiTheme();
-  return (
+export const AwsEC2Layout = withEuiTheme(
+  ({ metrics, theme, onChangeRangeTime }: LayoutPropsWithTheme) => (
     <React.Fragment>
       <MetadataDetails
         fields={[
@@ -54,7 +54,7 @@ export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
               type="area"
               formatter="percent"
               seriesOverrides={{
-                total: { color: euiTheme.colors.vis.euiColorVis1 },
+                total: { color: theme.euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -73,7 +73,7 @@ export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
               type="area"
               seriesOverrides={{
                 rx: {
-                  color: euiTheme.colors.vis.euiColorVis1,
+                  color: theme.euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.networkRxRateSeriesLabel',
                     {
@@ -82,7 +82,7 @@ export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
                   ),
                 },
                 tx: {
-                  color: euiTheme.colors.vis.euiColorVis2,
+                  color: theme.euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.hostMetricsLayout.networkTrafficSection.networkTxRateSeriesLabel',
                     {
@@ -108,7 +108,7 @@ export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
               type="area"
               seriesOverrides={{
                 write: {
-                  color: euiTheme.colors.vis.euiColorVis2,
+                  color: theme.euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.ec2MetricsLayout.diskIOBytesSection.writeLabel',
                     {
@@ -117,7 +117,7 @@ export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
                   ),
                 },
                 read: {
-                  color: euiTheme.colors.vis.euiColorVis1,
+                  color: theme.euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.ec2MetricsLayout.diskIOBytesSection.readLabel',
                     {
@@ -131,5 +131,5 @@ export function AwsEC2Layout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
         </Section>
       </EuiPanel>
     </React.Fragment>
-  );
-}
+  )
+);

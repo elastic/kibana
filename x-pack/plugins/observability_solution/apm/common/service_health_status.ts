@@ -35,34 +35,34 @@ export function getServiceHealthStatus({ severity }: { severity: ML_ANOMALY_SEVE
 }
 
 export function getServiceHealthStatusColor(
-  theme: EuiThemeComputed<{}>,
+  euiTheme: EuiThemeComputed<{}>,
   status: ServiceHealthStatus
 ) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return theme.colors.vis.euiColorVis0;
+      return euiTheme.colors.vis.euiColorVis0;
     case ServiceHealthStatus.warning:
-      return theme.colors.vis.euiColorVis5;
+      return euiTheme.colors.vis.euiColorVis5;
     case ServiceHealthStatus.critical:
-      return theme.colors.vis.euiColorVis9;
+      return euiTheme.colors.vis.euiColorVis9;
     case ServiceHealthStatus.unknown:
-      return theme.colors.mediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 
 export function getServiceHealthStatusBadgeColor(
-  theme: EuiThemeComputed<{}>,
+  euiTheme: EuiThemeComputed<{}>,
   status: ServiceHealthStatus
 ) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return theme.colors.vis.euiColorVis0;
+      return euiTheme.colors.vis.euiColorVis0;
     case ServiceHealthStatus.warning:
-      return theme.colors.vis.euiColorVis5;
+      return euiTheme.colors.vis.euiColorVis5;
     case ServiceHealthStatus.critical:
-      return theme.colors.vis.euiColorVis9;
+      return euiTheme.colors.vis.euiColorVis9;
     case ServiceHealthStatus.unknown:
-      return theme.colors.mediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 

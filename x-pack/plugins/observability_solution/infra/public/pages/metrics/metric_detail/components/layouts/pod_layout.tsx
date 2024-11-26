@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { withEuiTheme } from '@elastic/eui';
 import React from 'react';
-import type { LayoutPropsWithChildren } from '../../types';
+import type { LayoutPropsWithTheme } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { GaugesSectionVis } from '../gauges_section_vis';
 import { MetadataDetails } from '../metadata_details';
@@ -16,9 +17,8 @@ import { Section } from '../section';
 import { SubSection } from '../sub_section';
 import { NginxLayoutSection } from './nginx_layout_sections';
 
-export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
-  const { euiTheme } = useEuiTheme();
-  return (
+export const PodLayout = withEuiTheme(
+  ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <React.Fragment>
       <MetadataDetails />
       <EuiPanel>
@@ -45,7 +45,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
                       defaultMessage: 'CPU Usage',
                     }
                   ),
-                  color: euiTheme.colors.fullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -56,7 +56,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
                       defaultMessage: 'Memory Usage',
                     }
                   ),
-                  color: euiTheme.colors.fullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'percent',
                   gaugeMax: 1,
                 },
@@ -67,7 +67,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
                       defaultMessage: 'Inbound (RX)',
                     }
                   ),
-                  color: euiTheme.colors.fullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'bits',
                   formatterTemplate: '{{value}}/s',
                 },
@@ -78,7 +78,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
                       defaultMessage: 'Outbound (TX)',
                     }
                   ),
-                  color: euiTheme.colors.fullShade,
+                  color: theme.euiTheme.colors.fullShade,
                   formatter: 'bits',
                   formatterTemplate: '{{value}}/s',
                 },
@@ -98,7 +98,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
               formatter="percent"
               type="area"
               seriesOverrides={{
-                cpu: { color: euiTheme.colors.vis.euiColorVis1 },
+                cpu: { color: theme.euiTheme.colors.vis.euiColorVis1 },
               }}
             />
           </SubSection>
@@ -116,7 +116,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
               formatter="percent"
               seriesOverrides={{
                 memory: {
-                  color: euiTheme.colors.vis.euiColorVis1,
+                  color: theme.euiTheme.colors.vis.euiColorVis1,
                 },
               }}
             />
@@ -136,7 +136,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
               type="area"
               seriesOverrides={{
                 rx: {
-                  color: euiTheme.colors.vis.euiColorVis1,
+                  color: theme.euiTheme.colors.vis.euiColorVis1,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.networkRxRateSeriesLabel',
                     {
@@ -145,7 +145,7 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
                   ),
                 },
                 tx: {
-                  color: euiTheme.colors.vis.euiColorVis2,
+                  color: theme.euiTheme.colors.vis.euiColorVis2,
                   name: i18n.translate(
                     'xpack.infra.metricDetailPage.podMetricsLayout.networkTrafficSection.networkTxRateSeriesLabel',
                     {
@@ -160,5 +160,5 @@ export function PodLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildre
         <NginxLayoutSection metrics={metrics} onChangeRangeTime={onChangeRangeTime} />
       </EuiPanel>
     </React.Fragment>
-  );
-}
+  )
+);

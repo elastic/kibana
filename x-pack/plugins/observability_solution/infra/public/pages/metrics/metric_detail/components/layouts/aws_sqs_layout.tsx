@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { withEuiTheme } from '@elastic/eui';
 import React from 'react';
-import type { LayoutPropsWithChildren } from '../../types';
+import type { LayoutPropsWithTheme } from '../../types';
 import { ChartSectionVis } from '../chart_section_vis';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 
-export function AwsSQSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
-  const { euiTheme } = useEuiTheme();
-  return (
+export const AwsSQSLayout = withEuiTheme(
+  ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <EuiPanel>
       <Section
         navLabel="AWS SQS"
@@ -42,7 +42,7 @@ export function AwsSQSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
             formatter="abbreviatedNumber"
             seriesOverrides={{
               visible: {
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesVisible.chartLabel',
                   { defaultMessage: 'Available' }
@@ -65,7 +65,7 @@ export function AwsSQSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
             formatter="abbreviatedNumber"
             seriesOverrides={{
               delayed: {
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesDelayed.chartLabel',
                   { defaultMessage: 'Delayed' }
@@ -88,7 +88,7 @@ export function AwsSQSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
             formatter="abbreviatedNumber"
             seriesOverrides={{
               sent: {
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesSent.chartLabel',
                   { defaultMessage: 'Added' }
@@ -111,7 +111,7 @@ export function AwsSQSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
             formatter="abbreviatedNumber"
             seriesOverrides={{
               sent: {
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.messagesEmpty.chartLabel',
                   { defaultMessage: 'Empty' }
@@ -134,7 +134,7 @@ export function AwsSQSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
             formatter="abbreviatedNumber"
             seriesOverrides={{
               oldest: {
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.sqsMetricsLayout.oldestMessage.chartLabel',
                   { defaultMessage: 'Age' }
@@ -145,5 +145,5 @@ export function AwsSQSLayout({ metrics, onChangeRangeTime }: LayoutPropsWithChil
         </SubSection>
       </Section>
     </EuiPanel>
-  );
-}
+  )
+);

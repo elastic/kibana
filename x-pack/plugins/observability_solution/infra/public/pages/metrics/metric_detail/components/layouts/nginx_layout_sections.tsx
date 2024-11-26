@@ -7,15 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
-import type { LayoutPropsWithChildren } from '../../types';
+import { withEuiTheme } from '@elastic/eui';
+import type { LayoutPropsWithTheme } from '../../types';
 import { Section } from '../section';
 import { SubSection } from '../sub_section';
 import { ChartSectionVis } from '../chart_section_vis';
 
-export function NginxLayoutSection({ metrics, onChangeRangeTime }: LayoutPropsWithChildren) {
-  const { euiTheme } = useEuiTheme();
-  return (
+export const NginxLayoutSection = withEuiTheme(
+  ({ metrics, onChangeRangeTime, theme }: LayoutPropsWithTheme) => (
     <React.Fragment>
       <Section
         navLabel="Nginx"
@@ -37,10 +36,10 @@ export function NginxLayoutSection({ metrics, onChangeRangeTime }: LayoutPropsWi
             type="bar"
             formatter="abbreviatedNumber"
             seriesOverrides={{
-              '200s': { color: euiTheme.colors.vis.euiColorVis1 },
-              '300s': { color: euiTheme.colors.vis.euiColorVis5 },
-              '400s': { color: euiTheme.colors.vis.euiColorVis2 },
-              '500s': { color: euiTheme.colors.vis.euiColorVis9 },
+              '200s': { color: theme.euiTheme.colors.vis.euiColorVis1 },
+              '300s': { color: theme.euiTheme.colors.vis.euiColorVis5 },
+              '400s': { color: theme.euiTheme.colors.vis.euiColorVis2 },
+              '500s': { color: theme.euiTheme.colors.vis.euiColorVis9 },
             }}
           />
         </SubSection>
@@ -58,7 +57,7 @@ export function NginxLayoutSection({ metrics, onChangeRangeTime }: LayoutPropsWi
             formatter="abbreviatedNumber"
             formatterTemplate="{{value}}/s"
             seriesOverrides={{
-              rate: { color: euiTheme.colors.vis.euiColorVis1 },
+              rate: { color: theme.euiTheme.colors.vis.euiColorVis1 },
             }}
           />
         </SubSection>
@@ -76,7 +75,7 @@ export function NginxLayoutSection({ metrics, onChangeRangeTime }: LayoutPropsWi
             formatter="abbreviatedNumber"
             seriesOverrides={{
               connections: {
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 type: 'bar',
               },
             }}
@@ -96,7 +95,7 @@ export function NginxLayoutSection({ metrics, onChangeRangeTime }: LayoutPropsWi
             formatter="abbreviatedNumber"
             seriesOverrides={{
               reqPerConns: {
-                color: euiTheme.colors.vis.euiColorVis1,
+                color: theme.euiTheme.colors.vis.euiColorVis1,
                 name: i18n.translate(
                   'xpack.infra.metricDetailPage.nginxMetricsLayout.requestsPerConnectionsSection.reqsPerConnSeriesLabel',
                   {
@@ -109,5 +108,5 @@ export function NginxLayoutSection({ metrics, onChangeRangeTime }: LayoutPropsWi
         </SubSection>
       </Section>
     </React.Fragment>
-  );
-}
+  )
+);
