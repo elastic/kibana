@@ -25,11 +25,17 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
 
-const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: number) => {
+const getFindingsStats = (
+  passedFindingsStats: number,
+  failedFindingsStats: number,
+  filterFunction: (filter: string) => void,
+  currentFilter: string
+) => {
   if (passedFindingsStats === 0 && failedFindingsStats === 0) return [];
   return [
     {
@@ -41,6 +47,14 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
       ),
       count: passedFindingsStats,
       color: euiThemeVars.euiColorSuccess,
+      onClick: () => {
+        filterFunction('passed');
+      },
+      isCurrentFilter: currentFilter === 'passed',
+      onClickReset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+        filterFunction('');
+        event?.stopPropagation();
+      },
     },
     {
       key: i18n.translate(
@@ -51,6 +65,14 @@ const getFindingsStats = (passedFindingsStats: number, failedFindingsStats: numb
       ),
       count: failedFindingsStats,
       color: euiThemeVars.euiColorVis9,
+      onClick: () => {
+        filterFunction('failed');
+      },
+      isCurrentFilter: currentFilter === 'failed',
+      onClickReset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+        filterFunction('');
+        event?.stopPropagation();
+      },
     },
   ];
 };
@@ -67,15 +89,16 @@ export const MisconfigurationFindingsDetailsTable = memo(
       );
     }, []);
 
+    const [currentFilter, setCurrentFilter] = useState<string>('');
+
     const { data } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQuery(field, value),
+      query: buildEntityFlyoutPreviewQuery(field, value, currentFilter),
       sort: [],
       enabled: true,
       pageSize: 1,
     });
 
-    const passedFindings = data?.count.passed || 0;
-    const failedFindings = data?.count.failed || 0;
+    const { passedFindings, failedFindings } = useHasMisconfigurations(field, value);
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);
@@ -202,7 +225,15 @@ export const MisconfigurationFindingsDetailsTable = memo(
             <EuiIcon type={'popout'} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
-          <DistributionBar stats={getFindingsStats(passedFindings, failedFindings)} />
+          <EuiSpacer size="xl" />
+          <DistributionBar
+            stats={getFindingsStats(
+              passedFindings,
+              failedFindings,
+              setCurrentFilter,
+              currentFilter
+            )}
+          />
           <EuiSpacer size="l" />
           <EuiBasicTable
             items={pageOfItems || []}

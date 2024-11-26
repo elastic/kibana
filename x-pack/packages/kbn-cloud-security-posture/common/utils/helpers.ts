@@ -43,7 +43,11 @@ export const buildMutedRulesFilter = (
   return mutedRulesFilterQuery;
 };
 
-export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string) => {
+export const buildEntityFlyoutPreviewQuery = (
+  field: string,
+  queryValue?: string,
+  status?: string
+) => {
   return {
     bool: {
       filter: [
@@ -59,6 +63,60 @@ export const buildEntityFlyoutPreviewQuery = (field: string, queryValue?: string
             minimum_should_match: 1,
           },
         },
+        status
+          ? {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'result.evaluation': status,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            }
+          : undefined,
+      ],
+    },
+  };
+};
+
+// Need to Combine this with Above
+export const buildEntityVulnerabilityQuery = (
+  field: string,
+  queryValue?: string,
+  status?: string
+) => {
+  return {
+    bool: {
+      filter: [
+        {
+          bool: {
+            should: [
+              {
+                term: {
+                  [field]: `${queryValue || ''}`,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        status
+          ? {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'vulnerability.severity': status,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            }
+          : undefined,
       ],
     },
   };

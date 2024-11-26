@@ -12,7 +12,15 @@ import { css } from '@emotion/react';
 /** DistributionBar component props */
 export interface DistributionBarProps {
   /** distribution data points */
-  stats: Array<{ key: string; count: number; color: string; label?: React.ReactNode }>;
+  stats: Array<{
+    key: string;
+    count: number;
+    color: string;
+    label?: React.ReactNode;
+    isCurrentFilter?: boolean;
+    onClick?: () => void;
+    onClickReset?: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
+  }>;
   /** hide the label above the bar at first render */
   hideLastTooltip?: boolean;
   /** data-test-subj used for querying the component in tests */
@@ -155,7 +163,13 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
     const prettyNumber = numeral(stat.count).format('0,0a');
 
     return (
-      <div key={stat.key} css={partStyle} data-test-subj={`${dataTestSubj}__part`}>
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+      <div
+        key={stat.key}
+        css={partStyle}
+        data-test-subj={`${dataTestSubj}__part`}
+        onClick={stat.onClick}
+      >
         <div css={styles.tooltip}>
           <EuiFlexGroup
             gutterSize={'none'}
@@ -175,6 +189,11 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
                     <EuiIcon type={'dot'} size={'s'} color={stat.color} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>{stat.label ? stat.label : stat.key}</EuiFlexItem>
+                  {stat.isCurrentFilter ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="cross" size="m" onClick={stat.onClickReset} />
+                    </EuiFlexItem>
+                  ) : undefined}
                 </EuiFlexGroup>
               </EuiBadge>
             </EuiFlexItem>
