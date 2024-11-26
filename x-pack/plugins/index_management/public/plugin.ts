@@ -20,6 +20,7 @@ import {
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
 import { IndexManagementLocator } from '@kbn/index-management-shared-types';
+import { Subscription } from 'rxjs';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -57,6 +58,8 @@ export class IndexMgmtUIPlugin
     enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
   };
+  private canUseSyntheticSource: boolean = false;
+  private licensingSubscription?: Subscription;
 
   constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -113,6 +116,7 @@ export class IndexMgmtUIPlugin
             kibanaVersion: this.kibanaVersion,
             config: this.config,
             cloud,
+            canUseSyntheticSource: this.canUseSyntheticSource,
           });
         },
       });
@@ -133,6 +137,11 @@ export class IndexMgmtUIPlugin
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
     const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+
+    this.licensingSubscription = licensing?.license$.subscribe((next) => {
+      this.canUseSyntheticSource = next.hasAtLeast('enterprise');
+    });
+
     return {
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
@@ -213,5 +222,7 @@ export class IndexMgmtUIPlugin
       },
     };
   }
-  public stop() {}
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }
