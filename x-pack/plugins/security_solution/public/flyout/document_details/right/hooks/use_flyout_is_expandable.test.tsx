@@ -6,7 +6,7 @@
  */
 
 import { useFlyoutIsExpandable } from './use_flyout_is_expandable';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 

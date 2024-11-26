@@ -26,7 +26,7 @@ describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
     cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
     createTimeline().then((response) => {
       visit(TIMELINES_URL);
-      openTimeline(response.body.data.persistTimeline.timeline.savedObjectId);
+      openTimeline(response.body.savedObjectId);
       addEqlToTimeline(eql);
       saveTimeline();
       cy.wait('@updateTimeline');

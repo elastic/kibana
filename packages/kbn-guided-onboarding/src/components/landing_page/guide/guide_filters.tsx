@@ -76,7 +76,7 @@ export const GuideFilters = ({
         >
           <FormattedMessage
             id="guidedOnboardingPackage.gettingStarted.guideFilter.search.buttonLabel"
-            defaultMessage="Search"
+            defaultMessage="Elasticsearch"
           />
         </EuiButton>
       </EuiFlexItem>

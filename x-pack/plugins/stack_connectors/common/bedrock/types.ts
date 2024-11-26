@@ -21,8 +21,8 @@ import {
   RunApiLatestResponseSchema,
   BedrockMessageSchema,
   BedrockToolChoiceSchema,
-  ConverseActionParamsSchema,
-  ConverseActionResponseSchema,
+  BedrockClientSendParamsSchema,
+  BedrockClientSendResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;
@@ -39,5 +39,5 @@ export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
 export type BedrockMessage = TypeOf<typeof BedrockMessageSchema>;
 export type BedrockToolChoice = TypeOf<typeof BedrockToolChoiceSchema>;
-export type ConverseActionParams = TypeOf<typeof ConverseActionParamsSchema>;
-export type ConverseActionResponse = TypeOf<typeof ConverseActionResponseSchema>;
+export type ConverseActionParams = TypeOf<typeof BedrockClientSendParamsSchema>;
+export type ConverseActionResponse = TypeOf<typeof BedrockClientSendResponseSchema>;

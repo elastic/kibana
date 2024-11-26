@@ -52,15 +52,6 @@ type SelectInferenceIdContentProps = SelectInferenceIdProps & {
   value: string;
 };
 
-const defaultEndpoints = [
-  {
-    inference_id: 'elser_model_2',
-  },
-  {
-    inference_id: 'e5',
-  },
-];
-
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   createInferenceEndpoint,
   'data-test-subj': dataTestSubj,
@@ -89,13 +80,15 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   value,
 }) => {
   const {
-    core: { application, http },
+    core: { application },
     docLinks,
-    plugins: { ml },
+    plugins: { ml, share },
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
-  const inferenceEndpointsPageLink = `${http.basePath.get()}/app/enterprise_search/relevance/inference_endpoints`;
+  const inferenceEndpointsPageLink = share?.url.locators
+    .get('SEARCH_INFERENCE_ENDPOINTS')
+    ?.useUrl({});
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<
@@ -134,13 +127,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         endpoint.task_type === 'text_embedding' || endpoint.task_type === 'sparse_embedding'
     );
 
-    const missingDefaultEndpoints = defaultEndpoints.filter(
-      (endpoint) => !(filteredEndpoints || []).find((e) => e.inference_id === endpoint.inference_id)
-    );
-    const newOptions: EuiSelectableOption[] = [
-      ...(filteredEndpoints || []),
-      ...missingDefaultEndpoints,
-    ].map((endpoint) => ({
+    const newOptions: EuiSelectableOption[] = [...(filteredEndpoints || [])].map((endpoint) => ({
       label: endpoint.inference_id,
       'data-test-subj': `custom-inference_${endpoint.inference_id}`,
       checked: value === endpoint.inference_id ? 'on' : undefined,
@@ -239,24 +226,28 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       panelPaddingSize="m"
       closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
     >
-      <EuiContextMenuPanel>
-        <EuiContextMenuItem
-          key="manageInferenceEndpointButton"
-          icon="gear"
-          size="s"
-          data-test-subj="manageInferenceEndpointButton"
-          onClick={async () => {
-            application.navigateToUrl(inferenceEndpointsPageLink);
-          }}
-        >
-          {i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
-            {
-              defaultMessage: 'Manage Inference Endpoints',
-            }
-          )}
-        </EuiContextMenuItem>
-      </EuiContextMenuPanel>
+      {inferenceEndpointsPageLink && (
+        <EuiContextMenuPanel>
+          <EuiContextMenuItem
+            key="manageInferenceEndpointButton"
+            icon="gear"
+            size="s"
+            data-test-subj="manageInferenceEndpointButton"
+            href={inferenceEndpointsPageLink}
+            onClick={(e) => {
+              e.preventDefault();
+              application.navigateToUrl(inferenceEndpointsPageLink);
+            }}
+          >
+            {i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
+              {
+                defaultMessage: 'Manage Inference Endpoints',
+              }
+            )}
+          </EuiContextMenuItem>
+        </EuiContextMenuPanel>
+      )}
       <EuiHorizontalRule margin="none" />
       <EuiPanel color="transparent" paddingSize="s">
         <EuiTitle size="xxxs">
@@ -307,7 +298,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiHorizontalRule margin="none" />
       <EuiContextMenuItem icon={<EuiIcon type="help" color="primary" />} size="s">
         <EuiLink
-          href={docLinks.links.enterpriseSearch.inferenceApiCreate}
+          href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
           target="_blank"
           data-test-subj="learn-how-to-create-inference-endpoints"
         >

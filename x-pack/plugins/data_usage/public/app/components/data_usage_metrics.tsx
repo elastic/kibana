@@ -7,18 +7,20 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Charts } from './charts';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import { PLUGIN_NAME } from '../../../common';
+import { DEFAULT_METRIC_TYPES, type UsageMetricsRequestBody } from '../../../common/rest_types';
+import { PLUGIN_NAME } from '../../translations';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import { DEFAULT_DATE_RANGE_OPTIONS, useDateRangePicker } from '../hooks/use_date_picker';
-import { DEFAULT_METRIC_TYPES, UsageMetricsRequestBody } from '../../../common/rest_types';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
+import { ChartsLoading } from './charts_loading';
+import { NoDataCallout } from './no_data_callout';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const EuiItemCss = css`
@@ -32,6 +34,8 @@ const FlexItemWithCss = ({ children }: { children: React.ReactNode }) => (
 export const DataUsageMetrics = memo(
   ({ 'data-test-subj': dataTestSubj = 'data-usage-metrics' }: { 'data-test-subj'?: string }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
 
     const {
       services: { chrome, appParams, notifications },
@@ -68,10 +72,10 @@ export const DataUsageMetrics = memo(
     });
 
     useEffect(() => {
-      if (!metricTypesFromUrl) {
+      if (!metricTypesFromUrl && isFirstPageLoad) {
         setUrlMetricTypesFilter(metricsFilters.metricTypes.join(','));
       }
-      if (!dataStreamsFromUrl && dataStreams) {
+      if (!dataStreamsFromUrl && dataStreams && isFirstPageLoad) {
         const hasMoreThan50 = dataStreams.length > 50;
         const _dataStreams = hasMoreThan50 ? dataStreams.slice(0, 50) : dataStreams;
         setUrlDataStreamsFilter(_dataStreams.map((ds) => ds.name).join(','));
@@ -83,6 +87,7 @@ export const DataUsageMetrics = memo(
       dataStreams,
       dataStreamsFromUrl,
       endDateFromUrl,
+      isFirstPageLoad,
       metricTypesFromUrl,
       metricsFilters.dataStreams,
       metricsFilters.from,
@@ -106,9 +111,9 @@ export const DataUsageMetrics = memo(
 
     const {
       error: errorFetchingDataUsageMetrics,
-      data,
+      data: usageMetricsData,
       isFetching,
-      isFetched,
+      isFetched: hasFetchedDataUsageMetricsData,
       refetch: refetchDataUsageMetrics,
     } = useGetDataUsageMetrics(
       {
@@ -118,9 +123,15 @@ export const DataUsageMetrics = memo(
       },
       {
         retry: false,
-        enabled: !!metricsFilters.dataStreams.length,
+        enabled: !!(metricsFilters.dataStreams.length && metricsFilters.metricTypes.length),
       }
     );
+
+    useEffect(() => {
+      if (!isFetching && hasFetchedDataUsageMetricsData) {
+        setIsFirstPageLoad(false);
+      }
+    }, [isFetching, hasFetchedDataUsageMetricsData]);
 
     const onRefresh = useCallback(() => {
       refetchDataUsageMetrics();
@@ -204,13 +215,14 @@ export const DataUsageMetrics = memo(
             data-test-subj={getTestId('filter')}
           />
         </FlexItemWithCss>
-
         <FlexItemWithCss>
-          {isFetched && data?.metrics ? (
-            <Charts data={data} data-test-subj={dataTestSubj} />
+          {hasFetchedDataUsageMetricsData && usageMetricsData ? (
+            <Charts data={usageMetricsData} data-test-subj={dataTestSubj} />
           ) : isFetching ? (
-            <EuiLoadingElastic data-test-subj={getTestId('charts-loading')} />
-          ) : null}
+            <ChartsLoading data-test-subj={dataTestSubj} />
+          ) : (
+            <NoDataCallout data-test-subj={dataTestSubj} />
+          )}
         </FlexItemWithCss>
       </EuiFlexGroup>
     );
