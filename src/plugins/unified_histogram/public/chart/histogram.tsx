@@ -127,6 +127,8 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
+      console.log('Response', JSON.stringify(response, null, 2));
+
       if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
@@ -137,7 +139,6 @@ export function Histogram({
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
       if (response?._shards?.failed || response?.timed_out) {
-        console.log('Failed to fetch data', JSON.stringify(response, null, 2));
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
       } else {
         onTotalHitsChange?.(
