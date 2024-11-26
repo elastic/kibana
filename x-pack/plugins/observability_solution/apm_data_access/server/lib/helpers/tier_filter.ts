@@ -19,7 +19,7 @@ export function getDataTierFilterCombined({
     return excludedDataTiers.length > 0 ? excludeTiersQuery(excludedDataTiers)[0] : undefined;
   }
 
-  return !excludedDataTiers
+  return !excludedDataTiers.length
     ? filter
     : {
         bool: {
