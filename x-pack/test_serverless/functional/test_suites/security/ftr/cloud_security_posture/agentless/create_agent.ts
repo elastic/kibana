@@ -8,7 +8,6 @@
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import expect from '@kbn/expect';
-import equals from 'fast-deep-equal';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -57,22 +56,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.selectSetupTechnology('agentless');
       await cisIntegration.selectAwsCredentials('direct');
 
-      if (
-        process.env.TEST_CLOUD &&
-        process.env.CSPM_AWS_ACCOUNT_ID &&
-        process.env.CSPM_AWS_SECRET_KEY
-      ) {
-        await cisIntegration.fillInTextField(
-          cisIntegration.testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
-          process.env.CSPM_AWS_ACCOUNT_ID
-        );
-
-        await cisIntegration.fillInTextField(
-          cisIntegration.testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID,
-          process.env.CSPM_AWS_SECRET_KEY
-        );
-      }
-
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
@@ -85,13 +68,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         integrationPolicyName
       );
 
-      // wait for eventually Pending or Healthy status
-      // purpose of this retry is to wait for the agent to be created and the status to be updated
-      // not to wait for the agent to be healthy
-      await retry.tryForTime(agentCreationTimeout, async () => {
-        const resStatus = await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus();
-        expect(equals(resStatus, 'Healthy') || equals(resStatus, 'Pending')).to.be(true);
-      });
+      const resStatus = await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus();
+      expect(resStatus).to.be('Pending');
     });
 
     it(`should create default agent-based agent`, async () => {
