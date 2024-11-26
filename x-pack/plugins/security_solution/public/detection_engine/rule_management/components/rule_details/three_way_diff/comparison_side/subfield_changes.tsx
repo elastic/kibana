@@ -30,7 +30,7 @@ export function SubfieldChanges({ fieldName, subfieldChanges }: SubfieldChangesP
         return (
           <>
             <Subfield
-              key={change.subfieldName}
+              key={`${fieldName}${change.subfieldName}`}
               fieldName={fieldName}
               subfieldName={change.subfieldName}
               oldSubfieldValue={change.oldSubfieldValue}
