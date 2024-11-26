@@ -27,6 +27,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type {
   AlertSuppressionMissingFieldsStrategy,
+  EqlOptionalFields,
   RequiredFieldArray,
   RuleResponse,
   Threshold as ThresholdType,
@@ -60,6 +61,11 @@ import { getQueryLanguageLabel } from './helpers';
 import { useDefaultIndexPattern } from '../../hooks/use_default_index_pattern';
 import { convertDateMathToDuration } from '../../../../common/utils/date_math';
 import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
+import {
+  EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
+  EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
+  EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
+} from '../../../rule_creation/components/eql_query_edit/translations';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -563,6 +569,51 @@ const prepareDefinitionSectionListItems = (
         }
       );
     }
+  }
+
+  if ((rule as EqlOptionalFields).event_category_override) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="eqlOptionsEventCategoryOverrideTitle">
+          {EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="eqlOptionsEventCategoryOverrideValue">
+          {(rule as EqlOptionalFields).event_category_override}
+        </span>
+      ),
+    });
+  }
+
+  if ((rule as EqlOptionalFields).tiebreaker_field) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="eqlOptionsTiebreakerFieldTitle">
+          {EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="eqlOptionsEventTiebreakerFieldValue">
+          {(rule as EqlOptionalFields).tiebreaker_field}
+        </span>
+      ),
+    });
+  }
+
+  if ((rule as EqlOptionalFields).timestamp_field) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="eqlOptionsTimestampFieldTitle">
+          {EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="eqlOptionsTimestampFieldValue">
+          {(rule as EqlOptionalFields).timestamp_field}
+        </span>
+      ),
+    });
   }
 
   if (rule.type) {

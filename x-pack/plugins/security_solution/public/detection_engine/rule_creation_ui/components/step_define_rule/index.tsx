@@ -20,7 +20,7 @@ import React, { memo, useCallback, useState, useEffect, useMemo, useRef } from '
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual } from 'lodash';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -33,7 +33,6 @@ import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_f
 import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type {
   DefineStepRule,
@@ -73,7 +72,7 @@ import {
   isEqlSequenceQuery,
   isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
-import { EqlQueryBar } from '../eql_query_bar';
+import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';
 import { ThreatMatchInput } from '../threatmatch_input';
 import { useFetchIndex } from '../../../../common/containers/source';
@@ -88,7 +87,10 @@ import { useAlertSuppression } from '../../../rule_management/logic/use_alert_su
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
-import { AlertSuppressionEdit } from '../../../rule_creation/components/alert_suppression_edit';
+import {
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  AlertSuppressionEdit,
+} from '../../../rule_creation/components/alert_suppression_edit';
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { useTermsAggregationFields } from '../../../../common/hooks/use_terms_aggregation_fields';
@@ -106,8 +108,6 @@ export interface StepDefineRuleProps extends RuleStepProps {
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
   form: FormHook<DefineStepRule>;
-  optionsSelected: EqlOptionsSelected;
-  setOptionsSelected: React.Dispatch<React.SetStateAction<EqlOptionsSelected>>;
   indexPattern: DataViewBase;
   isIndexPatternLoading: boolean;
   isQueryBarValid: boolean;
@@ -164,13 +164,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   isLoading,
   isQueryBarValid,
   isUpdateView = false,
-  optionsSelected,
   queryBarSavedId,
   queryBarTitle,
   ruleType,
   setIsQueryBarValid,
   setIsThreatQueryBarValid,
-  setOptionsSelected,
   shouldLoadQueryDynamically,
   threatIndex,
   threatIndicesConfig,
@@ -221,15 +219,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       };
       if (timelineQueryBar.query.language === 'eql') {
         setRuleTypeCallback('eql', setQuery);
-        setOptionsSelected((prevOptions) => ({
-          ...prevOptions,
-          ...(eqlOptions != null ? eqlOptions : {}),
-        }));
+        setFieldValue('eqlOptions', eqlOptions ?? {});
       } else {
         setQuery();
       }
     },
-    [setFieldValue, setRuleTypeCallback, setOptionsSelected]
+    [setFieldValue, setRuleTypeCallback]
   );
 
   const { onOpenTimeline, loading: timelineQueryLoading } =
@@ -719,43 +714,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     ]
   );
 
-  const onOptionsChange = useCallback(
-    (field: FieldsEqlOptions, value: string | undefined) => {
-      setOptionsSelected((prevOptions) => {
-        const newOptions = {
-          ...prevOptions,
-          [field]: value,
-        };
-
-        setFieldValue('eqlOptions', newOptions);
-        return newOptions;
-      });
-    },
-    [setFieldValue, setOptionsSelected]
-  );
-
-  const optionsData = useMemo(
-    () =>
-      isEmpty(indexPattern.fields)
-        ? {
-            keywordFields: [],
-            dateFields: [],
-            nonDateFields: [],
-          }
-        : {
-            keywordFields: (indexPattern.fields as FieldSpec[])
-              .filter((f) => f.esTypes?.includes('keyword'))
-              .map((f) => ({ label: f.name })),
-            dateFields: indexPattern.fields
-              .filter((f) => f.type === 'date')
-              .map((f) => ({ label: f.name })),
-            nonDateFields: indexPattern.fields
-              .filter((f) => f.type !== 'date')
-              .map((f) => ({ label: f.name })),
-          },
-    [indexPattern]
-  );
-
   const selectRuleTypeProps = useMemo(
     () => ({
       describedByIds: ['detectionEngineStepDefineRuleType'],
@@ -794,29 +752,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <EuiSpacer size="s" />
               {isEqlRule(ruleType) ? (
                 <>
-                  <UseField
-                    key="EqlQueryBar"
+                  <EqlQueryEdit
+                    key="eqlQueryBar"
                     path="queryBar"
-                    component={EqlQueryBar}
-                    componentProps={{
-                      optionsData,
-                      optionsSelected,
-                      isSizeOptionDisabled: true,
-                      onOptionsChange,
-                      onValidityChange: setIsQueryBarValid,
-                      idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
-                      isDisabled: isLoading,
-                      isLoading: isIndexPatternLoading,
-                      indexPattern,
-                      showFilterBar: true,
-                      dataTestSubj: 'detectionEngineStepDefineRuleEqlQueryBar',
-                    }}
-                    config={{
-                      ...schema.queryBar,
-                      label: i18n.EQL_QUERY_BAR_LABEL,
-                    }}
+                    eqlOptionsPath="eqlOptions"
+                    fieldsToValidateOnChange={ALERT_SUPPRESSION_FIELDS_FIELD_NAME}
+                    required
+                    showFilterBar
+                    dataView={indexPattern}
+                    loading={isIndexPatternLoading}
+                    disabled={isLoading}
+                    onValidityChange={setIsQueryBarValid}
                   />
-                  <UseField path="eqlOptions" component={HiddenField} />
                 </>
               ) : isEsqlRule(ruleType) ? (
                 EsqlQueryBarMemo
