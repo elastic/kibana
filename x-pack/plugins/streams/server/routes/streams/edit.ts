@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import { badRequest, internal, notFound } from '@hapi/boom';
 import {
   DefinitionNotFound,
   ForkConditionMissing,
@@ -28,18 +29,15 @@ import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
 
 export const editStreamRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{id} 2023-10-31',
+  endpoint: 'PUT /api/streams/{id}',
   options: {
-    access: 'public',
-    availability: {
-      stability: 'experimental',
-    },
-    security: {
-      authz: {
-        enabled: false,
-        reason:
-          'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
-      },
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   params: z.object({
@@ -59,22 +57,10 @@ export const editStreamRoute = createServerRoute({
       const parentId = getParentId(params.path.id);
       let parentDefinition: StreamDefinition | undefined;
 
-      if (parentId) {
-        parentDefinition = await updateParentStream(
-          scopedClusterClient,
-          parentId,
-          params.path.id,
-          logger
-        );
-      }
       const streamDefinition = { ...params.body };
 
-      await syncStream({
-        scopedClusterClient,
-        definition: { ...streamDefinition, id: params.path.id },
-        rootDefinition: parentDefinition,
-        logger,
-      });
+      // always need to go from the leaves to the parent when syncing ingest pipelines, otherwise data
+      // will be routed before the data stream is ready
 
       for (const child of streamDefinition.children) {
         const streamExists = await checkStreamExists({
@@ -99,10 +85,26 @@ export const editStreamRoute = createServerRoute({
         });
       }
 
-      return response.ok({ body: { acknowledged: true } });
+      await syncStream({
+        scopedClusterClient,
+        definition: { ...streamDefinition, id: params.path.id },
+        rootDefinition: parentDefinition,
+        logger,
+      });
+
+      if (parentId) {
+        parentDefinition = await updateParentStream(
+          scopedClusterClient,
+          parentId,
+          params.path.id,
+          logger
+        );
+      }
+
+      return { acknowledged: true };
     } catch (e) {
       if (e instanceof IndexTemplateNotFound || e instanceof DefinitionNotFound) {
-        return response.notFound({ body: e });
+        throw notFound(e);
       }
 
       if (
@@ -110,10 +112,10 @@ export const editStreamRoute = createServerRoute({
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId
       ) {
-        return response.customError({ body: e, statusCode: 400 });
+        throw badRequest(e);
       }
 
-      return response.customError({ body: e, statusCode: 500 });
+      throw internal(e);
     }
   },
 });
