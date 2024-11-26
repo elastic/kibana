@@ -21,7 +21,6 @@
     "@kbn/presentation-publishing",
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
-    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",
