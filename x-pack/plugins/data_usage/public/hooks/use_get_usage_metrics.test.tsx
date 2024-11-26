@@ -41,24 +41,31 @@ jest.mock('../utils/use_kibana', () => {
   };
 });
 
-const timeRange = {
-  start: 'now-15m',
-  end: 'now',
-};
-const utcTimeRange = transformToUTCtime({
-  ...timeRange,
-  isISOString: true,
-});
-const defaultUsageMetricsRequestBody = {
-  from: utcTimeRange.start as string,
-  to: utcTimeRange.end as string,
-  metricTypes: ['ingest_rate'],
-  dataStreams: ['ds-1'],
-};
-
 describe('useGetDataUsageMetrics', () => {
+  const timeRange = {
+    start: 'now-15m',
+    end: 'now',
+  };
+  const getUtcTimeRange = (range: { start: string; end: string }) =>
+    transformToUTCtime({
+      ...range,
+      isISOString: true,
+    });
+  let defaultUsageMetricsRequestBody = {
+    from: '',
+    to: '',
+    metricTypes: ['ingest_rate'],
+    dataStreams: ['ds-1'],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    defaultUsageMetricsRequestBody = {
+      ...defaultUsageMetricsRequestBody,
+      from: getUtcTimeRange(timeRange).start as string,
+      to: getUtcTimeRange(timeRange).end as string,
+    };
   });
 
   it('should call the correct API', async () => {
@@ -74,6 +81,19 @@ describe('useGetDataUsageMetrics', () => {
       version: '1',
       body: JSON.stringify(defaultUsageMetricsRequestBody),
     });
+  });
+
+  it('should call the API if invalid date range', async () => {
+    const requestBody = {
+      ...defaultUsageMetricsRequestBody,
+      from: 'invalid-date',
+      to: 'invalid-date',
+    };
+    await renderHook(() => useGetDataUsageMetrics(requestBody, { enabled: true }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(mockServices.http.post).not.toHaveBeenCalled();
   });
 
   it('should not call the API if disabled', async () => {
