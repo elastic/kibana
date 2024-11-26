@@ -110,7 +110,7 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
         },
-        docsInTimeRange: 100,
+        docsInTimeRange: 102,
         quality: 'degraded',
         degradedDocs: {
           percentage: 0,
@@ -173,14 +173,14 @@ describe('generateDatasets', () => {
         userPrivileges: {
           canMonitor: true,
         },
-        docsInTimeRange: 0,
-        quality: 'good',
+        docsInTimeRange: 2,
+        quality: 'poor',
         degradedDocs: {
           percentage: 0,
           count: 0,
         },
         failedDocs: {
-          percentage: 0,
+          percentage: 100,
           count: 2,
         },
       },

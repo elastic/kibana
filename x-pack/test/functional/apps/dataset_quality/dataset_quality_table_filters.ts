@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows full dataset names when toggled', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('searches the datasets', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       );
 
       const colsAfterSearch = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterSearch = colsAfterSearch['Data Set Name'];
+      const datasetNameColAfterSearch = colsAfterSearch['Data set name'];
       const datasetNameColCellTextsAfterSearch = await datasetNameColAfterSearch.getCellTexts();
       expect(datasetNameColCellTextsAfterSearch).to.eql([datasetNames[2]]);
 
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('filters for integration', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameCol = cols['Data Set Name'];
+      const datasetNameCol = cols['Data set name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.filterForIntegrations([apacheIntegrationName]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
-      const datasetNameColAfterFilter = colsAfterFilter['Data Set Name'];
+      const datasetNameColAfterFilter = colsAfterFilter['Data set name'];
       const datasetNameColCellTextsAfterFilter = await datasetNameColAfterFilter.getCellTexts();
 
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
