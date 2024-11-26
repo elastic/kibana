@@ -10,10 +10,7 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type {
-  CrowdstrikeGetAgentOnlineStatusResponse,
-  CrowdstrikeGetAgentsResponse,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
+import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { keyBy } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
@@ -54,7 +51,9 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
     this.connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
   }
 
-  private async getAgentStatusFromConnectorAction(agentIds: string[]) {
+  private async getAgentStatusFromConnectorAction(
+    agentIds: string[]
+  ): Promise<Record<string, CrowdstrikeGetAgentOnlineStatusResponse['resources'][0]>> {
     const agentStatusResponse = (await this.connectorActions.execute({
       params: {
         subAction: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
@@ -71,21 +70,22 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
     agentIds: string[]
   ): Promise<Record<string, LimitedCrowdstrikeHostDetails>> {
     try {
-      const getAgentDetails = (await this.connectorActions.execute({
+      const getAgentDetails = await this.connectorActions.execute<{
+        resources: Array<{
+          device_id: string;
+          status: CROWDSTRIKE_NETWORK_STATUS;
+          last_seen: string;
+        }>;
+      }>({
         params: {
           subAction: SUB_ACTION.GET_AGENT_DETAILS,
           subActionParams: {
             ids: agentIds,
           },
         },
-      })) as ActionTypeExecutorResult<CrowdstrikeGetAgentsResponse>;
-      const resources = getAgentDetails.data?.resources as Array<{
-        device_id: string;
-        status: CROWDSTRIKE_NETWORK_STATUS;
-        last_seen: string;
-      }>;
-
-      return resources.reduce((acc, response) => {
+      });
+      const resources = getAgentDetails.data?.resources || [];
+      return resources?.reduce((acc: Record<string, LimitedCrowdstrikeHostDetails>, response) => {
         if (response.device_id) {
           acc[response.device_id] = {
             device: {
@@ -100,7 +100,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           };
         }
         return acc;
-      }, {} as Record<string, LimitedCrowdstrikeHostDetails>);
+      }, {});
     } catch (error) {
       this.log.error(`Failed to get agent details from connector action: ${error.message}`);
       throw error;
