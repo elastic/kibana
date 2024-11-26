@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await retry.tryForTime(agentCreationTimeout, async () => {
         const resStatus = await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus();
         expect(resStatus == 'Healthy' || resStatus == 'Pending').to.be(true);
-      });      
+      });
     });
 
     it(`should create default agent-based agent`, async () => {
