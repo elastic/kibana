@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { chromeServiceMock } from '@kbn/core/public/mocks';
 import { useChromeVisibility } from './use_chrome_visibility';

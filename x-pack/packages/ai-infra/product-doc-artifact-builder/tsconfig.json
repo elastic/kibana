@@ -16,5 +16,6 @@
   "kbn_references": [
     "@kbn/tooling-log",
     "@kbn/repo-info",
+    "@kbn/product-doc-common",
   ]
 }
