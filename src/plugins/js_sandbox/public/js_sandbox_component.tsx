@@ -15,8 +15,8 @@ import { EuiBadge } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EventBus } from '@kbn/event-bus-plugin/public';
 import { getESQLResults } from '@kbn/esql-utils';
+import type { DashboardCrossfilterSlice } from '@kbn/eventbus-slices';
 
-import type { DashboardCrossfilterSlice } from './dashboard_crossfilter_slice';
 import { getUnableToParseIframeMessage, getIframeContent } from './js_sandbox_iframe_content';
 
 function truncateString(str: string, n: number) {
