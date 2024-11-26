@@ -152,7 +152,7 @@ export const ProfileQueryEditor = memo(() => {
               <EuiToolTip
                 position="top"
                 content={i18n.translate('xpack.searchProfiler.formProfileButtonTooltip', {
-                  defaultMessage: 'An index must be created before leveraging Search Profiler',
+                  defaultMessage: 'You must have at least one index to use Search Profiler',
                 })}
               >
                 <EuiButton
