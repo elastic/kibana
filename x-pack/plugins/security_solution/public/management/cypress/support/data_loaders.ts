@@ -504,9 +504,32 @@ WHERE AM I:
 
 
 
-WHATS INSIDE OF ./target:
+WHATS INSIDE OF ${process.env.PWD}/target:
 
-${(await execa.command(`find ./target`).catch((e) => ({ stdout: `ERROR: ${e.message}` }))).stdout}
+${
+  (
+    await execa
+      .command(`find ${process.env.PWD}/target`)
+      .catch((e) => ({ stdout: `ERROR: ${e.message}` }))
+  ).stdout
+}
+
+
+WHATS INSIDE OF ${process.env.PWD.substring(0, process.env.PWD.indexOf('/kibana/'))}/kibana/target:
+
+${
+  (
+    await execa
+      .command(
+        `find ${process.env.PWD.substring(0, process.env.PWD.indexOf('/kibana/'))}/kibana/target`
+      )
+      .catch((e) => ({ stdout: `ERROR: ${e.message}` }))
+  ).stdout
+}
+
+
+
+
 
 
 ---------------------------
@@ -518,14 +541,14 @@ ${(await execa.command(`find ./target`).catch((e) => ({ stdout: `ERROR: ${e.mess
       return null;
     },
 
-    captureHostVmAgentDiagnostics: async ({ hostname: string }) => {
+    captureHostVmAgentDiagnostics: async ({ hostname }) => {
       const { log } = await stackServicesPromise;
       const vmClient = getHostVmClient(hostname, undefined, undefined, log);
       const vmDiagnosticsFile = `/tmp/elastic-agent-diagnostics-${hostname}-${new Date().toISOString()}.zip`;
 
       // generate diagnostics file on the host
       await vmClient.exec(`sudo /var/Elastic/Agent diagnostics --file ${vmDiagnosticsFile}`);
-      return vmClient.download(vmDiagnosticsFile, '');
+      return vmClient.download(vmDiagnosticsFile, ''); // FIXME:PT need calculate the destination directory for CI
     },
 
     uploadFileToEndpoint: async ({
