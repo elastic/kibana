@@ -60,13 +60,12 @@ const invalid: RuleTester.InvalidTestCase[] = [
     import React from 'react';
 
     function TestComponent() {
+      const codeStyle = { color: '#dd4040' };
       return (
-        <EuiCode style={\`{ color: '#dd4040', margin: '${Math.floor(
-          Math.random() * 5
-        )}px'  }\`}>This is a test</EuiCode>
+        <EuiCode style={codeStyle}>This is a test</EuiCode>
       )
     }`,
-    errors: [{ messageId: 'noCssColor' }],
+    errors: [{ messageId: 'noCSSColorSpecificDeclaredVariable' }],
   },
   {
     name: 'Raises an error when a CSS color is used for the background property in a JSX style attribute',
