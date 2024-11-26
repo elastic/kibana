@@ -61,6 +61,13 @@ describe('Service inventory', () => {
       });
     });
 
+    it('opens the inventory plugin', () => {
+      cy.wait(mainAliasNames);
+      cy.contains('h1', 'Services');
+      cy.contains('Try our new Inventory!').click();
+      cy.url().should('include', '/inventory');
+    });
+
     it('has no detectable a11y violations on load', () => {
       cy.contains('h1', 'Services');
       // set skipFailures to true to not fail the test when there are accessibility failures
@@ -81,13 +88,6 @@ describe('Service inventory', () => {
       cy.contains('opbeans-node').click({ force: true });
       cy.url().should('include', '/apm/services/opbeans-node/overview');
       cy.contains('h1', 'opbeans-node');
-    });
-
-    it('opens the inventory plugin', () => {
-      cy.wait(mainAliasNames);
-      cy.contains('h1', 'Services');
-      cy.contains('Try our new Inventory!').click();
-      cy.url().should('include', '/inventory');
     });
   });
 
