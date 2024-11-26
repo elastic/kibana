@@ -17,10 +17,11 @@ import {
   SEARCH_AI_SEARCH,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
+import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
 import { GETTING_STARTED_TITLE } from '../../../../common/constants';
 
-import { ClassicNavItem, BuildClassicNavParameters } from '../types';
+import { BuildClassicNavParameters } from '../types';
 
 export const buildBaseClassicNavItems = ({
   productAccess,

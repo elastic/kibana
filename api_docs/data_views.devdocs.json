@@ -14203,10 +14203,6 @@
                 "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/eql_query_bar/validators.ts"
-              },
-              {
                 "plugin": "timelines",
                 "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
