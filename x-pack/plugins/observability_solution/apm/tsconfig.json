@@ -70,7 +70,6 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/field-types",
     "@kbn/babel-register",
-    "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",

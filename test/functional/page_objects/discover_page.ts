@@ -597,6 +597,7 @@ export class DiscoverPageObject extends FtrService {
     if (await this.testSubjects.exists('select-text-based-language-btn')) {
       await this.testSubjects.click('select-text-based-language-btn');
       await this.header.waitUntilLoadingHasFinished();
+      await this.waitUntilSearchingHasFinished();
     }
   }
 
