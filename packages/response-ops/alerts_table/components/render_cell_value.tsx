@@ -54,7 +54,11 @@ const getRenderValue = (mappedNonEcsValue: any) => {
 };
 
 export const renderCellValue: AlertsTableProps['renderCellValue'] = (props) => {
-  const { columnId, data, fieldFormats, http } = props;
+  const {
+    columnId,
+    data,
+    services: { fieldFormats, http },
+  } = props;
   const alertValueFormatter = getAlertFormatters(fieldFormats, http);
   const rawValue = props.alert[columnId]?.[0];
   const value = getRenderValue(rawValue);
