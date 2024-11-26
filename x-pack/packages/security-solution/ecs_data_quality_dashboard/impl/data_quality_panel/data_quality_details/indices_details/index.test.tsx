@@ -95,23 +95,20 @@ describe('IndicesDetails', () => {
   describe('tour', () => {
     test('it renders the tour wrapping view history button of first row of first non-empty pattern', async () => {
       const wrapper = await screen.findByTestId('historicalResultsTour');
-      const button = within(wrapper).getByRole('button', { name: 'View history' });
-      expect(button).toBeInTheDocument();
+      const button = within(wrapper).getByTestId(
+        'viewHistoryAction-.internal.alerts-security.alerts-default-000001'
+      );
       expect(button).toHaveAttribute('data-tour-element', patterns[1]);
 
-      expect(
-        screen.getByRole('dialog', { name: 'Introducing data quality history' })
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('historicalResultsTourPanel')).toHaveTextContent(
+        'Introducing data quality history'
+      );
     });
 
     describe('when the tour is dismissed', () => {
       test('it hides the tour and persists in localStorage', async () => {
-        const wrapper = await screen.findByRole('dialog', {
-          name: 'Introducing data quality history',
-        });
-
-        const button = within(wrapper).getByRole('button', { name: 'Close' });
-
+        const wrapper = screen.getByTestId('historicalResultsTourPanel');
+        const button = within(wrapper).getByText('Close');
         await userEvent.click(button);
 
         await waitFor(() => expect(screen.queryByTestId('historicalResultsTour')).toBeNull());
@@ -127,24 +124,22 @@ describe('IndicesDetails', () => {
         const firstNonEmptyPatternAccordionWrapper = await screen.findByTestId(
           `${patterns[1]}PatternPanel`
         );
-        const accordionToggle = within(firstNonEmptyPatternAccordionWrapper).getByRole('button', {
-          name: /Pass/,
-        });
+        const accordionToggle = within(firstNonEmptyPatternAccordionWrapper).getByTestId(
+          'indexResultBadge'
+        );
         await userEvent.click(accordionToggle);
 
         const secondPatternAccordionWrapper = screen.getByTestId(`${patterns[2]}PatternPanel`);
         const historicalResultsWrapper = await within(secondPatternAccordionWrapper).findByTestId(
           'historicalResultsTour'
         );
-        const button = within(historicalResultsWrapper).getByRole('button', {
-          name: 'View history',
-        });
+        const button = within(historicalResultsWrapper).getByTestId(
+          `viewHistoryAction-${patternIndexNames[patterns[2]][0]}`
+        );
         expect(button).toHaveAttribute('data-tour-element', patterns[2]);
 
-        expect(
-          screen.getByRole('dialog', { name: 'Introducing data quality history' })
-        ).toBeInTheDocument();
-      }, 10000);
+        expect(screen.getByTestId('historicalResultsTourPanel')).toBeInTheDocument();
+      });
     });
   });
 });

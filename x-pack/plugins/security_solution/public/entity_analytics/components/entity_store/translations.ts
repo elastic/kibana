@@ -62,3 +62,10 @@ export const ENABLEMENT_DESCRIPTION_BOTH = i18n.translate(
       'Your entity store is currently empty. Add information about your entities directly from your logs, or import them using a text file.',
   }
 );
+
+export const ENABLEMENT_WARNING_SELECT_TO_PROCEED = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.enablementWarningMessage',
+  {
+    defaultMessage: 'Please enable at least one option to proceed.',
+  }
+);

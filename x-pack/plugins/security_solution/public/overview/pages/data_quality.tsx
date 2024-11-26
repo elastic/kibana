@@ -171,6 +171,8 @@ const DataQualityComponent: React.FC = () => {
             startDate={startDate}
             theme={theme}
             toasts={toasts}
+            defaultStartTime={DEFAULT_START_TIME}
+            defaultEndTime={DEFAULT_END_TIME}
           />
         </SecuritySolutionPageWrapper>
       ) : (

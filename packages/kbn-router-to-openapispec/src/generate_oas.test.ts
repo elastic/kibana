@@ -312,9 +312,9 @@ describe('generateOpenApiDocument', () => {
         }
       );
       // router paths
-      expect(result.paths['/1-1/{id}/{path*}']!.get!.tags).toEqual(['1', '2']);
-      expect(result.paths['/1-2/{id}/{path*}']!.get!.tags).toEqual(['1']);
-      expect(result.paths['/2-1/{id}/{path*}']!.get!.tags).toEqual([]);
+      expect(result.paths['/1-1/{id}/{path}']!.get!.tags).toEqual(['1', '2']);
+      expect(result.paths['/1-2/{id}/{path}']!.get!.tags).toEqual(['1']);
+      expect(result.paths['/2-1/{id}/{path}']!.get!.tags).toEqual([]);
       // versioned router paths
       expect(result.paths['/v1-1']!.get!.tags).toEqual(['v1']);
       expect(result.paths['/v1-2']!.get!.tags).toEqual(['v2', 'v3']);
@@ -390,17 +390,17 @@ describe('generateOpenApiDocument', () => {
       );
 
       // router paths
-      expect(result.paths['/1-1/{id}/{path*}']!.get).toMatchObject({
+      expect(result.paths['/1-1/{id}/{path}']!.get).toMatchObject({
         'x-state': 'Technical Preview',
       });
-      expect(result.paths['/1-2/{id}/{path*}']!.get).toMatchObject({
+      expect(result.paths['/1-2/{id}/{path}']!.get).toMatchObject({
         'x-state': 'Beta',
       });
 
-      expect(result.paths['/1-3/{id}/{path*}']!.get).not.toMatchObject({
+      expect(result.paths['/1-3/{id}/{path}']!.get).not.toMatchObject({
         'x-state': expect.any(String),
       });
-      expect(result.paths['/2-1/{id}/{path*}']!.get).not.toMatchObject({
+      expect(result.paths['/2-1/{id}/{path}']!.get).not.toMatchObject({
         'x-state': expect.any(String),
       });
 

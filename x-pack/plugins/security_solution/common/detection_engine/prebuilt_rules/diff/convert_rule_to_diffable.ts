@@ -53,6 +53,7 @@ import { extractRuleNameOverrideObject } from './extract_rule_name_override_obje
 import { extractRuleSchedule } from './extract_rule_schedule';
 import { extractTimelineTemplateReference } from './extract_timeline_template_reference';
 import { extractTimestampOverrideObject } from './extract_timestamp_override_object';
+import { extractThreatArray } from './extract_threat_array';
 
 /**
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
@@ -128,7 +129,7 @@ const extractDiffableCommonFields = (
     // About -> Advanced settings
     references: rule.references ?? [],
     false_positives: rule.false_positives ?? [],
-    threat: rule.threat ?? [],
+    threat: extractThreatArray(rule),
     note: rule.note ?? '',
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],

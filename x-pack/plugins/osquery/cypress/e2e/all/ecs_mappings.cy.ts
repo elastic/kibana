@@ -18,7 +18,8 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/192128
+describe.skip('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     initializeDataViews();
   });

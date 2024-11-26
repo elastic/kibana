@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.16.1",
+  "version": "8.16.2",
   "branch": "8.16",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -1207,7 +1207,7 @@
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
-    "re2js": "0.4.2",
+    "re2js": "0.4.3",
     "react": "^17.0.2",
     "react-diff-view": "^3.2.1",
     "react-dom": "^17.0.2",
