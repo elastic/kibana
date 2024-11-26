@@ -501,7 +501,7 @@ ${Object.entries(process.env)
 
 WHATS INSIDE OF ./target:
 
-${(await execa.command(`find ./target`)).stdout}
+${(await execa.command(`find ./target`).catch((e) => ({ stdout: `ERROR: ${e.message}` }))).stdout}
 
 
 ---------------------------
