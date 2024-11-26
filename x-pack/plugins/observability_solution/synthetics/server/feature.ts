@@ -63,7 +63,7 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
       includeIn: 'all',
       savedObject: {
         all: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
-        read: [],
+        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
       },
       ui: ['canManagePrivateLocations'],
     },
@@ -92,13 +92,12 @@ export const syntheticsFeature = {
           syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
-          privateLocationSavedObjectName,
-          legacyPrivateLocationsSavedObjectName,
           syntheticsParamType,
+
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
-        read: [],
+        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
       },
       alerting: {
         rule: {
