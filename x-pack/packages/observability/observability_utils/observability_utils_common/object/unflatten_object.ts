@@ -6,13 +6,17 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import { DedotObject } from '@kbn/utility-types';
 
-export function unflattenObject(source: Record<string, any>, target: Record<string, any> = {}) {
+export function unflattenObject<T extends Record<string, any>>(
+  source: T,
+  target: Record<string, any> = {}
+): DedotObject<T> {
   // eslint-disable-next-line guard-for-in
   for (const key in source) {
     const val = source[key as keyof typeof source];
     if (Array.isArray(val)) {
-      const unflattenedArray = val.map((item) => {
+      const unflattenedArray = val.map((item: unknown) => {
         if (item && typeof item === 'object' && !Array.isArray(item)) {
           return unflattenObject(item);
         }
@@ -23,5 +27,6 @@ export function unflattenObject(source: Record<string, any>, target: Record<stri
       set(target, key, val);
     }
   }
-  return target;
+
+  return target as DedotObject<T>;
 }
