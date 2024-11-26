@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
@@ -93,6 +93,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
     sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
+  /*
+   * `pageIndex` needs to be maintained for each table in each tab independently
+   * and consequently it cannot be the part of common redux state
+   * of the timeline.
+   *
+   */
+  const [pageIndex, setPageIndex] = useState(0);
 
   const { uiSettings, telemetry, timelineDataService } = useKibana().services;
   const {
@@ -105,7 +112,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
-  const { sampleSize, pageIndex = 0 } = currentTimeline;
+  const { sampleSize } = currentTimeline;
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
@@ -199,6 +206,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
     loadNotesOnEventsLoad(eventsOnCurrentPage);
   }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
+
+  /**
+   *
+   * Triggers on Datagrid page change
+   *
+   */
+  const onChangePage = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
@@ -375,6 +389,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         activeTab={activeTab}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
+        onChangePage={onChangePage}
       />
     </>
   );

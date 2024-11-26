@@ -39,6 +39,7 @@ const defaultProps: UnifiedTimelineBodyProps = {
   timelineId: 'timeline-1',
   totalCount: 0,
   updatedAt: 0,
+  onChangePage: jest.fn(),
 };
 
 const renderTestComponents = (props?: UnifiedTimelineBodyProps) => {

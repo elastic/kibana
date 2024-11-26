@@ -1934,7 +1934,6 @@ export const mockTimelineModel: TimelineModel = {
   savedSearch: null,
   isDataProviderVisible: false,
   sampleSize: 500,
-  pageIndex: 0,
 };
 
 export const mockDataTableModel: DataTableModel = {
@@ -2121,7 +2120,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     isDataProviderVisible: false,
     sampleSize: 500,
     rowHeight: 3,
-    pageIndex: 0,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,

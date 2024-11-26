@@ -6,13 +6,14 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useState, useEffect } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -68,6 +69,14 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   sort,
   eventIdToNoteIds,
 }) => {
+  /*
+   * Needs to be maintained for each table in each tab independently
+   * and consequently it cannot be the part of common redux state
+   * of the timeline.
+   *
+   */
+  const [pageIndex, setPageIndex] = useState(0);
+
   const { telemetry } = useKibana().services;
   const { dataViewId, sourcererDataView, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.timeline
@@ -145,6 +154,26 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       sort: timelineQuerySortField,
       timerangeKind: undefined,
     });
+
+  const { onLoad: loadNotesOnEventsLoad } = useFetchNotes();
+
+  useEffect(() => {
+    // This useEffect loads the notes only for the events on the current
+    // page.
+    const eventsOnCurrentPage = events.slice(
+      itemsPerPage * pageIndex,
+      itemsPerPage * (pageIndex + 1)
+    );
+
+    loadNotesOnEventsLoad(eventsOnCurrentPage);
+  }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
+
+  /**
+   *
+   * Triggers on Datagrid page change
+   *
+   */
+  const onChangePage = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
@@ -263,6 +292,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         isTextBasedQuery={false}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
         trailingControlColumns={rowDetailColumn}
+        onChangePage={onChangePage}
       />
     </>
   );

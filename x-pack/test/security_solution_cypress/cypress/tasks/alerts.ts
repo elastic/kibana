@@ -356,7 +356,7 @@ const clickAction = (propertySelector: string, rowIndex: number, actionSelector:
     ($el) => $el.is(':visible')
   );
 
-  cy.get(actionSelector).first().click();
+  cy.get(actionSelector).first().should('be.visible').click();
 };
 export const clickExpandActions = (propertySelector: string, rowIndex: number) => {
   clickAction(propertySelector, rowIndex, ACTIONS_EXPAND_BUTTON);
@@ -368,7 +368,13 @@ export const filterForAlertProperty = (propertySelector: string, rowIndex: numbe
   clickAction(propertySelector, rowIndex, CELL_FILTER_IN_BUTTON);
 };
 export const filterOutAlertProperty = (propertySelector: string, rowIndex: number) => {
-  clickAction(propertySelector, rowIndex, CELL_FILTER_OUT_BUTTON);
+  recurse(
+    () => {
+      clickAction(propertySelector, rowIndex, CELL_FILTER_OUT_BUTTON);
+      return cy.get(propertySelector);
+    },
+    ($el) => $el.is(':not(:visible)')
+  );
 };
 
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {

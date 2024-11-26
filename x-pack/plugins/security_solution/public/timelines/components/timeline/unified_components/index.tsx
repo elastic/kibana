@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DataLoadingState } from '@kbn/unified-data-table';
+import type { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
@@ -114,6 +114,7 @@ interface Props {
   dataView: DataView;
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
+  onChangePage?: UnifiedDataTableProps['onChangePage'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -135,6 +136,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   dataView,
   trailingControlColumns,
   leadingControlColumns,
+  onChangePage,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -442,6 +444,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFilter={onAddFilter as DocViewFilterFn}
                       trailingControlColumns={trailingControlColumns}
                       leadingControlColumns={leadingControlColumns}
+                      onChangePage={onChangePage}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>
