@@ -16,8 +16,7 @@ import {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
-import { StreamsRouteRepository } from './routes';
-import { RouteDependencies } from './routes/types';
+import { streamsRouteRepository } from './routes';
 import {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
@@ -58,8 +57,8 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    registerRoutes<RouteDependencies>({
-      repository: StreamsRouteRepository,
+    registerRoutes({
+      repository: streamsRouteRepository,
       dependencies: {
         server: this.server,
         getScopedClients: async ({ request }: { request: KibanaRequest }) => {
