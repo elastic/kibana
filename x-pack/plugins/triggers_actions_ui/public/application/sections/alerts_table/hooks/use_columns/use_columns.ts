@@ -175,6 +175,12 @@ export const useColumns = ({
     }
   );
 
+  // eslint-disable-next-line no-console
+  console.log(
+    'use_columns.fields',
+    JSON.stringify(fieldsQuery.data?.fields.find((field) => field.name === 'kibana.alert.start'))
+  );
+
   const selectedAlertsFields = useMemo<BrowserFields>(
     () => alertsFields ?? fieldsQuery.data?.browserFields ?? {},
     [alertsFields, fieldsQuery.data?.browserFields]

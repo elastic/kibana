@@ -58,15 +58,19 @@ export function AlertsSearchBar({
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
 
-  // eslint-disable-next-line no-console
-  console.log('AlertsSearchBar featureIds', JSON.stringify(featureIds, null, 4));
-
   const { dataView } = useAlertsDataView({
     featureIds,
     http,
     dataViewsService,
     toasts,
   });
+
+  // eslint-disable-next-line no-console
+  console.log(
+    'dataView.fields',
+    JSON.stringify(dataView?.fields.find((field) => field.name === 'kibana.alert.start'))
+  );
+
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns = useMemo(() => {

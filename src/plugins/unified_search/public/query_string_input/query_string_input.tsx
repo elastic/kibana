@@ -802,9 +802,6 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
 
-    // eslint-disable-next-line no-console
-    console.log('suggestions: ', JSON.stringify(this.state.suggestions.slice(0, 5), null, 4));
-
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {prependElement}
