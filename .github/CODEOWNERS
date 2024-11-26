@@ -2144,6 +2144,8 @@ x-pack/test/security_solution_api_integration/test_suites/explore @elastic/secur
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 /x-pack/test/common/utils/security_solution/detections_response @elastic/security-detections-response
+/x-pack/test/functional/es_archives/signals @elastic/security-detections-response
+/x-pack/test/functional/es_archives/rule_keyword_family @elastic/security-detections-response
 
 # Security Solution sub teams
 
