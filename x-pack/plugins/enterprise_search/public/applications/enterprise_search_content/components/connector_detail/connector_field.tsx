@@ -85,7 +85,7 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
         isLoading={isLoading}
         isInvalid={field === 'name' && !value?.trim()}
         size="m"
-        heading={isTitle ? 'h2' : 'span'}
+        heading={isTitle ? 'h1' : 'span'}
         editModeProps={{
           cancelButtonProps: { onClick: () => handleCancel(connector[field] || '') },
           formRowProps:
