@@ -17,6 +17,8 @@ import { FeatureUsageService } from './services';
 import type { PublicLicenseJSON } from '../common/types';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 
+const MAX_RETRY_DELAY = 30 * 1000;
+
 export const licensingSessionStorageKey = 'xpack.licensing';
 
 /**
@@ -75,13 +77,12 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
 
   public setup(core: CoreSetup) {
     const signatureUpdated$ = new Subject<void>();
-    const maxRetryDelay = 30 * 1000;
 
     const { license$, refreshManually } = createLicenseUpdate(
       signatureUpdated$,
       this.stop$,
       () => this.fetchLicense(core),
-      maxRetryDelay,
+      MAX_RETRY_DELAY,
       this.getSaved()
     );
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { firstValueFrom, Subject, Observable } from 'rxjs';
+import { firstValueFrom, Subject, type Observable } from 'rxjs';
 import { take, toArray } from 'rxjs';
 
 import { ILicense } from './types';
@@ -91,9 +91,9 @@ describe('licensing update', () => {
 
     const { license$ } = createLicenseUpdate(trigger$, stop$, fetcher, maxRetryDelay);
 
-    license$.subscribe(() => {});
-    license$.subscribe(() => {});
-    license$.subscribe(() => {});
+    license$.subscribe(() => { });
+    license$.subscribe(() => { });
+    license$.subscribe(() => { });
     trigger$.next();
 
     expect(fetcher).toHaveBeenCalledTimes(1);
@@ -185,7 +185,7 @@ describe('licensing update', () => {
     expect(secondResult).toBe(fromObservable);
   });
 
-  describe('exponential backoff behavior working as expected (1s, 2s, 4s, ..., maxRetryDelay, ...)', () => {
+  describe('exponential backoff behavior working as expected (1s, 2s, 4s, ...)', () => {
     let trigger$: Subject<void>;
     let stop$: Subject<void>;
     let license: ILicense;
@@ -255,13 +255,24 @@ describe('licensing update', () => {
       await advanceTimeAndCheck(16 * 1000 + offset, 6);
     });
 
-    it('retries after 30 seconds (not 32 because of the maxRetryDelay)', async () => {
-      await advanceTimeAndCheck(30 * 1000 + offset, 7);
+    it('shouldnt retry anymore because 32 seconds goes over the maxRetryDelay', async () => {
+      await advanceTimeAndCheck(32 * 1000 + offset, 6);
     });
 
-    it('succeeds after 30 seconds', async () => {
+    it('calls fetcher after new trigger', async () => {
+      trigger$.next();
+      await advanceTimeAndCheck(offset, 7);
+    });
+
+    it('retries after 1 second again', async () => {
+      await advanceTimeAndCheck(1000 + offset, 8);
+    });
+
+    it('succeeds after 2 seconds', async () => {
+      expect(values).toHaveLength(0);
+
       fetcher.mockImplementationOnce(async () => license);
-      await advanceTimeAndCheck(30 * 1000 + offset, 8);
+      await advanceTimeAndCheck(2 * 1000 + offset, 9);
 
       expect(values).toHaveLength(1);
       expect(values[0].type).toBe('basic');

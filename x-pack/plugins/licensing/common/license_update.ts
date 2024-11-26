@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type Observable, Subject, merge, firstValueFrom, defer } from 'rxjs';
+import { type Observable, Subject, merge, firstValueFrom, defer, EMPTY } from 'rxjs';
 
 import {
   filter,
@@ -38,7 +38,9 @@ export function createLicenseUpdate(
       defer(() => fetcher()).pipe(
         retry({
           delay: (_, retryCount) =>
-            timer(Math.min(maxRetryDelay, 1000 * Math.pow(2, retryCount - 1))),
+            maxRetryDelay > Math.pow(2, retryCount - 1) * 1000
+              ? timer(Math.pow(2, retryCount - 1) * 1000) 
+              : EMPTY,
           resetOnSuccess: true,
         })
       )
