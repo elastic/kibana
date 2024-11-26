@@ -23,6 +23,9 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { zip, get } from 'lodash';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-types';
+import { ErrorWithReason } from '../../lib';
+import { CLUSTER_BLOCK_EXCEPTION, isClusterBlockedError } from '../../lib/is_alerting_error';
 import { sanitizeBulkErrorResponse } from '../..';
 
 // these fields are the one's we'll refresh from the fresh mget'd docs
@@ -56,6 +59,9 @@ export async function resolveAlertConflicts(params: ResolveAlertConflictsParams)
   try {
     await resolveAlertConflicts_(params);
   } catch (err) {
+    if (isClusterBlockedError(err)) {
+      throw err;
+    }
     logger.error(`Error resolving alert conflicts ${ruleInfoMessage}: ${err.message}`, logTags);
   }
 }
@@ -69,7 +75,15 @@ async function resolveAlertConflicts_(params: ResolveAlertConflictsParams): Prom
   const logTags = { tags: [ruleType, ruleId, 'resolve-alert-conflicts'] };
 
   // get numbers for a summary log message
-  const { success, errors, conflicts, messages } = getResponseStats(bulkResponse);
+  const { success, errors, conflicts, messages, hasClusterBlockException } =
+    getResponseStats(bulkResponse);
+
+  if (hasClusterBlockException) {
+    throw new ErrorWithReason(
+      RuleExecutionStatusErrorReasons.Blocked,
+      new Error('Alerts index is blocked')
+    );
+  }
   if (conflicts === 0 && errors === 0) return;
 
   const allMessages = messages.join('; ');
@@ -285,15 +299,25 @@ interface ResponseStatsResult {
   conflicts: number;
   errors: number;
   messages: string[];
+  hasClusterBlockException: boolean;
 }
 
 // generate a summary of the original bulk request attempt, for logging
 function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
   const sanitizedResponse = sanitizeBulkErrorResponse(bulkResponse) as BulkResponse;
-  const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
+  const stats: ResponseStatsResult = {
+    success: 0,
+    conflicts: 0,
+    errors: 0,
+    messages: [],
+    hasClusterBlockException: false,
+  };
   for (const item of sanitizedResponse.items) {
     const op = item.create || item.index || item.update || item.delete;
     if (op?.error) {
+      if (op.error.type === CLUSTER_BLOCK_EXCEPTION) {
+        stats.hasClusterBlockException = true;
+      }
       if (op?.status === 409 && op === item.index) {
         stats.conflicts++;
       } else {

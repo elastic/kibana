@@ -18,6 +18,7 @@ import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
+import { isClusterBlockedError } from '../lib/is_alerting_error';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
   SummarizedAlerts,
@@ -79,6 +80,7 @@ interface AlertsAffectedByMaintenanceWindows {
   alertIds: string[];
   maintenanceWindowIds: string[];
 }
+
 export class AlertsClient<
   AlertData extends RuleAlertData,
   LegacyState extends AlertInstanceState,
@@ -579,6 +581,9 @@ export class AlertsClient<
           });
         }
       } catch (err) {
+        if (isClusterBlockedError(err)) {
+          throw err;
+        }
         this.options.logger.error(
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} ${this.ruleInfoMessage} - ${err.message}`,
           this.logTags
