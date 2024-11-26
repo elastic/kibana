@@ -188,6 +188,13 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
   defaultMessage: 'Retry',
 });
 
+export const DECODE_CEF_LINK = i18n.translate(
+  'xpack.integrationAssistant.errors.cefFormat.decodeLink',
+  {
+    defaultMessage: 'CEF format not supported yet. Instead please use CEF Integration: {link}',
+  }
+);
+
 export const GENERATION_ERROR_TRANSLATION: Record<
   GenerationErrorCode,
   string | ((attributes: GenerationErrorAttributes) => string)
@@ -211,6 +218,11 @@ export const GENERATION_ERROR_TRANSLATION: Record<
       defaultMessage: 'Unsupported log format in the samples.',
     }
   ),
+  [GenerationErrorCode.CEF_ERROR]: i18n.translate('xpack.integrationAssistant.errors.cefError', {
+    // This is a default error message if the linking does not work.
+    defaultMessage:
+      'CEF format detected. Please decode the CEF logs into JSON format using filebeat decode_cef processor.',
+  }),
   [GenerationErrorCode.UNPARSEABLE_CSV_DATA]: (attributes) => {
     if (
       attributes.underlyingMessages !== undefined &&
