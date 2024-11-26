@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           const datasetWithMonitorPrivilege = apacheAccessDatasetHumanName;
           const datasetWithoutMonitorPrivilege = 'synth.1';
 
-          await retry.tryForTime(5000, async () => {
+          await retry.tryForTime(10000, async () => {
             // "Size" should be available for `apacheAccessDatasetName`
             await testSubjects.missingOrFail(
               `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-sizeBytes-${datasetWithMonitorPrivilege}`

@@ -137,17 +137,11 @@
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
         "cheerio",
-        "@istanbuljs/nyc-config-typescript",
-        "@istanbuljs/schema",
-        "@types/enzyme",
         "@types/faker",
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
-        "@wojtekmaj/enzyme-adapter-react-17",
         "babel-plugin-istanbul",
-        "enzyme",
-        "enzyme-to-json",
         "faker",
         "nyc",
         "oboe",
@@ -171,6 +165,217 @@
         "backport:all-open"
       ],
       "enabled": true
+    },
+    {
+      "groupName": "@elastic/appex-sharedux dependencies",
+      "matchDepNames": [
+        "@elastic/filesaver",
+        "@elastic/numeral",
+        "@wojtekmaj/enzyme-adapter-react-17",
+        "base64-js",
+        "blurhash",
+        "classnames",
+        "deep-freeze-strict",
+        "enzyme",
+        "enzyme-to-json",
+        "fflate",
+        "history",
+        "lz-string",
+        "monaco-editor",
+        "rison-node",
+        "styled-components",
+        "@types/base64-js",
+        "@types/classnames",
+        "@types/deep-freeze-strict",
+        "@types/enzyme",
+        "@types/history",
+        "@types/lz-string",
+        "@types/styled-components"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/appex-sharedux emotion dependencies",
+      "matchDepNames": [
+        "@emotion/cache",
+        "@emotion/css",
+        "@emotion/react",
+        "@emotion/serialize",
+        "@emotion/server",
+        "@emotion/styled"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/appex-sharedux react dependencies",
+      "matchDepNames": [
+        "prop-types",
+        "react",
+        "react-dom",
+        "react-monaco-editor",
+        "react-router",
+        "react-router-config",
+        "react-router-dom",
+        "react-router-dom-v5-compat",
+        "react-use",
+        "@types/prop-types",
+        "@types/react",
+        "@types/react-dom",
+        "@types/react-router",
+        "@types/react-router-config",
+        "@types/react-router-dom"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/fleet dependencies",
+      "matchDepNames": [
+        "exponential-backoff",
+        "@paralleldrive/cuid2",
+        "isbinaryfile",
+        "js-search",
+        "openpgp",
+        "remark-gfm",
+        "@types/js-search"
+      ],
+      "reviewers": [
+        "team:fleet"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Fleet",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/kibana-cloud-security-posture dependencies",
+      "matchDepNames": [
+        "@mswjs/http-middleware",
+        "@types/byte-size",
+        "byte-size",
+        "msw",
+        "xterm"
+      ],
+      "reviewers": [
+        "team:kibana-cloud-security-posture"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Cloud Security",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "formatjs dependencies",
+      "matchDepNames": [
+        "@formatjs/icu-messageformat-parser",
+        "@formatjs/intl",
+        "@formatjs/intl-pluralrules",
+        "@formatjs/intl-relativetimeformat",
+        "@formatjs/intl-utils",
+        "@formatjs/ts-transformer"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Core",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-core dependencies",
+      "matchDepNames": [
+        "@elastic/request-crypto",
+        "ansi-regex",
+        "axios",
+        "cacheable-lookup",
+        "getos",
+        "has-ansi",
+        "joi-to-json",
+        "json5",
+        "load-json-file",
+        "mime-types",
+        "mock-fs",
+        "node-fetch",
+        "react-intl",
+        "reflect-metadata",
+        "type-detect",
+        "utility-types",
+        "@types/getos",
+        "@types/hapi__cookie",
+        "@types/hapi__h2o2",
+        "@types/hapi__hapi",
+        "@types/hapi__inert",
+        "@types/has-ansi",
+        "@types/json5",
+        "@types/mime",
+        "@types/mime-types",
+        "@types/mock-fs",
+        "@types/node-fetch",
+        "@types/type-detect"
+      ],
+      "reviewers": [
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Core",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
     },
     {
       "groupName": "@elastic/charts",
@@ -352,7 +557,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:skip"
+        "backport:all-open"
       ],
       "enabled": true
     },
@@ -376,28 +581,11 @@
       "enabled": true
     },
     {
-      "groupName": "ansi-regex",
-      "matchDepNames": [
-        "ansi-regex"
-      ],
-      "reviewers": [
-        "team:kibana-core"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "Team:Core",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "OpenAPI Spec",
       "matchDepNames": [
-        "@redocly/cli"
+        "@apidevtools/swagger-parser",
+        "@redocly/cli",
+        "openapi-types"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -408,7 +596,7 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:skip"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -926,27 +1114,6 @@
       "enabled": true
     },
     {
-      "groupName": "TTY Output",
-      "matchDepNames": [
-        "xterm",
-        "byte-size",
-        "@types/byte-size"
-      ],
-      "reviewers": [
-        "team:sec-cloudnative-integrations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team: AWP: Visualization",
-        "release_note:skip",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "Cloud Defend",
       "matchDepNames": [
         "monaco-yaml"
@@ -1079,25 +1246,6 @@
       "enabled": true
     },
     {
-      "groupName": "MSW",
-      "matchPackageNames": [
-        "msw"
-      ],
-      "reviewers": [
-        "team:kibana-cloud-security-posture"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Cloud Security",
-        "release_note:skip",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "re2js",
       "matchDepNames": [
         "re2js"
@@ -1157,25 +1305,6 @@
       "enabled": true
     },
     {
-      "groupName": "@mswjs/http-middleware",
-      "matchPackageNames": [
-        "@mswjs/http-middleware"
-      ],
-      "reviewers": [
-        "team:kibana-cloud-security-posture"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Cloud Security",
-        "release_note:skip",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "@xyflow/react",
       "matchPackageNames": [
         "@xyflow/react"
@@ -1189,7 +1318,7 @@
       "labels": [
         "Team:Cloud Security",
         "release_note:skip",
-        "backport:skip"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1208,9 +1337,28 @@
       "labels": [
         "Team:Cloud Security",
         "release_note:skip",
-        "backport:skip"
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/request-converter",
+      "matchDepNames": [
+        "@elastic/request-converter"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Kibana Management",
+        "Feature:Console"
+      ],
       "enabled": true
     }
   ],

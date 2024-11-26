@@ -128,12 +128,20 @@ export const ilmBannerExtension = (indices: Index[]) => {
   if (!numIndicesWithLifecycleErrors) {
     return null;
   }
+  const { requestMethod, successMessage, indexNames, buttonLabel } =
+    retryLifecycleActionExtension({ indices: indicesWithLifecycleErrors }) ?? {};
   return {
     type: 'warning',
     filter: Query.parse(`${stepPath}:ERROR`),
     filterLabel: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.filterLabel', {
       defaultMessage: 'Show errors',
     }),
+    action: {
+      buttonLabel,
+      indexNames: indexNames?.[0] ?? [],
+      requestMethod,
+      successMessage,
+    },
     title: i18n.translate('xpack.indexLifecycleMgmt.indexMgmtBanner.errorMessage', {
       defaultMessage: `{ numIndicesWithLifecycleErrors, number}
           {numIndicesWithLifecycleErrors, plural, one {index has} other {indices have} }

@@ -115,6 +115,11 @@ function validOptions(
     );
   }
 
+  // @ts-expect-error to eliminate problems with `security` in the options for route factories abstractions
+  if (options.security) {
+    throw new Error('`options.security` is not allowed in route config. Use `security` instead.');
+  }
+
   const body = shouldNotHavePayload
     ? undefined
     : {
