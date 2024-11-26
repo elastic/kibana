@@ -407,7 +407,11 @@ describe('CreateIntegration', () => {
 
         it('should disable the next button', () => {
           const result = renderIntegrationAssistant();
-          expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+          // Not sure why there are two buttons when testing.
+          const nextButton = result
+            .getAllByTestId('buttonsFooter-nextButton')
+            .filter((button) => button.textContent !== 'Next')[0];
+          expect(nextButton).toBeDisabled();
         });
       });
     });
@@ -607,7 +611,11 @@ describe('CreateIntegration with generateCel enabled', () => {
 
       it('should disable the next button', () => {
         const result = renderIntegrationAssistant();
-        expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+        // Not sure why there are two buttons when testing.
+        const nextButton = result
+          .getAllByTestId('buttonsFooter-nextButton')
+          .filter((button) => button.textContent !== 'Next')[0];
+        expect(nextButton).toBeDisabled();
       });
     });
 
@@ -650,7 +658,11 @@ describe('CreateIntegration with generateCel enabled', () => {
 
         it('should disable the next button', () => {
           const result = renderIntegrationAssistant();
-          expect(result.getByTestId('buttonsFooter-nextButton')).toBeDisabled();
+          // Not sure why there are two buttons when testing.
+          const nextButton = result
+            .getAllByTestId('buttonsFooter-nextButton')
+            .filter((button) => button.textContent !== 'Next')[0];
+          expect(nextButton).toBeDisabled();
         });
       });
     });
