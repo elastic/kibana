@@ -127,8 +127,10 @@ export const useAlertsDataView = ({
 
   // eslint-disable-next-line no-console
   console.log(
+    'use_alerts_data_view.fields.length',
+    fields?.fields?.length,
     'use_alerts_data_view.fields',
-    JSON.stringify(fields?.fields.find((field) => field.name === 'kibana.alert.start'))
+    JSON.stringify(fields?.fields?.find((field) => field.name === 'kibana.alert.start'))
   );
 
   const { data: virtualDataView, isError: isVirtualDataViewError } = useVirtualDataViewQuery(
