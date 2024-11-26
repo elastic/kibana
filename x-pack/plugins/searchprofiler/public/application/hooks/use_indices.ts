@@ -5,23 +5,19 @@
  * 2.0.
  */
 
+import { useRequest } from '@kbn/es-ui-shared-plugin/public';
+import { API_BASE_PATH } from '../../../common/constants';
 import { useAppContext } from '../contexts/app_context';
 
 interface ReturnValue {
   hasIndices: boolean;
+  ok: boolean;
 }
 
 export const useIndices = () => {
   const { http } = useAppContext();
-  return async (): Promise<ReturnValue> => {
-    try {
-      const response = await http.get<
-        { ok: true; hasIndices: boolean } | { ok: false; err: { msg: string } }
-      >('../api/searchprofiler/getIndices');
-
-      return { hasIndices: response.ok ? response.hasIndices : false };
-    } catch (e) {
-      throw new Error('Error fetching indices:', e);
-    }
-  };
+  return useRequest<ReturnValue>(http, {
+    path: `${API_BASE_PATH}/get_Indices`,
+    method: 'get',
+  });
 };

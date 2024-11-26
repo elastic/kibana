@@ -6,12 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
 import { RouteDependencies } from '../types';
 
 export const register = ({ router, getLicenseStatus, log }: RouteDependencies) => {
   router.post(
     {
-      path: '/api/searchprofiler/profile',
+      path: `${API_BASE_PATH}/profile`,
       validate: {
         body: schema.object({
           query: schema.object({}, { unknowns: 'allow' }),
@@ -70,7 +71,7 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
   );
   router.get(
     {
-      path: '/api/searchprofiler/getIndices',
+      path: `${API_BASE_PATH}/get_Indices`,
       validate: false,
     },
     async (ctx, _request, response) => {
