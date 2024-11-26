@@ -21,7 +21,8 @@ export async function handleBuildProgram({
   const program = await celProgramGraph.invoke({
     data_stream_name: state.dataStreamName,
     example_cel_programs: SAMPLE_CEL_PROGRAMS,
-    open_api_spec: state.apiDefinition,
+    open_api_path_details: state.openApiPathDetails,
+    open_api_schemas: state.openApiSchemas,
     api_query_summary: state.apiQuerySummary,
     ex_answer: EX_ANSWER_PROGRAM,
   });

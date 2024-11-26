@@ -12,7 +12,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { ESProcessorItem, SamplesFormat } from '../common';
+import { ESProcessorItem, SamplesFormat, CelAuthType } from '../common';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -37,6 +37,14 @@ export interface SimplifiedProcessor {
 export interface SimplifiedProcessors {
   type: string;
   processors: SimplifiedProcessor[];
+}
+
+export interface ApiAnalysisState {
+  dataStreamName: string;
+  pathOptions: object;
+  results: object;
+  suggestedPaths: string[];
+  lastExecutedChain: string;
 }
 
 export interface CategorizationState {
@@ -67,12 +75,17 @@ export interface CategorizationState {
 
 export interface CelInputState {
   dataStreamName: string;
-  apiDefinition: string;
+  path: string;
+  authType: CelAuthType;
+  openApiPathDetails: object;
+  openApiSchemas: object;
+  openApiAuthSchema: object;
   lastExecutedChain: string;
   finalized: boolean;
   apiQuerySummary: string;
   exampleCelPrograms: string[];
   currentProgram: string;
+  hasProgramHeaders: boolean | undefined;
   stateVarNames: string[];
   stateSettings: object;
   redactVars: string[];

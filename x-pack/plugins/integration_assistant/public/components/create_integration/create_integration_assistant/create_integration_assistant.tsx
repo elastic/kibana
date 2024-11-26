@@ -14,6 +14,7 @@ import { IntegrationStep, isIntegrationStepReady } from './steps/integration_ste
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
 import { ReviewStep, isReviewStepReady } from './steps/review_step';
 import { CelInputStep, isCelInputStepReady } from './steps/cel_input_step';
+import { CelConfirmStep, isCelConfirmStepReady } from './steps/cel_confirm_settings_step';
 import { ReviewCelStep, isCelReviewStepReady } from './steps/review_cel_step';
 import { DeployStep } from './steps/deploy_step';
 import { reducer, initialState, ActionsProvider, type Actions } from './state';
@@ -41,11 +42,17 @@ export const CreateIntegrationAssistant = React.memo(() => {
       setIntegrationSettings: (payload) => {
         dispatch({ type: 'SET_INTEGRATION_SETTINGS', payload });
       },
+      // setCelSettings: (payload) => {
+      //   dispatch({ type: 'SET_CEL_SETTINGS', payload });
+      // },
       setIsGenerating: (payload) => {
         dispatch({ type: 'SET_IS_GENERATING', payload });
       },
       setHasCelInput: (payload) => {
         dispatch({ type: 'SET_HAS_CEL_INPUT', payload });
+      },
+      setCelSuggestedPaths: (payload) => {
+        dispatch({ type: 'SET_CEL_SUGGESTED_PATHS', payload });
       },
       setResult: (payload) => {
         dispatch({ type: 'SET_GENERATED_RESULT', payload });
@@ -69,6 +76,8 @@ export const CreateIntegrationAssistant = React.memo(() => {
     } else if (isGenerateCelEnabled && state.step === 5) {
       return isCelInputStepReady(state);
     } else if (isGenerateCelEnabled && state.step === 6) {
+      return isCelConfirmStepReady(state);
+    } else if (isGenerateCelEnabled && state.step === 7) {
       return isCelReviewStepReady(state);
     }
     return false;
@@ -109,14 +118,22 @@ export const CreateIntegrationAssistant = React.memo(() => {
                 connector={state.connector}
               />
             ))}
+          {isGenerateCelEnabled && state.step === 6 && (
+            <CelConfirmStep
+              integrationSettings={state.integrationSettings}
+              celSuggestedPaths={state.celSuggestedPaths}
+              connector={state.connector}
+              isGenerating={state.isGenerating}
+            />
+          )}
 
-          {isGenerateCelEnabled && state.celInputResult && state.step === 6 && (
+          {isGenerateCelEnabled && state.celInputResult && state.step === 7 && (
             <ReviewCelStep
               isGenerating={state.isGenerating}
               celInputResult={state.celInputResult}
             />
           )}
-          {isGenerateCelEnabled && state.step === 7 && (
+          {isGenerateCelEnabled && state.step === 8 && (
             <DeployStep
               integrationSettings={state.integrationSettings}
               result={state.result}

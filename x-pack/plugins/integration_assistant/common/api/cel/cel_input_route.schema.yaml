@@ -3,7 +3,7 @@ info:
   title: Automatic Import CEL Input API endpoint
   version: "1"
 paths:
-  /api/integration_assistant/cel:
+  /internal/integration_assistant/cel:
     post:
       summary: Builds CEL input configuration
       operationId: CelInput
@@ -18,14 +18,14 @@ paths:
             schema:
               type: object
               required:
-                - apiDefinition
                 - dataStreamName
+                - celDetails
                 - connectorId
               properties:
                 dataStreamName:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
-                apiDefinition:
-                  $ref: "../model/cel_input_attributes.schema.yaml#/components/schemas/ApiDefinition"
+                celDetails:
+                  $ref: "../model/cel_input_attributes.schema.yaml#/components/schemas/CelDetails"
                 connectorId:
                   $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
                 langSmithOptions:

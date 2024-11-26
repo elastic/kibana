@@ -296,3 +296,184 @@ export const SAMPLE_CEL_PROGRAMS = [
         })
       )`,
 ];
+
+export const SAMPLE_CEL_PROGRAMS_OAUTH = [
+  `state.with(
+    post(state.url.trim_right("/") + "/oauth/token", "application/json", {
+      "client_id": state.client_id,
+      "client_secret": state.client_secret,
+      "audience": state.url.trim_right("/") + "/api/v2/",
+      "grant_type": "client_credentials",
+    }.encode_json()).as(auth_resp, auth_resp.StatusCode != 200 ?
+      {
+        "events": {
+          "error": {
+            "code": string(auth_resp.StatusCode),
+            "id": string(auth_resp.Status),
+            "message": "POST:"+(
+              size(auth_resp.Body) != 0 ?
+                string(auth_resp.Body)
+              :
+                string(auth_resp.Status) + ' (' + string(auth_resp.StatusCode) + ')'
+            ),
+          },
+        },
+        "want_more": false,
+      }
+    :
+      {
+        "Body": bytes(auth_resp.Body).decode_json(),
+      }
+    ).as(token, has(token.events) ? token :
+      get_request(
+        state.?next.orValue(
+          has(state.?cursor.next) ?
+            // Use the cursor next rel link if it exists.
+            state.cursor.next.parse_url().as(next, next.with({
+              // The next rel link includes the take parameter which the
+              // user may have changed, so replace it with the config's
+              // value.
+              "RawQuery": next.RawQuery.parse_query().with({
+                ?"take": has(state.take) ?
+                  optional.of([string(state.take)])
+                :
+                  optional.none(),
+              }).format_query()
+            }).format_url())
+          :
+            // Otherwise construct a next rel-ish link to look back.
+            state.url.trim_right("/") + "/api/v2/logs?" + {
+              ?"take": has(state.take) ?
+                optional.of([string(state.take)])
+              :
+                optional.none(),
+              ?"from": has(state.look_back) ?
+                // Format a relative timestamp into a log ID.
+                optional.of(["900" + (now-duration(state.look_back)).format("20060102150405") + "000000000000000000000000000000000000000"])
+              :
+                optional.none(),
+            }.format_query()
+        )
+      ).with({
+        "Header": {
+          "Authorization": [token.?Body.token_type.orValue("Bearer") + " " + token.?Body.access_token.orValue("MISSING")],
+          "Accept": ["application/json"],
+        }
+      }).do_request().as(resp, resp.StatusCode != 200 ?
+        {
+          "events": {
+            "error": {
+              "code": string(resp.StatusCode),
+              "id": string(resp.Status),
+              "message": "GET:"+(
+                size(resp.Body) != 0 ?
+                  string(resp.Body)
+                :
+                  string(resp.Status) + ' (' + string(resp.StatusCode) + ')'
+              ),
+            },
+          },
+          "want_more": false,
+        }
+      :
+        {
+          "Body": bytes(resp.Body).decode_json(),
+          ?"next": resp.Header.?Link[0].orValue("").as(next, next.split(";").as(attrs, attrs.exists(attr, attr.contains('rel="next"')) ?
+            attrs.map(attr, attr.matches("^<https?://"), attr.trim_prefix('<').trim_suffix('>'))[?0]
+          :
+            optional.none()
+          )),
+        }.as(result, result.with({
+          "events": result.Body.map(e, {"json": {"log_id": e.log_id, "data": e}}),
+          "cursor": {
+            ?"next": result.?next,
+          },
+          "want_more": has(result.next) && size(result.Body) != 0,
+        })).drop("Body")
+      )
+    )
+  )`,
+  `request("POST", state.url.trim_right("/") + "/auth/external").with(
+  			{
+  				"Header": {
+  					"Accept": ["application/json"],
+  					"Content-Type": ["application/json"],
+  				},
+  				"Body": {
+  					"clientId": state.auth_client_id,
+  					"accessKey": state.auth_access_key,
+  				}.encode_json(),
+  			}
+  		).do_request().as(resp,
+  			(resp.StatusCode == 200) ?
+  				bytes(resp.Body).decode_json().as(body,
+  					body.data.token
+  				)
+  			:
+  				bytes(resp.Body).decode_json().as(body,
+  					body.message
+  				)
+  		).as(auth_token,
+  			// submit logs query to search security event logs
+  			request("POST", state.url.trim_right("/") + "/app/laas-logs-api/api/logs_query").with(
+  				{
+  					"Header": {
+  						"Accept": ["application/json"],
+  						"Content-Type": ["application/json"],
+  						"Authorization": ["Bearer " + auth_token],
+  					},
+  					"Body": {
+  						"filter": state.filter,
+  						"limit": state.limit,
+  						"pageLimit": state.page_limit,
+  						"cloudService": "Harmony Endpoint",
+  						"timeframe": {
+  							"startTime": (state.?cursor.next_startTime.orValue(null) == null) ?
+  								timestamp(now() - duration(state.initial_interval)).format(time_layout.RFC3339)
+  							:
+  								timestamp(state.cursor.next_startTime).format(time_layout.RFC3339),
+  							"endTime": timestamp(now().format(time_layout.RFC3339)),
+  						},
+  					}.encode_json(),
+  				}
+  			).do_request().as(resp,
+  				(resp.StatusCode == 200) ?
+  					bytes(resp.Body).decode_json().as(body,
+  						state.with(
+  							{
+  								"events": [{ "message": { "event": { "reason": "polling" }}.encode_json() }],
+  								"want_more": true,
+  								"cursor": {
+  									"auth_token": auth_token,
+  									"task_id": body.data.taskId,
+  									"task_ready": false,
+  									"page_token": null,
+  									"next_startTime": (has(state.cursor) && has(state.cursor.next_startTime)) ? state.cursor.next_startTime : null,
+  									"last_page": false,
+  								},
+  							}
+  						)
+  					)
+  				:
+  					state.with(
+  						{
+  							"events": {
+  								"error": {
+  									"message": "Error " + bytes(resp.Body).decode_json().as(body, body.message),
+  								},
+  							},
+  							"want_more": false,
+  							"cursor": state.cursor.with(
+  								{
+  									"auth_token": null,
+  									"task_id": null,
+  									"task_ready": false,
+  									"page_token": null,
+  									"last_page": false,
+  								}
+  							),
+  						}
+  					)
+  			)
+  		)`,
+];

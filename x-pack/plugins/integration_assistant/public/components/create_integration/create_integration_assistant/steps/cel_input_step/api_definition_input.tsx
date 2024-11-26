@@ -7,9 +7,45 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiFilePicker, EuiFormRow, EuiText } from '@elastic/eui';
+import Oas from 'oas';
+import yaml from 'js-yaml';
 import type { IntegrationSettings } from '../../types';
 import * as i18n from './translations';
 import { useActions } from '../../state';
+
+interface PrepareOasErrorResult {
+  error: string;
+}
+interface PrepareOasSuccessResult {
+  oas: Oas | undefined;
+}
+type PrepareOasResult = PrepareOasSuccessResult | PrepareOasErrorResult;
+
+/**
+ * Prepares the OpenAPI specification file to send to the backend from the user-uploaded file.
+ *
+ * This function will return an error message if the uploaded API definition cannot be parsed into an OAS Document
+ * from the uploaded JSON or YAML defintion file.
+ *
+ * @param fileContent The content of the user-provided API definition file.
+ * @returns The parsed OAS object or an error message.
+ */
+const prepareOas = (fileContent: string): PrepareOasResult => {
+  let parsedApiSpec: Oas | undefined;
+
+  try {
+    parsedApiSpec = new Oas(fileContent);
+  } catch (parseJsonOasError) {
+    try {
+      const specYaml = yaml.load(fileContent);
+      const specJson = JSON.stringify(specYaml);
+      parsedApiSpec = new Oas(specJson);
+    } catch (parseYamlOasError) {
+      return { error: i18n.API_DEFINITION_ERROR.INVALID_OAS };
+    }
+  }
+  return { oas: parsedApiSpec };
+};
 
 interface ApiDefinitionInputProps {
   integrationSettings: IntegrationSettings | undefined;
@@ -29,7 +65,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(({ integra
       setApiFileError(undefined);
       setIntegrationSettings({
         ...integrationSettings,
-        apiDefinition: undefined,
+        apiSpec: undefined,
       });
 
       const apiDefinitionFile = files[0];
@@ -58,9 +94,18 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(({ integra
           return;
         }
 
+        const prepareResult = prepareOas(fileContent);
+
+        if ('error' in prepareResult) {
+          setApiFileError(prepareResult.error);
+          return;
+        }
+
+        const { oas } = prepareResult;
+
         setIntegrationSettings({
           ...integrationSettings,
-          apiDefinition: fileContent,
+          apiSpec: oas,
         });
       };
 

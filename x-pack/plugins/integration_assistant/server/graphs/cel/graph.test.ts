@@ -15,7 +15,7 @@ import {
   celStateSettings,
   celRedact,
 } from '../../../__jest__/fixtures/cel';
-import { mockedRequestWithApiDefinition } from '../../../__jest__/fixtures';
+import { mockedRequestWithCelDetails } from '../../../__jest__/fixtures';
 import { handleSummarizeQuery } from './summarize_query';
 import { handleBuildProgram } from './build_program';
 import { handleGetStateVariables } from './retrieve_state_vars';
@@ -84,7 +84,7 @@ describe('CelGraph', () => {
     const celGraph = await getCelGraph({ model });
     let response;
     try {
-      response = await celGraph.invoke(mockedRequestWithApiDefinition);
+      response = await celGraph.invoke(mockedRequestWithCelDetails);
     } catch (error) {
       throw Error(`getCelGraph threw an error: ${error}`);
     }

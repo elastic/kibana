@@ -49,11 +49,16 @@ export function createDataStream(
           program: cel.program.split('\n'),
           state: cel.stateSettings,
           redact: cel.redactVars,
+          auth: cel.authType,
+          url: cel.url,
+          showAll: false,
         };
       } else {
         mappedValues = {
           ...mappedValues,
           program: DEFAULT_CEL_PROGRAM.split('\n'),
+          url: 'https://server.example.com:8089/api',
+          showAll: true,
         };
       }
     }

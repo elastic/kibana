@@ -12,19 +12,14 @@ export const CEL_QUERY_SUMMARY_PROMPT = ChatPromptTemplate.fromMessages([
     `You are a helpful, expert assistant in REST APIs and OpenAPI specifications.
 Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
 <context>
-<open_api_spec>
-{open_api_spec}
-</open_api_spec>
+<path_details>
+{path_details}
+</path_details>
 </context>`,
   ],
   [
     'human',
-    `For the {data_stream_name} endpoint and provided OpenAPI specification, please describe which query parameters you would use so that all events are covered in a chronological manner.
-
-You ALWAYS follow these guidelines when writing your response:
- <guidelines>
- - Prioritize bulk api routes over more specialized routes.
- </guidelines>
+    `For the {path} endpoint and provided OpenAPI specification, please describe which query parameters you would use so that all {data_stream_name} events are covered in a chronological manner.
 
 Please respond with a concise text answer, and a sample URL path.`,
   ],
@@ -37,9 +32,12 @@ export const CEL_BASE_PROGRAM_PROMPT = ChatPromptTemplate.fromMessages([
     `You are a helpful, expert assistant in building Elastic filebeat input configurations utilizing the Common Expression Language (CEL) input type.
 Here is some context for you to reference your task, review it carefully as you will get questions about it later:
 <context>
-<open_api_spec>
-{open_api_spec}
-</open_api_spec>
+<open_api_path_details>
+{open_api_path_details}
+</open_api_path_details>
+<open_api_schemas>
+{open_api_schemas}
+</open_api_schemas>
 <example_cel_programs>
 {example_cel_programs}
 </example_cel_programs>
@@ -59,6 +57,7 @@ Utilize the following paging summary details and sample URL for implementing pag
 Each of the following criteria must be addressed in final configuration output:
 - The REST verb must be specified.
 - The request URL must include the 'state.url'.
+- Any reference to 'state.url' must append \`.trim_right("/")\`.
 - The request URL must include the API path.
 - The request URL must include all query parameters from the paging summary using a 'format_query' function. Remember to utilize the state variables inside brackets when building the function and be sure to cast any numeric variables to string using 'string(variable)'.
 - All request URL parameters must utilize state variables.
@@ -77,6 +76,7 @@ You ALWAYS follow these guidelines when writing your response:
 - You must never include any code for writing data to the API.
 - You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
 - You must use 2 spaces for tab size.
+- The final program must not be enclosed in parentheses.
 - Do not enclose the final output in backticks, only return the codeblock and nothing else.
 </guidelines>
 
@@ -85,6 +85,23 @@ A: Please find the CEL program below:
 {ex_answer}`,
   ],
   ['ai', `Please find the CEL program below:`],
+]);
+
+export const CEL_ANALYZE_HEADERS_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful, expert assistant in writing and analyzing CEL programs for Elastic filebeat. Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
+<context>
+<cel_program>
+{cel_program}
+</cel_program>
+</context>`,
+  ],
+  [
+    'human',
+    `Looking at the CEL program provided in the context, please return a boolean response for whether or not the program contains any headers on the HTTP request to get events. Return true if there are headers, and false if there are none. Do not respond with anything except the boolean answer.`,
+  ],
+  ['ai', `Please find the boolean answer below:`],
 ]);
 
 export const CEL_STATE_PROMPT = ChatPromptTemplate.fromMessages([
@@ -126,9 +143,9 @@ export const CEL_CONFIG_DETAILS_PROMPT = ChatPromptTemplate.fromMessages([
 Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
 
 <context>
-<open_api_spec>
-{open_api_spec}
-</open_api_spec>
+<open_api_path_details>
+{open_api_path_details}
+</open_api_path_details>
 </context>`,
   ],
   [
@@ -139,7 +156,10 @@ You ALWAYS follow these guidelines when writing your response:
 
  <guidelines>
  - Page sizing default should always be non-zero. 
+ - Paging information, usernames and client ids should never be redacted.
  - Redact anything that could possibly contain PII, tokens or keys, or expose any sensitive information in the logs.
+ - Always use the most broad settings for parameters that filter down event types in the responses.
+ - Always include defaults for date fields in the specified date format. 
  - You must use the variable names in parentheses when building the return object. Each item in the response must contain the fields: name, redact and default.
  - Do not respond with anything except the JSON object enclosed with 3 backticks (\`), see example response below.
  </guidelines>
@@ -153,4 +173,135 @@ Example response format:
 `,
   ],
   ['ai', `Please find the JSON object below:`],
+]);
+
+export const CEL_AUTH_HEADERS_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful, expert assistant in building Elastic filebeat input configurations utilizing the Common Expression Language (CEL) input type.
+Here is some context for you to reference your task, review it carefully as you will get questions about it later:
+<context>
+<open_api_auth_schema>
+{open_api_auth_schema}
+</open_api_auth_schema>
+</context>`,
+  ],
+  [
+    'human',
+    `Please update the following CEL program for the OpenAPI Header authentication information specified in the context.
+
+<context>
+<cel_program>
+{cel_program}
+</cel_program>
+</context>
+    
+You ALWAYS follow these guidelines when writing your response:
+<guidelines>
+- Do not update any other details of the program besides authentication on the GET request headers.
+- You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
+- You must use 2 spaces for tab size.
+- The final program must not be enclosed in parentheses.
+- Do not enclose the final output in backticks, only return the codeblock and nothing else.
+</guidelines>`,
+  ],
+  ['ai', ``],
+]);
+
+export const CEL_AUTH_OAUTH2_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful, expert assistant in building Elastic filebeat input configurations utilizing the Common Expression Language (CEL) input type.
+Here is some context for you to reference your task, review it carefully as you will get questions about it later:
+<context>
+<open_api_auth_schema>
+{open_api_auth_schema}
+</open_api_auth_schema>
+<example_cel_programs>
+{example_cel_programs}
+</example_cel_programs>
+</context>`,
+  ],
+  [
+    'human',
+    `Please update the following CEL program for the OpenAPI OAuth2 authentication information specified in the context.
+
+<context>
+<cel_program>
+{cel_program}
+</cel_program>
+</context>
+
+Each of the following criteria must be addressed in final configuration output:
+- There must be configuration for submitting a request for the oauth token. 
+- The received token must be utilized in subsequent GET requests for the events.
+- There must be configuration for error handling for the oauth token request.
+    
+You ALWAYS follow these guidelines when writing your response:
+<guidelines>
+- You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
+- You must use 2 spaces for tab size.
+- The final program must not be enclosed in parentheses.
+- Do not enclose the final output in backticks, only return the codeblock and nothing else.
+</guidelines>`,
+  ],
+  ['ai', `Please find the updated program below:`],
+]);
+
+export const CEL_AUTH_BASIC_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful, expert assistant in building Elastic filebeat input configurations utilizing the Common Expression Language (CEL) input type.
+Here is some context for you to reference your task, review it carefully as you will get questions about it later:
+<context>
+<open_api_auth_schema>
+{open_api_auth_schema}
+</open_api_auth_schema>
+</context>`,
+  ],
+  [
+    'human',
+    `Please update the following CEL program for the OpenAPI Basic authentication information specified in the context.
+
+<context>
+<cel_program>
+{cel_program}
+</cel_program>
+</context>
+    
+You ALWAYS follow these guidelines when writing your response:
+<guidelines>
+- Do not update any other details of the program besides authentication on the GET request headers. 
+- You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
+- You must use 2 spaces for tab size.
+- The final program must not be enclosed in parentheses.
+- Do not enclose the final output in backticks, only return the codeblock and nothing else.
+</guidelines>`,
+  ],
+  ['ai', `Please find the updated program below:`],
+]);
+
+export const CEL_AUTH_DIGEST_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    'system',
+    `You are a helpful, expert assistant in writing and analyzing CEL programs for Elastic filebeat. Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
+<context>
+<cel_program>
+{cel_program}
+</cel_program>
+</context>`,
+  ],
+  [
+    'human',
+    `Please update the program above to ensure no HTTP headers are being set and respond with the updated program.
+
+You ALWAYS follow these guidelines when writing your response:
+<guidelines>
+- You must respond only with the code block containing the program formatted like human-readable C code. See example response below.
+- You must use 2 spaces for tab size.
+- The final program must not be enclosed in parentheses.
+- Do not enclose the final output in backticks, only return the codeblock and nothing else.
+</guidelines>`,
+  ],
+  ['ai', `Please find the updated program below:`],
 ]);

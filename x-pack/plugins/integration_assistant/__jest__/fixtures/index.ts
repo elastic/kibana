@@ -53,7 +53,7 @@ export const mockedRequestWithPipeline = {
   currentPipeline: currentPipelineMock,
 };
 
-export const mockedRequestWithApiDefinition = {
-  apiDefinition: '{ "openapi": "3.0.0" }',
+// todo update
+export const mockedRequestWithCelDetails = {
   dataStreamName: 'audit',
 };

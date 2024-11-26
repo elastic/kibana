@@ -17,13 +17,13 @@
 import { z } from '@kbn/zod';
 
 import { DataStreamName, Connector, LangSmithOptions } from '../model/common_attributes.gen';
-import { ApiDefinition } from '../model/cel_input_attributes.gen';
+import { CelDetails } from '../model/cel_input_attributes.gen';
 import { CelInputAPIResponse } from '../model/response_schemas.gen';
 
 export type CelInputRequestBody = z.infer<typeof CelInputRequestBody>;
 export const CelInputRequestBody = z.object({
   dataStreamName: DataStreamName,
-  apiDefinition: ApiDefinition,
+  celDetails: CelDetails,
   connectorId: Connector,
   langSmithOptions: LangSmithOptions.optional(),
 });

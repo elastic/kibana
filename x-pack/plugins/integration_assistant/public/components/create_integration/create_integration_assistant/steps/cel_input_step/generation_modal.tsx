@@ -23,15 +23,33 @@ import {
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
+import type Oas from 'oas';
 import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
-import { type CelInputRequestBody } from '../../../../../../common';
-import { runCelGraph } from '../../../../../common/lib/api';
+import { type AnalyzeApiRequestBody } from '../../../../../../common';
+import { runAnalyzeApiGraph } from '../../../../../common/lib/api';
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
+import type { ApiPathOptions } from '../../types';
 
-export type OnComplete = (result: State['celInputResult']) => void;
+export type OnComplete = (result: State['celSuggestedPaths']) => void;
+
+const getApiPathsWithDescriptions = (apiSpec: Oas | undefined): ApiPathOptions => {
+  const pathMap: { [key: string]: string } = {};
+  const pathObjs = apiSpec?.getPaths();
+  if (pathObjs) {
+    for (const [path, pathObj] of Object.entries(pathObjs)) {
+      if (pathObj?.get) {
+        const val = pathObj?.get?.getDescription()
+          ? pathObj?.get?.getDescription()
+          : pathObj?.get?.getSummary();
+        pathMap[path] = val;
+      }
+    }
+  }
+  return pathMap;
+};
 
 interface UseGenerationProps {
   integrationSettings: State['integrationSettings'];
@@ -58,38 +76,28 @@ export const useGeneration = ({
     ) {
       return;
     }
-    const generationStartedAt = Date.now();
     const abortController = new AbortController();
     const deps = { http, abortSignal: abortController.signal };
 
     (async () => {
       try {
-        const apiDefinition = integrationSettings.apiDefinition;
-        const celRequest: CelInputRequestBody = {
+        const apiOptions = getApiPathsWithDescriptions(integrationSettings.apiSpec);
+        const analyzeApiRequest: AnalyzeApiRequestBody = {
           dataStreamName: integrationSettings.dataStreamName ?? '',
-          apiDefinition: apiDefinition ?? '',
+          pathOptions: apiOptions,
           connectorId: connector.id,
           langSmithOptions: getLangSmithOptions(),
         };
-        const celGraphResult = await runCelGraph(celRequest, deps);
+
+        const apiAnalysisGraphResult = await runAnalyzeApiGraph(analyzeApiRequest, deps);
 
         if (abortController.signal.aborted) return;
 
-        if (isEmpty(celGraphResult?.results)) {
+        if (isEmpty(apiAnalysisGraphResult?.results)) {
           throw new Error('Results not found in response');
         }
 
-        reportCelGenerationComplete({
-          connector,
-          integrationSettings,
-          durationMs: Date.now() - generationStartedAt,
-        });
-
-        const result = {
-          program: celGraphResult.results.program,
-          stateSettings: celGraphResult.results.stateSettings,
-          redactVars: celGraphResult.results.redactVars,
-        };
+        const result = apiAnalysisGraphResult.results.suggestedPaths;
 
         onComplete(result);
       } catch (e) {
@@ -97,13 +105,6 @@ export const useGeneration = ({
         const errorMessage = `${e.message}${
           e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
         }`;
-
-        reportCelGenerationComplete({
-          connector,
-          integrationSettings,
-          durationMs: Date.now() - generationStartedAt,
-          error: errorMessage,
-        });
 
         setError(errorMessage);
       } finally {

@@ -22,17 +22,17 @@ interface CelInputStepProps {
 
 export const CelInputStep = React.memo<CelInputStepProps>(
   ({ integrationSettings, connector, isGenerating }) => {
-    const { setIsGenerating, setStep, setCelInputResult } = useActions();
+    const { setIsGenerating, setStep, setCelSuggestedPaths } = useActions();
 
     const onGenerationCompleted = useCallback<OnComplete>(
-      (result: State['celInputResult']) => {
+      (result: State['celSuggestedPaths']) => {
         if (result) {
-          setCelInputResult(result);
+          setCelSuggestedPaths(result);
           setIsGenerating(false);
           setStep(6);
         }
       },
-      [setCelInputResult, setIsGenerating, setStep]
+      [setCelSuggestedPaths, setIsGenerating, setStep]
     );
     const onGenerationClosed = useCallback(() => {
       setIsGenerating(false); // aborts generation

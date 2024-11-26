@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.dataStream.analyzing', {
+export const ANALYZING = i18n.translate('xpack.integrationAssistant.step.celInput.analyzing', {
   defaultMessage: 'Analyzing',
 });
 
@@ -49,7 +49,13 @@ export const API_DEFINITION_ERROR = {
   CAN_NOT_READ: i18n.translate(
     'xpack.integrationAssistant.step.celInput.openapiSpec.errorCanNotRead',
     {
-      defaultMessage: 'Failed to read the logs sample file',
+      defaultMessage: 'Failed to read the uploaded file',
+    }
+  ),
+  INVALID_OAS: i18n.translate(
+    'xpack.integrationAssistant.step.celInput.openapiSpec.errorInvalidFormat',
+    {
+      defaultMessage: 'Uploaded file is not a valid OpenApi spec file',
     }
   ),
   CAN_NOT_READ_WITH_REASON: (reason: string) =>
@@ -69,16 +75,16 @@ export const API_DEFINITION_ERROR = {
 };
 
 export const PROGRESS_CEL_INPUT_GRAPH = i18n.translate(
-  'xpack.integrationAssistant.step.celInput.progress.relatedGraph',
+  'xpack.integrationAssistant.step.celInput.generating',
   {
-    defaultMessage: 'Generating CEL input configuration',
+    defaultMessage: 'Analyzing the uploaded API specification',
   }
 );
 
 export const GENERATION_ERROR = i18n.translate(
   'xpack.integrationAssistant.step.celInput.generationError',
   {
-    defaultMessage: 'An error occurred during: CEL input generation',
+    defaultMessage: 'An error occurred during API analysis',
   }
 );
 

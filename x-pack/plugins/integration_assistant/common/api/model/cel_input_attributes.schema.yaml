@@ -6,13 +6,41 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    ApiDefinition:
-      type: string
-      description: String form of the Open API schema.
-
-    CelInput:
+    PathOptions:
       type: object
-      description: Optional CEL input details.
+      additionalProperties: true
+
+    CelDetails:
+      type: object
+      description: Details for building a CEL program.
+      required:
+        - path
+        - auth
+      properties:
+        path:
+          type: string
+        auth: 
+          $ref: "#/components/schemas/CelAuthType"
+        openApiDetails:
+          $ref: "#/components/schemas/OpenApiDetails"
+
+    OpenApiDetails:
+      type: object
+      description: Necessary OpenAPI spec details for building a CEL program.
+      required:
+        - operation
+        - schemas
+      properties:
+        operation:
+          type: string
+        schemas: 
+          type: string
+        auth:
+          type: string
+
+    GeneratedCelDetails:
+      type: object
+      description: Generated CEL details.
       required:
         - program
         - stateSettings
@@ -27,4 +55,37 @@ components:
           type: array
           items:
             type: string
+    
+    CelInput:
+      type: object
+      description: Optional CEL input details.
+      required:
+        - authType
+        - program
+        - stateSettings
+        - redactVars
+        - url
+      properties:
+        authType:
+          $ref: "#/components/schemas/CelAuthType"  
+        program:
+          type: string
+        stateSettings:
+          type: object
+          additionalProperties: true
+        redactVars:
+          type: array
+          items:
+            type: string
+        url:
+          type: string
+
+    CelAuthType:
+      type: string
+      description: The type of auth utilized for the input.
+      enum:
+        - basic
+        - digest
+        - oauth2
+        - header
         

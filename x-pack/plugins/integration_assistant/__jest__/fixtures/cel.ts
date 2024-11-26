@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+// todo update
 export const celTestState = {
   dataStreamName: 'testDataStream',
-  apiDefinition: 'apiDefinition',
   lastExecutedChain: 'testchain',
   finalized: false,
   apiQuerySummary: 'testQuerySummary',

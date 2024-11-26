@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import Analyze API specifications API endpoint
+  version: "1"
+paths:
+  /api/integration_assistant/cel:
+    post:
+      summary: Analyzes API specifications.
+      operationId: AnalyzeApi
+      x-codegen-enabled: true
+      description: Analyzes API specifications.
+      tags:
+        - Analyze API spec
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - dataStreamName
+                - pathOptions
+                - connectorId
+              properties:
+                dataStreamName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
+                pathOptions:
+                  $ref: "../model/cel_input_attributes.schema.yaml#/components/schemas/PathOptions"
+                connectorId:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
+                langSmithOptions:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: "../model/response_schemas.schema.yaml#/components/schemas/AnalyzeApiAPIResponse"

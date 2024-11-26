@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ANALYZE_API = i18n.translate('xpack.integrationAssistant.bottomBar.analyzeApi', {
+  defaultMessage: 'Analyze API',
+});
+
 export const ANALYZE_LOGS = i18n.translate('xpack.integrationAssistant.bottomBar.analyzeLogs', {
   defaultMessage: 'Analyze logs',
 });

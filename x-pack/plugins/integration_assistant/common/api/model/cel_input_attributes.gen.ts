@@ -16,18 +16,55 @@
 
 import { z } from '@kbn/zod';
 
+export type PathOptions = z.infer<typeof PathOptions>;
+export const PathOptions = z.object({}).catchall(z.unknown());
+
 /**
- * String form of the Open API schema.
+ * The type of auth utilized for the input.
  */
-export type ApiDefinition = z.infer<typeof ApiDefinition>;
-export const ApiDefinition = z.string();
+export type CelAuthType = z.infer<typeof CelAuthType>;
+export const CelAuthType = z.enum(['basic', 'digest', 'oauth2', 'header']);
+export type CelAuthTypeEnum = typeof CelAuthType.enum;
+export const CelAuthTypeEnum = CelAuthType.enum;
+
+/**
+ * Necessary OpenAPI spec details for building a CEL program.
+ */
+export type OpenApiDetails = z.infer<typeof OpenApiDetails>;
+export const OpenApiDetails = z.object({
+  operation: z.string(),
+  schemas: z.string(),
+  auth: z.string().optional(),
+});
+
+/**
+ * Details for building a CEL program.
+ */
+export type CelDetails = z.infer<typeof CelDetails>;
+export const CelDetails = z.object({
+  path: z.string(),
+  auth: CelAuthType,
+  openApiDetails: OpenApiDetails.optional(),
+});
+
+/**
+ * Generated CEL details.
+ */
+export type GeneratedCelDetails = z.infer<typeof GeneratedCelDetails>;
+export const GeneratedCelDetails = z.object({
+  program: z.string(),
+  stateSettings: z.object({}).catchall(z.unknown()),
+  redactVars: z.array(z.string()),
+});
 
 /**
  * Optional CEL input details.
  */
 export type CelInput = z.infer<typeof CelInput>;
 export const CelInput = z.object({
+  authType: CelAuthType,
   program: z.string(),
   stateSettings: z.object({}).catchall(z.unknown()),
   redactVars: z.array(z.string()),
+  url: z.string(),
 });

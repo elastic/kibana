@@ -68,8 +68,16 @@ export const getCategorizationRequestMock = (): CategorizationRequestBody => ({
 
 export const getCelRequestMock = (): CelInputRequestBody => ({
   dataStreamName: 'test-data-stream-name',
-  apiDefinition: 'test-api-definition',
   connectorId: 'test-connector-id',
+  celDetails: {
+    path: 'test-cel-path',
+    auth: 'basic',
+    openApiDetails: {
+      operation: 'test-open-api-operation',
+      schemas: 'test-open-api-schemas',
+      auth: 'test-open-api-auth',
+    },
+  },
 });
 
 export const getBuildIntegrationRequestMock = (): BuildIntegrationRequestBody => ({

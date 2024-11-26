@@ -145,69 +145,75 @@ async function runGeneration({
   // logSamples may be modified to JSON format if they are in different formats
   // Keeping originalLogSamples for running pipeline and generating docs
   const originalLogSamples = integrationSettings.logSamples;
-  let logSamples = integrationSettings.logSamples;
-  let samplesFormat: SamplesFormat | undefined = integrationSettings.samplesFormat;
+  const logSamples = integrationSettings.logSamples;
+  const samplesFormat: SamplesFormat | undefined = integrationSettings.samplesFormat;
 
-  if (integrationSettings.samplesFormat === undefined) {
-    const analyzeLogsRequest: AnalyzeLogsRequestBody = {
-      packageName: integrationSettings.name ?? '',
-      dataStreamName: integrationSettings.dataStreamName ?? '',
-      packageTitle: integrationSettings.title ?? integrationSettings.name ?? '',
-      dataStreamTitle:
-        integrationSettings.dataStreamTitle ?? integrationSettings.dataStreamName ?? '',
-      logSamples: integrationSettings.logSamples ?? [],
-      connectorId: connector.id,
-      langSmithOptions: getLangSmithOptions(),
-    };
+  // if (integrationSettings.samplesFormat === undefined) {
+  //   const analyzeLogsRequest: AnalyzeLogsRequestBody = {
+  //     packageName: integrationSettings.name ?? '',
+  //     dataStreamName: integrationSettings.dataStreamName ?? '',
+  //     packageTitle: integrationSettings.title ?? integrationSettings.name ?? '',
+  //     dataStreamTitle:
+  //       integrationSettings.dataStreamTitle ?? integrationSettings.dataStreamName ?? '',
+  //     logSamples: integrationSettings.logSamples ?? [],
+  //     connectorId: connector.id,
+  //     langSmithOptions: getLangSmithOptions(),
+  //   };
 
-    setProgress('analyzeLogs');
-    const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
-    if (isEmpty(analyzeLogsResult?.results)) {
-      throw new Error('No results from Analyze Logs Graph');
-    }
-    logSamples = analyzeLogsResult.results.parsedSamples;
-    samplesFormat = analyzeLogsResult.results.samplesFormat;
-    additionalProcessors = analyzeLogsResult.additionalProcessors;
-  }
+  //   setProgress('analyzeLogs');
+  //   const analyzeLogsResult = await runAnalyzeLogsGraph(analyzeLogsRequest, deps);
+  //   if (isEmpty(analyzeLogsResult?.results)) {
+  //     throw new Error('No results from Analyze Logs Graph');
+  //   }
+  //   logSamples = analyzeLogsResult.results.parsedSamples;
+  //   samplesFormat = analyzeLogsResult.results.samplesFormat;
+  //   additionalProcessors = analyzeLogsResult.additionalProcessors;
+  // }
 
-  const ecsRequest: EcsMappingRequestBody = {
-    packageName: integrationSettings.name ?? '',
-    dataStreamName: integrationSettings.dataStreamName ?? '',
-    rawSamples: logSamples ?? [],
-    samplesFormat: samplesFormat ?? { name: 'json' },
-    additionalProcessors: additionalProcessors ?? [],
-    connectorId: connector.id,
-    langSmithOptions: getLangSmithOptions(),
-  };
+  // const ecsRequest: EcsMappingRequestBody = {
+  //   packageName: integrationSettings.name ?? '',
+  //   dataStreamName: integrationSettings.dataStreamName ?? '',
+  //   rawSamples: logSamples ?? [],
+  //   samplesFormat: samplesFormat ?? { name: 'json' },
+  //   additionalProcessors: additionalProcessors ?? [],
+  //   connectorId: connector.id,
+  //   langSmithOptions: getLangSmithOptions(),
+  // };
 
-  setProgress('ecs');
-  const ecsGraphResult = await runEcsGraph(ecsRequest, deps);
-  if (isEmpty(ecsGraphResult?.results)) {
-    throw new Error('No results from ECS graph');
-  }
-  const categorizationRequest: CategorizationRequestBody = {
-    ...ecsRequest,
-    rawSamples: originalLogSamples ?? [],
-    samplesFormat: samplesFormat ?? { name: 'json' },
-    currentPipeline: ecsGraphResult.results.pipeline,
-  };
+  // setProgress('ecs');
+  // const ecsGraphResult = await runEcsGraph(ecsRequest, deps);
+  // if (isEmpty(ecsGraphResult?.results)) {
+  //   throw new Error('No results from ECS graph');
+  // }
+  // const categorizationRequest: CategorizationRequestBody = {
+  //   ...ecsRequest,
+  //   rawSamples: originalLogSamples ?? [],
+  //   samplesFormat: samplesFormat ?? { name: 'json' },
+  //   currentPipeline: ecsGraphResult.results.pipeline,
+  // };
 
-  setProgress('categorization');
-  const categorizationResult = await runCategorizationGraph(categorizationRequest, deps);
-  const relatedRequest: RelatedRequestBody = {
-    ...categorizationRequest,
-    currentPipeline: categorizationResult.results.pipeline,
-  };
+  // setProgress('categorization');
+  // const categorizationResult = await runCategorizationGraph(categorizationRequest, deps);
+  // const relatedRequest: RelatedRequestBody = {
+  //   ...categorizationRequest,
+  //   currentPipeline: categorizationResult.results.pipeline,
+  // };
 
-  setProgress('related');
-  const relatedGraphResult = await runRelatedGraph(relatedRequest, deps);
-  if (isEmpty(relatedGraphResult?.results)) {
-    throw new Error('Results not found in response');
-  }
+  // setProgress('related');
+  // const relatedGraphResult = await runRelatedGraph(relatedRequest, deps);
+  // if (isEmpty(relatedGraphResult?.results)) {
+  //   throw new Error('Results not found in response');
+  // }
+
+  // return {
+  //   pipeline: relatedGraphResult.results.pipeline,
+  //   docs: relatedGraphResult.results.docs,
+  //   samplesFormat,
+  // };
 
   return {
-    pipeline: relatedGraphResult.results.pipeline,
-    docs: relatedGraphResult.results.docs,
+    pipeline: { processors: [] },
+    docs: [],
     samplesFormat,
   };
 }

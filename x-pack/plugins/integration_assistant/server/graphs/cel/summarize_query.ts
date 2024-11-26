@@ -19,7 +19,8 @@ export async function handleSummarizeQuery({
 
   const apiQuerySummary = await celSummarizeGraph.invoke({
     data_stream_name: state.dataStreamName,
-    open_api_spec: state.apiDefinition,
+    path: state.path,
+    path_details: state.openApiPathDetails,
   });
 
   return {

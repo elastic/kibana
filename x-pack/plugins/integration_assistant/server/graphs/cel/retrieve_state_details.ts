@@ -21,7 +21,7 @@ export async function handleGetStateDetails({
 
   const stateDetails = (await celConfigGraph.invoke({
     state_variables: state.stateVarNames,
-    open_api_spec: state.apiDefinition,
+    open_api_path_details: state.openApiPathDetails,
     ex_answer: EX_ANSWER_CONFIG,
   })) as CelInputStateDetails[];
 
