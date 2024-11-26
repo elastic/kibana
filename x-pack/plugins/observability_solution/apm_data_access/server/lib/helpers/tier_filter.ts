@@ -13,13 +13,13 @@ export function getDataTierFilterCombined({
   excludedDataTiers,
 }: {
   filter?: QueryDslQueryContainer;
-  excludedDataTiers: DataTier[];
+  excludedDataTiers?: DataTier[];
 }): QueryDslQueryContainer | undefined {
   if (!filter) {
     return excludedDataTiers.length > 0 ? excludeTiersQuery(excludedDataTiers)[0] : undefined;
   }
 
-  return !excludedDataTiers.length
+  return !excludedDataTiers
     ? filter
     : {
         bool: {
