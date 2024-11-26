@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
-  // This test suiteis only running in the Serverless Quality Gates environment
+  // This test suite is only running in the Serverless Quality Gates environment
   describe('Agentless API Serverless', function () {
     let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -65,6 +65,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       const agentStatusBadge = testSubjects.find('agentlessStatusBadge');
+      // The status badge could be either "Pending", "Healthy",  or "Unhealthy" so we are just checking that it exists
       expect(agentStatusBadge).to.be.ok();
     });
 

@@ -13,10 +13,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless security UI', function () {
     this.tags(['esGate']);
 
-    // loadTestFile(require.resolve('./ftr/navigation'));
-    // loadTestFile(require.resolve('./ftr/cases'));
-    // loadTestFile(require.resolve('./ftr/advanced_settings'));
-    // loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./ftr/navigation'));
+    loadTestFile(require.resolve('./ftr/cases'));
+    loadTestFile(require.resolve('./ftr/advanced_settings'));
+    loadTestFile(require.resolve('./ml'));
     if (isCloud) {
       // only run the agentless API tests in the Serverless Quality Gates
       loadTestFile(
