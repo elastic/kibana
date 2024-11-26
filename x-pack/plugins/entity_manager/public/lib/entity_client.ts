@@ -95,7 +95,7 @@ export class EntityClient {
     const identityFieldsValue = this.getIdentityFieldsValue(entityInstance);
 
     const nodes: KueryNode[] = Object.entries(identityFieldsValue).map(([identityField, value]) => {
-      return nodeTypes.function.buildNode('is', identityField, value);
+      return nodeTypes.function.buildNode('is', identityField, `"${value}"`);
     });
 
     if (nodes.length === 0) return '';
