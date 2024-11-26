@@ -8,12 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OnboardingCardContentAssetPanel } from './card_content_asset_panel';
-import { CardSelectorListItemAssetType } from '../types';
+import { CardAssetType } from '../types';
 
 describe('OnboardingCardContentAssetPanel', () => {
   const defaultProps = {
     asset: {
-      type: CardSelectorListItemAssetType.image,
+      type: CardAssetType.image,
       source: 'https://example.com/image.jpg',
       alt: 'Example image',
     },
@@ -31,7 +31,7 @@ describe('OnboardingCardContentAssetPanel', () => {
   it('renders a video when asset type is video', () => {
     const videoProps = {
       asset: {
-        type: CardSelectorListItemAssetType.video,
+        type: CardAssetType.video,
         source: 'https://example.com/video.mp4',
         alt: 'Example video',
       },

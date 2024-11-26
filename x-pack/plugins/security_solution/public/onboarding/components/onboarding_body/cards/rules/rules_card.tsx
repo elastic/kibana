@@ -19,8 +19,9 @@ import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
 import { useOnboardingContext } from '../../../onboarding_context';
-import { RULES_CARD_ITEMS_BY_ID, RULES_CARD_SELECTOR_ITEMS } from './rules_card_config';
+import { RULES_CARD_ITEMS_BY_ID, RULES_CARD_ITEMS } from './rules_card_config';
 import { DEFAULT_RULES_CARD_ITEM_SELECTED } from './constants';
+import type { CardSelectorAssetListItem } from '../types';
 
 export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpandedCardId }) => {
   const { spaceId } = useOnboardingContext();
@@ -30,7 +31,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
     spaceId,
     DEFAULT_RULES_CARD_ITEM_SELECTED.id
   );
-  const [selectedCardItem, setSelectedCardItem] = useState(
+  const [selectedCardItem, setSelectedCardItem] = useState<CardSelectorAssetListItem>(
     RULES_CARD_ITEMS_BY_ID[toggleIdSelected]
   );
   const isIntegrationsCardComplete = useMemo(
@@ -65,7 +66,7 @@ export const RulesCard: OnboardingCardComponent = ({ isCardComplete, setExpanded
           <EuiSpacer />
           <CardSelectorList
             title={i18n.RULES_CARD_STEP_SELECTOR_TITLE}
-            items={RULES_CARD_SELECTOR_ITEMS}
+            items={RULES_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />

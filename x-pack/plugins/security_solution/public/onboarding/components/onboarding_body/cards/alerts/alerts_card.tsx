@@ -18,7 +18,7 @@ import { CardCallOut } from '../common/card_callout';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
-import { ALERTS_CARD_ITEMS_BY_ID, ALERTS_CARD_SELECTOR_ITEMS } from './alerts_card_config';
+import { ALERTS_CARD_ITEMS_BY_ID, ALERTS_CARD_ITEMS } from './alerts_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { DEFAULT_ALERTS_CARD_ITEM_SELECTED } from './constants';
 
@@ -74,7 +74,7 @@ export const AlertsCard: OnboardingCardComponent = ({
           <EuiSpacer />
           <CardSelectorList
             title={i18n.ALERTS_CARD_STEP_SELECTOR_TITLE}
-            items={ALERTS_CARD_SELECTOR_ITEMS}
+            items={ALERTS_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />

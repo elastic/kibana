@@ -8,14 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import alertTimelineImageSrc from './images/alert_timeline.png';
 import sessionViewImageSrc from './images/session_view.png';
-import type { AlertsCardSelectorListItem } from './types';
 import { AlertsCardItemId } from './types';
-import { CardSelectorListItemAssetType } from '../types';
-import type { CardSelectorListItem } from '../common/card_selector_list';
+import type { CardSelectorAssetListItem } from '../types';
+import { CardAssetType } from '../types';
 
 const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
 
-export const ALERTS_CARD_ITEMS: AlertsCardSelectorListItem[] = [
+export const ALERTS_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
     id: AlertsCardItemId.list,
     title: i18n.translate('xpack.securitySolution.onboarding.alertsCards.details.title', {
@@ -28,7 +27,7 @@ export const ALERTS_CARD_ITEMS: AlertsCardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: CardSelectorListItemAssetType.video,
+      type: CardAssetType.video,
       source: VIDEO_SOURCE,
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.details.description', {
         defaultMessage: 'Sort through alerts and drill down into its details',
@@ -47,7 +46,7 @@ export const ALERTS_CARD_ITEMS: AlertsCardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: CardSelectorListItemAssetType.image,
+      type: CardAssetType.image,
       source: alertTimelineImageSrc,
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.timeline.description', {
         defaultMessage: 'Streamline alert investigation with real-time visualization',
@@ -66,7 +65,7 @@ export const ALERTS_CARD_ITEMS: AlertsCardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: CardSelectorListItemAssetType.video,
+      type: CardAssetType.video,
       source: VIDEO_SOURCE,
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.analyzer.description', {
         defaultMessage: 'Simplify alert analysis by visualizing threat detection processes',
@@ -85,7 +84,7 @@ export const ALERTS_CARD_ITEMS: AlertsCardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: CardSelectorListItemAssetType.image,
+      type: CardAssetType.image,
       source: sessionViewImageSrc,
       alt: i18n.translate('xpack.securitySolution.onboarding.alertsCards.sessionView.description', {
         defaultMessage: 'Centralized threat analysis and response with real-time data insights',
@@ -96,12 +95,4 @@ export const ALERTS_CARD_ITEMS: AlertsCardSelectorListItem[] = [
 
 export const ALERTS_CARD_ITEMS_BY_ID = Object.fromEntries(
   ALERTS_CARD_ITEMS.map((card) => [card.id, card])
-) as Record<AlertsCardSelectorListItem['id'], AlertsCardSelectorListItem>;
-
-export const ALERTS_CARD_SELECTOR_ITEMS = ALERTS_CARD_ITEMS.map<CardSelectorListItem>(
-  (alertsItem) => ({
-    id: alertsItem.id,
-    title: alertsItem.title,
-    description: alertsItem.description,
-  })
-);
+) as Record<CardSelectorAssetListItem['id'], CardSelectorAssetListItem>;

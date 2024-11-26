@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-export enum CardSelectorListItemAssetType {
+import type { CardSelectorListItem } from './common/card_selector_list';
+
+export enum CardAssetType {
   video = 'video',
   image = 'image',
 }
-
-export interface CardAssetType {
-  asset: {
-    type: CardSelectorListItemAssetType;
-    source: string;
-    alt: string;
-  };
+export interface CardAsset {
+  type: CardAssetType;
+  source: string;
+  alt: string;
+}
+export interface CardSelectorAssetListItem extends CardSelectorListItem {
+  asset: CardAsset;
 }

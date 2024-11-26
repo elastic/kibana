@@ -15,7 +15,7 @@ import { OnboardingCardContentAssetPanel } from '../common/card_content_asset_pa
 import { CardCallOut } from '../common/card_callout';
 import attackDiscoveryImageSrc from './images/attack_discovery.png';
 import * as i18n from './translations';
-import { CardSelectorListItemAssetType } from '../types';
+import { CardAssetType } from '../types';
 
 export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
   ({ isCardComplete, setExpandedCardId, setComplete }) => {
@@ -31,7 +31,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
     return (
       <OnboardingCardContentAssetPanel
         asset={{
-          type: CardSelectorListItemAssetType.image,
+          type: CardAssetType.image,
           source: attackDiscoveryImageSrc,
           alt: i18n.ATTACK_DISCOVERY_CARD_TITLE,
         }}

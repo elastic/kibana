@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type { CardSelectorListItem } from '../common/card_selector_list';
-import type { CardAssetType } from '../types';
-
 export enum RulesCardItemId {
   install = 'install',
   create = 'create',
 }
-
-export type RulesCardSelectorListItem = CardSelectorListItem & CardAssetType;

@@ -6,14 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type CardSelectorListItem } from '../common/card_selector_list';
-import type { DashboardsCardSelectorListItem } from './types';
 import { DashboardsCardItemId } from './types';
-import { CardSelectorListItemAssetType } from '../types';
+import type { CardSelectorAssetListItem } from '../types';
+import { CardAssetType } from '../types';
 
 const VIDEO_SOURCE = '//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?autoplay=1';
 
-export const DASHBOARDS_CARD_ITEMS: DashboardsCardSelectorListItem[] = [
+export const DASHBOARDS_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
     id: DashboardsCardItemId.discover,
     title: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.discover.title', {
@@ -26,7 +25,7 @@ export const DASHBOARDS_CARD_ITEMS: DashboardsCardSelectorListItem[] = [
       }
     ),
     asset: {
-      type: CardSelectorListItemAssetType.video,
+      type: CardAssetType.video,
       source: VIDEO_SOURCE,
       alt: i18n.translate('xpack.securitySolution.onboarding.dashboardsCard.discover.description', {
         defaultMessage: 'Quickly add and enable the rules you need with Elastic’s prebuilt rules',
@@ -37,12 +36,4 @@ export const DASHBOARDS_CARD_ITEMS: DashboardsCardSelectorListItem[] = [
 
 export const DASHBOARDS_CARD_ITEMS_BY_ID = Object.fromEntries(
   DASHBOARDS_CARD_ITEMS.map((card) => [card.id, card])
-) as Record<DashboardsCardSelectorListItem['id'], DashboardsCardSelectorListItem>;
-
-export const DASHBOARDS_CARD_SELECTOR_ITEMS = DASHBOARDS_CARD_ITEMS.map<CardSelectorListItem>(
-  (dashboardsItem) => ({
-    id: dashboardsItem.id,
-    title: dashboardsItem.title,
-    description: dashboardsItem.description,
-  })
-);
+) as Record<CardSelectorAssetListItem['id'], CardSelectorAssetListItem>;

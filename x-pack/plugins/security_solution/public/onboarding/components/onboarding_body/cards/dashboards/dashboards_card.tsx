@@ -17,10 +17,7 @@ import { CardLinkButton } from '../common/card_link_button';
 import * as i18n from './translations';
 import type { CardSelectorListItem } from '../common/card_selector_list';
 import { CardSelectorList } from '../common/card_selector_list';
-import {
-  DASHBOARDS_CARD_ITEMS_BY_ID,
-  DASHBOARDS_CARD_SELECTOR_ITEMS,
-} from './dashboards_card_config';
+import { DASHBOARDS_CARD_ITEMS_BY_ID, DASHBOARDS_CARD_ITEMS } from './dashboards_card_config';
 import { useOnboardingContext } from '../../../onboarding_context';
 import { DEFAULT_DASHBOARDS_CARD_ITEM_SELECTED } from './constants';
 
@@ -69,7 +66,7 @@ export const DashboardsCard: OnboardingCardComponent = ({
           </EuiText>
           <EuiSpacer />
           <CardSelectorList
-            items={DASHBOARDS_CARD_SELECTOR_ITEMS}
+            items={DASHBOARDS_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
           />

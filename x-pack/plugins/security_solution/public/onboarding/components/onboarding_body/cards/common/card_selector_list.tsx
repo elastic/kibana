@@ -18,10 +18,10 @@ export interface CardSelectorListItem {
   description: string;
 }
 
-interface CardSelectorListProps {
-  items: CardSelectorListItem[];
-  onSelect: (item: CardSelectorListItem) => void;
-  selectedItem: CardSelectorListItem;
+export interface CardSelectorListProps<T extends CardSelectorListItem> {
+  items: T[];
+  onSelect: (item: T) => void;
+  selectedItem: T;
   title?: string;
 }
 
@@ -34,8 +34,13 @@ const scrollToSelectedItem = (cardId: string) => {
   }, HEIGHT_ANIMATION_DURATION + 250);
 };
 
-export const CardSelectorList = React.memo<CardSelectorListProps>(
-  ({ items, onSelect, selectedItem, title }) => {
+export const CardSelectorList = React.memo(
+  <T extends CardSelectorListItem>({
+    items,
+    onSelect,
+    selectedItem,
+    title,
+  }: CardSelectorListProps<T>) => {
     const styles = useCardSelectorListStyles();
 
     useEffect(() => {

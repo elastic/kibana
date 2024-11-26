@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import type { CardSelectorListItem } from '../common/card_selector_list';
-import type { CardAssetType } from '../types';
-
 export enum AlertsCardItemId {
   list = 'list',
   timeline = 'timeline',
   analyzer = 'analyzer',
   sessionView = 'session_view',
 }
-
-export type AlertsCardSelectorListItem = CardSelectorListItem & CardAssetType;
