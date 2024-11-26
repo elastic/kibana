@@ -7464,6 +7464,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/streams-plugin@link:x-pack/plugins/streams":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthetics-e2e@link:x-pack/plugins/observability_solution/synthetics/e2e":
   version "0.0.0"
   uid ""

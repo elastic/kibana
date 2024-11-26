@@ -27,9 +27,9 @@ export function k8sStatefulSetEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
-      'entity.type': 'stateful_set',
+      'entity.definition_id': 'stateful_set',
+      'entity.type': 'statefulset',
       'kubernetes.statefulset.name': name,
-      'kubernetes.statefulset.uid': uid,
       'kubernetes.namespace': clusterName,
       'entity.id': entityId,
       ...others,
@@ -37,7 +37,8 @@ export function k8sStatefulSetEntity({
   }
 
   return new K8sEntity(schema, {
-    'entity.type': 'stateful_set',
+    'entity.definition_id': 'stateful_set',
+    'entity.type': 'statefulset',
     'k8s.statefulset.name': name,
     'k8s.statefulset.uid': uid,
     'k8s.cluster.name': clusterName,
