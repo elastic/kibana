@@ -20,8 +20,8 @@ interface Props {
 
 export const EntityActions = ({ entity, setShowActions }: Props) => {
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
-  const actionButtonTestSubject = entity.identifyingValue
-    ? `inventoryEntityActionsButton-${entity.identifyingValue}`
+  const actionButtonTestSubject = entity.entityDisplayName
+    ? `inventoryEntityActionsButton-${entity.entityDisplayName}`
     : 'inventoryEntityActionsButton';
 
   const { getDiscoverEntitiesRedirectUrl, isEntityDefinitionLoading } = useDiscoverRedirect(entity);
@@ -37,8 +37,8 @@ export const EntityActions = ({ entity, setShowActions }: Props) => {
   if (!isEntityDefinitionLoading) {
     actions.push(
       <EuiContextMenuItem
-        data-test-subj="inventoryEntityActionOpenInDiscover"
-        key={`openInDiscover-${entity.identifyingValue}`}
+        data-test-subj="inventoryEntityActionExploreInDiscover"
+        key={`exploreInDiscover-${entity.entityDisplayName}`}
         color="text"
         icon="discoverApp"
         href={discoverUrl}
