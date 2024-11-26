@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import type { RuleUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
-import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
+import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
+import { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ActionRequiredBadge } from '../badges/action_required';
 import { ReviewRequiredBadge } from '../badges/review_required_badge';
 import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';

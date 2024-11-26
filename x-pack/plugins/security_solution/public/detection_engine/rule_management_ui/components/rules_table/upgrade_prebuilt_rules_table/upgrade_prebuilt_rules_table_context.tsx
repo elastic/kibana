@@ -13,24 +13,24 @@ import type {
   RuleUpgradeInfoForReview,
   RuleUpgradeSpecifier,
 } from '../../../../../../common/api/detection_engine';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import type {
+  RuleUpgradeState,
+  RulesUpgradeState,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import { RuleUpgradeTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_tab';
+import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type {
   RuleResponse,
   RuleSignatureId,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
-import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { TabContentPadding } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import { usePerformUpgradeSpecificRules } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_upgrade';
 import { usePrebuiltRulesUpgradeReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_upgrade_review';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { RuleUpgradeConflictsResolverTab } from '../../../../rule_management/components/rule_details/three_way_diff/rule_upgrade_conflicts_resolver_tab';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import type {
-  RuleUpgradeState,
-  RulesUpgradeState,
-} from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { FieldUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade/field_upgrade_state';
 import { isNonUpgradeableFieldName } from '../../../../rule_management/model/prebuilt_rule_upgrade/fields';
 import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
@@ -335,7 +335,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       // conflicts, only accept the target rule.
       if (isPrebuiltRulesCustomizationEnabled && !hasRuleTypeChange) {
         updateTabContent = (
-          <RuleUpgradeConflictsResolverTab
+          <RuleUpgradeTab
             ruleUpgradeState={ruleUpgradeState}
             setRuleFieldResolvedValue={setRuleFieldResolvedValue}
           />

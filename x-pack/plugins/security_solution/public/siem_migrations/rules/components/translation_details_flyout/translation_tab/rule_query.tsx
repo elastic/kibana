@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiMarkdownEditor, EuiMarkdownFormat, EuiTitle } from '@elastic/eui';
-import { SideHeader } from '../../../../../detection_engine/rule_management/components/rule_details/three_way_diff/components/side_header';
 import * as i18n from './translations';
 
 interface RuleQueryProps {
@@ -34,11 +33,9 @@ export const RuleQueryComponent = ({ title, query, canEdit }: RuleQueryProps) =>
   }, [canEdit, query]);
   return (
     <>
-      <SideHeader>
-        <EuiTitle size="xxs">
-          <h3>{title}</h3>
-        </EuiTitle>
-      </SideHeader>
+      <EuiTitle size="xxs">
+        <h3>{title}</h3>
+      </EuiTitle>
       {queryTextComponent}
     </>
   );

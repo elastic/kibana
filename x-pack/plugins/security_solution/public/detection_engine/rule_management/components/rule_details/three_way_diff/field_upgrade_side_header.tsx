@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-export function SideHeader({ children }: PropsWithChildren<{}>) {
+export function FieldUpgradeSideHeader({ children }: PropsWithChildren<{}>) {
   const { euiTheme } = useEuiTheme();
 
   return (

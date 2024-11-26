@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './rule_upgrade_callout';
+export * from './rule_upgrade';

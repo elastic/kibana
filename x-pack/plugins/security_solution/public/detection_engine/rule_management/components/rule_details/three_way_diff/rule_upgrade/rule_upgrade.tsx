@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
-import { FieldUpgradeConflictsResolver } from './field_upgrade_conflicts_resolver';
 import type { NonUpgradeableDiffableFields } from '../../../../model/prebuilt_rule_upgrade/fields';
 import { isNonUpgradeableFieldName } from '../../../../model/prebuilt_rule_upgrade/fields';
+import { RuleUpgradeInfoBar } from './rule_upgrade_info_bar';
+import { RuleUpgradeCallout } from './rule_upgrade_callout';
+import { FieldUpgrade } from './field_upgrade';
 
 type FieldDiffEntries<FieldsDiff, ExcludedFields extends keyof FieldsDiff = never> = Array<
   [
@@ -18,13 +21,11 @@ type FieldDiffEntries<FieldsDiff, ExcludedFields extends keyof FieldsDiff = neve
   ]
 >;
 
-interface RuleUpgradeConflictsResolverProps {
+interface RuleUpgradeProps {
   ruleUpgradeState: RuleUpgradeState;
 }
 
-export function RuleUpgradeConflictsResolver({
-  ruleUpgradeState,
-}: RuleUpgradeConflictsResolverProps): React.ReactNode {
+export function RuleUpgrade({ ruleUpgradeState }: RuleUpgradeProps): React.ReactNode {
   const fieldDiffEntries = Object.entries(ruleUpgradeState.diff.fields) as FieldDiffEntries<
     typeof ruleUpgradeState.diff.fields
   >;
@@ -33,12 +34,21 @@ export function RuleUpgradeConflictsResolver({
     return isNonUpgradeableFieldName(fieldName) === false;
   }) as FieldDiffEntries<typeof ruleUpgradeState.diff.fields, NonUpgradeableDiffableFields>;
 
-  return fields.map(([fieldName, fieldDiff]) => (
-    <FieldUpgradeConflictsResolver
-      key={fieldName}
-      fieldName={fieldName}
-      fieldUpgradeState={ruleUpgradeState.fieldsUpgradeState[fieldName]}
-      fieldThreeWayDiff={fieldDiff}
-    />
-  ));
+  return (
+    <>
+      <EuiSpacer size="s" />
+      <RuleUpgradeInfoBar ruleUpgradeState={ruleUpgradeState} />
+      <EuiSpacer size="s" />
+      <RuleUpgradeCallout ruleUpgradeState={ruleUpgradeState} />
+      <EuiSpacer size="s" />
+      {fields.map(([fieldName, fieldDiff]) => (
+        <FieldUpgrade
+          key={fieldName}
+          fieldName={fieldName}
+          fieldUpgradeState={ruleUpgradeState.fieldsUpgradeState[fieldName]}
+          fieldThreeWayDiff={fieldDiff}
+        />
+      ))}
+    </>
+  );
 }
