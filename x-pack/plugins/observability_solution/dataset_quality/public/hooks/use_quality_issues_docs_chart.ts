@@ -22,25 +22,10 @@ import { useDatasetDetailsTelemetry } from './use_dataset_details_telemetry';
 import { useDatasetDetailsRedirectLinkTelemetry } from './use_redirect_link_telemetry';
 import { QualityIssue } from '../state_machines/dataset_quality_details_controller';
 
-const exploreDataInLogsExplorerText = i18n.translate(
-  'xpack.datasetQuality.details.chartExploreDataInLogsExplorerText',
-  {
-    defaultMessage: 'Explore data in Logs Explorer',
-  }
-);
-
-const exploreDataInDiscoverText = i18n.translate(
-  'xpack.datasetQuality.details.chartExploreDataInDiscoverText',
-  {
-    defaultMessage: 'Explore data in Discover',
-  }
-);
-
 const openInLensText = i18n.translate('xpack.datasetQuality.details.chartOpenInLensText', {
   defaultMessage: 'Open in Lens',
 });
 
-const ACTION_EXPLORE_IN_LOGS_EXPLORER = 'ACTION_EXPLORE_IN_LOGS_EXPLORER';
 const ACTION_OPEN_IN_LENS = 'ACTION_OPEN_IN_LENS';
 const DEGRADED_DOCS_KUERY = `_ignored:*`;
 
@@ -193,32 +178,7 @@ export const useQualityIssuesDocsChart = () => {
     sendTelemetry,
   });
 
-  const getOpenInLogsExplorerAction = useMemo(() => {
-    return {
-      id: ACTION_EXPLORE_IN_LOGS_EXPLORER,
-      type: 'link',
-      getDisplayName(): string {
-        return redirectLinkProps?.isLogsExplorerAvailable
-          ? exploreDataInLogsExplorerText
-          : exploreDataInDiscoverText;
-      },
-      getHref: async () => {
-        return redirectLinkProps.linkProps.href;
-      },
-      getIconType(): string | undefined {
-        return 'visTable';
-      },
-      async isCompatible(): Promise<boolean> {
-        return true;
-      },
-      async execute(): Promise<void> {
-        return redirectLinkProps.navigate();
-      },
-      order: 18,
-    };
-  }, [redirectLinkProps]);
-
-  const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
+  const extraActions: Action[] = [getOpenInLensAction];
 
   const breakdown = useMemo(() => {
     return {
