@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
@@ -14,21 +14,22 @@ interface FormFieldsProps {
 }
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({ isSubmitting }) => {
+  const newLocal = useMemo(
+    () => ({
+      euiFieldProps: {
+        'data-test-subj': 'observable-type-label-input',
+        fullWidth: true,
+        autoFocus: true,
+        isLoading: isSubmitting,
+      },
+    }),
+    [isSubmitting]
+  );
+
   return (
     <>
       <UseField path="key" component={HiddenField} />
-      <UseField
-        path="label"
-        component={TextField}
-        componentProps={{
-          euiFieldProps: {
-            'data-test-subj': 'observable-type-label-input',
-            fullWidth: true,
-            autoFocus: true,
-            isLoading: isSubmitting,
-          },
-        }}
-      />
+      <UseField path="label" component={TextField} componentProps={newLocal} />
     </>
   );
 };
