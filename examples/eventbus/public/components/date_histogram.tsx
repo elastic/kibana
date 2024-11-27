@@ -64,35 +64,26 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
     state.actions.setCrossfilter({ id: iframeID, filter });
   }, 50);
 
-  const esqlContext = useMemo(() => {
-    if (esql === '') return null;
-
-    const els = esql.split('|').map((d) => d.trim());
-    els.push(
-      `STATS count = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
-    );
-
-    return els.join('\n| ');
-  }, [esql, field]);
-
   const esqlWithFilters = useMemo(() => {
     if (esql === '') return null;
 
     const els = esql.split('|').map((d) => d.trim());
-    Object.values(panelFilters).forEach((filter) => {
-      els.splice(1, 0, `WHERE ${filter}`);
-    });
 
-    els.push(
-      `STATS count = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
-    );
+    if (Object.values(panelFilters).length === 0) {
+      els.push(
+        `STATS count = COUNT(*), context = COUNT(*) WHERE ${field}=="1970-01-01T00:00:00.000Z", total = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
+      );
+    } else {
+      const filter = Object.values(panelFilters).join(' AND ');
+      els.push(
+        `STATS count = COUNT(*) WHERE ${filter}, context = COUNT(*) WHERE NOT(${filter}), total = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
+      );
+    }
 
     return els.join('\n| ');
   }, [esql, field, panelFilters]);
 
-  const rawDataContext = useFetchESQL(esqlContext);
   const rawDataWithFilters = useFetchESQL(esqlWithFilters);
-  // console.log('date histogram raw data', rawData);
 
   const [initialized, setInitialized] = React.useState(false);
   const wrapperRef = React.useRef(null);
@@ -101,38 +92,26 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
   // https://observablehq.com/@vega/vega-lite-api
 
   const data = React.useMemo(() => {
-    function transformData(rawData: ESQLSearchResponse) {
-      return rawData.values.map((row) => {
-        return row.reduce((acc, val, idx) => {
-          acc[rawData.columns[idx].name.replace(/\./g, '_')] = val;
-          return acc;
-        }, {});
-      });
+    if (!rawDataWithFilters) {
+      return null;
     }
 
-    const wideFormatFull = rawDataContext ? transformData(rawDataContext) : null;
-    const crossfilter = rawDataWithFilters ? transformData(rawDataWithFilters) : null;
-
-    if (wideFormatFull === null || crossfilter === null) {
-      return [];
-    }
-
-    return [
-      // crossfilter
-      ...crossfilter.map((d) => ({
-        ...d,
+    const longFormat = rawDataWithFilters.values.reduce((acc, val, idx) => {
+      acc.push({
+        date: val[3],
+        count: val[0],
         type: 'crossfilter',
-        typeOrder: 0,
-      })),
-      // global
-      ...wideFormatFull.map((d, i) => ({
-        ...d,
-        count: d.count - (crossfilter.find((d2) => d2.date === d.date)?.count ?? 0),
+      });
+      acc.push({
+        date: val[3],
+        count: val[1],
         type: 'context',
-        typeOrder: 1,
-      })),
-    ];
-  }, [rawDataContext, rawDataWithFilters]);
+      });
+      return acc;
+    }, []);
+
+    return longFormat;
+  }, [rawDataWithFilters]);
 
   React.useEffect(() => {
     if (vegaRef.current) {
@@ -153,7 +132,6 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
         // Vega-Lite default configuration
       },
       init: (view) => {
-        // console.log('init', view);
         vegaRef.current = view;
         // initialize tooltip handler
         view.tooltip(new vegaTooltip.Handler().call);
