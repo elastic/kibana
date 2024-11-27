@@ -62,7 +62,7 @@ function generationErrorMessage(
     if (body.attributes.errorMessageWithLink !== undefined) {
       return {
         link: body.attributes.errorMessageWithLink.link,
-        errorMessage: i18n.DECODE_CEF_LINK,
+        errorMessage: `${i18n.DECODE_CEF_LINK}`,
         linkText: body.attributes.errorMessageWithLink.linkText,
       };
     }
