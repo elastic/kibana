@@ -537,6 +537,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
@@ -719,6 +720,7 @@
     "revision",
     "secret_references",
     "secret_references.id",
+    "supports_agentless",
     "updated_at",
     "updated_by",
     "vars"
