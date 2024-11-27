@@ -287,6 +287,6 @@ AnomaliesTableInternal.propTypes = {
   influencerFilter: PropTypes.func,
   tableState: PropTypes.object.isRequired,
   updateTableState: PropTypes.func.isRequired,
-  sourceIndicesWithGeoFields: PropTypes.object.isRequired,
+  sourceIndicesWithGeoFields: PropTypes.object,
   selectedJobs: PropTypes.array.isRequired,
 };

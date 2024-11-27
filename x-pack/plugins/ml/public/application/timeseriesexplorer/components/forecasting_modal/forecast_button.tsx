@@ -13,11 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 interface Props {
   isDisabled: boolean;
   onClick: () => void;
-  mode: 'full' | 'empty';
+  emptyMode: boolean;
 }
 
-export const ForecastButton: FC<Props> = ({ isDisabled, onClick, mode = 'full' }) => {
-  const Button = mode === 'full' ? EuiButton : EuiButtonEmpty;
+export const ForecastButton: FC<Props> = ({ isDisabled, onClick, emptyMode }) => {
+  const Button = emptyMode ? EuiButtonEmpty : EuiButton;
   return (
     <Button
       onClick={onClick}

@@ -34,7 +34,6 @@ import type { AnomalyTimelineService } from '../application/services/anomaly_tim
 import type { MlFieldFormatService } from '../application/services/field_format_service';
 import type { MlApi } from '../application/services/ml_api_service';
 import type { MlResultsService } from '../application/services/results_service';
-import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
 import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type {
@@ -245,7 +244,6 @@ export interface SingleMetricViewerServices {
   mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
-  mlTimeSeriesSearchService?: MlTimeSeriesSearchService;
   mlTimeSeriesExplorerService?: TimeSeriesExplorerService;
   toastNotificationService?: ToastNotificationService;
 }

@@ -28,8 +28,6 @@ export const getMlServices = async (
     { mlApiProvider },
     { mlResultsServiceProvider },
     { MlCapabilitiesService },
-    { timeSeriesSearchServiceFactory },
-    { toastNotificationServiceProvider },
     { mlJobServiceFactory },
   ] = await Promise.all([
     await import('../../application/services/anomaly_detector_service'),
@@ -39,20 +37,14 @@ export const getMlServices = async (
     await import('../../application/services/ml_api_service'),
     await import('../../application/services/results_service'),
     await import('../../application/capabilities/check_capabilities'),
-    await import(
-      '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
-    ),
-    await import('../../application/services/toast_notification_service'),
     await import('../../application/services/job_service'),
   ]);
 
   const httpService = new HttpService(coreStart.http);
   const anomalyDetectorService = new AnomalyDetectorService(httpService);
   const mlApi = mlApiProvider(httpService);
-  const toastNotificationService = toastNotificationServiceProvider(coreStart.notifications.toasts);
   const mlJobService = mlJobServiceFactory(mlApi);
   const mlResultsService = mlResultsServiceProvider(mlApi);
-  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApi);
   const mlTimeSeriesExplorerService = timeSeriesExplorerServiceFactory(
     coreStart.uiSettings,
     mlApi,
@@ -82,9 +74,7 @@ export const getMlServices = async (
     mlCapabilities,
     mlFieldFormatService,
     mlResultsService,
-    mlTimeSeriesSearchService,
     mlTimeSeriesExplorerService,
-    toastNotificationService,
   };
 };
 
