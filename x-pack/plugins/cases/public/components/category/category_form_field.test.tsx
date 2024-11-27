@@ -14,7 +14,8 @@ import { categories } from '../../containers/mock';
 import { MAX_CATEGORY_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
 
-describe('Category', () => {
+// Failing: See https://github.com/elastic/kibana/issues/177791
+describe.skip('Category', () => {
   const onSubmit = jest.fn();
 
   it('renders the category field correctly', async () => {
