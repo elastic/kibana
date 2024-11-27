@@ -101,14 +101,11 @@ you make the necessary updates after you upgrade to 8.17.0.
       
 [discrete]
 [[deprecation-197227]]
-* Remove `metrics:allowCheckingForFailedShards` Advanced Setting.
+.Removes `metrics:allowCheckingForFailedShards` advanced setting.
 [%collapsible]
 ====
 *Details* +
-!!TODO!! For more information, refer to ({kibana-pull}197227[#197227]).
-
-*Impact* +
-!!TODO!!
+The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With ths change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
 ====
       
 [float]
@@ -117,93 +114,61 @@ you make the necessary updates after you upgrade to 8.17.0.
 {kib} 8.17.0 adds the following new and notable features.
 
 Alerting::
+* The Case action is now GA ({kibana-pull}196972[#196972]).
 * Files can now be attached to cases directly via API ({kibana-pull}198377[#198377]).
 Data ingestion and Fleet::
-* Expose advanced file logging config in UI ({kibana-pull}200274[#200274]).
-Discover::
-* Starred queries in the editor ({kibana-pull}198362[#198362]).
-* Keeps the preferred chart configuration when possible ({kibana-pull}197453[#197453]).
+* Exposes advanced file logging configuration in the UI ({kibana-pull}200274[#200274]).
+Dashboards and visualizations::
+* AIOps: Adds Log Rate Analysis embeddable for dashboards ({kibana-pull}197943[#197943]).
+Discover and ES|QL::
+* Keeps the preferred chart configuration when possible when writing ES|QL queries in Discover ({kibana-pull}197453[#197453]).
+ES|QL::
+* Adds the ability to star queries in the ES|QL editor ({kibana-pull}198362[#198362]).
 Elastic Observability solution::
-* Show monitors from all permitted spaces !! ({kibana-pull}196109[#196109]).
+* Adds ability to show monitors from all permitted spaces in a single view in Synthetics ({kibana-pull}196109[#196109]).
 * Adds fix it flow for field limit ({kibana-pull}195561[#195561]).
-* New cases subfeatures, add comments and reopen cases ({kibana-pull}194898[#194898]).
+* Adds permissions to reopen and add comments to cases ({kibana-pull}194898[#194898]).
+* Adds built-in definitions for core Kubernetes entities ({kibana-pull}196916[#196916]).
 Elastic Security solution::
 For the Elastic Security 8.17.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
-* When running in FIPS mode, Kibana will forbid usage of PKCS12 configuration options ({kibana-pull}192627[#192627]).
-Machine Learning::
-* AIOps: Adds Log Rate Analysis embeddable for dashboards ({kibana-pull}197943[#197943]).
-Platform::
-* Adds ESLINT constraints to detect inter-group dependencies ({kibana-pull}194810[#194810]).
-Other::
 * Kibana's FIPS mode is no longer considered experimental ({kibana-pull}200734[#200734]).
-* Adds built in definitions for core Kubernetes entities ({kibana-pull}196916[#196916]).
+* When running in FIPS mode, Kibana now forbids usage of PKCS12 configuration options ({kibana-pull}192627[#192627]).
 
 For more information about the features introduced in 8.17.0, refer to <<whats-new,What's new in 8.17>>.
 
 [[enhancements-and-bug-fixes-v8.17.0]]
 === Enhancements and bug fixes
 
-For detailed information about the 8.17.0 release, review the enhancements and bug fixes.
-
-[float]
-[[deprecation-v8.17.0]]
-=== Deprecations
-[discrete]
-[[deprecation-197936]]
-* Changes deprecated SO HTTP APIs deprecation field to object.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}197936[#197936]).
-
-*Impact* +
-!!TODO!!
-====
-      
-[discrete]
-[[deprecation-197227]]
-* Remove `metrics:allowCheckingForFailedShards` Advanced Setting.
-[%collapsible]
-====
-*Details* +
-!!TODO!! For more information, refer to ({kibana-pull}197227[#197227]).
-
-*Impact* +
-!!TODO!!
-====
-      
+For detailed information about the 8.17.0 release, review the enhancements and bug fixes.   
 
 [float]
 [[enhancement-v8.17.0]]
 === Enhancements
-Alerting::
-* The case action is now GA ({kibana-pull}196972[#196972]).
 Dashboards & Visualizations::
-* [ES|QL] Allow creating a dashboard with ES|QL chart even when there are no dataviews ({kibana-pull}196658[#196658]).
-* Newly and default configured Lens line charts are now interpolated by default with a straight Linear interpolation. in *Lens* ({kibana-pull}196184[#196184]).
+* Allows creating a dashboard with ES|QL chart even when there are no data views ({kibana-pull}196658[#196658]).
+* Newly and default configured Lens line charts are now interpolated by default with a straight linear interpolation in *Lens* ({kibana-pull}196184[#196184]).
+* Simplifies access to some actions when hovering over panels ({kibana-pull}182535[#182535]).
+* Improves URL drilldown authoring experience ({kibana-pull}197454[#197454]).
 Data ingestion and Fleet::
-* Filter integrations/packages list shown depending on the `policy_templates_behavior` field ({kibana-pull}200605[#200605]).
-* Adds <type>@custom component template to integrations index te… ({kibana-pull}192731[#192731]).
+* Filters integrations/packages list shown depending on the `policy_templates_behavior` field ({kibana-pull}200605[#200605]).
+* Adds a `<type>@custom` component template to integrations index template's `composed_of` array ({kibana-pull}192731[#192731]).
 Discover::
-* Don't suggest unsupported fields ({kibana-pull}200544[#200544]).
-* Adds autocomplete and validation to support MATCH and QSRT ({kibana-pull}199032[#199032]).
-* Enable drag&drop for grid columns ({kibana-pull}197832[#197832]).
+* Enables drag & drop for reordering columns in Discover ({kibana-pull}197832[#197832]).
+ES|QL::
+* Prevents suggestions with unsupported fields when writing ES|QL queries ({kibana-pull}200544[#200544]).
+* Adds autocomplete and validation to support MATCH and QSRT when writing ES|QL queries ({kibana-pull}199032[#199032]).
 Elastic Observability solution::
-* Support querying `semantic_text` fields in search connectors ({kibana-pull}200184[#200184]).
+* Supports querying `semantic_text` fields in search connectors ({kibana-pull}200184[#200184]).
 * Adds retry statements as an attempt to resolve flaky tests ({kibana-pull}200022[#200022]).
-* Change host.hostname to host.name in java metrics query ({kibana-pull}199208[#199208]).
-* Improve analyzer by filtering unsuitable tokens ({kibana-pull}197868[#197868]).
-* Use `semantic_text` for internal knowledge base ({kibana-pull}186499[#186499]).
+* Changes `host.hostname` to `host.name` in java metrics query ({kibana-pull}199208[#199208]).
+* Improves analyzer by filtering unsuitable tokens ({kibana-pull}197868[#197868]).
+* Uses `semantic_text` for internal knowledge base ({kibana-pull}186499[#186499]).
 Elastic Security solution::
 For the Elastic Security 8.17.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Kibana security::
-* Superuser privileges ({kibana-pull}196586[#196586]).
-////
-!!TODO!! The above PR had a lengthy release note description:
-Introduced explicit configuration for routes that require superuser access. Moved `api/encrypted_saved_objects/_rotate_key` endpoint to the new configuration.
-////
-* Enforce standard on API Actions definitions by separating operations and subjects ({kibana-pull}193140[#193140]).
+* Introduces explicit configuration for routes that require superuser access and moves the `api/encrypted_saved_objects/_rotate_key` endpoint to the new configuration. ({kibana-pull}196586[#196586]).
+* Enforces standard on API Actions definitions by separating operations and subjects ({kibana-pull}193140[#193140]).
 Machine Learning::
 * AIOps: Adds action for adding Log Rate analysis embeddable to a dashboard ({kibana-pull}200557[#200557]).
 * AIOps: Adds action for adding Log Pattern embeddable to a dashboard and case ({kibana-pull}199478[#199478]).
@@ -211,51 +176,45 @@ Machine Learning::
 * File upload: Adds deployment initialization step ({kibana-pull}198446[#198446]).
 * Data visualizer: Changes refresh button in Data View and Data Drift view to indicate an update is pending ({kibana-pull}196537[#196537]).
 * Anomaly Detection: Adds never expire option to forecast creation modal ({kibana-pull}195151[#195151]).
-Sharing::
-* Hover actions for panels ({kibana-pull}182535[#182535]).
+Kibana platform::
+* When attempting to save an object with a name that already exists, the name is automatically appended with a suffix to make it unique ({kibana-pull}198777[#198777]).
 
 [float]
 [[fixes-v8.17.0]]
 === Bug fixes
 Dashboards & Visualizations::
-* Prevent identical include and exclude values in *Lens* ({kibana-pull}197628[#197628]).
-* Improve URL drilldown authoring experience ({kibana-pull}197454[#197454]).
-* [Expressions] Fixes react Error When Rendering Recoverable Error in *Lens* ({kibana-pull}196285[#196285]).
+* Prevents identical include and exclude values in *Lens* ({kibana-pull}197628[#197628]).
+* Fixes react Error When Rendering Recoverable Error in *Lens* ({kibana-pull}196285[#196285]).
+* Fixes an issue allowing to save a dashboard while there were no pending changes. The button is now disabled if there are no changes to save ({kibana-pull}196137[#196137]).
+* Fixes an issue in Lens where the table exported did not match what was visible in the UI. ({kibana-pull}193780[#193780]).
 Data ingestion and Fleet::
-* Allow to create integration policy with no agent policies ({kibana-pull}201051[#201051]).
+* Allows to create integration policy with no agent policies ({kibana-pull}201051[#201051]).
 Discover::
-* Address chart performance issues for non-transformational and non-time-based ES|QL queries ({kibana-pull}200583[#200583]).
-* Respect system dark mode in ESQL editor ({kibana-pull}200233[#200233]).
+* Addresses chart performance issues for non-transformational and non-time-based ES|QL queries ({kibana-pull}200583[#200583]).
+ES|QL::
+* Fixes an issue causing the the ES|QL editor to incorrectly use the light theme in some cases ({kibana-pull}200233[#200233]).
 Elastic Observability solution::
-* Obs AI Assistant Fetch user instructions using user_id ({kibana-pull}200137[#200137]).
-* Include an AdHoc instruction about the slack connector to avoid executing a loop ({kibana-pull}199531[#199531]).
-* Update the word "chat" to "conversation" across the UI ({kibana-pull}199216[#199216]).
-* Remove the copy button if there is no content to copy ({kibana-pull}199064[#199064]).
-* Fix(slo): handle custom DSL query filters ({kibana-pull}198073[#198073]).
-* Fixes error when opening an old conversation ({kibana-pull}197745[#197745]).
-* Use subfeature permissions for Labs settings ({kibana-pull}197092[#197092]).
-* Input box can be resized off-screen (elastic ({kibana-pull}197063[#197063]).
-* Use `telemetry.sdk` as a fallback for missing `agent.name` on non-tracing data ({kibana-pull}196529[#196529]).
-* Attempt to resolve flaky knowledge based user instructions test ({kibana-pull}196026[#196026]).
-* Handle private locations simultaneous edits !! ({kibana-pull}195874[#195874]).
-* Adds uuid to knowledge base entries to avoid overwriting accidentally ({kibana-pull}191043[#191043]).
+* Fixes incorrect Y-axis and hover values in log rate chart on service overview ({kibana-pull}201361[#201361]).
+* Observability AI Assistant: Fetch user instructions using the user ID instead of the username ({kibana-pull}200137[#200137]).
+* Observability AI Assistant: Adds instructions about the slack connector to avoid executing a loop ({kibana-pull}199531[#199531]).
+* Observability AI Assistant: Updates the term "chat" to "conversation" across the UI ({kibana-pull}199216[#199216]).
+* Observability AI Assistant: Removes the "Copy" button if there is no content to copy ({kibana-pull}199064[#199064]).
+* Observability AI Assistant: Adds uuid to knowledge base entries to avoid accidental overrides ({kibana-pull}191043[#191043]).
+* Observability AI Assistant: Fixes error when opening an old conversation ({kibana-pull}197745[#197745]).
+* Observability AI Assistant: Allows the input box to be resized off-screen ({kibana-pull}197063[#197063]).
+* SLOs: Handle custom DSL query filters ({kibana-pull}198073[#198073]).
+* Enables sub-feature permissions to edit Labs settings ({kibana-pull}197092[#197092]).
+* Uses `telemetry.sdk` as a fallback for missing `agent.name` on non-tracing data ({kibana-pull}196529[#196529]).
+* Adds support for simultaneous edits for private locations in Synthetics({kibana-pull}195874[#195874]).
 Elastic Security solution::
 For the Elastic Security 8.17.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Kibana platform::
-* Fix: make panel top nav menu item button full width on mobile ({kibana-pull}200823[#200823]).
-* Feat: SavedObjectSaveModal - add postfix if the title is duplicated ({kibana-pull}198777[#198777]).
-* Fix: updating dashboard - initial save button state is "disabled" ({kibana-pull}196137[#196137]).
 Machine Learning::
-* Adds query guardrails and technical preview badge to ES|QL data visualizer ({kibana-pull}200325[#200325]).
-* AIOps: fixes time range filter in change point chart ({kibana-pull}200183[#200183]).
-* Anomaly detection: Adds spacer below split card chart in job wizard ({kibana-pull}199708[#199708]).
-* Adds missing aria labels to eui button icons ({kibana-pull}199447[#199447]).
-Platform::
-* Fixes share export and inspect data ({kibana-pull}193780[#193780]).
-Sharing::
-* Remove borders from presentation panel and CSS clean up for hover actions ({kibana-pull}198454[#198454]).
-Other::
-* Instantly set `isLoading=true` when search value changes ({kibana-pull}197750[#197750]).
+* Adds query guardrails and technical preview badge to the ES|QL data visualizer ({kibana-pull}200325[#200325]).
+* AIOps: fixes time range filter in change point charts ({kibana-pull}200183[#200183]).
+* Anomaly detection: Adds spacer below split card charts in job wizard ({kibana-pull}199708[#199708]).
+* Adds missing aria labels to button icons ({kibana-pull}199447[#199447]).
+Kibana platform::
+* Fixes an issue with the global search field that could open the wrong page when pressing "Enter" while results were not yet fully loaded ({kibana-pull}197750[#197750]).
 
 
 [[release-notes-8.16.1]]

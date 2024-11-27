@@ -1715,6 +1715,15 @@ unchanged. For more information, refer to {kibana-pull}178159[#178159].
 // Visualizations
 
 [discrete]
+[[kibana-197227]]
+.[Visualizations] Removed `metrics:allowCheckingForFailedShards` advanced setting. (8.17)
+[%collapsible]
+====
+*Details* +
+The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With ths change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
+====
+
+[discrete]
 [[kibana-156455]]
 .[Visualizations] The ability to create legacy input controls was hidden. (8.9)
 [%collapsible]
