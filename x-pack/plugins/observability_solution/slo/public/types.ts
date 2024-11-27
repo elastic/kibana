@@ -48,6 +48,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLOPlugin } from './plugin';
 
@@ -66,6 +67,7 @@ export interface SLOPublicPluginsSetup {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface SLOPublicPluginsStart {
@@ -96,6 +98,7 @@ export interface SLOPublicPluginsStart {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
+  security?: SecurityPluginStart;
 }
 
 export type SLOPublicSetup = ReturnType<SLOPlugin['setup']>;
