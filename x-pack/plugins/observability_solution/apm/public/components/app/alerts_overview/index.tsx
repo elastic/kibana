@@ -80,6 +80,7 @@ export function AlertsOverview() {
     AlertConsumers.OBSERVABILITY,
     AlertConsumers.SLO,
     AlertConsumers.LOGS,
+    AlertConsumers.INFRASTRUCTURE,
   ];
 
   return (

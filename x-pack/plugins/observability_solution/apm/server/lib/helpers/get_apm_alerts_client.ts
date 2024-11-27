@@ -36,6 +36,7 @@ export async function getApmAlertsClient({
     'apm',
     'slo',
     'observability',
+    'infrastructure',
   ]);
 
   if (!apmAlertsIndices || isEmpty(apmAlertsIndices)) {
