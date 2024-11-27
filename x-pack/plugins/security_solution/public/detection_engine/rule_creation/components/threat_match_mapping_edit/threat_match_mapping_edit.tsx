@@ -10,8 +10,8 @@ import type { DataViewBase } from '@kbn/es-query';
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
-import { threatMatchMappingValidatorFactory } from '../../../rule_creation_ui/validators/threat_match_mapping_validator';
-import { ThreatMatchField } from './threat_match_mapping_field';
+import { threatMatchMappingValidator } from './validators/threat_match_mapping_validator';
+import { ThreatMatchMappingField } from './threat_match_mapping_field';
 import * as i18n from './translations';
 
 interface ThreatMatchMappingEditProps {
@@ -29,7 +29,7 @@ export const ThreatMatchMappingEdit = memo(function ThreatMatchMappingEdit({
     <UseField
       path={path}
       config={THREAT_MATCH_MAPPING_FIELD_CONFIG}
-      component={ThreatMatchField}
+      component={ThreatMatchMappingField}
       componentProps={{
         indexPatterns,
         threatIndexPatterns,
@@ -42,7 +42,7 @@ const THREAT_MATCH_MAPPING_FIELD_CONFIG: FieldConfig<ThreatMapEntries[]> = {
   label: i18n.THREAT_MATCH_MAPPING_FIELD_LABEL,
   validations: [
     {
-      validator: threatMatchMappingValidatorFactory(),
+      validator: threatMatchMappingValidator,
     },
   ],
 };

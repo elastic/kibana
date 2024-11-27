@@ -240,6 +240,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   });
   usePersistentAlertSuppressionState({ form });
 <<<<<<< HEAD
+<<<<<<< HEAD
   usePersistentThresholdState({ form, ruleTypePath: 'ruleType', thresholdPath: 'threshold' });
   usePersistentMachineLearningState({
     form,
@@ -259,6 +260,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     form,
   });
 >>>>>>> 49853eaf618 (add threat mapping persistence functionality)
+=======
+  usePersistentThreatMatchState({ form });
+>>>>>>> 30e3c9c1f35 (fix validation upon saving)
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
