@@ -16,10 +16,10 @@ import { StreamDetailManagement } from '../stream_detail_management';
 export function StreamDetailView() {
   const params1 = useStreamsAppParams('/{key}/{tab}', true);
 
-  const params2 = useStreamsAppParams('/{key}/{tab}/{subtab}', true);
+  const params2 = useStreamsAppParams('/{key}/management/{subtab}', true);
 
   const key = params1?.path?.key || params2.path.key;
-  const tab = params1?.path?.tab || params2.path.tab;
+  const tab = params1?.path?.tab || 'management';
 
   const {
     dependencies: {
