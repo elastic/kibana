@@ -107,6 +107,8 @@ import {
   InitEntityEngineRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enablement.gen';
+import { InstallAllMigrationRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import { InstallMigrationRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
 import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
@@ -1058,6 +1060,31 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
+     * Installs all translated migration rules
+     */
+    installAllMigrationRules(
+      props: InstallAllMigrationRulesProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(routeWithNamespace('/internal/siem_migrations/rules/install_all', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Installs migration rules
+     */
+    installMigrationRules(props: InstallMigrationRulesProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/internal/siem_migrations/rules/install', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Install and update all Elastic prebuilt detection rules and Timelines.
      */
     installPrebuiltRulesAndTimelines(kibanaSpace: string = 'default') {
@@ -1663,6 +1690,12 @@ export interface InitEntityEngineProps {
 }
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
+}
+export interface InstallAllMigrationRulesProps {
+  body: InstallAllMigrationRulesRequestBodyInput;
+}
+export interface InstallMigrationRulesProps {
+  body: InstallMigrationRulesRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;

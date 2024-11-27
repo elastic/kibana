@@ -360,6 +360,10 @@ import type {
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
+  InstallAllMigrationRulesRequestBodyInput,
+  InstallAllMigrationRulesResponse,
+  InstallMigrationRulesRequestBodyInput,
+  InstallMigrationRulesResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -1571,6 +1575,38 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Installs all translated migration rules
+   */
+  async installAllMigrationRules(props: InstallAllMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallAllMigrationRules`);
+    return this.kbnClient
+      .request<InstallAllMigrationRulesResponse>({
+        path: '/internal/siem_migrations/rules/install_all',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Installs migration rules
+   */
+  async installMigrationRules(props: InstallMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallMigrationRules`);
+    return this.kbnClient
+      .request<InstallMigrationRulesResponse>({
+        path: '/internal/siem_migrations/rules/install',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Install and update all Elastic prebuilt detection rules and Timelines.
    */
   async installPrebuiltRulesAndTimelines() {
@@ -2334,6 +2370,12 @@ export interface InitEntityEngineProps {
 }
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
+}
+export interface InstallAllMigrationRulesProps {
+  body: InstallAllMigrationRulesRequestBodyInput;
+}
+export interface InstallMigrationRulesProps {
+  body: InstallMigrationRulesRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
