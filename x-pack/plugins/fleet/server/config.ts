@@ -170,6 +170,7 @@ export const config: PluginConfigDescriptor = {
       proxies: PreconfiguredFleetProxiesSchema,
       spaceSettings: PreconfiguredSpaceSettingsSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
+      eventIngestedEnabled: schema.boolean({ defaultValue: false }),
       setup: schema.maybe(
         schema.object({
           agentPolicySchemaUpgradeBatchSize: schema.maybe(schema.number()),
@@ -202,6 +203,9 @@ export const config: PluginConfigDescriptor = {
       }),
 
       internal: schema.object({
+        useMeteringApi: schema.boolean({
+          defaultValue: false,
+        }),
         disableILMPolicies: schema.boolean({
           defaultValue: false,
         }),

@@ -340,6 +340,7 @@ export interface DocLinks {
     readonly aiAssistant: string;
     readonly artifactControl: string;
     readonly avcResults: string;
+    readonly bidirectionalIntegrations: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
@@ -504,6 +505,7 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
+    deprecatedV1Endpoints: string;
   }>;
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
@@ -673,6 +675,12 @@ export interface DocLinks {
     readonly retrieval: string;
     readonly context: string;
     readonly hiddenFields: string;
+  };
+  readonly inferenceManagement: {
+    readonly inferenceAPIDocumentation: string;
+  };
+  readonly cases: {
+    readonly legacyApiDeprecations: string;
   };
 }
 

@@ -143,6 +143,18 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               },
             ]
           : []),
+        ...(os === OperatingSystem.MAC
+          ? [
+              {
+                dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER_MAC),
+                inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER_MAC],
+                value: ConditionEntryField.SIGNER_MAC,
+                'data-test-subj': getTestId(
+                  `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER_MAC]}`
+                ),
+              },
+            ]
+          : []),
       ];
     }, [getTestId, os]);
 
@@ -224,7 +236,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           </ConditionEntryCell>
         </InputItem>
         <InputItem gridArea="remove">
-          {/* Unicode `nbsp` is used below so that Remove button is property displayed */}
+          {/* Unicode `nbsp` is used below so that Remove button is properly displayed */}
           <ConditionEntryCell showLabel={showLabels} label={'\u00A0'}>
             <EuiButtonIcon
               color="danger"

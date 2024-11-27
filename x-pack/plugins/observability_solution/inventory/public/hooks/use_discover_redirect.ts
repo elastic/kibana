@@ -11,12 +11,11 @@ import {
   ENTITY_TYPE,
 } from '@kbn/observability-shared-plugin/common';
 import { useCallback } from 'react';
-import type { Entity, EntityColumnIds } from '../../common/entities';
-import { unflattenEntity } from '../../common/utils/unflatten_entity';
+import type { InventoryEntity } from '../../common/entities';
 import { useKibana } from './use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search_context';
 
-const ACTIVE_COLUMNS: EntityColumnIds[] = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];
+const ACTIVE_COLUMNS = [ENTITY_DISPLAY_NAME, ENTITY_TYPE, ENTITY_LAST_SEEN];
 
 export const useDiscoverRedirect = () => {
   const {
@@ -31,9 +30,14 @@ export const useDiscoverRedirect = () => {
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
   const getDiscoverEntitiesRedirectUrl = useCallback(
-    (entity?: Entity) => {
+    (entity?: InventoryEntity) => {
       const entityKqlFilter = entity
-        ? entityManager.entityClient.asKqlFilter(unflattenEntity(entity))
+        ? entityManager.entityClient.asKqlFilter({
+            entity: {
+              identity_fields: entity.entityIdentityFields,
+            },
+            ...entity,
+          })
         : '';
 
       const kueryWithEntityDefinitionFilters = [
@@ -65,7 +69,7 @@ export const useDiscoverRedirect = () => {
   );
 
   const getDiscoverRedirectUrl = useCallback(
-    (entity?: Entity) => getDiscoverEntitiesRedirectUrl(entity),
+    (entity?: InventoryEntity) => getDiscoverEntitiesRedirectUrl(entity),
     [getDiscoverEntitiesRedirectUrl]
   );
 

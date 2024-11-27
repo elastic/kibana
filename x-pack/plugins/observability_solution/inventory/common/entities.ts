@@ -4,24 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import { ENTITY_LATEST, entitiesAliasPattern, entityLatestSchema } from '@kbn/entities-schema';
-import {
-  ENTITY_DEFINITION_ID,
-  ENTITY_DISPLAY_NAME,
-  ENTITY_ID,
-  ENTITY_IDENTITY_FIELDS,
-  ENTITY_LAST_SEEN,
-  ENTITY_TYPE,
-} from '@kbn/observability-shared-plugin/common';
+import { ENTITY_LATEST, entitiesAliasPattern, type EntityMetadata } from '@kbn/entities-schema';
 import { decode, encode } from '@kbn/rison';
 import { isRight } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
 export const entityColumnIdsRt = t.union([
-  t.literal(ENTITY_DISPLAY_NAME),
-  t.literal(ENTITY_LAST_SEEN),
-  t.literal(ENTITY_TYPE),
+  t.literal('entityDisplayName'),
+  t.literal('entityLastSeenTimestamp'),
+  t.literal('entityType'),
   t.literal('alertsCount'),
   t.literal('actions'),
 ]);
@@ -80,23 +71,20 @@ export const ENTITIES_LATEST_ALIAS = entitiesAliasPattern({
   dataset: ENTITY_LATEST,
 });
 
-export interface Entity {
-  [ENTITY_LAST_SEEN]: string;
-  [ENTITY_ID]: string;
-  [ENTITY_TYPE]: string;
-  [ENTITY_DISPLAY_NAME]: string;
-  [ENTITY_DEFINITION_ID]: string;
-  [ENTITY_IDENTITY_FIELDS]: string | string[];
-  alertsCount?: number;
-  [key: string]: any;
-}
-
 export type EntityGroup = {
   count: number;
 } & {
   [key: string]: string;
 };
 
-export type InventoryEntityLatest = z.infer<typeof entityLatestSchema> & {
+export type InventoryEntity = {
+  entityId: string;
+  entityType: string;
+  entityIdentityFields: string | string[];
+  entityDisplayName: string;
+  entityDefinitionId: string;
+  entityLastSeenTimestamp: string;
+  entityDefinitionVersion: string;
+  entitySchemaVersion: string;
   alertsCount?: number;
-};
+} & EntityMetadata;

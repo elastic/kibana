@@ -9,7 +9,6 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/data-plugin",
     "@kbn/inspector-plugin",
     "@kbn/observability-plugin",
@@ -18,10 +17,8 @@
     "@kbn/apm-types",
     "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
-    "@kbn/core-http-server",
-    "@kbn/security-plugin-types-server",
-    "@kbn/observability-utils",
     "@kbn/utility-types",
-    "@kbn/elastic-agent-utils"
+    "@kbn/elastic-agent-utils",
+    "@kbn/observability-utils-common"
   ]
 }

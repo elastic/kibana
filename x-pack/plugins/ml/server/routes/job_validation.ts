@@ -67,8 +67,10 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/estimate_bucket_span`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Estimates bucket span',
       description:
@@ -112,8 +114,10 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/calculate_model_memory_limit`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Calculates model memory limit',
       description: 'Calls _estimate_model_memory endpoint to retrieve model memory estimation.',
@@ -144,8 +148,10 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/cardinality`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Validates cardinality',
       description: 'Validates cardinality for the given job configuration.',
@@ -177,8 +183,10 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/job`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Validates job',
       description: 'Validates the given job configuration.',
@@ -215,8 +223,10 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     .post({
       path: `${ML_INTERNAL_BASE_PATH}/validate/datafeed_preview`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateJob'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateJob'],
+        },
       },
       summary: 'Validates datafeed preview',
       description: 'Validates that the datafeed preview runs successfully and produces results.',

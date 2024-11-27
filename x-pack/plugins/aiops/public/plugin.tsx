@@ -19,7 +19,7 @@ import type {
 } from './types';
 import { registerEmbeddables } from './embeddables';
 import { registerAiopsUiActions } from './ui_actions';
-import { registerChangePointChartsAttachment } from './cases/register_change_point_charts_attachment';
+import { registerCases } from './cases/register_cases';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -44,7 +44,7 @@ export class AiopsPlugin
           }
 
           if (cases) {
-            registerChangePointChartsAttachment(cases, coreStart, pluginStart);
+            registerCases(cases, coreStart, pluginStart);
           }
         }
       }

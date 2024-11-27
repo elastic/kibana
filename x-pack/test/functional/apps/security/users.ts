@@ -111,9 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(roles.apm_system.reserved).to.be(true);
       expect(roles.apm_system.deprecated).to.be(false);
 
-      expect(roles.apm_user.reserved).to.be(true);
-      expect(roles.apm_user.deprecated).to.be(true);
-
       expect(roles.beats_admin.reserved).to.be(true);
       expect(roles.beats_admin.deprecated).to.be(false);
 

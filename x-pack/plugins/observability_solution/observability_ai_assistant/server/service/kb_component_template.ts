@@ -6,6 +6,7 @@
  */
 
 import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AI_ASSISTANT_KB_INFERENCE_ID } from './inference_endpoint';
 
 const keyword = {
   type: 'keyword' as const,
@@ -58,6 +59,14 @@ export const kbComponentTemplate: ClusterComponentTemplate['component_template']
       },
       namespace: keyword,
       text,
+      semantic_text: {
+        type: 'semantic_text',
+        inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
+        // @ts-expect-error: @elastic/elasticsearch does not have this type yet
+        model_settings: {
+          task_type: 'sparse_embedding',
+        },
+      },
       'ml.tokens': {
         type: 'rank_features',
       },

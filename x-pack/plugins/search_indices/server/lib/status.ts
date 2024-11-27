@@ -38,7 +38,7 @@ export async function fetchIndicesStatus(
 export async function fetchUserStartPrivileges(
   client: ElasticsearchClient,
   logger: Logger,
-  indexName: string = 'test-index-name'
+  indexName: string
 ): Promise<UserStartPrivilegesResponse> {
   try {
     const securityCheck = await client.security.hasPrivileges({
@@ -46,14 +46,15 @@ export async function fetchUserStartPrivileges(
       index: [
         {
           names: [indexName],
-          privileges: ['create_index'],
+          privileges: ['manage', 'delete'],
         },
       ],
     });
 
     return {
       privileges: {
-        canCreateIndex: securityCheck?.index?.[indexName]?.create_index ?? false,
+        canManageIndex: securityCheck?.index?.[indexName]?.manage ?? false,
+        canDeleteDocuments: securityCheck?.index?.[indexName]?.delete ?? false,
         canCreateApiKeys: securityCheck?.cluster?.manage_api_key ?? false,
       },
     };
@@ -62,7 +63,8 @@ export async function fetchUserStartPrivileges(
     logger.error(e);
     return {
       privileges: {
-        canCreateIndex: false,
+        canManageIndex: false,
+        canDeleteDocuments: false,
         canCreateApiKeys: false,
       },
     };

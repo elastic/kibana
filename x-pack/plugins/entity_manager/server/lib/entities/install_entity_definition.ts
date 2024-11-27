@@ -6,7 +6,7 @@
  */
 
 import semver from 'semver';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
 import { Logger } from '@kbn/logging';
@@ -88,12 +88,12 @@ export async function installEntityDefinition({
 }
 
 export async function installBuiltInEntityDefinitions({
-  clusterClient,
+  esClient,
   soClient,
   logger,
   definitions,
 }: Omit<InstallDefinitionParams, 'definition' | 'esClient'> & {
-  clusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   definitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
@@ -102,18 +102,18 @@ export async function installBuiltInEntityDefinitions({
   const installPromises = definitions.map(async (builtInDefinition) => {
     const installedDefinition = await findEntityDefinitionById({
       soClient,
-      esClient: clusterClient.asInternalUser,
+      esClient,
       id: builtInDefinition.id,
       includeState: true,
     });
 
     if (!installedDefinition) {
       // clean data from previous installation
-      await deleteIndices(clusterClient.asCurrentUser, builtInDefinition, logger);
+      await deleteIndices(esClient, builtInDefinition, logger);
 
       return await installEntityDefinition({
         definition: builtInDefinition,
-        esClient: clusterClient.asSecondaryAuthUser,
+        esClient,
         soClient,
         logger,
       });
@@ -134,7 +134,7 @@ export async function installBuiltInEntityDefinitions({
     );
     return await reinstallEntityDefinition({
       soClient,
-      clusterClient,
+      esClient,
       logger,
       definition: installedDefinition,
       definitionUpdate: builtInDefinition,
@@ -174,14 +174,14 @@ async function install({
 
 // stop and delete the current transforms and reinstall all the components
 export async function reinstallEntityDefinition({
-  clusterClient,
+  esClient,
   soClient,
   definition,
   definitionUpdate,
   logger,
   deleteData = false,
 }: Omit<InstallDefinitionParams, 'esClient'> & {
-  clusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   definitionUpdate: EntityDefinitionUpdate;
   deleteData?: boolean;
 }): Promise<EntityDefinition> {
@@ -202,16 +202,16 @@ export async function reinstallEntityDefinition({
     });
 
     logger.debug(`Deleting transforms for definition [${definition.id}] v${definition.version}`);
-    await stopAndDeleteTransforms(clusterClient.asSecondaryAuthUser, definition, logger);
+    await stopAndDeleteTransforms(esClient, definition, logger);
 
     if (deleteData) {
-      await deleteIndices(clusterClient.asCurrentUser, definition, logger);
+      await deleteIndices(esClient, definition, logger);
     }
 
     return await install({
       soClient,
       logger,
-      esClient: clusterClient.asSecondaryAuthUser,
+      esClient,
       definition: updatedDefinition,
     });
   } catch (err) {

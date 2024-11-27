@@ -7,7 +7,7 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useIsInvestigateInResolverActionEnabled } from './investigate_in_resolver';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 
 describe('InvestigateInResolverAction', () => {

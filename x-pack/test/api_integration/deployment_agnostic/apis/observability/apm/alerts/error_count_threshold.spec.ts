@@ -10,8 +10,8 @@ import { errorCountActionVariables } from '@kbn/apm-plugin/server/routes/alerts/
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import type { RoleCredentials, SupertestWithRoleScopeType } from '../../../../services';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { RoleCredentials } from '../../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   fetchServiceInventoryAlertCounts,
@@ -23,7 +23,6 @@ import {
 } from './helpers/alerting_helper';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const roleScopedSupertest = getService('roleScopedSupertest');
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
   const alertingApi = getService('alertingApi');
@@ -31,7 +30,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('error count threshold alert', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-    let supertestViewerWithCookieCredentials: SupertestWithRoleScopeType;
     let roleAuthc: RoleCredentials;
 
     const javaErrorMessage = 'a java error';
@@ -52,14 +50,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     };
 
     before(async () => {
-      supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
-        'viewer',
-        {
-          withInternalHeaders: true,
-          useCookieHeader: true,
-        }
-      );
-
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
       const opbeansJava = apm
@@ -116,7 +106,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
-      await supertestViewerWithCookieCredentials.destroy();
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
