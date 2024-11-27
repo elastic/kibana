@@ -63,6 +63,17 @@ export const EntityAnalyticsManagementPage = () => {
     localStorage.setItem('dateEnd', end);
   };
 
+  const calculateNextRunTime = () => {
+    if (runEngineEnabled) {
+      const currentTime = new Date();
+      const runAtTime = riskEngineStatus?.risk_engine_task_status?.runAt
+        ? new Date(riskEngineStatus.risk_engine_task_status.runAt)
+        : new Date();
+      const minutesUntilNextRun = Math.round((runAtTime.getTime() - currentTime.getTime()) / 60000);
+      return `Next engine run in ${minutesUntilNextRun} minutes`;
+    }
+  };
+
   return (
     <>
       <RiskEnginePrivilegesCallOut privileges={privileges} />
@@ -102,12 +113,11 @@ export const EntityAnalyticsManagementPage = () => {
                   />
                 )}
 
-                {/* Text: "Next engine run in 14 minutes" */}
+                {/* Text: "Next engine run in {} minutes" */}
                 {runEngineEnabled && (
                   <EuiFlexItem grow={false}>
                     <span style={{ fontSize: '14px', color: '#888888', fontWeight: 'normal' }}>
-                      {/* {calculateNextRunTime()} */}
-                      {'Next engine run in 14 minutes'}
+                      {calculateNextRunTime()}
                     </span>
                   </EuiFlexItem>
                 )}
