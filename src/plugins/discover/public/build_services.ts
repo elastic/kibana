@@ -229,7 +229,6 @@ export const buildServices = memoize(
       ebtManager,
       fieldsMetadata: plugins.fieldsMetadata,
       logsDataAccess: plugins.logsDataAccess,
-      discoverShared: plugins.discoverShared,
     };
   }
 );
