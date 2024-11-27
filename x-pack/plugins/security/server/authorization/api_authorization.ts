@@ -102,9 +102,7 @@ export function initAPIAuthorization(
           kibanaPrivileges[ReservedPrivilegesSet.superuser] =
             checkSuperuserPrivilegesResponse.hasAllRequested;
         }
-      }
 
-      for (const reservedPrivilege of requestedReservedPrivileges) {
         if (reservedPrivilege === ReservedPrivilegesSet.operator) {
           const currentUser = getCurrentUser(request);
 
