@@ -29,6 +29,8 @@ function createSetupMock() {
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
+      getCurrentUser: jest.fn(),
+      getClusterClient: jest.fn(),
     },
     registerSpacesService: jest.fn(),
     license: licenseMock.create(),
