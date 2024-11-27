@@ -39,7 +39,7 @@ describe(
   {
     // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
     // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@skipInServerlessMKI'],
     env: {
       kbnServerArgs: [
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
