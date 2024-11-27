@@ -7,22 +7,17 @@
 
 import { resolve } from 'path';
 import type { GenericFtrProviderContext } from '@kbn/test';
-import {
-  KibanaEBTUIProvider,
-  KibanaEBTServerProvider,
-} from '@kbn/test-suites-src/analytics/services/kibana_ebt';
+import { KibanaEBTUIProvider } from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import { services as inheritedServices } from '../../services';
 import { pageObjects } from '../../page_objects';
 import { createTestConfig } from '../../config.base';
 
 type ObservabilityTelemetryServices = typeof inheritedServices & {
-  kibana_ebt_server: typeof KibanaEBTServerProvider;
   kibana_ebt_ui: typeof KibanaEBTUIProvider;
 };
 
 const services: ObservabilityTelemetryServices = {
   ...inheritedServices,
-  kibana_ebt_server: KibanaEBTServerProvider,
   kibana_ebt_ui: KibanaEBTUIProvider,
 };
 
