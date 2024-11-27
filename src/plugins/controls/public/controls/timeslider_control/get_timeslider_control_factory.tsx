@@ -317,7 +317,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
                 value={localTimeslice}
                 onChange={(value) => {
                   setLocalTimeslice(value as Timeslice);
-                  debouncedOnChange(localTimeslice);
+                  debouncedOnChange(value);
                 }}
                 stepSize={timeRangeMeta.stepSize}
                 ticks={timeRangeMeta.ticks}
