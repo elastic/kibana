@@ -36,6 +36,7 @@ export function initAPIAuthorization(
     checkPrivilegesWithRequest,
     mode,
     getCurrentUser,
+    getClusterClient,
   }: AuthorizationServiceSetup,
   logger: Logger
 ) {
@@ -54,7 +55,60 @@ export function initAPIAuthorization(
 
       const authz = security.authz as AuthzEnabled;
 
-      const { requestedPrivileges, requestedReservedPrivileges } = authz.requiredPrivileges.reduce(
+      const normalizeRequiredPrivileges = async (
+        privileges: AuthzEnabled['requiredPrivileges']
+      ) => {
+        const hasOperatorPrivileges = privileges.some(
+          (privilege) =>
+            privilege === ReservedPrivilegesSet.operator ||
+            (typeof privilege === 'object' &&
+              privilege.allRequired?.includes(ReservedPrivilegesSet.operator))
+        );
+
+        // nothing to normalize
+        if (!hasOperatorPrivileges) {
+          return privileges;
+        }
+
+        const esClient = await getClusterClient();
+        const operatorPrivilegesConfig = await esClient.asInternalUser.transport.request<{
+          security: { operator_privileges: { enabled: boolean; available: boolean } };
+        }>({
+          method: 'GET',
+          path: '/_xpack/usage?filter_path=security.operator_privileges',
+        });
+
+        // nothing to normalize
+        if (operatorPrivilegesConfig.security.operator_privileges.enabled) {
+          return privileges;
+        }
+
+        return privileges.map((privilege) => {
+          if (typeof privilege === 'object') {
+            const operatorPrivilegeIndex =
+              privilege.allRequired?.findIndex((p) => p === ReservedPrivilegesSet.operator) ?? -1;
+
+            return operatorPrivilegeIndex !== -1
+              ? {
+                  anyRequired: privilege.anyRequired,
+                  allRequired: privilege.allRequired?.toSpliced(
+                    operatorPrivilegeIndex,
+                    1,
+                    ReservedPrivilegesSet.superuser
+                  ),
+                }
+              : privilege;
+          }
+
+          return privilege === ReservedPrivilegesSet.operator
+            ? ReservedPrivilegesSet.superuser
+            : privilege;
+        });
+      };
+
+      const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
+
+      const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
         (acc, privilegeEntry) => {
           const privileges =
             typeof privilegeEntry === 'object'
@@ -93,19 +147,21 @@ export function initAPIAuthorization(
         }
       }
 
+      const hasSuperuserPrivileges = async () => {
+        const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(request).globally(
+          SUPERUSER_PRIVILEGES
+        );
+
+        return checkSuperuserPrivilegesResponse.hasAllRequested;
+      };
+
       for (const reservedPrivilege of requestedReservedPrivileges) {
         if (reservedPrivilege === ReservedPrivilegesSet.superuser) {
-          const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(
-            request
-          ).globally(SUPERUSER_PRIVILEGES);
-
-          kibanaPrivileges[ReservedPrivilegesSet.superuser] =
-            checkSuperuserPrivilegesResponse.hasAllRequested;
+          kibanaPrivileges[ReservedPrivilegesSet.superuser] = await hasSuperuserPrivileges();
         }
 
         if (reservedPrivilege === ReservedPrivilegesSet.operator) {
           const currentUser = getCurrentUser(request);
-
           kibanaPrivileges[ReservedPrivilegesSet.operator] = currentUser?.operator ?? false;
         }
       }
@@ -125,8 +181,8 @@ export function initAPIAuthorization(
         return kibanaPrivileges[kbPrivilege];
       };
 
-      for (const requiredPrivilege of authz.requiredPrivileges) {
-        if (!hasRequestedPrivilege(requiredPrivilege)) {
+      for (const privilege of requiredPrivileges) {
+        if (!hasRequestedPrivilege(privilege)) {
           const missingPrivileges = Object.keys(kibanaPrivileges).filter(
             (key) => !kibanaPrivileges[key]
           );

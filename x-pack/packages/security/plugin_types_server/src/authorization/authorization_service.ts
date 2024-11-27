@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 import type { Actions } from './actions';
@@ -29,4 +29,5 @@ export interface AuthorizationServiceSetup {
   checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   mode: AuthorizationMode;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  getClusterClient: () => Promise<IClusterClient>;
 }

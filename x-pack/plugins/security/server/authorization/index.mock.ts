@@ -25,5 +25,6 @@ export const authorizationMock = {
     registerPrivilegesWithCluster: jest.fn(),
     disableUnauthorizedCapabilities: jest.fn(),
     getCurrentUser: jest.fn(),
+    getClusterClient: jest.fn(),
   }),
 };

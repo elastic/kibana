@@ -139,6 +139,7 @@ export class AuthorizationService {
         getSpacesService
       ),
       getCurrentUser,
+      getClusterClient,
     };
 
     capabilities.registerSwitcher(
