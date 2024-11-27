@@ -427,15 +427,10 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
     }: {
       pageOfPipelines: Array<{ id: string }>;
     }) => {
-      const termAggExtras: {
-        include: string[];
-      } = {
-        include: [],
-      };
+      const include: string[] | undefined = pageOfPipelines?.length
+        ? pageOfPipelines.map((pipeline) => pipeline.id)
+        : undefined;
 
-      if (pageOfPipelines) {
-        termAggExtras.include = pageOfPipelines.map((pipeline) => pipeline.id);
-      }
       return {
         pipelines_nested: {
           nested: {
@@ -446,7 +441,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
               terms: {
                 field: 'logstash_stats.pipelines.id',
                 size: 1000,
-                ...(termAggExtras.include.length !== 0 ? termAggExtras : undefined),
+                include,
               },
               aggs: {
                 to_root: {
@@ -472,7 +467,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
               terms: {
                 field: 'logstash.node.stats.pipelines.id',
                 size: 1000,
-                ...(termAggExtras.include.length !== 0 ? termAggExtras : undefined),
+                include,
               },
               aggs: {
                 to_root: {
