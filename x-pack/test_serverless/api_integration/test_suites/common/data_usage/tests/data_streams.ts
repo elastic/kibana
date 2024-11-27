@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
   const testDataStreamName = 'test-data-stream';
   describe(`GET ${DATA_USAGE_DATA_STREAMS_API_ROUTE}`, function () {
+    this.tags(['skipMKI']);
     before(async () => {
       await svlDatastreamsHelpers.createDataStream(testDataStreamName);
       supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
