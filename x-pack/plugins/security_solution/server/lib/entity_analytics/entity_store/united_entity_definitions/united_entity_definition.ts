@@ -65,7 +65,7 @@ export class UnitedEntityDefinition {
       displayNameTemplate: `{{${identityField}}}`,
       metadata,
       latest: {
-        timestampField: '@timestamp',
+        timestampField: 'event.ingested', // '@timestamp',
         lookbackPeriod: DEFAULT_LOOKBACK_PERIOD,
         settings: {
           syncDelay,
