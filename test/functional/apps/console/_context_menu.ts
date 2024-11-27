@@ -46,7 +46,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('console');
         await PageObjects.console.skipTourIfExists();
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('GET _search');
+        await PageObjects.console.enterText('GET _search\n');
+      });
+
+      it('doesnt allow to copy kbn requests as anything other than curl', async () => {
+        // Add a kbn request
+        // pressEnter
+        await PageObjects.console.enterText('GET kbn:/api/spaces/space');
+        // Make sure to select the es and kbn request
+        await PageObjects.console.selectAllRequests();
+
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.clickCopyAsButton();
+
+        let resultToast = await toasts.getElementByIndex(1);
+        let toastText = await resultToast.getVisibleText();
+
+        expect(toastText).to.be('Requests copied to clipboard as curl');
+
+        // Wait until async operation is done
+        await PageObjects.common.sleep(1000);
+
+        // Focus editor once again
+        await PageObjects.console.focusInputEditor();
+
+        // Try to copy as javascript
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.changeLanguageAndCopy('javascript');
+
+        resultToast = await toasts.getElementByIndex(2);
+        toastText = await resultToast.getVisibleText();
+
+        expect(toastText).to.be('Kibana requests can only be copied as curl');
       });
 
       it('by default it should copy as curl and show toast when copy as button is clicked', async () => {
