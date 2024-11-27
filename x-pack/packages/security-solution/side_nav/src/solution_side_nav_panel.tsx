@@ -356,10 +356,7 @@ const SolutionSideNavPanelItem: React.FC<SolutionSideNavPanelItemProps> = React.
   function SolutionSideNavPanelItem({ item, onClose }) {
     const { tracker } = useTelemetryContext();
     const { euiTheme } = useEuiTheme();
-    const panelLinkClassNames = classNames(
-      'solutionSideNavPanelLink',
-      SolutionSideNavPanelItemStyles(euiTheme)
-    );
+    const panelLinkClassNames = classNames(SolutionSideNavPanelItemStyles(euiTheme));
     const { id, href, onClick, iconType, openInNewTab } = item;
     const onClickHandler = useCallback<React.MouseEventHandler>(
       (ev) => {
