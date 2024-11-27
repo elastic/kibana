@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Component } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiFormRow,
@@ -26,8 +25,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import type { DashboardContainer } from '../../embeddable/dashboard_container';
+
 interface Props {
   onClose: () => void;
+  dashboardApi: DashboardContainer;
 }
 
 interface State {}
@@ -45,6 +47,8 @@ export class ShowSourceFlyout extends React.Component<Props, State> {
   }
 
   render() {
+    const dashboardCode = 'Should get dashboard-json here from props.dashboardApi object';
+
     return (
       <>
         <EuiFlyoutHeader hasBorder>
@@ -57,7 +61,7 @@ export class ShowSourceFlyout extends React.Component<Props, State> {
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>Foobar</EuiFlyoutBody>
+        <EuiFlyoutBody>{dashboardCode}</EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>

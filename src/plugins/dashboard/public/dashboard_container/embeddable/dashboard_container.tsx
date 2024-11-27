@@ -11,6 +11,9 @@ import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import { isErrorEmbeddable, openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
+
 import {
   BehaviorSubject,
   Subject,
@@ -68,6 +71,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
+import { core } from '@kbn/embeddable-plugin/public/kibana_services';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
 import type { DashboardAttributes } from '../../../server/content_management';
 import { DashboardContainerInput, DashboardPanelMap, DashboardPanelState } from '../../../common';
@@ -969,39 +974,28 @@ export class DashboardContainer
   };
 
   public showSource() {
-    alert('All the code below is broken.');
 
-    return;
 
-    const {
-      analytics,
-      settings: { i18n, theme },
-      overlays,
-    } = pluginServices.getServices();
-
-    console.log('dashboard', this);
-
-    this.openOverlay(
-      overlays.openFlyout(
-        toMountPoint(
-          <DashboardContainerContext.Provider value={this}>
-            <ShowSourceFlyout
-              onClose={() => {
-                this.clearOverlays();
-              }}
-            />
-          </DashboardContainerContext.Provider>,
-          { analytics, i18n, theme }
-        ),
-        {
-          size: 'm',
-          'data-test-subj': 'dashboardShowSourceFlyout',
-          onClose: (flyout) => {
+    const flyout = coreServices.overlays.openFlyout(
+      toMountPoint(
+        <ShowSourceFlyout
+          onClose={() => {
             this.clearOverlays();
-            flyout.close();
-          },
-        }
-      )
+          }}
+          dashboardApi={this}
+        />, coreServices
+
+      ),
+      {
+        size: 'm',
+        'data-test-subj': 'dashboardShowSourceFlyout',
+        onClose: (flyout) => {
+          this.clearOverlays();
+          flyout.close();
+        },
+      }
     );
+
+    this.openOverlay(flyout);
   }
 }
