@@ -108,6 +108,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -150,6 +151,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let alerts: Alerts;
 
         before(async () => {
+          await alertingApi.cleanUpAlerts({
+            alertIndexName: APM_ALERTS_INDEX,
+            connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+            consumer: 'apm',
+            roleAuthc,
+          });
+
           const createdRule = await alertingApi.createRule({
             name: `Latency threshold | ${serviceName}`,
             params: {
@@ -214,12 +222,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 
-          const expected = txGroupsTypeRequest.transactionGroups
-            .filter(({ name }) => name.includes('request'))
-            .map(({ name, alertsCount }) => ({
-              name,
-              alertsCount,
-            }));
+          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
+            name,
+            alertsCount,
+          }));
 
           expect(expected).to.eql([
             { name: 'GET /api/failed/request', alertsCount: 0 },
@@ -303,12 +309,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 
-          const expected = txGroupsTypeRequest.transactionGroups
-            .filter(({ name }) => name.includes('request'))
-            .map(({ name, alertsCount }) => ({
-              name,
-              alertsCount,
-            }));
+          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
+            name,
+            alertsCount,
+          }));
 
           expect(expected).to.eql([
             { name: 'GET /api/failed/request', alertsCount: 0 },
@@ -389,12 +393,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           });
 
-          const expected = txGroupsTypeRequest.transactionGroups
-            .filter(({ name }) => name.includes('request'))
-            .map(({ name, alertsCount }) => ({
-              name,
-              alertsCount,
-            }));
+          const expected = txGroupsTypeRequest.transactionGroups.map(({ name, alertsCount }) => ({
+            name,
+            alertsCount,
+          }));
 
           expect(txGroupsTypeRequest.hasActiveAlerts).to.be.equal(true);
 

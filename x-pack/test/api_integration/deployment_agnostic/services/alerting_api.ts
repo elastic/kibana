@@ -1186,14 +1186,16 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       connectorIndexName,
     }: {
       roleAuthc: RoleCredentials;
-      ruleId: string;
+      ruleId?: string;
       consumer?: string;
       alertIndexName?: string;
       connectorIndexName?: string;
     }) {
       return Promise.allSettled([
         // Delete the rule by ID
-        this.deleteRuleById({ roleAuthc, ruleId }),
+        ruleId
+          ? this.deleteRuleById({ roleAuthc, ruleId })
+          : this.deleteRules({ roleAuthc, filter: '' }),
         // Delete all documents in the alert index if specified
         alertIndexName
           ? es.deleteByQuery({
