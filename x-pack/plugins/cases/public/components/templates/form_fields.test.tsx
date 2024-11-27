@@ -345,26 +345,26 @@ describe('form fields', () => {
 
     await userEvent.click(screen.getByText('Submit'));
 
-    // await waitFor(() => {
-    expect(onSubmit).toBeCalledWith(
-      {
-        category: null,
-        tags: [],
-        connectorId: 'none',
-        customFields: {
-          test_key_1: 'My text test value 1',
-          test_key_2: false,
-          test_key_4: false,
-          test_key_5: '987',
-          test_key_7: 'option_2',
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          category: null,
+          tags: [],
+          connectorId: 'none',
+          customFields: {
+            test_key_1: 'My text test value 1',
+            test_key_2: false,
+            test_key_4: false,
+            test_key_5: '987',
+            test_key_7: 'option_2',
+          },
+          syncAlerts: true,
+          templateTags: [],
         },
-        syncAlerts: true,
-        templateTags: [],
-      },
-      true
-    );
+        true
+      );
+    });
   });
-  // });
 
   it('calls onSubmit with connector fields', async () => {
     const newProps = {

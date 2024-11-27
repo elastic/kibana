@@ -207,6 +207,7 @@ describe('CaseFormFields', () => {
     const textField = customFieldsConfigurationMock[0];
     const toggleField = customFieldsConfigurationMock[1];
     const numberField = customFieldsConfigurationMock[4];
+    const listField = customFieldsConfigurationMock[6];
 
     const textCustomField = await screen.findByTestId(
       `${textField.key}-${textField.type}-create-custom-field`
@@ -227,6 +228,15 @@ describe('CaseFormFields', () => {
     await user.clear(numberCustomField);
     await user.paste('4321');
 
+    const listCustomField = await screen.findByTestId(
+      `${listField.key}-${listField.type}-create-custom-field`
+    );
+
+    await user.selectOptions(
+      listCustomField,
+      await within(listCustomField).getByRole('option', { name: 'Option 2' })
+    );
+
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
@@ -239,7 +249,7 @@ describe('CaseFormFields', () => {
             test_key_2: false,
             test_key_4: false,
             test_key_5: '4321',
-            test_key_6: 'option_1',
+            test_key_7: 'option_2',
           },
         },
         true
@@ -279,7 +289,7 @@ describe('CaseFormFields', () => {
             test_key_2: true,
             test_key_4: false,
             test_key_5: 123,
-            test_key_6: 'option_1',
+            test_key_7: 'option_1',
           },
         },
         true

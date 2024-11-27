@@ -35,11 +35,11 @@ describe('Create', () => {
 
     expect(
       await screen.findByTestId(`${customFieldConfiguration.key}-list-create-custom-field`)
-    ).toHaveValue(Object.keys(customFieldConfiguration.defaultValue ?? {})[0] as string);
+    ).toHaveValue(customFieldConfiguration.defaultValue);
   });
 
   it('renders correctly with optional fields', async () => {
-    const optionalField = customFieldsConfigurationMock[5] as ListCustomFieldConfiguration; // optional list custom field
+    const optionalField = customFieldsConfigurationMock[7] as ListCustomFieldConfiguration; // optional list custom field
 
     render(
       <FormTestComponent onSubmit={onSubmit}>
