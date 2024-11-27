@@ -79,10 +79,9 @@ export const GridRow = forwardRef<
           gridLayoutStateManager.interactionEvent$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
-          gridLayoutStateManager.expandedPanelId$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([interactionEvent, gridLayout, runtimeSettings, expandedPanelId]) => {
+          .subscribe(([interactionEvent, gridLayout, runtimeSettings]) => {
             const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
             if (!rowRef) return;
 
@@ -91,30 +90,6 @@ export const GridRow = forwardRef<
             rowRef.style.gridTemplateRows = `repeat(${getRowCount(
               gridLayout[rowIndex]
             )}, ${rowHeight}px)`;
-
-            const rowContainerRef = rowContainer.current;
-            if (!rowContainerRef) return;
-
-            if (expandedPanelId) {
-              // If any panel is expanded, move all rows with their panels out of the viewport.
-              // The expanded panel is repositioned to its original location in the GridPanel component
-              // and stretched to fill the viewport.
-
-              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
-
-              const panelsIds = Object.keys(gridLayout[rowIndex].panels);
-              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
-              if (includesExpandedPanel) {
-                // Stretch the row with the expanded panel to occupy the entire remaining viewport
-                rowContainerRef.style.height = '100%';
-              } else {
-                // Hide the row if it does not contain the expanded panel
-                rowContainerRef.style.height = '0';
-              }
-            } else {
-              rowContainerRef.style.transform = ``;
-              rowContainerRef.style.height = ``;
-            }
 
             const targetRow = interactionEvent?.targetRowIndex;
             if (rowIndex === targetRow && interactionEvent) {
@@ -138,6 +113,36 @@ export const GridRow = forwardRef<
               rowRef.style.backgroundSize = ``;
               rowRef.style.backgroundImage = ``;
               rowRef.style.backgroundColor = `transparent`;
+            }
+          });
+
+        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
+          .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+          .subscribe((expandedPanelId) => {
+            const rowContainerRef = rowContainer.current;
+            if (!rowContainerRef) return;
+
+            if (expandedPanelId) {
+              // If any panel is expanded, move all rows with their panels out of the viewport.
+              // The expanded panel is repositioned to its original location in the GridPanel component
+              // and stretched to fill the viewport.
+
+              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
+
+              const panelsIds = Object.keys(
+                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+              );
+              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
+              if (includesExpandedPanel) {
+                // Stretch the row with the expanded panel to occupy the entire remaining viewport
+                rowContainerRef.style.height = '100%';
+              } else {
+                // Hide the row if it does not contain the expanded panel
+                rowContainerRef.style.height = '0';
+              }
+            } else {
+              rowContainerRef.style.transform = ``;
+              rowContainerRef.style.height = ``;
             }
           });
 
@@ -175,6 +180,7 @@ export const GridRow = forwardRef<
         return () => {
           styleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
+          expandedPanelSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
