@@ -30,8 +30,8 @@ import * as i18n from '../translations';
 export const EntityAnalyticsManagementPage = () => {
   const privileges = useMissingRiskEnginePrivileges();
   const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
-  const [from, setFrom] = useState('now-30m');
-  const [to, setTo] = useState('now');
+  const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30m');
+  const [to, setTo] = useState(localStorage.getItem('dateEnd') || 'now');
   const { euiTheme } = useEuiTheme();
   const { data: riskEngineStatus } = useRiskEngineStatus();
   const currentRiskEngineStatus = riskEngineStatus?.risk_engine_status;
@@ -59,6 +59,8 @@ export const EntityAnalyticsManagementPage = () => {
   const handleDateChange = ({ start, end }: { start: string; end: string }) => {
     setFrom(start);
     setTo(end);
+    localStorage.setItem('dateStart', start);
+    localStorage.setItem('dateEnd', end);
   };
 
   return (

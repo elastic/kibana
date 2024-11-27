@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiSuperDatePicker,
@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
-
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
 
 export const IncludeClosedAlertsSection = ({
@@ -41,31 +40,66 @@ export const IncludeClosedAlertsSection = ({
   const [showBar, setShowBar] = useState(false);
   const { addSuccess } = useAppToasts();
 
+  // Retrieve state from localStorage on initial render
+  useEffect(() => {
+    const savedIncludeClosedAlerts = localStorage.getItem('includeClosedAlerts');
+    const savedStart = localStorage.getItem('dateStart');
+    const savedEnd = localStorage.getItem('dateEnd');
+
+    if (savedIncludeClosedAlerts !== null) {
+      setIncludeClosedAlerts(JSON.parse(savedIncludeClosedAlerts));
+    }
+    if (savedStart) {
+      setFrom(savedStart);
+    }
+    if (savedEnd) {
+      setTo(savedEnd);
+    }
+  }, [setIncludeClosedAlerts]);
+
   const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
     setFrom(newStart);
     setTo(newEnd);
     onDateChange({ start: newStart, end: newEnd });
     setShowBar(true);
+
+    localStorage.setItem('dateStart', newStart);
+    localStorage.setItem('dateEnd', newEnd);
   };
 
   const handleToggle = () => {
-    setIncludeClosedAlerts(!includeClosedAlerts);
+    const newValue = !includeClosedAlerts;
+    setIncludeClosedAlerts(newValue);
     setShowBar(true);
+    localStorage.setItem('includeClosedAlerts', JSON.stringify(newValue));
   };
 
   const { mutate } = useConfigureSORiskEngineMutation();
 
   const handleSave = () => {
-    mutate({
-      includeClosedAlerts,
-      range: { start, end },
-    });
+    setIsLoading(true);
 
-    setShowBar(false);
-    setIsLoading(false);
-    if (!isLoading) {
-      addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, { toastLifeTimeMs: 5000 });
-    }
+    mutate(
+      {
+        includeClosedAlerts,
+        range: { start, end },
+      },
+      {
+        onSuccess: () => {
+          setShowBar(false);
+          addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, {
+            toastLifeTimeMs: 5000,
+          });
+          setIsLoading(false);
+        },
+        onError: () => {
+          setIsLoading(false);
+        },
+      }
+    );
+
+    // Persist the toggle state in localStorage after saving
+    localStorage.setItem('includeClosedAlerts', JSON.stringify(includeClosedAlerts));
   };
 
   return (
@@ -98,11 +132,11 @@ export const IncludeClosedAlertsSection = ({
       <EuiText size="s" style={{ marginTop: '10px' }}>
         <p>
           {`Enable this option to factor both open and closed alerts into the risk engine
-                    calculations. Including closed alerts helps provide a more comprehensive risk assessment
-                    based on past incidents, leading to more accurate scoring and insights.`}
+            calculations. Including closed alerts helps provide a more comprehensive risk assessment
+            based on past incidents, leading to more accurate scoring and insights.`}
         </p>
       </EuiText>
-      {showBar && ( // Only render EuiBottomBar when showBar is true
+      {showBar && (
         <EuiBottomBar
           paddingSize="s"
           position="fixed"
@@ -123,7 +157,14 @@ export const IncludeClosedAlertsSection = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" fill size="s" iconType="check" onClick={handleSave}>
+                <EuiButton
+                  color="primary"
+                  fill
+                  size="s"
+                  iconType="check"
+                  onClick={handleSave}
+                  isLoading={isLoading}
+                >
                   {'Save'}
                 </EuiButton>
               </EuiFlexItem>
