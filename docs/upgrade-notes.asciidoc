@@ -51,7 +51,7 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 
 [discrete]
 [[breaking-201550]]
-.[Alerting] Legacy deprecations (9.0.0)
+.Removed legacy alerting endpoints (9.0.0)
 [%collapsible]
 ====
 *Details* +
@@ -85,7 +85,7 @@ The updated APIs can be found here https://www.elastic.co/docs/api/doc/kibana/v8
 ====
 
 [[breaking-201004]]
-.[Cases] Legacy deprecations (9.0.0)
+.Removed legacy cases endpoints (9.0.0)
 [%collapsible]
 ====
 *Details* +
