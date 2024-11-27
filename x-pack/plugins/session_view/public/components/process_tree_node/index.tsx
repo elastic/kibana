@@ -283,7 +283,9 @@ export function ProcessTreeNode({
 
   const timeStampsNormal = formatDate(start, dateFormat);
 
-  const promptText = `${workingDirectory ?? ''} ${args?.join(' ')}`;
+  const promptText = `${workingDirectory ?? ''} ${
+    args ? (Array.isArray(args) ? args?.join(' ') : args) : ''
+  }`;
 
   return (
     <div>
@@ -341,7 +343,11 @@ export function ProcessTreeNode({
                   </SplitText>
                   <SplitText css={styles.darkText}>{`${dataOrDash(args?.[0])}`}</SplitText>
                   <SplitText>
-                    {args && args.length > 1 ? ' ' + args?.slice(1).join(' ') : ''}
+                    {args
+                      ? Array.isArray(args) && args.length > 1
+                        ? ' ' + args?.slice(1).join(' ')
+                        : args
+                      : ''}
                   </SplitText>
                 </TextHighlight>
               </span>
