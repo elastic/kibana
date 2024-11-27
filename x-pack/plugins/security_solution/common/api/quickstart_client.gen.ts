@@ -257,10 +257,6 @@ import type {
   StartEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/start.gen';
 import type {
-  GetEntityEngineStatsRequestParamsInput,
-  GetEntityEngineStatsResponse,
-} from './entity_analytics/entity_store/engine/stats.gen';
-import type {
   StopEntityEngineRequestParamsInput,
   StopEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/stop.gen';
@@ -1293,18 +1289,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getEntityEngineStats(props: GetEntityEngineStatsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetEntityEngineStats`);
-    return this.kbnClient
-      .request<GetEntityEngineStatsResponse>({
-        path: replaceParams('/api/entity_store/engines/{entityType}/stats', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async getEntityStoreStatus(props: GetEntityStoreStatusProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
     return this.kbnClient
@@ -2289,9 +2273,6 @@ export interface GetEndpointSuggestionsProps {
 }
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
-}
-export interface GetEntityEngineStatsProps {
-  params: GetEntityEngineStatsRequestParamsInput;
 }
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
