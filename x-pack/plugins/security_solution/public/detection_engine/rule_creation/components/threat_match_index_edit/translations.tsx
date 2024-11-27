@@ -27,10 +27,3 @@ export const RESET_TO_DEFAULT_THREAT_MATCH_INDEX = i18n.translate(
     defaultMessage: 'Reset to default index patterns',
   }
 );
-
-export const THREAT_MATCH_INDEX_FIELD_VALIDATION_REQUIRED_ERROR = i18n.translate(
-  'xpack.securitySolution.ruleManagement.ruleFields.threatMatchIndex.validation.requiredError',
-  {
-    defaultMessage: 'A minimum of one index pattern is required.',
-  }
-);

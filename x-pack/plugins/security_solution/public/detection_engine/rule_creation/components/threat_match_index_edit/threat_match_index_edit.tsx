@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { FieldConfig } from '../../../../shared_imports';
-import { customValidators } from '../../../../common/components/threat_match/helpers';
-import { UseField, fieldValidators } from '../../../../shared_imports';
+import { UseField } from '../../../../shared_imports';
 import { ThreatMatchIndexField } from './threat_match_index_field';
-import * as i18n from './translations';
+import { threatIndexPatternsRequiredValidator } from './validators/threat_index_patterns_required_validator';
+import { forbiddenIndexPatternValidator } from './validators/forbidden_index_pattern_validator';
 
 interface ThreatMatchIndexEditProps {
   path: string;
@@ -29,16 +29,10 @@ export function ThreatMatchIndexEdit({ path }: ThreatMatchIndexEditProps): JSX.E
 const THREAT_MATCH_INDEX_FIELD_CONFIG: FieldConfig<string[]> = {
   validations: [
     {
-      validator: fieldValidators.emptyField(
-        i18n.THREAT_MATCH_INDEX_FIELD_VALIDATION_REQUIRED_ERROR
-      ),
+      validator: threatIndexPatternsRequiredValidator,
     },
     {
-      validator: (...args) => {
-        const [{ value }] = args;
-
-        return customValidators.forbiddenField(value, '*');
-      },
+      validator: forbiddenIndexPatternValidator,
     },
   ],
 };
