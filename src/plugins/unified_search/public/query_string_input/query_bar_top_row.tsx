@@ -787,12 +787,17 @@ export const QueryBarTopRow = React.memo(
                   adHocDataview={props.indexPatterns?.[0]}
                 />
               )}
-              <EuiFlexItem
-                grow={!shouldShowDatePickerAsBadge()}
-                style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
-              >
-                {!isQueryLangSelected ? renderQueryInput() : null}
-              </EuiFlexItem>
+              {!isQueryLangSelected && shouldRenderQueryInput() && (
+                <EuiFlexItem
+                  grow={!shouldShowDatePickerAsBadge()}
+                  style={{
+                    minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320,
+                    maxWidth: '100%',
+                  }}
+                >
+                  {renderQueryInput()}
+                </EuiFlexItem>
+              )}
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}

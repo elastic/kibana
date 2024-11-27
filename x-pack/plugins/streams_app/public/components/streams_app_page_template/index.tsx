@@ -6,7 +6,7 @@
  */
 import { css } from '@emotion/css';
 import React from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
@@ -22,7 +22,10 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
     <PageTemplate
       pageSectionProps={{
         className: css`
-          max-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
+          max-height: calc(
+            100vh - var(--euiFixedHeadersOffset, 0) -
+              var(--kbnProjectHeaderAppActionMenuHeight, 48px)
+          );
           overflow: auto;
           padding-inline: 0px;
         `,
@@ -42,9 +45,9 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
         hasBorder={false}
         className={css`
           display: flex;
+          max-width: 100%;
         `}
       >
-        <EuiSpacer size="m" />
         {children}
       </EuiPanel>
     </PageTemplate>

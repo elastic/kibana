@@ -10,7 +10,6 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiPanel,
   EuiSelect,
   EuiSwitch,
@@ -67,7 +66,7 @@ export function ConditionForm(props: {
     }
   }, [syntaxEditor, props.condition]);
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexGroup>
         <EuiFlexItem grow>
           <EuiText
@@ -83,6 +82,7 @@ export function ConditionForm(props: {
           label={i18n.translate('xpack.streams.conditionEditor.switch', {
             defaultMessage: 'Syntax editor',
           })}
+          compressed
           checked={syntaxEditor}
           onChange={() => setSyntaxEditor(!syntaxEditor)}
         />
@@ -113,7 +113,7 @@ export function ConditionForm(props: {
           <pre>{JSON.stringify(props.condition, null, 2)}</pre>
         ))
       )}
-    </>
+    </EuiFlexGroup>
   );
 }
 
@@ -124,110 +124,112 @@ function FilterForm(props: {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow>
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
-        >
-          <EuiFieldText
-            data-test-subj="streamsAppFilterFormFieldText"
-            value={props.condition.field}
-            onChange={(e) => {
-              props.onConditionChange({ ...props.condition, field: e.target.value });
-            }}
-          />
-        </EuiFormRow>
+        <EuiFieldText
+          data-test-subj="streamsAppFilterFormFieldText"
+          aria-label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
+          compressed
+          placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
+            defaultMessage: 'Field',
+          })}
+          value={props.condition.field}
+          onChange={(e) => {
+            props.onConditionChange({ ...props.condition, field: e.target.value });
+          }}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow>
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.filter.operator', { defaultMessage: 'Operator' })}
-        >
-          <EuiSelect
-            data-test-subj="streamsAppFilterFormSelect"
-            options={[
-              {
-                value: 'eq',
-                text: 'equals',
-              },
-              {
-                value: 'neq',
-                text: 'not equals',
-              },
-              {
-                value: 'lt',
-                text: 'less than',
-              },
-              {
-                value: 'lte',
-                text: 'less than or equals',
-              },
-              {
-                value: 'gt',
-                text: 'greater than',
-              },
-              {
-                value: 'gte',
-                text: 'greater than or equals',
-              },
-              {
-                value: 'contains',
-                text: 'contains',
-              },
-              {
-                value: 'startsWith',
-                text: 'starts with',
-              },
-              {
-                value: 'endsWith',
-                text: 'ends with',
-              },
-              {
-                value: 'exists',
-                text: 'exists',
-              },
-              {
-                value: 'notExists',
-                text: 'not exists',
-              },
-            ]}
-            value={props.condition.operator}
-            onChange={(e) => {
-              const newCondition: Partial<FilterCondition> = {
-                ...props.condition,
-              };
+        <EuiSelect
+          aria-label={i18n.translate('xpack.streams.filter.operator', {
+            defaultMessage: 'Operator',
+          })}
+          data-test-subj="streamsAppFilterFormSelect"
+          options={[
+            {
+              value: 'eq',
+              text: 'equals',
+            },
+            {
+              value: 'neq',
+              text: 'not equals',
+            },
+            {
+              value: 'lt',
+              text: 'less than',
+            },
+            {
+              value: 'lte',
+              text: 'less than or equals',
+            },
+            {
+              value: 'gt',
+              text: 'greater than',
+            },
+            {
+              value: 'gte',
+              text: 'greater than or equals',
+            },
+            {
+              value: 'contains',
+              text: 'contains',
+            },
+            {
+              value: 'startsWith',
+              text: 'starts with',
+            },
+            {
+              value: 'endsWith',
+              text: 'ends with',
+            },
+            {
+              value: 'exists',
+              text: 'exists',
+            },
+            {
+              value: 'notExists',
+              text: 'not exists',
+            },
+          ]}
+          value={props.condition.operator}
+          compressed
+          onChange={(e) => {
+            const newCondition: Partial<FilterCondition> = {
+              ...props.condition,
+            };
 
-              const newOperator = e.target.value as FilterCondition['operator'];
-              if (
-                'value' in newCondition &&
-                (newOperator === 'exists' || newOperator === 'notExists')
-              ) {
-                delete newCondition.value;
-              } else if (!('value' in newCondition)) {
-                (newCondition as BinaryFilterCondition).value = '';
-              }
-              props.onConditionChange({
-                ...newCondition,
-                operator: newOperator,
-              } as FilterCondition);
-            }}
-          />
-        </EuiFormRow>
+            const newOperator = e.target.value as FilterCondition['operator'];
+            if (
+              'value' in newCondition &&
+              (newOperator === 'exists' || newOperator === 'notExists')
+            ) {
+              delete newCondition.value;
+            } else if (!('value' in newCondition)) {
+              (newCondition as BinaryFilterCondition).value = '';
+            }
+            props.onConditionChange({
+              ...newCondition,
+              operator: newOperator,
+            } as FilterCondition);
+          }}
+        />
       </EuiFlexItem>
 
       {'value' in props.condition && (
         <EuiFlexItem grow>
-          <EuiFormRow
-            label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
-          >
-            <EuiFieldText
-              value={String(props.condition.value)}
-              data-test-subj="streamsAppFilterFormValueText"
-              onChange={(e) => {
-                props.onConditionChange({
-                  ...props.condition,
-                  value: e.target.value,
-                } as BinaryFilterCondition);
-              }}
-            />
-          </EuiFormRow>
+          <EuiFieldText
+            aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
+            placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
+              defaultMessage: 'Value',
+            })}
+            compressed
+            value={String(props.condition.value)}
+            data-test-subj="streamsAppFilterFormValueText"
+            onChange={(e) => {
+              props.onConditionChange({
+                ...props.condition,
+                value: e.target.value,
+              } as BinaryFilterCondition);
+            }}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -287,7 +289,14 @@ function AndDisplay(props: { condition: AndCondition }) {
 
 function FilterDisplay(props: { condition: FilterCondition }) {
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      className={css`
+        overflow-x: scroll;
+        white-space: nowrap;
+      `}
+    >
       <EuiBadge>
         {i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
       </EuiBadge>
