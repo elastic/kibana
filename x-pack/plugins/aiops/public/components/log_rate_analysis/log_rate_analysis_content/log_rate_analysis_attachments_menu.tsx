@@ -27,6 +27,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
@@ -36,12 +37,14 @@ const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashb
 
 interface LogRateAnalysisAttachmentsMenuProps {
   windowParameters?: WindowParameters;
-  hasSignificantItemsToAttach: boolean;
+  showLogRateAnalysisResults: boolean;
+  significantItems: SignificantItem[];
 }
 
 export const LogRateAnalysisAttachmentsMenu = ({
   windowParameters,
-  hasSignificantItemsToAttach,
+  showLogRateAnalysisResults,
+  significantItems,
 }: LogRateAnalysisAttachmentsMenuProps) => {
   const {
     application: { capabilities },
@@ -65,6 +68,8 @@ export const LogRateAnalysisAttachmentsMenu = ({
     create: false,
     update: false,
   };
+
+  const isCasesAttachmentEnabled = showLogRateAnalysisResults && significantItems.length > 0;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
@@ -90,6 +95,19 @@ export const LogRateAnalysisAttachmentsMenu = ({
     [dataView.id, embeddable, applyTimeRange, timeRange]
   );
 
+  const caseAttachmentTooltipContent = useMemo(() => {
+    if (!showLogRateAnalysisResults) {
+      return i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseTooltipNoAnalysis', {
+        defaultMessage: 'Run the analysis first to add results to a case',
+      });
+    }
+    if (significantItems.length === 0) {
+      return i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseTooltipNoResults', {
+        defaultMessage: 'Cannot add to case because the analysis did not produce any results',
+      });
+    }
+  }, [showLogRateAnalysisResults, significantItems.length]);
+
   const panels = useMemo<Exclude<EuiContextMenuProps['panels'], undefined>>(() => {
     return [
       {
@@ -114,17 +132,11 @@ export const LogRateAnalysisAttachmentsMenu = ({
                     defaultMessage: 'Add to case',
                   }),
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToCaseButton',
-                  disabled: !hasSignificantItemsToAttach,
-                  ...(!hasSignificantItemsToAttach
+                  disabled: !isCasesAttachmentEnabled,
+                  ...(!isCasesAttachmentEnabled
                     ? {
                         toolTipProps: { position: 'left' as const },
-                        toolTipContent: i18n.translate(
-                          'xpack.aiops.logRateAnalysis.attachToCaseTooltipContent',
-                          {
-                            defaultMessage:
-                              'Cannot add to case because the analysis did not produce any results',
-                          }
-                        ),
+                        toolTipContent: caseAttachmentTooltipContent,
                       }
                     : {}),
                   onClick: () => {
@@ -185,7 +197,8 @@ export const LogRateAnalysisAttachmentsMenu = ({
     canEditDashboards,
     canUpdateCase,
     canCreateCase,
-    hasSignificantItemsToAttach,
+    isCasesAttachmentEnabled,
+    caseAttachmentTooltipContent,
     applyTimeRange,
     openCasesModalCallback,
     dataView.id,

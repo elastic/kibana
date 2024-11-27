@@ -206,8 +206,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 
   const changePointType = documentCountStats?.changePoint?.type;
 
-  const hasSignificantItemsToAttach = significantItems.length > 0;
-
   return (
     <EuiPanel
       hasBorder={false}
@@ -222,7 +220,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           attachmentsMenu={
             <LogRateAnalysisAttachmentsMenu
               windowParameters={windowParameters}
-              hasSignificantItemsToAttach={hasSignificantItemsToAttach}
+              showLogRateAnalysisResults={showLogRateAnalysisResults}
+              significantItems={significantItems}
             />
           }
         />
