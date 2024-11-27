@@ -12,8 +12,6 @@ import { omit } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { isErrorEmbeddable, openAddPanelFlyout } from '@kbn/embeddable-plugin/public';
-
 import {
   BehaviorSubject,
   Subject,
@@ -974,8 +972,6 @@ export class DashboardContainer
   };
 
   public showSource() {
-
-
     const flyout = coreServices.overlays.openFlyout(
       toMountPoint(
         <ShowSourceFlyout
@@ -983,8 +979,8 @@ export class DashboardContainer
             this.clearOverlays();
           }}
           dashboardApi={this}
-        />, coreServices
-
+        />,
+        coreServices
       ),
       {
         size: 'm',
