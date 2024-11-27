@@ -64,8 +64,7 @@ export const GridPanel = forwardRef<
 
     useEffect(
       () => {
-        /** Update the styles of the panel via a subscription to prevent re-renders */
-        const styleSubscription = combineLatest([
+        const activePanelStyleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
@@ -113,7 +112,6 @@ export const GridPanel = forwardRef<
                 ref.style.gridColumnEnd = ``;
                 ref.style.gridRowEnd = ``;
               }
-              return;
             } else {
               ref.style.zIndex = '0';
 
@@ -132,18 +130,8 @@ export const GridPanel = forwardRef<
             }
           });
 
-        return () => {
-          styleSubscription.unsubscribe();
-        };
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
-    );
-
-    useEffect(
-      () => {
         /** Update the styles of the panel via a subscription to prevent re-renders */
-        const styleSubscription = gridLayoutStateManager.expandedPanelId$
+        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
@@ -153,24 +141,12 @@ export const GridPanel = forwardRef<
 
             if (expandedPanelId && expandedPanelId === panelId) {
               ref.classList.add('kbnGridPanel--isExpanded');
-              return;
             } else {
               ref.classList.remove('kbnGridPanel--isExpanded');
             }
           });
 
-        return () => {
-          styleSubscription.unsubscribe();
-        };
-      },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
-    );
-
-    useEffect(
-      () => {
-        /** Update the styles of the panel via a subscription to prevent re-renders */
-        const styleSubscription = gridLayoutStateManager.isMobileView$
+        const mobileViewStyleSubscription = gridLayoutStateManager.isMobileView$
           .pipe(skip(1))
           .subscribe((isMobileView) => {
             if (!isMobileView) {
@@ -196,7 +172,9 @@ export const GridPanel = forwardRef<
           });
 
         return () => {
-          styleSubscription.unsubscribe();
+          expandedPanelStyleSubscription.unsubscribe();
+          mobileViewStyleSubscription.unsubscribe();
+          activePanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
