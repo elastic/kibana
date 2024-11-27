@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import { NonEmptyString } from './primitives.gen';
+
+describe('NonEmptyString', () => {
+  test('accepts newline chars', () => {
+    expect(() => NonEmptyString.parse('hello \nworld')).not.toThrow();
+  });
+  test('rejects comment with just spaces', () => {
+    expect(() => NonEmptyString.parse('    ')).toThrow();
+  });
+  test('accepts null', () => {
+    expect(() => NonEmptyString.parse(null)).not.toThrow();
+  });
+  test('accepts undefined', () => {
+    expect(() => NonEmptyString.parse(undefined)).not.toThrow();
+  });
+});
