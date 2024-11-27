@@ -68,7 +68,7 @@ Deprecated endpoints will fail with a 404 status code starting from version 9.0.
 
 *Action* +
 Remove references to `GET /api/cases/status` endpoint.
-Replace references to endpoints listed as deprecated by it's replacement. See `Details` section 
+Replace references to deprecated endpoints with the replacements listed in the breaking change details.
 ====
 
 [[breaking-199656]]
