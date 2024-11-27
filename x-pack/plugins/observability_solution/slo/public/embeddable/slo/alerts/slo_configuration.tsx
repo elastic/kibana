@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
 import {
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiTitle,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiSpacer,
   EuiSwitch,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
-
+import React, { useState } from 'react';
 import { SloSelector } from './slo_selector';
 import type { EmbeddableSloProps, SloItem } from './types';
 
@@ -47,7 +47,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
   return (
     <EuiFlyout
       onClose={onCancel}
-      css={`
+      css={css`
         min-width: 550px;
       `}
     >

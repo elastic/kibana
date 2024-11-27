@@ -13,5 +13,5 @@ import { InfraMetricsClient } from '../../../lib/helpers/get_infra_metrics_clien
 export interface GetHostParameters extends GetInfraMetricsRequestBodyPayload {
   infraMetricsClient: InfraMetricsClient;
   alertsClient: InfraAlertsClient;
-  apmDataAccessServices?: ApmDataAccessServicesWrapper;
+  apmDataAccessServices: ApmDataAccessServicesWrapper;
 }

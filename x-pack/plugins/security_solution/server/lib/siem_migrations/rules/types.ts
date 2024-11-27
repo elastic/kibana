@@ -10,7 +10,15 @@ import type {
   RuleMigrationResource,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 
-export type Stored<T extends object> = T & { _id: string };
+export type Stored<T extends object> = T & { id: string };
 
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;
+
+export interface Integration {
+  title: string;
+  id: string;
+  description: string;
+  data_streams: Array<{ dataset: string; title: string; index_pattern: string }>;
+  elser_embedding: string;
+}
