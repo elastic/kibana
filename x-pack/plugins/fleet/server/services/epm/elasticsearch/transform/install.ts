@@ -45,10 +45,11 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 import { isUserSettingsTemplate } from '../template/utils';
 
+import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
+
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
-import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from './transform_utils';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
