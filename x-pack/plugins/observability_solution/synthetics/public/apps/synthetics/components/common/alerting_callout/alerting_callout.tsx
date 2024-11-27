@@ -114,13 +114,16 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
         content={MISSING_MONITOR_STATUS_CONTENT}
         title={MISSING_MONITOR_STATUS_HEADER}
         buttonLabel={CONFIGURE_CUSTOM_RULE_LABEL}
-        createRuleTestId="xpack.plugins.synthetics.monitorStatusRuleMissingCallout.configureNowButton"
-        enableDefaultRuleTestId="xpack.plugins.synthetics.monitorStatusRuleMissingCallout.enableDefaultRule"
+        createRuleTestId="xpack.synthetics.monitorStatusRuleMissingCallout.configureNowButton"
+        enableDefaultRuleTestId="xpack.synthetics.monitorStatusRuleMissingCallout.enableDefaultRule"
         defaultRuleType={SYNTHETICS_STATUS_RULE}
         manageRulesProps={toRulesProps(
-          'xpack.plugins.synthetics.monitorStatusRuleMissingCallout.manageRulesButton',
+          'xpack.synthetics.monitorStatusRuleMissingCallout.manageRulesButton',
           url
         )}
+        tooltipContent={i18n.translate('xpack.synthetics.monitorStatusRuleMissingCallout.tooltip', {
+          defaultMessage: `Turns on a default rule that will create an alert any time a monitor's status is down.`,
+        })}
       />
       <MissingRuleCallout
         showCallout={showTlsCallout}
@@ -129,15 +132,22 @@ export const AlertingCallout = ({ isAlertingEnabled }: { isAlertingEnabled?: boo
         title={MISSING_TLS_RULE_HEADER}
         buttonLabel={CONFIGURE_CUSTOM_RULE_LABEL}
         defaultRuleType={SYNTHETICS_TLS_RULE}
-        createRuleTestId="xpack.plugins.synthetics.tlsRuleMissingCallout.configureNowButton"
-        enableDefaultRuleTestId="xpack.plugins.synthetics.tlsRuleMissingCallout.enableDefaultRule"
+        createRuleTestId="xpack.synthetics.tlsRuleMissingCallout.configureNowButton"
+        enableDefaultRuleTestId="xpack.synthetics.tlsRuleMissingCallout.enableDefaultRule"
         manageRulesProps={toRulesProps(
-          'xpack.plugins.synthetics.tlsRuleMissingCallout.manageRulesButton',
+          'xpack.synthetics.tlsRuleMissingCallout.manageRulesButton',
           url
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.synthetics.synthetics.tlsRuleMissingCallout.tooltip',
+          {
+            defaultMessage:
+              'Turns on a default rule that will create an alert for any HTTP monitor that logs certificate issues.',
+          }
         )}
       />
       <MissingConnectorCallout
-        data-test-subj="xpack.plugins.synthetics.missingConnector.manage"
+        data-test-subj="xpack.synthetics.missingConnector.manage"
         showCallout={showConnectorCallout}
         url={url}
       />
@@ -172,6 +182,7 @@ interface MissingRuleCalloutProps {
   defaultRuleType: FlyoutIdArgument;
   createRuleTestId: string;
   enableDefaultRuleTestId: string;
+  tooltipContent: string;
   manageRulesProps?: ManageRulesProps;
 }
 
@@ -213,15 +224,16 @@ const MissingConnectorCallout = ({
 };
 
 const MissingRuleCallout = ({
-  showCallout,
-  setFlyoutVisibleArgs,
-  title,
   buttonLabel,
   content,
-  manageRulesProps,
   createRuleTestId,
-  enableDefaultRuleTestId,
   defaultRuleType,
+  enableDefaultRuleTestId,
+  manageRulesProps,
+  setFlyoutVisibleArgs,
+  showCallout,
+  title,
+  tooltipContent,
 }: MissingRuleCalloutProps) => {
   const dispatch = useDispatch();
   const showFlyout = useCallback(
@@ -256,7 +268,7 @@ const MissingRuleCallout = ({
               <EuiFlexItem>
                 <EuiIconTip
                   color="warning"
-                  content="Enable default rule"
+                  content={tooltipContent}
                   position="top"
                   type="iInCircle"
                 />
