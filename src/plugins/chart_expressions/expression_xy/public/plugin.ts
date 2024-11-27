@@ -95,6 +95,7 @@ export class ExpressionXyPlugin {
         usageCollection,
         activeCursor,
         paletteService,
+        palettes$: palettes.palettes$,
         useLegacyTimeAxis,
         eventAnnotationService,
         timeZone: getTimeZone(core.uiSettings),

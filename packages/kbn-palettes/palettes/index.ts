@@ -44,3 +44,4 @@ export const getPalettes = (darkMode: boolean) =>
 
 export { elasticPalette } from './categorical';
 export * from './get_kbn_palettes';
+export * from './vis_state_colors';

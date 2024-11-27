@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { palette, systemPalette } from '../common';
 
@@ -42,8 +42,7 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
     this.themeService.init(core.theme);
-    // TODO: make this reactive to changes in $theme
-    this.palettes = this.paletteService.setup(core.theme.getTheme());
+    this.palettes = this.paletteService.setup(core.theme);
     this.activeCursor.setup();
 
     return {
@@ -52,10 +51,10 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
     };
   }
 
-  public start(): ChartsPluginStart {
+  public start(core: CoreStart): ChartsPluginStart {
     return {
       theme: this.themeService,
-      palettes: this.palettes!,
+      palettes: this.palettes ?? this.paletteService.setup(core.theme),
       activeCursor: this.activeCursor,
     };
   }

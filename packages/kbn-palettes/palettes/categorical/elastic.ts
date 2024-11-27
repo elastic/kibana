@@ -17,7 +17,7 @@ import { KbnCategoricalPalette } from '../../classes/categorical_palette';
  * This is not correctly returning the updated vis colors from eui.
  * All gradient function work correctly.
  */
-export const elasticPaletteBad = new KbnColorFnPalette({
+export const elasticPalette = new KbnColorFnPalette({
   id: KbnPalette.Default,
   type: 'categorical',
   aliases: [
@@ -33,7 +33,7 @@ export const elasticPaletteBad = new KbnColorFnPalette({
   colorFn: (n) => euiPaletteColorBlind({ rotations: Math.ceil(n / 10) }).slice(0, n),
 });
 
-export const elasticPalette = new KbnCategoricalPalette({
+export const elasticPaletteCustom = new KbnCategoricalPalette({
   id: KbnPalette.Default,
   aliases: [
     'elastic_borealis', // placeholder - not yet used
