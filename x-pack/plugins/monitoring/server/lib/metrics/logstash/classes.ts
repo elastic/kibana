@@ -7,11 +7,11 @@
 
 /* eslint-disable max-classes-per-file */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ClusterMetric, Metric, MetricOptions } from '../classes';
-import { LARGE_FLOAT } from '../../../../common/formatting';
+import _ from 'lodash';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
+import { LARGE_FLOAT } from '../../../../common/formatting';
+import { ClusterMetric, Metric, MetricOptions } from '../classes';
 
 const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.msTimeUnitLabel', {
   defaultMessage: 'ms',
@@ -411,7 +411,7 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
 
 type LogstashPipelineNodeCountMetricOptions = Pick<
   MetricOptions,
-  'field' | 'label' | 'description' | 'format' | 'units'
+  'field' | 'label' | 'mbField' | 'description' | 'format' | 'units'
 > &
   Partial<Pick<MetricOptions, 'uuidField'>>;
 
