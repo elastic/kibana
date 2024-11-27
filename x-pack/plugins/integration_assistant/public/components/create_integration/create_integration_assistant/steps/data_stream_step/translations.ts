@@ -191,7 +191,7 @@ export const RETRY = i18n.translate('xpack.integrationAssistant.step.dataStream.
 export const DECODE_CEF_LINK = i18n.translate(
   'xpack.integrationAssistant.errors.cefFormat.decodeLink',
   {
-    defaultMessage: 'CEF format not supported yet. Instead please use CEF Integration: {link}',
+    defaultMessage: 'CEF format not supported yet. Instead please use CEF Integration:',
   }
 );
 
