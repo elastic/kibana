@@ -107,7 +107,12 @@ export function AlertsOverview() {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={[AlertConsumers.APM, AlertConsumers.OBSERVABILITY]}
+              featureIds={[
+                AlertConsumers.APM,
+                AlertConsumers.OBSERVABILITY,
+                AlertConsumers.SLO,
+                AlertConsumers.LOGS,
+              ]}
               query={esQuery}
               showAlertStatusWithFlapping
               cellContext={{ observabilityRuleTypeRegistry }}
