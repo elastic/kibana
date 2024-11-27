@@ -61,14 +61,14 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 
 `GET /api/cases/<case_id>/user_actions` has been replaced by `GET /api/cases/<case_id>/user_actions/_find` released in v8.7
 
-`includeComments` parameter in `GET /api/cases/{case_id}`has been deprecated. Use `GET /api/cases/{case_id}/comments/_find` instead, released in v7.13
+`includeComments` parameter in `GET /api/cases/{case_id}` has been deprecated. Use `GET /api/cases/{case_id}/comments/_find` instead, released in v7.13
 
 *Impact* +
 Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
 
 *Action* +
 Remove references to `GET /api/cases/status` endpoint.
-Replace references to endpoints listed as deprecated by it's replacement. See `Details` section 
+Replace references to deprecated endpoints with the replacements listed in the breaking change details.
 ====
 
 [[breaking-199656]]
