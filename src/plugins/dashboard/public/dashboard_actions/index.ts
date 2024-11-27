@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
@@ -16,19 +16,17 @@ import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { ExpandPanelAction } from './expand_panel_action';
 import { ExportCSVAction } from './export_csv_action';
 import { FiltersNotificationAction } from './filters_notification_action';
-import { LegacyLibraryNotificationAction } from './legacy_library_notification_action';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
-import { LibraryNotificationAction } from './library_notification_action';
 
 interface BuildAllDashboardActionsProps {
-  core: CoreStart;
   allowByValueEmbeddables?: boolean;
   plugins: DashboardStartDependencies;
 }
 
+export const DASHBOARD_ACTION_GROUP = { id: 'dashboard_actions', order: 10 } as const;
+
 export const buildAllDashboardActions = async ({
-  core,
   plugins,
   allowByValueEmbeddables,
 }: BuildAllDashboardActionsProps) => {
@@ -63,21 +61,11 @@ export const buildAllDashboardActions = async ({
     uiActions.registerAction(unlinkFromLibraryAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
-    const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
-    uiActions.registerAction(libraryNotificationAction);
-    uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
-
     const legacyUnlinkFromLibraryAction = new LegacyUnlinkFromLibraryAction();
     uiActions.registerAction(legacyUnlinkFromLibraryAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, legacyUnlinkFromLibraryAction.id);
 
-    const legacyLibraryNotificationAction = new LegacyLibraryNotificationAction(
-      legacyUnlinkFromLibraryAction
-    );
-    uiActions.registerAction(legacyLibraryNotificationAction);
-    uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, legacyLibraryNotificationAction.id);
-
-    const copyToDashboardAction = new CopyToDashboardAction(core);
+    const copyToDashboardAction = new CopyToDashboardAction();
     uiActions.registerAction(copyToDashboardAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, copyToDashboardAction.id);
   }

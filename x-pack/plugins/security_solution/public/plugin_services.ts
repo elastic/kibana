@@ -19,6 +19,7 @@ import type { ConfigSettings } from '../common/config_settings';
 import { parseConfigSettings } from '../common/config_settings';
 import { APP_UI_ID } from '../common/constants';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
+import { createSiemMigrationsService } from './siem_migrations/service';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import type {
   PluginStart,
@@ -70,16 +71,21 @@ export class PluginServices {
       { prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion }
     );
 
+    const minRefreshInterval =
+      pluginsSetup.data.query.timefilter.timefilter.getMinRefreshInterval();
+
     this.queryService.setup({
       uiSettings: coreSetup.uiSettings,
       storage: this.storage,
       nowProvider: new NowProvider(),
+      minRefreshInterval,
     });
 
     this.timelineQueryService.setup({
       uiSettings: coreSetup.uiSettings,
       storage: this.storage,
       nowProvider: new NowProvider(),
+      minRefreshInterval,
     });
   }
 
@@ -147,6 +153,7 @@ export class PluginServices {
       customDataService,
       timelineDataService,
       topValuesPopover: new TopValuesPopoverService(),
+      siemMigrations: await createSiemMigrationsService(coreStart),
       ...(params && {
         onAppLeave: params.onAppLeave,
         setHeaderActionMenu: params.setHeaderActionMenu,

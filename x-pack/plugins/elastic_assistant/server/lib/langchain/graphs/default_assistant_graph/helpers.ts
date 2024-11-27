@@ -7,6 +7,7 @@
 
 import agent, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
+import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -16,17 +17,17 @@ import { AIMessageChunk } from '@langchain/core/messages';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
+import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  bedrockChatEnabled: boolean;
-  inputs: { input: string };
-  llmType: string | undefined;
+  inputs: GraphInputs;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
 }
 
@@ -39,17 +40,17 @@ interface StreamGraphParams {
  * @param logger
  * @param onLlmResponse
  * @param request
+ * @param telemetryTracer
  * @param traceOptions
  */
 export const streamGraph = async ({
   apmTracer,
-  llmType,
-  bedrockChatEnabled,
   assistantGraph,
   inputs,
   logger,
   onLlmResponse,
   request,
+  telemetryTracer,
   traceOptions,
 }: StreamGraphParams): Promise<StreamResponseWithHeaders> => {
   let streamingSpan: Span | undefined;
@@ -82,24 +83,30 @@ export const streamGraph = async ({
     streamingSpan?.end();
   };
 
-  if ((llmType === 'bedrock' || llmType === 'gemini') && bedrockChatEnabled) {
+  // Stream is from tool calling agent or structured chat agent
+  if (inputs.isOssModel || inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') {
     const stream = await assistantGraph.streamEvents(
       inputs,
       {
-        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+        callbacks: [
+          apmTracer,
+          ...(traceOptions?.tracers ?? []),
+          ...(telemetryTracer ? [telemetryTracer] : []),
+        ],
         runName: DEFAULT_ASSISTANT_GRAPH_ID,
         tags: traceOptions?.tags ?? [],
         version: 'v2',
         streamMode: 'values',
       },
-      llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+      inputs.isOssModel || inputs?.llmType === 'bedrock'
+        ? { includeNames: ['Summarizer'] }
+        : undefined
     );
 
     for await (const { event, data, tags } of stream) {
       if ((tags || []).includes(AGENT_NODE_TAG)) {
         if (event === 'on_chat_model_stream') {
           const msg = data.chunk as AIMessageChunk;
-
           if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
             push({ payload: msg.content as string, type: 'content' });
           }
@@ -116,22 +123,22 @@ export const streamGraph = async ({
     }
     return responseWithHeaders;
   }
+
+  // Stream is from openai functions agent
   let finalMessage = '';
   let conversationId: string | undefined;
   const stream = assistantGraph.streamEvents(inputs, {
-    callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+    callbacks: [
+      apmTracer,
+      ...(traceOptions?.tracers ?? []),
+      ...(telemetryTracer ? [telemetryTracer] : []),
+    ],
     runName: DEFAULT_ASSISTANT_GRAPH_ID,
     streamMode: 'values',
     tags: traceOptions?.tags ?? [],
     version: 'v1',
   });
 
-  let currentOutput = '';
-  let finalOutputIndex = -1;
-  const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
-  let streamingFinished = false;
-  const finalOutputStopRegex = /(?<!\\)"/;
-  let extraOutput = '';
   const processEvent = async () => {
     try {
       const { value, done } = await stream.next();
@@ -157,41 +164,6 @@ export const streamGraph = async ({
             if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
               handleStreamEnd(generations[0]?.text ?? finalMessage);
             }
-          }
-        }
-        if (event.name === 'ActionsClientSimpleChatModel') {
-          if (event.event === 'on_llm_stream') {
-            const chunk = event.data?.chunk;
-
-            const msg = chunk.content;
-            if (finalOutputIndex === -1) {
-              currentOutput += msg;
-              // Remove whitespace to simplify parsing
-              const noWhitespaceOutput = currentOutput.replace(/\s/g, '');
-              if (noWhitespaceOutput.includes(finalOutputStartToken)) {
-                const nonStrippedToken = '"action_input": "';
-                finalOutputIndex = currentOutput.indexOf(nonStrippedToken);
-                const contentStartIndex = finalOutputIndex + nonStrippedToken.length;
-                extraOutput = currentOutput.substring(contentStartIndex);
-                push({ payload: extraOutput, type: 'content' });
-                finalMessage += extraOutput;
-              }
-            } else if (!streamingFinished && !didEnd) {
-              const finalOutputEndIndex = msg.search(finalOutputStopRegex);
-              if (finalOutputEndIndex !== -1) {
-                extraOutput = msg.substring(0, finalOutputEndIndex);
-                streamingFinished = true;
-                if (extraOutput.length > 0) {
-                  push({ payload: extraOutput, type: 'content' });
-                  finalMessage += extraOutput;
-                }
-              } else {
-                push({ payload: chunk.content, type: 'content' });
-                finalMessage += chunk.content;
-              }
-            }
-          } else if (event.event === 'on_llm_end' && streamingFinished && !didEnd) {
-            handleStreamEnd(finalMessage);
           }
         }
       }
@@ -225,8 +197,9 @@ export const streamGraph = async ({
 interface InvokeGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
-  inputs: { input: string };
+  inputs: GraphInputs;
   onLlmResponse?: OnLlmResponse;
+  telemetryTracer?: TelemetryTracer;
   traceOptions?: TraceOptions;
 }
 interface InvokeGraphResponse {
@@ -242,6 +215,7 @@ interface InvokeGraphResponse {
  * @param assistantGraph
  * @param inputs
  * @param onLlmResponse
+ * @param telemetryTracer
  * @param traceOptions
  */
 export const invokeGraph = async ({
@@ -249,6 +223,7 @@ export const invokeGraph = async ({
   assistantGraph,
   inputs,
   onLlmResponse,
+  telemetryTracer,
   traceOptions,
 }: InvokeGraphParams): Promise<InvokeGraphResponse> => {
   return withAssistantSpan(DEFAULT_ASSISTANT_GRAPH_ID, async (span) => {
@@ -262,7 +237,11 @@ export const invokeGraph = async ({
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
     const r = await assistantGraph.invoke(inputs, {
-      callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+      callbacks: [
+        apmTracer,
+        ...(traceOptions?.tracers ?? []),
+        ...(telemetryTracer ? [telemetryTracer] : []),
+      ],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
     });

@@ -51,181 +51,280 @@ import {
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
 import { ReadAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
 import { UpdateAssetsStatusRequestQueryInput } from '@kbn/osquery-plugin/common/api/asset/assets.gen';
+import { routeWithNamespace } from '../../common/utils/security_solution';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
-    getAgentDetails(props: GetAgentDetailsProps) {
+    getAgentDetails(props: GetAgentDetailsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(replaceParams('/internal/osquery/fleet_wrapper/agents/{id}', props.params))
+        .get(
+          routeWithNamespace(
+            replaceParams('/internal/osquery/fleet_wrapper/agents/{id}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getAgentPackagePolicies() {
+    getAgentPackagePolicies(kibanaSpace: string = 'default') {
       return supertest
-        .get('/internal/osquery/fleet_wrapper/package_policies')
+        .get(routeWithNamespace('/internal/osquery/fleet_wrapper/package_policies', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getAgentPolicies() {
+    getAgentPolicies(kibanaSpace: string = 'default') {
       return supertest
-        .get('/internal/osquery/fleet_wrapper/agent_policies')
+        .get(routeWithNamespace('/internal/osquery/fleet_wrapper/agent_policies', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getAgentPolicy(props: GetAgentPolicyProps) {
+    getAgentPolicy(props: GetAgentPolicyProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(replaceParams('/internal/osquery/fleet_wrapper/agent_policies/{id}', props.params))
+        .get(
+          routeWithNamespace(
+            replaceParams('/internal/osquery/fleet_wrapper/agent_policies/{id}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getAgents(props: GetAgentsProps) {
+    getAgents(props: GetAgentsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/internal/osquery/fleet_wrapper/agents')
+        .get(routeWithNamespace('/internal/osquery/fleet_wrapper/agents', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    osqueryCreateLiveQuery(props: OsqueryCreateLiveQueryProps) {
+    /**
+     * Create and run a live query.
+     */
+    osqueryCreateLiveQuery(props: OsqueryCreateLiveQueryProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/osquery/live_queries')
+        .post(routeWithNamespace('/api/osquery/live_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    osqueryCreatePacks(props: OsqueryCreatePacksProps) {
+    /**
+     * Create a query pack.
+     */
+    osqueryCreatePacks(props: OsqueryCreatePacksProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/osquery/packs')
+        .post(routeWithNamespace('/api/osquery/packs', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    osqueryCreateSavedQuery(props: OsqueryCreateSavedQueryProps) {
+    /**
+     * Create and run a saved query.
+     */
+    osqueryCreateSavedQuery(props: OsqueryCreateSavedQueryProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/api/osquery/saved_queries')
+        .post(routeWithNamespace('/api/osquery/saved_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    osqueryDeletePacks(props: OsqueryDeletePacksProps) {
+    /**
+     * Delete a query pack using the pack ID.
+     */
+    osqueryDeletePacks(props: OsqueryDeletePacksProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(replaceParams('/api/osquery/packs/{id}', props.params))
+        .delete(
+          routeWithNamespace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    osqueryDeleteSavedQuery(props: OsqueryDeleteSavedQueryProps) {
+    /**
+     * Delete a saved query using the query ID.
+     */
+    osqueryDeleteSavedQuery(props: OsqueryDeleteSavedQueryProps, kibanaSpace: string = 'default') {
       return supertest
-        .delete(replaceParams('/api/osquery/saved_queries/{id}', props.params))
+        .delete(
+          routeWithNamespace(
+            replaceParams('/api/osquery/saved_queries/{id}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    osqueryFindLiveQueries(props: OsqueryFindLiveQueriesProps) {
+    /**
+     * Get a list of all live queries.
+     */
+    osqueryFindLiveQueries(props: OsqueryFindLiveQueriesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/osquery/live_queries')
+        .get(routeWithNamespace('/api/osquery/live_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    osqueryFindPacks(props: OsqueryFindPacksProps) {
+    /**
+     * Get a list of all query packs.
+     */
+    osqueryFindPacks(props: OsqueryFindPacksProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/osquery/packs')
+        .get(routeWithNamespace('/api/osquery/packs', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    osqueryFindSavedQueries(props: OsqueryFindSavedQueriesProps) {
+    /**
+     * Get a list of all saved queries.
+     */
+    osqueryFindSavedQueries(props: OsqueryFindSavedQueriesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/api/osquery/saved_queries')
+        .get(routeWithNamespace('/api/osquery/saved_queries', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    osqueryGetLiveQueryDetails(props: OsqueryGetLiveQueryDetailsProps) {
+    /**
+     * Get the details of a live query using the query ID.
+     */
+    osqueryGetLiveQueryDetails(
+      props: OsqueryGetLiveQueryDetailsProps,
+      kibanaSpace: string = 'default'
+    ) {
       return supertest
-        .get(replaceParams('/api/osquery/live_queries/{id}', props.params))
+        .get(
+          routeWithNamespace(
+            replaceParams('/api/osquery/live_queries/{id}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    osqueryGetLiveQueryResults(props: OsqueryGetLiveQueryResultsProps) {
+    /**
+     * Get the results of a live query using the query action ID.
+     */
+    osqueryGetLiveQueryResults(
+      props: OsqueryGetLiveQueryResultsProps,
+      kibanaSpace: string = 'default'
+    ) {
       return supertest
-        .get(replaceParams('/api/osquery/live_queries/{id}/results/{actionId}', props.params))
+        .get(
+          routeWithNamespace(
+            replaceParams('/api/osquery/live_queries/{id}/results/{actionId}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    osqueryGetPacksDetails(props: OsqueryGetPacksDetailsProps) {
+    /**
+     * Get the details of a query pack using the pack ID.
+     */
+    osqueryGetPacksDetails(props: OsqueryGetPacksDetailsProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(replaceParams('/api/osquery/packs/{id}', props.params))
+        .get(
+          routeWithNamespace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    osqueryGetSavedQueryDetails(props: OsqueryGetSavedQueryDetailsProps) {
+    /**
+     * Get the details of a saved query using the query ID.
+     */
+    osqueryGetSavedQueryDetails(
+      props: OsqueryGetSavedQueryDetailsProps,
+      kibanaSpace: string = 'default'
+    ) {
       return supertest
-        .get(replaceParams('/api/osquery/saved_queries/{id}', props.params))
+        .get(
+          routeWithNamespace(
+            replaceParams('/api/osquery/saved_queries/{id}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    osqueryUpdatePacks(props: OsqueryUpdatePacksProps) {
+    /**
+      * Update a query pack using the pack ID.
+> info
+> You cannot update a prebuilt pack.
+
+      */
+    osqueryUpdatePacks(props: OsqueryUpdatePacksProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(replaceParams('/api/osquery/packs/{id}', props.params))
+        .put(
+          routeWithNamespace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace)
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    osqueryUpdateSavedQuery(props: OsqueryUpdateSavedQueryProps) {
+    /**
+      * Update a saved query using the query ID.
+> info
+> You cannot update a prebuilt saved query.
+
+      */
+    osqueryUpdateSavedQuery(props: OsqueryUpdateSavedQueryProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(replaceParams('/api/osquery/saved_queries/{id}', props.params))
+        .put(
+          routeWithNamespace(
+            replaceParams('/api/osquery/saved_queries/{id}', props.params),
+            kibanaSpace
+          )
+        )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    readAssetsStatus(props: ReadAssetsStatusProps) {
+    readAssetsStatus(props: ReadAssetsStatusProps, kibanaSpace: string = 'default') {
       return supertest
-        .get('/internal/osquery/assets')
+        .get(routeWithNamespace('/internal/osquery/assets', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    readInstallationStatus() {
+    readInstallationStatus(kibanaSpace: string = 'default') {
       return supertest
-        .get('/internal/osquery/status')
+        .get(routeWithNamespace('/internal/osquery/status', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    readPrivilegesCheck() {
+    readPrivilegesCheck(kibanaSpace: string = 'default') {
       return supertest
-        .get('/internal/osquery/privileges_check')
+        .get(routeWithNamespace('/internal/osquery/privileges_check', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    updateAssetsStatus(props: UpdateAssetsStatusProps) {
+    updateAssetsStatus(props: UpdateAssetsStatusProps, kibanaSpace: string = 'default') {
       return supertest
-        .post('/internal/osquery/assets/update')
+        .post(routeWithNamespace('/internal/osquery/assets/update', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

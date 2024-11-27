@@ -16,6 +16,7 @@ import {
 } from './helpers';
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
+// eslint-disable-next-line no-restricted-imports
 import { Router } from 'react-router-dom';
 import React from 'react';
 

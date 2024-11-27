@@ -79,7 +79,7 @@
         "tags": [],
         "label": "externals",
         "description": [
-          "\nExternals mapping inteded to be used in a webpack config"
+          "\nExternals mapping intended to be used in a webpack config"
         ],
         "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
         "deprecated": false,
@@ -456,6 +456,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticeuithemeborealis",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/eui-theme-borealis'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.hellopangeadnd",
             "type": "string",
             "tags": [],
@@ -673,6 +684,39 @@
             "type": "string",
             "tags": [],
             "label": "'@kbn/esql-ast'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnebttools",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/ebt-tools'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.elasticapmrumcore",
+            "type": "string",
+            "tags": [],
+            "label": "'@elastic/apm-rum-core'",
+            "description": [],
+            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnreactkibanacontexttheme",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/react-kibana-context-theme'",
             "description": [],
             "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

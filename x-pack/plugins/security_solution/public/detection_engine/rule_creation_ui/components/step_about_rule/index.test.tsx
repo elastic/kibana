@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount, shallow, type ComponentType as EnzymeComponentType } from 'enzyme';
 import { act } from '@testing-library/react';
 
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
@@ -23,7 +23,7 @@ import type {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   DataSourceType,
-  GroupByOptions,
+  AlertSuppressionDurationType,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../../detections/pages/detection_engine/rules/helpers';
 import { TestProviders } from '../../../../common/mock';
@@ -36,6 +36,16 @@ import {
 import type { FormHook } from '../../../../shared_imports';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useKibana } from '../../../../common/lib/kibana';
+import {
+  ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
+  ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
+} from '../../../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../rule_creation/components/threshold_alert_suppression_edit';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
@@ -69,16 +79,17 @@ export const stepDefineStepMLRule: DefineStepRule = {
   timeline: { id: null, title: null },
   eqlOptions: {},
   dataSourceType: DataSourceType.IndexPatterns,
-  groupByFields: ['host.name'],
-  groupByRadioSelection: GroupByOptions.PerRuleExecution,
-  groupByDuration: {
-    unit: 'm',
-    value: 5,
+  [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: ['host.name'],
+  [ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME]: AlertSuppressionDurationType.PerRuleExecution,
+  [ALERT_SUPPRESSION_DURATION_FIELD_NAME]: {
+    [ALERT_SUPPRESSION_DURATION_VALUE_FIELD_NAME]: 5,
+    [ALERT_SUPPRESSION_DURATION_UNIT_FIELD_NAME]: 'm',
   },
+  [ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME]: AlertSuppressionMissingFieldsStrategyEnum.suppress,
+  [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: false,
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
-  enableThresholdSuppression: false,
 };
 
 describe('StepAboutRuleComponent', () => {
@@ -149,7 +160,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -174,7 +185,7 @@ describe('StepAboutRuleComponent', () => {
         defineStepDefaultOverride={{ ruleType: 'threat_match' } as DefineStepRule}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -198,7 +209,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -226,7 +237,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -249,7 +260,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -305,7 +316,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -367,7 +378,7 @@ describe('StepAboutRuleComponent', () => {
         }}
       />,
       {
-        wrappingComponent: TestProviders,
+        wrappingComponent: TestProviders as EnzymeComponentType<{}>,
       }
     );
 
@@ -412,7 +423,7 @@ describe('StepAboutRuleComponent', () => {
     });
 
     mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     const indexNames = ['.ml-anomalies-shared'];
@@ -433,7 +444,7 @@ describe('StepAboutRuleComponent', () => {
     });
 
     mount(<TestComp setFormRef={() => {}} defineStepDefaultOverride={stepDefineStepMLRule} />, {
-      wrappingComponent: TestProviders,
+      wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
     expect(useFetchIndex).lastCalledWith(stepDefineStepMLRule.index);

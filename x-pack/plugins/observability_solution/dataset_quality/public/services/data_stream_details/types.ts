@@ -15,14 +15,25 @@ import {
   GetIntegrationDashboardsParams,
   GetDataStreamDegradedFieldsParams,
   DegradedFieldResponse,
+  GetDataStreamDegradedFieldValuesPathParams,
 } from '../../../common/data_streams_stats';
-import { GetDataStreamIntegrationParams } from '../../../common/data_stream_details/types';
-import { Dashboard } from '../../../common/api_types';
+import {
+  AnalyzeDegradedFieldsParams,
+  GetDataStreamIntegrationParams,
+  UpdateFieldLimitParams,
+} from '../../../common/data_stream_details/types';
+import {
+  Dashboard,
+  DataStreamRolloverResponse,
+  DegradedFieldAnalysis,
+  DegradedFieldValues,
+  UpdateFieldLimitResponse,
+} from '../../../common/api_types';
 
 export type DataStreamDetailsServiceSetup = void;
 
 export interface DataStreamDetailsServiceStart {
-  client: IDataStreamDetailsClient;
+  getClient: () => Promise<IDataStreamDetailsClient>;
 }
 
 export interface DataStreamDetailsServiceStartDeps {
@@ -35,8 +46,14 @@ export interface IDataStreamDetailsClient {
   getDataStreamDegradedFields(
     params: GetDataStreamDegradedFieldsParams
   ): Promise<DegradedFieldResponse>;
+  getDataStreamDegradedFieldValues(
+    params: GetDataStreamDegradedFieldValuesPathParams
+  ): Promise<DegradedFieldValues>;
   getIntegrationDashboards(params: GetIntegrationDashboardsParams): Promise<Dashboard[]>;
   getDataStreamIntegration(
     params: GetDataStreamIntegrationParams
   ): Promise<Integration | undefined>;
+  analyzeDegradedField(params: AnalyzeDegradedFieldsParams): Promise<DegradedFieldAnalysis>;
+  setNewFieldLimit(params: UpdateFieldLimitParams): Promise<UpdateFieldLimitResponse>;
+  rolloverDataStream(params: { dataStream: string }): Promise<DataStreamRolloverResponse>;
 }

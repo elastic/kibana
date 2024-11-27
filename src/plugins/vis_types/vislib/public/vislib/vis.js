@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
@@ -40,13 +41,7 @@ export class Vis extends EventEmitter {
   initVisConfig(data, uiState) {
     this.data = data;
     this.uiState = uiState;
-    this.visConfig = new VisConfig(
-      this.visConfigArgs,
-      this.data,
-      this.uiState,
-      this.element,
-      this.charts.legacyColors.createColorLookupFunction.bind(this.charts.legacyColors)
-    );
+    this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.element);
   }
 
   /**

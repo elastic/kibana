@@ -86,7 +86,7 @@ const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
 const renderUseAppLinks = () =>
   renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
 const renderUseLinkExists = (id: SecurityPageName) =>
-  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+  renderHook<React.PropsWithChildren<SecurityPageName>, boolean>(() => useLinkExists(id), {
     wrapper: TestProviders,
   });
 
@@ -432,9 +432,9 @@ describe('Security links', () => {
 
   describe('hasCapabilities', () => {
     const siemShow = 'siem.show';
-    const createCases = 'securitySolutionCases.create_cases';
-    const readCases = 'securitySolutionCases.read_cases';
-    const pushCases = 'securitySolutionCases.push_cases';
+    const createCases = 'securitySolutionCasesV2.create_cases';
+    const readCases = 'securitySolutionCasesV2.read_cases';
+    const pushCases = 'securitySolutionCasesV2.push_cases';
 
     it('returns false when capabilities is an empty array', () => {
       expect(hasCapabilities(createCapabilities(), [])).toBeFalsy();
@@ -461,7 +461,7 @@ describe('Security links', () => {
         hasCapabilities(
           createCapabilities({
             siem: { show: true },
-            securitySolutionCases: { create_cases: false },
+            securitySolutionCasesV2: { create_cases: false },
           }),
           [siemShow, createCases]
         )
@@ -473,7 +473,7 @@ describe('Security links', () => {
         hasCapabilities(
           createCapabilities({
             siem: { show: false },
-            securitySolutionCases: { create_cases: true },
+            securitySolutionCasesV2: { create_cases: true },
           }),
           [siemShow, createCases]
         )
@@ -485,7 +485,7 @@ describe('Security links', () => {
         hasCapabilities(
           createCapabilities({
             siem: { show: true },
-            securitySolutionCases: { create_cases: false },
+            securitySolutionCasesV2: { create_cases: false },
           }),
           [readCases, createCases]
         )
@@ -497,7 +497,7 @@ describe('Security links', () => {
         hasCapabilities(
           createCapabilities({
             siem: { show: true },
-            securitySolutionCases: { read_cases: true, create_cases: true },
+            securitySolutionCasesV2: { read_cases: true, create_cases: true },
           }),
           [[readCases, createCases]]
         )
@@ -509,7 +509,7 @@ describe('Security links', () => {
         hasCapabilities(
           createCapabilities({
             siem: { show: false },
-            securitySolutionCases: { read_cases: false, create_cases: true },
+            securitySolutionCasesV2: { read_cases: false, create_cases: true },
           }),
           [siemShow, [readCases, createCases]]
         )
@@ -521,7 +521,7 @@ describe('Security links', () => {
         hasCapabilities(
           createCapabilities({
             siem: { show: true },
-            securitySolutionCases: { read_cases: false, create_cases: true },
+            securitySolutionCasesV2: { read_cases: false, create_cases: true },
           }),
           [siemShow, [readCases, createCases]]
         )
@@ -533,7 +533,7 @@ describe('Security links', () => {
         hasCapabilities(
           createCapabilities({
             siem: { show: true },
-            securitySolutionCases: { read_cases: false, create_cases: true, push_cases: false },
+            securitySolutionCasesV2: { read_cases: false, create_cases: true, push_cases: false },
           }),
           [
             [siemShow, pushCases],
@@ -547,7 +547,7 @@ describe('Security links', () => {
   describe('isLinkUiSettingsAllowed', () => {
     const SETTING_KEY = 'test setting';
     const mockedLink: LinkItem = {
-      id: SecurityPageName.entityAnalyticsAssetClassification,
+      id: SecurityPageName.entityAnalyticsEntityStoreManagement,
       title: 'test title',
       path: '/test_path',
     };

@@ -5,8 +5,10 @@
  * 2.0.
  */
 import { IconType } from '@elastic/eui';
+import type { ToolSchema } from '@kbn/inference-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
-import type { CompatibleJSONSchema, FunctionResponse } from './functions/types';
+import type { FunctionResponse } from './functions/types';
 
 export enum MessageRole {
   System = 'system',
@@ -80,10 +82,11 @@ export type ConversationUpdateRequest = ConversationRequestBase & {
 export interface KnowledgeBaseEntry {
   '@timestamp': string;
   id: string;
+  title?: string;
   text: string;
-  doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
+  type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
@@ -92,22 +95,36 @@ export interface KnowledgeBaseEntry {
   };
 }
 
-export interface UserInstruction {
-  doc_id: string;
+export interface Instruction {
+  id: string;
   text: string;
-  system?: boolean;
 }
 
-export type UserInstructionOrPlainText = string | UserInstruction;
+export interface AdHocInstruction {
+  id?: string;
+  text: string;
+  instruction_type: 'user_instruction' | 'application_instruction';
+}
+
+export type InstructionOrPlainText = string | Instruction;
+
+export enum KnowledgeBaseType {
+  // user instructions are included in the system prompt regardless of the user's input
+  UserInstruction = 'user_instruction',
+
+  // contextual entries are only included in the system prompt if the user's input matches the context
+  Contextual = 'contextual',
+}
 
 export interface ObservabilityAIAssistantScreenContextRequest {
+  starterPrompts?: StarterPrompt[];
   screenDescription?: string;
   data?: Array<{
     name: string;
     description: string;
     value: any;
   }>;
-  actions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
+  actions?: Array<{ name: string; description: string; parameters?: ToolSchema }>;
 }
 
 export type ScreenContextActionRespondFunction<TArguments> = ({}: {
@@ -121,7 +138,7 @@ export type ScreenContextActionRespondFunction<TArguments> = ({}: {
 export interface ScreenContextActionDefinition<TArguments = any> {
   name: string;
   description: string;
-  parameters?: CompatibleJSONSchema;
+  parameters?: ToolSchema;
   respond: ScreenContextActionRespondFunction<TArguments>;
 }
 
@@ -129,6 +146,7 @@ export interface StarterPrompt {
   title: string;
   prompt: string;
   icon: IconType;
+  scopes?: AssistantScope[];
 }
 
 export interface ObservabilityAIAssistantScreenContext {

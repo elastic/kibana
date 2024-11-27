@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as helpers from '../helpers';
@@ -16,10 +17,10 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           const { expectErrors } = await setup();
 
           await expectErrors('m', [
-            "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+            "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'row', 'show'}",
           ]);
           await expectErrors('metrics ', [
-            "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
+            "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
           ]);
         });
 
@@ -50,10 +51,14 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('metrics in*ex', []);
             await expectErrors('metrics ind*ex', []);
             await expectErrors('metrics *,-.*', []);
-            await expectErrors('metrics remote-*:indexes*', []);
-            await expectErrors('metrics remote-*:indexes', []);
-            await expectErrors('metrics remote-ccs:indexes', []);
-            await expectErrors('metrics a_index, remote-ccs:indexes', []);
+            await expectErrors('metrics remote-*:indexes*', ['Unknown index [remote-*:indexes*]']);
+            await expectErrors('metrics remote-*:indexes', ['Unknown index [remote-*:indexes]']);
+            await expectErrors('metrics remote-ccs:indexes', [
+              'Unknown index [remote-ccs:indexes]',
+            ]);
+            await expectErrors('metrics a_index, remote-ccs:indexes', [
+              'Unknown index [remote-ccs:indexes]',
+            ]);
             await expectErrors('metrics .secret_index', []);
           });
 
@@ -61,10 +66,10 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors('metrics index,', [
-              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
             await expectErrors(`metrics index\n, \tother_index\t,\n \t `, [
-              "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
+              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
           });
 

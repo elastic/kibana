@@ -15,7 +15,12 @@ import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
+  const pageObjects = getPageObjects([
+    'svlCommonPage',
+    'svlCommonNavigation',
+    'searchPlayground',
+    'embeddedConsole',
+  ]);
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -64,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToExist();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundHeaderComponentsToDisabled();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageComponentsToExist();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexCalloutExists();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundStartChatPageIndexButtonExists();
       });
 
       describe('with gen ai connectors', () => {
@@ -101,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without any indices', () => {
-        it('hide no index callout when index added', async () => {
+        it('hide create index button when index added', async () => {
           await createIndex();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectOpenFlyoutAndSelectIndex();
         });
@@ -112,16 +117,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/189314
-      describe.skip('with existing indices', () => {
+      describe('with existing indices', () => {
         before(async () => {
           await createConnector();
           await createIndex();
+        });
+
+        beforeEach(async () => {
+          await pageObjects.searchPlayground.session.setSession();
           await browser.refresh();
         });
 
         it('can select index from dropdown and load chat page', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+        });
+
+        it('load start page after removing selected index', async () => {
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToSelectIndicesAndLoadChat();
+          await esArchiver.unload(esArchiveIndex);
+          await browser.refresh();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
         });
 
         after(async () => {
@@ -201,6 +216,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.searchPlayground.PlaygroundChatPage.updateQuestion('i have back pain');
           await pageObjects.searchPlayground.session.expectInSession('prompt', "You're a doctor");
           await pageObjects.searchPlayground.session.expectInSession('question', undefined);
+        });
+
+        it('click on manage connector button', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
         });
       });
 

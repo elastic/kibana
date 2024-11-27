@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -144,4 +145,20 @@ export interface CoreUsageStats {
   'savedObjectsRepository.resolvedOutcome.conflict'?: number;
   'savedObjectsRepository.resolvedOutcome.notFound'?: number;
   'savedObjectsRepository.resolvedOutcome.total'?: number;
+  // API Deprecations counters
+  'deprecated_api_calls_resolved.total'?: number;
+  'deprecated_api_calls.total'?: number;
+}
+
+/**
+ * @public
+ *
+ * CoreDeprecatedApiUsageStats are collected over time while Kibana is running.
+ */
+export interface CoreDeprecatedApiUsageStats {
+  apiId: string;
+  totalMarkedAsResolved: number;
+  markedAsResolvedLastCalledAt: string;
+  apiTotalCalls: number;
+  apiLastCalledAt: string;
 }

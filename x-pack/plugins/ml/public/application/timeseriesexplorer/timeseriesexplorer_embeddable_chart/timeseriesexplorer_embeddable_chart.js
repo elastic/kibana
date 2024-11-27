@@ -30,15 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { ML_JOB_AGGREGATION, aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiTextColor,
-} from '@elastic/eui';
-import { TimeSeriesExplorerHelpPopover } from '../timeseriesexplorer_help_popover';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import {
@@ -65,17 +57,13 @@ import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
 import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
+import { mlJobServiceFactory } from '../../services/job_service';
 import { forecastServiceFactory } from '../../services/forecast_service';
-
-// Used to indicate the chart is being plotted across
-// all partition field values, where the cardinality of the field cannot be
-// obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
-const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
-  defaultMessage: 'all',
-});
+import { SingleMetricViewerTitle } from './timeseriesexplorer_title';
 
 export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   static propTypes = {
+    api: PropTypes.object,
     appStateHandler: PropTypes.func.isRequired,
     autoZoomDuration: PropTypes.number.isRequired,
     bounds: PropTypes.object.isRequired,
@@ -272,7 +260,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     } = this.props;
     const entityControls = this.getControlsForDetector();
 
-    return this.context.services.mlServices.mlApiServices.results
+    return this.context.services.mlServices.mlApi.results
       .getAnomaliesTableData(
         [selectedJob.job_id],
         this.getCriteriaFields(selectedDetectorIndex, entityControls),
@@ -613,13 +601,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    * @param callback to invoke after a state update.
    */
   getControlsForDetector = () => {
-    const { selectedDetectorIndex, selectedEntities, selectedJobId, selectedJob } = this.props;
-    return getControlsForDetector(
-      selectedDetectorIndex,
-      selectedEntities,
-      selectedJobId,
-      selectedJob
-    );
+    const { selectedDetectorIndex, selectedEntities, selectedJob } = this.props;
+    return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJob);
   };
 
   /**
@@ -646,10 +629,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       this.context.services.uiSettings,
-      this.context.services.mlServices.mlApiServices,
+      this.context.services.mlServices.mlApi,
       this.context.services.mlServices.mlResultsService
     );
-    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApiServices);
+    this.mlForecastService = forecastServiceFactory(this.context.services.mlServices.mlApi);
 
     // Listen for context chart updates.
     this.subscriptions.add(
@@ -740,6 +723,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         this.props.selectedJob.job_id,
       ]);
     }
+
+    // Populate mlJobService to work with LinksMenuUI.
+    this.mlJobService = mlJobServiceFactory(undefined, this.context.services.mlServices.mlApi);
+    await this.mlJobService.loadJobsWrapper();
 
     this.componentDidUpdate();
   }
@@ -930,70 +917,11 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size={'xs'}>
-                    <h2>
-                      <span>
-                        {i18n.translate(
-                          'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
-                          {
-                            defaultMessage: 'Single time series analysis of {functionLabel}',
-                            values: { functionLabel: chartDetails.functionLabel },
-                          }
-                        )}
-                      </span>
-                      &nbsp;
-                      {chartDetails.entityData.count === 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
-                          {chartDetails.entityData.entities.length > 0 && '('}
-                          {chartDetails.entityData.entities
-                            .map((entity) => {
-                              return `${entity.fieldName}: ${entity.fieldValue}`;
-                            })
-                            .join(', ')}
-                          {chartDetails.entityData.entities.length > 0 && ')'}
-                        </EuiTextColor>
-                      )}
-                      {chartDetails.entityData.count !== 1 && (
-                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
-                          {chartDetails.entityData.entities.map((countData, i) => {
-                            return (
-                              <Fragment key={countData.fieldName}>
-                                {i18n.translate(
-                                  'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                                  {
-                                    defaultMessage:
-                                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                                    values: {
-                                      openBrace: i === 0 ? '(' : '',
-                                      closeBrace:
-                                        i === chartDetails.entityData.entities.length - 1
-                                          ? ')'
-                                          : '',
-                                      cardinalityValue:
-                                        countData.cardinality === 0
-                                          ? allValuesLabel
-                                          : countData.cardinality,
-                                      cardinality: countData.cardinality,
-                                      fieldName: countData.fieldName,
-                                    },
-                                  }
-                                )}
-                                {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                              </Fragment>
-                            );
-                          })}
-                        </EuiTextColor>
-                      )}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <TimeSeriesExplorerHelpPopover embeddableMode />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <SingleMetricViewerTitle
+                api={this.props.api}
+                functionLabel={chartDetails.functionLabel}
+                entityData={chartDetails.entityData}
+              />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
                 {showModelBoundsCheckbox && (
                   <TimeseriesExplorerCheckbox
@@ -1051,6 +979,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                         setForecastId={this.setForecastId}
                         className="forecast-controls"
                         onForecastComplete={onForecastComplete}
+                        selectedForecastId={this.props.selectedForecastId}
                       />
                     </EuiFlexItem>
                   )}

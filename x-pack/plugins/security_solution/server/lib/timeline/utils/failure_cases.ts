@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type { TimelineType, TimelineSavedObject } from '../../../../common/api/timeline';
+import type { TimelineType, TimelineResponse } from '../../../../common/api/timeline';
 import { type TimelineStatus, TimelineStatusEnum } from '../../../../common/api/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
@@ -42,8 +42,8 @@ export const DEFAULT_ERROR = `Something has gone wrong. We didn't handle somethi
 const isUpdatingStatus = (
   isHandlingTemplateTimeline: boolean,
   status: TimelineStatus | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   const obj = isHandlingTemplateTimeline ? existTemplateTimeline : existTimeline;
   return obj?.status === TimelineStatusEnum.immutable ? UPDATE_STATUS_ERROR_MESSAGE : null;
@@ -76,8 +76,8 @@ const commonUpdateTemplateTimelineCheck = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   if (isHandlingTemplateTimeline) {
     if (
@@ -129,8 +129,8 @@ const commonUpdateTimelineCheck = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   if (existTimeline == null) {
     // timeline !exists
@@ -158,8 +158,8 @@ const commonUpdateCases = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   if (isHandlingTemplateTimeline) {
     return commonUpdateTemplateTimelineCheck(
@@ -193,8 +193,8 @@ const createTemplateTimelineCheck = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   if (isHandlingTemplateTimeline && existTemplateTimeline != null) {
     // Throw error to create timeline template in patch
@@ -219,8 +219,8 @@ export const checkIsUpdateViaImportFailureCases = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   if (!isHandlingTemplateTimeline) {
     if (existTimeline == null) {
@@ -281,8 +281,8 @@ export const checkIsUpdateFailureCases = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   const error = isUpdatingStatus(
     isHandlingTemplateTimeline,
@@ -315,8 +315,8 @@ export const checkIsCreateFailureCases = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   if (!isHandlingTemplateTimeline && existTimeline != null) {
     return {
@@ -346,8 +346,8 @@ export const checkIsCreateViaImportFailureCases = (
   version: string | null,
   templateTimelineVersion: number | null,
   templateTimelineId: string | null | undefined,
-  existTimeline: TimelineSavedObject | null,
-  existTemplateTimeline: TimelineSavedObject | null
+  existTimeline: TimelineResponse | null,
+  existTemplateTimeline: TimelineResponse | null
 ) => {
   if (status === TimelineStatusEnum.draft) {
     return {

@@ -824,7 +824,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return actionDetails;
   }
 
-  public async runningProcesses(
+  async runningProcesses(
     actionRequest: GetProcessesRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
@@ -908,6 +908,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     const addResponsesToQueueIfAny = (responseList: LogsEndpointActionResponse[]): void => {
       if (responseList.length > 0) {
         addToQueue(...responseList);
+
+        this.sendActionResponseTelemetry(responseList);
       }
     };
 
@@ -950,8 +952,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             );
             break;
 
-          // FIXME:PT refactor kill-process entry here when that PR is merged
-
           case 'get-file':
             addResponsesToQueueIfAny(
               await this.checkPendingGetFileActions(
@@ -967,8 +967,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             break;
 
           case 'kill-process':
-            {
-              const responseDocsForKillProcess = await this.checkPendingKillProcessActions(
+            addResponsesToQueueIfAny(
+              await this.checkPendingKillProcessActions(
                 typePendingActions as Array<
                   ResponseActionsClientPendingAction<
                     ResponseActionParametersWithProcessName,
@@ -976,11 +976,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                     SentinelOneKillProcessRequestMeta
                   >
                 >
-              );
-              if (responseDocsForKillProcess.length) {
-                addToQueue(...responseDocsForKillProcess);
-              }
-            }
+              )
+            );
             break;
         }
       }

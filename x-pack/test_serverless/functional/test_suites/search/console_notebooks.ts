@@ -8,48 +8,51 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation']);
+  const pageObjects = getPageObjects(['svlCommonPage', 'embeddedConsole']);
+  const svlSearchNavigation = getService('svlSearchNavigation');
 
   describe('Console Notebooks', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
+
+      await svlSearchNavigation.navigateToGettingStartedPage();
     });
 
     it('has notebooks view available', async () => {
       // Expect Console Bar & Notebooks button to exist
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleControlBarExists();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksButtonExists();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleControlBarExists();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebooksButtonExists();
 
       // Click the Notebooks button to open console to See Notebooks
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebooksButton();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeOpen();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleNotebooksButton();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebooksToBeOpen();
 
       // Click the Notebooks button again to switch to the dev console
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebooksButton();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeClosed();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleNotebooksButton();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebooksToBeClosed();
 
       // Clicking control bar should close the console
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeClosed();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebooksToBeClosed();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
 
       // Re-open console and then open Notebooks
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebooksButton();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeOpen();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeOpen();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleNotebooksButton();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebooksToBeOpen();
 
       // Close the console
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeClosed();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebooksToBeClosed();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleToBeClosed();
     });
 
     it('can open notebooks', async () => {
       // Click the Notebooks button to open console to See Notebooks
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebooksButton();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebooksToBeOpen();
+      await pageObjects.embeddedConsole.clickEmbeddedConsoleNotebooksButton();
+      await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebooksToBeOpen();
 
       const defaultNotebooks = [
         '00_quick_start',
@@ -59,13 +62,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         '04_multilingual',
       ];
       for (const notebookId of defaultNotebooks) {
-        await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebookListItemToBeAvailable(
+        await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebookListItemToBeAvailable(
           notebookId
         );
-        await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleNotebook(notebookId);
-        await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleNotebookToBeAvailable(
-          notebookId
-        );
+        await pageObjects.embeddedConsole.clickEmbeddedConsoleNotebook(notebookId);
+        await pageObjects.embeddedConsole.expectEmbeddedConsoleNotebookToBeAvailable(notebookId);
       }
     });
   });

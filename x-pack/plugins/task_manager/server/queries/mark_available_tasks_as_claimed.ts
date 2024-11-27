@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskStatus, TaskPriority } from '../task';
+import { TaskStatus, TaskPriority, ConcreteTaskInstance } from '../task';
 import {
   ScriptBasedSortClause,
   ScriptClause,
@@ -14,23 +14,6 @@ import {
   MustCondition,
   MustNotCondition,
 } from './query_clauses';
-
-export function taskWithLessThanMaxAttempts(type: string, maxAttempts: number): MustCondition {
-  return {
-    bool: {
-      must: [
-        { term: { 'task.taskType': type } },
-        {
-          range: {
-            'task.attempts': {
-              lt: maxAttempts,
-            },
-          },
-        },
-      ],
-    },
-  };
-}
 
 export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {
@@ -166,10 +149,51 @@ function getSortByPriority(definitions: TaskTypeDictionary): estypes.SortCombina
   };
 }
 
+// getClaimSort() is used to generate sort bits for the ES query
+// should align with claimSort() below
 export function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombinations[] {
   const sortByPriority = getSortByPriority(definitions);
   if (!sortByPriority) return [SortByRunAtAndRetryAt];
   return [sortByPriority, SortByRunAtAndRetryAt];
+}
+
+// claimSort() is used to sort tasks returned from a claimer by priority and date.
+// Kept here so it should align with getClaimSort() above.
+// Returns a copy of the tasks passed in.
+export function claimSort(
+  definitions: TaskTypeDictionary,
+  tasks: ConcreteTaskInstance[]
+): ConcreteTaskInstance[] {
+  const priorityMap: Record<string, TaskPriority> = {};
+  tasks.forEach((task) => {
+    const taskType = task.taskType;
+    const priority = getPriority(definitions, taskType);
+    priorityMap[taskType] = priority;
+  });
+
+  return tasks.slice().sort(compare);
+
+  function compare(a: ConcreteTaskInstance, b: ConcreteTaskInstance) {
+    // sort by priority, descending
+    const priorityA = priorityMap[a.taskType] ?? TaskPriority.Normal;
+    const priorityB = priorityMap[b.taskType] ?? TaskPriority.Normal;
+
+    if (priorityA > priorityB) return -1;
+    if (priorityA < priorityB) return 1;
+
+    // then sort by retry/runAt, ascending
+    const runA = a.retryAt?.valueOf() ?? a.runAt.valueOf() ?? 0;
+    const runB = b.retryAt?.valueOf() ?? b.runAt.valueOf() ?? 0;
+
+    if (runA < runB) return -1;
+    if (runA > runB) return 1;
+
+    return 0;
+  }
+}
+
+function getPriority(definitions: TaskTypeDictionary, taskType: string): TaskPriority {
+  return definitions.get(taskType)?.priority ?? TaskPriority.Normal;
 }
 
 export interface UpdateFieldsAndMarkAsFailedOpts {
@@ -178,7 +202,6 @@ export interface UpdateFieldsAndMarkAsFailedOpts {
   };
   claimableTaskTypes: string[];
   skippedTaskTypes: string[];
-  unusedTaskTypes: string[];
   taskMaxAttempts: { [field: string]: number };
 }
 
@@ -186,7 +209,6 @@ export const updateFieldsAndMarkAsFailed = ({
   fieldUpdates,
   claimableTaskTypes,
   skippedTaskTypes,
-  unusedTaskTypes,
   taskMaxAttempts,
 }: UpdateFieldsAndMarkAsFailedOpts): ScriptClause => {
   const setScheduledAtScript = `if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
@@ -203,8 +225,6 @@ export const updateFieldsAndMarkAsFailed = ({
     source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
       ${setScheduledAtAndMarkAsClaimed}
-    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
-      ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
     }`,
@@ -214,7 +234,6 @@ export const updateFieldsAndMarkAsFailed = ({
       fieldUpdates,
       claimableTaskTypes,
       skippedTaskTypes,
-      unusedTaskTypes,
       taskMaxAttempts,
     },
   };

@@ -13,7 +13,6 @@ import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
 import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../../../../rules_client/lib';
-import { RuleAttributes } from '../../../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { DisableRuleParams } from './types';
 import { disableRuleParamsSchema } from './schemas';
@@ -78,7 +77,7 @@ async function disableWithOCC(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.DISABLE,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
         error,
       })
     );
@@ -86,14 +85,14 @@ async function disableWithOCC(
   }
 
   if (untrack) {
-    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+    await untrackRuleAlerts(context, id, attributes);
   }
 
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.DISABLE,
       outcome: 'unknown',
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
     })
   );
 

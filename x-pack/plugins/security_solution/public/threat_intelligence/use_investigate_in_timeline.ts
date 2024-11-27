@@ -6,14 +6,12 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
 import { timelineDefaults } from '../timelines/store/defaults';
 import { APP_UI_ID } from '../../common/constants';
 import type { DataProvider } from '../../common/types';
 import { TimelineId } from '../../common/types/timeline';
 import { TimelineTypeEnum } from '../../common/api/timeline';
 import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
-import { timelineActions } from '../timelines/store';
 import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
 import { useUpdateTimeline } from '../timelines/components/open_timeline/use_update_timeline';
@@ -46,13 +44,7 @@ export const useInvestigateInTimeline = ({
   from,
   to,
 }: UseInvestigateInTimelineActionProps) => {
-  const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
-
-  const updateTimelineIsLoading = useCallback(
-    (payload) => dispatch(timelineActions.updateIsLoading(payload)),
-    [dispatch]
-  );
 
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
@@ -64,7 +56,6 @@ export const useInvestigateInTimeline = ({
   const createTimeline = useCallback(
     async ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
       await clearActiveTimeline();
-      updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       updateTimeline({
         duplicate: true,
         from: fromTimeline,
@@ -79,7 +70,7 @@ export const useInvestigateInTimeline = ({
         ruleNote,
       });
     },
-    [updateTimeline, updateTimelineIsLoading, clearActiveTimeline]
+    [updateTimeline, clearActiveTimeline]
   );
 
   const investigateInTimelineClick = useCallback(async () => {

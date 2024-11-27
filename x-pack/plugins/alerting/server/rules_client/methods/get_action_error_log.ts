@@ -54,7 +54,7 @@ export async function getActionErrorLog(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_ACTION_ERROR_LOG,
-        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
         error,
       })
     );
@@ -64,7 +64,7 @@ export async function getActionErrorLog(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_ACTION_ERROR_LOG,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: rule.name },
     })
   );
 

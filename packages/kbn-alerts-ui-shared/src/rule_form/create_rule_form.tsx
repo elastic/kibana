@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
-import { ALERTING_FEATURE_ID, DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
+import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
@@ -23,6 +24,7 @@ import {
 } from './rule_form_errors';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
 import {
+  getAvailableRuleTypes,
   getInitialConsumer,
   getInitialMultiConsumer,
   getInitialSchedule,
@@ -39,28 +41,35 @@ export interface CreateRuleFormProps {
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
   shouldUseRuleProducer?: boolean;
-  returnUrl: string;
+  canShowConsumerSelection?: boolean;
+  showMustacheAutocompleteSwitch?: boolean;
+  onCancel?: () => void;
+  onSubmit?: (ruleId: string) => void;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const {
     ruleTypeId,
     plugins,
-    consumer = ALERTING_FEATURE_ID,
+    consumer = 'alerts',
     multiConsumerSelection,
     validConsumers = DEFAULT_VALID_CONSUMERS,
     filteredRuleTypes = [],
     shouldUseRuleProducer = false,
-    returnUrl,
+    canShowConsumerSelection = true,
+    showMustacheAutocompleteSwitch = false,
+    onCancel,
+    onSubmit,
   } = props;
 
-  const { http, docLinks, notification, ruleTypeRegistry, i18n, theme } = plugins;
-  const { toasts } = notification;
+  const { http, docLinks, notifications, ruleTypeRegistry, i18n, theme } = plugins;
+  const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
-    onSuccess: ({ name }) => {
+    onSuccess: ({ name, id }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
+      onSubmit?.(id);
     },
     onError: (error) => {
       const message = parseRuleCircuitBreakerErrorMessage(
@@ -78,16 +87,27 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     },
   });
 
-  const { isInitialLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } =
-    useLoadDependencies({
-      http,
-      toasts: notification.toasts,
-      ruleTypeRegistry,
-      ruleTypeId,
-      consumer,
-      validConsumers,
-      filteredRuleTypes,
-    });
+  const {
+    isInitialLoading,
+    ruleType,
+    ruleTypes,
+    ruleTypeModel,
+    uiConfig,
+    healthCheckError,
+    connectors,
+    connectorTypes,
+    aadTemplateFields,
+    flappingSettings,
+  } = useLoadDependencies({
+    http,
+    toasts: notifications.toasts,
+    capabilities: plugins.application.capabilities,
+    ruleTypeRegistry,
+    ruleTypeId,
+    consumer,
+    validConsumers,
+    filteredRuleTypes,
+  });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -100,10 +120,10 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           tags: newFormData.tags,
           params: newFormData.params,
           schedule: newFormData.schedule,
-          // TODO: Will add actions in the actions PR
-          actions: [],
+          actions: newFormData.actions,
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
+          flapping: newFormData.flapping,
         },
       });
     },
@@ -138,7 +158,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     <div data-test-subj="createRuleForm">
       <RuleFormStateProvider
         initialRuleFormState={{
-          formData: GET_DEFAULT_FORM_DATA({
+          formData: getDefaultFormData({
             ruleTypeId,
             name: `${ruleType.name} rule`,
             consumer: getInitialConsumer({
@@ -150,12 +170,24 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
               ruleType,
               minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
             }),
+            actions: [],
           }),
           plugins,
+          connectors,
+          connectorTypes,
+          aadTemplateFields,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
+          availableRuleTypes: getAvailableRuleTypes({
+            consumer,
+            ruleTypes,
+            ruleTypeRegistry,
+          }).map(({ ruleType: rt }) => rt),
           validConsumers,
+          flappingSettings,
+          canShowConsumerSelection,
+          showMustacheAutocompleteSwitch,
           multiConsumerSelection: getInitialMultiConsumer({
             multiConsumerSelection,
             validConsumers,
@@ -163,7 +195,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           }),
         }}
       >
-        <RulePage isEdit={false} isSaving={isSaving} returnUrl={returnUrl} onSave={onSave} />
+        <RulePage isEdit={false} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
       </RuleFormStateProvider>
     </div>
   );

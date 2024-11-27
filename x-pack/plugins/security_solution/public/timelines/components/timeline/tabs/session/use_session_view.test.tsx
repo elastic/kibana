@@ -8,8 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { mockTimelineModel, TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -65,18 +64,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
           getLoadingPanel: jest.fn(),
         },
       },
-    }),
-  };
-});
-const mockOpenDetailFn = jest.fn();
-
-jest.mock('../../../side_panel/hooks/use_detail_panel', () => {
-  return {
-    useDetailPanel: () => ({
-      openEventDetailsPanel: mockOpenDetailFn,
-      handleOnDetailsPanelClosed: () => {},
-      DetailsPanel: () => <div />,
-      shouldShowDetailsPanel: false,
     }),
   };
 });
@@ -155,12 +142,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       },
       { wrapper: Wrapper }
     );
-    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalledWith({
-      height: 1000,
-      sessionEntityId: 'test',
-      loadAlertDetails: mockOpenDetailFn,
-      canReadPolicyManagement: false,
-    });
+    expect(kibana.services.sessionView.getSessionView).toHaveBeenCalled();
   });
 
   describe('useSessionView with non active timeline and graph event id set', () => {

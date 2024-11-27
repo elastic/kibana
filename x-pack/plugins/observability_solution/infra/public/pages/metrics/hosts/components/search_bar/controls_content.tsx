@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
 import {
-  type ControlEmbeddable,
-  ControlGroupAPI,
   ControlGroupRenderer,
-  type ControlInput,
-  type ControlOutput,
-  type ControlGroupInput,
+  ControlGroupRendererApi,
+  ControlGroupRuntimeState,
+  DataControlApi,
 } from '@kbn/controls-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { Subscription } from 'rxjs';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useControlPanels } from '../../hooks/use_control_panels_url_state';
+import { useControlPanels } from '@kbn/observability-shared-plugin/public';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { Subscription } from 'rxjs';
+import { controlPanelConfigs } from './control_panels_config';
 import { ControlTitle } from './controls_title';
 
 interface Props {
@@ -37,50 +35,46 @@ export const ControlsContent: React.FC<Props> = ({
   timeRange,
   onFiltersChange,
 }) => {
-  const [controlPanels, setControlPanels] = useControlPanels(dataView);
+  const [controlPanels, setControlPanels] = useControlPanels(controlPanelConfigs, dataView);
   const subscriptions = useRef<Subscription>(new Subscription());
 
   const getInitialInput = useCallback(
-    (loadedDataView: DataView) => async () => {
-      const initialInput: Partial<ControlGroupInput> = {
-        id: loadedDataView.id,
-        viewMode: ViewMode.VIEW,
+    () => async () => {
+      const initialInput: Partial<ControlGroupRuntimeState> = {
         chainingSystem: 'HIERARCHICAL',
-        controlStyle: 'oneLine',
-        defaultControlWidth: 'small',
-        panels: controlPanels,
-        filters,
-        query,
-        timeRange,
+        labelPosition: 'oneLine',
+        initialChildControlState: controlPanels,
       };
 
-      return { initialInput };
+      return { initialState: initialInput };
     },
-    [controlPanels, filters, query, timeRange]
+    [controlPanels]
   );
 
   const loadCompleteHandler = useCallback(
-    (controlGroup: ControlGroupAPI) => {
+    (controlGroup: ControlGroupRendererApi) => {
       if (!controlGroup) return;
 
-      controlGroup.untilAllChildrenReady().then(() => {
-        controlGroup.getChildIds().map((id) => {
-          const embeddable =
-            controlGroup.getChild<ControlEmbeddable<ControlInput, ControlOutput>>(id);
-          embeddable.renderPrepend = () => (
-            <ControlTitle title={embeddable.getTitle()} embeddableId={id} />
+      controlGroup.untilInitialized().then(() => {
+        const children = controlGroup.children$.getValue();
+        Object.keys(children).map((childId) => {
+          const child = children[childId] as DataControlApi;
+          child.CustomPrependComponent = () => (
+            <ControlTitle title={child.panelTitle.getValue()} embeddableId={childId} />
           );
         });
       });
 
       subscriptions.current.add(
-        controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+        controlGroup.filters$.subscribe((newFilters = []) => {
           onFiltersChange(newFilters);
         })
       );
 
       subscriptions.current.add(
-        controlGroup.getInput$().subscribe(({ panels }) => setControlPanels(panels))
+        controlGroup
+          .getInput$()
+          .subscribe(({ initialChildControlState }) => setControlPanels(initialChildControlState))
       );
     },
     [onFiltersChange, setControlPanels]
@@ -100,8 +94,8 @@ export const ControlsContent: React.FC<Props> = ({
   return (
     <ControlGroupContainer>
       <ControlGroupRenderer
-        getCreationOptions={getInitialInput(dataView)}
-        ref={loadCompleteHandler}
+        getCreationOptions={getInitialInput()}
+        onApiAvailable={loadCompleteHandler}
         timeRange={timeRange}
         query={query}
         filters={filters}

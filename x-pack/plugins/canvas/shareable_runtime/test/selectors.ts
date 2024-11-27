@@ -42,7 +42,7 @@ export const getSettingsTrigger = (wrapper: ReactWrapper) =>
 
 export const getPopover = (wrapper: ReactWrapper) => wrapper.find('EuiPopover');
 
-export const getPortal = (wrapper: ReactWrapper) => wrapper.find('EuiPortal');
+export const getPortal = (wrapper: ReactWrapper) => wrapper.find('.mockedEuiPortal');
 
 export const getContextMenu = (wrapper: ReactWrapper) => wrapper.find('EuiContextMenuClass');
 

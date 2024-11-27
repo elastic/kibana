@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ]);
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
   const dashboardBadgeActions = getService('dashboardBadgeActions');
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
@@ -47,17 +46,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
-      await dashboardPanelActions.customizePanel();
+      await panelActions.customizePanel();
       await dashboardCustomizePanel.enableCustomTimeRange();
       await dashboardCustomizePanel.openDatePickerQuickMenu();
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.waitForRenderComplete();
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
-      await panelActions.openContextMenu();
-      await panelActions.clickEdit();
+      await panelActions.convertToLens();
 
-      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -78,27 +75,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert a by reference TSVB viz to a Lens viz', async () => {
+      const visTitle = 'My TSVB to Lens viz 2';
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickVisType('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
-      // save it to library
-      const originalPanel = await testSubjects.find('embeddablePanelHeading-');
-      await panelActions.legacySaveToLibrary('My TSVB to Lens viz 2', originalPanel);
+      await panelActions.saveToLibrary(visTitle);
 
       await dashboard.waitForRenderComplete();
       const originalEmbeddableCount = await canvas.getEmbeddableCount();
-      await retry.try(async () => {
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.enableCustomTimeRange();
+
+      await panelActions.customizePanel();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutOpen();
+      await dashboardCustomizePanel.enableCustomTimeRange();
+      await retry.waitFor('quick menu', async () => {
         await dashboardCustomizePanel.openDatePickerQuickMenu();
-        await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
-        await dashboardCustomizePanel.clickSaveButton();
-        await dashboard.waitForRenderComplete();
-        await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
+        return await testSubjects.exists('superDatePickerCommonlyUsed_Last_30 days');
       });
-      await panelActions.openContextMenu();
+      await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_30 days');
+      await dashboardCustomizePanel.clickSaveButton();
+      await dashboardCustomizePanel.expectCustomizePanelSettingsFlyoutClosed();
+      await dashboard.waitForRenderComplete();
+      await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
+
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisualization();
@@ -114,14 +114,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
-      const panel = await testSubjects.find(`embeddablePanelHeading-MyTSVBtoLensviz2(converted)`);
-      const descendants = await testSubjects.findAllDescendant(
-        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
-        panel
-      );
-      expect(descendants.length).to.equal(0);
       const titles = await dashboard.getPanelTitles();
-      expect(titles[0]).to.be('My TSVB to Lens viz 2 (converted)');
+      expect(titles[0]).to.be(`${visTitle} (converted)`);
+
+      await panelActions.expectNotLinkedToLibrary(titles[0]);
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });

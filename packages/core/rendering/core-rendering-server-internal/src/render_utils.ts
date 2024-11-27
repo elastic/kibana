@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { firstValueFrom } from 'rxjs';
-import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IConfigService } from '@kbn/config';
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
@@ -56,28 +56,15 @@ export const getCommonStylesheetPaths = ({ baseHref }: { baseHref: string }) => 
 
 export const getThemeStylesheetPaths = ({
   darkMode,
-  themeVersion,
   baseHref,
 }: {
   darkMode: boolean;
-  themeVersion: UiSharedDepsNpm.ThemeVersion;
   baseHref: string;
 }) => {
-  const bundlesHref = getBundlesHref(baseHref);
   return [
     ...(darkMode
-      ? [
-          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
-            themeVersion
-          )}`,
-          `${baseHref}/ui/legacy_dark_theme.min.css`,
-        ]
-      : [
-          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
-            themeVersion
-          )}`,
-          `${baseHref}/ui/legacy_light_theme.min.css`,
-        ]),
+      ? [`${baseHref}/ui/legacy_dark_theme.min.css`]
+      : [`${baseHref}/ui/legacy_light_theme.min.css`]),
   ];
 };
 

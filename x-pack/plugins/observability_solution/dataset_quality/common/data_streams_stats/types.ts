@@ -15,16 +15,17 @@ export type GetDataStreamsStatsResponse =
 export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
 export type DataStreamStatServiceResponse = GetDataStreamsStatsResponse;
 
-export type GetIntegrationsParams =
-  APIClientRequestParamsOf<`GET /internal/dataset_quality/integrations`>['params'];
-
 export type GetDataStreamsDegradedDocsStatsParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
 export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsStatsParams['query'];
-export type GetDataStreamsDegradedDocsStatsResponse =
-  APIReturnType<`GET /internal/dataset_quality/data_streams/degraded_docs`>;
-export type DegradedDocsStatType = GetDataStreamsDegradedDocsStatsResponse['degradedDocs'][0];
-export type DataStreamDegradedDocsStatServiceResponse = DegradedDocsStatType[];
+
+/*
+Types for stats based in documents inside a DataStream
+*/
+
+export type GetDataStreamsTotalDocsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/total_docs`>['params'];
+export type GetDataStreamsTotalDocsQuery = GetDataStreamsTotalDocsParams['query'];
 
 /*
 Types for Degraded Fields inside a DataStream
@@ -36,6 +37,13 @@ export type GetDataStreamDegradedFieldsQueryParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/degraded_fields`>['params']['query'];
 export type GetDataStreamDegradedFieldsParams = GetDataStreamDegradedFieldsPathParams &
   GetDataStreamDegradedFieldsQueryParams;
+
+/*
+Types for Degraded Field Values inside a DataStream
+ */
+
+export type GetDataStreamDegradedFieldValuesPathParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/degraded_field/{degradedField}/values`>['params']['path'];
 
 /*
 Types for DataStream Settings

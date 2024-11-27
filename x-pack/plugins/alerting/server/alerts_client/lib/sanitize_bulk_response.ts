@@ -24,10 +24,10 @@ export const sanitizeBulkErrorResponse = (
     (responseToUse.items ?? []).forEach(
       (item: Partial<Record<estypes.BulkOperationType, estypes.BulkResponseItem>>) => {
         for (const [_, responseItem] of Object.entries(item)) {
-          const reason: string = get(responseItem, 'error.reason');
+          const reason = get(responseItem, 'error.reason');
           const redactIndex = reason ? reason.indexOf(`Preview of field's value:`) : -1;
           if (redactIndex > 1) {
-            set(responseItem, 'error.reason', reason.substring(0, redactIndex - 1));
+            set(responseItem, 'error.reason', reason!.substring(0, redactIndex - 1));
           }
         }
       }

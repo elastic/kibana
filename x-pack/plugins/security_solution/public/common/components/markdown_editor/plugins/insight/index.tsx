@@ -9,7 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
-import type { RemarkTokenizer } from '@elastic/eui';
+import type { RemarkTokenizer, EuiSelectProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiIcon,
@@ -43,7 +43,7 @@ import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
 import { useInsightDataProviders, type Provider } from './use_insight_data_providers';
 import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
-import { InvestigateInTimelineButton } from '../../../event_details/table/investigate_in_timeline_button';
+import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
 import {
   getTimeRangeSettings,
   parseDateWithDefault,
@@ -281,7 +281,7 @@ const InsightEditorComponent = ({
   onCancel,
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
-  const { indexPattern } = useSourcererDataView(SourcererScopeName.default);
+  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.default);
   const {
     unifiedSearch: {
       ui: { FiltersBuilderLazy },
@@ -382,7 +382,7 @@ const InsightEditorComponent = ({
   const onChange = useCallback((filters: Filter[]) => {
     setProviders(filtersToInsightProviders(filters));
   }, []);
-  const selectOnChange = useCallback(
+  const selectOnChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (event) => {
       relativeTimerangeController.field.onChange(event.target.value);
     },
@@ -400,7 +400,7 @@ const InsightEditorComponent = ({
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
-    const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
+    const index = sourcererDataView.name ?? '*';
     return [
       {
         $state: {
@@ -414,7 +414,7 @@ const InsightEditorComponent = ({
         },
       },
     ];
-  }, [indexPattern]);
+  }, [sourcererDataView]);
   const isPlatinum = useLicense().isAtLeast('platinum');
 
   return (
@@ -541,11 +541,7 @@ const exampleInsight = `${insightPrefix}{
   ]
 }}`;
 
-export const plugin = ({
-  insightsUpsellingMessage,
-}: {
-  insightsUpsellingMessage: string | null;
-}) => {
+export const plugin = ({ insightsUpsellingMessage }: { insightsUpsellingMessage?: string }) => {
   return {
     name: 'insights',
     button: {

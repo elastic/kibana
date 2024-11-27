@@ -8,7 +8,6 @@
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SortFieldTimelineEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
@@ -33,10 +32,6 @@ interface Props {
 const PAGE_SIZE = 3;
 
 const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
-  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineDisabled'
-  );
-
   const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
   const { navigateToApp } = useKibana().services.application;
 
@@ -47,14 +42,13 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
       queryTimelineById({
         duplicate,
         timelineId,
-        unifiedComponentsInTimelineDisabled,
       });
     },
-    [queryTimelineById, unifiedComponentsInTimelineDisabled]
+    [queryTimelineById]
   );
 
   const goToTimelines = useCallback(
-    (ev) => {
+    (ev: React.SyntheticEvent) => {
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.timelines,

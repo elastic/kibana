@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
@@ -13,6 +14,9 @@ import { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { Draggable } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
+import { isESQLFieldGroupable } from '@kbn/esql-utils';
 import type { SearchMode } from '../../types';
 import { FieldItemButton, type FieldItemButtonProps } from '../../components/field_item_button';
 import {
@@ -30,7 +34,7 @@ import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
-import { canProvideStatsForFieldTextBased } from '../../utils/can_provide_stats';
+import { canProvideStatsForEsqlField } from '../../utils/can_provide_stats';
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
@@ -139,6 +143,10 @@ export interface UnifiedFieldListItemProps {
    */
   dataView: DataView;
   /**
+   * Callback to update breakdown field
+   */
+  onAddBreakdownField?: (breakdownField: DataViewField | undefined) => void;
+  /**
    * Callback to add/select the field
    */
   onAddFieldToWorkspace: (field: DataViewField) => void;
@@ -199,6 +207,10 @@ export interface UnifiedFieldListItemProps {
    * Item size
    */
   size: FieldItemButtonProps<DataViewField>['size'];
+  /**
+   * Custom filters to apply for the field list, ex: namespace custom filter
+   */
+  additionalFilters?: Filter[];
 }
 
 function UnifiedFieldListItemComponent({
@@ -209,6 +221,7 @@ function UnifiedFieldListItemComponent({
   field,
   highlight,
   dataView,
+  onAddBreakdownField,
   onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
   onAddFilter,
@@ -222,8 +235,12 @@ function UnifiedFieldListItemComponent({
   groupIndex,
   itemIndex,
   size,
+  additionalFilters,
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
+
+  const isBreakdownSupported =
+    searchMode === 'documents' ? fieldSupportsBreakdown(field) : isESQLFieldGroupable(field);
 
   const addFilterAndClosePopover: typeof onAddFilter | undefined = useMemo(
     () =>
@@ -287,6 +304,7 @@ function UnifiedFieldListItemComponent({
           multiFields={multiFields}
           dataView={dataView}
           onAddFilter={addFilterAndClosePopover}
+          additionalFilters={additionalFilters}
         />
 
         {searchMode === 'documents' && multiFields && (
@@ -301,21 +319,38 @@ function UnifiedFieldListItemComponent({
             />
           </>
         )}
-
-        {searchMode === 'documents' && !!services.uiActions && (
-          <FieldPopoverFooter
-            field={field}
-            dataView={dataView}
-            multiFields={rawMultiFields}
-            trackUiMetric={trackUiMetric}
-            contextualFields={workspaceSelectedFieldNames}
-            originatingApp={stateService.creationOptions.originatingApp}
-            uiActions={services.uiActions}
-          />
-        )}
       </>
     );
   };
+
+  const renderFooter = useMemo(() => {
+    const uiActions = services.uiActions;
+
+    if (searchMode !== 'documents' || !uiActions) {
+      return;
+    }
+
+    return () => (
+      <FieldPopoverFooter
+        field={field}
+        dataView={dataView}
+        multiFields={rawMultiFields}
+        trackUiMetric={trackUiMetric}
+        contextualFields={workspaceSelectedFieldNames}
+        originatingApp={stateService.creationOptions.originatingApp}
+        uiActions={uiActions}
+      />
+    );
+  }, [
+    dataView,
+    field,
+    rawMultiFields,
+    searchMode,
+    services.uiActions,
+    stateService.creationOptions.originatingApp,
+    trackUiMetric,
+    workspaceSelectedFieldNames,
+  ]);
 
   const value = useMemo(
     () => ({
@@ -369,22 +404,24 @@ function UnifiedFieldListItemComponent({
       data-test-subj={stateService.creationOptions.dataTestSubj?.fieldListItemPopoverDataTestSubj}
       renderHeader={() => (
         <FieldPopoverHeader
-          services={services}
-          field={field}
           closePopover={closePopover}
+          field={field}
+          onAddBreakdownField={isBreakdownSupported ? onAddBreakdownField : undefined}
           onAddFieldToWorkspace={!isSelected ? toggleDisplay : undefined}
           onAddFilter={onAddFilter}
-          onEditField={onEditField}
           onDeleteField={onDeleteField}
+          onEditField={onEditField}
+          services={services}
           {...customPopoverHeaderProps}
         />
       )}
       renderContent={
-        (searchMode === 'text-based' && canProvideStatsForFieldTextBased(field)) ||
+        (searchMode === 'text-based' && canProvideStatsForEsqlField(field)) ||
         searchMode === 'documents'
           ? renderPopover
           : undefined
       }
+      renderFooter={renderFooter}
     />
   );
 }

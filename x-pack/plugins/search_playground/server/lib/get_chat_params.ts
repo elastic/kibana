@@ -57,7 +57,7 @@ export const getChatParams = async (
         actionsClient,
         logger,
         connectorId,
-        model,
+        model: model || connector?.config?.defaultModel,
         traceId: uuidv4(),
         signal: abortSignal,
         temperature: getDefaultArguments().temperature,

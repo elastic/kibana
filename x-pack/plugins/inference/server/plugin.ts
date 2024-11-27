@@ -7,11 +7,16 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { createInferenceClient } from './inference_client';
-import { registerChatCompleteRoute } from './routes/chat_complete';
-import { registerConnectorsRoute } from './routes/connectors';
-import type {
-  ConfigSchema,
+import {
+  type BoundInferenceClient,
+  createClient as createInferenceClient,
+  type InferenceClient,
+} from './inference_client';
+import { registerRoutes } from './routes';
+import type { InferenceConfig } from './config';
+import {
+  InferenceBoundClientCreateOptions,
+  InferenceClientCreateOptions,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
@@ -27,9 +32,9 @@ export class InferencePlugin
       InferenceStartDependencies
     >
 {
-  logger: Logger;
+  private logger: Logger;
 
-  constructor(context: PluginInitializerContext<ConfigSchema>) {
+  constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
   }
   setup(
@@ -38,22 +43,23 @@ export class InferencePlugin
   ): InferenceServerSetup {
     const router = coreSetup.http.createRouter();
 
-    registerChatCompleteRoute({
+    registerRoutes({
       router,
       coreSetup,
+      logger: this.logger,
     });
 
-    registerConnectorsRoute({
-      router,
-      coreSetup,
-    });
     return {};
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     return {
-      getClient: ({ request }) => {
-        return createInferenceClient({ request, actions: pluginsStart.actions });
+      getClient: <T extends InferenceClientCreateOptions>(options: T) => {
+        return createInferenceClient({
+          ...options,
+          actions: pluginsStart.actions,
+          logger: this.logger.get('client'),
+        }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
     };
   }

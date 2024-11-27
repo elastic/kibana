@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 import {
@@ -65,7 +66,7 @@ describe('useDiscoverCustomization', () => {
   it('should provide customization', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
-      wrapper: ({ children }) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         service.set(customization);
         return (
@@ -79,8 +80,10 @@ describe('useDiscoverCustomization', () => {
   it('should allow changing the customization', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const service = createCustomizationService();
-    const wrapper = renderHook((id) => useDiscoverCustomization(id), {
-      initialProps: customization.id as DiscoverCustomizationId,
+    const wrapper = renderHook(({ id }) => useDiscoverCustomization(id), {
+      initialProps: { id: customization.id } as React.PropsWithChildren<{
+        id: DiscoverCustomizationId;
+      }>,
       wrapper: ({ children }) => {
         service.set(customization);
         return (
@@ -91,13 +94,13 @@ describe('useDiscoverCustomization', () => {
     expect(wrapper.result.current).toBe(customization);
     const newCustomization: DiscoverCustomization = { id: 'search_bar' };
     service.set(newCustomization);
-    wrapper.rerender('search_bar');
+    wrapper.rerender({ id: 'search_bar' });
     expect(wrapper.result.current).toBe(newCustomization);
   });
 
   it('should provide undefined if customization is not found', () => {
     const wrapper = renderHook(() => useDiscoverCustomization('top_nav'), {
-      wrapper: ({ children }) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
           <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>
@@ -112,7 +115,7 @@ describe('useDiscoverCustomization$', () => {
   it('should provide customization$', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
-      wrapper: ({ children }) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         service.set(customization);
         return (
@@ -130,8 +133,10 @@ describe('useDiscoverCustomization$', () => {
   it('should allow changing the customization', () => {
     const customization: DiscoverCustomization = { id: 'top_nav' };
     const service = createCustomizationService();
-    const wrapper = renderHook((id) => useDiscoverCustomization$(id), {
-      initialProps: customization.id as DiscoverCustomizationId,
+    const wrapper = renderHook(({ id }) => useDiscoverCustomization$(id), {
+      initialProps: { id: customization.id } as React.PropsWithChildren<{
+        id: DiscoverCustomizationId;
+      }>,
       wrapper: ({ children }) => {
         service.set(customization);
         return (
@@ -146,7 +151,7 @@ describe('useDiscoverCustomization$', () => {
     expect(result).toBe(customization);
     const newCustomization: DiscoverCustomization = { id: 'search_bar' };
     service.set(newCustomization);
-    wrapper.rerender('search_bar');
+    wrapper.rerender({ id: 'search_bar' });
     wrapper.result.current.subscribe((current) => {
       result = current;
     });
@@ -155,7 +160,7 @@ describe('useDiscoverCustomization$', () => {
 
   it('should provide undefined if customization is not found', () => {
     const wrapper = renderHook(() => useDiscoverCustomization$('top_nav'), {
-      wrapper: ({ children }) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         const service = createCustomizationService();
         return (
           <DiscoverCustomizationProvider value={service}>{children}</DiscoverCustomizationProvider>

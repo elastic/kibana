@@ -1,13 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
@@ -18,6 +18,7 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { Histogram } from './histogram';
@@ -68,7 +69,7 @@ export interface ChartProps {
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: LensEmbeddableOutput['dataLoading'];
   isChartLoading?: boolean;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
@@ -78,6 +79,7 @@ export interface ChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
+  columns?: DatatableColumn[];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -102,7 +104,7 @@ export function Chart({
   disabledActions,
   input$: originalInput$,
   lensAdapters,
-  lensEmbeddableOutput$,
+  dataLoading$,
   isChartLoading,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -113,6 +115,7 @@ export function Chart({
   onBrushEnd,
   withDefaultActions,
   abortController,
+  columns,
 }: ChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
@@ -311,6 +314,7 @@ export function Chart({
                       dataView={dataView}
                       breakdown={breakdown}
                       onBreakdownFieldChange={onBreakdownFieldChange}
+                      esqlColumns={isPlainRecord ? columns : undefined}
                     />
                   )}
                 </div>
@@ -378,9 +382,7 @@ export function Chart({
       )}
       {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
         <LensSaveModalComponent
-          initialInput={
-            removeTablesFromLensAttributes(visContext.attributes) as unknown as LensEmbeddableInput
-          }
+          initialInput={removeTablesFromLensAttributes(visContext.attributes)}
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
@@ -388,18 +390,16 @@ export function Chart({
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
         <ChartConfigPanel
-          {...{
-            services,
-            visContext,
-            lensAdapters,
-            lensEmbeddableOutput$,
-            isFlyoutVisible,
-            setIsFlyoutVisible,
-            isPlainRecord,
-            query,
-            currentSuggestionContext: lensVisServiceCurrentSuggestionContext,
-            onSuggestionContextEdit,
-          }}
+          services={services}
+          visContext={visContext}
+          lensAdapters={lensAdapters}
+          dataLoading$={dataLoading$}
+          isFlyoutVisible={isFlyoutVisible}
+          setIsFlyoutVisible={setIsFlyoutVisible}
+          isPlainRecord={isPlainRecord}
+          query={query}
+          currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
+          onSuggestionContextEdit={onSuggestionContextEdit}
         />
       )}
     </EuiFlexGroup>

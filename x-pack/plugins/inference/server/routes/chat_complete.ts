@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { schema, Type } from '@kbn/config-schema';
-import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { isObservable } from 'rxjs';
-import { MessageRole } from '../../common/chat_complete';
-import type { ChatCompleteRequestBody } from '../../common/chat_complete/request';
-import { ToolCall, ToolChoiceType } from '../../common/chat_complete/tools';
-import { createInferenceClient } from '../inference_client';
+import { schema, Type, TypeOf } from '@kbn/config-schema';
+import type {
+  CoreSetup,
+  IRouter,
+  Logger,
+  RequestHandlerContext,
+  KibanaRequest,
+} from '@kbn/core/server';
+import { MessageRole, ToolCall, ToolChoiceType } from '@kbn/inference-common';
+import type { ChatCompleteRequestBody } from '../../common/http_apis';
+import { createClient as createInferenceClient } from '../inference_client';
 import { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { observableIntoEventSourceStream } from '../util/observable_into_event_source_stream';
 
@@ -20,7 +24,7 @@ const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
     toolCallId: schema.string(),
     function: schema.object({
       name: schema.string(),
-      arguments: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+      arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     }),
   })
 );
@@ -57,8 +61,8 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
     schema.oneOf([
       schema.object({
         role: schema.literal(MessageRole.Assistant),
-        content: schema.string(),
-        toolCalls: toolCallSchema,
+        content: schema.oneOf([schema.string(), schema.literal(null)]),
+        toolCalls: schema.maybe(toolCallSchema),
       }),
       schema.object({
         role: schema.literal(MessageRole.User),
@@ -68,50 +72,83 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
       schema.object({
         role: schema.literal(MessageRole.Tool),
         toolCallId: schema.string(),
-        response: schema.object({}, { unknowns: 'allow' }),
+        response: schema.recordOf(schema.string(), schema.any()),
       }),
     ])
+  ),
+  functionCalling: schema.maybe(
+    schema.oneOf([schema.literal('native'), schema.literal('simulated')])
   ),
 });
 
 export function registerChatCompleteRoute({
   coreSetup,
   router,
+  logger,
 }: {
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
   router: IRouter<RequestHandlerContext>;
+  logger: Logger;
 }) {
+  async function callChatComplete<T extends boolean>({
+    request,
+    stream,
+  }: {
+    request: KibanaRequest<unknown, unknown, TypeOf<typeof chatCompleteBodySchema>>;
+    stream: T;
+  }) {
+    const actions = await coreSetup
+      .getStartServices()
+      .then(([coreStart, pluginsStart]) => pluginsStart.actions);
+
+    const client = createInferenceClient({ request, actions, logger });
+
+    const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
+
+    return client.chatComplete({
+      connectorId,
+      messages,
+      system,
+      toolChoice,
+      tools,
+      functionCalling,
+      stream,
+    });
+  }
+
   router.post(
     {
       path: '/internal/inference/chat_complete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: chatCompleteBodySchema,
       },
     },
     async (context, request, response) => {
-      const actions = await coreSetup
-        .getStartServices()
-        .then(([coreStart, pluginsStart]) => pluginsStart.actions);
-
-      const client = createInferenceClient({ request, actions });
-
-      const { connectorId, messages, system, toolChoice, tools } = request.body;
-
-      const chatCompleteResponse = await client.chatComplete({
-        connectorId,
-        messages,
-        system,
-        toolChoice,
-        tools,
+      const chatCompleteResponse = await callChatComplete({ request, stream: false });
+      return response.ok({
+        body: chatCompleteResponse,
       });
+    }
+  );
 
-      if (isObservable(chatCompleteResponse)) {
-        return response.ok({
-          body: observableIntoEventSourceStream(chatCompleteResponse),
-        });
-      }
-
-      return response.ok({ body: chatCompleteResponse });
+  router.post(
+    {
+      path: '/internal/inference/chat_complete/stream',
+      validate: {
+        body: chatCompleteBodySchema,
+      },
+    },
+    async (context, request, response) => {
+      const chatCompleteResponse = await callChatComplete({ request, stream: true });
+      return response.ok({
+        body: observableIntoEventSourceStream(chatCompleteResponse, logger),
+      });
     }
   );
 }

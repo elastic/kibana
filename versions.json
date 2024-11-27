@@ -2,21 +2,35 @@
   "notice": "This file is not maintained outside of the main branch and should only be used for tooling.",
   "versions": [
     {
-      "version": "8.16.0",
+      "version": "9.0.0",
       "branch": "main",
       "currentMajor": true,
       "currentMinor": true
     },
     {
-      "version": "8.15.1",
-      "branch": "8.15",
-      "currentMajor": true,
+      "version": "8.18.0",
+      "branch": "8.x",
+      "previousMajor": true,
       "previousMinor": true
     },
     {
-      "version": "7.17.24",
-      "branch": "7.17",
+      "version": "8.17.0",
+      "branch": "8.17",
       "previousMajor": true
+    },
+    {
+      "version": "8.16.2",
+      "branch": "8.16",
+      "previousMajor": true
+    },
+    {
+      "version": "8.15.5",
+      "branch": "8.15",
+      "previousMajor": true
+    },
+    {
+      "version": "7.17.26",
+      "branch": "7.17"
     }
   ]
 }

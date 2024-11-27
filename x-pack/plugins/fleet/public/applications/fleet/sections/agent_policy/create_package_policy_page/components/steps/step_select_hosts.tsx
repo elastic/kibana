@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useGetAgentPolicies } from '../../../../../hooks';
 import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../../../types';
-import { AgentPolicyIntegrationForm } from '../../../components';
-import { SO_SEARCH_LIMIT } from '../../../../../constants';
 import type { ValidationResults } from '../../../components/agent_policy_validation';
 
 import { incrementPolicyName } from '../../../../../services';
 
+import { AgentPolicyIntegrationForm } from '../../../components';
+
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
+import { useAllNonManagedAgentPolicies } from './components/use_policies';
 
 export enum SelectedPolicyTab {
   NEW = 'new',
@@ -60,23 +60,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   selectedAgentPolicyIds,
   initialSelectedTabIndex,
 }) => {
-  let existingAgentPolicies: AgentPolicy[] = [];
-  const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-    sortField: 'name',
-    sortOrder: 'asc',
-    full: false, // package_policies will always be empty
-    noAgentCount: true, // agentPolicy.agents will always be 0
-  });
-  if (err) {
-    // eslint-disable-next-line no-console
-    console.debug('Could not retrieve agent policies');
-  }
-  existingAgentPolicies = useMemo(
-    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
-    [agentPoliciesData?.items]
-  );
+  const existingAgentPolicies: AgentPolicy[] = useAllNonManagedAgentPolicies();
 
   useEffect(() => {
     if (existingAgentPolicies.length > 0) {
@@ -121,7 +105,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   const handleOnTabClick = (tab: EuiTabbedContentTab) =>
     updateSelectedTab(tab.id as SelectedPolicyTab);
 
-  return existingAgentPolicies.length > 0 ? (
+  return (
     <StyledEuiTabbedContent
       initialSelectedTab={
         initialSelectedTabIndex
@@ -132,14 +116,6 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
       }
       tabs={tabs}
       onTabClick={handleOnTabClick}
-    />
-  ) : (
-    <AgentPolicyIntegrationForm
-      agentPolicy={newAgentPolicy}
-      updateAgentPolicy={updateNewAgentPolicy}
-      withSysMonitoring={withSysMonitoring}
-      updateSysMonitoring={updateSysMonitoring}
-      validation={validation}
     />
   );
 };

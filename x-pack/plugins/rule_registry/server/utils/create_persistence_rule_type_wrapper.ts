@@ -50,7 +50,7 @@ export type BackendAlertWithSuppressionFields870<T> = Omit<
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
-const augmentAlerts = <T>({
+const augmentAlerts = async <T>({
   alerts,
   options,
   kibanaVersion,
@@ -62,16 +62,21 @@ const augmentAlerts = <T>({
   currentTimeOverride: Date | undefined;
 }) => {
   const commonRuleFields = getCommonAlertFields(options);
+  const maintenanceWindowIds: string[] =
+    alerts.length > 0 ? await options.services.getMaintenanceWindowIds() : [];
+
+  const currentDate = new Date();
+  const timestampOverrideOrCurrent = currentTimeOverride ?? currentDate;
   return alerts.map((alert) => {
     return {
       ...alert,
       _source: {
-        [ALERT_RULE_EXECUTION_TIMESTAMP]: new Date(),
-        [ALERT_START]: currentTimeOverride ?? new Date(),
-        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+        [ALERT_RULE_EXECUTION_TIMESTAMP]: currentDate,
+        [ALERT_START]: timestampOverrideOrCurrent,
+        [ALERT_LAST_DETECTED]: timestampOverrideOrCurrent,
         [VERSION]: kibanaVersion,
-        ...(options?.maintenanceWindowIds?.length
-          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: options.maintenanceWindowIds }
+        ...(maintenanceWindowIds.length
+          ? { [ALERT_MAINTENANCE_WINDOW_IDS]: maintenanceWindowIds }
           : {}),
         ...commonRuleFields,
         ...alert._source,
@@ -251,6 +256,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
             ...options.services,
             alertWithPersistence: async (alerts, refresh, maxAlerts = undefined, enrichAlerts) => {
               const numAlerts = alerts.length;
+
               logger.debug(`Found ${numAlerts} alerts.`);
 
               const ruleDataClientWriter = await ruleDataClient.getWriter({
@@ -297,7 +303,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,
@@ -555,7 +561,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   alertsWereTruncated = true;
                 }
 
-                const augmentedAlerts = augmentAlerts({
+                const augmentedAlerts = await augmentAlerts({
                   alerts: enrichedAlerts,
                   options,
                   kibanaVersion: ruleDataClient.kibanaVersion,

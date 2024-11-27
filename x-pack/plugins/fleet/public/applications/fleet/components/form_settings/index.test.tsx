@@ -9,7 +9,7 @@ import { act, fireEvent } from '@testing-library/react';
 
 import React from 'react';
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { zodStringWithDurationValidation } from '../../../../../common/settings/agent_policy_settings';
 import type { SettingsConfig } from '../../../../../common/settings/types';
@@ -102,66 +102,31 @@ describe('ConfiguredSettings', () => {
     expect(mockUpdateAdvancedSettingsHasErrors).toHaveBeenCalledWith(true);
   });
 
-  it('should render field group', () => {
+  it('should render boolean field using checkbox', () => {
     const result = render([
       {
-        name: 'agent.monitoring.http',
+        name: 'agent.logging.to_files',
+        title: 'Agent logging to files',
+        description: 'Description',
+        learnMoreLink: '',
         api_field: {
-          name: 'agent_monitoring_http',
+          name: 'agent_logging_to_files',
         },
-        title: 'Agent HTTP monitoring',
-        description: 'Agent HTTP monitoring settings',
-        learnMoreLink:
-          'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#override-default-monitoring-port',
-        schema: z
-          .object({
-            enabled: z.boolean().describe('Enabled').default(false),
-            host: z.string().describe('Host').default('localhost'),
-            port: z.number().describe('Port').min(0).max(65353).default(6791),
-            'buffer.enabled': z.boolean().describe('Buffer Enabled').default(false),
-          })
-          .default({}),
+        schema: z.boolean().default(false),
       },
     ]);
 
-    expect(result.getByText('Agent HTTP monitoring')).not.toBeNull();
-    expect(result.getByText('Buffer Enabled')).not.toBeNull();
-    const switches = result.getAllByRole('switch');
-    expect(switches).toHaveLength(2);
-    expect(switches[0]).not.toBeChecked();
-    expect(switches[1]).not.toBeChecked();
-    const port = result.getByTestId('configuredSetting-agent.monitoring.http-port');
-    expect(port).toHaveValue(6791);
-    const host = result.getByTestId('configuredSetting-agent.monitoring.http-host');
-    expect(host).toHaveValue('localhost');
+    expect(result.getByText('Agent logging to files')).not.toBeNull();
+    const input = result.getByTestId('configuredSetting-agent.logging.to_files');
+    expect(input).not.toBeChecked();
 
     act(() => {
-      fireEvent.click(switches[0]);
+      fireEvent.click(input);
     });
 
     expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
       expect.objectContaining({
-        advanced_settings: expect.objectContaining({ agent_monitoring_http: { enabled: true } }),
-      })
-    );
-
-    act(() => {
-      fireEvent.change(port, { target: { value: '6792' } });
-    });
-
-    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        advanced_settings: expect.objectContaining({ agent_monitoring_http: { port: 6792 } }),
-      })
-    );
-
-    act(() => {
-      fireEvent.change(host, { target: { value: '1.2.3.4' } });
-    });
-
-    expect(mockUpdateAgentPolicy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        advanced_settings: expect.objectContaining({ agent_monitoring_http: { host: '1.2.3.4' } }),
+        advanced_settings: expect.objectContaining({ agent_logging_to_files: true }),
       })
     );
   });

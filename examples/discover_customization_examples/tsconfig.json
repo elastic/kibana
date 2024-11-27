@@ -9,12 +9,10 @@
     "@kbn/discover-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/controls-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/shared-ux-router",
     "@kbn/i18n-react",
     "@kbn/react-kibana-context-theme",
     "@kbn/data-plugin",
-    "@kbn/react-kibana-context-render",
   ],
   "exclude": ["target/**/*"]
 }

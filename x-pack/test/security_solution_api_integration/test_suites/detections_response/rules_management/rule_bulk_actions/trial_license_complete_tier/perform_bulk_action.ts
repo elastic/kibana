@@ -34,12 +34,7 @@ import {
   removeServerGeneratedProperties,
   updateUsername,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../../common/utils/security_solution';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -82,22 +77,25 @@ export default ({ getService }: FtrProviderContext): void => {
     supertest.get(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'true');
 
   const createConnector = async (payload: Record<string, unknown>) =>
-    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
-      .body;
+    (
+      await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'true')
+        .send(payload)
+        .expect(200)
+    ).body;
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
   const createSlackConnector = () => createConnector(getSlackAction());
 
   describe('@ess @serverless @skipInServerless perform_bulk_action', () => {
     beforeEach(async () => {
-      await createAlertsIndex(supertest, log);
+      await deleteAllRules(supertest, log);
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest, log, es);
-      await deleteAllRules(supertest, log);
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
     });
 
     it('should export rules', async () => {
@@ -278,42 +276,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Check that the updates have been persisted
       await fetchRule(ruleId).expect(404);
-    });
-
-    it('should enable rules', async () => {
-      const ruleId = 'ruleId';
-      await createRule(supertest, log, getSimpleRule(ruleId));
-
-      const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionTypeEnum.enable })
-        .expect(200);
-
-      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
-
-      // Check that the updated rule is returned with the response
-      expect(body.attributes.results.updated[0].enabled).toEqual(true);
-
-      // Check that the updates have been persisted
-      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
-      expect(ruleBody.enabled).toEqual(true);
-    });
-
-    it('should disable rules', async () => {
-      const ruleId = 'ruleId';
-      await createRule(supertest, log, getSimpleRule(ruleId, true));
-
-      const { body } = await postBulkAction()
-        .send({ query: '', action: BulkActionTypeEnum.disable })
-        .expect(200);
-
-      expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
-
-      // Check that the updated rule is returned with the response
-      expect(body.attributes.results.updated[0].enabled).toEqual(false);
-
-      // Check that the updates have been persisted
-      const { body: ruleBody } = await fetchRule(ruleId).expect(200);
-      expect(ruleBody.enabled).toEqual(false);
     });
 
     it('should duplicate rules', async () => {

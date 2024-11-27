@@ -28,13 +28,30 @@ export const RunActionParamsSchema = schema.object({
   raw: schema.maybe(schema.boolean()),
 });
 
+export const BedrockMessageSchema = schema.object(
+  {
+    role: schema.string(),
+    content: schema.maybe(schema.string()),
+    rawContent: schema.maybe(schema.arrayOf(schema.any())),
+  },
+  {
+    validate: (value) => {
+      if (value.content === undefined && value.rawContent === undefined) {
+        return 'Must specify either content or rawContent';
+      } else if (value.content !== undefined && value.rawContent !== undefined) {
+        return 'content and rawContent can not be used at the same time';
+      }
+    },
+  }
+);
+
+export const BedrockToolChoiceSchema = schema.object({
+  type: schema.oneOf([schema.literal('auto'), schema.literal('any'), schema.literal('tool')]),
+  name: schema.maybe(schema.string()),
+});
+
 export const InvokeAIActionParamsSchema = schema.object({
-  messages: schema.arrayOf(
-    schema.object({
-      role: schema.string(),
-      content: schema.string(),
-    })
-  ),
+  messages: schema.arrayOf(BedrockMessageSchema),
   model: schema.maybe(schema.string()),
   temperature: schema.maybe(schema.number()),
   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
@@ -53,6 +70,7 @@ export const InvokeAIActionParamsSchema = schema.object({
       })
     )
   ),
+  toolChoice: schema.maybe(BedrockToolChoiceSchema),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -84,6 +102,7 @@ export const InvokeAIRawActionParamsSchema = schema.object({
       })
     )
   ),
+  toolChoice: schema.maybe(BedrockToolChoiceSchema),
 });
 
 export const InvokeAIRawActionResponseSchema = schema.object({}, { unknowns: 'allow' });
@@ -129,3 +148,12 @@ export const DashboardActionParamsSchema = schema.object({
 export const DashboardActionResponseSchema = schema.object({
   available: schema.boolean(),
 });
+
+export const BedrockClientSendParamsSchema = schema.object({
+  // ConverseCommand | ConverseStreamCommand from @aws-sdk/client-bedrock-runtime
+  command: schema.any(),
+  // Kibana related properties
+  signal: schema.maybe(schema.any()),
+});
+
+export const BedrockClientSendResponseSchema = schema.object({}, { unknowns: 'allow' });

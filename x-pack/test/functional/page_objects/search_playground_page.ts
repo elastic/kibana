@@ -146,7 +146,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const model = await testSubjects.find('summarizationModelSelect');
         const defaultModel = await model.getVisibleText();
 
-        expect(defaultModel).to.equal('OpenAI GPT-3.5 Turbo');
+        expect(defaultModel).to.equal('OpenAI GPT-4o');
         expect(defaultModel).not.to.be.empty();
 
         expect(
@@ -230,6 +230,15 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-false');
+      },
+
+      async clickManageButton() {
+        await testSubjects.click('manageConnectorsLink');
+        await testSubjects.existOrFail('manageConnectorsLink');
+        await browser.switchTab(1);
+        await testSubjects.existOrFail('edit-connector-flyout');
+        await browser.closeCurrentWindow();
+        await browser.switchTab(0);
       },
     },
   };

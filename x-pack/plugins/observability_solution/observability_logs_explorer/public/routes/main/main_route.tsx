@@ -21,17 +21,17 @@ import {
 } from '../../state_machines/observability_logs_explorer/src';
 import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 import { ObservabilityLogsExplorerHistory } from '../../types';
-import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
+import { useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export const ObservabilityLogsExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
-  const { logsExplorer, serverless, chrome, notifications, appParams, analytics, i18n, theme } =
+  const { logsExplorer, notifications, appParams, analytics, i18n, theme, logsDataAccess } =
     services;
   const { history } = appParams;
 
-  useBreadcrumbs(noBreadcrumbs, chrome, serverless);
+  useBreadcrumbs();
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
@@ -51,6 +51,7 @@ export const ObservabilityLogsExplorerMainRoute = () => {
       urlStateStorageContainer={urlStateStorageContainer}
       timeFilterService={services.data.query.timefilter.timefilter}
       analytics={services.analytics}
+      logSourcesService={logsDataAccess.services.logSourcesService}
     >
       <LogsExplorerTopNavMenu />
       <LazyOriginInterpreter

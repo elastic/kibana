@@ -26,8 +26,13 @@ export const getActiveMaintenanceWindowsRoute = (
     {
       path: INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH,
       validate: {},
+      security: {
+        authz: {
+          requiredPrivileges: [`${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+        },
+      },
       options: {
-        tags: [`access:${MAINTENANCE_WINDOW_API_PRIVILEGES.READ_MAINTENANCE_WINDOW}`],
+        access: 'internal',
       },
     },
     router.handleLegacyErrors(

@@ -77,7 +77,7 @@ export function createScenarios(
   };
 
   const tryDashboardGenerateCsvFail = async (savedSearchTitle: string) => {
-    await dashboardPanelActions.clickContextMenuItemByTitle(
+    await dashboardPanelActions.clickPanelActionByTitle(
       GENERATE_CSV_DATA_TEST_SUBJ,
       savedSearchTitle
     );
@@ -94,7 +94,7 @@ export function createScenarios(
       GENERATE_CSV_DATA_TEST_SUBJ,
       savedSearchTitle
     );
-    await dashboardPanelActions.clickContextMenuItemByTitle(
+    await dashboardPanelActions.clickPanelActionByTitle(
       GENERATE_CSV_DATA_TEST_SUBJ,
       savedSearchTitle
     );
@@ -121,7 +121,7 @@ export function createScenarios(
     expect(queueReportError).to.be(true);
   };
   const tryGeneratePdfNotAvailable = async () => {
-    PageObjects.share.clickShareTopNavButton();
+    await PageObjects.share.clickShareTopNavButton();
     await testSubjects.missingOrFail(`Export`);
   };
   const tryGeneratePdfSuccess = async () => {

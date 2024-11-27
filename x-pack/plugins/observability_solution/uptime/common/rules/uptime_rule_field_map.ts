@@ -17,13 +17,23 @@ export const uptimeRuleFieldMap: FieldMap = {
     type: 'keyword',
     required: false,
   },
+  'observer.name': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'observer.geo.name': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   // monitor status alert fields
   'error.message': {
     type: 'text',
+    required: false,
+  },
+  'error.stack_trace': {
+    type: 'wildcard',
     required: false,
   },
   'agent.name': {
@@ -43,6 +53,10 @@ export const uptimeRuleFieldMap: FieldMap = {
     array: true,
     required: false,
   },
+  'monitor.state.id': {
+    type: 'keyword',
+    required: false,
+  },
   configId: {
     type: 'keyword',
     required: false,
@@ -53,10 +67,12 @@ export const uptimeRuleFieldMap: FieldMap = {
   },
   'location.id': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   'location.name': {
     type: 'keyword',
+    array: true,
     required: false,
   },
   // tls alert fields
@@ -87,6 +103,14 @@ export const uptimeRuleFieldMap: FieldMap = {
   },
   'anomaly.bucket_span.minutes': {
     type: 'keyword',
+    required: false,
+  },
+  'service.name': {
+    type: 'keyword',
+    required: false,
+  },
+  labels: {
+    type: 'object',
     required: false,
   },
 } as const;

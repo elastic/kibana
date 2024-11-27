@@ -5,16 +5,17 @@
  * 2.0.
  */
 import type { CategorizationState } from '../../types';
+import type { CategorizationBaseNodeParams } from './types';
 import { ECS_EVENT_TYPES_PER_CATEGORY, EVENT_CATEGORIES, EVENT_TYPES } from './constants';
 
 import type { EventCategories } from './constants';
 
-interface Event {
+export interface Event {
   type?: string[];
   category?: string[];
 }
 
-interface PipelineResult {
+export interface PipelineResult {
   event?: Event;
 }
 
@@ -22,11 +23,9 @@ interface CategorizationError {
   error: string;
 }
 
-export function handleCategorizationValidation(state: CategorizationState): {
-  previousInvalidCategorization: string;
-  invalidCategorization: CategorizationError[];
-  lastExecutedChain: string;
-} {
+export function handleCategorizationValidation({
+  state,
+}: CategorizationBaseNodeParams): Partial<CategorizationState> {
   let previousInvalidCategorization = '';
   const errors: CategorizationError[] = [];
   const pipelineResults = state.pipelineResults as PipelineResult[];

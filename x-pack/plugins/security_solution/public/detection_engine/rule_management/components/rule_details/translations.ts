@@ -350,9 +350,44 @@ export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const CUSTOMIZED_PREBUILT_RULE_LABEL = i18n.translate(
+export const MODIFIED_PREBUILT_RULE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRuleLabel',
   {
-    defaultMessage: 'Customized Elastic rule',
+    defaultMessage: 'Modified Elastic rule',
+  }
+);
+
+export const QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.queryLanguageLabel',
+  {
+    defaultMessage: 'Custom query language',
+  }
+);
+
+export const THREAT_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.threatQueryLanguageLabel',
+  {
+    defaultMessage: 'Indicator index query language',
+  }
+);
+
+export const SAVED_QUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.savedQueryLanguageLabel',
+  {
+    defaultMessage: 'Saved query language',
+  }
+);
+
+export const KUERY_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.kqlLanguageLabel',
+  {
+    defaultMessage: 'KQL',
+  }
+);
+
+export const LUCENE_LANGUAGE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.luceneLanguageLabel',
+  {
+    defaultMessage: 'Lucene',
   }
 );

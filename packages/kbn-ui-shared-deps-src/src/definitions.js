@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const Path = require('path');
@@ -31,7 +32,7 @@ const jsFilename = 'kbn-ui-shared-deps-src.js';
 const cssDistFilename = 'kbn-ui-shared-deps-src.css';
 
 /**
- * Externals mapping inteded to be used in a webpack config
+ * Externals mapping intended to be used in a webpack config
  */
 const externals = {
   /**
@@ -76,6 +77,7 @@ const externals = {
     '__kbnSharedDeps__.ElasticEuiLibComponentsUseIsNestedEuiProvider',
   '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
   '@elastic/eui/lib/services/format': '__kbnSharedDeps__.ElasticEuiLibServicesFormat',
+  '@elastic/eui-theme-borealis': '__kbnSharedDeps__.ElasticEuiThemeBorealis',
 
   // transient dep of eui
   '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
@@ -102,6 +104,9 @@ const externals = {
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
   '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
   '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
+  '@kbn/ebt-tools': '__kbnSharedDeps__.KbnEbtTools',
+  '@elastic/apm-rum-core': '__kbnSharedDeps__.ElasticApmRumCore',
+  '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

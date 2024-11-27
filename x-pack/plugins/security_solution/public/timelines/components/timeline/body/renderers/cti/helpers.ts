@@ -19,6 +19,7 @@ const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] => {
   } else if (!Array.isArray(threatData)) {
     return [threatData];
   }
+  // @ts-expect-error the returned type is ThreatEnrichmentEcs[]
   return threatData;
 };
 

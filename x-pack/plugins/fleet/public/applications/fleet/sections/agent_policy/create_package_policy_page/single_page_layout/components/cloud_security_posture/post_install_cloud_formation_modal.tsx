@@ -39,12 +39,14 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
     sendGetEnrollmentAPIKeys({
       page: 1,
       perPage: 1,
-      kuery: `policy_id:${agentPolicy.id}`,
+      kuery: `policy_id:"${agentPolicy.id}"`,
     })
   );
 
   const { agentPolicyWithPackagePolicies } = useAgentPolicyWithPackagePolicies(agentPolicy.id);
-  const { fleetServerHost } = useFleetServerHostsForPolicy(agentPolicyWithPackagePolicies);
+  const { fleetServerHost, isLoadingInitialRequest } = useFleetServerHostsForPolicy(
+    agentPolicyWithPackagePolicies
+  );
 
   const cloudFormationProps = getCloudFormationPropsFromPackagePolicy(packagePolicy);
 
@@ -67,7 +69,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
 
       <EuiModalBody>
         <CloudFormationGuide awsAccountType={cloudFormationProps.awsAccountType} />
-        {error && isError && (
+        {error && isError && !isLoadingInitialRequest && (
           <>
             <EuiSpacer size="m" />
             <EuiCallOut title={error} color="danger" iconType="error" />

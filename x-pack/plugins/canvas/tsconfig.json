@@ -12,6 +12,7 @@
     "allowJs": false
   },
   "include": [
+    "*.ts",
     "../../../typings/**/*",
     "__fixtures__/**/*",
     "canvas_plugin_src/**/*",
@@ -27,7 +28,6 @@
   "kbn_references": [
     { "path": "../../../src/setup_node_env/tsconfig.json" },
     "@kbn/core",
-    "@kbn/bfetch-plugin",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
     "@kbn/share-plugin",
@@ -89,9 +89,7 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-types",
+    "@kbn/search-types"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

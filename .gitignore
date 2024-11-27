@@ -22,6 +22,7 @@ target
 *.iml
 *.log
 types.eslint.config.js
+types.eslint.config.cjs
 __tmp__
 
 # Ignore example plugin builds
@@ -141,3 +142,24 @@ x-pack/test/security_api_integration/plugins/audit_log/audit.log
 # ignore FTR temp directory
 .ftr
 role_users.json
+
+# ignore Scout temp directory
+.scout
+
+.devcontainer/.env
+
+# Ignore temporary files in oas_docs
+oas_docs/output/kibana.serverless.tmp*.yaml
+oas_docs/output/kibana.tmp*.yaml
+oas_docs/output/kibana.new.yaml
+oas_docs/output/kibana.serverless.new.yaml
+
+# Security Solution Playwright
+x-pack/test/security_solution_playwright/test-results/
+x-pack/test/security_solution_playwright/playwright-report/
+x-pack/test/security_solution_playwright/blob-report/
+x-pack/test/security_solution_playwright/playwright/.cache/
+x-pack/test/security_solution_playwright/.auth/
+x-pack/test/security_solution_playwright/.env
+.codeql
+.dependency-graph-log.json

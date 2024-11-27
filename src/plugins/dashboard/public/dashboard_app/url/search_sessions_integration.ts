@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { map } from 'rxjs';
@@ -17,12 +18,13 @@ import {
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-
+import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../dashboard_constants';
-import { DashboardContainer, DashboardLocatorParams } from '../../dashboard_container';
-import { convertPanelMapToSavedPanels } from '../../../common';
-import { pluginServices } from '../../services/plugin_services';
+import { DashboardLocatorParams } from '../../dashboard_container';
+import { convertPanelMapToPanelsArray } from '../../../common';
+import { dataService } from '../../services/kibana_services';
+import { DashboardApi } from '../../dashboard_api/types';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -45,14 +47,15 @@ export const getSessionURLObservable = (history: History) =>
   );
 
 export function createSessionRestorationDataProvider(
-  container: DashboardContainer
+  dashboardApi: DashboardApi
 ): SearchSessionInfoProvider<DashboardLocatorParams> {
   return {
-    getName: async () => container.getTitle(),
+    getName: async () =>
+      dashboardApi.panelTitle.value ?? dashboardApi.savedObjectId.value ?? dashboardApi.uuid$.value,
     getLocatorData: async () => ({
       id: DASHBOARD_APP_LOCATOR,
-      initialState: getLocatorParams({ container, shouldRestoreSearchSession: false }),
-      restoreState: getLocatorParams({ container, shouldRestoreSearchSession: true }),
+      initialState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: false }),
+      restoreState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: true }),
     }),
   };
 }
@@ -62,45 +65,36 @@ export function createSessionRestorationDataProvider(
  * as it was.
  */
 function getLocatorParams({
-  container,
+  dashboardApi,
   shouldRestoreSearchSession,
 }: {
-  container: DashboardContainer;
+  dashboardApi: DashboardApi;
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
-  const {
-    data: {
-      query: {
-        queryString,
-        filterManager,
-        timefilter: { timefilter },
-      },
-      search: { session },
-    },
-  } = pluginServices.getServices();
-
-  const {
-    componentState: { lastSavedId },
-    explicitInput: { panels, query, viewMode },
-  } = container.getState();
-
+  const savedObjectId = dashboardApi.savedObjectId.value;
   return {
-    viewMode,
+    viewMode: (dashboardApi.viewMode.value as ViewMode) ?? 'view',
     useHash: false,
     preserveSavedFilters: false,
-    filters: filterManager.getFilters(),
-    query: queryString.formatQuery(query) as Query,
-    dashboardId: container.getDashboardSavedObjectId(),
-    searchSessionId: shouldRestoreSearchSession ? session.getSessionId() : undefined,
-    timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
+    filters: dataService.query.filterManager.getFilters(),
+    query: dataService.query.queryString.formatQuery(dashboardApi.query$.value) as Query,
+    dashboardId: savedObjectId,
+    searchSessionId: shouldRestoreSearchSession
+      ? dataService.search.session.getSessionId()
+      : undefined,
+    timeRange: shouldRestoreSearchSession
+      ? dataService.query.timefilter.timefilter.getAbsoluteTime()
+      : dataService.query.timefilter.timefilter.getTime(),
     refreshInterval: shouldRestoreSearchSession
       ? {
           pause: true, // force pause refresh interval when restoring a session
           value: 0,
         }
       : undefined,
-    panels: lastSavedId
+    panels: savedObjectId
       ? undefined
-      : (convertPanelMapToSavedPanels(panels) as DashboardLocatorParams['panels']),
+      : (convertPanelMapToPanelsArray(
+          dashboardApi.panels$.value
+        ) as DashboardLocatorParams['panels']),
   };
 }

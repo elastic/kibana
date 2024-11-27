@@ -22,6 +22,8 @@ import { compact, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
 import type { APMError, Metric, Span, Transaction, Event } from '@kbn/apm-types/es_schemas_ui';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
+import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import { withApmSpan } from '../../../../utils';
 import type { ApmDataSource } from '../../../../../common/data_source';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
@@ -29,6 +31,7 @@ import { callAsyncWithDebug, getDebugBody, getDebugTitle } from '../call_async_w
 import type { ProcessorEventOfDocumentType } from '../document_type';
 import type { APMIndices } from '../../../..';
 import { getRequestBase, processorEventsToIndex } from './get_request_base';
+import { getDataTierFilterCombined } from '../../tier_filter';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -51,9 +54,9 @@ type APMEventWrapper<T> = Omit<T, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
-type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
+export type APMEventTermsEnumRequest = APMEventWrapper<TermsEnumRequest>;
 type APMEventEqlSearchRequest = APMEventWrapper<EqlSearchRequest>;
-type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
+export type APMEventFieldCapsRequest = APMEventWrapper<FieldCapsRequest>;
 
 type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   [ProcessorEvent.error]: APMError;
@@ -88,6 +91,7 @@ export interface APMEventClientConfig {
   options: {
     includeFrozen: boolean;
     inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
+    excludedDataTiers?: DataTier[];
   };
 }
 
@@ -96,7 +100,10 @@ export class APMEventClient {
   private readonly debug: boolean;
   private readonly request: KibanaRequest;
   public readonly indices: APMIndices;
+  /** @deprecated Use {@link excludedDataTiers} instead.
+   * See https://www.elastic.co/guide/en/kibana/current/advanced-options.html **/
   private readonly includeFrozen: boolean;
+  private readonly excludedDataTiers: DataTier[];
   private readonly inspectableEsQueriesMap?: WeakMap<KibanaRequest, InspectResponse>;
 
   constructor(config: APMEventClientConfig) {
@@ -105,6 +112,7 @@ export class APMEventClient {
     this.request = config.request;
     this.indices = config.indices;
     this.includeFrozen = config.options.includeFrozen;
+    this.excludedDataTiers = config.options.excludedDataTiers ?? [];
     this.inspectableEsQueriesMap = config.options.inspectableEsQueriesMap;
   }
 
@@ -159,6 +167,10 @@ export class APMEventClient {
       indices: this.indices,
     });
 
+    if (this.excludedDataTiers.length > 0) {
+      filters.push(...excludeTiersQuery(this.excludedDataTiers));
+    }
+
     const searchParams = {
       ...omit(params, 'apm', 'body'),
       index,
@@ -195,6 +207,9 @@ export class APMEventClient {
     // Reusing indices configured for errors since both events and errors are stored as logs.
     const index = processorEventsToIndex([ProcessorEvent.error], this.indices);
 
+    const filter =
+      this.excludedDataTiers.length > 0 ? excludeTiersQuery(this.excludedDataTiers) : undefined;
+
     const searchParams = {
       ...omit(params, 'body'),
       index,
@@ -202,6 +217,7 @@ export class APMEventClient {
         ...params.body,
         query: {
           bool: {
+            filter,
             must: compact([params.body.query]),
           },
         },
@@ -233,6 +249,10 @@ export class APMEventClient {
           apm: params.apm,
           indices: this.indices,
         });
+
+        if (this.excludedDataTiers.length > 0) {
+          filters.push(...excludeTiersQuery(this.excludedDataTiers));
+        }
 
         const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
           {
@@ -295,9 +315,13 @@ export class APMEventClient {
   ): Promise<FieldCapsResponse> {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
-    const requestParams = {
+    const requestParams: Omit<APMEventFieldCapsRequest, 'apm'> & { index: string[] } = {
       ...omit(params, 'apm'),
       index,
+      index_filter: getDataTierFilterCombined({
+        filter: params.index_filter,
+        excludedDataTiers: this.excludedDataTiers,
+      }),
     };
 
     return this.callAsyncWithDebug({
@@ -314,9 +338,13 @@ export class APMEventClient {
   ): Promise<TermsEnumResponse> {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
-    const requestParams = {
+    const requestParams: Omit<APMEventTermsEnumRequest, 'apm'> & { index: string } = {
       ...omit(params, 'apm'),
       index: index.join(','),
+      index_filter: getDataTierFilterCombined({
+        filter: params.index_filter,
+        excludedDataTiers: this.excludedDataTiers,
+      }),
     };
 
     return this.callAsyncWithDebug({

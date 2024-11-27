@@ -8,18 +8,19 @@
 import type { PopoverAnchorPosition, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiHeaderSectionItemButton,
-  EuiLoadingSpinner,
   EuiPopover,
+  EuiSkeletonRectangle,
   withEuiTheme,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
-import type { Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
 import { SpacesDescription } from './components/spaces_description';
 import { SpacesMenu } from './components/spaces_menu';
+import { SolutionViewTour } from './solution_view_tour';
 import type { Space } from '../../common';
 import type { EventTracker } from '../analytics';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -30,7 +31,7 @@ const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
 );
 
-interface Props {
+export interface Props {
   spacesManager: SpacesManager;
   anchorPosition: PopoverAnchorPosition;
   capabilities: Capabilities;
@@ -40,6 +41,8 @@ interface Props {
   theme: WithEuiThemeProps['theme'];
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
+  showTour$: Observable<boolean>;
+  onFinishTour: () => void;
 }
 
 interface State {
@@ -47,12 +50,14 @@ interface State {
   loading: boolean;
   activeSpace: Space | null;
   spaces: Space[];
+  showTour: boolean;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
 
 class NavControlPopoverUI extends Component<Props, State> {
   private activeSpace$?: Subscription;
+  private showTour$Sub?: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -61,6 +66,7 @@ class NavControlPopoverUI extends Component<Props, State> {
       loading: false,
       activeSpace: null,
       spaces: [],
+      showTour: false,
     };
   }
 
@@ -72,25 +78,37 @@ class NavControlPopoverUI extends Component<Props, State> {
         });
       },
     });
+
+    this.showTour$Sub = this.props.showTour$.subscribe((showTour) => {
+      this.setState({ showTour });
+    });
   }
 
   public componentWillUnmount() {
     this.activeSpace$?.unsubscribe();
+    this.showTour$Sub?.unsubscribe();
   }
 
   public render() {
     const button = this.getActiveSpaceButton();
     const { theme } = this.props;
+    const { activeSpace } = this.state;
+
+    const isTourOpen = Boolean(activeSpace) && this.state.showTour && !this.state.showSpaceSelector;
 
     let element: React.ReactNode;
-    if (this.state.loading || this.state.spaces.length < 2) {
+    if (this.state.loading) {
       element = (
         <SpacesDescription
           id={popoutContentId}
           isLoading={this.state.loading}
-          toggleSpaceSelector={this.toggleSpaceSelector}
           capabilities={this.props.capabilities}
           navigateToApp={this.props.navigateToApp}
+          onClickManageSpaceBtn={() => {
+            // No need to show the tour anymore, the user is taking action
+            this.props.onFinishTour();
+            this.toggleSpaceSelector();
+          }}
         />
       );
     } else {
@@ -106,24 +124,38 @@ class NavControlPopoverUI extends Component<Props, State> {
           activeSpace={this.state.activeSpace}
           allowSolutionVisibility={this.props.allowSolutionVisibility}
           eventTracker={this.props.eventTracker}
+          onClickManageSpaceBtn={() => {
+            // No need to show the tour anymore, the user is taking action
+            this.props.onFinishTour();
+            this.toggleSpaceSelector();
+          }}
         />
       );
     }
 
     return (
-      <EuiPopover
-        id="spcMenuPopover"
-        button={button}
-        isOpen={this.state.showSpaceSelector}
-        closePopover={this.closeSpaceSelector}
-        anchorPosition={this.props.anchorPosition}
-        panelPaddingSize="none"
-        repositionOnScroll
-        ownFocus
-        zIndex={Number(theme.euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
+      <SolutionViewTour
+        solution={activeSpace?.solution}
+        isTourOpen={isTourOpen}
+        onFinishTour={this.props.onFinishTour}
       >
-        {element}
-      </EuiPopover>
+        <EuiPopover
+          id="spcMenuPopover"
+          button={button}
+          isOpen={this.state.showSpaceSelector}
+          closePopover={this.closeSpaceSelector}
+          anchorPosition={this.props.anchorPosition}
+          panelPaddingSize="none"
+          repositionOnScroll
+          ownFocus
+          zIndex={Number(theme.euiTheme.levels.navigation) + 1} // it needs to sit above the collapsible nav menu
+          panelProps={{
+            'data-test-subj': 'spaceMenuPopoverPanel',
+          }}
+        >
+          {element}
+        </EuiPopover>
+      </SolutionViewTour>
     );
   }
 
@@ -147,7 +179,14 @@ class NavControlPopoverUI extends Component<Props, State> {
   }
 
   private getAlignedLoadingSpinner() {
-    return <EuiLoadingSpinner size="m" className="eui-alignMiddle" />;
+    return (
+      <EuiSkeletonRectangle
+        borderRadius="m"
+        contentAriaLabel={i18n.translate('xpack.spaces.navControl.popover.loadingSpacesLabel', {
+          defaultMessage: 'Loading spaces navigation',
+        })}
+      />
+    );
   }
 
   private getActiveSpaceButton = () => {
@@ -195,6 +234,7 @@ class NavControlPopoverUI extends Component<Props, State> {
 
   protected toggleSpaceSelector = () => {
     const isOpening = !this.state.showSpaceSelector;
+
     if (isOpening) {
       this.loadSpaces();
     }

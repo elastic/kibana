@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type DeleteNoteRequestBody = z.infer<typeof DeleteNoteRequestBody>;
 export const DeleteNoteRequestBody = z.union([
@@ -23,13 +23,10 @@ export const DeleteNoteRequestBody = z.union([
       noteId: z.string(),
     })
     .nullable(),
-  z.object({
-    noteIds: z.array(z.string()).nullable(),
-  }),
+  z
+    .object({
+      noteIds: z.array(z.string()).nullable(),
+    })
+    .nullable(),
 ]);
 export type DeleteNoteRequestBodyInput = z.input<typeof DeleteNoteRequestBody>;
-
-export type DeleteNoteResponse = z.infer<typeof DeleteNoteResponse>;
-export const DeleteNoteResponse = z.object({
-  data: z.object({}).optional(),
-});

@@ -26,8 +26,10 @@ export const ALERT_SUPPRESSION_FIELDS_COMBO_BOX =
 
 export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_BOX} input`;
 
+export const ALERT_SUPPRESSION_WARNING = '[data-test-subj="alertSuppressionWarning"]';
+
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
-  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationOptions"]';
 
 export const ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-time-period`;
 
@@ -40,11 +42,14 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS = `${ALERT_SUPPRESSION_MI
 
 export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS = `${ALERT_SUPPRESSION_MISSING_FIELDS_OPTIONS} #doNotSuppress`;
 
-export const ALERT_SUPPRESSION_DURATION_INPUT =
-  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationInput"]';
+export const ALERT_SUPPRESSION_DURATION_VALUE_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="interval"]';
+
+export const ALERT_SUPPRESSION_DURATION_UNIT_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="timeType"]';
 
 export const THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX =
-  '[data-test-subj="detectionEngineStepDefineRuleThresholdEnableSuppression"] input';
+  '[data-test-subj="thresholdAlertSuppressionEnabled"] input';
 
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
@@ -55,6 +60,10 @@ export const COMBO_BOX_CLEAR_BTN = '[data-test-subj="comboBoxClearButton"]';
 export const CREATE_AND_ENABLE_BTN = '[data-test-subj="create-enable"]';
 
 export const CREATE_WITHOUT_ENABLING_BTN = '[data-test-subj="create-enabled-false"]';
+
+export const SAVE_WITH_ERRORS_MODAL = '[data-test-subj="save-with-errors-confirmation-modal"]';
+
+export const SAVE_WITH_ERRORS_MODAL_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
@@ -292,3 +301,19 @@ export const RULE_INDICES =
   '[data-test-subj="detectionEngineStepDefineRuleIndices"] [data-test-subj="comboBoxInput"]';
 
 export const ALERTS_INDEX_BUTTON = 'span[title=".alerts-security.alerts-default"] button';
+
+export const PREVIEW_SUBMIT_BUTTON = '[data-test-subj="previewSubmitButton"]';
+
+export const PREVIEW_LOGGED_REQUESTS_CHECKBOX = '[data-test-subj="show-elasticsearch-requests"]';
+
+export const PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON =
+  '[data-test-subj="preview-logged-requests-item-accordion"] button';
+
+export const PREVIEW_LOGGED_REQUEST_DESCRIPTION =
+  '[data-test-subj="preview-logged-request-description"]';
+
+export const PREVIEW_LOGGED_REQUEST_CODE_BLOCK =
+  '[data-test-subj="preview-logged-request-code-block"]';

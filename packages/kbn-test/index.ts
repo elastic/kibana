@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export { KbnClientRequesterError } from './src/kbn_client/kbn_client_requester_error';
@@ -13,9 +14,23 @@ export { startServersCli, startServers } from './src/functional_tests/start_serv
 
 // @internal
 export { runTestsCli, runTests } from './src/functional_tests/run_tests';
-export { SamlSessionManager, type SamlSessionManagerOptions, type HostOptions } from './src/auth';
-export { runElasticsearch, runKibanaServer } from './src/functional_tests/lib';
-export { getKibanaCliArg, getKibanaCliLoggers } from './src/functional_tests/lib/kibana_cli_args';
+export {
+  runElasticsearch,
+  runKibanaServer,
+  parseRawFlags,
+  getArgValue,
+  remapPluginPaths,
+  getKibanaCliArg,
+  getKibanaCliLoggers,
+} from './src/functional_tests/lib';
+
+export { initLogsDir } from './src/functional_tests/lib';
+export {
+  SamlSessionManager,
+  type SamlSessionManagerOptions,
+  type HostOptions,
+  type GetCookieOptions,
+} from './src/auth';
 
 export type {
   CreateTestEsClusterOptions,
@@ -32,6 +47,7 @@ export {
 } from './src/es';
 
 export { kbnTestConfig } from './kbn_test_config';
+export type { UrlParts } from './kbn_test_config';
 
 export {
   kibanaServerTestUser,

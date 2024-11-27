@@ -34,18 +34,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
 
-  const PageObjects = getPageObjects([
-    'common',
-    'header',
-    'timePicker',
-    'common',
-    'visualize',
-    'dashboard',
-    'timeToVisualize',
-    'unifiedSearch',
-    'share',
-  ]);
+  const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share } =
+    getPageObjects([
+      'common',
+      'header',
+      'timePicker',
+      'dashboard',
+      'timeToVisualize',
+      'unifiedSearch',
+      'share',
+    ]);
 
   return logWrapper('lensPage', log, {
     /**
@@ -69,13 +69,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * a range that has data in our dataset.
      */
     async goToTimeRange(fromTime?: string, toTime?: string) {
-      const from = fromTime || PageObjects.timePicker.defaultStartTime;
-      const to = toTime || PageObjects.timePicker.defaultEndTime;
+      const from = fromTime || timePicker.defaultStartTime;
+      const to = toTime || timePicker.defaultEndTime;
       await retry.try(async () => {
-        await PageObjects.timePicker.ensureHiddenNoDataPopover();
-        await PageObjects.timePicker.setAbsoluteRange(from, to);
+        await timePicker.ensureHiddenNoDataPopover();
+        await timePicker.setAbsoluteRange(from, to);
         // give some time for the update button tooltip to close
-        await PageObjects.common.sleep(500);
+        await common.sleep(500);
       });
     },
 
@@ -173,7 +173,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Changes the specified dimension to the specified operation and (optinally) field.
+     * Changes the specified dimension to the specified operation and optionally the field.
      *
      * @param opts.dimension - the selector of the dimension being changed
      * @param opts.operation - the desired operation ID for the dimension
@@ -208,7 +208,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (opts.formula) {
         // Formula takes time to open
-        await PageObjects.common.sleep(500);
+        await common.sleep(500);
         await this.typeFormula(opts.formula);
       }
 
@@ -282,7 +282,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector('lnsGeoFieldWorkspace')
       );
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -409,12 +409,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       if (metaKey) {
-        this.pressMetaKey(metaKey);
+        await this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
       await this.waitForLensDragDropToFinish();
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -442,12 +442,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       if (metaKey) {
-        this.pressMetaKey(metaKey);
+        await this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
     /**
      * Selects draggable element and reorders it by number of `steps`
@@ -470,7 +470,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForLensDragDropToFinish() {
@@ -496,7 +496,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(dimension)
       );
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -513,7 +513,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(to)
       );
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -528,7 +528,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
       await this.waitForLensDragDropToFinish();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
 
     async assertPalette(paletteId: string, isLegacy: boolean) {
@@ -630,7 +630,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async setFilterBy(queryString: string) {
-      this.typeFilter(queryString);
+      await this.typeFilter(queryString);
       await retry.try(async () => {
         await testSubjects.click('indexPattern-filters-existingFilterTrigger');
       });
@@ -685,7 +685,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async addFilterToAgg(queryString: string) {
       await testSubjects.click('lns-newBucket-add');
-      this.typeFilter(queryString);
+      await this.typeFilter(queryString);
       // Problem here is that after typing in the queryInput a dropdown will fetch the server
       // with suggestions and show up. Depending on the cursor position and some other factors
       // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
@@ -693,12 +693,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // To close the Filter popover we need to move to the label input and then press Enter:
       // solution is to press Tab 3 tims (first Tab will close the dropdown) instead of Enter to avoid
       // race condition with the dropdown
-      await PageObjects.common.pressTabKey();
-      await PageObjects.common.pressTabKey();
-      await PageObjects.common.pressTabKey();
+      await common.pressTabKey();
+      await common.pressTabKey();
+      await common.pressTabKey();
       // Now it is safe to press Enter as we're in the label input
-      await PageObjects.common.pressEnterKey();
-      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+      await common.pressEnterKey();
+      await common.sleep(1000); // give time for debounced components to rerender
     },
 
     /**
@@ -726,7 +726,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setTermsNumberOfValues(value: number) {
       const valuesInput = await this.getNumericFieldReady('indexPattern-terms-values');
       await valuesInput.type(`${value}`);
-      await PageObjects.common.sleep(500);
+      await common.sleep(500);
     },
 
     async checkTermsAreNotAvailableToAgg(fields: string[]) {
@@ -757,7 +757,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       dashboardId?: string,
       description?: string
     ) {
-      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+      await timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
         redirectToOrigin,
         addToDashboard: addToDashboard ? addToDashboard : null,
@@ -787,7 +787,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       dashboardId?: string,
       description?: string
     ) {
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
 
       await this.saveModal(
@@ -823,7 +823,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (options?.decimals != null) {
         await testSubjects.setValue('indexPattern-dimension-formatDecimals', `${options.decimals}`);
         // press tab key to remove the range popover of the EUI field
-        await PageObjects.common.pressTabKey();
+        await common.pressTabKey();
       }
       if (options?.prefix != null) {
         await testSubjects.setValue('indexPattern-dimension-formatSuffix', options.prefix);
@@ -832,15 +832,27 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async editDimensionColor(color: string) {
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
       await colorPickerInput.type(color);
-      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+      await common.sleep(1000); // give time for debounced components to rerender
     },
     hasVisualOptionsButton() {
       return testSubjects.exists('lnsVisualOptionsButton');
     },
     async openVisualOptions() {
+      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
+        return;
+      }
       await retry.try(async () => {
         await testSubjects.click('lnsVisualOptionsButton');
-        await testSubjects.exists('lnsVisualOptionsButton');
+        await testSubjects.exists('lnsVisualOptionsPopover_title');
+      });
+    },
+    async openTextOptions() {
+      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
+        return;
+      }
+      await retry.try(async () => {
+        await testSubjects.click('lnsTextOptionsButton');
+        await testSubjects.exists('lnsTextOptionsPopover_title');
       });
     },
     async retrySetValue(
@@ -885,24 +897,28 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Uses the Lens visualization switcher to switch visualizations.
      *
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
-     * lnsDatatable or bar_stacked
+     * lnsDatatable or bar
      */
     async switchToVisualization(subVisualizationId: string, searchTerm?: string, layerIndex = 0) {
       await this.openChartSwitchPopover(layerIndex);
       await this.waitForSearchInputValue(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
     },
     async waitForSearchInputValue(subVisualizationId: string, searchTerm?: string) {
       await retry.try(async () => {
         await this.searchOnChartSwitch(subVisualizationId, searchTerm);
-        await PageObjects.common.sleep(1000); // give time for the value to be typed
+        await common.sleep(1000); // give time for the value to be typed
         const searchInputValue = await testSubjects.getAttribute('lnsChartSwitchSearch', 'value');
         const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
         if (searchInputValue !== queryTerm) {
           throw new Error('Search input value is not the expected value');
         }
       });
+    },
+    async getChartTypeFromChartSwitcher() {
+      const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      return await chartSwitcher.getVisibleText();
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
@@ -929,6 +945,58 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const isSelected = ariaPressed === 'true';
         if (isSelected) {
           return axisSideGroup?.getVisibleText();
+        }
+      }
+    },
+
+    async getDonutHoleSize() {
+      await this.openVisualOptions();
+      const comboboxOptions = await comboBox.getComboBoxSelectedOptions('lnsEmptySizeRatioOption');
+      return comboboxOptions[0];
+    },
+
+    async setDonutHoleSize(value: string) {
+      await retry.waitFor('visual options toolbar is open', async () => {
+        await this.openVisualOptions();
+        return await testSubjects.exists('lnsEmptySizeRatioOption');
+      });
+      await comboBox.set('lnsEmptySizeRatioOption', value);
+    },
+
+    async setGaugeShape(value: string) {
+      await retry.waitFor('visual options toolbar is open', async () => {
+        await this.openVisualOptions();
+        return await testSubjects.exists('lnsToolbarGaugeAngleType');
+      });
+      await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
+    },
+
+    async getSelectedBarOrientationSetting() {
+      await retry.waitFor('visual options are displayed', async () => {
+        await this.openVisualOptions();
+        return await testSubjects.exists('lns_barOrientation');
+      });
+      const orientationButtons = await find.allByCssSelector(
+        `[data-test-subj^="lns_barOrientation_"]`
+      );
+      for (const button of orientationButtons) {
+        const ariaPressed = await button.getAttribute('aria-pressed');
+        const isSelected = ariaPressed === 'true';
+        if (isSelected) {
+          return button?.getVisibleText();
+        }
+      }
+    },
+
+    async getGaugeOrientationSetting() {
+      const orientationButtons = await find.allByCssSelector(
+        `[data-test-subj^="lns_gaugeOrientation_"]`
+      );
+      for (const button of orientationButtons) {
+        const ariaPressed = await button.getAttribute('aria-pressed');
+        const isSelected = ariaPressed === 'true';
+        if (isSelected) {
+          return button?.getVisibleText();
         }
       }
     },
@@ -967,7 +1035,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Checks a specific subvisualization in the chart switcher for a "data loss" indicator
      *
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
-     * lnsDatatable or bar_stacked
+     * lnsDatatable or bar
      */
     async hasChartSwitchWarning(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
@@ -1001,7 +1069,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async createLayer(
       layerType: 'data' | 'referenceLine' | 'annotations' = 'data',
       annotationFromLibraryTitle?: string,
-      seriesType = 'bar_stacked'
+      seriesType = 'bar'
     ) {
       await testSubjects.click('lnsLayerAddButton');
       const layerCount = await this.getLayerCount();
@@ -1036,32 +1104,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Changes the index pattern in the data panel
      */
     async switchDataPanelIndexPattern(dataViewTitle: string) {
-      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
+      await header.waitUntilLoadingHasFinished();
     },
 
     /**
      * Changes the index pattern for the first layer
      */
     async switchFirstLayerIndexPattern(dataViewTitle: string) {
-      await PageObjects.unifiedSearch.switchDataView('lns_layerIndexPatternLabel', dataViewTitle);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await unifiedSearch.switchDataView('lns_layerIndexPatternLabel', dataViewTitle);
+      await header.waitUntilLoadingHasFinished();
     },
 
     /**
      * Returns the current index pattern of the first layer
      */
     async getFirstLayerIndexPattern() {
-      return await PageObjects.unifiedSearch.getSelectedDataView('lns_layerIndexPatternLabel');
+      return await unifiedSearch.getSelectedDataView('lns_layerIndexPatternLabel');
     },
 
     async linkedToOriginatingApp() {
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('lnsApp_saveAndReturnButton');
     },
 
     async notLinkedToOriginatingApp() {
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('lnsApp_saveAndReturnButton');
     },
 
@@ -1129,8 +1197,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
-    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
-      const el = await this.getDatatableCell(rowIndex, colIndex);
+    async getStylesFromCell(el: WebElementWrapper) {
       const styleString = (await el.getAttribute('style')) ?? '';
       return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
         const [prop, value] = cssLine.split(':');
@@ -1139,6 +1206,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         }
         return memo;
       }, {});
+    },
+
+    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      return this.getStylesFromCell(el);
     },
 
     async getDatatableCellSpanStyle(rowIndex = 0, colIndex = 0) {
@@ -1174,6 +1246,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
+    async getDatatableCellsByColumn(colIndex = 0) {
+      return await find.allByCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"]`
+      );
+    },
+
     async isDatatableHeaderSorted(index = 0) {
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
@@ -1182,20 +1260,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
+    async changeTableSortingBy(colIndex = 0, direction: 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
-      await el.moveMouseTo({ xOffset: 0, yOffset: -20 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
-      await el.click();
-      let buttonEl;
-      if (direction !== 'none') {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
-        );
-      } else {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
-        );
-      }
+      await el.moveMouseTo({ xOffset: 0, yOffset: -16 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
+      const popoverToggle = await el.findByClassName('euiDataGridHeaderCell__button');
+      await popoverToggle.click();
+      const buttonEl = await find.byCssSelector(
+        `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
+      );
       return buttonEl.click();
     },
 
@@ -1221,7 +1293,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click(`lns_colorEditing_trigger`);
         // wait for the UI to settle
-        await PageObjects.common.sleep(100);
+        await common.sleep(100);
         await testSubjects.existOrFail('lns-palettePanelFlyout', {
           timeout: 2500,
         });
@@ -1240,10 +1312,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async setPalette(paletteId: string, isLegacy: boolean) {
       await testSubjects.click('lns_colorEditing_trigger');
+      // This action needs to be slowed WAY down, otherwise it will not correctly set the palette
+      await common.sleep(200);
       await testSubjects.setEuiSwitch(
         'lns_colorMappingOrLegacyPalette_switch',
         isLegacy ? 'uncheck' : 'check'
       );
+
+      await common.sleep(200);
+
       if (isLegacy) {
         await testSubjects.click('lns-palettePicker');
         await find.clickByCssSelector(`#${paletteId}`);
@@ -1251,6 +1328,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.click('kbnColoring_ColorMapping_PalettePicker');
         await testSubjects.click(`kbnColoring_ColorMapping_Palette-${paletteId}`);
       }
+      await common.sleep(200);
+
       await this.closePaletteEditor();
     },
 
@@ -1282,16 +1361,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async toggleColumnVisibility(dimension: string, no = 1) {
       await this.openDimensionEditor(dimension);
       const id = 'lns-table-column-hidden';
-      await PageObjects.common.sleep(500);
+      await common.sleep(500);
       const isChecked = await testSubjects.isEuiSwitchChecked(id);
       log.debug(`switch status before the toggle = ${isChecked}`);
       await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
-      await PageObjects.common.sleep(500);
+      await common.sleep(500);
       const isChecked2 = await testSubjects.isEuiSwitchChecked(id);
       log.debug(`switch status after the toggle = ${isChecked2}`);
       await this.closeDimensionEditor();
-      await PageObjects.common.sleep(500);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.sleep(500);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
@@ -1380,6 +1459,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       };
     },
 
+    async hoverOverDimensionButton(index = 0) {
+      const dimensionButton = (await testSubjects.findAll('lns-dimensionTrigger'))[index];
+      await dimensionButton.moveMouseTo();
+    },
+
     async getMetricVisualizationData() {
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
@@ -1403,20 +1487,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title,
       redirectToOrigin,
       ignoreTimeFilter,
+      useAdHocDataView,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
       ignoreTimeFilter?: boolean;
+      useAdHocDataView?: boolean;
     }) {
       log.debug(`createAndAddLens${title}`);
-      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      const inViewMode = await dashboard.getIsInViewMode();
       if (inViewMode) {
-        await PageObjects.dashboard.switchToEditMode();
+        await dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
+      }
+
+      if (useAdHocDataView) {
+        await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
       }
 
       await this.configureDimension({
@@ -1476,11 +1566,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
         return Number(renderingCount);
       }
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await retry.waitFor('rendering count to stabilize', async () => {
         const firstCount = await getRenderingCount();
 
-        await PageObjects.common.sleep(1000);
+        await common.sleep(1000);
 
         const secondCount = await getRenderingCount();
 
@@ -1490,7 +1580,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async switchToTextBasedLanguage(language: string) {
       await testSubjects.click('lns-dataView-switch-link');
-      await PageObjects.unifiedSearch.selectTextBasedLanguage(language);
+      await unifiedSearch.selectTextBasedLanguage(language);
     },
 
     async configureTextBasedLanguagesDimension(opts: {
@@ -1661,7 +1751,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await input.clearValueWithKeyboard({ charByChar: true });
       await input.type(formula);
       // Debounce time for formula
-      await PageObjects.common.sleep(300);
+      await common.sleep(300);
     },
 
     async expectFormulaText(formula: string) {
@@ -1676,7 +1766,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     hasEmptySizeRatioButtonGroup() {
-      return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
+      return testSubjects.exists('lnsEmptySizeRatioOption');
     },
 
     settingsMenuOpen() {
@@ -1840,12 +1930,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     closeShareModal() {
-      return PageObjects.share.closeShareModal();
+      return share.closeShareModal();
     },
 
     async getUrl() {
       await this.ensureShareMenuIsOpen('link');
-      const url = await PageObjects.share.getSharedUrl();
+      const url = await share.getSharedUrl();
 
       if (!url) {
         throw Error('No data-share-url attribute found');
@@ -1960,6 +2050,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       ]);
 
       return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
+    },
+
+    async toggleDebug(enable: boolean = true) {
+      await browser.execute(`window.ELASTIC_LENS_LOGGER = arguments[0];`, enable);
     },
   });
 }

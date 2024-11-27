@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
-import { mapSavedObjectToMonitor } from './helper';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
-  validate: {
-    query: QuerySchema,
+  validate: {},
+  validation: {
+    request: {
+      query: QuerySchema,
+    },
   },
   handler: async (routeContext): Promise<any> => {
     const { request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
@@ -39,7 +42,16 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
 
     return {
       ...rest,
-      monitors: savedObjects.map(mapSavedObjectToMonitor),
+      monitors: savedObjects.map((monitor) => {
+        const mon = mapSavedObjectToMonitor({
+          monitor,
+          internal: request.query?.internal,
+        });
+        return {
+          spaceId: monitor.namespaces?.[0],
+          ...mon,
+        };
+      }),
       absoluteTotal,
       perPage: perPageT,
       syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,

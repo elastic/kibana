@@ -6,6 +6,7 @@
  */
 
 import type {
+  CaseCustomFields,
   CustomFieldConfiguration,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
@@ -15,7 +16,7 @@ import {
   convertValueToString,
   isRecordError,
   partitionRecordsByError,
-  buildRequiredCustomFieldsForRequest,
+  buildCustomFieldsForRequest,
   constructRequiredKibanaPrivileges,
 } from './utils';
 
@@ -78,7 +79,7 @@ describe('utils', () => {
     });
   });
 
-  describe('buildRequiredCustomFieldsForRequest', () => {
+  describe('buildCustomFieldsForRequest', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -101,7 +102,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
@@ -131,7 +132,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
@@ -175,7 +176,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([]);
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([]);
     });
 
     it('handles correctly a mix of required and optional custom fields', () => {
@@ -208,7 +209,7 @@ describe('utils', () => {
         },
       ];
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
         {
           key: 'third_key',
           type: CustomFieldTypes.TEXT,
@@ -232,9 +233,266 @@ describe('utils', () => {
           } as CustomFieldConfiguration)
       );
 
-      expect(buildRequiredCustomFieldsForRequest(customFieldsConfiguration).length).toEqual(
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration).length).toEqual(
         customFieldsConfiguration.length
       );
+    });
+
+    it('ensure template text custom fields are built correctly', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text 1',
+          required: false,
+          defaultValue: 'default value',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text 2',
+          required: true,
+          defaultValue: 'default value second',
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text 3',
+          required: true,
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text 4',
+          required: false,
+        },
+      ];
+
+      const templateCustomFields: CaseCustomFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'test value',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TEXT,
+          value: null,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TEXT,
+          value: null,
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TEXT,
+          value: null,
+        },
+      ];
+
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration, templateCustomFields)).toEqual([
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'test value',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'N/A',
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'N/A',
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TEXT,
+          value: null,
+        },
+      ]);
+    });
+
+    it('ensure template toggle custom fields are built correctly', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle 1',
+          required: false,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle 2',
+          required: true,
+          defaultValue: false,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle 3',
+          required: true,
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle 4',
+          required: false,
+          defaultValue: true,
+        },
+      ];
+
+      const templateCustomFields: CaseCustomFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ];
+
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration, templateCustomFields)).toEqual([
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: false,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ]);
+    });
+
+    it('ensure template custom fields are built correctly when configuration has different required custom fields than template', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text 1',
+          required: false,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle 2',
+          required: true,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text 3',
+          required: true,
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle 4',
+          required: false,
+          defaultValue: true,
+        },
+      ];
+
+      const templateCustomFields: CaseCustomFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'test 1',
+        },
+      ];
+
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration, templateCustomFields)).toEqual([
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'test 1',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: false,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'N/A',
+        },
+        {
+          key: 'fourth_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ]);
+    });
+
+    it('return empty when no configuration', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [];
+
+      const templateCustomFields: CaseCustomFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'test 1',
+        },
+      ];
+
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration, templateCustomFields)).toEqual(
+        []
+      );
+    });
+
+    it('return configuration custom fields when no template', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text 1',
+          required: false,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle 2',
+          required: true,
+        },
+      ];
+      const templateCustomFields: CaseCustomFields = [];
+
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration, templateCustomFields)).toEqual([
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: false,
+        },
+      ]);
     });
   });
 
@@ -249,6 +507,7 @@ describe('utils', () => {
         'cases:my-owner/updateComment',
         'cases:my-owner/deleteComment',
         'cases:my-owner/findConfigurations',
+        'cases:my-owner/reopenCase',
       ]);
     });
   });

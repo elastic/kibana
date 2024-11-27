@@ -9,30 +9,34 @@ import React from 'react';
 import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import {
   aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
+  aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { EuiSpacer } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
+import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
-
-const settingsKeys = [
-  aiAssistantLogsIndexPattern,
-  aiAssistantResponseLanguage,
-  aiAssistantSimulatedFunctionCalling,
-  aiAssistantSearchConnectorIndexPattern,
-];
 
 export function UISettings() {
   const {
     docLinks,
     settings,
     notifications,
-    application: { capabilities },
+    application: { capabilities, getUrlForApp },
   } = useKibana().services;
+  const knowledgeBase = useKnowledgeBase();
+  const { config } = useAppContext();
+
+  const settingsKeys = [
+    aiAssistantSimulatedFunctionCalling,
+    ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
+    ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
+  ];
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(settingsKeys);
@@ -84,6 +88,14 @@ export function UISettings() {
           </FieldRowProvider>
         );
       })}
+      {config.logSourcesEnabled && (
+        <LogSourcesSettingSynchronisationInfo
+          isLoading={false}
+          logSourcesValue={settings.client.get(aiAssistantLogsIndexPattern)}
+          getUrlForApp={getUrlForApp}
+        />
+      )}
+
       {!isEmpty(unsavedChanges) && (
         <BottomBarActions
           isLoading={isSaving}

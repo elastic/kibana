@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,6 +15,7 @@ import type {
   ESQLLocation,
   ESQLMessage,
 } from '@kbn/esql-ast';
+import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import type { ErrorTypes, ErrorValues } from './types';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
@@ -188,6 +190,21 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'fnUnsupportedAfterCommand':
+      return {
+        type: 'error',
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.fnUnsupportedAfterCommand',
+          {
+            defaultMessage: '[{function}] function cannot be used after {command}',
+            values: {
+              function: out.function,
+              command: out.command,
+            },
+          }
+        ),
+      };
+
     case 'unknownInterval':
       return {
         message: i18n.translate(
@@ -416,6 +433,16 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'onlyWhereCommandSupported':
+      return {
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.onlyWhereCommandSupported',
+          {
+            defaultMessage: '[{fn}] function is only supported in WHERE commands',
+            values: { fn: out.fn.toUpperCase() },
+          }
+        ),
+      };
   }
   return { message: '' };
 }
@@ -476,7 +503,7 @@ export const errors = {
   unknownFunction: (fn: ESQLFunction): ESQLMessage =>
     errors.byId('unknownFunction', fn.location, fn),
 
-  unknownColumn: (column: ESQLColumn): ESQLMessage =>
+  unknownColumn: (column: ESQLColumn | ESQLIdentifier): ESQLMessage =>
     errors.byId('unknownColumn', column.location, {
       name: column.name,
     }),
@@ -493,9 +520,12 @@ export const errors = {
       expression: fn.text,
     }),
 
-  unknownAggFunction: (col: ESQLColumn, type: string = 'FieldAttribute'): ESQLMessage =>
-    errors.byId('unknownAggregateFunction', col.location, {
-      value: col.name,
+  unknownAggFunction: (
+    node: ESQLColumn | ESQLIdentifier,
+    type: string = 'FieldAttribute'
+  ): ESQLMessage =>
+    errors.byId('unknownAggregateFunction', node.location, {
+      value: node.name,
       type,
     }),
 

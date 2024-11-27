@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { EuiAvatar, EuiPageTemplate, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
-
 import { css } from '@emotion/react';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -31,9 +31,13 @@ import {
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
 import { EvaluationSettings } from '.';
+import { SettingsTabs } from './types';
 
 interface Props {
+  dataViews: DataViewsContract;
   selectedConversation: Conversation;
+  onTabChange?: (tabId: string) => void;
+  currentTab: SettingsTabs;
 }
 
 /**
@@ -41,14 +45,16 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({ selectedConversation: defaultSelectedConversation }) => {
+  ({
+    dataViews,
+    selectedConversation: defaultSelectedConversation,
+    onTabChange,
+    currentTab: selectedSettingsTab,
+  }) => {
     const {
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       http,
-      selectedSettingsTab,
-      setSelectedSettingsTab,
     } = useAssistantContext();
-
     const { data: connectors } = useLoadConnectors({
       http,
     });
@@ -57,21 +63,15 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
 
-    useEffect(() => {
-      if (selectedSettingsTab == null) {
-        setSelectedSettingsTab(CONNECTORS_TAB);
-      }
-    }, [selectedSettingsTab, setSelectedSettingsTab]);
-
     const tabsConfig = useMemo(
       () => [
         {
-          id: CONNECTORS_TAB,
-          label: i18n.CONNECTORS_MENU_ITEM,
-        },
-        {
           id: CONVERSATIONS_TAB,
           label: i18n.CONVERSATIONS_MENU_ITEM,
+        },
+        {
+          id: CONNECTORS_TAB,
+          label: i18n.CONNECTORS_MENU_ITEM,
         },
         {
           id: SYSTEM_PROMPTS_TAB,
@@ -105,10 +105,12 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       return tabsConfig.map((t) => ({
         ...t,
         'data-test-subj': `settingsPageTab-${t.id}`,
-        onClick: () => setSelectedSettingsTab(t.id),
+        onClick: () => {
+          onTabChange?.(t.id);
+        },
         isSelected: t.id === selectedSettingsTab,
       }));
-    }, [setSelectedSettingsTab, selectedSettingsTab, tabsConfig]);
+    }, [onTabChange, selectedSettingsTab, tabsConfig]);
 
     return (
       <>
@@ -141,6 +143,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             padding-top: ${euiTheme.base * 0.75}px;
             padding-bottom: ${euiTheme.base * 0.75}px;
           `}
+          data-test-subj={`tab-${selectedSettingsTab}`}
         >
           {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
@@ -158,7 +161,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
           {selectedSettingsTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
-          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && <KnowledgeBaseSettingsManagement />}
+          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
+            <KnowledgeBaseSettingsManagement dataViews={dataViews} />
+          )}
           {selectedSettingsTab === EVALUATION_TAB && <EvaluationSettings />}
         </EuiPageTemplate.Section>
       </>

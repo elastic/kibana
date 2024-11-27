@@ -9,6 +9,7 @@
 export const DEFAULT_ALLOW = [
   '_id',
   '@timestamp',
+  'agent.id',
   'cloud.availability_zone',
   'cloud.provider',
   'cloud.region',
@@ -107,6 +108,7 @@ export const DEFAULT_ALLOW = [
   'user.name',
   'user.risk.calculated_level',
   'user.risk.calculated_score_norm',
+  'user.target.name',
 ];
 
 /** By default, these fields will be anonymized */
@@ -114,6 +116,7 @@ export const DEFAULT_ALLOW_REPLACEMENT = [
   'host.ip', // not a default allow field, but anonymized by default
   'host.name',
   'user.name',
+  'user.target.name',
 ];
 
 export const getDefaultAnonymizationFields = (spaceId: string) => {

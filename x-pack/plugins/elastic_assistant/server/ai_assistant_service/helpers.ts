@@ -53,7 +53,6 @@ export const pipelineExists = async ({ esClient, id }: PipelineExistsParams): Pr
 interface CreatePipelineParams {
   esClient: ElasticsearchClient;
   id: string;
-  modelId: string;
 }
 
 /**
@@ -62,25 +61,20 @@ interface CreatePipelineParams {
  * @param params params
  * @param params.esClient Elasticsearch client with privileges to check for ingest pipelines
  * @param params.id ID of the ingest pipeline
- * @param params.modelId ID of the ELSER model
  *
  * @returns Promise<boolean> indicating whether the pipeline was created
  */
-export const createPipeline = async ({
-  esClient,
-  id,
-  modelId,
-}: CreatePipelineParams): Promise<boolean> => {
+export const createPipeline = async ({ esClient, id }: CreatePipelineParams): Promise<boolean> => {
   try {
     const response = await esClient.ingest.putPipeline(
       knowledgeBaseIngestPipeline({
         id,
-        modelId,
       })
     );
 
     return response.acknowledged;
   } catch (e) {
+    // TODO: log error or just use semantic_text already
     return false;
   }
 };

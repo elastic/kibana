@@ -10,18 +10,23 @@ import {
   MessageRole,
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { type StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
-import { Response } from 'supertest';
-import { createLlmProxy, LlmProxy, LlmResponseSimulator } from '../../common/create_llm_proxy';
+import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import {
+  createLlmProxy,
+  isFunctionTitleRequest,
+  LlmProxy,
+  LlmResponseSimulator,
+} from '../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { createProxyActionConnector, deleteActionConnector } from '../../common/action_connectors';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
-
-  const PUBLIC_COMPLETE_API_URL = `/api/observability_ai_assistant/chat/complete`;
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
   const messages: Message[] = [
     {
@@ -46,8 +51,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     interface RequestOptions {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
-      instructions?: string[];
-      format?: 'openai';
+      instructions?: AdHocInstruction[];
+      format?: 'openai' | 'default';
     }
 
     type ConversationSimulatorCallback = (
@@ -55,7 +60,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     ) => Promise<void>;
 
     async function getResponseBody(
-      { actions, instructions, format }: RequestOptions,
+      { actions, instructions, format = 'default' }: RequestOptions,
       conversationSimulatorCallback: ConversationSimulatorCallback
     ) {
       const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
@@ -65,30 +70,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         (body) => !isFunctionTitleRequest(body)
       );
 
-      const responsePromise = new Promise<Response>((resolve, reject) => {
-        supertest
-          .post(PUBLIC_COMPLETE_API_URL)
-          .query({
-            format,
-          })
-          .set('kbn-xsrf', 'foo')
-          .set('elastic-api-version', '2023-10-31')
-          .send({
+      const responsePromise = observabilityAIAssistantAPIClient.admin({
+        endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+        params: {
+          query: { format },
+          body: {
             messages,
             connectorId,
             persist: true,
             actions,
             instructions,
-          })
-          .end((err, response) => {
-            if (err) {
-              return reject(err);
-            }
-            if (response.status !== 200) {
-              return reject(new Error(`${response.status}: ${JSON.stringify(response.body)}`));
-            }
-            return resolve(response);
-          });
+          },
+        },
       });
 
       const [conversationSimulator, titleSimulator] = await Promise.race([
@@ -141,36 +134,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-
-      const response = await supertest
-        .post('/api/actions/connector')
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'OpenAI Proxy',
-          connector_type_id: '.gen-ai',
-          config: {
-            apiProvider: 'OpenAI',
-            apiUrl: `http://localhost:${proxy.getPort()}`,
-          },
-          secrets: {
-            apiKey: 'my-api-key',
-          },
-        })
-        .expect(200);
-
-      connectorId = response.body.id;
+      connectorId = await createProxyActionConnector({ supertest, log, port: proxy.getPort() });
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-
+      await deleteActionConnector({ supertest, connectorId, log });
       proxy.close();
     });
 
-    describe('after executing an action', async () => {
+    describe('after executing an action', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
@@ -224,13 +196,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('after adding an instruction', async () => {
-      let body: string;
+    describe('after adding an instruction', () => {
+      let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
 
       before(async () => {
         await getEvents(
           {
-            instructions: ['This is a random instruction'],
+            instructions: [
+              {
+                text: 'This is a random instruction',
+                instruction_type: 'user_instruction',
+              },
+            ],
           },
           async (conversationSimulator) => {
             body = conversationSimulator.body;
@@ -244,13 +221,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('includes the instruction in the system message', async () => {
-        const request = JSON.parse(body) as OpenAI.ChatCompletionCreateParams;
-
-        expect(request.messages[0].content).to.contain('This is a random instruction');
+        expect(body.messages[0].content).to.contain('This is a random instruction');
       });
     });
 
-    describe('with openai format', async () => {
+    describe('with openai format', () => {
       let responseBody: string;
 
       before(async () => {
@@ -316,9 +291,4 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
   });
-}
-
-function isFunctionTitleRequest(body: string) {
-  const parsedBody = JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-  return parsedBody.tools?.find((fn) => fn.function.name === 'title_conversation') !== undefined;
 }

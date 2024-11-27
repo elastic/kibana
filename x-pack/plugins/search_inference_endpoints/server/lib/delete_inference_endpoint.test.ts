@@ -13,7 +13,7 @@ describe('deleteInferenceEndpoint', () => {
   beforeEach(() => {
     mockClient = {
       inference: {
-        deleteModel: jest.fn(),
+        delete: jest.fn(),
       },
     };
   });
@@ -24,9 +24,24 @@ describe('deleteInferenceEndpoint', () => {
 
     await deleteInferenceEndpoint(mockClient, type, id);
 
-    expect(mockClient.inference.deleteModel).toHaveBeenCalledWith({
+    expect(mockClient.inference.delete).toHaveBeenCalledWith({
       inference_id: id,
       task_type: type,
+      force: true,
+    });
+  });
+
+  it('should call the Inference Delete API to return list of usages', async () => {
+    const type = 'rerank';
+    const id = 'model-id-123';
+    const scanUsage = true;
+
+    await deleteInferenceEndpoint(mockClient, type, id, scanUsage);
+
+    expect(mockClient.inference.delete).toHaveBeenCalledWith({
+      inference_id: id,
+      task_type: type,
+      dry_run: true,
     });
   });
 });

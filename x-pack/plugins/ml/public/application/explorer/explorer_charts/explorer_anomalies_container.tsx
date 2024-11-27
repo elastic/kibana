@@ -19,6 +19,7 @@ import type { TableSeverity } from '../../components/controls/select_severity/se
 import { SelectSeverityUI } from '../../components/controls/select_severity/select_severity';
 import type { ExplorerChartsData } from './explorer_charts_container_service';
 import type { MlLocator } from '../../../../common/types/locator';
+import type { AnomaliesTableData } from '../explorer_utils';
 
 interface ExplorerAnomaliesContainerProps {
   id: string;
@@ -27,6 +28,7 @@ interface ExplorerAnomaliesContainerProps {
   severity: TableSeverity;
   setSeverity: (severity: TableSeverity) => void;
   mlLocator: MlLocator;
+  tableData: AnomaliesTableData;
   timeBuckets: TimeBuckets;
   timefilter: TimefilterContract;
   onSelectEntity: (
@@ -37,6 +39,7 @@ interface ExplorerAnomaliesContainerProps {
   showSelectedInterval?: boolean;
   chartsService: ChartsPluginStart;
   timeRange: { from: string; to: string } | undefined;
+  showFilterIcons: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -54,12 +57,14 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   severity,
   setSeverity,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   onSelectEntity,
   showSelectedInterval,
   chartsService,
   timeRange,
+  showFilterIcons,
 }) => {
   return (
     // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
@@ -87,8 +92,10 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
         <ExplorerChartsContainer
           {...{
             ...chartsData,
+            isEmbeddable: true,
             severity: severity.val,
             mlLocator,
+            tableData,
             timeBuckets,
             timefilter,
             timeRange,
@@ -97,6 +104,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             showSelectedInterval,
             chartsService,
             id,
+            showFilterIcons,
           }}
         />
       )}

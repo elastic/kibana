@@ -5,11 +5,35 @@
  * 2.0.
  */
 
+'investigations,list,{page:1,perPage:25}';
+
 export const investigationKeys = {
-  all: ['investigation'] as const,
-  list: (params: { page: number; perPage: number }) =>
-    [...investigationKeys.all, 'list', params] as const,
-  fetch: (params: { id: string }) => [...investigationKeys.all, 'fetch', params] as const,
+  all: ['investigations'] as const,
+  userProfiles: (profileIds: Set<string>) =>
+    [...investigationKeys.all, 'userProfiles', ...profileIds] as const,
+  tags: () => [...investigationKeys.all, 'tags'] as const,
+  events: (rangeFrom?: string, rangeTo?: string, filter?: string) =>
+    [...investigationKeys.all, 'events', rangeFrom, rangeTo, filter] as const,
+  stats: () => [...investigationKeys.all, 'stats'] as const,
+  lists: () => [...investigationKeys.all, 'list'] as const,
+  list: (params: { page: number; perPage: number; search?: string; filter?: string }) =>
+    [...investigationKeys.lists(), params] as const,
+  details: () => [...investigationKeys.all, 'detail'] as const,
+  detail: (investigationId: string) => [...investigationKeys.details(), investigationId] as const,
+  detailNotes: (investigationId: string) =>
+    [...investigationKeys.detail(investigationId), 'notes'] as const,
+  detailItems: (investigationId: string) =>
+    [...investigationKeys.detail(investigationId), 'items'] as const,
+  entities: ({
+    investigationId,
+    ...params
+  }: {
+    investigationId: string;
+    serviceName?: string;
+    serviceEnvironment?: string;
+    hostName?: string;
+    containerId?: string;
+  }) => [...investigationKeys.detail(investigationId), 'entities', params] as const,
 };
 
 export type InvestigationKeys = typeof investigationKeys;

@@ -7,7 +7,7 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
   render as reactTestLibRender,
@@ -29,6 +29,7 @@ import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { ChromeStyle } from '@kbn/core-chrome-browser';
 import { mockState } from './__mocks__/synthetics_store.mock';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
@@ -165,6 +166,10 @@ export const mockCore: () => Partial<CoreStart> = () => {
           })}
         </div>
       ),
+    },
+    chrome: {
+      ...defaultCore.chrome,
+      getChromeStyle$: () => new BehaviorSubject<ChromeStyle>('classic').asObservable(),
     },
   };
 
@@ -356,40 +361,11 @@ export const makeSyntheticsPermissionsCore = (
   };
 };
 
-// This function filters out the queried elements which appear only
-// either on mobile or desktop.
-//
-// It does so by filtering those with the class passed as the `classWrapper`.
-// For mobile, we filter classes which tell elements to be hidden on desktop.
-// For desktop, we do the opposite.
-//
-// We have this function because EUI will manipulate the visibility of some
-// elements through pure CSS, which we can't assert on tests. Therefore,
-// we look for the corresponding class wrapper.
-const finderWithClassWrapper =
-  (classWrapper: string) =>
-  (
-    getterFn: (f: MatcherFunction) => HTMLElement | null,
-    customAttribute?: keyof Element | keyof HTMLElement
-  ) =>
-  (text: string): HTMLElement | null =>
-    getterFn((_content: string, node: Element | null) => {
-      if (!node) return false;
-      // There are actually properties that are not in Element but which
-      // appear on the `node`, so we must cast the customAttribute as a keyof Element
-      const content = node[(customAttribute as keyof Element) ?? 'innerHTML'];
-      if (content === text && wrappedInClass(node, classWrapper)) return true;
-      return false;
-    });
-
 const wrappedInClass = (element: HTMLElement | Element, classWrapper: string): boolean => {
   if (element.className.includes(classWrapper)) return true;
   if (element.parentElement) return wrappedInClass(element.parentElement, classWrapper);
   return false;
 };
-
-export const forMobileOnly = finderWithClassWrapper('hideForDesktop');
-export const forDesktopOnly = finderWithClassWrapper('hideForMobile');
 
 export const makeUptimePermissionsCore = (
   permissions: Partial<{

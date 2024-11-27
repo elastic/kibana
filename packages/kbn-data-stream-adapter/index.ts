@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 export { DataStreamAdapter } from './src/data_stream_adapter';
 export { DataStreamSpacesAdapter } from './src/data_stream_spaces_adapter';
-export { retryTransientEsErrors } from './src/retry_transient_es_errors';
-export { ecsFieldMap, type EcsFieldMap } from './src/field_maps/ecs_field_map';
 
+export { retryTransientEsErrors, ecsFieldMap } from '@kbn/index-adapter';
 export type {
-  DataStreamAdapterParams,
   SetComponentTemplateParams,
   SetIndexTemplateParams,
   InstallParams,
-} from './src/data_stream_adapter';
-export * from './src/field_maps/types';
+  EcsFieldMap,
+} from '@kbn/index-adapter';
+
+export * from '@kbn/index-adapter/src/field_maps/types';

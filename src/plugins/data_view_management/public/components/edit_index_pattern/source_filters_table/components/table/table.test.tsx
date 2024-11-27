@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { ReactElement } from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { Table, TableProps, TableState } from './table';
+import { TableWithoutPersist as Table } from './table';
 import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SourceFiltersTableFilter } from '../../types';
@@ -19,10 +20,15 @@ const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
-const getTableColumnRender = (
-  component: ShallowWrapper<TableProps, TableState, Table>,
-  index: number = 0
-) => {
+const baseProps = {
+  euiTablePersist: {
+    pageSize: 10,
+    onTableChange: () => {},
+    sorting: { sort: { direction: 'asc' as const, field: 'clientId' as const } },
+  },
+};
+
+const getTableColumnRender = (component: ShallowWrapper<typeof Table>, index: number = 0) => {
   const columns =
     component.prop<Array<EuiTableFieldDataColumnType<SourceFiltersTableFilter>>>('columns');
   return {
@@ -34,6 +40,7 @@ describe('Table', () => {
   test('should render normally', () => {
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -47,8 +54,9 @@ describe('Table', () => {
   });
 
   test('should render filter matches', () => {
-    const component = shallow<Table>(
+    const component = shallow<typeof Table>(
       <Table
+        {...baseProps}
         indexPattern={getIndexPatternMock({
           getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
         })}
@@ -69,11 +77,12 @@ describe('Table', () => {
   describe('editing', () => {
     const saveFilter = jest.fn();
     const clientId = '1';
-    let component: ShallowWrapper<TableProps, TableState, Table>;
+    let component: ShallowWrapper<typeof Table>;
 
     beforeEach(() => {
-      component = shallow<Table>(
+      component = shallow<typeof Table>(
         <Table
+          {...baseProps}
           indexPattern={indexPattern}
           items={items}
           deleteFilter={() => {}}
@@ -124,6 +133,7 @@ describe('Table', () => {
     test('should update the matches dynamically as input value is changed', () => {
       const localComponent = shallow(
         <Table
+          {...baseProps}
           indexPattern={getIndexPatternMock({
             getNonScriptedFields: () => [{ name: 'time' }, { name: 'value' }],
           })}
@@ -190,6 +200,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={deleteFilter}
@@ -213,6 +224,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}
@@ -250,6 +262,7 @@ describe('Table', () => {
 
     const component = shallow(
       <Table
+        {...baseProps}
         indexPattern={indexPattern}
         items={items}
         deleteFilter={() => {}}

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^18.10.0",
-    "axios": "^1.6.3",
+    "axios": "^1.7.4",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",
@@ -24,7 +24,7 @@
     "@types/mocha": "^10.0.1",
     "@types/node": "^15.12.2",
     "chai": "^4.3.10",
-    "mocha": "^10.3.0",
+    "mocha": "^10.8.2",
     "nock": "^12.0.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.1.6"

@@ -40,16 +40,11 @@
     background: transparent;
   }
 
-  .euiDataGridHeaderCell {
-    align-items: start;
-
-    &:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__button {
-      height: 100%;
-      align-items: flex-start;
-    }
+  .euiDataGrid--bordersHorizontal .euiDataGridHeader {
+    border-top: none;
   }
 
-  .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
+  .euiDataGrid--headerUnderline .euiDataGridHeader {
     border-bottom: $euiBorderThin;
   }
 
@@ -62,6 +57,9 @@
     padding-right: 0;
     border-left: 0;
     border-right: 0;
+  }
+  .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='additionalRowControl_menuControl'] .euiDataGridRowCell__content {
+    padding-bottom: 0;
   }
 
   .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
@@ -77,7 +75,6 @@
   }
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
     height: 100%;
-    padding: 0;
     border-bottom: 0;
   }
 
@@ -90,8 +87,23 @@
   }
 
   .euiDataGridRowCell__content--autoHeight,
-  .euiDataGridRowCell__content--lineCountHeight {
+  .euiDataGridRowCell__content--lineCountHeight,
+  .euiDataGridHeaderCell__content {
     white-space: pre-wrap;
+  }
+}
+
+// Custom styles for data grid header cell.
+// It can also be inside a portal (outside of `unifiedDataTable__inner`) when dragged.
+.unifiedDataTable__headerCell {
+  align-items: start;
+
+  .euiDataGridHeaderCell__draggableIcon {
+    padding-block: calc($euiSizeXS / 2); // to align with a token height
+  }
+
+  .euiDataGridHeaderCell__button {
+    margin-block: -$euiSizeXS; // to override Eui value for Density "Expanded"
   }
 }
 
@@ -99,25 +111,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-// We only truncate if the cell is not a control column.
-.euiDataGridHeader {
-
-  .euiDataGridHeaderCell__content {
-    white-space: pre-wrap;
-  }
-
-  .euiDataGridHeaderCell__popover {
-    flex-grow: 0;
-    flex-basis: auto;
-    width: auto;
-    padding-left: $euiSizeXS;
-  }
-}
-
-.euiDataGridRowCell--numeric {
-  text-align: right;
 }
 
 .euiDataGrid__loading,
@@ -137,16 +130,17 @@
 
 .unifiedDataTable__rowControl {
   // fine-tuning the vertical alignment with the text for any row height setting
-  margin-top: -$euiSizeXS;
-  .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
-    margin-top: 0;
+  margin-top: -1px;
+
+  // Compact density - 'auto & custom' row height
+  .euiDataGrid--fontSizeSmall .euiDataGridRowCell__content:not(.euiDataGridRowCell__content--defaultHeight) & {
+    margin-top: -2.5px;
   }
 
-  &--size-normal {
-    display: inline-block;
-    width: $euiSizeL;
-    height: $euiSizeL;
-    overflow: hidden;
+  // Compact density - 'single' row height
+  .euiDataGrid--fontSizeSmall .euiDataGridRowCell__content--defaultHeight & {
+    align-self: flex-start;
+    margin-top: -3px;
   }
 }
 

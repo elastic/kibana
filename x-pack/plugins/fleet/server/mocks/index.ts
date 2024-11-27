@@ -22,9 +22,18 @@ import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+
+import { createFleetActionsClientMock } from '../services/actions/mocks';
+
+import { createFleetFilesClientFactoryMock } from '../services/files/mocks';
+
+import { createArtifactsClientMock } from '../services/artifacts/mocks';
+import { createOutputClientMock } from '../services/output_client.mock';
+
 import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
-import type { FleetAppContext } from '../plugin';
+import type { FleetAppContext, FleetStartContract } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
@@ -34,6 +43,8 @@ import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
 import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
 import type { MessageSigningServiceInterface } from '../services/security';
+
+import { getPackageSpecTagId } from '../services/epm/kibana/assets/tag_assets';
 
 import { PackagePolicyMocks } from './package_policy.mocks';
 
@@ -71,6 +82,7 @@ export const createAppContextStartContractMock = (
     agents: { enabled: true, elasticsearch: {} },
     enabled: true,
     agentIdVerificationEnabled: true,
+    eventIngestedEnabled: false,
     ...configOverrides,
   };
 
@@ -103,12 +115,14 @@ export const createAppContextStartContractMock = (
     experimentalFeatures: {
       agentTamperProtectionEnabled: true,
       diagnosticFileUploadEnabled: true,
+      enableReusableIntegrationPolicies: true,
     } as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
       agentIdVerificationEnabled: true,
+      eventIngestedEnabled: false,
     },
     config$,
     kibanaVersion: '8.99.0', // Fake version :)
@@ -129,6 +143,7 @@ export const createAppContextStartContractMock = (
         }
       : {}),
     unenrollInactiveAgentsTask: {} as any,
+    deleteUnenrolledAgentsTask: {} as any,
   };
 };
 
@@ -175,7 +190,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     inspect: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
-    getByIDs: jest.fn(),
+    getByIDs: jest.fn().mockResolvedValue(Promise.resolve([])),
     list: jest.fn(),
     listIds: jest.fn(),
     update: jest.fn(),
@@ -213,13 +228,13 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
  */
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
-    get: jest.fn(),
-    list: jest.fn(),
-    getFullAgentPolicy: jest.fn(),
-    getByIds: jest.fn(),
-    turnOffAgentTamperProtections: jest.fn(),
-    fetchAllAgentPolicies: jest.fn(),
-    fetchAllAgentPolicyIds: jest.fn(),
+    get: jest.fn().mockReturnValue(Promise.resolve()),
+    list: jest.fn().mockReturnValue(Promise.resolve()),
+    getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
+    getByIds: jest.fn().mockReturnValue(Promise.resolve()),
+    turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
+    fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
@@ -238,7 +253,7 @@ export const createMockAgentClient = () => agentServiceMock.createClient();
  */
 export const createMockPackageService = () => packageServiceMock.create();
 
-export function createMessageSigningServiceMock(): MessageSigningServiceInterface {
+export function createMessageSigningServiceMock(): jest.Mocked<MessageSigningServiceInterface> {
   return {
     isEncryptionAvailable: true,
     generateKeyPair: jest.fn(),
@@ -253,7 +268,7 @@ export function createMessageSigningServiceMock(): MessageSigningServiceInterfac
   };
 }
 
-export function createUninstallTokenServiceMock(): UninstallTokenServiceInterface {
+export function createUninstallTokenServiceMock(): DeeplyMockedKeys<UninstallTokenServiceInterface> {
   return {
     getToken: jest.fn(),
     getTokenMetadata: jest.fn(),
@@ -269,3 +284,28 @@ export function createUninstallTokenServiceMock(): UninstallTokenServiceInterfac
     scoped: jest.fn().mockImplementation(() => createUninstallTokenServiceMock()),
   };
 }
+
+export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContract> => {
+  const fleetAuthzMock = createFleetAuthzMock();
+  const fleetArtifactsClient = createArtifactsClientMock();
+  const fleetActionsClient = createFleetActionsClientMock();
+
+  const startContract: DeeplyMockedKeys<FleetStartContract> = {
+    fleetSetupCompleted: jest.fn(async () => {}),
+    authz: { fromRequest: jest.fn(async (_) => fleetAuthzMock) },
+    packageService: createMockPackageService(),
+    agentService: createMockAgentService(),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    agentPolicyService: createMockAgentPolicyService(),
+    registerExternalCallback: jest.fn(),
+    createArtifactsClient: jest.fn((_) => fleetArtifactsClient),
+    createFilesClient: createFleetFilesClientFactoryMock(),
+    messageSigningService: createMessageSigningServiceMock(),
+    uninstallTokenService: createUninstallTokenServiceMock(),
+    createFleetActionsClient: jest.fn((_) => fleetActionsClient),
+    getPackageSpecTagId: jest.fn(getPackageSpecTagId),
+    createOutputClient: jest.fn(async (_) => createOutputClientMock()),
+  };
+
+  return startContract;
+};

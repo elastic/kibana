@@ -218,7 +218,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const updateSelectedPolicyTab = useCallback(
-    (selectedTab) => {
+    (selectedTab: any) => {
       setSelectedPolicyTab(selectedTab);
       setPolicyValidation(selectedTab, newAgentPolicy);
     },
@@ -238,8 +238,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       let count = 0;
       for (const policyId of agentPolicyIds) {
         const { data } = await sendGetAgentStatus({ policyId });
-        if (data?.results.total) {
-          count += data.results.total;
+        if (data?.results.active) {
+          count += data.results.active;
         }
       }
       setAgentCount(count);
@@ -337,7 +337,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // If an auth block view is registered to the UI Extension context, we expect the registered component to return a React component when the PLI is not sufficient,
   // or simply a wrapper returning the children if the PLI is sufficient.
-  const PliAuthBlockWrapper: React.FC = useMemo(
+  const PliAuthBlockWrapper: React.FC<React.PropsWithChildren<{}>> = useMemo(
     () =>
       pliAuthBlockView?.Component && !isPackageInfoLoading
         ? pliAuthBlockView.Component
@@ -350,11 +350,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
+  const { isAgentlessIntegration } = useAgentless();
   const { handleSetupTechnologyChange, selectedSetupTechnology } = useSetupTechnology({
     newAgentPolicy,
     setNewAgentPolicy,
     updateAgentPolicies,
+    updatePackagePolicy,
     setSelectedPolicyTab,
     packageInfo,
     packagePolicy,
@@ -374,7 +375,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
-            isAgentlessEnabled={isAgentlessEnabled}
+            isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
           />
         </ExtensionWrapper>
       )
@@ -498,7 +499,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>
-            {formState === 'CONFIRM' && agentPolicies.length > 0 && (
+            {formState === 'CONFIRM' && (
               <ConfirmDeployAgentPolicyModal
                 agentCount={agentCount}
                 agentPolicies={agentPolicies}

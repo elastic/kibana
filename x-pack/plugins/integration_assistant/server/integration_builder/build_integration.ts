@@ -9,16 +9,19 @@ import AdmZip from 'adm-zip';
 import nunjucks from 'nunjucks';
 import { getDataPath } from '@kbn/utils';
 import { join as joinPath } from 'path';
+import { dump } from 'js-yaml';
 import type { DataStream, Integration } from '../../common';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
 import { createAgentInput } from './agent';
 import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
+import { createReadme } from './readme_files';
+import { Field, flattenObjectsList } from '../util/samples';
 
 const initialVersion = '1.0.0';
 
-export async function buildPackage(integration: Integration): Promise<Buffer> {
+function configureNunjucks() {
   const templateDir = joinPath(__dirname, '../templates');
   const agentTemplates = joinPath(templateDir, 'agent');
   const manifestTemplates = joinPath(templateDir, 'manifest');
@@ -26,23 +29,37 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   nunjucks.configure([templateDir, agentTemplates, manifestTemplates, systemTestTemplates], {
     autoescape: false,
   });
+}
+
+export async function buildPackage(integration: Integration): Promise<Buffer> {
+  configureNunjucks();
 
   const workingDir = joinPath(getDataPath(), `integration-assistant-${generateUniqueId()}`);
   const packageDirectoryName = `${integration.name}-${initialVersion}`;
   const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
 
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
-
-  for (const dataStream of integration.dataStreams) {
+  const fieldsPerDatastream = integration.dataStreams.map((dataStream) => {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
-    createDataStream(integration.name, specificDataStreamDir, dataStream);
+    const dataStreamFields = createDataStream(integration.name, specificDataStreamDir, dataStream);
     createAgentInput(specificDataStreamDir, dataStream.inputTypes);
     createPipeline(specificDataStreamDir, dataStream.pipeline);
-    createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);
-  }
+    const fields = createFieldMapping(
+      integration.name,
+      dataStreamName,
+      specificDataStreamDir,
+      dataStream.docs
+    );
 
+    return {
+      datastream: dataStreamName,
+      fields: mergeAndSortFields(fields, dataStreamFields),
+    };
+  });
+
+  createReadme(packageDir, integration.name, fieldsPerDatastream);
   const zipBuffer = await createZipArchive(workingDir, packageDirectoryName);
 
   removeDirSync(workingDir);
@@ -62,7 +79,6 @@ function createDirectories(
 }
 
 function createPackage(packageDir: string, integration: Integration): void {
-  createReadme(packageDir, integration);
   createChangelog(packageDir);
   createBuildFile(packageDir);
   createPackageManifest(packageDir, integration);
@@ -97,17 +113,6 @@ function createChangelog(packageDir: string): void {
   createSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
 }
 
-function createReadme(packageDir: string, integration: Integration) {
-  const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
-  ensureDirSync(readmeDirPath);
-  const readmeTemplate = nunjucks.render('package_readme.md.njk', {
-    package_name: integration.name,
-    data_streams: integration.dataStreams,
-  });
-
-  createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
-}
-
 async function createZipArchive(workingDir: string, packageDirectoryName: string): Promise<Buffer> {
   const tmpPackageDir = joinPath(workingDir, packageDirectoryName);
   const zip = new AdmZip();
@@ -116,7 +121,90 @@ async function createZipArchive(workingDir: string, packageDirectoryName: string
   return buffer;
 }
 
-function createPackageManifest(packageDir: string, integration: Integration): void {
+function mergeAndSortFields(fields: Field[], dataStreamFields: Field[]): Field[] {
+  const mergedFields = [...fields, ...dataStreamFields];
+
+  return flattenObjectsList(mergedFields);
+}
+
+/* eslint-disable @typescript-eslint/naming-convention */
+/**
+ * Creates a package manifest dictionary.
+ *
+ * @param format_version - The format version of the package.
+ * @param package_title - The title of the package.
+ * @param package_name - The name of the package.
+ * @param package_version - The version of the package.
+ * @param package_description - The description of the package.
+ * @param package_logo - The package logo file name, if present.
+ * @param package_owner - The owner of the package.
+ * @param min_version - The minimum version of Kibana required for the package.
+ * @param inputs - An array of unique input objects containing type, title, and description.
+ * @returns The package manifest dictionary.
+ */
+function createPackageManifestDict(
+  format_version: string,
+  package_title: string,
+  package_name: string,
+  package_version: string,
+  package_description: string,
+  package_logo: string | undefined,
+  package_owner: string,
+  min_version: string,
+  inputs: Array<{ type: string; title: string; description: string }>
+): { [key: string]: string | object } {
+  const data: { [key: string]: string | object } = {
+    format_version,
+    name: package_name,
+    title: package_title,
+    version: package_version,
+    description: package_description,
+    type: 'integration',
+    categories: ['security', 'iam'],
+    conditions: {
+      kibana: {
+        version: min_version,
+      },
+    },
+    policy_templates: [
+      {
+        name: package_name,
+        title: package_title,
+        description: package_description,
+        inputs: inputs.map((input) => ({
+          type: input.type,
+          title: `${input.title} : ${input.type}`,
+          description: input.description,
+        })),
+      },
+    ],
+    owner: {
+      github: package_owner,
+      type: 'community',
+    },
+  };
+
+  if (package_logo !== undefined && package_logo !== '') {
+    data.icons = [
+      {
+        src: '/img/logo.svg',
+        title: `${package_title} Logo`,
+        size: '32x32',
+        type: 'image/svg+xml',
+      },
+    ];
+  }
+  return data;
+}
+/* eslint-enable @typescript-eslint/naming-convention */
+
+/**
+ * Render the package manifest for an integration.
+ *
+ * @param integration - The integration object.
+ * @returns The package manifest YAML rendered into a string.
+ */
+export function renderPackageManifestYAML(integration: Integration): string {
   const uniqueInputs: { [key: string]: { type: string; title: string; description: string } } = {};
 
   integration.dataStreams.forEach((dataStream: DataStream) => {
@@ -133,17 +221,22 @@ function createPackageManifest(packageDir: string, integration: Integration): vo
 
   const uniqueInputsList = Object.values(uniqueInputs);
 
-  const packageManifest = nunjucks.render('package_manifest.yml.njk', {
-    format_version: '3.1.4',
-    package_title: integration.title,
-    package_name: integration.name,
-    package_version: initialVersion,
-    package_description: integration.description,
-    package_logo: integration.logo,
-    package_owner: '@elastic/custom-integrations',
-    min_version: '^8.13.0',
-    inputs: uniqueInputsList,
-  });
+  const packageData = createPackageManifestDict(
+    '3.1.4', // format_version
+    integration.title, // package_title
+    integration.name, // package_name
+    initialVersion, // package_version
+    integration.description, // package_description
+    integration.logo, // package_logo
+    '@elastic/custom-integrations', // package_owner
+    '^8.13.0', // min_version
+    uniqueInputsList // inputs
+  );
 
+  return dump(packageData);
+}
+
+function createPackageManifest(packageDir: string, integration: Integration): void {
+  const packageManifest = renderPackageManifestYAML(integration);
   createSync(joinPath(packageDir, 'manifest.yml'), packageManifest);
 }

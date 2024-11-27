@@ -63,6 +63,9 @@ export const getRuleExecutionLogRoute = (
   router.get(
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_execution_log`,
+      options: {
+        access: 'internal',
+      },
       validate: {
         params: paramSchema,
         query: querySchema,

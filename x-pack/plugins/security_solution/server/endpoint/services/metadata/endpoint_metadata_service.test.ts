@@ -7,7 +7,7 @@
 import { uniq } from 'lodash';
 import type { EndpointMetadataServiceTestContextMock } from './mocks';
 import { createEndpointMetadataServiceTestContextMock } from './mocks';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import {
   legacyMetadataSearchResponseMock,
@@ -37,7 +37,7 @@ describe('EndpointMetadataService', () => {
     endpointDocGenerator = new EndpointDocGenerator('seed');
     testMockedContext = createEndpointMetadataServiceTestContextMock();
     metadataService = testMockedContext.endpointMetadataService;
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+    esClient = testMockedContext.esClient;
     soClient = savedObjectsClientMock.create();
     soClient.find = jest.fn().mockResolvedValue({ saved_objects: [] });
     fleetAppContextService.start(
@@ -58,7 +58,7 @@ describe('EndpointMetadataService', () => {
     });
 
     it('should call elasticsearch with proper filter', async () => {
-      await metadataService.findHostMetadataForFleetAgents(esClient, fleetAgentIds);
+      await metadataService.findHostMetadataForFleetAgents(fleetAgentIds);
       expect(esClient.search).toHaveBeenCalledWith(
         { ...getESQueryHostMetadataByFleetAgentIds(fleetAgentIds), size: fleetAgentIds.length },
         { ignore: [404] }
@@ -67,17 +67,26 @@ describe('EndpointMetadataService', () => {
 
     it('should throw a wrapped elasticsearch Error when one occurs', async () => {
       esClient.search.mockRejectedValue(new Error('foo bar'));
-      await expect(
-        metadataService.findHostMetadataForFleetAgents(esClient, fleetAgentIds)
-      ).rejects.toThrow(EndpointError);
+      await expect(metadataService.findHostMetadataForFleetAgents(fleetAgentIds)).rejects.toThrow(
+        EndpointError
+      );
     });
 
     it('should return an array of Host Metadata documents', async () => {
-      const response = await metadataService.findHostMetadataForFleetAgents(
-        esClient,
-        fleetAgentIds
-      );
+      const response = await metadataService.findHostMetadataForFleetAgents(fleetAgentIds);
       expect(response).toEqual([endpointMetadataDoc]);
+    });
+
+    it('should validate agent is visible in current space', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      await metadataService.findHostMetadataForFleetAgents([data.unitedMetadata.agent.id]);
+
+      expect(testMockedContext.fleetServices.ensureInCurrentSpace).toHaveBeenCalledWith({
+        agentIds: [data.unitedMetadata.agent.id],
+      });
     });
   });
 
@@ -86,22 +95,16 @@ describe('EndpointMetadataService', () => {
 
     beforeEach(() => {
       agentPolicyServiceMock = testMockedContext.agentPolicyService;
-      esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     });
 
     it('should throw wrapped error if es error', async () => {
       esClient.search.mockRejectedValue({});
-      const metadataListResponse = metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        testMockedContext.fleetServices,
-        {
-          page: 0,
-          pageSize: 10,
-          kuery: '',
-          hostStatuses: [],
-        }
-      );
+      const metadataListResponse = metadataService.getHostMetadataList({
+        page: 0,
+        pageSize: 10,
+        kuery: '',
+        hostStatuses: [],
+      });
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
     });
 
@@ -109,17 +112,12 @@ describe('EndpointMetadataService', () => {
       esClient.search.mockRejectedValue({
         meta: { body: { error: { type: 'index_not_found_exception' } } },
       });
-      const metadataListResponse = await metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        testMockedContext.fleetServices,
-        {
-          page: 0,
-          pageSize: 10,
-          kuery: '',
-          hostStatuses: [],
-        }
-      );
+      const metadataListResponse = await metadataService.getHostMetadataList({
+        page: 0,
+        pageSize: 10,
+        kuery: '',
+        hostStatuses: [],
+      });
 
       expect(metadataListResponse).toEqual({
         data: [],
@@ -156,30 +154,23 @@ describe('EndpointMetadataService', () => {
       const mockDoc = unitedMetadataSearchResponseMock(endpointMetadataDoc, mockAgent);
       esClient.search.mockResponse(mockDoc);
       agentPolicyServiceMock.getByIds.mockResolvedValue(agentPolicies);
-      testMockedContext.packagePolicyService.list.mockImplementation(
-        async (_, { page, perPage }) => {
-          const response = {
-            items: packagePolicies,
-            page: page ?? 1,
-            total: packagePolicies.length,
-            perPage: packagePolicies.length,
-          };
+      testMockedContext.packagePolicyService.list.mockImplementation(async (_, { page }) => {
+        const response = {
+          items: packagePolicies,
+          page: page ?? 1,
+          total: packagePolicies.length,
+          perPage: packagePolicies.length,
+        };
 
-          if ((page ?? 1) > 1) {
-            response.items = [];
-          }
-
-          return response;
+        if ((page ?? 1) > 1) {
+          response.items = [];
         }
-      );
+
+        return response;
+      });
 
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
-      const metadataListResponse = await metadataService.getHostMetadataList(
-        esClient,
-        soClient,
-        testMockedContext.fleetServices,
-        queryOptions
-      );
+      const metadataListResponse = await metadataService.getHostMetadataList(queryOptions);
       const unitedIndexQuery = await buildUnitedIndexQuery(
         soClient,
         queryOptions,
@@ -238,6 +229,34 @@ describe('EndpointMetadataService', () => {
       const endpointPackagePolicies = await metadataService.getAllEndpointPackagePolicies();
       const expected: PackagePolicy[] = [mockPolicy];
       expect(endpointPackagePolicies).toEqual(expected);
+    });
+  });
+
+  describe('#getHostMetadata()', () => {
+    it('should validate agent is visible in current space', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      await metadataService.getHostMetadata(data.unitedMetadata.agent.id);
+
+      expect(testMockedContext.fleetServices.ensureInCurrentSpace).toHaveBeenCalledWith({
+        agentIds: [data.unitedMetadata.agent.id],
+      });
+    });
+  });
+
+  describe('#getMetadataForEndpoints()', () => {
+    it('should validate agent is visible in current space', async () => {
+      const data = testMockedContext.applyMetadataMocks(
+        testMockedContext.esClient,
+        testMockedContext.fleetServices
+      );
+      await metadataService.getMetadataForEndpoints([data.unitedMetadata.agent.id]);
+
+      expect(testMockedContext.fleetServices.ensureInCurrentSpace).toHaveBeenCalledWith({
+        agentIds: [data.unitedMetadata.agent.id],
+      });
     });
   });
 });

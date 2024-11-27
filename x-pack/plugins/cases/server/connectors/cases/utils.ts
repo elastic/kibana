@@ -7,7 +7,7 @@
 
 import { isPlainObject, partition, toString } from 'lodash';
 import type { CaseRequestCustomField, CaseRequestCustomFields } from '../../../common/types/api';
-import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
 import { VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS } from './constants';
 import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
@@ -52,9 +52,36 @@ export const convertValueToString = (value: unknown): string => {
   return toString(value);
 };
 
-export const buildRequiredCustomFieldsForRequest = (
-  customFieldsConfiguration?: CustomFieldsConfiguration
+export const buildCustomFieldsForRequest = (
+  customFieldsConfiguration?: CustomFieldsConfiguration,
+  templateCustomFields?: CaseCustomFields
 ): CaseRequestCustomFields => {
+  // populate with template's custom fields
+  if (templateCustomFields && templateCustomFields.length) {
+    return customFieldsConfiguration
+      ? customFieldsConfiguration.map((customFieldConfig) => {
+          const templateCustomField = templateCustomFields?.find(
+            (item) => item.key === customFieldConfig.key
+          );
+
+          let customFieldValue = templateCustomField?.value ?? null;
+          if (
+            customFieldConfig.required &&
+            customFieldConfig.type in VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS &&
+            customFieldValue === null
+          ) {
+            customFieldValue = VALUES_FOR_CUSTOM_FIELDS_MISSING_DEFAULTS[customFieldConfig.type];
+          }
+
+          return {
+            key: customFieldConfig.key,
+            type: customFieldConfig.type,
+            value: customFieldValue,
+          } as CaseRequestCustomField;
+        })
+      : [];
+  }
+
   // only populate with the default value required custom fields missing from the request
   return customFieldsConfiguration
     ? customFieldsConfiguration
@@ -82,7 +109,7 @@ export const buildRequiredCustomFieldsForRequest = (
 export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
   /**
    * Kibana features privileges are defined in
-   * x-pack/plugins/security/server/authorization/privileges/feature_privilege_builder/cases.ts
+   * x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
    */
   return [
     `cases:${owner}/createCase`,
@@ -93,5 +120,6 @@ export const constructRequiredKibanaPrivileges = (owner: string): string[] => {
     `cases:${owner}/updateComment`,
     `cases:${owner}/deleteComment`,
     `cases:${owner}/findConfigurations`,
+    `cases:${owner}/reopenCase`,
   ];
 };

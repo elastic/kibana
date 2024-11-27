@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,16 +14,9 @@ import { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
-
-const unifiedSearch = {
-  ui: {
-    SearchBar: () => <div className="searchBar" />,
-    AggregateQuerySearchBar: () => <div className="searchBar" />,
-  },
-} as unknown as UnifiedSearchPublicPluginStart;
+import { unifiedSearchMock } from '../mocks';
 
 describe('TopNavMenu', () => {
   const WRAPPER_SELECTOR = '.kbnTopNavMenu__wrapper';
@@ -96,7 +90,7 @@ describe('TopNavMenu', () => {
 
   it('Should render search bar', () => {
     const component = mountWithIntl(
-      <TopNavMenu appName={'test'} showSearchBar={true} unifiedSearch={unifiedSearch} />
+      <TopNavMenu appName={'test'} showSearchBar={true} unifiedSearch={unifiedSearchMock} />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
@@ -109,7 +103,7 @@ describe('TopNavMenu', () => {
         appName={'test'}
         config={menuItems}
         showSearchBar={true}
-        unifiedSearch={unifiedSearch}
+        unifiedSearch={unifiedSearchMock}
       />
     );
     expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
@@ -123,7 +117,7 @@ describe('TopNavMenu', () => {
         appName={'test'}
         config={menuItems}
         showSearchBar={true}
-        unifiedSearch={unifiedSearch}
+        unifiedSearch={unifiedSearchMock}
         className={'myCoolClass'}
       />
     );
@@ -171,7 +165,7 @@ describe('TopNavMenu', () => {
           appName={'test'}
           config={menuItems}
           showSearchBar={true}
-          unifiedSearch={unifiedSearch}
+          unifiedSearch={unifiedSearchMock}
           setMenuMountPoint={setMountPoint}
         />
       );
@@ -194,7 +188,7 @@ describe('TopNavMenu', () => {
           appName={'test'}
           badges={badges}
           showSearchBar={true}
-          unifiedSearch={unifiedSearch}
+          unifiedSearch={unifiedSearchMock}
           setMenuMountPoint={setMountPoint}
         />
       );

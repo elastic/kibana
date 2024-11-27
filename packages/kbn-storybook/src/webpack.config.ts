@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { externals } from '@kbn/ui-shared-deps-src';
@@ -123,6 +124,36 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
               },
             },
           ],
+        },
+        {
+          test: /node_modules\/@?xstate5\/.*\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+            },
+          },
+        },
+        {
+          test: /\.js$/,
+          include: /node_modules[\\\/]@dagrejs/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env'], // Doesn't work with @kbn/babel-preset/webpack_preset
+              plugins: ['@babel/plugin-proposal-class-properties'],
+            },
+          },
+        },
+        {
+          test: /node_modules[\/\\]@?xyflow[\/\\].*.js$/,
+          loaders: 'babel-loader',
+          options: {
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+          },
         },
       ],
     },

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import './discover_layout.scss';
@@ -19,20 +20,21 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
+import { appendWhereClauseToESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import {
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { UseColumnsProps, popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
+import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -76,15 +78,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
+    ebtManager,
+    fieldsMetadata,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
-  const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
+  const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
     state.savedQuery,
     state.columns,
     state.sort,
+    state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
 
@@ -100,6 +105,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.dataView!,
     state.isDataViewLoading,
   ]);
+  const customFilters = useInternalStateSelector((state) => state.customFilters);
+
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
 
@@ -126,6 +133,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     [dataState.fetchStatus, dataState.foundDocuments]
   );
 
+  const setAppState = useCallback<UseColumnsProps['setAppState']>(
+    ({ settings, ...rest }) => {
+      stateContainer.appState.update({ ...rest, grid: settings as DiscoverGridSettings });
+    },
+    [stateContainer]
+  );
+
   const {
     columns: currentColumns,
     onAddColumn,
@@ -135,11 +149,28 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     defaultOrder: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
     dataView,
     dataViews,
-    setAppState: stateContainer.appState.update,
+    setAppState,
     useNewFieldsApi,
     columns,
     sort,
+    settings: grid,
   });
+
+  const onAddColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+    },
+    [onAddColumn, ebtManager, fieldsMetadata]
+  );
+
+  const onRemoveColumnWithTracking = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+    },
+    [onRemoveColumn, ebtManager, fieldsMetadata]
+  );
 
   // The assistant is getting the state from the url correctly
   // expect from the index pattern where we have only the dataview id
@@ -162,9 +193,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
+      void ebtManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities]
+    [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
   );
 
   const getOperator = (fieldName: string, values: unknown, operation: '+' | '-') => {
@@ -200,17 +236,40 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         getOperator(fieldName, values, operation),
         fieldType
       );
+      if (!updatedQuery) {
+        return;
+      }
       data.query.queryString.setQuery({
         esql: updatedQuery,
       });
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
+      void ebtManager.trackFilterAddition({
+        fieldName: fieldName === '_exists_' ? String(values) : fieldName,
+        filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
+        fieldsMetadata,
+      });
     },
-    [data.query.queryString, query, trackUiMetric]
+    [data.query.queryString, query, trackUiMetric, ebtManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
+
+  const canSetBreakdownField = useMemo(
+    () =>
+      isOfAggregateQueryType(query)
+        ? dataView?.isTimeBased() && !hasTransformationalCommand(query.esql)
+        : true,
+    [dataView, query]
+  );
+
+  const onAddBreakdownField = useCallback(
+    (field: DataViewField | undefined) => {
+      stateContainer.appState.update({ breakdownField: field?.name });
+    },
+    [stateContainer]
+  );
 
   const onFieldEdited = useCallback(
     async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
@@ -258,8 +317,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       return undefined;
     }
 
-    return () => onAddColumn(draggingFieldName);
-  }, [onAddColumn, draggingFieldName, currentColumns]);
+    return () => onAddColumnWithTracking(draggingFieldName);
+  }, [onAddColumnWithTracking, draggingFieldName, currentColumns]);
 
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
@@ -379,17 +438,19 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                documents$={stateContainer.dataState.data$.documents$}
-                onAddField={onAddColumn}
+                additionalFilters={customFilters}
                 columns={currentColumns}
+                documents$={stateContainer.dataState.data$.documents$}
+                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
+                onAddField={onAddColumnWithTracking}
                 onAddFilter={onFilter}
-                onRemoveField={onRemoveColumn}
                 onChangeDataView={stateContainer.actions.onChangeDataView}
-                selectedDataView={dataView}
-                trackUiMetric={trackUiMetric}
-                onFieldEdited={onFieldEdited}
                 onDataViewCreated={stateContainer.actions.onDataViewCreated}
+                onFieldEdited={onFieldEdited}
+                onRemoveField={onRemoveColumnWithTracking}
+                selectedDataView={dataView}
                 sidebarToggleState$={sidebarToggleState$}
+                trackUiMetric={trackUiMetric}
               />
             }
             mainPanel={
@@ -413,6 +474,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                           }
                         )}
                         error={dataState.error}
+                        isEsqlMode={isEsqlMode}
                       />
                     ) : (
                       <DiscoverNoResults

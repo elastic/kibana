@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { NormalizedFields } from '../application/components/mappings_editor/types';
 import { useDetailsPageMappingsModelManagement } from './use_details_page_mappings_model_management';
 
@@ -49,7 +49,7 @@ jest.mock('../application/services/api', () => ({
   getInferenceEndpoints: jest.fn().mockResolvedValue({
     data: [
       {
-        model_id: 'e5',
+        inference_id: 'e5',
         task_type: 'text_embedding',
         service: 'elasticsearch',
         service_settings: {

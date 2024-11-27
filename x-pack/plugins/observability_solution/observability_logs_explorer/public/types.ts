@@ -25,7 +25,8 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { SloPublicStart } from '@kbn/slo-plugin/public';
+import { SLOPublicStart } from '@kbn/slo-plugin/public';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import {
   ObservabilityLogsExplorerLocators,
   ObservabilityLogsExplorerLocationState,
@@ -49,9 +50,10 @@ export interface ObservabilityLogsExplorerStartDeps {
   discover: DiscoverStart;
   logsExplorer: LogsExplorerPluginStart;
   logsShared: LogsSharedClientStartExports;
+  logsDataAccess: LogsDataAccessPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  slo: SloPublicStart;
+  slo: SLOPublicStart;
   serverless?: ServerlessPluginStart;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch?: UnifiedSearchPublicPluginStart;

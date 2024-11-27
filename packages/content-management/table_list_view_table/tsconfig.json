@@ -36,7 +36,10 @@
     "@kbn/react-kibana-mount",
     "@kbn/content-management-user-profiles",
     "@kbn/recently-accessed",
-    "@kbn/content-management-favorites-public"
+    "@kbn/content-management-content-insights-public",
+    "@kbn/content-management-favorites-public",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/shared-ux-table-persist"
   ],
   "exclude": [
     "target/**/*"

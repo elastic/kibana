@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
@@ -15,7 +16,7 @@ import {
   addPanelMenuTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from './service';
-import { setAnalytics, setI18n, setTheme } from './services';
+import { setAnalytics, setI18n, setNotifications, setTheme } from './services';
 
 export type UiActionsPublicSetup = Pick<
   UiActionsService,
@@ -59,6 +60,7 @@ export class UiActionsPlugin
   public start(core: CoreStart): UiActionsPublicStart {
     setAnalytics(core.analytics);
     setI18n(core.i18n);
+    setNotifications(core.notifications);
     setTheme(core.theme);
     return this.service;
   }

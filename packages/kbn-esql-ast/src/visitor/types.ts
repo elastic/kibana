@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { SharedData } from './global_visitor_context';
@@ -11,10 +12,9 @@ import type * as ast from '../types';
 import type * as contexts from './contexts';
 
 /**
- * We don't have a dedicated "query" AST node, so - for now - we use the root
- * array of commands as the "query" node.
+ * @deprecated Use `ESQLAstQueryExpression` directly.
  */
-export type ESQLAstQueryNode = ast.ESQLAst;
+export type ESQLAstQueryNode = ast.ESQLAstQueryExpression;
 
 /**
  * Represents an "expression" node in the AST.
@@ -25,7 +25,7 @@ export type ESQLAstExpressionNode = ast.ESQLSingleAstItem;
 /**
  * All possible AST nodes supported by the visitor.
  */
-export type VisitorAstNode = ESQLAstQueryNode | ast.ESQLAstNode;
+export type VisitorAstNode = ast.ESQLAstQueryExpression | ast.ESQLAstNode;
 
 export type Visitor<Ctx extends contexts.VisitorContext, Input = unknown, Output = unknown> = (
   ctx: Ctx,
@@ -59,7 +59,9 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitLiteralExpression'> &
       VisitorInput<Methods, 'visitListLiteralExpression'> &
       VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
-      VisitorInput<Methods, 'visitInlineCastExpression'>
+      VisitorInput<Methods, 'visitInlineCastExpression'> &
+      VisitorInput<Methods, 'visitRenameExpression'> &
+      VisitorInput<Methods, 'visitOrderExpression'>
 >;
 
 /**
@@ -73,7 +75,9 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitLiteralExpression'>
   | VisitorOutput<Methods, 'visitListLiteralExpression'>
   | VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'>
-  | VisitorOutput<Methods, 'visitInlineCastExpression'>;
+  | VisitorOutput<Methods, 'visitInlineCastExpression'>
+  | VisitorOutput<Methods, 'visitRenameExpression'>
+  | VisitorOutput<Methods, 'visitOrderExpression'>;
 
 /**
  * Input that satisfies any command visitor input constraints.
@@ -195,6 +199,12 @@ export interface VisitorMethods<
     any,
     any
   >;
+  visitRenameExpression?: Visitor<
+    contexts.RenameExpressionVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
+  visitOrderExpression?: Visitor<contexts.OrderExpressionVisitorContext<Visitors, Data>, any, any>;
 }
 
 /**
@@ -221,22 +231,6 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   : Node extends ast.ESQLInlineCast
   ? 'visitInlineCastExpression'
   : never;
-
-/**
- * Maps any AST node to the corresponding visitor context.
- */
-export type AstNodeToVisitor<
-  Node extends VisitorAstNode,
-  Methods extends VisitorMethods = VisitorMethods
-> = Methods[AstNodeToVisitorName<Node>];
-
-/**
- * Maps any AST node to its corresponding visitor context.
- */
-export type AstNodeToContext<
-  Node extends VisitorAstNode,
-  Methods extends VisitorMethods = VisitorMethods
-> = Parameters<EnsureFunction<AstNodeToVisitor<Node, Methods>>>[0];
 
 /**
  * Asserts that a type is a function.

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -20,6 +21,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense } from '@kbn/es';
 import type { ServerlessOptions } from '@kbn/es/src/utils';
+import { getFips } from 'crypto';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -70,6 +72,7 @@ export interface CreateTestEsClusterOptions {
    * `['key.1=val1', 'key.2=val2']`
    */
   esArgs?: string[];
+  esVersion?: string;
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
@@ -168,6 +171,7 @@ export function createTestEsCluster<
     log,
     writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
+    esVersion = esTestConfig.getVersion(),
     esFrom = esTestConfig.getBuildFrom(),
     esServerlessOptions,
     dataArchive,
@@ -188,18 +192,24 @@ export function createTestEsCluster<
     `transport.port=${transportPort ?? esTestConfig.getTransportPort()}`,
     // For multi-node clusters, we make all nodes master-eligible by default.
     ...(nodes.length > 1
-      ? ['discovery.type=zen', `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`]
+      ? [
+          'discovery.type=multi-node',
+          `cluster.initial_master_nodes=${nodes.map((n) => n.name).join(',')}`,
+        ]
       : ['discovery.type=single-node']),
   ];
 
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
+  // Use 'trial' license if FIPS mode is enabled, otherwise use the provided license or default to 'basic'
+  const testLicense: ArtifactLicense = getFips() === 1 ? 'trial' : license ? license : 'basic';
+
   const config = {
-    version: esTestConfig.getVersion(),
+    version: esVersion,
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(REPO_ROOT, '../elasticsearch'),
+    license: testLicense,
     password,
-    license,
     basePath,
     esArgs,
     resources: files,

@@ -37,8 +37,8 @@ import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useKibana } from '../../../../utils/kibana_react';
-import { GoodBadEventsChart } from '../../../slos/components/common/good_bad_events_chart';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { GoodBadEventsChart } from '../../../../components/good_bad_events_chart/good_bad_events_chart';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
@@ -289,12 +289,19 @@ export function DataPreviewChart({
                 theme={[
                   {
                     lineSeriesStyle: {
-                      point: { visible: false },
+                      point: { visible: 'never' },
                     },
                   },
                 ]}
                 noResults={
-                  <EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />
+                  <EuiIcon
+                    type="visualizeApp"
+                    size="l"
+                    color="subdued"
+                    title={i18n.translate('xpack.slo.dataPreviewChart.noResultsLabel', {
+                      defaultMessage: 'no results',
+                    })}
+                  />
                 }
                 locale={i18n.getLocale()}
               />

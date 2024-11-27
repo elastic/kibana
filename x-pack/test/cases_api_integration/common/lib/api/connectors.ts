@@ -236,7 +236,7 @@ export const createCaseWithConnector = async ({
     auth: auth ?? undefined,
   });
 
-  actionsRemover.add(auth?.space ?? 'default', connector.id, 'action', 'actions');
+  actionsRemover.add(auth?.space ?? 'default', connector.id, 'connector', 'actions');
 
   const [configuration, postedCase] = await Promise.all([
     createConfiguration(

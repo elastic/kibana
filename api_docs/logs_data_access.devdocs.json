@@ -23,14 +23,14 @@
           {
             "parentPluginId": "logsDataAccess",
             "id": "def-public.LogSourcesProvider.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,11 +44,44 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsDataAccess",
+        "id": "def-public.LogSourcesSettingSynchronisationInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "LogSourcesSettingSynchronisationInfo",
+        "description": [],
+        "signature": [
+          "({ isLoading, logSourcesValue, getUrlForApp, title }: { isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }) => React.JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_data_access/public/components/logs_sources_setting.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsDataAccess",
+            "id": "def-public.LogSourcesSettingSynchronisationInfo.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ isLoading, logSourcesValue, getUrlForApp, title }",
+            "description": [],
+            "signature": [
+              "{ isLoading: boolean; logSourcesValue: string; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; title?: string | undefined; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_data_access/public/components/logs_sources_setting.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

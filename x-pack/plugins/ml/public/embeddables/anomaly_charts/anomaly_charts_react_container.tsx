@@ -7,6 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import moment from 'moment-timezone';
+import useMountedState from 'react-use/lib/useMountedState';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,12 +29,15 @@ import type {
   AnomalyChartsAttachmentApi,
 } from '..';
 
+import type { AnomaliesTableData, ExplorerJob } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
+import { useDateFormatTz, loadAnomaliesTableData } from '../../application/explorer/explorer_utils';
+import { useMlJobService } from '../../application/services/job_service';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
@@ -46,6 +51,7 @@ export interface AnomalyChartsContainerProps
   onRenderComplete: () => void;
   onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
+  showFilterIcons?: boolean;
 }
 
 const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
@@ -57,7 +63,18 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   onError,
   onLoading,
   api,
+  showFilterIcons = true,
 }) => {
+  const isMounted = useMountedState();
+
+  const [tableData, setTableData] = useState<AnomaliesTableData>({
+    anomalies: [],
+    examplesByJobId: [''],
+    interval: 0,
+    jobIds: [],
+    showViewSeriesLink: false,
+  });
+
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
     optionValueToThreshold(
@@ -65,8 +82,14 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     )
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
-  const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
-    services;
+  const [
+    { uiSettings },
+    { data: dataServices, share, uiActions, charts: chartsService },
+    { mlApi },
+  ] = services;
+
+  const mlJobService = useMlJobService();
+
   const { timefilter } = dataServices.query.timefilter;
   const timeRange = useObservable(timeRange$);
 
@@ -107,6 +130,55 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     isLoading: isExplorerLoading,
     error,
   } = useAnomalyChartsData(api, services, chartWidth, severity.val, renderCallbacks);
+
+  const dateFormatTz = useDateFormatTz();
+
+  useEffect(() => {
+    // async IFEE
+    (async () => {
+      if (chartsData === undefined) {
+        return;
+      }
+
+      try {
+        await mlJobService.loadJobsWrapper();
+
+        const explorerJobs: ExplorerJob[] =
+          chartsData.seriesToPlot.map(({ jobId, bucketSpanSeconds }) => {
+            return {
+              id: jobId,
+              selected: true,
+              bucketSpanSeconds,
+              modelPlotEnabled: false,
+            };
+          }) ?? [];
+
+        const timeRangeBounds = {
+          min: moment(chartsData.seriesToPlot[0].plotEarliest),
+          max: moment(chartsData.seriesToPlot[0].plotLatest),
+        };
+
+        const newTableData = await loadAnomaliesTableData(
+          mlApi,
+          mlJobService,
+          undefined,
+          explorerJobs,
+          dateFormatTz,
+          timeRangeBounds,
+          'job ID',
+          'auto',
+          0
+        );
+
+        if (isMounted()) {
+          setTableData(newTableData);
+        }
+      } catch (err) {
+        console.log(err); // eslint-disable-line no-console
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartsData]);
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -207,12 +279,14 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
               severity={severity}
               setSeverity={setSeverity}
               mlLocator={mlLocator}
+              tableData={tableData}
               timeBuckets={timeBuckets}
               timefilter={timefilter}
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
               chartsService={chartsService}
               timeRange={timeRange}
+              showFilterIcons={showFilterIcons}
             />
           ) : null}
         </div>

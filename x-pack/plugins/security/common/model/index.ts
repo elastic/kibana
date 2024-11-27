@@ -21,7 +21,6 @@ export {
 } from './authenticated_user';
 export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';
-export type { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
 export {
   copyRole,
   isRoleDeprecated,

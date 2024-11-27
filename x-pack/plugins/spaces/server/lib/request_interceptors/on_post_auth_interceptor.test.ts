@@ -49,9 +49,21 @@ describe.skip('onPostAuthInterceptor', () => {
    */
 
   function initKbnServer(router: IRouter, basePath: IBasePath) {
-    router.get({ path: '/api/np_test/foo', validate: false }, (context, req, h) => {
-      return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
-    });
+    router.get(
+      {
+        path: '/api/np_test/foo',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, h) => {
+        return h.ok({ body: { path: req.url.pathname, basePath: basePath.get(req) } });
+      }
+    );
   }
 
   async function request(

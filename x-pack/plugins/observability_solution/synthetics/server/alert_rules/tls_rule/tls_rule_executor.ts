@@ -71,16 +71,16 @@ export class TLSRuleExecutor {
       allIds,
       enabledMonitorQueryIds,
       monitorLocationIds,
-      monitorLocationMap,
+      monitorLocationsMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
+    } = processMonitors(this.monitors);
 
     return {
       enabledMonitorQueryIds,
       monitorLocationIds,
       allIds,
-      monitorLocationMap,
+      monitorLocationsMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
     };

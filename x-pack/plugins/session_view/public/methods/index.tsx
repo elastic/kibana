@@ -28,10 +28,7 @@ const SUPPORTED_PACKAGES = [
   CLOUD_DEFEND_DATA_SOURCE,
   AUDITBEAT_DATA_SOURCE,
 ];
-const INDEX_REGEX = new RegExp(
-  `([a-z0-9_-]+\:)?[a-z0-9\-.]*(${SUPPORTED_PACKAGES.join('|')})`,
-  'i'
-);
+const INDEX_REGEX = new RegExp(`([a-z0-9_-]+\:)?[a-z0-9-.]*(${SUPPORTED_PACKAGES.join('|')})`, 'i');
 
 export const DEFAULT_INDEX = 'logs-*';
 export const CLOUD_DEFEND_INDEX = 'logs-cloud_defend.*';

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -157,7 +159,6 @@ describe('test getDataStateContainer', () => {
         expect(
           stateContainer.searchSessionManager.getCurrentSearchSessionId as jest.Mock
         ).toHaveBeenCalled();
-
         unsubscribe();
         done();
       }
@@ -167,21 +168,24 @@ describe('test getDataStateContainer', () => {
   });
 
   it('should update app state from default profile state', async () => {
+    mockFetchDocuments.mockResolvedValue({ records: [] });
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: true,
       rowHeight: true,
     });
+
     dataState.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: 0,
     });
     dataState.refetch$.next(undefined);
+
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
@@ -200,7 +204,7 @@ describe('test getDataStateContainer', () => {
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.transitions.setResetDefaultProfileState({
       columns: false,

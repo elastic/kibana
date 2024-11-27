@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
 import type { SessionViewConfig } from '../../../common/types';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type { Sort } from '../components/timeline/body/sort';
 import type {
   DataProvider,
   QueryOperator,
@@ -23,15 +22,16 @@ import {
   TimelineStatusEnum,
   TimelineTypeEnum,
 } from '../../../common/api/timeline';
+import { TimelineId } from '../../../common/types/timeline';
 import type {
   ColumnHeaderOptions,
   TimelineEventsType,
   SerializedFilterQuery,
   TimelinePersistInput,
   SortColumnTimeline,
+  SortColumnTimeline as Sort,
 } from '../../../common/types/timeline';
 import type { RowRendererId, TimelineType } from '../../../common/api/timeline';
-import { TimelineId } from '../../../common/types/timeline';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
@@ -44,6 +44,7 @@ import {
 import { activeTimeline } from '../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
+import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 
 interface AddTimelineNoteParams {
   id: string;
@@ -130,7 +131,6 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      isLoading: timelineById[id].isLoading,
       initialized: timeline.initialized ?? timelineById[id].initialized,
       resolveTimelineConfig,
       dateRange:
@@ -179,7 +179,6 @@ export const addNewTimeline = ({
       savedObjectId: null,
       version: null,
       isSaving: false,
-      isLoading: false,
       timelineType,
       ...templateTimelineInfo,
     },
@@ -841,7 +840,7 @@ const updateProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -875,7 +874,7 @@ const updateAndProviderProperties = ({
   operator: QueryOperator;
   providerId: string;
   timeline: TimelineModel;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }) =>
   timeline.dataProviders.map((provider) =>
     provider.id === providerId
@@ -909,7 +908,7 @@ interface UpdateTimelineProviderEditPropertiesParams {
   operator: QueryOperator;
   providerId: string;
   timelineById: TimelineById;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }
 
 export const updateTimelineProviderProperties = ({
@@ -1531,7 +1530,7 @@ export const updateTimelineColumnWidth = ({
   columnId: string;
   id: string;
   timelineById: TimelineById;
-  width: number;
+  width?: number;
 }): TimelineById => {
   const timeline = timelineById[id];
 

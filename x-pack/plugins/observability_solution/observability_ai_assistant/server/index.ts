@@ -19,7 +19,6 @@ export type {
 } from './types';
 
 export {
-  aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
@@ -48,7 +47,7 @@ export const config: PluginConfigDescriptor<ObservabilityAIAssistantConfig> = {
       level: 'warning',
     }),
   ],
-  exposeToBrowser: {},
+  exposeToBrowser: { scope: true },
   schema: configSchema,
 };
 

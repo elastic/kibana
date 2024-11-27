@@ -12,6 +12,7 @@ import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { TaskPartitioner } from '../lib/task_partitioner';
 import { KibanaDiscoveryService } from '../kibana_discovery_service';
+import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 
 jest.mock('../constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -25,7 +26,12 @@ jest.mock('../constants', () => ({
 }));
 
 const taskManagerLogger = mockLogger();
-const taskPartitioner = new TaskPartitioner('test', {} as KibanaDiscoveryService);
+const taskPartitioner = new TaskPartitioner({
+  logger: taskManagerLogger,
+  podName: 'test',
+  kibanaDiscoveryService: {} as KibanaDiscoveryService,
+  kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
+});
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -77,7 +83,6 @@ describe('TaskClaiming', () => {
       strategy: 'non-default',
       definitions,
       excludedTaskTypes: [],
-      unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
       getAvailableCapacity: () => 10,
@@ -85,7 +90,8 @@ describe('TaskClaiming', () => {
     });
 
     expect(taskManagerLogger.warn).toHaveBeenCalledWith(
-      'Unknown task claiming strategy "non-default", falling back to default'
+      'Unknown task claiming strategy "non-default", falling back to update_by_query',
+      { tags: ['taskClaiming'] }
     );
   });
 
@@ -127,7 +133,6 @@ describe('TaskClaiming', () => {
       strategy: 'default',
       definitions,
       excludedTaskTypes: [],
-      unusedTypes: [],
       taskStore: taskStoreMock.create({ taskManagerId: '' }),
       maxAttempts: 2,
       getAvailableCapacity: () => 10,

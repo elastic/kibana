@@ -13,9 +13,9 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { indexPatternFieldEditorPluginMock as dataViewFieldEditorMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import SearchBar from '@kbn/unified-search-plugin/public/search_bar/search_bar';
 import { http, HttpResponse, JsonBodyType } from 'msw';
+import { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { defaultHandlers } from './handlers';
 import { getMockDependencies } from '../fixtures/get_mock_dependencies';
-import { CspClientPluginStartDeps } from '../../types';
 import { MOCK_SERVER_LICENSING_INFO_URL } from './handlers/licensing.handlers.mock';
 
 /**
@@ -28,7 +28,7 @@ jest.mock('rxjs', () => {
     ...actual,
     lastValueFrom: async (source: Promise<any>) => {
       const value = await source;
-      return value.result;
+      return value;
     },
   };
 });
@@ -97,7 +97,7 @@ export const getMockServerDependencies = () => {
         search: {
           ...getMockDependencies().data.search,
           search: async ({ params }: { params: any }) => {
-            const response = await fetch(`${MOCK_SERVER_BASE_URL}/internal/bsearch`, {
+            const response = await fetch(`${MOCK_SERVER_BASE_URL}/internal/search`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

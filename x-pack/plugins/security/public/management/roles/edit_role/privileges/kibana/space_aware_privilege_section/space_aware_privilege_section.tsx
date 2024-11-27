@@ -20,15 +20,15 @@ import React, { Component, Fragment } from 'react';
 import type { Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Role } from '@kbn/security-plugin-types-common';
+import type { KibanaPrivileges } from '@kbn/security-role-management-model';
+import { PrivilegeFormCalculator } from '@kbn/security-ui-components';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
-import type { Role } from '../../../../../../../common';
 import { isRoleReserved, isRoleWithWildcardBasePrivilege } from '../../../../../../../common';
-import type { KibanaPrivileges } from '../../../../model';
 import type { RoleValidator } from '../../../validate_role';
-import { PrivilegeFormCalculator } from '../privilege_form_calculator';
 import { PrivilegeSummary } from '../privilege_summary';
 
 interface Props {
@@ -206,7 +206,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
         >
           <FormattedMessage
             id="xpack.security.management.editRole.spacePrivilegeSection.addSpacePrivilegeButton"
-            defaultMessage="Add Kibana privilege"
+            defaultMessage="Assign to space"
           />
         </EuiButton>
       );

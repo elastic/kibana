@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Pipeline, Docs } from '../../../../../common';
+import type { Pipeline, Docs, SamplesFormat } from '../../../../../common';
 import type { Actions, State } from '../state';
 import type { AIConnector } from '../types';
 
-const result: { pipeline: Pipeline; docs: Docs } = {
+const result: { pipeline: Pipeline; docs: Docs; samplesFormat: SamplesFormat } = {
   pipeline: {
     description: 'Pipeline to process my_integration my_data_stream_title logs',
     processors: [
@@ -389,6 +389,7 @@ const result: { pipeline: Pipeline; docs: Docs } = {
       ],
     },
   ],
+  samplesFormat: { name: 'json' },
 };
 
 const rawSamples = [
@@ -419,9 +420,10 @@ export const mockState: State = {
     dataStreamName: 'mocked_datastream_name',
     dataStreamDescription: 'Mocked Data Stream Description',
     inputTypes: ['filestream'],
-    logsSampleParsed: rawSamples,
+    logSamples: rawSamples,
   },
   isGenerating: false,
+  hasCelInput: false,
   result,
 };
 
@@ -430,5 +432,7 @@ export const mockActions: Actions = {
   setConnector: jest.fn(),
   setIntegrationSettings: jest.fn(),
   setIsGenerating: jest.fn(),
+  setHasCelInput: jest.fn(),
   setResult: jest.fn(),
+  setCelInputResult: jest.fn(),
 };

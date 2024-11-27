@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -20,19 +21,22 @@ export enum ConditionEntryField {
   HASH = 'process.hash.*',
   PATH = 'process.executable.caseless',
   SIGNER = 'process.Ext.code_signature',
+  SIGNER_MAC = 'process.code_signature',
 }
 
 export enum EntryFieldType {
   HASH = '.hash.',
   EXECUTABLE = '.executable.caseless',
   PATH = '.path',
-  SIGNER = '.Ext.code_signature',
+  SIGNER = '.code_signature',
 }
 
 export type TrustedAppConditionEntryField =
   | 'process.hash.*'
   | 'process.executable.caseless'
-  | 'process.Ext.code_signature';
+  | 'process.Ext.code_signature'
+  | 'process.code_signature';
+
 export type BlocklistConditionEntryField =
   | 'file.hash.*'
   | 'file.path'

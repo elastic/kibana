@@ -29,7 +29,10 @@ function savedObjectToDownloadSource(so: SavedObject<DownloadSourceSOAttributes>
 
   return {
     id: sourceId ?? so.id,
-    ...attributes,
+    name: attributes.name,
+    host: attributes.host,
+    is_default: attributes.is_default,
+    proxy_id: attributes.proxy_id,
   };
 }
 
@@ -156,7 +159,6 @@ class DownloadSourceService {
       throw new DownloadSourceError(`Default Download source ${id} cannot be deleted.`);
     }
     await agentPolicyService.removeDefaultSourceFromAll(
-      soClient,
       appContextService.getInternalUserESClient(),
       id
     );

@@ -5,14 +5,29 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
-import { useAnonymizationListUpdate } from '../anonymization_settings/use_anonymization_list_update';
+import {
+  useAnonymizationListUpdate,
+  UseAnonymizationListUpdateProps,
+} from '../anonymization_settings/use_anonymization_list_update';
 import {
   DEFAULT_ANONYMIZATION_FIELDS,
   DEFAULT_CONVERSATIONS,
@@ -22,13 +37,21 @@ import {
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
 import { useAssistantContext } from '../../../assistant_context';
-import { SETTINGS_UPDATED_TOAST_TITLE } from '../../../assistant/settings/translations';
+import {
+  CANCEL,
+  SAVE,
+  SETTINGS_UPDATED_TOAST_TITLE,
+} from '../../../assistant/settings/translations';
 
 export interface Props {
-  defaultPageSize?: number;
+  modalMode?: boolean;
+  onClose?: () => void;
 }
 
-const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPageSize = 5 }) => {
+const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
+  modalMode = false,
+  onClose,
+}) => {
   const { toasts } = useAssistantContext();
   const { data: anonymizationFields } = useFetchAnonymizationFields();
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
@@ -49,9 +72,10 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
   );
 
   const onCancelClick = useCallback(() => {
+    onClose?.();
     resetSettings();
     setHasPendingChanges(false);
-  }, [resetSettings]);
+  }, [onClose, resetSettings]);
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
@@ -68,9 +92,12 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave();
-  }, [handleSave]);
+    onClose?.();
+  }, [handleSave, onClose]);
 
-  const handleAnonymizationFieldsBulkActions = useCallback(
+  const handleAnonymizationFieldsBulkActions = useCallback<
+    UseAnonymizationListUpdateProps['setAnonymizationFieldsBulkActions']
+  >(
     (value) => {
       setHasPendingChanges(true);
       setAnonymizationFieldsBulkActions(value);
@@ -78,7 +105,9 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
     [setAnonymizationFieldsBulkActions]
   );
 
-  const handleUpdatedAnonymizationData = useCallback(
+  const handleUpdatedAnonymizationData = useCallback<
+    UseAnonymizationListUpdateProps['setUpdatedAnonymizationData']
+  >(
     (value) => {
       setHasPendingChanges(true);
       setUpdatedAnonymizationData(value);
@@ -92,6 +121,46 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
     setAnonymizationFieldsBulkActions: handleAnonymizationFieldsBulkActions,
     setUpdatedAnonymizationData: handleUpdatedAnonymizationData,
   });
+
+  if (modalMode) {
+    return (
+      <EuiModal onClose={onCancelClick}>
+        <EuiModalHeader>
+          <EuiModalHeaderTitle>{i18n.SETTINGS_TITLE}</EuiModalHeaderTitle>
+        </EuiModalHeader>
+        <EuiModalBody>
+          <EuiText size="m">{i18n.SETTINGS_DESCRIPTION}</EuiText>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup alignItems="center" data-test-subj="summary" gutterSize="none">
+            <Stats
+              isDataAnonymizable={true}
+              anonymizationFields={updatedAnonymizationData.data}
+              titleSize="m"
+              gap={euiThemeVars.euiSizeS}
+            />
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+
+          <ContextEditor
+            anonymizationFields={updatedAnonymizationData}
+            compressed={false}
+            onListUpdated={onListUpdated}
+            rawData={null}
+          />
+        </EuiModalBody>
+        <EuiModalFooter>
+          <EuiButtonEmpty onClick={onCancelClick}>{CANCEL}</EuiButtonEmpty>
+          <EuiButton type="submit" onClick={onSaveButtonClicked} fill disabled={!hasPendingChanges}>
+            {SAVE}
+          </EuiButton>
+        </EuiModalFooter>
+      </EuiModal>
+    );
+  }
+
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -115,7 +184,6 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({ defaultPage
           compressed={false}
           onListUpdated={onListUpdated}
           rawData={null}
-          pageSize={defaultPageSize}
         />
       </EuiPanel>
       <AssistantSettingsBottomBar

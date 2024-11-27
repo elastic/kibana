@@ -1,26 +1,10 @@
 {
   "id": "@kbn/typed-react-router-config",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.NotFoundRouteException",
+        "id": "def-public.NotFoundRouteException",
         "type": "Class",
         "tags": [],
         "label": "NotFoundRouteException",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.NotFoundRouteException",
+            "section": "def-public.NotFoundRouteException",
             "text": "NotFoundRouteException"
           },
           " extends Error"
@@ -41,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.NotFoundRouteException.Unnamed",
+            "id": "def-public.NotFoundRouteException.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -55,7 +39,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.NotFoundRouteException.Unnamed.$1",
+                "id": "def-public.NotFoundRouteException.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "message",
@@ -78,7 +62,52 @@
     "functions": [
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.createRouter",
+        "id": "def-public.BreadcrumbsContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "BreadcrumbsContextProvider",
+        "description": [],
+        "signature": [
+          "({\n  children,\n}: { children: React.ReactNode; }) => React.JSX.Element"
+        ],
+        "path": "packages/kbn-typed-react-router-config/src/breadcrumbs/context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/typed-react-router-config",
+            "id": "def-public.BreadcrumbsContextProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n}",
+            "description": [],
+            "path": "packages/kbn-typed-react-router-config/src/breadcrumbs/context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/typed-react-router-config",
+                "id": "def-public.BreadcrumbsContextProvider.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "packages/kbn-typed-react-router-config/src/breadcrumbs/context.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-public.createRouter",
         "type": "Function",
         "tags": [],
         "label": "createRouter",
@@ -87,9 +116,9 @@
           "(routes: TRoutes) => ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Router",
+            "section": "def-public.Router",
             "text": "Router"
           },
           "<TRoutes>"
@@ -100,7 +129,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.createRouter.$1",
+            "id": "def-public.createRouter.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "routes",
@@ -119,7 +148,43 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.CurrentRouteContextProvider",
+        "id": "def-public.createRouterBreadcrumbComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "createRouterBreadcrumbComponent",
+        "description": [],
+        "signature": [
+          "() => ",
+          "RouterBreadcrumb",
+          "<TRouteMap>"
+        ],
+        "path": "packages/kbn-typed-react-router-config/src/breadcrumbs/create_router_breadcrumb_component.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-public.createUseBreadcrumbs",
+        "type": "Function",
+        "tags": [],
+        "label": "createUseBreadcrumbs",
+        "description": [],
+        "signature": [
+          "() => UseBreadcrumbs<TRouteMap>"
+        ],
+        "path": "packages/kbn-typed-react-router-config/src/breadcrumbs/use_router_breadcrumb.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-public.CurrentRouteContextProvider",
         "type": "Function",
         "tags": [],
         "label": "CurrentRouteContextProvider",
@@ -128,20 +193,20 @@
           "({ match, element, children, }: { match: ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMatch",
+            "section": "def-public.RouteMatch",
             "text": "RouteMatch"
           },
           "<",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Route",
+            "section": "def-public.Route",
             "text": "Route"
           },
-          ">; element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }) => JSX.Element"
+          ">; element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/use_current_route.tsx",
         "deprecated": false,
@@ -149,7 +214,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.CurrentRouteContextProvider.$1",
+            "id": "def-public.CurrentRouteContextProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  match,\n  element,\n  children,\n}",
@@ -160,7 +225,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.CurrentRouteContextProvider.$1.match",
+                "id": "def-public.CurrentRouteContextProvider.$1.match",
                 "type": "Object",
                 "tags": [],
                 "label": "match",
@@ -168,17 +233,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.RouteMatch",
+                    "section": "def-public.RouteMatch",
                     "text": "RouteMatch"
                   },
                   "<",
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.Route",
+                    "section": "def-public.Route",
                     "text": "Route"
                   },
                   ">"
@@ -189,7 +254,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.CurrentRouteContextProvider.$1.element",
+                "id": "def-public.CurrentRouteContextProvider.$1.element",
                 "type": "Object",
                 "tags": [],
                 "label": "element",
@@ -203,7 +268,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.CurrentRouteContextProvider.$1.children",
+                "id": "def-public.CurrentRouteContextProvider.$1.children",
                 "type": "Object",
                 "tags": [],
                 "label": "children",
@@ -223,7 +288,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.Outlet",
+        "id": "def-public.Outlet",
         "type": "Function",
         "tags": [],
         "label": "Outlet",
@@ -240,13 +305,13 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.OutletContextProvider",
+        "id": "def-public.OutletContextProvider",
         "type": "Function",
         "tags": [],
         "label": "OutletContextProvider",
         "description": [],
         "signature": [
-          "({\n  element,\n  children,\n}: { element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactNode; }) => JSX.Element"
+          "({\n  element,\n  children,\n}: { element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
         "deprecated": false,
@@ -254,7 +319,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.OutletContextProvider.$1",
+            "id": "def-public.OutletContextProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  element,\n  children,\n}",
@@ -265,7 +330,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.OutletContextProvider.$1.element",
+                "id": "def-public.OutletContextProvider.$1.element",
                 "type": "Object",
                 "tags": [],
                 "label": "element",
@@ -279,13 +344,13 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.OutletContextProvider.$1.children",
+                "id": "def-public.OutletContextProvider.$1.children",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-typed-react-router-config/src/outlet.tsx",
                 "deprecated": false,
@@ -299,7 +364,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.RouterContextProvider",
+        "id": "def-public.RouterContextProvider",
         "type": "Function",
         "tags": [],
         "label": "RouterContextProvider",
@@ -308,20 +373,20 @@
           "({ router, children, }: { router: ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Router",
+            "section": "def-public.Router",
             "text": "Router"
           },
           "<",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMap",
+            "section": "def-public.RouteMap",
             "text": "RouteMap"
           },
-          ">; children: React.ReactNode; }) => JSX.Element"
+          ">; children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/use_router.tsx",
         "deprecated": false,
@@ -329,7 +394,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.RouterContextProvider.$1",
+            "id": "def-public.RouterContextProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  router,\n  children,\n}",
@@ -340,7 +405,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.RouterContextProvider.$1.router",
+                "id": "def-public.RouterContextProvider.$1.router",
                 "type": "Object",
                 "tags": [],
                 "label": "router",
@@ -348,17 +413,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.Router",
+                    "section": "def-public.Router",
                     "text": "Router"
                   },
                   "<",
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.RouteMap",
+                    "section": "def-public.RouteMap",
                     "text": "RouteMap"
                   },
                   ">"
@@ -369,13 +434,13 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.RouterContextProvider.$1.children",
+                "id": "def-public.RouterContextProvider.$1.children",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-typed-react-router-config/src/use_router.tsx",
                 "deprecated": false,
@@ -389,13 +454,13 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.RouteRenderer",
+        "id": "def-public.RouteRenderer",
         "type": "Function",
         "tags": [],
         "label": "RouteRenderer",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/route_renderer.tsx",
         "deprecated": false,
@@ -406,7 +471,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.RouterProvider",
+        "id": "def-public.RouterProvider",
         "type": "Function",
         "tags": [],
         "label": "RouterProvider",
@@ -415,22 +480,22 @@
           "({\n  children,\n  router,\n  history,\n}: { router: ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Router",
+            "section": "def-public.Router",
             "text": "Router"
           },
           "<",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMap",
+            "section": "def-public.RouteMap",
             "text": "RouteMap"
           },
           ">; history: ",
           "History",
-          "<unknown>; children?: React.ReactNode; }) => JSX.Element"
+          "<unknown>; children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "packages/kbn-typed-react-router-config/src/router_provider.tsx",
         "deprecated": false,
@@ -438,7 +503,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.RouterProvider.$1",
+            "id": "def-public.RouterProvider.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  children,\n  router,\n  history,\n}",
@@ -449,7 +514,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.RouterProvider.$1.router",
+                "id": "def-public.RouterProvider.$1.router",
                 "type": "Object",
                 "tags": [],
                 "label": "router",
@@ -457,17 +522,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.Router",
+                    "section": "def-public.Router",
                     "text": "Router"
                   },
                   "<",
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.RouteMap",
+                    "section": "def-public.RouteMap",
                     "text": "RouteMap"
                   },
                   ">"
@@ -478,7 +543,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.RouterProvider.$1.history",
+                "id": "def-public.RouterProvider.$1.history",
                 "type": "Object",
                 "tags": [],
                 "label": "history",
@@ -493,13 +558,13 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.RouterProvider.$1.children",
+                "id": "def-public.RouterProvider.$1.children",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
                 "path": "packages/kbn-typed-react-router-config/src/router_provider.tsx",
                 "deprecated": false,
@@ -513,7 +578,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.useCurrentRoute",
+        "id": "def-public.useCurrentRoute",
         "type": "Function",
         "tags": [],
         "label": "useCurrentRoute",
@@ -522,17 +587,17 @@
           "() => { match: ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMatch",
+            "section": "def-public.RouteMatch",
             "text": "RouteMatch"
           },
           "<",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Route",
+            "section": "def-public.Route",
             "text": "Route"
           },
           ">; element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
@@ -546,7 +611,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.useMatchRoutes",
+        "id": "def-public.useMatchRoutes",
         "type": "Function",
         "tags": [],
         "label": "useMatchRoutes",
@@ -555,17 +620,17 @@
           "(path: string | undefined) => ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMatch",
+            "section": "def-public.RouteMatch",
             "text": "RouteMatch"
           },
           "<",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Route",
+            "section": "def-public.Route",
             "text": "Route"
           },
           ">[]"
@@ -576,7 +641,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.useMatchRoutes.$1",
+            "id": "def-public.useMatchRoutes.$1",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -595,7 +660,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.useParams",
+        "id": "def-public.useParams",
         "type": "Function",
         "tags": [],
         "label": "useParams",
@@ -604,9 +669,9 @@
           "(args: any[]) => ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.DefaultOutput",
+            "section": "def-public.DefaultOutput",
             "text": "DefaultOutput"
           },
           " | undefined"
@@ -617,7 +682,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.useParams.$1",
+            "id": "def-public.useParams.$1",
             "type": "Array",
             "tags": [],
             "label": "args",
@@ -636,7 +701,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.useRoutePath",
+        "id": "def-public.useRoutePath",
         "type": "Function",
         "tags": [],
         "label": "useRoutePath",
@@ -653,7 +718,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.useRouter",
+        "id": "def-public.useRouter",
         "type": "Function",
         "tags": [],
         "label": "useRouter",
@@ -662,20 +727,12 @@
           "() => ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Router",
+            "section": "def-public.Router",
             "text": "Router"
           },
-          "<",
-          {
-            "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
-            "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMap",
-            "text": "RouteMap"
-          },
-          ">"
+          "<TRouteMap>"
         ],
         "path": "packages/kbn-typed-react-router-config/src/use_router.tsx",
         "deprecated": false,
@@ -688,7 +745,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.DefaultOutput",
+        "id": "def-public.DefaultOutput",
         "type": "Interface",
         "tags": [],
         "label": "DefaultOutput",
@@ -699,7 +756,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.DefaultOutput.path",
+            "id": "def-public.DefaultOutput.path",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -713,7 +770,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.DefaultOutput.query",
+            "id": "def-public.DefaultOutput.query",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -730,7 +787,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.Route",
+        "id": "def-public.Route",
         "type": "Interface",
         "tags": [],
         "label": "Route",
@@ -741,7 +798,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Route.element",
+            "id": "def-public.Route.element",
             "type": "Object",
             "tags": [],
             "label": "element",
@@ -755,7 +812,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Route.children",
+            "id": "def-public.Route.children",
             "type": "Object",
             "tags": [],
             "label": "children",
@@ -763,9 +820,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.RouteMap",
+                "section": "def-public.RouteMap",
                 "text": "RouteMap"
               },
               " | undefined"
@@ -776,7 +833,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Route.params",
+            "id": "def-public.Route.params",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -791,7 +848,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Route.defaults",
+            "id": "def-public.Route.defaults",
             "type": "Object",
             "tags": [],
             "label": "defaults",
@@ -805,7 +862,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Route.pre",
+            "id": "def-public.Route.pre",
             "type": "Object",
             "tags": [],
             "label": "pre",
@@ -822,7 +879,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.RouteMatch",
+        "id": "def-public.RouteMatch",
         "type": "Interface",
         "tags": [],
         "label": "RouteMatch",
@@ -830,9 +887,9 @@
         "signature": [
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMatch",
+            "section": "def-public.RouteMatch",
             "text": "RouteMatch"
           },
           "<TRoute>"
@@ -843,7 +900,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.RouteMatch.route",
+            "id": "def-public.RouteMatch.route",
             "type": "CompoundType",
             "tags": [],
             "label": "route",
@@ -857,7 +914,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.RouteMatch.match",
+            "id": "def-public.RouteMatch.match",
             "type": "Object",
             "tags": [],
             "label": "match",
@@ -878,7 +935,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.Router",
+        "id": "def-public.Router",
         "type": "Interface",
         "tags": [],
         "label": "Router",
@@ -886,9 +943,9 @@
         "signature": [
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Router",
+            "section": "def-public.Router",
             "text": "Router"
           },
           "<TRoutes>"
@@ -899,7 +956,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.matchRoutes",
+            "id": "def-public.Router.matchRoutes",
             "type": "Function",
             "tags": [],
             "label": "matchRoutes",
@@ -908,9 +965,9 @@
               "{ <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, location: ",
@@ -918,9 +975,9 @@
               "<unknown>): ToRouteMatch<",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.Match",
+                "section": "def-public.Match",
                 "text": "Match"
               },
               "<TRoutes, TPath>>; (location: ",
@@ -928,17 +985,17 @@
               "<unknown>): ToRouteMatch<",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.Match",
+                "section": "def-public.Match",
                 "text": "Match"
               },
               "<TRoutes, ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>>; }"
@@ -949,7 +1006,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.matchRoutes.$1",
+                "id": "def-public.Router.matchRoutes.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path",
@@ -964,7 +1021,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.matchRoutes.$2",
+                "id": "def-public.Router.matchRoutes.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -983,7 +1040,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.matchRoutes",
+            "id": "def-public.Router.matchRoutes",
             "type": "Function",
             "tags": [],
             "label": "matchRoutes",
@@ -992,9 +1049,9 @@
               "{ <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, location: ",
@@ -1002,9 +1059,9 @@
               "<unknown>): ToRouteMatch<",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.Match",
+                "section": "def-public.Match",
                 "text": "Match"
               },
               "<TRoutes, TPath>>; (location: ",
@@ -1012,17 +1069,17 @@
               "<unknown>): ToRouteMatch<",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.Match",
+                "section": "def-public.Match",
                 "text": "Match"
               },
               "<TRoutes, ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>>; }"
@@ -1033,7 +1090,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.matchRoutes.$1",
+                "id": "def-public.Router.matchRoutes.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -1052,7 +1109,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.getParams",
+            "id": "def-public.Router.getParams",
             "type": "Function",
             "tags": [],
             "label": "getParams",
@@ -1061,9 +1118,9 @@
               "{ <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, location: ",
@@ -1071,17 +1128,17 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1089,33 +1146,33 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, location: ",
@@ -1123,41 +1180,41 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T3 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, path3: T3, location: ",
@@ -1165,33 +1222,33 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T3, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1199,17 +1256,17 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; }"
@@ -1220,7 +1277,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$1",
+                "id": "def-public.Router.getParams.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path",
@@ -1235,7 +1292,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$2",
+                "id": "def-public.Router.getParams.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -1254,7 +1311,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.getParams",
+            "id": "def-public.Router.getParams",
             "type": "Function",
             "tags": [],
             "label": "getParams",
@@ -1263,9 +1320,9 @@
               "{ <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, location: ",
@@ -1273,17 +1330,17 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1291,33 +1348,33 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, location: ",
@@ -1325,41 +1382,41 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T3 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, path3: T3, location: ",
@@ -1367,33 +1424,33 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T3, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1401,17 +1458,17 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; }"
@@ -1422,7 +1479,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$1",
+                "id": "def-public.Router.getParams.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path",
@@ -1437,7 +1494,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$2",
+                "id": "def-public.Router.getParams.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -1453,7 +1510,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$3",
+                "id": "def-public.Router.getParams.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "optional",
@@ -1471,7 +1528,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.getParams",
+            "id": "def-public.Router.getParams",
             "type": "Function",
             "tags": [],
             "label": "getParams",
@@ -1480,9 +1537,9 @@
               "{ <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, location: ",
@@ -1490,17 +1547,17 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1508,33 +1565,33 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, location: ",
@@ -1542,41 +1599,41 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T3 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, path3: T3, location: ",
@@ -1584,33 +1641,33 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T3, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1618,17 +1675,17 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; }"
@@ -1639,7 +1696,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$1",
+                "id": "def-public.Router.getParams.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path1",
@@ -1654,7 +1711,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$2",
+                "id": "def-public.Router.getParams.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path2",
@@ -1669,7 +1726,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$3",
+                "id": "def-public.Router.getParams.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -1688,7 +1745,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.getParams",
+            "id": "def-public.Router.getParams",
             "type": "Function",
             "tags": [],
             "label": "getParams",
@@ -1697,9 +1754,9 @@
               "{ <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, location: ",
@@ -1707,17 +1764,17 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1725,33 +1782,33 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, location: ",
@@ -1759,41 +1816,41 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T3 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, path3: T3, location: ",
@@ -1801,33 +1858,33 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T3, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1835,17 +1892,17 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; }"
@@ -1856,7 +1913,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$1",
+                "id": "def-public.Router.getParams.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path1",
@@ -1871,7 +1928,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$2",
+                "id": "def-public.Router.getParams.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path2",
@@ -1886,7 +1943,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$3",
+                "id": "def-public.Router.getParams.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path3",
@@ -1901,7 +1958,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$4",
+                "id": "def-public.Router.getParams.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -1920,7 +1977,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.getParams",
+            "id": "def-public.Router.getParams",
             "type": "Function",
             "tags": [],
             "label": "getParams",
@@ -1929,9 +1986,9 @@
               "{ <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, location: ",
@@ -1939,17 +1996,17 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -1957,33 +2014,33 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, location: ",
@@ -1991,41 +2048,41 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true>; <T1 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T2 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, T3 extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path1: T1, path2: T2, path3: T3, location: ",
@@ -2033,33 +2090,33 @@
               "<unknown>): ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T1, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T2, true> | ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, T3, true>; <TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>, TOptional extends boolean>(path: TPath, location: ",
@@ -2067,17 +2124,17 @@
               "<unknown>, optional: TOptional): TOptional extends true ? ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true> | undefined : ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, true>; }"
@@ -2088,7 +2145,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$1",
+                "id": "def-public.Router.getParams.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path",
@@ -2103,7 +2160,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$2",
+                "id": "def-public.Router.getParams.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -2119,7 +2176,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getParams.$3",
+                "id": "def-public.Router.getParams.$3",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "optional",
@@ -2137,7 +2194,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.link",
+            "id": "def-public.Router.link",
             "type": "Function",
             "tags": [],
             "label": "link",
@@ -2146,25 +2203,25 @@
               "<TPath extends ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.PathsOf",
+                "section": "def-public.PathsOf",
                 "text": "PathsOf"
               },
               "<TRoutes>>(path: TPath, ...args: ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeAsArgs",
+                "section": "def-public.TypeAsArgs",
                 "text": "TypeAsArgs"
               },
               "<",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.TypeOf",
+                "section": "def-public.TypeOf",
                 "text": "TypeOf"
               },
               "<TRoutes, TPath, false>>) => string"
@@ -2175,7 +2232,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.link.$1",
+                "id": "def-public.Router.link.$1",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "path",
@@ -2190,7 +2247,7 @@
               },
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.link.$2",
+                "id": "def-public.Router.link.$2",
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "args",
@@ -2198,17 +2255,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.TypeAsArgs",
+                    "section": "def-public.TypeAsArgs",
                     "text": "TypeAsArgs"
                   },
                   "<",
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.TypeOf",
+                    "section": "def-public.TypeOf",
                     "text": "TypeOf"
                   },
                   "<TRoutes, TPath, false>>"
@@ -2223,7 +2280,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.getRoutePath",
+            "id": "def-public.Router.getRoutePath",
             "type": "Function",
             "tags": [],
             "label": "getRoutePath",
@@ -2232,9 +2289,9 @@
               "(route: ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.RouteWithPath",
+                "section": "def-public.RouteWithPath",
                 "text": "RouteWithPath"
               },
               ") => string"
@@ -2245,7 +2302,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getRoutePath.$1",
+                "id": "def-public.Router.getRoutePath.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "route",
@@ -2253,9 +2310,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/typed-react-router-config",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                    "section": "def-common.RouteWithPath",
+                    "section": "def-public.RouteWithPath",
                     "text": "RouteWithPath"
                   }
                 ],
@@ -2269,7 +2326,7 @@
           },
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.Router.getRoutesToMatch",
+            "id": "def-public.Router.getRoutesToMatch",
             "type": "Function",
             "tags": [],
             "label": "getRoutesToMatch",
@@ -2278,9 +2335,9 @@
               "(path: string) => ",
               {
                 "pluginId": "@kbn/typed-react-router-config",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnTypedReactRouterConfigPluginApi",
-                "section": "def-common.FlattenRoutesOf",
+                "section": "def-public.FlattenRoutesOf",
                 "text": "FlattenRoutesOf"
               },
               "<TRoutes>"
@@ -2291,7 +2348,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/typed-react-router-config",
-                "id": "def-common.Router.getRoutesToMatch.$1",
+                "id": "def-public.Router.getRoutesToMatch.$1",
                 "type": "string",
                 "tags": [],
                 "label": "path",
@@ -2312,7 +2369,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.RouteWithPath",
+        "id": "def-public.RouteWithPath",
         "type": "Interface",
         "tags": [],
         "label": "RouteWithPath",
@@ -2320,17 +2377,17 @@
         "signature": [
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteWithPath",
+            "section": "def-public.RouteWithPath",
             "text": "RouteWithPath"
           },
           " extends ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Route",
+            "section": "def-public.Route",
             "text": "Route"
           }
         ],
@@ -2340,7 +2397,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/typed-react-router-config",
-            "id": "def-common.RouteWithPath.path",
+            "id": "def-public.RouteWithPath.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -2357,7 +2414,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.FlattenRoutesOf",
+        "id": "def-public.FlattenRoutesOf",
         "type": "Type",
         "tags": [],
         "label": "FlattenRoutesOf",
@@ -2375,7 +2432,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.Match",
+        "id": "def-public.Match",
         "type": "Type",
         "tags": [],
         "label": "Match",
@@ -2390,7 +2447,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.OutputOf",
+        "id": "def-public.OutputOf",
         "type": "Type",
         "tags": [],
         "label": "OutputOf",
@@ -2399,17 +2456,17 @@
           "OutputOfRoutes<",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Match",
+            "section": "def-public.Match",
             "text": "Match"
           },
           "<TRoutes, TPath>> & ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.DefaultOutput",
+            "section": "def-public.DefaultOutput",
             "text": "DefaultOutput"
           }
         ],
@@ -2420,7 +2477,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.PathsOf",
+        "id": "def-public.PathsOf",
         "type": "Type",
         "tags": [],
         "label": "PathsOf",
@@ -2431,9 +2488,9 @@
           "<{ [key in keyof TRouteMap]: key | (TRouteMap[key] extends { children: ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.RouteMap",
+            "section": "def-public.RouteMap",
             "text": "RouteMap"
           },
           "; } ? ",
@@ -2441,9 +2498,9 @@
           "<`${key & string}/*`> | ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.PathsOf",
+            "section": "def-public.PathsOf",
             "text": "PathsOf"
           },
           "<TRouteMap[key][\"children\"]> : never); }>"
@@ -2455,7 +2512,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.RouteMap",
+        "id": "def-public.RouteMap",
         "type": "Type",
         "tags": [],
         "label": "RouteMap",
@@ -2464,9 +2521,9 @@
           "{ [x: string]: ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Route",
+            "section": "def-public.Route",
             "text": "Route"
           },
           "; }"
@@ -2478,7 +2535,7 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.TypeAsArgs",
+        "id": "def-public.TypeAsArgs",
         "type": "Type",
         "tags": [],
         "label": "TypeAsArgs",
@@ -2495,7 +2552,24 @@
       },
       {
         "parentPluginId": "@kbn/typed-react-router-config",
-        "id": "def-common.TypeOf",
+        "id": "def-public.TypeAsParams",
+        "type": "Type",
+        "tags": [],
+        "label": "TypeAsParams",
+        "description": [],
+        "signature": [
+          "keyof TObject extends never ? {} : ",
+          "RequiredKeys",
+          "<TObject> extends never ? never : { params: TObject; }"
+        ],
+        "path": "packages/kbn-typed-react-router-config/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-public.TypeOf",
         "type": "Type",
         "tags": [],
         "label": "TypeOf",
@@ -2504,17 +2578,17 @@
           "TypeOfRoutes<",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.Match",
+            "section": "def-public.Match",
             "text": "Match"
           },
           "<TRoutes, TPath>> & (TWithDefaultOutput extends true ? ",
           {
             "pluginId": "@kbn/typed-react-router-config",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnTypedReactRouterConfigPluginApi",
-            "section": "def-common.DefaultOutput",
+            "section": "def-public.DefaultOutput",
             "text": "DefaultOutput"
           },
           " : {})"
@@ -2525,6 +2599,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

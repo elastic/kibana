@@ -17,7 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/presentation-publishing",
     "@kbn/ui-theme",
+    "@kbn/i18n",
   ]
 }

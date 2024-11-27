@@ -14,7 +14,7 @@
  *   version: 8.9.0
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { ErrorSchema } from '../../model/error_schema.gen';

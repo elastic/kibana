@@ -2,24 +2,18 @@ openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Notes API
   version: '2023-10-31'
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/note:
     delete:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: DeleteNote
-      summary: Deletes a note from a timeline.
+      summary: Delete a note
+      description: Delete a note from a Timeline using the note ID.
       tags:
         - access:securitySolution
       requestBody:
-        description: The id of the note to delete.
+        description: The ID of the note to delete.
         required: true
         content:
           application/json:
@@ -33,6 +27,7 @@ paths:
                       type: string
                 - type: object
                   required: [noteIds]
+                  nullable: true
                   properties:
                     noteIds:
                       type: array
@@ -42,10 +37,3 @@ paths:
       responses:
         '200':
           description: Indicates the note was successfully deleted.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object

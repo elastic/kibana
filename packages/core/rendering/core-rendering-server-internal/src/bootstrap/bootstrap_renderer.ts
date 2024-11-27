@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
-import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import { type DarkModeValue, parseDarkModeValue } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -58,7 +58,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request, isAnonymousPage = false }) {
     let darkMode: DarkModeValue = false;
-    const themeVersion: ThemeVersion = 'v8';
+    let themeName: string = 'amsterdam';
 
     try {
       const authenticated = isAuthenticated(request);
@@ -71,6 +71,8 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
         } else {
           darkMode = parseDarkModeValue(await uiSettingsClient.get('theme:darkMode'));
         }
+
+        themeName = await uiSettingsClient.get('theme:name');
       }
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
@@ -82,7 +84,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     }
 
     const themeTag = getThemeTag({
-      themeVersion,
+      name: !themeName || themeName === 'amsterdam' ? 'v8' : themeName,
       darkMode,
     });
     const bundlesHref = getBundlesHref(baseHref);
@@ -113,7 +115,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       publicPathMap,
     });
 
-    const hash = createHash('sha1');
+    const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
     hash.update(body);
     const etag = hash.digest('hex');
 

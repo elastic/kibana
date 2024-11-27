@@ -11,7 +11,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import {
   rulesSettingsClientMock,
   RulesSettingsClientMock,
-} from '../../../../rules_settings_client.mock';
+} from '../../../../rules_settings/rules_settings_client.mock';
 import { getQueryDelaySettingsRoute } from './get_query_delay_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
@@ -37,11 +37,16 @@ describe('getQueryDelaySettingsRoute', () => {
     expect(config).toMatchInlineSnapshot(`
       Object {
         "options": Object {
-          "tags": Array [
-            "access:read-query-delay-settings",
-          ],
+          "access": "internal",
         },
         "path": "/internal/alerting/rules/settings/_query_delay",
+        "security": Object {
+          "authz": Object {
+            "requiredPrivileges": Array [
+              "read-query-delay-settings",
+            ],
+          },
+        },
         "validate": Object {},
       }
     `);

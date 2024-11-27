@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import kbnRison from '@kbn/rison';
@@ -11,91 +12,125 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'unifiedFieldList']);
-  const esArchiver = getService('esArchiver');
+  const { common, discover, unifiedFieldList } = getPageObjects([
+    'common',
+    'discover',
+    'unifiedFieldList',
+  ]);
   const testSubjects = getService('testSubjects');
-  const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
-  const queryBar = getService('queryBar');
 
   describe('extension getCellRenderers', () => {
-    before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-    });
-
-    after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-    });
-
     describe('ES|QL mode', () => {
-      it('should render log.level badge cell', async () => {
-        const state = kbnRison.encode({
-          dataSource: { type: 'esql' },
-          query: {
-            esql: 'from my-example-logs,logstash* | sort @timestamp desc | where `log.level` is not null',
-          },
+      describe('root profile', () => {
+        it('should render custom @timestamp', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-* | sort @timestamp desc' },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await discover.waitUntilSearchingHasFinished();
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
+          expect(timestamps).to.have.length(6);
+          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
+          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
-          ensureCurrentUrl: false,
-        });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-        const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
-        const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
-        expect(await logLevelBadge.getVisibleText()).to.be('debug');
-        expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-          'rgba(190, 207, 227, 1)'
-        );
       });
 
-      it("should not render log.level badge cell if it's not a logs data source", async () => {
-        const state = kbnRison.encode({
-          dataSource: { type: 'esql' },
-          query: {
-            esql: 'from my-example* | sort @timestamp desc | where `log.level` is not null',
-          },
+      describe('data source profile', () => {
+        it('should render custom @timestamp but not custom log.level', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-* | sort @timestamp desc' },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('@timestamp');
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
+          expect(timestamps).to.have.length(6);
+          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
+          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel', 2500);
+          expect(logLevels).to.have.length(0);
         });
-        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
-          ensureCurrentUrl: false,
+
+        it('should render custom @timestamp and custom log.level', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: { esql: 'from my-example-logs | sort @timestamp desc' },
+          });
+          await common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('@timestamp');
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
+          expect(timestamps).to.have.length(3);
+          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:00:00.000Z');
+          expect(await timestamps[2].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel');
+          expect(logLevels).to.have.length(3);
+          expect(await logLevels[0].getVisibleText()).to.be('Debug');
+          expect(await logLevels[2].getVisibleText()).to.be('Info');
         });
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-        const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
-        expect(await firstCell.getVisibleText()).to.be('debug');
-        await testSubjects.missingOrFail('*logLevelBadgeCell-');
       });
     });
 
     describe('data view mode', () => {
-      it('should render log.level badge cell', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
+      describe('root profile', () => {
+        it('should render custom @timestamp', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await dataViews.switchTo('my-example-*');
+          await discover.waitUntilSearchingHasFinished();
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
+          expect(timestamps).to.have.length(6);
+          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
+          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
         });
-        await dataViews.switchTo('my-example-logs,logstash*');
-        await queryBar.setQuery('log.level:*');
-        await queryBar.submitQuery();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-        const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
-        expect(await logLevelBadge.getVisibleText()).to.be('debug');
-        expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-          'rgba(190, 207, 227, 1)'
-        );
       });
 
-      it("should not render log.level badge cell if it's not a logs data source", async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
+      describe('data source profile', () => {
+        it('should render custom @timestamp but not custom log.level', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await dataViews.switchTo('my-example-*');
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('@timestamp');
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
+          expect(timestamps).to.have.length(6);
+          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:30:00.000Z');
+          expect(await timestamps[5].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel', 2500);
+          expect(logLevels).to.have.length(0);
         });
-        await dataViews.switchTo('my-example-*');
-        await queryBar.setQuery('log.level:*');
-        await queryBar.submitQuery();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.clickFieldListItemAdd('log.level');
-        const firstCell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await firstCell.getVisibleText()).to.be('debug');
-        await testSubjects.missingOrFail('*logLevelBadgeCell-');
+
+        it('should render custom @timestamp and custom log.level', async () => {
+          await common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
+          });
+          await dataViews.switchTo('my-example-logs');
+          await discover.waitUntilSearchingHasFinished();
+          await unifiedFieldList.clickFieldListItemAdd('@timestamp');
+          await unifiedFieldList.clickFieldListItemAdd('log.level');
+          const timestamps = await testSubjects.findAll('exampleRootProfileTimestamp');
+          expect(timestamps).to.have.length(3);
+          expect(await timestamps[0].getVisibleText()).to.be('2024-06-10T16:00:00.000Z');
+          expect(await timestamps[2].getVisibleText()).to.be('2024-06-10T14:00:00.000Z');
+          const logLevels = await testSubjects.findAll('exampleDataSourceProfileLogLevel');
+          expect(logLevels).to.have.length(3);
+          expect(await logLevels[0].getVisibleText()).to.be('Debug');
+          expect(await logLevels[2].getVisibleText()).to.be('Info');
+        });
       });
     });
   });

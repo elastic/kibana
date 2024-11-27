@@ -28,6 +28,7 @@ import type {
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
@@ -39,7 +40,6 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  CSPM_POLICY_TEMPLATE,
   SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
 import {
@@ -51,6 +51,7 @@ import {
   isBelowMinVersion,
   type NewPackagePolicyPostureInput,
   POSTURE_NAMESPACE,
+  POLICY_TEMPLATE_FORM_DTS,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -147,7 +148,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
   {
     id: GCP_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel', {
-      defaultMessage: 'Single Account',
+      defaultMessage: 'Single Project',
     }),
     testId: 'gcpSingleAccountTestId',
   },
@@ -376,7 +377,7 @@ const GcpAccountTypeSelect = ({
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
-          defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
+          defaultMessage="Select between single project or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
       <EuiSpacer size="l" />
@@ -673,6 +674,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
+    const isParentSecurityPosture = !integration;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const { cloud } = useKibana().services;
@@ -775,6 +777,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       setTimeout(() => setIsLoading(false), 200);
     }, [validationResultsNonNullFields]);
 
+    useEffect(() => {
+      setIsLoading(getIsSubscriptionValid.isLoading);
+    }, [getIsSubscriptionValid.isLoading]);
+
     const { data: packagePolicyList, refetch } = usePackagePolicyList(packageInfo.name, {
       enabled: canFetchIntegration,
     });
@@ -793,6 +799,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+
+      // When the integration is the parent Security Posture (!integration) we need to
+      // reset the setup technology when the integration option changes if it was set to agentless for CSPM
+      if (isParentSecurityPosture && input.policy_template !== 'cspm') {
+        updateSetupTechnology(SetupTechnology.AGENT_BASED);
+      }
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
@@ -826,7 +838,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     if (isLoading) {
       return (
-        <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexGroup justifyContent="spaceAround" data-test-subj={POLICY_TEMPLATE_FORM_DTS.LOADER}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
@@ -859,7 +871,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       },
     ];
 
-    if (!isSubscriptionValid) {
+    if (!getIsSubscriptionValid.isLoading && !isSubscriptionValid) {
       return <SubscriptionNotAllowed />;
     }
 

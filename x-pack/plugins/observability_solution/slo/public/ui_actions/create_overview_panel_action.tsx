@@ -4,40 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup } from '@kbn/core/public';
+import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { SLOPublicPluginsStart } from '..';
 import {
   ADD_SLO_OVERVIEW_ACTION_ID,
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from '../embeddable/slo/overview/constants';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
+import { SLORepositoryClient } from '../types';
 
 export function createOverviewPanelAction(
-  getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
+  coreStart: CoreStart,
+  pluginsStart: SLOPublicPluginsStart,
+  sloClient: SLORepositoryClient
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SLO_OVERVIEW_ACTION_ID,
-    grouping: COMMON_SLO_GROUPING,
-    order: 30,
+    grouping: COMMON_OBSERVABILITY_GROUPING,
+    order: 20,
     getIconType: () => 'visGauge',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      const [coreStart, deps] = await getStartServices();
+
       try {
         const { openSloConfiguration } = await import(
           '../embeddable/slo/overview/slo_overview_open_configuration'
         );
-        const initialState = await openSloConfiguration(coreStart, deps);
+        const initialState = await openSloConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {
             panelType: SLO_OVERVIEW_EMBEDDABLE_ID,

@@ -56,5 +56,5 @@ export async function fetchLicenseType(
     },
   };
   const response = await client.search(params);
-  return get(response, 'hits.hits[0]._source.license.type', null);
+  return get(response, 'hits.hits[0]._source.license.type') as string | undefined;
 }

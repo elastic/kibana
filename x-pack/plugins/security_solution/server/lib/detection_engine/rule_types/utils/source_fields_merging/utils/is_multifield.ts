@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { FieldsType } from '../types';
-
 /**
  * Returns true if we are a multiField when passed in a fields entry and a fields key,
  * otherwise false. Notice that runtime fields can have multiple levels of multiFields which is kind a problem
@@ -16,18 +14,15 @@ import type { FieldsType } from '../types';
  * @param fieldEntries The entries to check against.
  * @returns True if we are a subObject, otherwise false.
  */
-export const isMultiField = (
-  fieldsKey: string,
-  fieldEntries: Array<[string, FieldsType]>
-): boolean => {
+export const isMultiField = (fieldsKey: string, fieldsKeys: string[]): boolean => {
   const splitPath = fieldsKey.split('.');
   return splitPath.some((_, index, array) => {
     if (index + 1 === array.length) {
       return false;
     } else {
       const newPath = [...array].splice(0, index + 1).join('.');
-      return fieldEntries.some(([fieldKeyToCheck]) => {
-        return fieldKeyToCheck === newPath;
+      return fieldsKeys.some((key) => {
+        return key === newPath;
       });
     }
   });

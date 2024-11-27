@@ -1,24 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import classNames from 'classnames';
 import React, { FC, ReactElement, useEffect, useState } from 'react';
 import { v4 } from 'uuid';
+import { Subscription } from 'rxjs';
 
 import {
-  panelHoverTrigger,
   PANEL_HOVER_TRIGGER,
+  panelHoverTrigger,
   type EmbeddableInput,
   type ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
-
-import { pluginServices } from '../../services';
+import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
+import { uiActionsService } from '../../services/kibana_services';
 import './floating_actions.scss';
 
 export interface FloatingActionsProps {
@@ -31,6 +34,10 @@ export interface FloatingActionsProps {
   disabledActions?: EmbeddableInput['disabledActions'];
 }
 
+export type FloatingActionItem = AnyApiAction & {
+  MenuItem: React.FC<{ context: unknown }>;
+};
+
 export const FloatingActions: FC<FloatingActionsProps> = ({
   children,
   viewMode,
@@ -39,61 +46,88 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   className = '',
   disabledActions,
 }) => {
-  const {
-    uiActions: { getTriggerCompatibleActions },
-  } = pluginServices.getServices();
-  const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
+  const [floatingActions, setFloatingActions] = useState<FloatingActionItem[]>([]);
 
   useEffect(() => {
     if (!api) return;
 
-    const getActions = async () => {
-      let mounted = true;
-      const context = {
-        embeddable: api,
-        trigger: panelHoverTrigger,
-      };
-      const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
-        .filter((action): action is Action & { MenuItem: React.FC } => {
-          return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
-        })
-        .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-      if (!mounted) return;
-      if (actions.length > 0) {
-        setFloatingActions(
-          <>
-            {actions.map((action) =>
-              // @ts-expect-error upgrade typescript v5.1.6
-              React.createElement(action.MenuItem, {
-                key: action.id,
-                context,
-              })
-            )}
-          </>
-        );
-      } else {
-        setFloatingActions(undefined);
-      }
-      return () => {
-        mounted = false;
-      };
+    let mounted = true;
+    const context = {
+      embeddable: api,
+      trigger: panelHoverTrigger,
     };
 
-    getActions();
-  }, [api, getTriggerCompatibleActions, viewMode, disabledActions]);
+    const sortByOrder = (a: Action | FloatingActionItem, b: Action | FloatingActionItem) => {
+      return (a.order || 0) - (b.order || 0);
+    };
+
+    const getActions: () => Promise<FloatingActionItem[]> = async () => {
+      const actions = (
+        await uiActionsService.getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)
+      )
+        .filter((action) => {
+          return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
+        })
+        .sort(sortByOrder);
+      return actions as FloatingActionItem[];
+    };
+
+    const subscriptions = new Subscription();
+
+    const handleActionCompatibilityChange = (isCompatible: boolean, action: Action) => {
+      if (!mounted) return;
+      setFloatingActions((currentActions) => {
+        const newActions: FloatingActionItem[] = currentActions
+          ?.filter((current) => current.id !== action.id)
+          .sort(sortByOrder) as FloatingActionItem[];
+        if (isCompatible) {
+          return [action as FloatingActionItem, ...newActions];
+        }
+        return newActions;
+      });
+    };
+
+    (async () => {
+      const actions = await getActions();
+      if (!mounted) return;
+      setFloatingActions(actions);
+
+      const frequentlyChangingActions = uiActionsService.getFrequentlyChangingActionsForTrigger(
+        PANEL_HOVER_TRIGGER,
+        context
+      );
+
+      for (const action of frequentlyChangingActions) {
+        subscriptions.add(
+          action.subscribeToCompatibilityChanges(context, handleActionCompatibilityChange)
+        );
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      subscriptions.unsubscribe();
+    };
+  }, [api, viewMode, disabledActions]);
 
   return (
     <div className="presentationUtil__floatingActionsWrapper">
       {children}
-      {isEnabled && floatingActions && (
+      {isEnabled && floatingActions.length > 0 && (
         <div
           data-test-subj={`presentationUtil__floatingActions__${
             apiHasUniqueId(api) ? api.uuid : v4()
           }`}
           className={classNames('presentationUtil__floatingActions', className)}
         >
-          {floatingActions}
+          <>
+            {floatingActions.map((action) =>
+              React.createElement(action.MenuItem, {
+                key: action.id,
+                context: { embeddable: api },
+              })
+            )}
+          </>
         </div>
       )}
     </div>

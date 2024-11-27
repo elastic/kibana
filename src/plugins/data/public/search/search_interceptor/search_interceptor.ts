@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -60,10 +61,18 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
+  AsyncSearchGetResponse,
+  ErrorResponseBase,
+  SqlGetAsyncResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
   ENHANCED_ES_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  getTotalLoaded,
   IAsyncSearchOptions,
   isRunningResponse,
   pollSearch,
+  shimHitsTotal,
   UI_SETTINGS,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
@@ -73,7 +82,7 @@ import { toPartialResponseAfterTimeout } from './to_partial_response';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
-import { SearchConfigSchema } from '../../../config';
+import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
 import { createRequestHash } from './create_request_hash';
 
@@ -444,14 +453,75 @@ export class SearchInterceptor {
     if (this.bFetchDisabled) {
       const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
       return this.deps.http
-        .post(`/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`, {
-          version: '1',
-          signal: abortSignal,
-          context: executionContext,
-          body: JSON.stringify({
-            ...request,
-            ...searchOptions,
-          }),
+        .post<IKibanaSearchResponse | ErrorResponseBase>(
+          `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+          {
+            version: '1',
+            signal: abortSignal,
+            context: executionContext,
+            body: JSON.stringify({
+              ...request,
+              ...searchOptions,
+              stream:
+                strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
+                strategy === ENHANCED_ES_SEARCH_STRATEGY ||
+                strategy === undefined, // undefined strategy is treated as enhanced ES
+            }),
+            asResponse: true,
+          }
+        )
+        .then((rawResponse) => {
+          const warning = rawResponse.response?.headers.get('warning');
+          const requestParams =
+            rawResponse.body && 'requestParams' in rawResponse.body
+              ? rawResponse.body.requestParams
+              : JSON.parse(rawResponse.response?.headers.get('kbn-search-request-params') || '{}');
+          const isRestored =
+            rawResponse.body && 'isRestored' in rawResponse.body
+              ? rawResponse.body.isRestored
+              : rawResponse.response?.headers.get('kbn-search-is-restored') === '?1';
+
+          if (rawResponse.body && 'error' in rawResponse.body) {
+            // eslint-disable-next-line no-throw-literal
+            throw {
+              attributes: {
+                error: rawResponse.body.error,
+                rawResponse: rawResponse.body,
+                requestParams,
+                isRestored,
+              },
+            };
+          }
+
+          switch (strategy) {
+            case ENHANCED_ES_SEARCH_STRATEGY:
+              if (rawResponse.body?.rawResponse) return rawResponse.body;
+              const typedResponse = rawResponse.body as unknown as AsyncSearchGetResponse;
+              const shimmedResponse = shimHitsTotal(typedResponse.response, {
+                legacyHitsTotal: searchOptions.legacyHitsTotal,
+              });
+              return {
+                id: typedResponse.id,
+                isPartial: typedResponse.is_partial,
+                isRunning: typedResponse.is_running,
+                rawResponse: shimmedResponse,
+                warning,
+                requestParams,
+                isRestored,
+                ...getTotalLoaded(shimmedResponse),
+              };
+            case ESQL_ASYNC_SEARCH_STRATEGY:
+              const esqlResponse = rawResponse.body as unknown as SqlGetAsyncResponse;
+              return {
+                id: esqlResponse.id,
+                rawResponse: esqlResponse,
+                isPartial: esqlResponse.is_partial,
+                isRunning: esqlResponse.is_running,
+                warning,
+              };
+            default:
+              return rawResponse.body;
+          }
         })
         .catch((e: IHttpFetchError<KibanaServerError>) => {
           if (e?.body) {

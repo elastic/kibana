@@ -5,20 +5,14 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-get.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timelines:
     get:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: GetTimelines
-      summary: This API is used to retrieve a list of existing saved timelines or timeline templates.
+      summary: Get Timelines or Timeline templates
+      description: Get a list of all saved Timelines or Timeline templates.
       tags:
         - access:securitySolution
       parameters:
@@ -69,42 +63,32 @@ paths:
             nullable: true
       responses:
         '200':
-          description: Indicates that the (template) timelines were found and returned.
+          description: Indicates that the (template) Timelines were found and returned.
           content:
             application/json:
               schema:
                 type: object
-                required: [data]
+                required: [
+                  timeline,
+                  totalCount,
+                ]
                 properties:
-                  data:
-                    type: object
-                    required:
-                      [
-                        timelines,
-                        totalCount,
-                        defaultTimelineCount,
-                        templateTimelineCount,
-                        favoriteCount,
-                        elasticTemplateTimelineCount,
-                        customTemplateTimelineCount,
-                      ]
-                    properties:
-                      timelines:
-                        type: array
-                        items:
-                          $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-                      totalCount:
-                        type: number
-                      defaultTimelineCount:
-                        type: number
-                      templateTimelineCount:
-                        type: number
-                      favoriteCount:
-                        type: number
-                      elasticTemplateTimelineCount:
-                        type: number
-                      customTemplateTimelineCount:
-                        type: number
+                  timeline:
+                    type: array
+                    items:
+                      $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
+                  totalCount:
+                    type: number
+                  defaultTimelineCount:
+                    type: number
+                  templateTimelineCount:
+                    type: number
+                  favoriteCount:
+                    type: number
+                  elasticTemplateTimelineCount:
+                    type: number
+                  customTemplateTimelineCount:
+                    type: number
         '400':
           description: Bad request. The user supplied invalid data.
           content:

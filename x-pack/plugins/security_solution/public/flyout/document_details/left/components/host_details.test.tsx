@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
+import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import type { Anomalies } from '../../../../common/components/ml/types';
 import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
@@ -23,6 +25,10 @@ import {
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
   HOST_DETAILS_LINK_TEST_ID,
   HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  HOST_DETAILS_VULNERABILITIES_TEST_ID,
+  HOST_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -33,11 +39,12 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { NetworkPanelKey, NETWORK_PREVIEW_BANNER } from '../../../network_details';
+import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(),
-  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-}));
+jest.mock('@kbn/expandable-flyout');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
@@ -81,7 +88,9 @@ jest.mock('../../../../helper_hooks', () => ({
 }));
 
 jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({ selectedPatterns: ['index'] }),
+  useSourcererDataView: jest
+    .fn()
+    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -104,6 +113,19 @@ const mockUseHostsRelatedUsers = useHostRelatedUsers as jest.Mock;
 
 jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as jest.Mock;
+
+jest.mock(
+  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
+);
+const mockAlertData = {
+  open: {
+    total: 2,
+    severities: [
+      { key: 'high', value: 1, label: 'High' },
+      { key: 'low', value: 1, label: 'Low' },
+    ],
+  },
+};
 
 const timestamp = '2022-07-25T08:20:18.966Z';
 
@@ -159,6 +181,9 @@ describe('<HostDetails />', () => {
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseHostsRelatedUsers.mockReturnValue(mockRelatedUsersResponse);
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({});
+    (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({});
+    (useAlertsByStatus as jest.Mock).mockReturnValue({ isLoading: false, items: {} });
   });
 
   it('should render host details correctly', () => {
@@ -167,7 +192,7 @@ describe('<HostDetails />', () => {
     expect(queryByTestId(HOST_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('should render host name as clicable link when feature flag is true', () => {
+  it('should render host name as clicable link when preview is not disabled', () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     const { getByTestId } = renderHostDetails(mockContextValue);
     expect(getByTestId(HOST_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
@@ -271,7 +296,7 @@ describe('<HostDetails />', () => {
       );
     });
 
-    it('should render user name as clicable link when feature flag is true', () => {
+    it('should render user name as clicable link when preview is not disabled', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       const { getAllByTestId } = renderHostDetails(mockContextValue);
       expect(getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID).length).toBe(1);
@@ -285,6 +310,53 @@ describe('<HostDetails />', () => {
           banner: USER_PREVIEW_BANNER,
         },
       });
+
+      getAllByTestId(HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID)[0].click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: NetworkPanelKey,
+        params: {
+          ip: '100.XXX.XXX',
+          flowTarget: 'source',
+          banner: NETWORK_PREVIEW_BANNER,
+        },
+      });
+    });
+  });
+
+  describe('distribution bar insights', () => {
+    it('should not render if no data is available', () => {
+      const { queryByTestId } = renderHostDetails(mockContextValue);
+      expect(queryByTestId(HOST_DETAILS_MISCONFIGURATIONS_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(HOST_DETAILS_VULNERABILITIES_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(HOST_DETAILS_ALERT_COUNT_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should render alert count when data is available', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render misconfiguration when data is available', () => {
+      (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+        data: { count: { passed: 1, failed: 2 } },
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_MISCONFIGURATIONS_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('should render vulnerabilities when data is available', () => {
+      (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
+        data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
+      });
+
+      const { getByTestId } = renderHostDetails(mockContextValue);
+      expect(getByTestId(HOST_DETAILS_VULNERABILITIES_TEST_ID)).toBeInTheDocument();
     });
   });
 });

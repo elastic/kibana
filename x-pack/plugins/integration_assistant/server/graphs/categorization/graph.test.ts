@@ -25,13 +25,14 @@ import { handleReview } from './review';
 import { handleCategorization } from './categorization';
 import { handleErrors } from './errors';
 import { handleInvalidCategorization } from './invalid';
+import { handleUpdateStableSamples } from './stable';
 import { testPipeline, combineProcessors } from '../../util';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 
-const mockLlm = new FakeLLM({
+const model = new FakeLLM({
   response: "I'll callback later.",
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
@@ -39,13 +40,14 @@ jest.mock('./errors');
 jest.mock('./review');
 jest.mock('./categorization');
 jest.mock('./invalid');
+jest.mock('./stable');
 
 jest.mock('../../util/pipeline', () => ({
   testPipeline: jest.fn(),
 }));
 
 describe('runCategorizationGraph', () => {
-  const mockClient = {
+  const client = {
     asCurrentUser: {
       ingest: {
         simulate: jest.fn(),
@@ -74,7 +76,8 @@ describe('runCategorizationGraph', () => {
       return {
         currentPipeline,
         currentProcessors,
-        reviewed: false,
+        stableSamples: [],
+        reviewCount: 0,
         finalized: false,
         lastExecutedChain: 'categorization',
       };
@@ -90,7 +93,8 @@ describe('runCategorizationGraph', () => {
       return {
         currentPipeline,
         currentProcessors,
-        reviewed: false,
+        stableSamples: [],
+        reviewCount: 0,
         finalized: false,
         lastExecutedChain: 'error',
       };
@@ -106,7 +110,8 @@ describe('runCategorizationGraph', () => {
       return {
         currentPipeline,
         currentProcessors,
-        reviewed: false,
+        stableSamples: [],
+        reviewCount: 0,
         finalized: false,
         lastExecutedChain: 'invalidCategorization',
       };
@@ -122,23 +127,41 @@ describe('runCategorizationGraph', () => {
       return {
         currentProcessors,
         currentPipeline,
-        reviewed: true,
+        stableSamples: [],
+        reviewCount: 0,
         finalized: false,
         lastExecutedChain: 'review',
       };
     });
+    // After the review it should route to modelOutput and finish.
+    (handleUpdateStableSamples as jest.Mock)
+      .mockResolvedValueOnce({
+        stableSamples: [],
+        finalized: false,
+        lastExecutedChain: 'handleUpdateStableSamples',
+      })
+      .mockResolvedValueOnce({
+        stableSamples: [],
+        finalized: false,
+        lastExecutedChain: 'handleUpdateStableSamples',
+      })
+      .mockResolvedValueOnce({
+        stableSamples: [0],
+        finalized: false,
+        lastExecutedChain: 'handleUpdateStableSamples',
+      });
   });
 
   it('Ensures that the graph compiles', async () => {
     try {
-      await getCategorizationGraph(mockClient, mockLlm);
+      await getCategorizationGraph({ client, model });
     } catch (error) {
-      // noop
+      throw Error(`getCategorizationGraph threw an error: ${error}`);
     }
   });
 
   it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
-    const categorizationGraph = await getCategorizationGraph(mockClient, mockLlm);
+    const categorizationGraph = await getCategorizationGraph({ client, model });
 
     (testPipeline as jest.Mock)
       .mockResolvedValueOnce(testPipelineValidResult)
@@ -151,8 +174,8 @@ describe('runCategorizationGraph', () => {
     let response;
     try {
       response = await categorizationGraph.invoke(mockedRequestWithPipeline);
-    } catch (e) {
-      // noop
+    } catch (error) {
+      throw Error(`getCategorizationGraph threw an error: ${error}`);
     }
 
     expect(response.results).toStrictEqual(categorizationExpectedResults);

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrService } from '../ftr_provider_context';
@@ -26,6 +27,28 @@ export class UnifiedSearchPageObject extends FtrService {
     );
   }
 
+  public async getDataViewList(switchButtonSelector: string) {
+    await this.testSubjects.click(switchButtonSelector);
+
+    await this.retry.waitFor(
+      'wait for popover',
+      async () => await this.testSubjects.exists('indexPattern-switcher')
+    );
+
+    const indexPatternSwitcher = await this.testSubjects.find('indexPattern-switcher', 500);
+    const availableDataViews = await Promise.all(
+      (
+        await indexPatternSwitcher.findAllByCssSelector('.euiSelectableListItem')
+      ).map(async (item) => {
+        return await item.getAttribute('title');
+      })
+    );
+
+    await this.testSubjects.click(switchButtonSelector);
+
+    return availableDataViews;
+  }
+
   public async getSelectedDataView(switchButtonSelector: string) {
     let visibleText = '';
 
@@ -45,6 +68,12 @@ export class UnifiedSearchPageObject extends FtrService {
 
   public async switchToDataViewMode() {
     await this.testSubjects.click('switch-to-dataviews');
+    await this.retry.waitFor('the modal to open', async () => {
+      return await this.testSubjects.exists('discover-esql-to-dataview-modal');
+    });
     await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
+    await this.retry.waitFor('the modal to close', async () => {
+      return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
+    });
   }
 }

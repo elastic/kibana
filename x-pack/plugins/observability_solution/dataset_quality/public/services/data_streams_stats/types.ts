@@ -7,20 +7,19 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
-  DataStreamDegradedDocsStatServiceResponse,
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsStatsQuery,
-  GetIntegrationsParams,
+  GetDataStreamsTotalDocsQuery,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import { Integration } from '../../../common/data_streams_stats/integration';
-import { NonAggregatableDatasets } from '../../../common/api_types';
+import { DataStreamDocsStat, NonAggregatableDatasets } from '../../../common/api_types';
 
 export type DataStreamsStatsServiceSetup = void;
 
 export interface DataStreamsStatsServiceStart {
-  client: IDataStreamsStatsClient;
+  getClient: () => Promise<IDataStreamsStatsClient>;
 }
 
 export interface DataStreamsStatsServiceStartDeps {
@@ -31,8 +30,9 @@ export interface IDataStreamsStatsClient {
   getDataStreamsStats(params?: GetDataStreamsStatsQuery): Promise<DataStreamStatServiceResponse>;
   getDataStreamsDegradedStats(
     params?: GetDataStreamsDegradedDocsStatsQuery
-  ): Promise<DataStreamDegradedDocsStatServiceResponse>;
-  getIntegrations(params: GetIntegrationsParams['query']): Promise<Integration[]>;
+  ): Promise<DataStreamDocsStat[]>;
+  getDataStreamsTotalDocs(params: GetDataStreamsTotalDocsQuery): Promise<DataStreamDocsStat[]>;
+  getIntegrations(): Promise<Integration[]>;
   getNonAggregatableDatasets(
     params: GetNonAggregatableDataStreamsParams
   ): Promise<NonAggregatableDatasets>;

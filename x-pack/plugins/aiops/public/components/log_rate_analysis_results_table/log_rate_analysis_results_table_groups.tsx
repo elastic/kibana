@@ -91,8 +91,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   const visColors = euiPaletteColorBlind();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
-  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTable.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTable.selectedGroup);
   const dispatch = useAppDispatch();
   const isMounted = useMountedState();
 
@@ -247,7 +247,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
 
   groupColumns.push(...columns);
 
-  const onChange = useCallback((tableSettings) => {
+  const onChange = useCallback((tableSettings: any) => {
     if (tableSettings.page) {
       const { index, size } = tableSettings.page;
       setPageIndex(index);

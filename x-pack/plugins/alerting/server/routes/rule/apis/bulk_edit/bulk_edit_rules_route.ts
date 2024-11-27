@@ -8,20 +8,20 @@
 import { IRouter } from '@kbn/core/server';
 
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
-import { verifyAccessAndContext, handleDisabledApiKeysError } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 
 import {
   bulkEditRulesRequestBodySchemaV1,
   BulkEditRulesRequestBodyV1,
   BulkEditRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_edit';
-import { Rule } from '../../../../application/rule/types';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { Rule } from '../../../../application/rule/types';
 
 import { transformRuleToRuleResponseV1 } from '../../transforms';
-import { transformOperationsV1 } from './transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
+import { transformOperationsV1 } from './transforms';
 
 interface BuildBulkEditRulesRouteParams {
   licenseState: ILicenseState;
@@ -33,6 +33,7 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
   router.post(
     {
       path,
+      options: { access: 'internal' },
       validate: {
         body: bulkEditRulesRequestBodySchemaV1,
       },

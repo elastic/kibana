@@ -6,4 +6,5 @@
  */
 
 export { connectorModelVersions } from './connector_model_versions';
+export { connectorTokenModelVersions } from './connector_token_model_versions';
 export { actionTaskParamsModelVersions } from './action_task_params_model_versions';

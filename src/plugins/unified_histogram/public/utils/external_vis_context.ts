@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { getDatasourceId } from '@kbn/visualization-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
@@ -41,7 +43,7 @@ export const exportVisContext = (
       ? {
           suggestionType: visContext.suggestionType,
           requestData: visContext.requestData,
-          attributes: removeTablesFromLensAttributes(visContext.attributes),
+          attributes: removeTablesFromLensAttributes(visContext.attributes).attributes,
         }
       : undefined;
 
@@ -102,6 +104,42 @@ export const isSuggestionShapeAndVisContextCompatible = (
   );
 };
 
+export const injectESQLQueryIntoLensLayers = (
+  visAttributes: UnifiedHistogramVisContext['attributes'],
+  query: AggregateQuery
+) => {
+  const datasourceId = getDatasourceId(visAttributes.state.datasourceStates);
+
+  // if the datasource is formBased, we should not fix the query
+  if (!datasourceId || datasourceId === 'formBased') {
+    return visAttributes;
+  }
+
+  if (!visAttributes.state.datasourceStates[datasourceId]) {
+    return visAttributes;
+  }
+
+  const datasourceState = cloneDeep(visAttributes.state.datasourceStates[datasourceId]);
+
+  if (datasourceState && datasourceState.layers) {
+    Object.values(datasourceState.layers).forEach((layer) => {
+      if (!isEqual(layer.query, query)) {
+        layer.query = query;
+      }
+    });
+  }
+  return {
+    ...visAttributes,
+    state: {
+      ...visAttributes.state,
+      datasourceStates: {
+        ...visAttributes.state.datasourceStates,
+        [datasourceId]: datasourceState,
+      },
+    },
+  };
+};
+
 export function deriveLensSuggestionFromLensAttributes({
   externalVisContext,
   queryParams,
@@ -121,10 +159,7 @@ export function deriveLensSuggestionFromLensAttributes({
       }
 
       // it should be one of 'formBased'/'textBased' and have value
-      const datasourceId: 'formBased' | 'textBased' | undefined = [
-        'formBased' as const,
-        'textBased' as const,
-      ].find((key) => Boolean(externalVisContext.attributes.state.datasourceStates[key]));
+      const datasourceId = getDatasourceId(externalVisContext.attributes.state.datasourceStates);
 
       if (!datasourceId) {
         return undefined;

@@ -56,13 +56,26 @@ describe('getActiveMaintenanceWindowsRoute', () => {
     const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
 
     expect(config.path).toEqual('/internal/alerting/rules/maintenance_window/_active');
-    expect(config.options?.tags?.[0]).toEqual('access:read-maintenance-window');
+    expect(config.options).toMatchInlineSnapshot(`
+      Object {
+        "access": "internal",
+      }
+    `);
+
+    expect(config.security).toMatchInlineSnapshot(`
+      Object {
+        "authz": Object {
+          "requiredPrivileges": Array [
+            "read-maintenance-window",
+          ],
+        },
+      }
+    `);
 
     await handler(context, req, res);
 
     expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalled();
     expect(res.ok).toHaveBeenLastCalledWith({
-      // @ts-expect-error upgrade typescript v5.1.6
       body: mockMaintenanceWindows.map((data) => rewriteMaintenanceWindowRes(data)),
     });
   });

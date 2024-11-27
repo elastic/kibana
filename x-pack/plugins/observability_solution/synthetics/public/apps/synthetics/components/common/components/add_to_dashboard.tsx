@@ -90,6 +90,12 @@ export const AddToDashboard = ({
               data-test-subj="syntheticsEmbeddablePanelWrapperButton"
               iconType="boxesHorizontal"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+              aria-label={i18n.translate(
+                'xpack.synthetics.embeddablePanelWrapper.shareButtonAriaLabel',
+                {
+                  defaultMessage: 'Add to dashboard',
+                }
+              )}
             />
           }
           isOpen={isPopoverOpen}

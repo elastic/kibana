@@ -1,88 +1,70 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableInput, PanelState } from '@kbn/embeddable-plugin/common/types';
-import { SerializableRecord } from '@kbn/utility-types';
-import { ControlInput, ControlStyle, ControlWidth } from '../types';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { ControlLabelPosition, DefaultControlState, ParentIgnoreSettings } from '../types';
+import { CONTROL_CHAINING_OPTIONS } from '../constants';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
 
-export interface ControlPanelState<TEmbeddableInput extends ControlInput = ControlInput>
-  extends PanelState<TEmbeddableInput> {
-  order: number;
-  width: ControlWidth;
-  grow: boolean;
+export type ControlGroupChainingSystem =
+  (typeof CONTROL_CHAINING_OPTIONS)[keyof typeof CONTROL_CHAINING_OPTIONS];
+
+export type FieldFilterPredicate = (f: DataViewField) => boolean;
+
+/**
+ * ----------------------------------------------------------------
+ * Control group state
+ * ----------------------------------------------------------------
+ */
+
+export interface ControlGroupEditorConfig {
+  hideDataViewSelector?: boolean;
+  hideWidthSettings?: boolean;
+  hideAdditionalSettings?: boolean;
+  fieldFilterPredicate?: FieldFilterPredicate;
 }
 
-export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';
-
-export interface ControlsPanels {
-  [panelId: string]: ControlPanelState;
-}
-
-export interface ControlGroupInput extends EmbeddableInput, ControlInput {
+export interface ControlGroupRuntimeState<State extends DefaultControlState = DefaultControlState> {
   chainingSystem: ControlGroupChainingSystem;
-  defaultControlWidth?: ControlWidth;
-  defaultControlGrow?: boolean;
-  controlStyle: ControlStyle;
-  panels: ControlsPanels;
-  showApplySelections?: boolean;
+  labelPosition: ControlLabelPosition;
+  autoApplySelections: boolean;
+  ignoreParentSettings?: ParentIgnoreSettings;
+
+  initialChildControlState: ControlPanelsState<State>;
+
+  /*
+   * Configuration settings that are never persisted
+   * - remove after https://github.com/elastic/kibana/issues/189939 is resolved
+   */
+  editorConfig?: ControlGroupEditorConfig;
+}
+
+export interface ControlGroupSerializedState
+  extends Omit<ControlGroupRuntimeState, 'initialChildControlState'> {
+  // In runtime state, we refer to this property as `initialChildControlState`, but in
+  // the serialized state we transform the state object into an array of state objects
+  // to make it easier for API consumers to add new controls without specifying a uuid key.
+  controls: Array<ControlPanelState & { id?: string }>;
 }
 
 /**
- * Only parts of the Control Group Input should be persisted
+ * ----------------------------------------------------------------
+ * Control group panel state
+ * ----------------------------------------------------------------
  */
-export const persistableControlGroupInputKeys: Array<
-  keyof Pick<
-    ControlGroupInput,
-    'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings' | 'showApplySelections'
-  >
-> = ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings', 'showApplySelections'];
-export type PersistableControlGroupInput = Pick<
-  ControlGroupInput,
-  (typeof persistableControlGroupInputKeys)[number]
->;
 
-/**
- * Some use cases need the Persistable Control Group Input to conform to the SerializableRecord format which requires string index signatures in any objects
- */
-export type SerializableControlGroupInput = Omit<
-  PersistableControlGroupInput,
-  'panels' | 'ignoreParentSettings'
-> & {
-  panels: ControlsPanels & SerializableRecord;
-  ignoreParentSettings: PersistableControlGroupInput['ignoreParentSettings'] & SerializableRecord;
-};
-
-// panels are json stringified for storage in a saved object.
-export type RawControlGroupAttributes = Omit<
-  PersistableControlGroupInput,
-  'panels' | 'ignoreParentSettings'
-> & {
-  ignoreParentSettingsJSON: string;
-  panelsJSON: string;
-};
-
-export interface ControlGroupTelemetry {
-  total: number;
-  chaining_system: {
-    [key: string]: number;
-  };
-  label_position: {
-    [key: string]: number;
-  };
-  ignore_settings: {
-    [key: string]: number;
-  };
-  by_type: {
-    [key: string]: {
-      total: number;
-      details: { [key: string]: number };
-    };
-  };
+export interface ControlPanelsState<State extends DefaultControlState = DefaultControlState> {
+  [panelId: string]: ControlPanelState<State>;
 }
+
+export type ControlPanelState<State extends DefaultControlState = DefaultControlState> = State & {
+  type: string;
+  order: number;
+};

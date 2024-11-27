@@ -18,18 +18,17 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/181889
+describe.skip(
   'Alert Event Details',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let ruleId: string;
     let ruleName: string;
-    before(() => {
-      initializeDataViews();
-    });
     beforeEach(() => {
+      initializeDataViews();
       loadRule().then((data) => {
         ruleId = data.id;
         ruleName = data.name;

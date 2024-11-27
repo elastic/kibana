@@ -49,6 +49,10 @@ enum TASK_STATE_COLOR {
   stopping = 'hollow',
 }
 
+const badgeStyle = {
+  maxWidth: '100px',
+};
+
 export const getTaskStateBadge = (
   state: DataFrameAnalyticsStats['state'],
   failureReason?: DataFrameAnalyticsStats['failure_reason']
@@ -58,7 +62,7 @@ export const getTaskStateBadge = (
   if (isDataFrameAnalyticsFailed(state) && failureReason !== undefined) {
     return (
       <EuiToolTip content={failureReason}>
-        <EuiBadge className="mlTaskStateBadge" color={color}>
+        <EuiBadge css={badgeStyle} color={color}>
           {state}
         </EuiBadge>
       </EuiToolTip>
@@ -66,14 +70,14 @@ export const getTaskStateBadge = (
   }
 
   return (
-    <EuiBadge className="mlTaskStateBadge" color={color}>
+    <EuiBadge css={badgeStyle} color={color}>
       {state}
     </EuiBadge>
   );
 };
 
 export const getJobTypeBadge = (jobType: string) => (
-  <EuiBadge className="mlTaskStateBadge" color="hollow">
+  <EuiBadge css={badgeStyle} color="hollow">
     {jobType}
   </EuiBadge>
 );
@@ -216,7 +220,6 @@ export const useColumns = (
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: { lines: TRUNCATE_TEXT_LINES },
       'data-test-subj': 'mlAnalyticsTableColumnId',
-      scope: 'row',
       render: (id: string) => {
         return <span title={id}>{id}</span>;
       },

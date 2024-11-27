@@ -8,8 +8,13 @@
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type {
+  AlertsTableConfigurationRegistry,
+  RenderCustomActionsRowArgs,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
@@ -20,20 +25,46 @@ import { getAlertsDefaultModel } from '../../components/alerts_table/default_con
 import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 
+// we show a maximum of 6 action buttons
+// - open flyout
+// - investigate in timeline
+// - 3-dot menu for more actions
+// - add new note
+// - session view
+// - analyzer graph
+const MAX_ACTION_BUTTON_COUNT = 6;
+
 export const getUseActionColumnHook =
   (tableId: TableId): AlertsTableConfigurationRegistry['useActionsColumn'] =>
   () => {
+    let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
+
+    // hiding the session view icon for users without enterprise plus license
     const license = useLicense();
     const isEnterprisePlus = license.isEnterprise();
-    let ACTION_BUTTON_COUNT = tableId === TableId.alertsOnCasePage ? 4 : isEnterprisePlus ? 6 : 5;
-
-    // we only want to show the note icon if the expandable flyout and the new notes system are enabled
-    // TODO delete most likely in 8.16
-    const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-      'securitySolutionNotesEnabled'
-    );
-    if (!securitySolutionNotesEnabled) {
+    if (!isEnterprisePlus) {
       ACTION_BUTTON_COUNT--;
+    }
+
+    // we only want to show the note icon if the new notes system feature flag is enabled
+    const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
+      'securitySolutionNotesDisabled'
+    );
+    if (securitySolutionNotesDisabled) {
+      ACTION_BUTTON_COUNT--;
+    }
+
+    // we do not show the analyzer graph and session view icons on the cases alerts tab alerts table
+    // if the visualization in flyout advanced settings is disabled because these aren't supported inside the table
+    if (tableId === TableId.alertsOnCasePage) {
+      const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
+        ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
+      );
+      if (!isEnterprisePlus && !visualizationInFlyoutEnabled) {
+        ACTION_BUTTON_COUNT -= 1;
+      } else if (isEnterprisePlus && !visualizationInFlyoutEnabled) {
+        ACTION_BUTTON_COUNT -= 2;
+      }
     }
 
     const eventContext = useContext(StatefulEventContext);
@@ -61,7 +92,7 @@ export const getUseActionColumnHook =
         clearSelection,
         ecsAlert: alert,
         nonEcsData,
-      }) => {
+      }: RenderCustomActionsRowArgs) => {
         const timelineItem: TimelineItem = {
           _id: (alert as Ecs)._id,
           _index: (alert as Ecs)._index,

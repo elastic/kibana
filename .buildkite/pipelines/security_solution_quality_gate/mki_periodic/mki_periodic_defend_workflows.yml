@@ -2,7 +2,7 @@ steps:
   - group: "Cypress MKI - Defend Workflows"
     key: cypress_test_defend_workflows
     steps:
-      - label: "Running cypress:dw:qa:serverless:run"
+      - label: "Cypress - DW - Running cypress:dw:qa:serverless:run"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
         key: test_defend_workflows
         agents:
@@ -10,11 +10,10 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
+          preemptible: true
         timeout_in_minutes: 300
-        parallelism: 6
+        parallelism: 5
         retry:
           automatic:
             - exit_status: "*"
@@ -31,8 +30,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -48,8 +45,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -65,8 +60,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -82,8 +75,6 @@ steps:
 #          imageProject: elastic-images-prod
 #          provider: gcp
 #          enableNestedVirtualization: true
-#          localSsds: 1
-#          localSsdInterface: nvme
 #          machineType: n2-standard-4
 #        timeout_in_minutes: 120
 #        retry:
@@ -91,7 +82,7 @@ steps:
 #            - exit_status: "1"
 #              limit: 1
 
-      - label: "Running edr_workflows:policy_response:qa:serverless"
+      - label: "API - DW - Running edr_workflows:policy_response:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy_response:qa:serverless
         key: edr_workflows:policy_response:qa:serverless
         agents:
@@ -99,16 +90,15 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
+          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
             - exit_status: "1"
               limit: 1
 
-      - label: "Running edr_workflows:resolver:qa:serverless"
+      - label: "API - DW - Running edr_workflows:resolver:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:resolver:qa:serverless
         key: edr_workflows:resolver:qa:serverless
         agents:
@@ -116,16 +106,15 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
+          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
             - exit_status: "1"
               limit: 1
 
-      - label: "Running edr_workflows:response_actions:qa:serverless"
+      - label: "API - DW - Running edr_workflows:response_actions:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:response_actions:qa:serverless
         key: edr_workflows:response_actions:qa:serverless
         agents:
@@ -133,11 +122,30 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
-          localSsds: 1
-          localSsdInterface: nvme
           machineType: n2-standard-4
+          preemptible: true
         timeout_in_minutes: 120
         retry:
           automatic:
             - exit_status: "1"
+              limit: 1
+
+  - group: "Osquery MKI - Defend Workflows"
+    key: cypress_test_osquery_defend_workflows
+    steps:
+      - label: "Osquery - Cypress - DW - Running cypress:qa:serverless:run"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows_osquery.sh cypress:qa:serverless:run
+        key: test_osquery_defend_workflows
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 300
+        parallelism: 3
+        retry:
+          automatic:
+            - exit_status: "*"
               limit: 1

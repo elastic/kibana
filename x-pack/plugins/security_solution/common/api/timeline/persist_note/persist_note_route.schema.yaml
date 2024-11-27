@@ -5,24 +5,18 @@ info:
 externalDocs:
   url: https://www.elastic.co/guide/en/security/current/timeline-api-update.html
   description: Documentation
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/note:
     patch:
       x-labels: [serverless, ess]
       x-codegen-enabled: true
       operationId: PersistNoteRoute
-      summary: Persists a note to a timeline.
+      summary: Add or update a note
+      description: Add a note to a Timeline or update an existing note.
       tags:
         - access:securitySolution
       requestBody:
-        description: The note to persist or update along with additional metadata.
+        description: The note to add or update, along with additional metadata.
         required: true
         content:
           application/json:
@@ -56,20 +50,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [persistNote]
-                    properties:
-                      persistNote:
-                        type: object
-                        required: [code, message, note]
-                        properties:
-                          code:
-                            type: number
-                          message:
-                            type: string
-                          note:
-                            $ref: '../model/components.schema.yaml#/components/schemas/Note'
+                $ref: '#/components/schemas/ResponseNote'
+components:
+  schemas:
+    ResponseNote:
+      type: object
+      required: [note]
+      properties:
+        note:
+          $ref: '../model/components.schema.yaml#/components/schemas/Note'

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { errors } from '@elastic/elasticsearch';
@@ -14,16 +15,20 @@ import { isKibanaResponse } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import {
+  DefaultRouteCreateOptions,
+  RouteParamsRT,
   ServerRoute,
-  ServerRouteCreateOptions,
   ZodParamsObject,
   parseEndpoint,
 } from '@kbn/server-route-repository-utils';
+import { ServerSentEvent } from '@kbn/sse-utils';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
-import { merge } from 'lodash';
-import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
-import { validateAndDecodeParams } from './validate_and_decode_params';
+import { merge, omit } from 'lodash';
+import { Observable, isObservable } from 'rxjs';
 import { makeZodValidationObject } from './make_zod_validation_object';
+import { validateAndDecodeParams } from './validate_and_decode_params';
+import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
 
 const CLIENT_CLOSED_REQUEST = {
   statusCode: 499,
@@ -39,7 +44,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   dependencies,
 }: {
   core: CoreSetup;
-  repository: Record<string, ServerRoute<string, any, any, any, ServerRouteCreateOptions>>;
+  repository: Record<string, ServerRoute<string, RouteParamsRT | undefined, any, any, any>>;
   logger: Logger;
   dependencies: TDependencies;
 }) {
@@ -48,7 +53,11 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { params, endpoint, options, handler } = route;
+    const { endpoint, handler, security } = route;
+
+    const params = 'params' in route ? route.params : undefined;
+
+    const options: DefaultRouteCreateOptions = 'options' in route ? route.options : {};
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
@@ -88,6 +97,10 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
         if (isKibanaResponse(result)) {
           return result;
+        } else if (isObservable(result)) {
+          return response.ok({
+            body: observableIntoEventSourceStream(result as Observable<ServerSentEvent>),
+          });
         } else {
           const body = result || {};
           return response.ok({ body });
@@ -129,11 +142,18 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       validationObject = passThroughValidationObject;
     }
 
+    const access = options?.access ?? (pathname.startsWith('/internal/') ? 'internal' : 'public');
+
     if (!version) {
       router[method](
         {
           path: pathname,
-          options,
+          // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
+          options: {
+            ...options,
+            access,
+          },
+          security,
           validate: validationObject,
         },
         wrappedHandler
@@ -141,8 +161,10 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
     } else {
       router.versioned[method]({
         path: pathname,
-        access: pathname.startsWith('/internal/') ? 'internal' : 'public',
-        options,
+        access,
+        // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
+        options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
+        security,
       }).addVersion(
         {
           version,

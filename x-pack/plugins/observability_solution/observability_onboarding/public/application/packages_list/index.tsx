@@ -9,12 +9,10 @@ import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useRef, Suspense, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
-import { useCustomMargin } from '../shared/use_custom_margin';
 import { CustomCard } from './types';
 
 interface Props {
@@ -38,6 +36,7 @@ interface Props {
    * When enabled, custom and integration cards are joined into a single list.
    */
   joinCardLists?: boolean;
+  excludePackageIdList?: string[];
   onLoaded?: () => void;
 }
 
@@ -58,9 +57,9 @@ const PackageListGridWrapper = ({
   flowCategory,
   flowSearch,
   joinCardLists = false,
+  excludePackageIdList = [],
   onLoaded,
 }: WrapperProps) => {
-  const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
   });
@@ -68,6 +67,7 @@ const PackageListGridWrapper = ({
   const list: IntegrationCardItem[] = useIntegrationCardList(
     filteredCards,
     selectedCategory,
+    excludePackageIdList,
     customCards,
     flowCategory,
     flowSearch,
@@ -86,25 +86,19 @@ const PackageListGridWrapper = ({
 
   return (
     <Suspense fallback={<Loading />}>
-      <div css={customMargin} ref={packageListRef}>
+      <div ref={packageListRef}>
         {showSearchBar && (
-          <div
-            css={css`
-              max-width: 600px;
-            `}
-          >
-            <EuiSearchBar
-              box={{
-                incremental: true,
-              }}
-              onChange={({ queryText, error }) => {
-                if (error) return;
+          <EuiSearchBar
+            box={{
+              incremental: true,
+            }}
+            onChange={({ queryText, error }) => {
+              if (error) return;
 
-                setSearchQuery?.(queryText);
-              }}
-              query={searchQuery ?? ''}
-            />
-          </div>
+              setSearchQuery?.(queryText);
+            }}
+            query={searchQuery ?? ''}
+          />
         )}
         {showPackageList && (
           <PackageList
@@ -120,7 +114,7 @@ const PackageListGridWrapper = ({
             categories={[]}
             setUrlandReplaceHistory={() => {}}
             setUrlandPushHistory={() => {}}
-            showCardLabels={false}
+            showCardLabels={true}
           />
         )}
       </div>

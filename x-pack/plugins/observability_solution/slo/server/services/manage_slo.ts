@@ -26,7 +26,7 @@ export class ManageSLO {
     await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = true;
     slo.updatedAt = new Date();
-    await this.repository.save(slo);
+    await this.repository.update(slo);
   }
 
   async disable(sloId: string) {
@@ -39,6 +39,6 @@ export class ManageSLO {
     await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = false;
     slo.updatedAt = new Date();
-    await this.repository.save(slo);
+    await this.repository.update(slo);
   }
 }

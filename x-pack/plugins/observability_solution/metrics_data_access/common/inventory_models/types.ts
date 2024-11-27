@@ -11,6 +11,7 @@ import type {
   LensConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
+import { estypes } from '@elastic/elasticsearch';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
@@ -45,7 +46,6 @@ export const InventoryMetricRT = rt.keyof({
   hostSystemOverview: null,
   hostCpuUsageTotal: null,
   hostCpuUsage: null,
-  hostFilesystem: null,
   hostK8sOverview: null,
   hostK8sCpuCap: null,
   hostK8sDiskCap: null,
@@ -54,17 +54,12 @@ export const InventoryMetricRT = rt.keyof({
   hostLoad: null,
   hostMemoryUsage: null,
   hostNetworkTraffic: null,
-  hostDockerOverview: null,
-  hostDockerInfo: null,
-  hostDockerTop5ByCpu: null,
-  hostDockerTop5ByMemory: null,
   podOverview: null,
   podCpuUsage: null,
   podMemoryUsage: null,
   podLogUsage: null,
   podNetworkTraffic: null,
   containerOverview: null,
-  containerCpuKernel: null,
   containerCpuUsage: null,
   containerDiskIOOps: null,
   containerDiskIOBytes: null,
@@ -234,118 +229,7 @@ export type TSVBMetricModelCreator = (
   interval: string
 ) => TSVBMetricModel;
 
-export const ESBasicMetricAggRT = rt.record(
-  rt.string,
-  rt.union([
-    rt.undefined,
-    rt.type({
-      field: rt.string,
-    }),
-  ])
-);
-
-export const ESPercentileAggRT = rt.type({
-  percentiles: rt.type({
-    field: rt.string,
-    percents: rt.array(rt.number),
-  }),
-});
-
-export const ESCaridnalityAggRT = rt.type({
-  cardinality: rt.partial({
-    field: rt.string,
-  }),
-});
-
-export const ESBucketScriptAggRT = rt.type({
-  bucket_script: rt.intersection([
-    rt.type({
-      buckets_path: rt.record(rt.string, rt.string),
-      script: rt.type({
-        source: rt.string,
-        lang: rt.keyof({ painless: null, expression: null }),
-      }),
-    }),
-    rt.partial({ gap_policy: rt.keyof({ skip: null, insert_zeros: null }) }),
-  ]),
-});
-
-export const ESCumulativeSumAggRT = rt.type({
-  cumulative_sum: rt.type({
-    buckets_path: rt.string,
-  }),
-});
-
-export const ESDerivativeAggRT = rt.type({
-  derivative: rt.type({
-    buckets_path: rt.string,
-    gap_policy: rt.keyof({ skip: null, insert_zeros: null }),
-    unit: rt.string,
-  }),
-});
-
-export const ESSumBucketAggRT = rt.type({
-  sum_bucket: rt.type({
-    buckets_path: rt.string,
-  }),
-});
-
-export const ESTopMetricsAggRT = rt.type({
-  top_metrics: rt.intersection([
-    rt.type({
-      metrics: rt.union([rt.array(rt.type({ field: rt.string })), rt.type({ field: rt.string })]),
-    }),
-    rt.partial({
-      size: rt.number,
-      sort: rt.record(rt.string, rt.union([rt.literal('desc'), rt.literal('asc')])),
-    }),
-  ]),
-});
-
-export const ESMaxPeriodFilterExistsAggRT = rt.type({
-  filter: rt.type({
-    exists: rt.type({
-      field: rt.string,
-    }),
-  }),
-  aggs: rt.type({
-    period: rt.type({
-      max: rt.type({
-        field: rt.string,
-      }),
-    }),
-  }),
-});
-
-export interface SnapshotTermsWithAggregation {
-  terms: { field: string };
-  aggregations: MetricsUIAggregation;
-}
-
-export const ESTermsWithAggregationRT: rt.Type<SnapshotTermsWithAggregation> = rt.recursion(
-  'SnapshotModelRT',
-  () =>
-    rt.type({
-      terms: rt.type({ field: rt.string }),
-      aggregations: MetricsUIAggregationRT,
-    })
-);
-
-export const ESAggregationRT = rt.union([
-  ESBasicMetricAggRT,
-  ESPercentileAggRT,
-  ESBucketScriptAggRT,
-  ESCumulativeSumAggRT,
-  ESDerivativeAggRT,
-  ESSumBucketAggRT,
-  ESTermsWithAggregationRT,
-  ESCaridnalityAggRT,
-  ESTopMetricsAggRT,
-  ESMaxPeriodFilterExistsAggRT,
-]);
-
-export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
-export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
+export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;
 
 export const SnapshotMetricTypeKeys = {
   count: null,
@@ -386,7 +270,7 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
 export interface InventoryMetrics {
-  tsvb: { [name: string]: TSVBMetricModelCreator };
+  tsvb?: { [name: string]: TSVBMetricModelCreator };
   snapshot: { [name: string]: MetricsUIAggregation | undefined };
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metrics like awsS3 require multiple days where others like host only need an hour.*/

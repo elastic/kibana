@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
@@ -124,7 +125,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="s">
           <h1 id="addPanelsFlyout">
             <FormattedMessage
               id="dashboard.solutionToolbar.addPanelFlyout.headingText"
@@ -147,6 +148,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
             <EuiForm component="form" fullWidth>
               <EuiFormRow css={{ backgroundColor: euiTheme.colors.emptyShade }}>
                 <EuiFieldSearch
+                  compressed
                   autoFocus
                   value={searchTerm}
                   onChange={(e) => {
@@ -186,9 +188,13 @@ export const DashboardPanelSelectionListFlyout: React.FC<
               >
                 {panelsSearchResult?.some(({ isDisabled }) => !isDisabled) ? (
                   panelsSearchResult.map(
-                    ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj }) =>
+                    ({ id, title, items, isDisabled, ['data-test-subj']: dataTestSubj, order }) =>
                       !isDisabled ? (
-                        <EuiFlexItem key={id} data-test-subj={dataTestSubj}>
+                        <EuiFlexItem
+                          key={id}
+                          data-test-subj={dataTestSubj}
+                          data-group-sort-order={order}
+                        >
                           <EuiTitle id={`${id}-group`} size="xxs">
                             {typeof title === 'string' ? <h3>{title}</h3> : title}
                           </EuiTitle>
@@ -276,7 +282,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<
             <EuiButtonEmpty onClick={close} data-test-subj="dashboardPanelSelectionCloseBtn">
               <FormattedMessage
                 id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
-                defaultMessage="Close"
+                defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

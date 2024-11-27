@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -78,3 +79,12 @@ export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
 export const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = 'data_views:fields_excluded_data_tiers';
 
 export const DEFAULT_DATA_VIEW_ID = 'defaultIndex';
+
+/**
+ * Valid `failureReason` attribute values for `has_es_data` API error responses
+ */
+export enum HasEsDataFailureReason {
+  localDataTimeout = 'local_data_timeout',
+  remoteDataTimeout = 'remote_data_timeout',
+  unknown = 'unknown',
+}

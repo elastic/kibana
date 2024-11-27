@@ -1,0 +1,115 @@
+[[breaking-changes-summary]]
+== Upgrade notes
+
+////
+USE THE FOLLOWING TEMPLATE to add entries to this document, from "[discrete]" to the last "====" included.
+
+[discrete]
+[[REPO-PR]]
+.[FEATURE] TITLE TO DESCRIBE THE CHANGE. (VERSION)
+[%collapsible]
+====
+*Details* +
+ADD MORE DETAILS ON WHAT IS CHANGING AND A LINK TO THE PR INTRODUCING THE CHANGE
+
+*Impact* +
+ADD INFORMATION ABOUT WHAT THIS CHANGE WILL BREAK FOR USERS
+
+*Action* +
+ADD INSTRUCTIONS FOR USERS LOOKING TO UPGRADE. HOW CAN THEY WORK AROUND THIS?
+====
+
+
+1. Copy and edit the template in the right section of this file. Most recent entries should be at the top of the section, search for sections using the text "[float]".
+2. Edit the anchor ID [[REPO-PR]] of the template with proper values.
+3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
+  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/get_doc_links.ts
+  - https://github.com/elastic/kibana/blob/main/packages/kbn-doc-links/src/types.ts
+
+The entry in the main links file should look like this:
+
+id: `${KIBANA_DOCS}breaking-changes-summary.html#REPO-PR`
+
+Where:
+      - `id` is the ID of your choice.
+      - `REPO-PR` is the anchor ID that you assigned to the entry in this upgrade document.
+
+4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
+Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
+
+////
+
+Before you upgrade, review the breaking changes and deprecations introduced since the version you are migrating from, then mitigate the impact.
+
+If you are migrating from a version prior to version 9.0, you must first upgrade to the last 8.x version available.
+
+For Elastic Security solution release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+=== Breaking changes
+
+
+[discrete]
+[[breaking-199656]]
+.Removed all security v1 endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+All `v1` Kibana security HTTP endpoints have been removed.
+
+`GET /api/security/v1/logout` has been replaced by `GET /api/security/logout`
+`GET /api/security/v1/oidc/implicit` has been replaced by `GET /api/security/oidc/implicit`
+`GET /api/security/v1/oidc` has been replaced by GET `/api/security/oidc/callback`
+`POST /api/security/v1/oidc` has been replaced by POST `/api/security/oidc/initiate_login`
+`POST /api/security/v1/saml` has been replaced by POST `/api/security/saml/callback`
+`GET /api/security/v1/me` has been removed with no replacement.
+
+For more information, refer to {kibana-pull}199656[#199656].
+
+*Impact* + 
+Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0.
+Third party OIDC and SAML identity providers configured with `v1` endpoints will no longer work.
+
+*Action* +
+Update any OIDC and SAML identity providers to reference the corresponding replacement endpoint listed above.
+Remove references to the `/api/security/v1/me` endpoint from any automations, applications, tooling, and scripts.
+====
+
+[discrete]
+[[breaking-193792]]
+.Access to all internal APIs is blocked (9.0.0)
+[%collapsible]
+====
+*Details* +
+Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure
+that HTTP API integrations with Kibana avoid unexpected breaking changes. 
+Refer to {kibana-pull}193792[#193792].
+
+*Impact* +
+Any HTTP API calls to internal Kibana endpoints will fail with a 400 status code starting
+from version 9.0.0.
+
+*Action* +
+**Do not integrate with internal HTTP APIs**. They may change or be removed without notice, 
+and lead to unexpected behaviors. If you would like some capability to be exposed over an
+HTTP API, https://github.com/elastic/kibana/issues/new/choose[create an issue].
+We would love to discuss your use case.
+
+====
+
+[float]
+=== Deprecation notices
+
+The following functionality is deprecated and will be removed at a future date. Deprecated functionality 
+does not have an immediate impact on your application, but we strongly recommend you make the necessary 
+updates to avoid use of deprecated features.
+
+Use the **Kibana Upgrade Assistant** to prepare for your upgrade to the next version of the Elastic Stack. 
+The assistant identifies deprecated settings in your configuration and guides you through the process of 
+resolving issues if any deprecated features are enabled. 
+To access the assistant, go to **Stack Management** > **Upgrade Assistant**.
+
+
+
+
+

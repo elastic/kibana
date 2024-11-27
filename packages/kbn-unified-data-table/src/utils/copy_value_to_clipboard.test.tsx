@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dataTableContextComplexMock } from '../../__mocks__/table_context';
+import {
+  dataTableContextComplexMock,
+  dataTableContextComplexRowsMock,
+} from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import {
   copyValueToClipboard,
@@ -24,7 +28,7 @@ const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
     convertValueToString({
-      rows: dataTableContextComplexMock.rows,
+      rows: dataTableContextComplexRowsMock,
       dataView: dataTableContextComplexMock.dataView,
       fieldFormats: servicesMock.fieldFormats,
       rowIndex,
@@ -197,7 +201,7 @@ describe('copyValueToClipboard', () => {
 
     const result = await copyRowsAsJsonToClipboard({
       toastNotifications: servicesMock.toastNotifications,
-      selectedRows: [dataTableContextComplexMock.rows[0]],
+      selectedRows: [dataTableContextComplexMock.getRowByIndex(0)!],
     });
 
     const output =

@@ -8,11 +8,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import type { HttpFetchOptions } from '@kbn/core-http-browser';
 
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
-import { HOT, WARM, UNMANAGED } from './translations';
 import { useKibana } from '../../common/lib/kibana';
 
 const mockedUseKibana = mockUseKibana();
@@ -23,7 +23,17 @@ jest.mock('../../common/lib/kibana', () => {
 
   const mockKibanaServices = {
     get: () => ({
-      http: { fetch: jest.fn() },
+      http: {
+        fetch: jest.fn().mockImplementation((path: string, options: HttpFetchOptions) => {
+          if (
+            path.startsWith('/internal/ecs_data_quality_dashboard/results_latest') &&
+            options.method === 'GET'
+          ) {
+            return Promise.resolve([]);
+          }
+          return Promise.resolve();
+        }),
+      },
     }),
   };
 
@@ -56,7 +66,7 @@ jest.mock('../../detections/containers/detection_engine/alerts/use_signal_index'
 }));
 
 describe('DataQuality', () => {
-  const defaultIlmPhases = `${HOT}${WARM}${UNMANAGED}`;
+  const defaultIlmPhases = 'hotwarmunmanaged';
 
   beforeEach(() => {
     jest.clearAllMocks();

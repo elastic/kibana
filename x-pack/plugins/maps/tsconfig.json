@@ -8,8 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "config.ts",
-    "../../../typings/**/*",
+    "server/config.ts",
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -90,7 +90,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-containers",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/react-hooks"
   ],
   "exclude": [
     "target/**/*",

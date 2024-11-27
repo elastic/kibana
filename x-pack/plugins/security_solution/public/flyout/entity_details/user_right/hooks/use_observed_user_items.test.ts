@@ -10,7 +10,7 @@ import { mockObservedUser } from '../mocks';
 import { TestProviders } from '../../../../common/mock';
 import { useObservedUserItems } from './use_observed_user_items';
 
-describe('useManagedUserItems', () => {
+describe('useObservedUserItems', () => {
   it('returns observed user fields', () => {
     const { result } = renderHook(() => useObservedUserItems(mockObservedUser), {
       wrapper: TestProviders,

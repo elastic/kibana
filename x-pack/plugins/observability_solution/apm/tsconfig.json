@@ -70,7 +70,6 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/field-types",
     "@kbn/babel-register",
-    "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
@@ -119,17 +118,15 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/test-jest-helpers",
     "@kbn/security-plugin-types-common",
-    "@kbn/entityManager-plugin",
-    "@kbn/react-hooks",
-    "@kbn/shared-ux-avatar-solution",
-    "@kbn/shared-ux-page-no-data-config-types",
-    "@kbn/react-hooks",
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
     "@kbn/apm-types",
-    "@kbn/entities-schema"
+    "@kbn/entities-schema",
+    "@kbn/serverless",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/router-utils",
+    "@kbn/react-hooks",
+    "@kbn/alerting-comparators",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

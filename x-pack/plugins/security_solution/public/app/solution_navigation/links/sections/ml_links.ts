@@ -39,7 +39,7 @@ export const mlAppLink: LinkItem = {
   id: SecurityPageName.mlLanding,
   title: i18n.ML_TITLE,
   path: MACHINE_LEARNING_PATH,
-  capabilities: [`${SERVER_APP_ID}.show`],
+  capabilities: [[`${SERVER_APP_ID}.show`, `ml.canGetJobs`]],
   globalSearchKeywords: [i18n.ML_KEYWORD],
   hideTimeline: true,
   skipUrlState: true,
@@ -62,6 +62,7 @@ export const mlNavCategories: SolutionLinkCategory[] = [
       ExternalPageName.mlAnomalyDetection,
       ExternalPageName.mlAnomalyExplorer,
       ExternalPageName.mlSingleMetricViewer,
+      ExternalPageName.mlSuppliedConfigurations,
       ExternalPageName.mlSettings,
     ],
   },
@@ -85,6 +86,7 @@ export const mlNavCategories: SolutionLinkCategory[] = [
     linkIds: [
       ExternalPageName.mlFileUpload,
       ExternalPageName.mlIndexDataVisualizer,
+      ExternalPageName.mlESQLdataVisualizer,
       ExternalPageName.mlDataDrift,
     ],
   },
@@ -138,6 +140,12 @@ export const mlNavLinks: SolutionNavLink[] = [
     description: i18n.SINGLE_METRIC_VIEWER_DESC,
   },
   {
+    id: ExternalPageName.mlSuppliedConfigurations,
+    title: i18n.SUPPLIED_CONFIGURATIONS_TITLE,
+    landingIcon: IconJobsLazy,
+    description: i18n.SUPPLIED_CONFIGURATIONS_DESC,
+  },
+  {
     id: ExternalPageName.mlSettings,
     title: i18n.SETTINGS_TITLE,
     landingIcon: IconSettingsLazy,
@@ -178,6 +186,12 @@ export const mlNavLinks: SolutionNavLink[] = [
     title: i18n.INDEX_DATA_VISUALIZER_TITLE,
     landingIcon: IconDataViewLazy,
     description: i18n.INDEX_DATA_VISUALIZER_DESC,
+  },
+  {
+    id: ExternalPageName.mlESQLdataVisualizer,
+    title: i18n.ESQL_DATA_VISUALIZER_TITLE,
+    landingIcon: 'sqlApp',
+    description: i18n.ESQL_DATA_VISUALIZER_DESC,
   },
   {
     id: ExternalPageName.mlDataDrift,

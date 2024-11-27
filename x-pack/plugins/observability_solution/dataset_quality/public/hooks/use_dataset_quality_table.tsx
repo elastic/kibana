@@ -14,7 +14,6 @@ import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/table/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
 import { SortDirection } from '../../common/types';
@@ -30,14 +29,16 @@ const sortingOverrides: Partial<{
 
 export const useDatasetQualityTable = () => {
   const {
-    services: { fieldFormats },
+    services: {
+      fieldFormats,
+      share: { url },
+    },
   } = useKibanaContextForPlugin();
 
   const { service } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
-  const isSizeStatsAvailable = useSelector(service, (state) => state.context.isSizeStatsAvailable);
   const canUserMonitorDataset = useSelector(
     service,
     (state) => state.context.datasetUserPrivileges.canMonitor
@@ -46,8 +47,7 @@ export const useDatasetQualityTable = () => {
     service,
     (state) =>
       !state.context.dataStreamStats ||
-      !state.context.dataStreamStats.length ||
-      state.context.dataStreamStats.some((s) => s.userPrivileges.canMonitor)
+      state.context.datasets.some((s) => s.userPrivileges?.canMonitor)
   );
 
   const {
@@ -61,20 +61,18 @@ export const useDatasetQualityTable = () => {
   } = useSelector(service, (state) => state.context.filters);
   const showInactiveDatasets = inactive || !canUserMonitorDataset;
 
-  const flyout = useSelector(service, (state) => state.context.flyout);
-
   const loading = useSelector(
     service,
     (state) =>
-      state.matches('datasets.fetching') ||
+      state.matches('stats.datasets.fetching') ||
       state.matches('integrations.fetching') ||
-      state.matches('degradedDocs.fetching')
+      state.matches('stats.degradedDocs.fetching')
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
-    state.matches('datasets.fetching')
+    state.matches('stats.datasets.fetching')
   );
   const loadingDegradedStats = useSelector(service, (state) =>
-    state.matches('degradedDocs.fetching')
+    state.matches('stats.degradedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
@@ -89,33 +87,6 @@ export const useDatasetQualityTable = () => {
     [service]
   );
 
-  const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
-  const openFlyout = useCallback(
-    (selectedDataset: FlyoutDataset) => {
-      if (flyout?.dataset?.rawName === selectedDataset.rawName) {
-        service.send({
-          type: 'CLOSE_FLYOUT',
-        });
-
-        return;
-      }
-
-      if (!flyout?.insightsTimeRange) {
-        service.send({
-          type: 'OPEN_FLYOUT',
-          dataset: selectedDataset,
-        });
-        return;
-      }
-
-      service.send({
-        type: 'SELECT_NEW_DATASET',
-        dataset: selectedDataset,
-      });
-    },
-    [flyout?.dataset?.rawName, flyout?.insightsTimeRange, service]
-  );
-
   const isActive = useCallback(
     (lastActivity: number) => isActiveDataset({ lastActivity, timeRange }),
     [timeRange]
@@ -127,27 +98,23 @@ export const useDatasetQualityTable = () => {
         fieldFormats,
         canUserMonitorDataset,
         canUserMonitorAnyDataStream,
-        selectedDataset: flyout?.dataset,
-        openFlyout,
         loadingDataStreamStats,
         loadingDegradedStats,
         showFullDatasetNames,
-        isSizeStatsAvailable,
         isActiveDataset: isActive,
         timeRange,
+        urlService: url,
       }),
     [
       fieldFormats,
       canUserMonitorDataset,
       canUserMonitorAnyDataStream,
-      flyout?.dataset,
-      openFlyout,
       loadingDataStreamStats,
       loadingDegradedStats,
       showFullDatasetNames,
-      isSizeStatsAvailable,
       isActive,
       timeRange,
+      url,
     ]
   );
 
@@ -165,8 +132,7 @@ export const useDatasetQualityTable = () => {
       const passesNamespaceFilter =
         namespaces.length === 0 || namespaces.includes(dataset.namespace);
 
-      const passesQualityFilter =
-        qualities.length === 0 || qualities.includes(dataset.degradedDocs.quality);
+      const passesQualityFilter = qualities.length === 0 || qualities.includes(dataset.quality);
 
       const passesQueryFilter = !query || dataset.rawName.includes(query);
 
@@ -235,14 +201,11 @@ export const useDatasetQualityTable = () => {
     columns,
     loading,
     resultsCount,
-    closeFlyout,
-    selectedDataset: flyout?.dataset,
     showInactiveDatasets,
     showFullDatasetNames,
     canUserMonitorDataset,
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
-    isSizeStatsAvailable,
   };
 };

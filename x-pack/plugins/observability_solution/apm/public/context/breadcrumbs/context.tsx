@@ -9,6 +9,7 @@ import { ChromeBreadcrumb } from '@kbn/core/public';
 import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../kibana_context/use_kibana';
 
 export interface Breadcrumb {
   title: string;
@@ -25,6 +26,9 @@ export const BreadcrumbsContext = createContext<BreadcrumbApi | undefined>(undef
 
 export function BreadcrumbsContextProvider({ children }: { children: React.ReactElement }) {
   const [, forceUpdate] = useState({});
+  const {
+    services: { serverless },
+  } = useKibana();
 
   const breadcrumbs = useMemo(() => {
     return new Map<Route, Breadcrumb[]>();
@@ -72,7 +76,7 @@ export function BreadcrumbsContextProvider({ children }: { children: React.React
       };
     });
 
-  useBreadcrumbs(formattedBreadcrumbs);
+  useBreadcrumbs(formattedBreadcrumbs, { serverless, absoluteProjectStyleBreadcrumbs: false });
 
   return <BreadcrumbsContext.Provider value={api}>{children}</BreadcrumbsContext.Provider>;
 }

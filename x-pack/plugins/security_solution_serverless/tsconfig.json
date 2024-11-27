@@ -19,6 +19,7 @@
     "@kbn/security-plugin",
     "@kbn/security-solution-ess",
     "@kbn/security-solution-plugin",
+    "@kbn/server-http-tools",
     "@kbn/serverless",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
@@ -45,5 +46,7 @@
     "@kbn/discover-plugin",
     "@kbn/logging",
     "@kbn/integration-assistant-plugin",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/dev-utils"
   ]
 }

@@ -18,7 +18,8 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiPanel,
-  EuiLink,
+  EuiHorizontalRule,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,7 +36,7 @@ import { NetworkDetailsLink } from '../../../../common/components/links';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
-import { CellActions } from './cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -51,14 +52,24 @@ import {
   USER_DETAILS_RELATED_HOSTS_TABLE_TEST_ID,
   USER_DETAILS_TEST_ID,
   USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID,
+  USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID,
+  USER_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  USER_DETAILS_ALERT_COUNT_TEST_ID,
 } from './test_ids';
+import {
+  HOST_NAME_FIELD_NAME,
+  HOST_IP_FIELD_NAME,
+} from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { PreviewLink } from '../../../shared/components/preview_link';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
+import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const USER_DETAILS_ID = 'entities-users-details';
 const RELATED_HOSTS_ID = 'entities-users-related-hosts';
@@ -100,7 +111,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
@@ -123,29 +134,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         banner: USER_PREVIEW_BANNER,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });
   }, [openPreviewPanel, userName, scopeId, telemetry]);
-
-  const openHostPreview = useCallback(
-    (hostName: string) => {
-      openPreviewPanel({
-        id: HostPreviewPanelKey,
-        params: {
-          hostName,
-          scopeId,
-          banner: HOST_PREVIEW_BANNER,
-        },
-      });
-      telemetry.reportDetailsFlyoutOpened({
-        location: scopeId,
-        panel: 'preview',
-      });
-    },
-    [openPreviewPanel, scopeId, telemetry]
-  );
 
   const [isUserLoading, { inspect, userDetails, refetch }] = useObservedUserDetails({
     id: userDetailsQueryId,
@@ -181,14 +174,14 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
         ),
         render: (host: string) => (
           <EuiText grow={false} size="xs">
-            <CellActions field={'host.name'} value={host}>
+            <CellActions field={HOST_NAME_FIELD_NAME} value={host}>
               {isPreviewEnabled ? (
-                <EuiLink
+                <PreviewLink
+                  field={HOST_NAME_FIELD_NAME}
+                  value={host}
+                  scopeId={scopeId}
                   data-test-subj={USER_DETAILS_RELATED_HOSTS_LINK_TEST_ID}
-                  onClick={() => openHostPreview(host)}
-                >
-                  {host}
-                </EuiLink>
+                />
               ) : (
                 <>{host}</>
               )}
@@ -208,10 +201,23 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           return (
             <DefaultFieldRenderer
               rowItems={ips}
-              attrName={'host.ip'}
+              attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
               isDraggable={false}
-              render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
+              render={(ip) =>
+                ip == null ? (
+                  getEmptyTagValue()
+                ) : isPreviewEnabled ? (
+                  <PreviewLink
+                    field={HOST_IP_FIELD_NAME}
+                    value={ip}
+                    scopeId={scopeId}
+                    data-test-subj={USER_DETAILS_RELATED_HOSTS_IP_LINK_TEST_ID}
+                  />
+                ) : (
+                  <NetworkDetailsLink ip={ip} />
+                )
+              }
               scopeId={scopeId}
             />
           );
@@ -235,7 +241,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId, openHostPreview, isPreviewEnabled]
+    [isEntityAnalyticsAuthorized, scopeId, isPreviewEnabled]
   );
 
   const relatedHostsCount = useMemo(
@@ -341,6 +347,23 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
           )}
         </AnomalyTableProvider>
         <EuiSpacer size="s" />
+        <EuiHorizontalRule margin="s" />
+        <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+          <AlertCountInsight
+            fieldName={'user.name'}
+            name={userName}
+            direction="column"
+            data-test-subj={USER_DETAILS_ALERT_COUNT_TEST_ID}
+          />
+          <MisconfigurationsInsight
+            fieldName={'user.name'}
+            name={userName}
+            direction="column"
+            data-test-subj={USER_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'user-details'}
+          />
+        </EuiFlexGrid>
+        <EuiSpacer size="l" />
         <EuiPanel hasBorder={true}>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>

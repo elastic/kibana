@@ -16,9 +16,9 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
-import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { isFullLicense } from '../../license';
@@ -26,6 +26,7 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { TechnicalPreviewBadge } from '../../components/technical_preview_badge';
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -36,14 +37,15 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         dataViews: { get: getDataView },
       },
       mlServices: {
-        mlApiServices: { recognizeIndex },
+        mlApi: { recognizeIndex },
       },
     },
   } = useMlKibana();
+  const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
   const mlLocator = useMlLocator()!;
   const mlFeaturesDisabled = !isFullLicense();
-  getMlNodeCount();
+  getMlNodeCount(mlApi);
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null
@@ -187,6 +189,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, mlFeaturesDisabled]
   );
+  const { euiTheme } = useEuiTheme();
   return IndexDataVisualizer ? (
     <Fragment>
       {IndexDataVisualizer !== null ? (
@@ -201,6 +204,9 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                 <>
                   <EuiFlexItem grow={false}>
                     <FormattedMessage id="xpack.ml.datavisualizer" defaultMessage="(ES|QL)" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
+                    <TechnicalPreviewBadge />
                   </EuiFlexItem>
                 </>
               ) : null}

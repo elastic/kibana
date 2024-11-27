@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { camelCase } from 'lodash';
@@ -11,9 +12,7 @@ import { ESQLRealField } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 
 export const fields: ESQLRealField[] = [
-  ...fieldTypes
-    .map((type) => ({ name: `${camelCase(type)}Field`, type }))
-    .filter((f) => f.type !== 'unsupported'),
+  ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'double' },
   { name: 'kubernetes.something.something', type: 'double' },
   { name: '@timestamp', type: 'date' },
@@ -55,7 +54,7 @@ export const policies = [
 
 export function getCallbackMocks() {
   return {
-    getFieldsFor: jest.fn(async ({ query }) => {
+    getColumnsFor: jest.fn(async ({ query }) => {
       if (/enrich/.test(query)) {
         return enrichFields;
       }

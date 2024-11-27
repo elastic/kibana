@@ -3,9 +3,10 @@ disabled:
   - x-pack/plugins/observability_solution/observability_onboarding/e2e/ftr_config_open.ts
   - x-pack/plugins/observability_solution/observability_onboarding/e2e/ftr_config_runner.ts
   - x-pack/plugins/observability_solution/observability_onboarding/e2e/ftr_config.ts
-  - x-pack/plugins/observability_solution/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/observability_solution/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/observability_solution/apm/ftr_e2e/ftr_config.ts
+  - x-pack/plugins/observability_solution/inventory/e2e/ftr_config_run.ts
+  - x-pack/plugins/observability_solution/inventory/e2e/ftr_config.ts
   - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_open.ts
   - x-pack/plugins/observability_solution/profiling/e2e/ftr_config_runner.ts
   - x-pack/plugins/observability_solution/profiling/e2e/ftr_config.ts
@@ -29,9 +30,9 @@ enabled:
   - x-pack/test/api_integration/apis/metrics_ui/config.ts
   - x-pack/test/api_integration/apis/osquery/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
-  - x-pack/test/api_integration/apis/slos/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
   - x-pack/test/api_integration/apis/entity_manager/config.ts
+  - x-pack/test/api_integration/apis/streams/config.ts
   - x-pack/test/apm_api_integration/basic/config.ts
   - x-pack/test/apm_api_integration/cloud/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
@@ -50,3 +51,6 @@ enabled:
   - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
   - x-pack/test/functional/apps/apm/config.ts
+  # stateful configs that run deployment-agnostic tests
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts

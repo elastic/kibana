@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
@@ -33,12 +33,7 @@ import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext 
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
-import {
-  LensEmbeddableInput,
-  LensByReferenceInput,
-  LensByValueInput,
-} from '../embeddable/embeddable';
-import { LensAttributeService } from '../lens_attribute_service';
+import { LensAttributesService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
 import {
   makeConfigureStore,
@@ -55,6 +50,7 @@ import {
   MainHistoryLocationState,
 } from '../../common/locator/locator';
 import { SavedObjectIndexStore } from '../persistence';
+import { LensSerializedState } from '../react_embeddable/types';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -83,7 +79,7 @@ function getInitialContext(history: AppMountParameters['history']) {
 export async function getLensServices(
   coreStart: CoreStart,
   startDependencies: LensPluginStartDependencies,
-  attributeService: LensAttributeService,
+  attributeService: LensAttributesService,
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   locator?: LensAppLocator
 ): Promise<LensAppServices> {
@@ -146,19 +142,12 @@ export async function mountApp(
   params: AppMountParameters,
   mountProps: {
     createEditorFrame: EditorFrameStart['createInstance'];
-    attributeService: LensAttributeService;
-    getPresentationUtilContext: () => FC<PropsWithChildren<{}>>;
+    attributeService: LensAttributesService;
     topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
     locator?: LensAppLocator;
   }
 ) {
-  const {
-    createEditorFrame,
-    attributeService,
-    getPresentationUtilContext,
-    topNavMenuEntryGenerators,
-    locator,
-  } = mountProps;
+  const { createEditorFrame, attributeService, topNavMenuEntryGenerators, locator } = mountProps;
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
     createEditorFrame(),
@@ -195,12 +184,12 @@ export async function mountApp(
     i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
   );
 
-  const getInitialInput = (id?: string, editByValue?: boolean): LensEmbeddableInput | undefined => {
+  const getInitialInput = (id?: string, editByValue?: boolean): LensSerializedState | undefined => {
     if (editByValue) {
-      return embeddableEditorIncomingState?.valueInput as LensByValueInput;
+      return embeddableEditorIncomingState?.valueInput as LensSerializedState;
     }
     if (id) {
-      return { savedObjectId: id } as LensByReferenceInput;
+      return { savedObjectId: id } as LensSerializedState;
     }
   };
 
@@ -227,14 +216,14 @@ export async function mountApp(
     if (initialContext && 'embeddableId' in initialContext) {
       embeddableId = initialContext.embeddableId;
     }
-    if (stateTransfer && props?.input) {
-      const { input, isCopied } = props;
+    if (stateTransfer && props?.state) {
+      const { state, isCopied } = props;
       stateTransfer.navigateToWithEmbeddablePackage(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
-          input,
+          input: { ...state, savedObject: state.savedObjectId },
           searchSessionId: data.search.session.getSessionId(),
         },
       });
@@ -411,25 +400,21 @@ export async function mountApp(
 
   params.element.classList.add('lnsAppWrapper');
 
-  const PresentationUtilContext = getPresentationUtilContext();
-
   render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={lensServices}>
-        <PresentationUtilContext>
-          <HashRouter>
-            <Routes>
-              <Route exact path="/edit/:id" component={EditorRoute} />
-              <Route
-                exact
-                path={`/${LENS_EDIT_BY_VALUE}`}
-                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-              />
-              <Route exact path="/" component={EditorRoute} />
-              <Route path="/" component={NotFound} />
-            </Routes>
-          </HashRouter>
-        </PresentationUtilContext>
+        <HashRouter>
+          <Routes>
+            <Route exact path="/edit/:id" component={EditorRoute} />
+            <Route
+              exact
+              path={`/${LENS_EDIT_BY_VALUE}`}
+              render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+            />
+            <Route exact path="/" component={EditorRoute} />
+            <Route path="/" component={NotFound} />
+          </Routes>
+        </HashRouter>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>,
     params.element
@@ -437,7 +422,7 @@ export async function mountApp(
   return () => {
     data.search.session.clear();
     unmountComponentAtNode(params.element);
-    lensServices.inspector.close();
+    lensServices.inspector.closeInspector();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
     stateTransfer.clearEditorState?.(APP_ID);

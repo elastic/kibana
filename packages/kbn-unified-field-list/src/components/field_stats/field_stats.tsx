@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -41,7 +42,6 @@ import {
   canProvideNumberSummaryForField,
 } from '../../utils/can_provide_stats';
 import { loadFieldStats } from '../../services/field_stats';
-import { loadFieldStatsTextBased } from '../../services/field_stats_text_based';
 import type { AddFieldFilterHandler } from '../../types';
 import {
   FieldTopValues,
@@ -135,7 +135,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [dataView, changeDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const isCanceledRef = useRef<boolean>(false);
-  const isTextBased = !!query && isOfAggregateQueryType(query);
+  const isEsqlQuery = !!query && isOfAggregateQueryType(query);
 
   const setState: typeof changeState = useCallback(
     (nextState) => {
@@ -177,6 +177,12 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
       setDataView(loadedDataView);
 
+      if (isEsqlQuery) {
+        // Not supported yet for ES|QL queries
+        // Previous implementation was removed in https://github.com/elastic/kibana/pull/198948/
+        return;
+      }
+
       if (state.isLoading) {
         return;
       }
@@ -186,32 +192,17 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       abortControllerRef.current?.abort();
       abortControllerRef.current = new AbortController();
 
-      const results = isTextBased
-        ? await loadFieldStatsTextBased({
-            services: { data },
-            dataView: loadedDataView,
-            field,
-            fromDate,
-            toDate,
-            baseQuery: query,
-            abortController: abortControllerRef.current,
-          })
-        : await loadFieldStats({
-            services: { data },
-            dataView: loadedDataView,
-            field,
-            fromDate,
-            toDate,
-            dslQuery:
-              dslQuery ??
-              buildEsQuery(
-                loadedDataView,
-                query ?? [],
-                filters ?? [],
-                getEsQueryConfig(uiSettings)
-              ),
-            abortController: abortControllerRef.current,
-          });
+      const results = await loadFieldStats({
+        services: { data },
+        dataView: loadedDataView,
+        field,
+        fromDate,
+        toDate,
+        dslQuery:
+          dslQuery ??
+          buildEsQuery(loadedDataView, query ?? [], filters ?? [], getEsQueryConfig(uiSettings)),
+        abortController: abortControllerRef.current,
+      });
 
       abortControllerRef.current = null;
 
@@ -296,7 +287,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
-    const countsElement = getCountsElement(state, services, isTextBased, dataTestSubject);
+    const countsElement = getCountsElement(state, services, isEsqlQuery, dataTestSubject);
 
     return (
       <>
@@ -318,7 +309,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     );
   }
 
-  if (!canProvideStatsForField(field, isTextBased)) {
+  if (!canProvideStatsForField(field, isEsqlQuery)) {
     const messageNoAnalysis = (
       <FieldSummaryMessage
         message={i18n.translate('unifiedFieldList.fieldStats.notAvailableForThisFieldDescription', {
@@ -335,7 +326,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       : messageNoAnalysis;
   }
 
-  if (canProvideNumberSummaryForField(field, isTextBased) && isNumberSummaryValid(numberSummary)) {
+  if (canProvideNumberSummaryForField(field, isEsqlQuery) && isNumberSummaryValid(numberSummary)) {
     title = (
       <EuiTitle size="xxxs">
         <h6>
@@ -562,21 +553,19 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 function getCountsElement(
   state: FieldStatsState,
   services: FieldStatsServices,
-  isTextBased: boolean,
+  isEsqlQuery: boolean,
   dataTestSubject: string
 ): JSX.Element {
   const dataTestSubjDocsCount = 'unifiedFieldStats-statsFooter-docsCount';
   const { fieldFormats } = services;
-  const { totalDocuments, sampledValues, sampledDocuments, topValues } = state;
+  const { totalDocuments, sampledDocuments } = state;
 
-  if (!totalDocuments) {
+  if (!totalDocuments || isEsqlQuery) {
     return <></>;
   }
 
-  let labelElement;
-
-  if (isTextBased) {
-    labelElement = topValues?.areExamples ? (
+  const labelElement =
+    sampledDocuments && sampledDocuments < totalDocuments ? (
       <FormattedMessage
         id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
         defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
@@ -593,54 +582,20 @@ function getCountsElement(
       />
     ) : (
       <FormattedMessage
-        id="unifiedFieldList.fieldStats.calculatedFromSampleValuesLabel"
-        defaultMessage="Calculated from {sampledValuesFormatted} sample {sampledValues, plural, one {value} other {values}}."
+        id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
+        defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
         values={{
-          sampledValues,
-          sampledValuesFormatted: (
+          totalDocuments,
+          totalDocumentsFormatted: (
             <strong data-test-subj={dataTestSubjDocsCount}>
               {fieldFormats
                 .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                .convert(sampledValues)}
+                .convert(totalDocuments)}
             </strong>
           ),
         }}
       />
     );
-  } else {
-    labelElement =
-      sampledDocuments && sampledDocuments < totalDocuments ? (
-        <FormattedMessage
-          id="unifiedFieldList.fieldStats.calculatedFromSampleRecordsLabel"
-          defaultMessage="Calculated from {sampledDocumentsFormatted} sample {sampledDocuments, plural, one {record} other {records}}."
-          values={{
-            sampledDocuments,
-            sampledDocumentsFormatted: (
-              <strong data-test-subj={dataTestSubjDocsCount}>
-                {fieldFormats
-                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(sampledDocuments)}
-              </strong>
-            ),
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="unifiedFieldList.fieldStats.calculatedFromTotalRecordsLabel"
-          defaultMessage="Calculated from {totalDocumentsFormatted} {totalDocuments, plural, one {record} other {records}}."
-          values={{
-            totalDocuments,
-            totalDocumentsFormatted: (
-              <strong data-test-subj={dataTestSubjDocsCount}>
-                {fieldFormats
-                  .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
-                  .convert(totalDocuments)}
-              </strong>
-            ),
-          }}
-        />
-      );
-  }
 
   return (
     <EuiText color="subdued" size="xs" data-test-subj={`${dataTestSubject}-statsFooter`}>

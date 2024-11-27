@@ -22,6 +22,7 @@ import {
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useBaseChartTheme } from '../../../../../../hooks/use_base_chart_theme';
 import { BAR_HEIGHT } from './constants';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
@@ -39,27 +40,29 @@ const getChartHeight = (data: WaterfallData): number => {
 };
 
 const CustomTooltip: CustomChartTooltip = (tooltipInfo) => {
-  const { data, sidebarItems } = useWaterfallContext();
+  const { sidebarItems, metadata } = useWaterfallContext();
   return useMemo(() => {
     const sidebarItem = sidebarItems?.find((item) => item.index === tooltipInfo.header?.value);
-    const relevantItems = data.filter((item) => {
-      return (
-        item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
-      );
-    });
-    return relevantItems.length ? (
+    if (!sidebarItem) {
+      return null;
+    }
+    const metadataEntry = metadata?.[sidebarItem.index];
+    const showTooltip =
+      metadataEntry?.showTooltip && metadataEntry?.networkItemTooltipProps.length > 1;
+    return showTooltip ? (
       <TooltipContainer>
         <WaterfallChartTooltip>
           {sidebarItem && (
             <WaterfallTooltipContent
-              text={formatTooltipHeading(sidebarItem.index + 1, sidebarItem.url)}
+              text={formatTooltipHeading(sidebarItem.offsetIndex, sidebarItem.url)}
               url={sidebarItem.url}
+              index={sidebarItem.offsetIndex}
             />
           )}
         </WaterfallChartTooltip>
       </TooltipContainer>
     ) : null;
-  }, [data, sidebarItems, tooltipInfo.header?.value]);
+  }, [sidebarItems, tooltipInfo.header?.value, metadata]);
 };
 
 interface Props {
@@ -84,6 +87,8 @@ export const WaterfallBarChart = ({
   const handleProjectionClick = useMemo(() => onProjectionClick, [onProjectionClick]);
   const memoizedTickFormat = useCallback(tickFormat, [tickFormat]);
 
+  const appFixedViewport = useAppFixedViewport();
+
   return (
     <WaterfallChartChartContainer
       height={getChartHeight(chartData)}
@@ -94,7 +99,7 @@ export const WaterfallBarChart = ({
         <Tooltip
           // this is done to prevent the waterfall tooltip from rendering behind Kibana's
           // stacked header when the user highlights an item at the top of the chart
-          boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+          boundary={appFixedViewport}
           customTooltip={CustomTooltip}
         />
         <Settings

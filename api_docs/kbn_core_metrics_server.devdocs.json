@@ -570,7 +570,7 @@
               "The os platform"
             ],
             "signature": [
-              "\"linux\" | \"android\" | \"aix\" | \"darwin\" | \"freebsd\" | \"haiku\" | \"openbsd\" | \"sunos\" | \"win32\" | \"cygwin\" | \"netbsd\""
+              "\"android\" | \"linux\" | \"aix\" | \"darwin\" | \"freebsd\" | \"haiku\" | \"openbsd\" | \"sunos\" | \"win32\" | \"cygwin\" | \"netbsd\""
             ],
             "path": "packages/core/metrics/core-metrics-server/src/metrics.ts",
             "deprecated": false,

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { comboBoxFieldOptionMatcher, getFieldIconType } from '@kbn/field-utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -52,7 +53,9 @@ export const FieldPicker = ({
     () =>
       sortBy(
         (dataView?.fields ?? [])
-          .filter((f) => typesFilter.length === 0 || typesFilter.includes(f.type as string))
+          .filter(
+            (f) => typesFilter.length === 0 || typesFilter.includes(getFieldIconType(f) as string)
+          )
           .filter((f) => (filterPredicate ? filterPredicate(f) : true)),
         ['name']
       ).sort((f) => (f.name === initialSelection.current ? -1 : 1)),
@@ -71,7 +74,7 @@ export const FieldPicker = ({
         'data-test-subj': `field-picker-select-${field.name}`,
         prepend: (
           <FieldIcon
-            type={field.type}
+            type={getFieldIconType(field)}
             label={field.name}
             scripted={field.scripted}
             className="eui-alignMiddle"
@@ -88,7 +91,7 @@ export const FieldPicker = ({
         ? uniq(
             dataView.fields
               .filter((f) => (filterPredicate ? filterPredicate(f) : true))
-              .map((f) => f.type as string)
+              .map((f) => getFieldIconType(f))
           )
         : [],
     [dataView, filterPredicate]
@@ -137,6 +140,7 @@ export const FieldPicker = ({
         placeholder: i18n.translate('presentationUtil.fieldSearch.searchPlaceHolder', {
           defaultMessage: 'Search field names',
         }),
+        compressed: true,
         disabled: Boolean(selectableProps?.isLoading),
         inputRef: setSearchRef,
       }}

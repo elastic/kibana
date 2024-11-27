@@ -40,12 +40,23 @@ export async function getAgentStatusById(
   return (await getAgentById(esClient, soClient, agentId)).status!;
 }
 
+/**
+ * getAgentStatusForAgentPolicy
+ * @param esClient
+ * @param soClient
+ * @param agentPolicyId @deprecated use agentPolicyIds instead since the move to multi-policy
+ * @param filterKuery
+ * @param spaceId
+ * @param agentPolicyIds
+ */
+
 export async function getAgentStatusForAgentPolicy(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   agentPolicyId?: string,
   filterKuery?: string,
-  spaceId?: string
+  spaceId?: string,
+  agentPolicyIds?: string[]
 ) {
   const logger = appContextService.getLogger();
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
@@ -71,8 +82,14 @@ export async function getAgentStatusForAgentPolicy(
     );
     clauses.push(kueryAsElasticsearchQuery);
   }
-
-  if (agentPolicyId) {
+  // If agentPolicyIds is provided, we filter by those, otherwise we filter by depreciated agentPolicyId
+  if (agentPolicyIds) {
+    clauses.push({
+      terms: {
+        policy_id: agentPolicyIds,
+      },
+    });
+  } else if (agentPolicyId) {
     clauses.push({
       term: {
         policy_id: agentPolicyId,
@@ -160,11 +177,17 @@ export async function getAgentStatusForAgentPolicy(
   };
 }
 
-export async function getIncomingDataByAgentsId(
-  esClient: ElasticsearchClient,
-  agentsIds: string[],
-  returnDataPreview: boolean = false
-) {
+export async function getIncomingDataByAgentsId({
+  esClient,
+  agentsIds,
+  dataStreamPattern = DATA_STREAM_INDEX_PATTERN,
+  returnDataPreview = false,
+}: {
+  esClient: ElasticsearchClient;
+  agentsIds: string[];
+  dataStreamPattern?: string;
+  returnDataPreview?: boolean;
+}) {
   const logger = appContextService.getLogger();
 
   try {
@@ -172,7 +195,7 @@ export async function getIncomingDataByAgentsId(
       body: {
         index: [
           {
-            names: [DATA_STREAM_INDEX_PATTERN],
+            names: [dataStreamPattern],
             privileges: ['read'],
           },
         ],
@@ -186,7 +209,7 @@ export async function getIncomingDataByAgentsId(
     const searchResult = await retryTransientEsErrors(
       () =>
         esClient.search({
-          index: DATA_STREAM_INDEX_PATTERN,
+          index: dataStreamPattern,
           allow_partial_search_results: true,
           _source: returnDataPreview,
           timeout: '5s',
@@ -227,9 +250,9 @@ export async function getIncomingDataByAgentsId(
     if (!searchResult.aggregations?.agent_ids) {
       return {
         items: agentsIds.map((id) => {
-          return { items: { [id]: { data: false } } };
+          return { [id]: { data: false } };
         }),
-        data: [],
+        dataPreview: [],
       };
     }
 

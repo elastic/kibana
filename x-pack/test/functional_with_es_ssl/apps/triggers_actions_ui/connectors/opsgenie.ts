@@ -59,15 +59,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
         const connector = await getConnectorByName(connectorName, supertest);
-        objectRemover.add(connector.id, 'action', 'actions');
+        objectRemover.add(connector.id, 'connector', 'actions');
       });
 
       it('should edit the connector', async () => {
         const connectorName = generateUniqueKey();
         const updatedConnectorName = `${connectorName}updated`;
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        objectRemover.add(createdAction.id, 'connector', 'actions');
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -99,8 +99,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should reset connector when canceling an edit', async () => {
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        objectRemover.add(createdAction.id, 'connector', 'actions');
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -127,8 +127,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should disable the run button when the message field is not filled', async () => {
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
-        browser.refresh();
+        objectRemover.add(createdAction.id, 'connector', 'actions');
+        await browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -149,7 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const connectorName = generateUniqueKey();
           const createdAction = await createOpsgenieConnector(connectorName);
           connectorId = createdAction.id;
-          objectRemover.add(createdAction.id, 'action', 'actions');
+          objectRemover.add(createdAction.id, 'connector', 'actions');
         });
 
         beforeEach(async () => {
@@ -292,7 +292,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       before(async () => {
         const createdAction = await createOpsgenieConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+        objectRemover.add(createdAction.id, 'connector', 'actions');
 
         await pageObjects.common.navigateToApp('triggersActions');
       });

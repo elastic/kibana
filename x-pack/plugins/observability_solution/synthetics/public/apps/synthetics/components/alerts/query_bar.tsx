@@ -5,81 +5,73 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
+import { Filter } from '@kbn/es-query';
+import { EuiFormRow } from '@elastic/eui';
+import { useSyntheticsDataView } from '../../contexts/synthetics_data_view_context';
 import { ClientPluginsStart } from '../../../../plugin';
 
-interface Props {
-  query: string;
-  onChange: (query: string) => void;
-}
-export const isValidKuery = (query: string) => {
-  if (query === '') {
-    return true;
-  }
-  const listOfOperators = [':', '>=', '=>', '>', '<'];
-  for (let i = 0; i < listOfOperators.length; i++) {
-    const operator = listOfOperators[i];
-    const qParts = query.trim().split(operator);
-    if (query.includes(operator) && qParts.length > 1 && qParts[1]) {
-      return true;
-    }
-  }
-  return false;
-};
-
-export const AlertQueryBar = ({ query = '', onChange }: Props) => {
-  const { services } = useKibana<ClientPluginsStart>();
-
+export function AlertSearchBar({
+  kqlQuery,
+  onChange,
+}: {
+  kqlQuery: string;
+  onChange: (val: { kqlQuery?: string; filters?: Filter[] }) => void;
+}) {
   const {
-    appName,
-    dataViews,
+    data: { query },
     unifiedSearch: {
       ui: { QueryStringInput },
     },
-  } = services;
+  } = useKibana<ClientPluginsStart>().services;
 
-  const [inputVal, setInputVal] = useState<string>(query);
-
-  const { data: dataView } = useFetcher(async () => {
-    return await dataViews.create({ title: SYNTHETICS_INDEX_PATTERN });
-  }, [dataViews]);
+  const dataView = useSyntheticsDataView();
 
   useEffect(() => {
-    onChange(query);
-    setInputVal(query);
+    const sub = query.state$.subscribe(() => {
+      const queryState = query.getState();
+      onChange({
+        kqlQuery: String(queryState.query),
+      });
+    });
+
+    return () => sub.unsubscribe();
   }, [onChange, query]);
 
   return (
-    <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
+    <EuiFormRow
+      label={i18n.translate('xpack.synthetics.list.search.title', {
+        defaultMessage: 'Filter by',
+      })}
+      fullWidth
+    >
       <QueryStringInput
-        indexPatterns={dataView ? [dataView] : []}
+        appName="synthetics"
         iconType="search"
-        isClearable={true}
+        placeholder={PLACEHOLDER}
+        indexPatterns={dataView ? [dataView] : []}
         onChange={(queryN) => {
-          setInputVal(queryN?.query as string);
-          if (isValidKuery(queryN?.query as string)) {
-            // we want to submit when user clears or paste a complete kuery
-            onChange(queryN.query as string);
-          }
+          onChange({
+            kqlQuery: String(queryN.query),
+          });
         }}
         onSubmit={(queryN) => {
-          if (queryN) onChange(queryN.query as string);
+          if (queryN) {
+            onChange({
+              kqlQuery: String(queryN.query),
+            });
+          }
         }}
-        query={{ query: inputVal, language: 'kuery' }}
-        dataTestSubj="xpack.synthetics.alerts.monitorStatus.filterBar"
+        query={{ query: String(kqlQuery), language: 'kuery' }}
         autoSubmit={true}
         disableLanguageSwitcher={true}
-        isInvalid={!!(inputVal && !query)}
-        placeholder={i18n.translate('xpack.synthetics.alerts.searchPlaceholder.kql', {
-          defaultMessage: 'Filter using kql syntax',
-        })}
-        appName={appName}
       />
-    </EuiFlexItem>
+    </EuiFormRow>
   );
-};
+}
+
+const PLACEHOLDER = i18n.translate('xpack.synthetics.list.search', {
+  defaultMessage: 'Filter by KQL query',
+});

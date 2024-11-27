@@ -1,11 +1,18 @@
 {
   "type": "plugin",
   "id": "@kbn/content-management-plugin",
-  "owner": "@elastic/appex-sharedux",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Content management app",
   "plugin": {
     "id": "contentManagement",
+    "browser": true,
     "server": true,
-    "browser": true
+    "optionalPlugins": [
+      "usageCollection"
+    ]
   }
 }

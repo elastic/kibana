@@ -139,9 +139,9 @@ describe('DataTable', () => {
       wrapper.update();
       expect(
         wrapper
-          .find('[data-test-subj="dataGridRowCell"]')
+          .find('div[data-test-subj="dataGridRowCell"]')
           .at(0)
-          .find('.euiDataGridRowCell__content')
+          .find('div.euiDataGridRowCell__content')
           .childAt(0)
           .text()
       ).toEqual(mockTimelineData[0].ecs.timestamp);
@@ -269,7 +269,7 @@ describe('DataTable', () => {
     );
 
     // click the `@timestamp` column header to display the popover
-    fireEvent.click(screen.getByText('@timestamp'));
+    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-@timestamp'));
 
     // click the `Remove column` action in the popover
     fireEvent.click(await screen.getByText(REMOVE_COLUMN));

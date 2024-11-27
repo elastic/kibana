@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
@@ -15,8 +15,6 @@ import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
   CLOUDBEAT_VULN_MGMT_AWS,
-  KSPM_POLICY_TEMPLATE,
-  CSPM_POLICY_TEMPLATE,
   VULN_MGMT_POLICY_TEMPLATE,
   CLOUDBEAT_VULN_MGMT_GCP,
   CLOUDBEAT_VULN_MGMT_AZURE,
@@ -25,17 +23,9 @@ import {
 } from '../../common/constants';
 
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
-import aksLogo from '../assets/icons/cis_aks_logo.svg';
-import gkeLogo from '../assets/icons/cis_gke_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
-export const statusColors = {
-  passed: euiThemeVars.euiColorSuccess,
-  failed: euiThemeVars.euiColorVis9,
-};
-
 export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
-export const MAX_FINDINGS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';
@@ -45,6 +35,9 @@ export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
   'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
+
+export const LOCAL_STORAGE_3P_INTEGRATIONS_CALLOUT_KEY =
+  'cloudPosture:findings:3pIntegrationsCallout';
 
 export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
 export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
@@ -150,34 +143,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         }),
         testId: 'cisEksTestId',
       },
-      {
-        type: CLOUDBEAT_AKS,
-        name: i18n.translate('xpack.csp.kspmIntegration.aksOption.nameTitle', {
-          defaultMessage: 'AKS',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.aksOption.benchmarkTitle', {
-          defaultMessage: 'CIS AKS',
-        }),
-        disabled: true,
-        icon: aksLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.aksOption.tooltipContent', {
-          defaultMessage: 'Azure Kubernetes Service - Coming soon',
-        }),
-      },
-      {
-        type: CLOUDBEAT_GKE,
-        name: i18n.translate('xpack.csp.kspmIntegration.gkeOption.nameTitle', {
-          defaultMessage: 'GKE',
-        }),
-        benchmark: i18n.translate('xpack.csp.kspmIntegration.gkeOption.benchmarkTitle', {
-          defaultMessage: 'CIS GKE',
-        }),
-        disabled: true,
-        icon: gkeLogo,
-        tooltip: i18n.translate('xpack.csp.kspmIntegration.gkeOption.tooltipContent', {
-          defaultMessage: 'Google Kubernetes Engine - Coming soon',
-        }),
-      },
     ],
   },
   vuln_mgmt: {
@@ -238,6 +203,7 @@ export const FINDINGS_GROUPING_OPTIONS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
 };
+
 export const VULNERABILITY_FIELDS = {
   VULNERABILITY_ID: 'vulnerability.id',
   SCORE_BASE: 'vulnerability.score.base',
@@ -250,11 +216,39 @@ export const VULNERABILITY_FIELDS = {
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
   CLOUD_PROVIDER: 'cloud.provider',
   DESCRIPTION: 'vulnerability.description',
+  VENDOR: 'observer.vendor',
 } as const;
+
 export const VULNERABILITY_GROUPING_OPTIONS = {
   NONE: 'none',
   RESOURCE_NAME: VULNERABILITY_FIELDS.RESOURCE_NAME,
   RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
   CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
+};
+
+/*
+The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
+The runtime mappings are used to prevent filtering out the data when any of these columns are sorted in the Data Table.
+TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
+the fields from the runtime mappings if they are removed from the Data Table.
+*/
+export const CDR_VULNERABILITY_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [];
+export const CDR_MISCONFIGURATION_DATA_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
+  'rule.benchmark.rule_number',
+  'rule.section',
+  'resource.sub_type',
+];
+
+/*
+The fields below are used to group the data in the Cloud Security Data Table.
+The keys are the fields that are used to group the data, and the values are the fields that need to have keyword mapping
+to prevent filtering out the data when grouping by the key field.
+TODO: Remove the fields below once they are mapped as Keyword in the Third Party integrations, or remove
+the fields from the runtime mappings if they are removed from the Data Table.
+*/
+export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
+export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
+  [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: ['orchestrator.cluster.name'],
+  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: ['cloud.account.name'],
 };

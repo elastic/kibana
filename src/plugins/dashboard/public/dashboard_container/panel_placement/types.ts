@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
 import { DashboardPanelState } from '../../../common';
-import { GridData } from '../../../common/content_management';
+import type { GridData } from '../../../server/content_management';
 import { PanelPlacementStrategy } from '../../dashboard_constants';
 
 export interface PanelPlacementSettings {

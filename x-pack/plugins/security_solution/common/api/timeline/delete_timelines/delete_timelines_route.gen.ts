@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type DeleteTimelinesRequestBody = z.infer<typeof DeleteTimelinesRequestBody>;
 export const DeleteTimelinesRequestBody = z.object({
@@ -25,10 +25,3 @@ export const DeleteTimelinesRequestBody = z.object({
   searchIds: z.array(z.string()).optional(),
 });
 export type DeleteTimelinesRequestBodyInput = z.input<typeof DeleteTimelinesRequestBody>;
-
-export type DeleteTimelinesResponse = z.infer<typeof DeleteTimelinesResponse>;
-export const DeleteTimelinesResponse = z.object({
-  data: z.object({
-    deleteTimeline: z.boolean(),
-  }),
-});

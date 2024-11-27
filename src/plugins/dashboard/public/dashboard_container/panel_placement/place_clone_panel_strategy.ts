@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { cloneDeep, forOwn } from 'lodash';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../common';
-import { GridData } from '../../../common/content_management';
+import type { GridData } from '../../../server/content_management';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../dashboard_constants';
 
@@ -108,9 +109,9 @@ export function placeClonePanel({
 
   for (let j = position + 1; j < grid.length; j++) {
     originalPositionInTheGrid = grid[j].i;
-    const movedPanel = cloneDeep(otherPanels[originalPositionInTheGrid]);
-    movedPanel.gridData.y = movedPanel.gridData.y + diff;
-    otherPanels[originalPositionInTheGrid] = movedPanel;
+    const { gridData, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
+    const newGridData = { ...gridData, y: gridData.y + diff };
+    otherPanels[originalPositionInTheGrid] = { ...movedPanel, gridData: newGridData };
   }
   return { newPanelPlacement: bottomPlacement.grid, otherPanels };
 }

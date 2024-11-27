@@ -7,11 +7,20 @@
 
 import { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
-import type { StatusResponse } from '@kbn/core-status-common-internal';
+import type { StatusResponse } from '@kbn/core-status-common';
 import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 
 export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusResponse> => {
-  return (await kbnClient.status.get().catch(catchAxiosErrorFormatAndThrow)) as StatusResponse;
+  // We DO NOT use `kbnClient.status.get()` here because the `kbnClient` passed on input could be our enhanced
+  // client (created by `x-pack/plugins/security_solution/scripts/endpoint/common/stack_services.ts:267`)
+  // which could be using an API key (which the core KbnClient does not support)
+  return kbnClient
+    .request<StatusResponse>({
+      method: 'GET',
+      path: '/api/status',
+    })
+    .then(({ data }) => data)
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 /**
  * Checks to see if Kibana/ES is running in serverless mode

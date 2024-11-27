@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { execSync } from 'child_process';
@@ -17,17 +18,16 @@ const STORYBOOKS = [
   'canvas',
   'cases',
   'cell_actions',
-  'cloud_chat',
-  'coloring',
   'chart_icons',
+  'cloud_security_posture_packages',
+  'coloring',
   'content_management_examples',
-  'controls',
   'custom_integrations',
   'dashboard_enhanced',
   'dashboard',
   'data',
-  'logs_explorer',
   'embeddable',
+  'esql_editor',
   'expression_error',
   'expression_image',
   'expression_metric',
@@ -35,26 +35,28 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'management',
   'fleet',
   'grouping',
   'home',
   'infra',
   'kibana_react',
+  'language_documentation_popover',
   'lists',
-  'observability',
+  'logs_explorer',
+  'management',
   'observability_ai_assistant',
+  'observability_inventory',
+  'observability_shared',
+  'observability',
   'presentation',
-  'security_solution',
+  'random_sampling',
   'security_solution_packages',
+  'security_solution',
   'serverless',
   'shared_ux',
   'triggers_actions_ui',
   'ui_actions_enhanced',
-  'language_documentation_popover',
   'unified_search',
-  'random_sampling',
-  'text_based_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -15,7 +16,7 @@ import {
   type WhenOptions,
   CustomHelpers,
 } from 'joi';
-import { META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
+import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_DISCONTINUED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
 
@@ -32,6 +33,11 @@ export interface TypeMeta {
    * Whether this field is deprecated.
    */
   deprecated?: boolean;
+  /**
+   * Release version or date that this route will be removed
+   * @example 9.0.0
+   */
+  'x-discontinued'?: string;
 }
 
 export interface TypeOptions<T> {
@@ -128,6 +134,8 @@ export abstract class Type<V> {
       if (options.meta.deprecated) {
         schema = schema.meta({ [META_FIELD_X_OAS_DEPRECATED]: true });
       }
+      if (options.meta.deprecated && options.meta['x-discontinued'])
+        schema = schema.meta({ [META_FIELD_X_OAS_DISCONTINUED]: options.meta['x-discontinued'] });
     }
 
     // Attach generic error handler only if it hasn't been attached yet since

@@ -8,6 +8,7 @@
 export { AutoDetectPage } from './auto_detect';
 export { CustomLogsPage } from './custom_logs';
 export { KubernetesPage } from './kubernetes';
+export { OtelKubernetesPage } from './otel_kubernetes';
 export { LandingPage } from './landing';
 export { OtelLogsPage } from './otel_logs';
-export { SystemLogsPage } from './system_logs';
+export { FirehosePage } from './firehose';

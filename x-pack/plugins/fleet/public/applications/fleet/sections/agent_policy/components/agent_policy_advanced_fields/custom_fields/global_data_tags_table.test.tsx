@@ -44,9 +44,11 @@ describe('GlobalDataTagsTable', () => {
         global_data_tags: tags,
       });
 
-      const updateAgentPolicy = React.useCallback((policy) => {
+      const updateAgentPolicy = React.useCallback<
+        React.ComponentProps<typeof GlobalDataTagsTable>['updateAgentPolicy']
+      >((policy) => {
         mockUpdateAgentPolicy(policy);
-        _updateAgentPolicy(policy);
+        _updateAgentPolicy({ ...policy, global_data_tags: policy.global_data_tags ?? [] });
       }, []);
 
       return (
@@ -123,7 +125,7 @@ describe('GlobalDataTagsTable', () => {
         { name: 'newTag2', value: '123 123' },
       ],
     });
-  });
+  }, 10000);
 
   it('should edit an existing tag', async () => {
     renderComponent(globalDataTags);

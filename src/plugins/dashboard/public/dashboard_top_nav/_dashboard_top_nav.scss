@@ -1,8 +1,13 @@
 .kbnBody {
+  .dshTitleBreadcrumbs__updateIcon {
+    margin-left: $euiSizeXS;
+    cursor: pointer;
+  }
+
   .dashboardTopNav {
     width: 100%;
     position: sticky;
-    z-index: $euiZLevel2;
+    z-index: $euiZLevel3;
     top: var(--euiFixedHeadersOffset, 0);
     background: $euiPageBackgroundColor;
   }

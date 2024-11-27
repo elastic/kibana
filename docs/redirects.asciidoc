@@ -200,19 +200,19 @@ This content has moved. See <<known-kibana-plugins>>.
 [[trigger-picker]]
 === Picking a trigger for a URL drilldown
 
-This page has moved. Refer to <<url-drilldowns>>.
+This page has moved. Refer to <<create-url-drilldowns>>.
 
 [float]
 [[templating]]
 === URL templating
 
-This page has moved. Refer to <<url_templating-language>>.
+This page has moved. Refer to <<url-templating-language>>.
 
 [float]
 [[variables]]
 === Variables
 
-This page has moved. Refer to <<url-template-variables>>.
+This page has moved. Refer to <<url-template-variable>>.
 
 [float]
 [[time-series-visual-builder]]
@@ -418,10 +418,6 @@ This page has been deleted. Refer to <<machine-learning-api-sync>>.
 
 This page has been deleted. Refer to <<alerting-getting-started>>.
 
-[role="exclude",id="enhancements-and-bug-fixes-v8.10.0"]
-== Enhancements and bug fixes for 8.10.0
-
-This content has moved. Refer to <<enhancements-and-bug-fixes-v8.10.0-revised>> for 8.10.0.
 
 [role="exclude",id="gen-ai-action-type"]
 == Generative AI connector and action
@@ -438,6 +434,20 @@ For the most up-to-date API details, refer to the
 == Add connectors to cases
 
 This content has moved. Refer to <<manage-cases-settings>>.
+
+[role="exclude", id="create-drilldowns"]
+== Create drilldowns
+
+[[url-drilldowns]]
+[[url_templating-language]]
+[[url-template-variables]]
+This content has moved. Refer to <<drilldowns>>.
+
+[role="exclude", id="tsvb"]
+== TSVB
+
+[[tsvb-index-pattern-mode]]
+This content has moved. Refer to <<tsvb-panel>>.
 
 ////
 APM redirects
@@ -765,3 +775,445 @@ Refer to {observability-guide}/apm-agent-key-api.html[APM agent Key API].
 Refer to {observability-guide}/apm-app-troubleshooting.html[Troubleshooting].
 
 :!apm-docs-move-notice:
+
+[role="exclude",id="saved-objects-api-export"]
+== Export objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-import"]
+== Import objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-create"]
+== Bulk create saved objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-delete"]
+== Bulk delete object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-get"]
+== Bulk get objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-resolve"]
+== Bulk resolve objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-bulk-update"]
+== Bulk update object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-create"]
+== Create saved objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-delete"]
+==  Delete object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-find"]
+== Find objects API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-get"]
+== Get object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-resolve-import-errors"]
+== Resolve import errors API
+
+[role="exclude",id="saved-objects-api-resolve"]
+== Resolve object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-rotate-encryption-key"]
+== Rotate encryption key API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="saved-objects-api-update"]
+== Update object API
+
+Refer to {api-kibana}/group/endpoint-saved-objects[saved objects API].
+
+[role="exclude",id="data-views-api-get-all"]
+== Get all data views API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-create"]
+== Create runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-delete"]
+== Delete runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-get"]
+== Get runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-update"]
+== Update runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-runtime-field-api-upsert"]
+== Upsert runtime field API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-create"]
+== Create data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-default-get"]
+== Get default data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-default-set"]
+== Set default data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-delete"]
+== Delete data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-get"]
+== Get data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-swap-references-preview"]
+== Swap references preview data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-swap-references"]
+== Swap references data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-fields-api-update"]
+== Update data view fields API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="data-views-api-update"]
+== Update data view API
+
+Refer to {api-kibana}/group/endpoint-data-views[data views API].
+
+[role="exclude",id="create-rule-api"]
+== Create rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="delete-rule-api"]
+== Delete rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="disable-rule-api"]
+== Disable rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="enable-rule-api"]
+== Enable rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="find-rules-api"]
+== Find rules API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="get-rule-api"]
+== Get rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="get-alerting-framework-health-api"]
+== Get alerting framework health API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="list-rule-types-api"]
+== Get rule types API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="mute-alert-api"]
+== Mute alert API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="mute-all-alerts-api"]
+== Mute all alerts API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="unmute-alert-api"]
+== Unmute alert API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="unmute-all-alerts-api"]
+== Unmute all alerts API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="update-rule-api"]
+== Update rule API
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="alerts-api"]
+== Deprecated 7.x APIs
+
+Refer to {api-kibana}/group/endpoint-alerting[alerting API].
+
+[role="exclude",id="update-connector-api"]
+== Update connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="list-connector-types-api"]
+== List connector types API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="get-connector-api"]
+== Get connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="get-all-connectors-api"]
+== Get all connectors API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="execute-connector-api"]
+== Run connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="delete-connector-api"]
+== Delete connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="create-connector-api"]
+== Create connector API
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="actions-and-connectors-legacy-apis"]
+== Deprecated 7.x APIs
+
+Refer to {api-kibana}/group/endpoint-connectors[connectors API].
+
+[role="exclude",id="cases-api-add-comment"]
+== Add comment to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-create"]
+== Create case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-cases"]
+== Delete cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-delete-comments"]
+== Delete comments from case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-case-activity"]
+== Find case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-cases"]
+== Find cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-find-connectors"]
+== Find connectors API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-alerts"]
+== Get alerts attached to case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case-activity"]
+== Get case activity API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-case"]
+== Get case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-cases-by-alert"]
+== Get cases by alert API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-comments"]
+== Get comments API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-get-configuration"]
+== Get case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-reporters"]
+== Get reporters API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-status"]
+== Get case status API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-get-tag"]
+== Get tags API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-push"]
+== Push case API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-set-configuration"]
+== Set case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-comment"]
+== Update case comment API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update-configuration"]
+== Update case configuration API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="cases-api-update"]
+== Update cases API
+
+Refer to {api-kibana}/group/endpoint-cases[cases API].
+
+[role="exclude",id="machine-learning-api-sync"]
+== Sync {ml} saved objects API
+
+Refer to {api-kibana}/group/endpoint-ml[machine learning APIs].
+
+[role="exclude",id="spaces-api-post"]
+== Create space API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-put"]
+== Update space API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-get"]
+== Get a space API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-get-all"]
+== Get all {kib} spaces API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-delete"]
+== Delete space API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-copy-saved-objects"]
+== Copy saved objects to space API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-disable-legacy-url-aliases"]
+== Disable legacy URL aliases API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-get-shareable-references"]
+== Get shareable references API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-resolve-copy-saved-objects-conflicts"]
+== Resolve copy saved objects to space conflicts API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+
+[role="exclude",id="spaces-api-update-objects-spaces"]
+== Update saved objects spaces API
+
+Refer to {api-kibana}/group/endpoint-spaces[spaces APIs].
+[role="exclude",id="role-management-api-delete]
+== Delete role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-get"]
+== Get all {kib} roles API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-specific-api-get"]
+== Get specific role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-put-bulk"]
+== Bulk create or update roles API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="role-management-api-put"]
+== Create or update role API
+
+Refer to {api-kibana}/group/endpoint-roles[role APIs].

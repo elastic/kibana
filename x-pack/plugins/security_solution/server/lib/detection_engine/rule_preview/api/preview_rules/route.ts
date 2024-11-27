@@ -31,7 +31,11 @@ import type {
   RulePreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { RulePreviewRequestBody } from '../../../../../../common/api/detection_engine';
+import {
+  RulePreviewRequestBody,
+  RulePreviewRequestQuery,
+} from '../../../../../../common/api/detection_engine';
+import type { RulePreviewLoggedRequest } from '../../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -85,14 +89,24 @@ export const previewRulesRoute = (
     .post({
       path: DETECTION_ENGINE_RULES_PREVIEW,
       access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        tags: [routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidationWithZod(RulePreviewRequestBody) } },
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(RulePreviewRequestBody),
+            query: buildRouteValidationWithZod(RulePreviewRequestQuery),
+          },
+        },
       },
       async (context, request, response): Promise<IKibanaResponse<RulePreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
@@ -143,7 +157,9 @@ export const previewRulesRoute = (
           const username = security?.authc.getCurrentUser(request)?.username;
           const loggedStatusChanges: Array<RuleExecutionContext & StatusChangeArgs> = [];
           const previewRuleExecutionLogger = createPreviewRuleExecutionLogger(loggedStatusChanges);
-          const runState: Record<string, unknown> = {};
+          const runState: Record<string, unknown> = {
+            isLoggedRequestsEnabled: request.query.enable_logged_requests,
+          };
           const logs: RulePreviewLogs[] = [];
           let isAborted = false;
 
@@ -224,6 +240,7 @@ export const previewRulesRoute = (
             }
           ) => {
             let statePreview = runState as TState;
+            let loggedRequests = [];
 
             const abortController = new AbortController();
             setTimeout(() => {
@@ -268,7 +285,7 @@ export const previewRulesRoute = (
             while (invocationCount > 0 && !isAborted) {
               invocationStartTime = moment();
 
-              ({ state: statePreview } = (await executor({
+              ({ state: statePreview, loggedRequests } = (await executor({
                 executionId: uuidv4(),
                 params,
                 previousStartedAt,
@@ -288,6 +305,7 @@ export const previewRulesRoute = (
                       abortController,
                       searchSourceClient,
                     }),
+                  getMaintenanceWindowIds: async () => [],
                   uiSettingsClient: coreContext.uiSettings.client,
                   getDataViews: async () => dataViewsService,
                   share,
@@ -302,7 +320,7 @@ export const previewRulesRoute = (
                   const date = startedAt.toISOString();
                   return { dateStart: date, dateEnd: date };
                 },
-              })) as { state: TState });
+              })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
               const errors = loggedStatusChanges
                 .filter((item) => item.newStatus === RuleExecutionStatusEnum.failed)
@@ -317,6 +335,7 @@ export const previewRulesRoute = (
                 warnings,
                 startedAt: startedAt.toDate().toISOString(),
                 duration: moment().diff(invocationStartTime, 'milliseconds'),
+                ...(loggedRequests ? { requests: loggedRequests } : {}),
               });
 
               loggedStatusChanges.length = 0;

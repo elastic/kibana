@@ -55,6 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
           'kibana',
           'observer',
           'orchestrator',
+          'service',
           'tls',
           'url',
         ]);
@@ -80,6 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
           'monitor',
           'observer',
           'orchestrator',
+          'service',
           'tls',
           'url',
         ]);

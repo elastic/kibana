@@ -67,6 +67,8 @@ import {
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
+import { PermissionsError } from '../../../../../fleet/layouts';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
@@ -87,6 +89,8 @@ import { DocumentationPage, hasDocumentation } from './documentation';
 import { Configs } from './configs';
 
 import './index.scss';
+import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
+import { InstallButton } from './settings/install_button';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -135,6 +139,11 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
+  /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+   ** to redirect back to the onboarding page after adding an integration
+   */
+  const onboardingLink = useMemo(() => queryParams.get('onboardingLink'), [queryParams]);
+  const onboardingAppId = useMemo(() => queryParams.get('onboardingAppId'), [queryParams]);
 
   const authz = useAuthz();
   const canAddAgent = authz.fleet.addAgents;
@@ -354,13 +363,23 @@ export function Detail() {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="default">
-                        {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
-                          defaultMessage: 'Elastic Agent',
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
+                    {packageInfo?.type === 'content' ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="default">
+                          {i18n.translate('xpack.fleet.epm.contentPackageBadgeLabel', {
+                            defaultMessage: 'Content only',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ) : (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="default">
+                          {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                            defaultMessage: 'Elastic Agent',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
                     {packageInfo?.release && packageInfo.release !== 'ga' ? (
                       <EuiFlexItem grow={false}>
                         <HeaderReleaseBadge release={getPackageReleaseLabel(packageInfo.version)} />
@@ -388,7 +407,7 @@ export function Detail() {
         hash,
       });
 
-      const navigateOptions = getInstallPkgRouteOptions({
+      const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
         integration,
@@ -398,6 +417,25 @@ export function Detail() {
         isGuidedOnboardingActive,
         pkgkey,
       });
+
+      /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
+       ** to redirect back to the onboarding page after adding an integration
+       */
+      const navigateOptions: InstallPkgRouteOptions =
+        onboardingAppId && onboardingLink
+          ? [
+              defaultNavigateOptions[0],
+              {
+                ...defaultNavigateOptions[1],
+                state: {
+                  ...(defaultNavigateOptions[1]?.state ?? {}),
+                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                  onCancelUrl: onboardingLink,
+                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                },
+              },
+            ]
+          : defaultNavigateOptions;
 
       services.application.navigateToApp(...navigateOptions);
     },
@@ -410,6 +448,8 @@ export function Detail() {
       isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
+      onboardingAppId,
+      onboardingLink,
       pathname,
       pkgkey,
       search,
@@ -491,7 +531,7 @@ export function Detail() {
                   </EuiFlexGroup>
                 ),
               },
-              ...(isInstalled
+              ...(isInstalled && packageInfo.type !== 'content'
                 ? [
                     { isDivider: true },
                     {
@@ -503,31 +543,37 @@ export function Detail() {
                     },
                   ]
                 : []),
-              { isDivider: true },
-              {
-                content: (
-                  <WithGuidedOnboardingTour
-                    packageKey={pkgkey}
-                    tourType={'addIntegrationButton'}
-                    isTourVisible={isOverviewPage && isGuidedOnboardingActive}
-                    tourOffset={10}
-                  >
-                    <AddIntegrationButton
-                      userCanInstallPackages={userCanInstallPackages}
-                      href={getHref('add_integration_to_policy', {
-                        pkgkey,
-                        ...(integration ? { integration } : {}),
-                        ...(agentPolicyIdFromContext
-                          ? { agentPolicyId: agentPolicyIdFromContext }
-                          : {}),
-                      })}
-                      missingSecurityConfiguration={missingSecurityConfiguration}
-                      packageName={integrationInfo?.title || packageInfo.title}
-                      onClick={handleAddIntegrationPolicyClick}
-                    />
-                  </WithGuidedOnboardingTour>
-                ),
-              },
+              ...(packageInfo.type === 'content'
+                ? !isInstalled
+                  ? [{ isDivider: true }, { content: <InstallButton {...packageInfo} /> }]
+                  : [] // if content package is already installed, don't show install button in header
+                : [
+                    { isDivider: true },
+                    {
+                      content: (
+                        <WithGuidedOnboardingTour
+                          packageKey={pkgkey}
+                          tourType={'addIntegrationButton'}
+                          isTourVisible={isOverviewPage && isGuidedOnboardingActive}
+                          tourOffset={10}
+                        >
+                          <AddIntegrationButton
+                            userCanInstallPackages={userCanInstallPackages}
+                            href={getHref('add_integration_to_policy', {
+                              pkgkey,
+                              ...(integration ? { integration } : {}),
+                              ...(agentPolicyIdFromContext
+                                ? { agentPolicyId: agentPolicyIdFromContext }
+                                : {}),
+                            })}
+                            missingSecurityConfiguration={missingSecurityConfiguration}
+                            packageName={integrationInfo?.title || packageInfo.title}
+                            onClick={handleAddIntegrationPolicyClick}
+                          />
+                        </WithGuidedOnboardingTour>
+                      ),
+                    },
+                  ]),
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
@@ -590,7 +636,7 @@ export function Detail() {
       },
     ];
 
-    if (canReadIntegrationPolicies && isInstalled) {
+    if (canReadIntegrationPolicies && isInstalled && packageInfo.type !== 'content') {
       tabs.push({
         id: 'policies',
         name: (
@@ -799,7 +845,14 @@ export function Detail() {
             <Configs packageInfo={packageInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_policies}>
-            <PackagePoliciesPage name={packageInfo.name} version={packageInfo.version} />
+            {canReadIntegrationPolicies ? (
+              <PackagePoliciesPage packageInfo={packageInfo} />
+            ) : (
+              <PermissionsError
+                error="MISSING_PRIVILEGES"
+                requiredFleetRole="Agent Policies Read and Integrations Read"
+              />
+            )}
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_custom}>
             <CustomViewPage packageInfo={packageInfo} />

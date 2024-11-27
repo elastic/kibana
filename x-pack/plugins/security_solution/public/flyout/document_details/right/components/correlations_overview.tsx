@@ -12,6 +12,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -72,7 +73,7 @@ export const CorrelationsOverview: React.FC = () => {
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
   useEffect(() => {
-    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase) {
+    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.createCase) {
       goToCorrelationsTab();
     }
   }, [activeStep, goToCorrelationsTab, isTourShown]);
@@ -100,7 +101,7 @@ export const CorrelationsOverview: React.FC = () => {
     showCases ||
     showSuppressedAlerts;
 
-  const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
+  const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0] as Type | undefined;
 
   const link = useMemo(
     () =>
@@ -133,7 +134,7 @@ export const CorrelationsOverview: React.FC = () => {
       data-test-subj={CORRELATIONS_TEST_ID}
     >
       {canShowAtLeastOneInsight ? (
-        <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGroup direction="column" gutterSize="s">
           {showSuppressedAlerts && (
             <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType={ruleType} />
           )}

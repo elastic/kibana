@@ -32,6 +32,7 @@ interface BulkEditBulkActionsValidationArgs {
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
   immutable: boolean;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 interface DryRunBulkEditBulkActionsValidationArgs {
@@ -89,11 +90,6 @@ export const validateBulkScheduleBackfill = async ({
   experimentalFeatures,
 }: DryRunManualRuleRunBulkActionsValidationArgs) => {
   // check whether "manual rule run" feature is enabled
-  await throwDryRunError(
-    () =>
-      invariant(experimentalFeatures?.manualRuleRunEnabled, 'Manual rule run feature is disabled.'),
-    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE
-  );
 
   await throwDryRunError(
     () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),
@@ -110,15 +106,18 @@ export const validateBulkEditRule = async ({
   mlAuthz,
   edit,
   immutable,
+  experimentalFeatures,
 }: BulkEditBulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, ruleType);
 
-  // if rule can't be edited error will be thrown
-  const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
-  await throwDryRunError(
-    () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
-    BulkActionsDryRunErrCode.IMMUTABLE
-  );
+  if (!experimentalFeatures.prebuiltRulesCustomizationEnabled) {
+    // if rule can't be edited error will be thrown
+    const canRuleBeEdited = !immutable || istEditApplicableToImmutableRule(edit);
+    await throwDryRunError(
+      () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
+      BulkActionsDryRunErrCode.IMMUTABLE
+    );
+  }
 };
 
 /**
@@ -140,12 +139,14 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
+  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
     mlAuthz,
     edit,
     immutable: rule.params.immutable,
+    experimentalFeatures,
   });
 
   // if rule is machine_learning, index pattern action can't be applied to it

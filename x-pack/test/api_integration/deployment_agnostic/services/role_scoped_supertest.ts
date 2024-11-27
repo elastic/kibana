@@ -7,6 +7,7 @@
 
 import {
   RoleCredentials,
+  CookieCredentials,
   SupertestWithoutAuthProviderType,
   SamlAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
@@ -14,62 +15,76 @@ import { Test } from 'supertest';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export interface RequestHeadersOptions {
+  useCookieHeader?: boolean;
   withInternalHeaders?: boolean;
   withCommonHeaders?: boolean;
   withCustomHeaders?: Record<string, string>;
 }
 
 export class SupertestWithRoleScope {
-  private roleAuthc: RoleCredentials | null;
+  private authValue: RoleCredentials | CookieCredentials | null;
   private readonly supertestWithoutAuth: SupertestWithoutAuthProviderType;
   private samlAuth: SamlAuthProviderType;
   private readonly options: RequestHeadersOptions;
 
   constructor(
-    roleAuthc: RoleCredentials,
+    authValue: RoleCredentials | CookieCredentials | null,
     supertestWithoutAuth: SupertestWithoutAuthProviderType,
     samlAuth: SamlAuthProviderType,
     options: RequestHeadersOptions
   ) {
-    this.roleAuthc = roleAuthc;
+    this.authValue = authValue;
     this.supertestWithoutAuth = supertestWithoutAuth;
     this.samlAuth = samlAuth;
     this.options = options;
   }
 
+  private isRoleCredentials(value: any): value is RoleCredentials {
+    return value && typeof value === 'object' && 'apiKey' in value && 'apiKeyHeader' in value;
+  }
+
   async destroy() {
-    if (this.roleAuthc) {
-      await this.samlAuth.invalidateM2mApiKeyWithRoleScope(this.roleAuthc);
-      this.roleAuthc = null;
+    if (this.isRoleCredentials(this.authValue)) {
+      await this.samlAuth.invalidateM2mApiKeyWithRoleScope(this.authValue);
+      this.authValue = null;
     }
   }
 
   private addHeaders(agent: Test): Test {
-    const { withInternalHeaders, withCommonHeaders, withCustomHeaders } = this.options;
+    const { useCookieHeader, withInternalHeaders, withCommonHeaders, withCustomHeaders } =
+      this.options;
 
-    if (!this.roleAuthc) {
-      throw new Error('The instance has already been destroyed.');
+    if (useCookieHeader) {
+      if (!this.authValue || !('Cookie' in this.authValue)) {
+        throw new Error('The instance has already been destroyed or cookieHeader is missing.');
+      }
+      // set cookie header
+      void agent.set(this.authValue);
+    } else {
+      if (!this.authValue || !this.isRoleCredentials(this.authValue)) {
+        throw new Error('The instance has already been destroyed or roleAuthc is missing.');
+      }
+      // set API key header
+      void agent.set(this.authValue.apiKeyHeader);
     }
-    // set role-based API key by default
-    agent.set(this.roleAuthc.apiKeyHeader);
 
     if (withInternalHeaders) {
-      agent.set(this.samlAuth.getInternalRequestHeader());
+      void agent.set(this.samlAuth.getInternalRequestHeader());
     }
 
     if (withCommonHeaders) {
-      agent.set(this.samlAuth.getCommonRequestHeader());
+      void agent.set(this.samlAuth.getCommonRequestHeader());
     }
 
     if (withCustomHeaders) {
-      agent.set(withCustomHeaders);
+      void agent.set(withCustomHeaders);
     }
 
     return agent;
   }
 
-  private request(method: 'post' | 'get' | 'put' | 'delete', url: string): Test {
-    if (!this.roleAuthc) {
+  private request(method: 'post' | 'get' | 'put' | 'delete' | 'patch', url: string): Test {
+    if (!this.authValue) {
       throw new Error('Instance has been destroyed and cannot be used for making requests.');
     }
     const agent = this.supertestWithoutAuth[method](url);
@@ -91,6 +106,10 @@ export class SupertestWithRoleScope {
   delete(url: string) {
     return this.request('delete', url);
   }
+
+  patch(url: string) {
+    return this.request('patch', url);
+  }
 }
 
 /**
@@ -101,6 +120,9 @@ export class SupertestWithRoleScope {
  *
  * Use this service to easily test API endpoints with role-specific authorization and
  * custom headers, both in serverless and stateful environments.
+ *
+ * Pass '{ useCookieHeader: true }' to use Cookie header for authentication instead of API key.
+ * It is the correct way to perform HTTP requests for internal end-points.
  */
 export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -110,10 +132,18 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
     async getSupertestWithRoleScope(
       role: string,
       options: RequestHeadersOptions = {
+        useCookieHeader: false,
         withCommonHeaders: false,
         withInternalHeaders: false,
       }
     ) {
+      // if 'useCookieHeader' set to 'true', HTTP requests will be called with cookie Header (like in browser)
+      if (options.useCookieHeader) {
+        const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role);
+        return new SupertestWithRoleScope(cookieHeader, supertestWithoutAuth, samlAuth, options);
+      }
+
+      // HTTP requests will be called with API key in header by default
       const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope(role);
       return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, options);
     },

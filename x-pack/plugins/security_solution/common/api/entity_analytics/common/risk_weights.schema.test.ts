@@ -6,7 +6,7 @@
  */
 
 import { RiskScoreWeight } from '.';
-import type { SafeParseError, SafeParseSuccess } from 'zod';
+import type { SafeParseError, SafeParseSuccess } from '@kbn/zod';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { RiskCategories, RiskWeightTypes } from '../../../entity_analytics/risk_engine';
 

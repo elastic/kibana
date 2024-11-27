@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { type AxisProps, HorizontalAlignment, Position, VerticalAlignment } from '@elastic/charts';
@@ -12,6 +13,8 @@ import type { PaletteOutput } from '@kbn/coloring';
 import type {
   Datatable,
   DatatableColumnMeta,
+  DefaultInspectorAdapters,
+  ExecutionContext,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import {
@@ -448,13 +451,15 @@ export type XyVisFn = ExpressionFunctionDefinition<
   typeof XY_VIS,
   Datatable,
   XYArgs,
-  Promise<XYRender>
+  Promise<XYRender>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 export type LayeredXyVisFn = ExpressionFunctionDefinition<
   typeof LAYERED_XY_VIS,
   Datatable,
   LayeredXYArgs,
-  Promise<XYRender>
+  Promise<XYRender>,
+  ExecutionContext<DefaultInspectorAdapters>
 >;
 
 export type ExtendedDataLayerFn = ExpressionFunctionDefinition<

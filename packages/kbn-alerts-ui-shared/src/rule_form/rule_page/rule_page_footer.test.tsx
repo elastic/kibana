@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -31,12 +32,27 @@ const onSave = jest.fn();
 const onCancel = jest.fn();
 
 hasRuleErrors.mockReturnValue(false);
-useRuleFormState.mockReturnValue({
-  baseErrors: {},
-  paramsErrors: {},
-});
 
 describe('rulePageFooter', () => {
+  beforeEach(() => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          capabilities: {
+            actions: {
+              show: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      formData: {
+        actions: [],
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -69,6 +85,30 @@ describe('rulePageFooter', () => {
 
     fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
     expect(screen.getByTestId('rulePageConfirmCreateRule')).toBeInTheDocument();
+  });
+
+  test('should not show creat rule confirmation if user cannot read actions', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          capabilities: {
+            actions: {
+              show: false,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      formData: {
+        actions: [],
+      },
+    });
+
+    render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
+    fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
+    expect(screen.queryByTestId('rulePageConfirmCreateRule')).not.toBeInTheDocument();
+    expect(onSave).toHaveBeenCalled();
   });
 
   test('should show call onSave if clicking rule confirmation', () => {

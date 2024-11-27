@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { isValidDateMath } from '@kbn/zod-helpers';
 
 import { UUID, NonEmptyString } from '../../../model/primitives.gen';
@@ -555,10 +555,15 @@ export const RuleExceptionList = z.object({
   namespace_type: z.enum(['agnostic', 'single']),
 });
 
+export type AlertSuppressionDurationUnit = z.infer<typeof AlertSuppressionDurationUnit>;
+export const AlertSuppressionDurationUnit = z.enum(['s', 'm', 'h']);
+export type AlertSuppressionDurationUnitEnum = typeof AlertSuppressionDurationUnit.enum;
+export const AlertSuppressionDurationUnitEnum = AlertSuppressionDurationUnit.enum;
+
 export type AlertSuppressionDuration = z.infer<typeof AlertSuppressionDuration>;
 export const AlertSuppressionDuration = z.object({
   value: z.number().int().min(1),
-  unit: z.enum(['s', 'm', 'h']),
+  unit: AlertSuppressionDurationUnit,
 });
 
 /**

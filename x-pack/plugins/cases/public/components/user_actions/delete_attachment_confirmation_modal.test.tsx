@@ -7,12 +7,10 @@
 
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { DeleteAttachmentConfirmationModal } from './delete_attachment_confirmation_modal';
+import { render, screen } from '@testing-library/react';
 
 describe('DeleteAttachmentConfirmationModal', () => {
-  let appMock: AppMockRenderer;
   const props = {
     title: 'My title',
     confirmButtonText: 'My button text',
@@ -20,34 +18,29 @@ describe('DeleteAttachmentConfirmationModal', () => {
     onConfirm: jest.fn(),
   };
 
-  beforeEach(() => {
-    appMock = createAppMockRenderer();
-    jest.clearAllMocks();
-  });
-
   it('renders correctly', async () => {
-    const result = appMock.render(<DeleteAttachmentConfirmationModal {...props} />);
+    render(<DeleteAttachmentConfirmationModal {...props} />);
 
-    expect(result.getByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-    expect(result.getByText('My title')).toBeInTheDocument();
-    expect(result.getByText('My button text')).toBeInTheDocument();
-    expect(result.getByText('Cancel')).toBeInTheDocument();
+    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+    expect(await screen.findByText('My title')).toBeInTheDocument();
+    expect(await screen.findByText('My button text')).toBeInTheDocument();
+    expect(await screen.findByText('Cancel')).toBeInTheDocument();
   });
 
   it('calls onConfirm', async () => {
-    const result = appMock.render(<DeleteAttachmentConfirmationModal {...props} />);
+    const result = render(<DeleteAttachmentConfirmationModal {...props} />);
 
-    expect(result.getByText('My button text')).toBeInTheDocument();
-    userEvent.click(result.getByText('My button text'));
+    expect(await result.findByText('My button text')).toBeInTheDocument();
+    await userEvent.click(await result.findByText('My button text'));
 
     expect(props.onConfirm).toHaveBeenCalled();
   });
 
   it('calls onCancel', async () => {
-    const result = appMock.render(<DeleteAttachmentConfirmationModal {...props} />);
+    render(<DeleteAttachmentConfirmationModal {...props} />);
 
-    expect(result.getByText('Cancel')).toBeInTheDocument();
-    userEvent.click(result.getByText('Cancel'));
+    expect(await screen.findByText('Cancel')).toBeInTheDocument();
+    await userEvent.click(await screen.findByText('Cancel'));
 
     expect(props.onCancel).toHaveBeenCalled();
   });

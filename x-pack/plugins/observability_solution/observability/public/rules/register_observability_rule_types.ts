@@ -56,7 +56,7 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
     ? searchConfiguration.index
     : searchConfiguration?.index?.title;
 
-export const registerObservabilityRuleTypes = async (
+export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   uiSettings: IUiSettingsClient,
   logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>

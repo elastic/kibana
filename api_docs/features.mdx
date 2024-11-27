@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/features
 title: "features"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the features plugin
-date: 2024-08-19
+date: 2024-11-26
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'features']
 ---
 import featuresObj from './features.devdocs.json';
@@ -21,7 +21,7 @@ Contact [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 247 | 0 | 102 | 2 |
+| 270 | 0 | 110 | 2 |
 
 ## Client
 
@@ -37,6 +37,9 @@ Contact [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core
 ### Interfaces
 <DocDefinitionList data={featuresObj.client.interfaces}/>
 
+### Enums
+<DocDefinitionList data={featuresObj.client.enums}/>
+
 ## Server
 
 ### Objects
@@ -48,6 +51,9 @@ Contact [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core
 ### Interfaces
 <DocDefinitionList data={featuresObj.server.interfaces}/>
 
+### Consts, variables and types
+<DocDefinitionList data={featuresObj.server.misc}/>
+
 ## Common
 
 ### Classes
@@ -55,6 +61,9 @@ Contact [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core
 
 ### Interfaces
 <DocDefinitionList data={featuresObj.common.interfaces}/>
+
+### Enums
+<DocDefinitionList data={featuresObj.common.enums}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={featuresObj.common.misc}/>

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import url from 'url';
@@ -52,5 +53,22 @@ export const kbnTestConfig = new (class KbnTestConfig {
       username,
       password,
     };
+  }
+
+  /**
+   * Use to get `port:undefined` for assertions if the port is default for the
+   * used protocol and thus would be stripped by the browser
+   */
+  getUrlPartsWithStrippedDefaultPort(user: UserAuth = kibanaTestUser): UrlParts {
+    const urlParts = this.getUrlParts(user);
+
+    if (
+      (urlParts.protocol === 'http' && urlParts.port === 80) ||
+      (urlParts.protocol === 'https' && urlParts.port === 443)
+    ) {
+      urlParts.port = undefined;
+    }
+
+    return urlParts;
   }
 })();

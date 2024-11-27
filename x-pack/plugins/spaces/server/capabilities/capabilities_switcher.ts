@@ -11,6 +11,7 @@ import type { Capabilities, CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 
 import type { Space } from '../../common';
+import { withSpaceSolutionDisabledFeatures } from '../lib/utils/space_solution_disabled_features';
 import type { PluginsStart } from '../plugin';
 import type { SpacesServiceStart } from '../spaces_service';
 
@@ -61,13 +62,17 @@ function toggleDisabledFeatures(
   capabilities: Capabilities,
   activeSpace: Space
 ) {
-  const disabledFeatureKeys = activeSpace.disabledFeatures;
+  const disabledFeatureKeys = withSpaceSolutionDisabledFeatures(
+    features,
+    activeSpace.disabledFeatures,
+    activeSpace.solution
+  );
 
   const { enabledFeatures, disabledFeatures } = features.reduce(
     (acc, feature) => {
       if (disabledFeatureKeys.includes(feature.id)) {
         acc.disabledFeatures.push(feature);
-      } else {
+      } else if (!feature.deprecated) {
         acc.enabledFeatures.push(feature);
       }
       return acc;

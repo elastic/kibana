@@ -30,8 +30,6 @@ export {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmLabsButton,
-  enableInfrastructureHostsView,
-  enableInfrastructureContainerAssetView,
   enableInfrastructureProfilingIntegration,
   enableInfrastructureAssetCustomDashboards,
   enableAwsLambdaMetrics,
@@ -63,7 +61,9 @@ export {
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
 
+/** @deprecated deprecated in 8.17. Please use casesFeatureIdV2 instead */
 export const casesFeatureId = 'observabilityCases';
+export const casesFeatureIdV2 = 'observabilityCasesV2';
 export const sloFeatureId = 'slo';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
@@ -88,6 +88,6 @@ export const sloListLocatorID = 'SLO_LIST_LOCATOR';
 
 import { paths } from './locators/paths';
 export const observabilityPaths = paths.observability;
-export type { AlertsLocatorParams } from './locators/alerts';
+export type { AlertsLocator, AlertsLocatorParams } from './locators/alerts';
 export { AlertsLocatorDefinition } from './locators/alerts';
 export { observabilityAlertFeatureIds } from './constants';

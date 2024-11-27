@@ -4,17 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import deepEqual from 'fast-deep-equal';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
+  MappingDynamicTemplate,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import pMap from 'p-map';
 import { isResponseError } from '@kbn/es-errors';
 
-import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+import {
+  FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+} from '../../../../constants/fleet_es_assets';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -26,6 +30,7 @@ import type {
 } from '../../../../types';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -60,6 +65,7 @@ export interface CurrentDataStream {
   dataStreamName: string;
   replicated: boolean;
   indexTemplate: IndexTemplate;
+  currentWriteIndex: string;
 }
 
 const DEFAULT_IGNORE_ABOVE = 1024;
@@ -114,6 +120,9 @@ export function getTemplate({
 
   const esBaseComponents = getBaseEsComponents(type, !!isIndexModeTimeSeries);
 
+  const isEventIngestedEnabled = (config?: FleetConfigType): boolean =>
+    Boolean(!config?.agentIdVerificationEnabled && config?.eventIngestedEnabled);
+
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
@@ -121,6 +130,9 @@ export function getTemplate({
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
+      : []),
+    ...(isEventIngestedEnabled(appContextService.getConfig())
+      ? [FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
 
@@ -513,9 +525,11 @@ function _generateMappings(
               fieldProps.subobjects = mappings.subobjects;
             }
             break;
+          case 'nested':
           case 'group-nested':
-            fieldProps = {
-              properties: _generateMappings(
+            fieldProps = { ...generateNestedProps(field), type: 'nested' };
+            if (field.fields) {
+              fieldProps.properties = _generateMappings(
                 field.fields!,
                 {
                   ...ctx,
@@ -524,10 +538,8 @@ function _generateMappings(
                     : field.name,
                 },
                 isIndexModeTimeSeries
-              ).properties,
-              ...generateNestedProps(field),
-              type: 'nested',
-            };
+              ).properties;
+            }
             break;
           case 'integer':
             fieldProps.type = 'long';
@@ -563,9 +575,6 @@ function _generateMappings(
             if (field.value) {
               fieldProps.value = field.value;
             }
-            break;
-          case 'nested':
-            fieldProps = { ...fieldProps, ...generateNestedProps(field), type: 'nested' };
             break;
           case 'array':
             // this assumes array fields were validated in an earlier step
@@ -946,6 +955,7 @@ const getDataStreams = async (
     dataStreamName: dataStream.name,
     replicated: dataStream.replicated,
     indexTemplate,
+    currentWriteIndex: dataStream.indices?.at(-1)?.index_name,
   }));
 };
 
@@ -981,6 +991,7 @@ const updateAllDataStreams = async (
       return updateExistingDataStream({
         esClient,
         logger,
+        currentWriteIndex: templateEntry.currentWriteIndex,
         dataStreamName: templateEntry.dataStreamName,
         options,
       });
@@ -994,11 +1005,13 @@ const updateAllDataStreams = async (
 
 const updateExistingDataStream = async ({
   dataStreamName,
+  currentWriteIndex,
   esClient,
   logger,
   options,
 }: {
   dataStreamName: string;
+  currentWriteIndex: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   options?: {
@@ -1007,7 +1020,7 @@ const updateExistingDataStream = async ({
   };
 }) => {
   const existingDs = await esClient.indices.get({
-    index: dataStreamName,
+    index: currentWriteIndex,
   });
 
   const existingDsConfig = Object.values(existingDs);
@@ -1029,10 +1042,16 @@ const updateExistingDataStream = async ({
     );
 
     settings = simulateResult.template.settings;
-    mappings = fillConstantKeywordValues(
-      currentBackingIndexConfig?.mappings || {},
-      simulateResult.template.mappings
-    );
+
+    try {
+      mappings = fillConstantKeywordValues(
+        currentBackingIndexConfig?.mappings || {},
+        simulateResult.template.mappings || {}
+      );
+    } catch (err) {
+      logger.error(`Error filling constant keyword values: ${err}`);
+      mappings = simulateResult.template.mappings;
+    }
 
     lifecycle = simulateResult.template.lifecycle;
 
@@ -1046,6 +1065,7 @@ const updateExistingDataStream = async ({
     if (currentBackingIndexConfig?.mappings?.subobjects !== mappings.subobjects) {
       subobjectsFieldChanged = true;
     }
+
     logger.info(`Attempt to update the mappings for the ${dataStreamName} (write_index_only)`);
     await retryTransientEsErrors(
       () =>
@@ -1089,16 +1109,42 @@ const updateExistingDataStream = async ({
     }
   }
 
+  const filterDimensionMappings = (templates?: Array<Record<string, MappingDynamicTemplate>>) =>
+    templates?.filter(
+      (template) => (Object.values(template)[0].mapping as any)?.time_series_dimension
+    ) ?? [];
+
+  const currentDynamicDimensionMappings = filterDimensionMappings(
+    currentBackingIndexConfig?.mappings?.dynamic_templates
+  );
+  const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
+
+  const sortMappings = (
+    a: Record<string, MappingDynamicTemplate>,
+    b: Record<string, MappingDynamicTemplate>
+  ) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]);
+
+  const dynamicDimensionMappingsChanged = !deepEqual(
+    currentDynamicDimensionMappings.sort(sortMappings),
+    updatedDynamicDimensionMappings.sort(sortMappings)
+  );
+
   // Trigger a rollover if the index mode or source type has changed
-  if (currentIndexMode !== settings?.index?.mode || currentSourceType !== mappings?._source?.mode) {
+  if (
+    currentIndexMode !== settings?.index?.mode ||
+    currentSourceType !== mappings?._source?.mode ||
+    dynamicDimensionMappingsChanged
+  ) {
     if (options?.skipDataStreamRollover === true) {
       logger.info(
-        `Index mode or source type has changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
+        `Index mode or source type or dynamic dimension mappings have changed for ${dataStreamName}, skipping rollover as "skipDataStreamRollover" is enabled`
       );
       return;
     } else {
       logger.info(
-        `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
+        dynamicDimensionMappingsChanged
+          ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
+          : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
       await rolloverDataStream(dataStreamName, esClient);
     }

@@ -8,6 +8,12 @@ Actions are instantiations of a connector that are linked to rules and run as ba
 [cols="2"]
 |===
 
+// ifeval::["featureAIConnector"=="true"]
+// a| <<inference-action-type,{infer}>>
+
+// | Send a request to {infer}.
+// endif::[]
+
 a| <<bedrock-action-type,{bedrock}>>
 
 | Send a request to {bedrock}.
@@ -92,9 +98,9 @@ a| <<swimlane-action-type,{swimlane}>>
 
 | Create an incident in {swimlane}.
 
-a| <<thehive-action-type,{thehive}>>
+a| <<thehive-action-type,{hive}>>
 
-| Create cases and alerts in {thehive}.
+| Create cases and alerts in {hive}.
 
 a| <<tines-action-type,Tines>>
 

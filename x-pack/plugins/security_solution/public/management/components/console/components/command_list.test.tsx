@@ -12,7 +12,6 @@ import {
   getHelpSidePanelSelectorsAndActionsMock,
 } from '../mocks';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 
 describe('When rendering the command list (help output)', () => {
   let render: ConsoleTestSetup['renderConsole'];
@@ -70,7 +69,7 @@ describe('When rendering the command list (help output)', () => {
       expect(renderResult.getByTestId('test-commandList-helpfulTips')).toHaveTextContent(
         'Helpful tips:You can enter consecutive response actions — no need to wait for previous ' +
           'actions to complete.Leaving the response console does not terminate any actions that have ' +
-          'been submitted.Learn moreExternal link(opens in a new tab or window) about response actions ' +
+          'been submitted.Learn more(external, opens in a new tab or window) about response actions ' +
           'and using the console.'
       );
 
@@ -131,11 +130,9 @@ describe('When rendering the command list (help output)', () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      enterCommand('help');
+      await enterCommand('help');
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('custom-help')).toBeTruthy();
-      });
+      expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });
   });
 
@@ -145,11 +142,9 @@ describe('When rendering the command list (help output)', () => {
         return <div data-test-subj="custom-help">{'help output'}</div>;
       };
       render({ HelpComponent });
-      enterCommand('help');
+      await enterCommand('help');
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('custom-help')).toBeTruthy();
-      });
+      expect(renderResult.getByTestId('custom-help')).toBeInTheDocument();
     });
   });
 });

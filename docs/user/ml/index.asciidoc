@@ -19,10 +19,24 @@ if your data is stored in {es} and contains a time field, you can use the
 [role="screenshot"]
 image::user/ml/images/ml-data-visualizer-sample.png[{data-viz} for sample flight data]
 
-You can also upload a CSV, NDJSON, or log file. The *{data-viz}*
-identifies the file format and field mappings. You can then optionally import
-that data into an {es} index. To change the default file size limit, see
-<<kibana-general-settings, fileUpload:maxFileSize advanced settings>>.
+You can upload different file formats for analysis with the *{data-viz}*.
+
+File formats supported up to 500 MB:
+
+* CSV
+* TSV
+* NDJSON
+* Log files
+
+File formats supported up to 60 MB:
+
+* PDF
+* Microsoft Office files (Word, Excel, PowerPoint)
+* Plain Text (TXT)
+* Rich Text (RTF)
+* Open Document Format (ODF)
+
+The *{data-viz}* identifies the file format and field mappings, and you can import the data into an {es} index. To change the default file size limit, see <<kibana-general-settings, `fileUpload:maxFileSize`>> in advanced settings.
 
 If {stack-security-features} are enabled, users must have the necessary
 privileges to use {ml-features}. Refer to
@@ -37,7 +51,8 @@ information, refer to {ml-docs}/ml-limitations.html[{ml-cap}].
 
 preview::[]
 
-You can find the data drift view in **{ml-app}** > *{data-viz}* in {kib}. 
+You can find the data drift view in **{ml-app}** > *{data-viz}* in {kib} or by using
+the <<kibana-navigation-search,global search field>>. 
 The data drift view shows you the differences in each field for two 
 different time ranges in a given {data-source}. The view helps you to visualize 
 the changes in your data over time and enables you to understand its behavior 
@@ -153,7 +168,7 @@ It makes it easy to find and investigate causes of unusual spikes or drops by us
 Examine the histogram chart of the log rates for a given {data-source}, and find the reason behind a particular change possibly in millions of log events across multiple fields and values.
 
 You can find log rate analysis embedded in multiple applications.
-In {kib}, you can find it under **{ml-app}** > **AIOps Labs** where you can select the {data-source} or saved search that you want to analyze.
+In {kib}, you can find it under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. Here, you can select the {data-source} or saved search that you want to analyze.
 
 [role="screenshot"]
 image::user/ml/images/ml-log-rate-analysis-before.png[Log event histogram chart]
@@ -187,8 +202,8 @@ displays them together with a chart that shows the distribution of each category
 and an example document that matches the category.
 //end::log-pattern-analysis-intro[]
 
-You can find log pattern analysis under **{ml-app}** > **AIOps Labs** where you 
-can select the {data-source} or saved search that you want to analyze, or in 
+You can find log pattern analysis under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. 
+Here, you can select the {data-source} or saved search that you want to analyze, or in 
 **Discover** as an available action for any text field.
 
 [role="screenshot"]
@@ -212,8 +227,8 @@ Change point detection uses the
 to detect distribution changes, trend changes, and other statistically 
 significant change points in a metric of your time series data.
 
-You can find change point detection under **{ml-app}** > **AIOps Labs** where 
-you can select the {data-source} or saved search that you want to analyze.
+You can find change point detection under **{ml-app}** > **AIOps Labs** or by using the <<kibana-navigation-search,global search field>>. 
+Here, you can select the {data-source} or saved search that you want to analyze.
 
 [role="screenshot"]
 image::user/ml/images/ml-change-point-detection.png[Change point detection UI]

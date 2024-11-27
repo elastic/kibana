@@ -14,14 +14,13 @@ import {
   PromptResponse,
   PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { getRandomEuiColor } from './helpers';
 import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
 import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
 import { useAssistantContext } from '../../../assistant_context';
 import { useQuickPromptEditor } from './use_quick_prompt_editor';
-
-const DEFAULT_COLOR = '#D36086';
 
 interface Props {
   onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
@@ -112,14 +111,8 @@ const QuickPromptSettingsEditorComponent = ({
     ]
   );
 
-  // Color
-  const selectedColor = useMemo(
-    () => selectedQuickPrompt?.color ?? DEFAULT_COLOR,
-    [selectedQuickPrompt?.color]
-  );
-
   const handleColorChange = useCallback<EuiSetColorMethod>(
-    (color, { hex, isValid }) => {
+    (color) => {
       if (selectedQuickPrompt != null) {
         setUpdatedQuickPromptSettings((prev) => {
           const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
@@ -177,6 +170,17 @@ const QuickPromptSettingsEditorComponent = ({
     ]
   );
 
+  const setDefaultPromptColor = useCallback((): string => {
+    const randomColor = getRandomEuiColor();
+    handleColorChange(randomColor, { hex: randomColor, isValid: true });
+    return randomColor;
+  }, [handleColorChange]);
+
+  // Color
+  const selectedColor = useMemo(
+    () => selectedQuickPrompt?.color ?? setDefaultPromptColor(),
+    [selectedQuickPrompt?.color, setDefaultPromptColor]
+  );
   // Prompt Contexts
   const selectedPromptContexts = useMemo(
     () =>
@@ -263,6 +267,7 @@ const QuickPromptSettingsEditorComponent = ({
           quickPrompts={quickPromptSettings}
           resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
+          selectedColor={selectedColor}
         />
       </EuiFormRow>
 

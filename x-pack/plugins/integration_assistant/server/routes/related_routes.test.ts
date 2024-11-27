@@ -23,7 +23,9 @@ const mockResult = jest.fn().mockResolvedValue({
 jest.mock('../graphs/related', () => {
   return {
     getRelatedGraph: jest.fn().mockResolvedValue({
-      invoke: () => mockResult(),
+      withConfig: () => ({
+        invoke: () => mockResult(),
+      }),
     }),
   };
 });
@@ -41,6 +43,7 @@ describe('registerRelatedRoutes', () => {
       rawSamples: ['{"ei":0}'],
       currentPipeline: { processors: [{ script: { source: {} } }] },
       connectorId: 'testConnector',
+      samplesFormat: { name: 'json' },
     },
   });
 

@@ -21,13 +21,13 @@ const _allowedExperimentalValues = {
   kafkaOutput: true,
   outputSecretsStorage: true,
   remoteESOutput: true,
-  agentless: false,
   enableStrictKQLValidation: true,
   subfeaturePrivileges: false,
-  enablePackagesStateMachine: true,
   advancedPolicySettings: true,
   useSpaceAwareness: false,
   enableReusableIntegrationPolicies: true,
+  asyncDeployPolicies: true,
+  enableExportCSV: false,
 };
 
 /**

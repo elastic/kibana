@@ -4,40 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup } from '@kbn/core/public';
+import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { SLOPublicPluginsStart } from '..';
 import {
   ADD_SLO_ALERTS_ACTION_ID,
   SLO_ALERTS_EMBEDDABLE_ID,
 } from '../embeddable/slo/alerts/constants';
-import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { COMMON_SLO_GROUPING } from '../embeddable/slo/common/constants';
+import { SLORepositoryClient } from '../types';
 
 export function createAddAlertsPanelAction(
-  getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
+  coreStart: CoreStart,
+  pluginsStart: SLOPublicPluginsStart,
+  sloClient: SLORepositoryClient
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SLO_ALERTS_ACTION_ID,
-    grouping: COMMON_SLO_GROUPING,
+    grouping: COMMON_OBSERVABILITY_GROUPING,
     getIconType: () => 'alert',
-    order: 20,
+    order: 10,
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      const [coreStart, deps] = await getStartServices();
+
       try {
         const { openSloConfiguration } = await import(
           '../embeddable/slo/alerts/slo_alerts_open_configuration'
         );
-        const initialState = await openSloConfiguration(coreStart, deps);
+        const initialState = await openSloConfiguration(coreStart, pluginsStart, sloClient);
         embeddable.addNewPanel(
           {
             panelType: SLO_ALERTS_EMBEDDABLE_ID,

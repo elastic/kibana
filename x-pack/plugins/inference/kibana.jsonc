@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/inference-plugin",
-  "owner": "@elastic/kibana-core",
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "inference",
     "server": true,

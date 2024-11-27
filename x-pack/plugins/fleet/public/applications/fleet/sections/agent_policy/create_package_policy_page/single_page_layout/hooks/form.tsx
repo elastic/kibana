@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 
@@ -26,6 +26,7 @@ import {
   sendCreatePackagePolicy,
   sendBulkInstallPackages,
   sendGetPackagePolicies,
+  useMultipleAgentPolicies,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
@@ -154,6 +155,8 @@ export function useOnSubmit({
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
   // Form state
@@ -175,8 +178,7 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
-    useAgentless();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
@@ -184,14 +186,10 @@ export function useOnSubmit({
       if (isEqual(updatedAgentPolicies, agentPolicies)) {
         return;
       }
-      if (updatedAgentPolicies.length > 0) {
-        setAgentPolicies(updatedAgentPolicies);
-        if (packageInfo) {
-          setHasAgentPolicyError(false);
-        }
-      } else {
-        setHasAgentPolicyError(true);
-        setAgentPolicies([]);
+
+      setAgentPolicies(updatedAgentPolicies);
+      if (packageInfo) {
+        setHasAgentPolicyError(false);
       }
 
       // eslint-disable-next-line no-console
@@ -206,7 +204,7 @@ export function useOnSubmit({
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          safeLoad,
+          load,
           spaceSettings
         );
         setValidationResults(newValidationResult);
@@ -235,18 +233,17 @@ export function useOnSubmit({
         ? validationHasErrors(newValidationResults)
         : false;
       const hasAgentPolicy =
-        newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '';
-      if (
-        hasPackage &&
-        (hasAgentPolicy || selectedPolicyTab === SelectedPolicyTab.NEW) &&
-        !hasValidationErrors
-      ) {
+        (newPackagePolicy.policy_ids.length > 0 && newPackagePolicy.policy_ids[0] !== '') ||
+        selectedPolicyTab === SelectedPolicyTab.NEW;
+      const isOrphaningPolicy =
+        canUseMultipleAgentPolicies && newPackagePolicy.policy_ids.length === 0;
+      if (hasPackage && (hasAgentPolicy || isOrphaningPolicy) && !hasValidationErrors) {
         setFormState('VALID');
       } else {
         setFormState('INVALID');
       }
     },
-    [packagePolicy, setFormState, updatePackagePolicyValidation, selectedPolicyTab]
+    [packagePolicy, updatePackagePolicyValidation, selectedPolicyTab, canUseMultipleAgentPolicies]
   );
 
   // Initial loading of package info
@@ -282,7 +279,7 @@ export function useOnSubmit({
 
   useEffect(() => {
     if (
-      agentPolicies.length > 0 &&
+      (canUseMultipleAgentPolicies || agentPolicies.length > 0) &&
       !isEqual(
         agentPolicies.map((policy) => policy.id),
         packagePolicy.policy_ids
@@ -292,7 +289,7 @@ export function useOnSubmit({
         policy_ids: agentPolicies.map((policy) => policy.id),
       });
     }
-  }, [packagePolicy, agentPolicies, updatePackagePolicy]);
+  }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
   const onSaveNavigate = useOnSaveNavigate({
     packagePolicy,
@@ -315,8 +312,11 @@ export function useOnSubmit({
         return;
       }
       if (
-        agentCount !== 0 &&
-        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
+        (agentCount !== 0 ||
+          (agentPolicies.length === 0 && selectedPolicyTab !== SelectedPolicyTab.NEW)) &&
+        !(
+          isAgentlessIntegration(packageInfo) || isAgentlessAgentPolicy(overrideCreatedAgentPolicy)
+        ) &&
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
@@ -340,10 +340,18 @@ export function useOnSubmit({
           }
         } catch (e) {
           setFormState('VALID');
+          const agentlessPolicy = agentPolicies.find(
+            (policy) => policy?.supports_agentless === true
+          );
+
           notifications.toasts.addError(e, {
-            title: i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-              defaultMessage: 'Unable to create agent policy',
-            }),
+            title: agentlessPolicy?.supports_agentless
+              ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                  defaultMessage: 'Unable to create integration',
+                })
+              : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                  defaultMessage: 'Unable to create agent policy',
+                }),
           });
           return;
         }
@@ -354,9 +362,7 @@ export function useOnSubmit({
         : packagePolicy.policy_ids;
 
       const shouldForceInstallOnAgentless =
-        isAgentlessAgentPolicy(createdPolicy) ||
-        isAgentlessIntegration(packageInfo) ||
-        isAgentlessPackagePolicy(packagePolicy);
+        isAgentlessAgentPolicy(createdPolicy) || isAgentlessIntegration(packageInfo);
 
       const forceInstall = force || shouldForceInstallOnAgentless;
 
@@ -378,19 +384,29 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (agentCount > 0) {
-        setFormState('SUBMITTED');
-        return;
+      // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
+      const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
+
+      // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
+      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
+        if (agentCount) {
+          setFormState('SUBMITTED');
+        } else if (hasAzureArmTemplate) {
+          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+        } else if (hasCloudFormation) {
+          setFormState('SUBMITTED_CLOUD_FORMATION');
+        } else if (hasGoogleCloudShell) {
+          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+        } else {
+          setFormState('SUBMITTED_NO_AGENTS');
+        }
       }
 
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
-        // Check if agentless is configured in ESS and Serverless until Agentless API migrates to Serverless
-        const isAgentlessConfigured =
-          isAgentlessAgentPolicy(createdPolicy) || isAgentlessPackagePolicy(data!.item);
         const promptForAgentEnrollment =
-          !(agentCount && agentPolicies.length > 0) &&
+          (createdPolicy || (agentPolicies.length > 0 && !agentCount)) &&
           !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 
@@ -457,7 +473,6 @@ export function useOnSubmit({
       selectedPolicyTab,
       packagePolicy,
       isAgentlessAgentPolicy,
-      isAgentlessPackagePolicy,
       hasFleetAddAgentsPrivileges,
       withSysMonitoring,
       newAgentPolicy,

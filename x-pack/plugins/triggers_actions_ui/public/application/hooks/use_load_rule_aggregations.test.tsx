@@ -5,13 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
 import { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
@@ -32,7 +31,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -75,7 +74,7 @@ describe('useLoadRuleAggregations', () => {
       refresh: undefined,
     };
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () => {
         return useLoadRuleAggregations(params);
       },
@@ -83,20 +82,21 @@ describe('useLoadRuleAggregations', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
 
-    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
-      expect.objectContaining({
-        searchText: '',
-        typesFilter: [],
-        actionTypesFilter: [],
-        ruleExecutionStatusesFilter: [],
-        ruleLastRunOutcomesFilter: [],
-        ruleStatusesFilter: [],
-        tagsFilter: [],
-      })
-    );
-    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    await waitFor(() => {
+      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+        expect.objectContaining({
+          searchText: '',
+          typesFilter: [],
+          actionTypesFilter: [],
+          ruleExecutionStatusesFilter: [],
+          ruleLastRunOutcomesFilter: [],
+          ruleStatusesFilter: [],
+          tagsFilter: [],
+        })
+      );
+      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    });
   });
 
   it('should call loadRuleAggregation API with params and handle result', async () => {
@@ -115,28 +115,26 @@ describe('useLoadRuleAggregations', () => {
       refresh: undefined,
     };
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
-      () => useLoadRuleAggregations(params),
-      {
-        wrapper,
-      }
-    );
+    const { rerender, result } = renderHook(() => useLoadRuleAggregations(params), {
+      wrapper,
+    });
 
     rerender();
-    await waitForNextUpdate();
 
-    expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
-      expect.objectContaining({
-        searchText: 'test',
-        typesFilter: ['type1', 'type2'],
-        actionTypesFilter: ['action1', 'action2'],
-        ruleExecutionStatusesFilter: ['status1', 'status2'],
-        ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
-        tagsFilter: ['tag1', 'tag2'],
-        ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
-      })
-    );
-    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    await waitFor(() => {
+      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+        expect.objectContaining({
+          searchText: 'test',
+          typesFilter: ['type1', 'type2'],
+          actionTypesFilter: ['action1', 'action2'],
+          ruleExecutionStatusesFilter: ['status1', 'status2'],
+          ruleStatusesFilter: ['enabled', 'snoozed'] as RuleStatus[],
+          tagsFilter: ['tag1', 'tag2'],
+          ruleLastRunOutcomesFilter: ['outcome1', 'outcome2'],
+        })
+      );
+      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
+    });
   });
 
   it('should call onError if API fails', async () => {

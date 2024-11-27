@@ -29,7 +29,7 @@
           "\nUtility component to portal a part of a react application into the provided `MountPoint`."
         ],
         "signature": [
-          "({ children, setMountPoint, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, setMountPoint, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-mount",
             "scope": "common",
@@ -37,7 +37,7 @@
             "section": "def-common.MountPointPortalProps",
             "text": "MountPointPortalProps"
           },
-          ">>) => React.ReactPortal | null"
+          ">) => React.ReactPortal | null"
         ],
         "path": "packages/react/kibana_mount/mount_point_portal.tsx",
         "deprecated": false,
@@ -51,7 +51,7 @@
             "label": "{\n  children,\n  setMountPoint,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-mount",
                 "scope": "common",
@@ -59,7 +59,7 @@
                 "section": "def-common.MountPointPortalProps",
                 "text": "MountPointPortalProps"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
@@ -152,7 +152,7 @@
         "label": "useIfMounted",
         "description": [],
         "signature": [
-          "() => (func: any) => void"
+          "() => (func?: (() => void) | undefined) => void"
         ],
         "path": "packages/react/kibana_mount/utils.ts",
         "deprecated": false,
@@ -229,7 +229,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
             "path": "packages/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
@@ -268,9 +268,9 @@
           ", \"reportEvent\"> | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-public.ThemeServiceStart",
+            "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
           "; }"

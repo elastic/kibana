@@ -7,18 +7,18 @@
 
 import type { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server/language_models';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ECS_GRAPH_PATH, EcsMappingRequestBody, EcsMappingResponse } from '../../common';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
+import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
+import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { handleCustomErrors } from './routes_util';
+import { GenerationErrorCode } from '../../common/constants';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -34,6 +34,13 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
     .addVersion(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because the privileges are not defined yet.',
+          },
+        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(EcsMappingRequestBody),
@@ -41,28 +48,33 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
         },
       },
       withAvailability(async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
-        const { packageName, dataStreamName, rawSamples, mapping, langSmithOptions } = req.body;
+        const {
+          packageName,
+          dataStreamName,
+          samplesFormat,
+          rawSamples,
+          additionalProcessors,
+          mapping,
+          langSmithOptions,
+        } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
 
         const [, { actions: actionsPlugin }] = await getStartServices();
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-          const connector = req.body.connectorId
-            ? await actionsClient.get({ id: req.body.connectorId })
-            : (await actionsClient.getAll()).filter(
-                (connectorItem) => connectorItem.actionTypeId === '.bedrock'
-              )[0];
+          const connector = await actionsClient.get({ id: req.body.connectorId });
 
           const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-          const isOpenAI = connector.actionTypeId === '.gen-ai';
 
-          const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+          const actionTypeId = connector.actionTypeId;
+          const llmType = getLLMType(actionTypeId);
+          const llmClass = getLLMClass(llmType);
 
           const model = new llmClass({
             actionsClient,
             connectorId: connector.id,
             logger,
-            llmType: isOpenAI ? 'openai' : 'bedrock',
+            llmType,
             model: connector.config?.defaultModel,
             temperature: 0.05,
             maxTokens: 4096,
@@ -74,6 +86,8 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             packageName,
             dataStreamName,
             rawSamples,
+            samplesFormat,
+            additionalProcessors,
             ...(mapping && { mapping }),
           };
 
@@ -84,12 +98,21 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
             ],
           };
 
-          const graph = await getEcsGraph(model);
-          const results = await graph.invoke(parameters, options);
+          const graph = await getEcsGraph({ model });
+          const results = await graph
+            .withConfig({ runName: 'ECS Mapping' })
+            .invoke(parameters, options);
 
           return res.ok({ body: EcsMappingResponse.parse(results) });
-        } catch (e) {
-          return res.badRequest({ body: e });
+        } catch (err) {
+          try {
+            handleCustomErrors(err, GenerationErrorCode.RECURSION_LIMIT);
+          } catch (e) {
+            if (isErrorThatHandlesItsOwnResponse(e)) {
+              return e.sendResponse(res);
+            }
+          }
+          return res.badRequest({ body: err });
         }
       })
     );

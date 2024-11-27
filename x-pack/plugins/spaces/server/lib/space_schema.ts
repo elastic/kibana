@@ -18,10 +18,29 @@ const spaceSchema = schema.object({
         return `must be lower case, a-z, 0-9, '_', and '-' are allowed`;
       }
     },
+    meta: {
+      description:
+        'The space ID that is part of the Kibana URL when inside the space. Space IDs are limited to lowercase alphanumeric, underscore, and hyphen characters (a-z, 0-9, _, and -). You are cannot change the ID with the update operation.',
+    },
   }),
-  name: schema.string({ minLength: 1 }),
-  description: schema.maybe(schema.string()),
-  initials: schema.maybe(schema.string({ maxLength: MAX_SPACE_INITIALS })),
+  name: schema.string({
+    minLength: 1,
+    meta: { description: 'The display name for the space. ' },
+  }),
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'A description for the space.' },
+    })
+  ),
+  initials: schema.maybe(
+    schema.string({
+      maxLength: MAX_SPACE_INITIALS,
+      meta: {
+        description:
+          'One or two characters that are shown in the space avatar. By default, the initials are automatically generated from the space name.',
+      },
+    })
+  ),
   color: schema.maybe(
     schema.string({
       validate: (value) => {
@@ -29,9 +48,20 @@ const spaceSchema = schema.object({
           return `must be a 6 digit hex color, starting with a #`;
         }
       },
+      meta: {
+        description:
+          'The hexadecimal color code used in the space avatar. By default, the color is automatically generated from the space name.',
+      },
     })
   ),
-  disabledFeatures: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  disabledFeatures: schema.arrayOf(
+    schema.string({
+      meta: {
+        description: 'The list of features that are turned off in the space.',
+      },
+    }),
+    { defaultValue: [] }
+  ),
   _reserved: schema.maybe(schema.boolean()),
   imageUrl: schema.maybe(
     schema.string({
@@ -40,11 +70,15 @@ const spaceSchema = schema.object({
           return `must start with 'data:image'`;
         }
       },
+      meta: {
+        description:
+          'The data-URL encoded image to display in the space avatar. If specified, initials will not be displayed and the color will be visible as the background color for transparent images. For best results, your image should be 64x64. Images will not be optimized by this API call, so care should be taken when using custom images.',
+      },
     })
   ),
 });
 
-const solutionSchema = schema.oneOf([
+export const solutionSchema = schema.oneOf([
   schema.literal('security'),
   schema.literal('oblt'),
   schema.literal('es'),

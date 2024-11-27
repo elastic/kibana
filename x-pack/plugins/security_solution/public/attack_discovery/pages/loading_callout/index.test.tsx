@@ -29,9 +29,10 @@ describe('LoadingCallout', () => {
   ];
 
   const defaultProps = {
-    alertsCount: 30,
+    alertsContextCount: 30,
     approximateFutureTime: new Date(),
     connectorIntervals,
+    localStorageAttackDiscoveryMaxAlerts: '50',
   };
 
   it('renders the animated loading icon', () => {

@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export type FileName = z.infer<typeof file_name>;
 export const file_name = z.string();

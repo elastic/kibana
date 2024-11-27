@@ -12,16 +12,16 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
  * Represents the result of number validation.
  * @interface
  */
-export interface NumberValidationResult {
+export type NumberValidationResult = { [key: string]: boolean } & {
   /** The minimum allowed value. */
-  min: boolean;
+  min?: boolean;
 
   /** The maximum allowed value. */
-  max: boolean;
+  max?: boolean;
 
   /** Boolean flag to allow integer values only. */
-  integerOnly: boolean;
-}
+  integerOnly?: boolean;
+};
 
 /**
  * An interface describing conditions for validating numbers.
@@ -42,6 +42,8 @@ interface NumberValidatorConditions {
    * Indicates whether only integer values are valid.
    */
   integerOnly?: boolean;
+
+  required?: boolean;
 }
 
 /**
@@ -60,8 +62,18 @@ export function numberValidator(conditions?: NumberValidatorConditions) {
     throw new Error('Invalid validator conditions');
   }
 
-  return memoize((value: number): NumberValidationResult | null => {
+  return memoize((value: number | undefined): NumberValidationResult | null => {
     const result = {} as NumberValidationResult;
+
+    if (value === undefined) {
+      if (conditions?.required) {
+        result.required = true;
+        return result;
+      } else {
+        return null;
+      }
+    }
+
     if (conditions?.min !== undefined && value < conditions.min) {
       result.min = true;
     }

@@ -10,6 +10,7 @@ import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
 import { Readable } from 'stream';
+import { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
@@ -20,7 +21,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { functionRt, messageRt, screenContextRt } from '../runtime_types';
+import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
 const chatCompleteBaseRt = t.type({
@@ -33,7 +34,6 @@ const chatCompleteBaseRt = t.type({
     t.partial({
       conversationId: t.string,
       title: t.string,
-      responseLanguage: t.string,
       disableFunctions: t.union([
         toBooleanRt,
         t.type({
@@ -41,17 +41,15 @@ const chatCompleteBaseRt = t.type({
         }),
       ]),
       instructions: t.array(
-        t.union([
-          t.string,
-          t.intersection([
-            t.type({
-              doc_id: t.string,
-              text: t.string,
-            }),
-            t.partial({
-              system: t.boolean,
-            }),
-          ]),
+        t.intersection([
+          t.partial({ id: t.string }),
+          t.type({
+            text: t.string,
+            instruction_type: t.union([
+              t.literal('user_instruction'),
+              t.literal('application_instruction'),
+            ]),
+          }),
         ])
       ),
     }),
@@ -63,6 +61,7 @@ const chatCompleteInternalRt = t.intersection([
   t.type({
     body: t.type({
       screenContexts: t.array(screenContextRt),
+      scopes: t.array(assistantScopeType),
     }),
   }),
 ]);
@@ -84,10 +83,12 @@ async function initializeChatRequest({
   request,
   plugins: { cloud, actions },
   params: {
-    body: { connectorId },
+    body: { connectorId, scopes },
   },
   service,
-}: ObservabilityAIAssistantRouteHandlerResources & { params: { body: { connectorId: string } } }) {
+}: ObservabilityAIAssistantRouteHandlerResources & {
+  params: { body: { connectorId: string; scopes: AssistantScope[] } };
+}) {
   await withAssistantSpan('guard_against_invalid_connector', async () => {
     const actionsClient = await (await actions.start()).getActionsClientWithRequest(request);
 
@@ -100,7 +101,7 @@ async function initializeChatRequest({
   });
 
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
-    service.getClient({ request }),
+    service.getClient({ request, scopes }),
     cloud?.start(),
     (await context.core).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
@@ -135,6 +136,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(functionRt),
+        scopes: t.array(assistantScopeType),
       }),
       t.partial({
         functionCall: t.string,
@@ -180,6 +182,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       prompt: t.string,
       context: t.string,
       connectorId: t.string,
+      scopes: t.array(assistantScopeType),
     }),
   }),
   handler: async (resources): Promise<Readable> => {
@@ -191,7 +194,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
 
     const response$ = from(
       recallAndScore({
-        analytics: (await resources.context.core).coreStart.analytics,
+        analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
           client
             .chat(name, {
@@ -243,9 +246,9 @@ async function chatComplete(
       title,
       persist,
       screenContexts,
-      responseLanguage,
       instructions,
       disableFunctions,
+      scopes,
     },
   } = params;
 
@@ -258,6 +261,7 @@ async function chatComplete(
     resources,
     client,
     screenContexts,
+    scopes,
   });
 
   const response$ = client.complete({
@@ -268,7 +272,6 @@ async function chatComplete(
     persist,
     signal,
     functionClient,
-    responseLanguage,
     instructions,
     simulateFunctionCalling,
     disableFunctions,
@@ -309,6 +312,7 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
       params: {
         body: {
           ...restOfBody,
+          scopes: ['observability'],
           screenContexts: [
             {
               actions,

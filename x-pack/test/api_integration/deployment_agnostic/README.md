@@ -44,16 +44,24 @@ x-pack/test/<my_own_api_integration_folder>
 │  │  ├─ <api_2>
 │  │  │  ├─ <test_2_1>
 │  │  │  ├─ <test_2_2>
-│  ├─ services
-│  │  ├─ index.ts // only services from 'x-pack/test/api_integration/deployment_agnostic/services'
-│  │  ├─ <deployment_agnostic_service_1>.ts
-│  │  ├─ <deployment_agnostic_service_2>.ts
+│  ├─ configs
+│  │  ├─ stateful
+│  │  │  ├─ <stateful>.index.ts  // e.g., oblt.index.ts
+│  │  │  ├─ <stateful>.config.ts // e.g., oblt.stateful.config.ts
+│  │  ├─ serverless
+│  │     ├─ <serverless_project>.index.ts             // e.g., oblt.index.ts
+│  │     ├─ <serverless_project>.serverless.config.ts // e.g., oblt.serverless.config.ts
 │  ├─ ftr_provider_context.d.ts  // with types of services from './services'
-├─ stateful.index.ts
-├─ stateful.config.ts 
-├─ <serverless_project>.index.ts                // e.g., oblt.index.ts
-├─ <serverless_project>.serverless.config.ts    // e.g., oblt.serverless.config.ts
+│  ├─ services
+│     ├─ index.ts // only services from 'x-pack/test/api_integration/deployment_agnostic/services'
+│     ├─ <deployment_agnostic_service_1>.ts
+│     ├─ <deployment_agnostic_service_2>.ts
 ```
+
+## Loading Your Tests Properly
+When Platform teams add deployment-agnostic tests, it is expected that these tests are loaded in `configs/stateful/platform.index.ts` and at least one of the `<serverless_project>.serverless.config` files under `configs/serverless` folder.
+
+When a Solution team (e.g., one of the Oblt teams) adds deployment-agnostic tests, it is expected that these tests are loaded in both `configs/stateful/oblt.index.ts` and `configs/serverless/oblt.index.ts`.
 
 ## Step-by-Step Guide
 1. Define Deployment-Agnostic Services
@@ -89,31 +97,56 @@ export type DeploymentAgnosticFtrProviderContext = GenericFtrProviderContext<typ
 
 3. Add Tests
 
+API Authentication in Kibana: Public vs. Internal APIs
+
+Kibana provides both public and internal APIs, each requiring authentication with the correct privileges. However, the method of testing these APIs varies, depending on how they are untilized by end users.
+
+- Public APIs: When testing HTTP requests to public APIs, API key-based authentication should be used. It reflect how end user call these APIs. Due to existing restrictions, we utilize `Admin` user credentials to generate API keys for various roles. While the API key permissions are correctly scoped according to the assigned role, the user will internally be recognized as `Admin` during authentication.
+
+- Internal APIs: Direct HTTP requests to internal APIs are generally not expected. However, for testing purposes, authentication should be performed using the Cookie header. This approach simulates client-side behavior during browser interactions, mirroring how internal APIs are indirectly invoked.
+
+Recommendations:
+- use `roleScopedSupertest` service to create supertest instance scoped to specific role and pre-defined request headers
+- `roleScopedSupertest.getSupertestWithRoleScope(<role>)` authenticate requests with API key by default
+- pass `useCookieHeader: true` to use Cookie header for requests authentication
+- don't forget to invalidate API key using `destroy()` on supertest scoped instance in `after` hook
+
 Add test files to `x-pack/test/<my_own_api_integration_folder>/deployment_agnostic/apis/<my_api>`:
 
 test example
 ```ts
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  let supertestWithAdminScope: SupertestWithRoleScopeType;
+  let supertestViewerWithApiKey: SupertestWithRoleScopeType;
+  let supertestEditorWithCookieCredentials: SupertestWithRoleScopeType;
 
-  describe('compression', () => {
+  describe('test suite', () => {
     before(async () => {
-      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      supertestViewerWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
         withInternalHeaders: true,
         withCustomHeaders: { 'accept-encoding': 'gzip' },
+      });
+      supertestEditorWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+        withInternalHeaders: true,
+        useCookieHeader: true,
       });
     });
     after(async () => {
       // always invalidate API key for the scoped role in the end
-      await supertestWithAdminScope.destroy();
+      await supertestViewerWithApiKey.destroy();
+      // supertestEditorWithCookieCredentials.destroy() has no effect because Cookie session is cached per SAML role
+      // and valid for the whole FTR config run, no need to call it
     });
-    describe('against an application page', () => {
-      it(`uses compression when there isn't a referer`, async () => {
-        const response = await supertestWithAdminScope.get('/app/kibana');
-        expect(response.header).to.have.property('content-encoding', 'gzip');
+    it(`uses compression when there isn't a referer`, async () => {
+      const response = await supertestViewerWithApiKey.get('/app/kibana');
+      expect(response.header).to.have.property('content-encoding', 'gzip');
+    });
+
+    it(`can run rule with Editor privileges`, async () => {
+      const response = await supertestEditorWithCookieCredentials
+        .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
+        .expect(204);
       });
-    });
   });
 }
 ```
@@ -121,26 +154,26 @@ Load all test files in `index.ts` under the same folder.
 
 4. Add Tests Entry File and FTR Config File for **Stateful** Deployment
 
-Create `stateful.index.ts` tests entry file and load tests:
+Create `configs/stateful/plaform.index.ts` tests entry file and load tests:
 
 ```ts
 import { DeploymentAgnosticFtrProviderContext } from './ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('apis', () => {
-    loadTestFile(require.resolve('./apis/<my_api>'));
+    loadTestFile(require.resolve('./../../apis/<my_api>'));
   });
 }
 ```
 
-Create `stateful.config.ts` and link tests entry file:
+Create `configs/stateful/platform.stateful.config.ts` and link tests entry file:
 
 ```ts
 import { createStatefulTestConfig } from './../../api_integration/deployment_agnostic/default_configs/stateful.config.base';
 import { services } from './services';
 
 export default createStatefulTestConfig({
-  testFiles: [require.resolve('./stateful.index.ts')],
+  testFiles: [require.resolve('./platform.index.ts')],
   services,
   junit: {
     reportName: 'Stateful - Deployment-agnostic API Integration Tests',
@@ -157,7 +190,7 @@ import { DeploymentAgnosticFtrProviderContext } from './ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Serverless Observability - Deployment-agnostic api integration tests', () => {
-    loadTestFile(require.resolve('./apis/<my_api>'));
+    loadTestFile(require.resolve('./../../apis/<my_api>'));
   });
 }
 ```
@@ -183,6 +216,28 @@ Note: The FTR (Functional Test Runner) does not have the capability to provision
 We do not recommend use of custom server arguments because it may lead to unexpected test failures on MKI.
 
 6. Add FTR Configs Path to FTR Manifest Files Located in `.buildkite/`
+
+## Running the tests
+
+### Stateful
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/stateful/<solution>.stateful.config.ts --grep=$
+```
+
+### Serverless
+
+```sh
+# start server
+node scripts/functional_tests_server --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts
+
+# run tests
+node scripts/functional_test_runner --config x-pack/test/api_integration/deployment_agnostic/configs/serverless/<solution>.serverless.config.ts --grep=$
+```
 
 ## Tagging and Skipping the Tests
 Since deployment-agnostic tests are designed to run both locally and on MKI/Cloud, we believe no extra tagging is required. If a test is not working on MKI/Cloud or both, there is most likely an issue with the FTR service or the configuration file it uses.

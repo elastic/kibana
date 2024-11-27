@@ -8,9 +8,8 @@
 import type { FC } from 'react';
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
-import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
+import { OptionListWithFieldStats, useFieldStatsTrigger } from '@kbn/ml-field-stats-flyout';
 
 interface DropDownLabel {
   label: string;
@@ -32,7 +31,7 @@ export const RareFieldSelect: FC<Props> = ({
   testSubject,
   placeholder,
 }) => {
-  const { renderOption, optionCss } = useFieldStatsTrigger();
+  const { optionCss } = useFieldStatsTrigger();
 
   const options: EuiComboBoxOptionOption[] = fields.map(
     (f) =>
@@ -58,7 +57,7 @@ export const RareFieldSelect: FC<Props> = ({
   }
 
   return (
-    <EuiComboBox
+    <OptionListWithFieldStats
       singleSelection={{ asPlainText: true }}
       options={options}
       selectedOptions={selection}
@@ -66,7 +65,6 @@ export const RareFieldSelect: FC<Props> = ({
       placeholder={placeholder}
       data-test-subj={testSubject}
       isClearable={false}
-      renderOption={renderOption}
     />
   );
 };

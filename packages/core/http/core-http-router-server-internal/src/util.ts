@@ -1,19 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { once } from 'lodash';
 import {
   isFullValidatorContainer,
   type RouteValidatorFullConfigResponse,
-  type RouteConfig,
   type RouteMethod,
   type RouteValidator,
 } from '@kbn/core-http-server';
+import type { Mutable } from 'utility-types';
+import type { IKibanaResponse, ResponseHeaders } from '@kbn/core-http-server';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import type { InternalRouteConfig } from './route';
 
 function isStatusCode(key: string) {
   return !isNaN(parseInt(key, 10));
@@ -44,8 +48,8 @@ function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
 
 // Integration tested in ./routes.test.ts
 export function prepareRouteConfigValidation<P, Q, B>(
-  config: RouteConfig<P, Q, B, RouteMethod>
-): RouteConfig<P, Q, B, RouteMethod> {
+  config: InternalRouteConfig<P, Q, B, RouteMethod>
+): InternalRouteConfig<P, Q, B, RouteMethod> {
   // Calculating schema validation can be expensive so when it is provided lazily
   // we only want to instantiate it once. This also provides idempotency guarantees
   if (typeof config.validate === 'function') {
@@ -61,4 +65,30 @@ export function prepareRouteConfigValidation<P, Q, B>(
     };
   }
   return config;
+}
+
+/**
+ * @note mutates the response object
+ * @internal
+ */
+export function injectResponseHeaders(
+  headers: ResponseHeaders,
+  response: IKibanaResponse
+): IKibanaResponse {
+  const mutableResponse = response as Mutable<IKibanaResponse>;
+  mutableResponse.options.headers = {
+    ...mutableResponse.options.headers,
+    ...headers,
+  };
+  return mutableResponse;
+}
+
+export function getVersionHeader(version: string): ResponseHeaders {
+  return {
+    [ELASTIC_HTTP_VERSION_HEADER]: version,
+  };
+}
+
+export function injectVersionHeader(version: string, response: IKibanaResponse): IKibanaResponse {
+  return injectResponseHeaders(getVersionHeader(version), response);
 }

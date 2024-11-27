@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PrivilegesAPIClientPublicContract } from '../privileges';
 import type { RolesAPIClient } from '../roles';
 
 export interface AuthorizationServiceSetup {
@@ -17,6 +18,11 @@ export interface AuthorizationServiceSetup {
    * A set of methods to work with Kibana user roles.
    */
   roles: RolesAPIClient;
+
+  /**
+   * A set of methods to work with Kibana role privileges
+   */
+  privileges: PrivilegesAPIClientPublicContract;
 }
 
 /**

@@ -11,7 +11,7 @@ import {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { getKqlFilter } from '../../routes/common';
+import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
 import { SyntheticsServerSetup } from '../../types';
 import { RouteContext } from '../../routes/types';
@@ -44,6 +44,17 @@ import {
 import { normalizeProjectMonitor } from './normalizers';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
+
+export interface ExistingMonitor {
+  [ConfigKey.JOURNEY_ID]: string;
+  [ConfigKey.CONFIG_ID]: string;
+  [ConfigKey.REVISION]: number;
+  [ConfigKey.MONITOR_TYPE]: string;
+}
+
+export interface PreviousMonitorForUpdate extends ExistingMonitor {
+  updated_at?: string;
+}
 
 export const CANNOT_UPDATE_MONITOR_TO_DIFFERENT_TYPE = i18n.translate(
   'xpack.synthetics.service.projectMonitors.cannotUpdateMonitorToDifferentType',
@@ -128,14 +139,13 @@ export class ProjectMonitorFormatter {
 
     const normalizedNewMonitors: SyntheticsMonitor[] = [];
     const normalizedUpdateMonitors: Array<{
-      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>;
+      previousMonitor: PreviousMonitorForUpdate;
       monitor: SyntheticsMonitor;
     }> = [];
 
     for (const monitor of this.monitors) {
       const previousMonitor = existingMonitors.find(
-        (monitorObj) =>
-          (monitorObj.attributes as SyntheticsMonitor)[ConfigKey.JOURNEY_ID] === monitor.id
+        (monitorObj) => monitorObj[ConfigKey.JOURNEY_ID] === monitor.id
       );
 
       const normM = await this.validateProjectMonitor({
@@ -146,7 +156,7 @@ export class ProjectMonitorFormatter {
       if (normM) {
         if (
           previousMonitor &&
-          previousMonitor.attributes[ConfigKey.MONITOR_TYPE] !== normM[ConfigKey.MONITOR_TYPE]
+          previousMonitor[ConfigKey.MONITOR_TYPE] !== normM[ConfigKey.MONITOR_TYPE]
         ) {
           this.failedMonitors.push({
             reason: CANNOT_UPDATE_MONITOR_TO_DIFFERENT_TYPE,
@@ -157,7 +167,7 @@ export class ProjectMonitorFormatter {
                   'Monitor {monitorId} of type {previousType} cannot be updated to type {currentType}. Please delete the monitor first and try again.',
                 values: {
                   currentType: monitor.type,
-                  previousType: previousMonitor.attributes[ConfigKey.MONITOR_TYPE],
+                  previousType: previousMonitor[ConfigKey.MONITOR_TYPE],
                   monitorId: monitor.id,
                 },
               }
@@ -246,19 +256,33 @@ export class ProjectMonitorFormatter {
     }
   };
 
-  public getProjectMonitorsForProject = async () => {
-    const finder = this.savedObjectsClient.createPointInTimeFinder({
+  public getProjectMonitorsForProject = async (): Promise<PreviousMonitorForUpdate[]> => {
+    const journeyIds = this.monitors.map((monitor) => monitor.id);
+    const journeyFilter = getSavedObjectKqlFilter({
+      field: ConfigKey.JOURNEY_ID,
+      values: journeyIds,
+    });
+    const finder = this.savedObjectsClient.createPointInTimeFinder<ExistingMonitor>({
       type: syntheticsMonitorType,
       perPage: 5000,
-      filter: this.projectFilter,
+      filter: `${this.projectFilter} AND ${journeyFilter}`,
+      fields: [
+        ConfigKey.JOURNEY_ID,
+        ConfigKey.CONFIG_ID,
+        ConfigKey.REVISION,
+        ConfigKey.MONITOR_TYPE,
+      ],
     });
 
-    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+    const hits: PreviousMonitorForUpdate[] = [];
     for await (const result of finder.find()) {
       hits.push(
-        ...(result.saved_objects as Array<
-          SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>
-        >)
+        ...result.saved_objects.map((monitor) => {
+          return {
+            ...monitor.attributes,
+            updated_at: monitor.updated_at,
+          };
+        })
       );
     }
 
@@ -333,15 +357,16 @@ export class ProjectMonitorFormatter {
     }
   };
 
-  private getDecryptedMonitors = async (
-    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>
-  ) => {
-    const configIds = monitors.map((monitor) => monitor.attributes[ConfigKey.CONFIG_ID]);
-    const monitorFilter = getKqlFilter({ field: ConfigKey.CONFIG_ID, values: configIds });
+  private getDecryptedMonitors = async (monitors: PreviousMonitorForUpdate[]) => {
+    const configIds = monitors.map((monitor) => monitor[ConfigKey.CONFIG_ID]);
+    const monitorFilter = getSavedObjectKqlFilter({
+      field: ConfigKey.CONFIG_ID,
+      values: configIds,
+    });
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
         {
-          search: monitorFilter,
+          filter: monitorFilter,
           type: syntheticsMonitorType,
           perPage: 500,
           namespaces: [this.spaceId],
@@ -362,7 +387,7 @@ export class ProjectMonitorFormatter {
   private updateMonitorsBulk = async (
     monitors: Array<{
       monitor: SyntheticsMonitor;
-      previousMonitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>;
+      previousMonitor: PreviousMonitorForUpdate;
     }>
   ): Promise<
     | {
@@ -387,10 +412,11 @@ export class ProjectMonitorFormatter {
       const monitorsToUpdate: MonitorConfigUpdate[] = [];
 
       decryptedPreviousMonitors.forEach((decryptedPreviousMonitor) => {
-        const monitor = monitors.find((m) => m.previousMonitor.id === decryptedPreviousMonitor.id);
+        const monitor = monitors.find(
+          (m) => m.previousMonitor[ConfigKey.CONFIG_ID] === decryptedPreviousMonitor.id
+        );
         if (monitor) {
           const normalizedMonitor = monitor?.monitor;
-          const previousMonitor = monitor?.previousMonitor;
           const {
             attributes: { [ConfigKey.REVISION]: _, ...normalizedPrevMonitorAttr },
           } = normalizeSecrets(decryptedPreviousMonitor);
@@ -398,11 +424,10 @@ export class ProjectMonitorFormatter {
           const monitorWithRevision = formatSecrets({
             ...normalizedPrevMonitorAttr,
             ...normalizedMonitor,
-            revision: (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
+            revision: (decryptedPreviousMonitor.attributes[ConfigKey.REVISION] || 0) + 1,
           });
           monitorsToUpdate.push({
             normalizedMonitor,
-            previousMonitor,
             monitorWithRevision,
             decryptedPreviousMonitor,
           });

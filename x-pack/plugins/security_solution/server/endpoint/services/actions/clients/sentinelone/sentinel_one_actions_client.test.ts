@@ -51,6 +51,7 @@ import type {
   SentinelOneGetRemoteScriptStatusApiResponse,
   SentinelOneRemoteScriptExecutionStatus,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import { ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT } from '../../../../../lib/telemetry/event_based/events';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -803,7 +804,7 @@ describe('SentinelOneActionsClient class', () => {
         });
       });
 
-      it('should create response at error if request has no parentTaskId', async () => {
+      it('should create response as error if request has no parentTaskId', async () => {
         // @ts-expect-error
         actionRequestsSearchResponse.hits.hits[0]!._source!.meta!.parentTaskId = '';
         await s1ActionsClient.processPendingActions(processPendingActionsOptions);
@@ -902,6 +903,278 @@ describe('SentinelOneActionsClient class', () => {
         await s1ActionsClient.processPendingActions(processPendingActionsOptions);
 
         expect(processPendingActionsOptions.addToQueue).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Telemetry', () => {
+      beforeEach(() => {
+        // @ts-expect-error
+        classConstructorOptions.endpointService.experimentalFeatures.responseActionsTelemetryEnabled =
+          true;
+      });
+      describe('for Isolate and Release', () => {
+        let s1ActivityHits: Array<SearchHit<SentinelOneActivityEsDoc>>;
+
+        beforeEach(() => {
+          const s1DataGenerator = new SentinelOneDataGenerator('seed');
+          const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+            s1DataGenerator.generateActionEsHit<undefined, {}, SentinelOneIsolationRequestMeta>({
+              agent: { id: 'agent-uuid-1' },
+              EndpointActions: { data: { command: 'isolate' } },
+              meta: {
+                agentId: 's1-agent-a',
+                agentUUID: 'agent-uuid-1',
+                hostName: 's1-host-name',
+              },
+            }),
+          ]);
+          const actionResponsesSearchResponse = s1DataGenerator.toEsSearchResponse<
+            LogsEndpointActionResponse | EndpointActionResponse
+          >([]);
+          const s1ActivitySearchResponse = s1DataGenerator.generateActivityEsSearchResponse([
+            s1DataGenerator.generateActivityEsSearchHit({
+              sentinel_one: {
+                activity: {
+                  agent: {
+                    id: 's1-agent-a',
+                  },
+                  type: 1001,
+                },
+              },
+            }),
+          ]);
+
+          s1ActivityHits = s1ActivitySearchResponse.hits.hits;
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: ENDPOINT_ACTIONS_INDEX,
+            response: actionRequestsSearchResponse,
+            pitUsage: true,
+          });
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+            response: actionResponsesSearchResponse,
+          });
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
+            response: s1ActivitySearchResponse,
+          });
+        });
+
+        it('should send action response telemetry for completed/failed action', async () => {
+          s1ActivityHits[0]._source!.sentinel_one.activity.type = 2010;
+          s1ActivityHits[0]._source!.sentinel_one.activity.description.primary =
+            'Agent SOME_HOST_NAME was unable to disconnect from network.';
+          await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+          expect(
+            classConstructorOptions.endpointService.getTelemetryService().reportEvent
+          ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+            responseActions: {
+              actionId: expect.any(String),
+              actionStatus: 'failed',
+              agentType: 'sentinel_one',
+              command: 'isolate',
+            },
+          });
+        });
+
+        it('should send action response telemetry for completed/successful action', async () => {
+          await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+          expect(
+            classConstructorOptions.endpointService.getTelemetryService().reportEvent
+          ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+            responseActions: {
+              actionId: expect.any(String),
+              actionStatus: 'successful',
+              agentType: 'sentinel_one',
+              command: 'isolate',
+            },
+          });
+        });
+      });
+
+      describe('for get-file response action', () => {
+        let actionRequestsSearchResponse: SearchResponse<
+          LogsEndpointAction<ResponseActionGetFileParameters, ResponseActionGetFileOutputContent>
+        >;
+
+        beforeEach(() => {
+          const s1DataGenerator = new SentinelOneDataGenerator('seed');
+          actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+            s1DataGenerator.generateActionEsHit<
+              ResponseActionGetFileParameters,
+              ResponseActionGetFileOutputContent,
+              SentinelOneGetFileRequestMeta
+            >({
+              agent: { id: 'agent-uuid-1' },
+              EndpointActions: { data: { command: 'get-file' } },
+              meta: {
+                agentId: 's1-agent-a',
+                agentUUID: 'agent-uuid-1',
+                hostName: 's1-host-name',
+                commandBatchUuid: 'batch-111',
+                activityId: 'activity-222',
+              },
+            }),
+          ]);
+          const actionResponsesSearchResponse = s1DataGenerator.toEsSearchResponse<
+            LogsEndpointActionResponse | EndpointActionResponse
+          >([]);
+          const s1ActivitySearchResponse = s1DataGenerator.generateActivityEsSearchResponse([
+            s1DataGenerator.generateActivityEsSearchHit<SentinelOneActivityDataForType80>({
+              sentinel_one: {
+                activity: {
+                  id: 'activity-222',
+                  data: s1DataGenerator.generateActivityFetchFileResponseData({
+                    flattened: {
+                      commandBatchUuid: 'batch-111',
+                    },
+                  }),
+                  agent: {
+                    id: 's1-agent-a',
+                  },
+                  type: 80,
+                },
+              },
+            }),
+          ]);
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: ENDPOINT_ACTIONS_INDEX,
+            response: actionRequestsSearchResponse,
+            pitUsage: true,
+          });
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+            response: actionResponsesSearchResponse,
+          });
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: SENTINEL_ONE_ACTIVITY_INDEX_PATTERN,
+            response: s1ActivitySearchResponse,
+          });
+        });
+
+        it('should send action response telemetry for completed/failed action', async () => {
+          actionRequestsSearchResponse.hits.hits[0]!._source!.meta = {
+            agentId: 's1-agent-a',
+            agentUUID: 'agent-uuid-1',
+            hostName: 's1-host-name',
+          };
+          await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+          expect(
+            classConstructorOptions.endpointService.getTelemetryService().reportEvent
+          ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+            responseActions: {
+              actionId: expect.any(String),
+              actionStatus: 'failed',
+              agentType: 'sentinel_one',
+              command: 'get-file',
+            },
+          });
+        });
+
+        it('should send action response telemetry for completed/successful action', async () => {
+          await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+          expect(
+            classConstructorOptions.endpointService.getTelemetryService().reportEvent
+          ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+            responseActions: {
+              actionId: expect.any(String),
+              actionStatus: 'successful',
+              agentType: 'sentinel_one',
+              command: 'get-file',
+            },
+          });
+        });
+      });
+
+      describe.each`
+        actionName             | requestData
+        ${'kill-process'}      | ${{ command: 'kill-process', parameters: { process_name: 'foo' } }}
+        ${'running-processes'} | ${{ command: 'running-processes', parameters: undefined }}
+      `('for $actionName response action', ({ actionName, requestData }) => {
+        let actionRequestsSearchResponse: SearchResponse<LogsEndpointAction>;
+
+        beforeEach(() => {
+          const s1DataGenerator = new SentinelOneDataGenerator('seed');
+
+          actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+            s1DataGenerator.generateActionEsHit({
+              agent: { id: 'agent-uuid-1' },
+              EndpointActions: {
+                data: requestData,
+              },
+              meta: {
+                agentId: 's1-agent-a',
+                agentUUID: 'agent-uuid-1',
+                hostName: 's1-host-name',
+                parentTaskId: 's1-parent-task-123',
+              },
+            }),
+          ]);
+          const actionResponsesSearchResponse = s1DataGenerator.toEsSearchResponse<
+            LogsEndpointActionResponse | EndpointActionResponse
+          >([]);
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: ENDPOINT_ACTIONS_INDEX,
+            response: actionRequestsSearchResponse,
+            pitUsage: true,
+          });
+
+          applyEsClientSearchMock({
+            esClientMock: classConstructorOptions.esClient,
+            index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+            response: actionResponsesSearchResponse,
+          });
+        });
+
+        it('should send action response telemetry for completed/failed action', async () => {
+          // @ts-expect-error
+          actionRequestsSearchResponse.hits.hits[0]!._source!.meta!.parentTaskId = '';
+          await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+          expect(
+            classConstructorOptions.endpointService.getTelemetryService().reportEvent
+          ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+            responseActions: {
+              actionId: expect.any(String),
+              actionStatus: 'failed',
+              agentType: 'sentinel_one',
+              command: actionName,
+            },
+          });
+        });
+
+        it('should send action response telemetry for completed/successful action', async () => {
+          await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+          expect(
+            classConstructorOptions.endpointService.getTelemetryService().reportEvent
+          ).toHaveBeenCalledWith(ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT.eventType, {
+            responseActions: {
+              actionId: expect.any(String),
+              actionStatus: 'successful',
+              agentType: 'sentinel_one',
+              command: actionName,
+            },
+          });
+        });
       });
     });
   });

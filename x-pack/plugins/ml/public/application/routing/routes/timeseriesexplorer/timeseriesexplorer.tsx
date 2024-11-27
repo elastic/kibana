@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
-import { useMlApiContext, useUiSettings } from '../../../contexts/kibana';
+import { useMlApi, useUiSettings } from '../../../contexts/kibana';
 import { getDateFormatTz } from '../../../explorer/explorer_utils';
-import { mlJobService } from '../../../services/job_service';
+import { useMlJobService } from '../../../services/job_service';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
@@ -49,12 +49,13 @@ export const timeSeriesExplorerRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const mlApi = useMlApiContext();
+  const mlApi = useMlApi();
+  const mlJobService = useMlJobService();
   const uiSettings = useUiSettings();
   const { context, results } = useRouteResolver('full', ['canGetJobs'], {
     ...basicResolvers(),
     jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => mlApi.jobs.jobsWithTimerange(getDateFormatTz()),
+    jobsWithTimeRange: () => mlApi.jobs.jobsWithTimerange(getDateFormatTz(uiSettings)),
   });
 
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);

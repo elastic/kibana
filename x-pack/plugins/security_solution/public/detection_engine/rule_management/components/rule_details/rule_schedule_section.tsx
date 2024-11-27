@@ -14,14 +14,26 @@ import { getHumanizedDuration } from '../../../../detections/pages/detection_eng
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
 
+interface AccessibleTimeValueProps {
+  timeValue: string;
+  'data-test-subj'?: string;
+}
+
+export const AccessibleTimeValue = ({
+  timeValue,
+  'data-test-subj': dataTestSubj,
+}: AccessibleTimeValueProps) => (
+  <EuiText size="s" data-test-subj={dataTestSubj}>
+    <IntervalAbbrScreenReader interval={timeValue} />
+  </EuiText>
+);
+
 interface IntervalProps {
   interval: string;
 }
 
 const Interval = ({ interval }: IntervalProps) => (
-  <EuiText size="s" data-test-subj="intervalPropertyValue">
-    <IntervalAbbrScreenReader interval={interval} />
-  </EuiText>
+  <AccessibleTimeValue timeValue={interval} data-test-subj="intervalPropertyValue" />
 );
 
 interface FromProps {
@@ -30,9 +42,10 @@ interface FromProps {
 }
 
 const From = ({ from, interval }: FromProps) => (
-  <EuiText size="s" data-test-subj={`fromPropertyValue-${from}`}>
-    <IntervalAbbrScreenReader interval={getHumanizedDuration(from, interval)} />
-  </EuiText>
+  <AccessibleTimeValue
+    timeValue={getHumanizedDuration(from, interval)}
+    data-test-subj={`fromPropertyValue-${from}`}
+  />
 );
 
 export interface RuleScheduleSectionProps extends React.ComponentProps<typeof EuiDescriptionList> {

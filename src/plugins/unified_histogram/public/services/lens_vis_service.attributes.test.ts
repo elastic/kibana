@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
@@ -107,6 +108,7 @@ describe('LensVisService attributes', () => {
                         "sourceField": "timestamp",
                       },
                     },
+                    "indexPatternId": "index-pattern-with-timefield-id",
                   },
                 },
               },
@@ -283,6 +285,7 @@ describe('LensVisService attributes', () => {
                         "sourceField": "timestamp",
                       },
                     },
+                    "indexPatternId": "index-pattern-with-timefield-id",
                   },
                 },
               },
@@ -433,6 +436,7 @@ describe('LensVisService attributes', () => {
                         "sourceField": "timestamp",
                       },
                     },
+                    "indexPatternId": "index-pattern-with-timefield-id",
                   },
                 },
               },
@@ -673,7 +677,8 @@ describe('LensVisService attributes', () => {
               },
             ],
             "query": Object {
-              "esql": "from logstash-* | limit 10",
+              "esql": "from logstash-* | limit 10
+      | EVAL timestamp=DATE_TRUNC(10 minute, timestamp) | stats results = count(*) by timestamp | rename timestamp as \`timestamp every 10 minute\`",
             },
             "visualization": Object {
               "gridConfig": Object {
@@ -705,7 +710,7 @@ describe('LensVisService attributes', () => {
           "timeField": "timestamp",
           "timeInterval": undefined,
         },
-        "suggestionType": "lensSuggestion",
+        "suggestionType": "histogramForESQL",
       }
     `);
   });
@@ -763,7 +768,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: true,
       allSuggestions: [], // none available
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });

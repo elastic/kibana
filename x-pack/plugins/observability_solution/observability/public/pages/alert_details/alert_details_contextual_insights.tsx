@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import dedent from 'dedent';
 import { type AlertDetailsContextualInsight } from '../../../server/services';
 import { useKibana } from '../../utils/kibana_react';
@@ -34,6 +33,12 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
       }>('/internal/observability/assistant/alert_details_contextual_insights', {
         query: {
           alert_started_at: new Date(alert.formatted.start).toISOString(),
+
+          // alert fields used for log rate analysis
+          alert_rule_parameter_time_size: alert.formatted.fields[ALERT_RULE_PARAMETERS]
+            ?.timeSize as string | undefined,
+          alert_rule_parameter_time_unit: alert.formatted.fields[ALERT_RULE_PARAMETERS]
+            ?.timeUnit as string | undefined,
 
           // service fields
           'service.name': fields['service.name'],
@@ -81,21 +86,17 @@ export function AlertDetailContextualInsights({ alert }: { alert: AlertData | nu
     }
   }, [alert, http, observabilityAIAssistant]);
 
-  if (!ObservabilityAIAssistantContextualInsight) {
+  if (!ObservabilityAIAssistantContextualInsight || !getAlertContextMessages()) {
     return null;
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <ObservabilityAIAssistantContextualInsight
-          title={i18n.translate(
-            'xpack.observability.alertDetailContextualInsights.InsightButtonLabel',
-            { defaultMessage: 'Help me understand this alert' }
-          )}
-          messages={getAlertContextMessages}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ObservabilityAIAssistantContextualInsight
+      title={i18n.translate(
+        'xpack.observability.alertDetailContextualInsights.InsightButtonLabel',
+        { defaultMessage: 'Help me understand this alert' }
+      )}
+      messages={getAlertContextMessages}
+    />
   );
 }

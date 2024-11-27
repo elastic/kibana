@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
@@ -48,7 +49,7 @@ export interface UnifiedHistogramState {
   /**
    * Lens embeddable output observable
    */
-  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
   /**
    * The current time interval of the chart
    */
@@ -123,9 +124,7 @@ export interface UnifiedHistogramStateService {
    * Sets the current Lens adapters
    */
   setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => void;
-  setLensEmbeddableOutput$: (
-    lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-  ) => void;
+  setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => void;
   /**
    * Sets the current total hits status and result
    */
@@ -213,10 +212,8 @@ export const createStateService = (
     setLensAdapters: (lensAdapters: UnifiedHistogramChartLoadEvent['adapters'] | undefined) => {
       updateState({ lensAdapters });
     },
-    setLensEmbeddableOutput$: (
-      lensEmbeddableOutput$: Observable<LensEmbeddableOutput> | undefined
-    ) => {
-      updateState({ lensEmbeddableOutput$ });
+    setLensDataLoading$: (dataLoading$: PublishingSubject<boolean | undefined> | undefined) => {
+      updateState({ dataLoading$ });
     },
 
     setTotalHits: (totalHits: {

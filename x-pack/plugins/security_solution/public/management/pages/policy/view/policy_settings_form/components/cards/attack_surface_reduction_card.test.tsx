@@ -17,7 +17,8 @@ import {
   SWITCH_LABEL,
 } from './attack_surface_reduction_card';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
-import { cloneDeep, set } from 'lodash';
+import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import userEvent from '@testing-library/user-event';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
@@ -79,7 +80,7 @@ describe('Policy Attack Surface Reduction Card', () => {
     );
   });
 
-  it('should be able to toggle to disabled', () => {
+  it('should be able to toggle to disabled', async () => {
     const expectedUpdate = cloneDeep(formProps.policy);
     set(expectedUpdate, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
     render();
@@ -89,7 +90,7 @@ describe('Policy Attack Surface Reduction Card', () => {
       'true'
     );
 
-    userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -97,7 +98,7 @@ describe('Policy Attack Surface Reduction Card', () => {
     });
   });
 
-  it('should should be able to toggle to enabled', () => {
+  it('should should be able to toggle to enabled', async () => {
     set(formProps.policy, 'windows.attack_surface_reduction.credential_hardening.enabled', false);
 
     const expectedUpdate = cloneDeep(formProps.policy);
@@ -109,7 +110,7 @@ describe('Policy Attack Surface Reduction Card', () => {
       'false'
     );
 
-    userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
+    await userEvent.click(renderResult.getByTestId(testSubj.enableDisableSwitch));
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,

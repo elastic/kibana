@@ -14,7 +14,7 @@ export const HOST_BY_RISK_TABLE_CELL =
 
 export const HOST_BY_RISK_TABLE = '[data-test-subj="table-hostRisk-loading-false"]';
 
-export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-button"]';
+export const HOST_BY_RISK_TABLE_FILTER = '[data-test-subj="risk-filter-popoverButton"]';
 
 export const HOST_BY_RISK_TABLE_FILTER_CRITICAL = '[data-test-subj="risk-filter-item-Critical"]';
 

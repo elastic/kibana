@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
@@ -15,6 +16,7 @@ import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { useErrorTextStyle } from '@kbn/react-hooks';
 import { editPanelAction } from '../panel_actions/panel_actions';
 import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
@@ -26,6 +28,8 @@ export const PresentationPanelError = ({
   error: ErrorLike;
   api?: DefaultPresentationPanelApi;
 }) => {
+  const errorTextStyle = useErrorTextStyle();
+
   const [isEditable, setIsEditable] = useState(false);
   const handleErrorClick = useMemo(
     () => (isEditable ? () => editPanelAction?.execute({ embeddable: api }) : undefined),
@@ -81,7 +85,7 @@ export const PresentationPanelError = ({
     <EuiEmptyPrompt
       body={
         searchErrorDisplay?.body ?? (
-          <EuiText size="s">
+          <EuiText size="s" css={errorTextStyle}>
             <Markdown data-test-subj="errorMessageMarkdown" readOnly>
               {error.message?.length
                 ? error.message

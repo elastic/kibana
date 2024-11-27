@@ -44,7 +44,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -84,7 +84,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -124,7 +124,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -158,7 +158,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -198,7 +198,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -238,7 +238,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -270,7 +270,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -302,7 +302,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -367,7 +367,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -407,11 +407,28 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-exception-list-components",
+        "id": "def-common.PartialCodeSignatureCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "PartialCodeSignatureCallout",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "packages/kbn-securitysolution-exception-list-components/src/partial_code_signature_callout/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -439,7 +456,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -454,7 +471,7 @@
         "label": "ValueWithSpaceWarning",
         "description": [],
         "signature": [
-          "({ value, tooltipIconType, tooltipIconText, }: React.PropsWithChildren<ValueWithSpaceWarningProps>) => JSX.Element | null"
+          "({ value, tooltipIconType, tooltipIconText, }: ValueWithSpaceWarningProps) => React.JSX.Element | null"
         ],
         "path": "packages/kbn-securitysolution-exception-list-components/src/value_with_space_warning/value_with_space_warning.tsx",
         "deprecated": false,
@@ -463,12 +480,12 @@
           {
             "parentPluginId": "@kbn/securitysolution-exception-list-components",
             "id": "def-common.ValueWithSpaceWarning.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  value,\n  tooltipIconType = 'iInCircle',\n  tooltipIconText,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<ValueWithSpaceWarningProps>"
+              "ValueWithSpaceWarningProps"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/value_with_space_warning/value_with_space_warning.tsx",
             "deprecated": false,
@@ -487,7 +504,7 @@
         "label": "WildCardWithWrongOperatorCallout",
         "description": [],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
         "path": "packages/kbn-securitysolution-exception-list-components/src/wildcard_with_wrong_operator_callout/index.tsx",
         "deprecated": false,
@@ -851,7 +868,7 @@
             "label": "formattedDateComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"slot\" | \"style\" | \"title\" | \"data\" | \"path\" | \"code\" | \"pattern\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"form\" | \"line\" | \"rect\" | \"label\" | \"progress\" | \"article\" | \"image\" | \"menu\" | \"base\" | React.ComponentType<any> | \"s\" | \"legend\" | \"canvas\" | \"svg\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | \"select\" | \"output\" | \"script\" | \"time\" | \"mask\" | \"input\" | \"table\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"caption\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"section\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\""
+              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"search\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"label\" | \"data\" | \"slot\" | \"style\" | \"title\" | \"form\" | \"path\" | \"code\" | \"pattern\" | \"set\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"article\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"menu\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"s\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"table\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"time\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"image\" | \"line\" | \"linearGradient\" | \"marker\" | \"mask\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
             "deprecated": false,
@@ -865,7 +882,7 @@
             "label": "securityLinkAnchorComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"slot\" | \"style\" | \"title\" | \"data\" | \"path\" | \"code\" | \"pattern\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"form\" | \"line\" | \"rect\" | \"label\" | \"progress\" | \"article\" | \"image\" | \"menu\" | \"base\" | React.ComponentType<any> | \"s\" | \"legend\" | \"canvas\" | \"svg\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | \"select\" | \"output\" | \"script\" | \"time\" | \"mask\" | \"input\" | \"table\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"caption\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"section\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\""
+              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"search\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"label\" | \"data\" | \"slot\" | \"style\" | \"title\" | \"form\" | \"path\" | \"code\" | \"pattern\" | \"set\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"article\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"menu\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"s\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"table\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"time\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"image\" | \"line\" | \"linearGradient\" | \"marker\" | \"mask\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/meta/index.tsx",
             "deprecated": false,
@@ -1004,7 +1021,7 @@
             "label": "securityLinkAnchorComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"slot\" | \"style\" | \"title\" | \"data\" | \"path\" | \"code\" | \"pattern\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"form\" | \"line\" | \"rect\" | \"label\" | \"progress\" | \"article\" | \"image\" | \"menu\" | \"base\" | React.ComponentType<any> | \"s\" | \"legend\" | \"canvas\" | \"svg\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | \"select\" | \"output\" | \"script\" | \"time\" | \"mask\" | \"input\" | \"table\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"caption\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"section\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\""
+              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"search\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"label\" | \"data\" | \"slot\" | \"style\" | \"title\" | \"form\" | \"path\" | \"code\" | \"pattern\" | \"set\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"article\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"menu\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"s\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"table\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"time\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"image\" | \"line\" | \"linearGradient\" | \"marker\" | \"mask\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
@@ -1018,7 +1035,7 @@
             "label": "formattedDateComponent",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"slot\" | \"style\" | \"title\" | \"data\" | \"path\" | \"code\" | \"pattern\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"form\" | \"line\" | \"rect\" | \"label\" | \"progress\" | \"article\" | \"image\" | \"menu\" | \"base\" | React.ComponentType<any> | \"s\" | \"legend\" | \"canvas\" | \"svg\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | \"select\" | \"output\" | \"script\" | \"time\" | \"mask\" | \"input\" | \"table\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"caption\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"section\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\""
+              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"search\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"label\" | \"data\" | \"slot\" | \"style\" | \"title\" | \"form\" | \"path\" | \"code\" | \"pattern\" | \"set\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"article\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"menu\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"s\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"table\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"time\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"image\" | \"line\" | \"linearGradient\" | \"marker\" | \"mask\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,
@@ -1144,7 +1161,7 @@
             "label": "showValueListModal",
             "description": [],
             "signature": [
-              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"slot\" | \"style\" | \"title\" | \"data\" | \"path\" | \"code\" | \"pattern\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"form\" | \"line\" | \"rect\" | \"label\" | \"progress\" | \"article\" | \"image\" | \"menu\" | \"base\" | React.ComponentType<any> | \"s\" | \"legend\" | \"canvas\" | \"svg\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | \"select\" | \"output\" | \"script\" | \"time\" | \"mask\" | \"input\" | \"table\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"aside\" | \"audio\" | \"b\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"caption\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"ins\" | \"kbd\" | \"keygen\" | \"li\" | \"mark\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"param\" | \"picture\" | \"pre\" | \"rp\" | \"rt\" | \"ruby\" | \"samp\" | \"section\" | \"strong\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"linearGradient\" | \"marker\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\""
+              "\"symbol\" | \"object\" | \"source\" | \"meta\" | \"desc\" | \"filter\" | \"search\" | \"big\" | \"link\" | \"small\" | \"sub\" | \"sup\" | \"text\" | \"map\" | \"head\" | \"label\" | \"data\" | \"slot\" | \"style\" | \"title\" | \"form\" | \"path\" | \"code\" | \"pattern\" | \"set\" | \"summary\" | \"template\" | \"span\" | \"q\" | \"body\" | \"html\" | \"stop\" | \"main\" | \"a\" | \"abbr\" | \"address\" | \"area\" | \"article\" | \"aside\" | \"audio\" | \"b\" | \"base\" | \"bdi\" | \"bdo\" | \"blockquote\" | \"br\" | \"button\" | \"canvas\" | \"caption\" | \"center\" | \"cite\" | \"col\" | \"colgroup\" | \"datalist\" | \"dd\" | \"del\" | \"details\" | \"dfn\" | \"dialog\" | \"div\" | \"dl\" | \"dt\" | \"em\" | \"embed\" | \"fieldset\" | \"figcaption\" | \"figure\" | \"footer\" | \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"header\" | \"hgroup\" | \"hr\" | \"i\" | \"iframe\" | \"img\" | \"input\" | \"ins\" | \"kbd\" | \"keygen\" | \"legend\" | \"li\" | \"mark\" | \"menu\" | \"menuitem\" | \"meter\" | \"nav\" | \"noindex\" | \"noscript\" | \"ol\" | \"optgroup\" | \"option\" | \"output\" | \"p\" | \"param\" | \"picture\" | \"pre\" | \"progress\" | \"rp\" | \"rt\" | \"ruby\" | \"s\" | \"samp\" | \"script\" | \"section\" | \"select\" | \"strong\" | \"table\" | \"tbody\" | \"td\" | \"textarea\" | \"tfoot\" | \"th\" | \"thead\" | \"time\" | \"tr\" | \"track\" | \"u\" | \"ul\" | \"var\" | \"video\" | \"wbr\" | \"webview\" | \"svg\" | \"animate\" | \"animateMotion\" | \"animateTransform\" | \"circle\" | \"clipPath\" | \"defs\" | \"ellipse\" | \"feBlend\" | \"feColorMatrix\" | \"feComponentTransfer\" | \"feComposite\" | \"feConvolveMatrix\" | \"feDiffuseLighting\" | \"feDisplacementMap\" | \"feDistantLight\" | \"feDropShadow\" | \"feFlood\" | \"feFuncA\" | \"feFuncB\" | \"feFuncG\" | \"feFuncR\" | \"feGaussianBlur\" | \"feImage\" | \"feMerge\" | \"feMergeNode\" | \"feMorphology\" | \"feOffset\" | \"fePointLight\" | \"feSpecularLighting\" | \"feSpotLight\" | \"feTile\" | \"feTurbulence\" | \"foreignObject\" | \"g\" | \"image\" | \"line\" | \"linearGradient\" | \"marker\" | \"mask\" | \"metadata\" | \"mpath\" | \"polygon\" | \"polyline\" | \"radialGradient\" | \"rect\" | \"switch\" | \"textPath\" | \"tspan\" | \"use\" | \"view\" | React.ComponentType<any>"
             ],
             "path": "packages/kbn-securitysolution-exception-list-components/src/exception_item_card/exception_item_card.tsx",
             "deprecated": false,

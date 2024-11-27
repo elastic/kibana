@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -25,14 +26,14 @@ import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { MockLifecycle } from './test_helpers/test_types';
+import type { MockLifecycle } from './test_helpers/test_types';
 import { ApplicationService } from './application_service';
 import {
-  App,
-  AppDeepLink,
+  type App,
+  type AppDeepLink,
   AppStatus,
-  AppUpdater,
-  PublicAppInfo,
+  type AppUpdater,
+  type PublicAppInfo,
 } from '@kbn/core-application-browser';
 import { act } from 'react-dom/test-utils';
 import { DEFAULT_APP_VISIBILITY } from './utils';
@@ -98,7 +99,9 @@ describe('#setup()', () => {
       await service.start(startDeps);
       expect(() =>
         register(Symbol(), createApp({ id: 'app1' }))
-      ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Applications cannot be registered after \\"setup\\" (attempted to register \\"app1\\")"`
+      );
     });
 
     it('allows to register an AppUpdater for the application', async () => {
@@ -612,6 +615,26 @@ describe('#start()', () => {
 
       expect(() => shallow(createElement(getComponent))).not.toThrow();
       expect(getComponent()).toMatchSnapshot();
+    });
+  });
+
+  describe('isAppRegistered', () => {
+    let isAppRegistered: any;
+    beforeEach(async () => {
+      const { register } = service.setup(setupDeps);
+      register(Symbol(), createApp({ id: 'one_app' }));
+      register(Symbol(), createApp({ id: 'another_app', appRoute: '/custom/path' }));
+
+      const start = await service.start(startDeps);
+      isAppRegistered = start.isAppRegistered;
+    });
+
+    it('returns false for unregistered apps', () => {
+      expect(isAppRegistered('oneApp')).toEqual(false);
+    });
+
+    it('returns true for registered apps', () => {
+      expect(isAppRegistered('another_app')).toEqual(true);
     });
   });
 

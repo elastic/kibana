@@ -13,7 +13,7 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/content-management-table-list-view-table",
             "scope": "public",
@@ -21,7 +21,7 @@
             "section": "def-public.TableListViewKibanaDependencies",
             "text": "TableListViewKibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/table_list_view_table/src/services.tsx",
         "deprecated": false,
@@ -35,7 +35,7 @@
             "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/content-management-table-list-view-table",
                 "scope": "public",
@@ -43,7 +43,7 @@
                 "section": "def-public.TableListViewKibanaDependencies",
                 "text": "TableListViewKibanaDependencies"
               },
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -64,9 +64,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "Services",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "packages/content-management/table_list_view_table/src/services.tsx",
         "deprecated": false,
@@ -80,9 +80,9 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "Services",
-              ">>"
+              ">"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -117,7 +117,7 @@
             "section": "def-public.TableListViewTableProps",
             "text": "TableListViewTableProps"
           },
-          "<T>) => JSX.Element | null"
+          "<T>) => React.JSX.Element | null"
         ],
         "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
         "deprecated": false,
@@ -297,7 +297,7 @@
                 "section": "def-common.FormattedRelativeProps",
                 "text": "FormattedRelativeProps"
               },
-              ") => JSX.Element"
+              ") => React.JSX.Element"
             ],
             "path": "packages/content-management/table_list_view_table/src/services.tsx",
             "deprecated": false,
@@ -342,6 +342,29 @@
                 "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
                 "section": "def-public.FavoritesClientPublic",
                 "text": "FavoritesClientPublic"
+              },
+              "<void> | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_table/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-table",
+            "id": "def-public.TableListViewKibanaDependencies.contentInsightsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "contentInsightsClient",
+            "description": [
+              "\nContent insights client to enable content insights features."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-insights-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+                "section": "def-public.ContentInsightsClientPublic",
+                "text": "ContentInsightsClientPublic"
               },
               " | undefined"
             ],

@@ -5,20 +5,39 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import { HttpSetup, type IHttpFetchError, type ResponseErrorBody } from '@kbn/core/public';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { IToasts } from '@kbn/core-notifications-browser';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
+  FindKnowledgeBaseEntriesRequestQuery,
   FindKnowledgeBaseEntriesResponse,
 } from '@kbn/elastic-assistant-common';
 
 import { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 
 export interface UseKnowledgeBaseEntriesParams {
   http: HttpSetup;
+  query?: FindKnowledgeBaseEntriesRequestQuery;
   signal?: AbortSignal | undefined;
+  toasts?: IToasts;
+  enabled?: boolean; // For disabling if FF is off
+  isRefetching?: boolean; // For enabling polling
 }
+
+const defaultQuery: FindKnowledgeBaseEntriesRequestQuery = {
+  page: 1,
+  per_page: 100,
+};
+
+export const KNOWLEDGE_BASE_ENTRY_QUERY_KEY = [
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
+  defaultQuery.page,
+  defaultQuery.per_page,
+  API_VERSIONS.internal.v1,
+];
 
 /**
  * Hook for fetching Knowledge Base Entries.
@@ -27,24 +46,19 @@ export interface UseKnowledgeBaseEntriesParams {
  *
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
- * @param {Function} [options.onFetch] - transformation function for kb entries fetch result
+ * @param {Function} [options.query] - Query params to include, like filters, pagination, etc.
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {useQuery} hook for fetching Knowledge Base Entries
+ * @returns hook for fetching Knowledge Base Entries
  */
-const query = {
-  page: 1,
-  perPage: 100,
-};
-
-export const KNOWLEDGE_BASE_ENTRY_QUERY_KEY = [
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  query.page,
-  query.perPage,
-  API_VERSIONS.internal.v1,
-];
-
-export const useKnowledgeBaseEntries = ({ http, signal }: UseKnowledgeBaseEntriesParams) =>
+export const useKnowledgeBaseEntries = ({
+  http,
+  query = defaultQuery,
+  signal,
+  toasts,
+  enabled = false,
+  isRefetching = false,
+}: UseKnowledgeBaseEntriesParams) =>
   useQuery(
     KNOWLEDGE_BASE_ENTRY_QUERY_KEY,
     async () =>
@@ -58,8 +72,19 @@ export const useKnowledgeBaseEntries = ({ http, signal }: UseKnowledgeBaseEntrie
         }
       ),
     {
+      enabled,
       keepPreviousData: true,
       initialData: { page: 1, perPage: 100, total: 0, data: [] },
+      refetchInterval: isRefetching ? 30000 : false,
+      onError: (error: IHttpFetchError<ResponseErrorBody>) => {
+        if (error.name !== 'AbortError') {
+          toasts?.addError(error, {
+            title: i18n.translate('xpack.elasticAssistant.knowledgeBase.fetchError', {
+              defaultMessage: 'Error fetching Knowledge Base entries',
+            }),
+          });
+        }
+      },
     }
   );
 

@@ -15,17 +15,23 @@ const renderWithSecretFields = ({
   isEdit,
   isMissingSecrets,
   numberOfSecretFields,
+  isSecretFieldsHidden = false,
 }: {
   isEdit: boolean;
   isMissingSecrets: boolean;
   numberOfSecretFields: number;
+  isSecretFieldsHidden?: boolean;
 }): RenderResult => {
   return render(
     <FormTestProvider>
       <UseField path="config.foo" config={{ label: 'labelFoo' }} />
       {Array.from({ length: numberOfSecretFields }).map((_, index) => {
         return (
-          <UseField path={`secrets.${index}`} config={{ label: `label${index}` }} key={index} />
+          <UseField
+            path={`secrets.${index}`}
+            config={isSecretFieldsHidden ? {} : { label: `label${index}` }}
+            key={index}
+          />
         );
       })}
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={isMissingSecrets} />
@@ -67,10 +73,16 @@ describe('EncryptedFieldsCallout', () => {
     ],
   ];
 
-  const noSecretsTests: Array<[{ isEdit: boolean; isMissingSecrets: boolean }, string]> = [
+  const noSecretsTests: Array<
+    [{ isEdit: boolean; isMissingSecrets: boolean; isSecretFieldsHidden?: boolean }, string]
+  > = [
     [{ isEdit: false, isMissingSecrets: false }, 'create-connector-secrets-callout'],
     [{ isEdit: true, isMissingSecrets: false }, 'edit-connector-secrets-callout'],
     [{ isEdit: false, isMissingSecrets: true }, 'missing-secrets-callout'],
+    [
+      { isEdit: true, isMissingSecrets: true, isSecretFieldsHidden: true },
+      'edit-connector-secrets-callout',
+    ],
   ];
 
   it.each(isCreateTests)(

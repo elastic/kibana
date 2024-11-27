@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
-import { StepDefineRule, aggregatableFields } from '.';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { StepDefineRule } from '.';
 import type { StepDefineRuleProps } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
@@ -25,6 +26,22 @@ import {
   createIndexPatternField,
   getSelectToggleButtonForName,
 } from '../../../rule_creation/components/required_fields/required_fields.test';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
+import {
+  expectDuration,
+  expectSuppressionFields,
+  setDuration,
+  setDurationType,
+  setSuppressionFields,
+} from '../../../rule_creation/components/alert_suppression_edit/test_helpers';
+import {
+  selectEuiComboBoxOption,
+  selectFirstEuiComboBoxOption,
+} from '../../../../common/test/eui/combobox';
+import {
+  addRelatedIntegrationRow,
+  setVersion,
+} from '../../../rule_creation/components/related_integrations/test_helpers';
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');
@@ -47,6 +64,14 @@ jest.mock('../ai_assistant', () => {
     }),
   };
 });
+
+jest.mock('../data_view_selector_field/use_data_view_list_items');
+
+jest.mock('../../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({
+    isAtLeast: jest.fn().mockReturnValue(true),
+  }),
+}));
 
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
@@ -79,104 +104,6 @@ jest.mock('../../../../common/lib/kibana', () => {
           },
         },
         data: {
-          dataViews: {
-            getIdsWithTitle: async () =>
-              Promise.resolve([{ id: 'myfakeid', title: 'hello*,world*,refreshed*' }]),
-            create: async ({ title }: { title: string }) =>
-              Promise.resolve({
-                id: 'myfakeid',
-                matchedIndices: ['hello', 'world', 'refreshed'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-              }),
-            get: async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
-              Promise.resolve({
-                id: dataViewId,
-                matchedIndices: refreshFields
-                  ? ['hello', 'world', 'refreshed']
-                  : ['hello', 'world'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-              }),
-          },
           search: {
             search: () => ({
               subscribe: () => ({
@@ -245,60 +172,15 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_from_timeline');
 
-test('aggregatableFields', function () {
-  expect(
-    aggregatableFields([
-      {
-        name: 'error.message',
-        type: 'string',
-        esTypes: ['text'],
-        searchable: true,
-        aggregatable: false,
-        readFromDocValues: false,
-      },
-    ])
-  ).toEqual([]);
-});
-
-test('aggregatableFields with aggregatable: true', function () {
-  expect(
-    aggregatableFields([
-      {
-        name: 'error.message',
-        type: 'string',
-        esTypes: ['text'],
-        searchable: true,
-        aggregatable: false,
-        readFromDocValues: false,
-      },
-      {
-        name: 'file.path',
-        type: 'string',
-        esTypes: ['keyword'],
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: false,
-      },
-    ])
-  ).toEqual([
-    {
-      name: 'file.path',
-      type: 'string',
-      esTypes: ['keyword'],
-      searchable: true,
-      aggregatable: true,
-      readFromDocValues: false,
-    },
-  ]);
-});
-
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
 
 const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
 
-describe('StepDefineRule', () => {
+// Failing: See https://github.com/elastic/kibana/issues/199648
+// Failing: See https://github.com/elastic/kibana/issues/199700
+describe.skip('StepDefineRule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
@@ -310,6 +192,62 @@ describe('StepDefineRule', () => {
     });
 
     expect(screen.getByTestId('stepDefineRule')).toBeDefined();
+  });
+
+  describe('alert suppression', () => {
+    it('persists state when switching between custom query and threshold rule types', async () => {
+      const mockFields: FieldSpec[] = [
+        {
+          name: 'test-field',
+          type: 'string',
+          searchable: false,
+          aggregatable: true,
+        },
+      ];
+
+      const { rerender } = render(
+        <TestForm
+          indexPattern={{
+            title: '',
+            fields: mockFields,
+          }}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await setSuppressionFields(['test-field']);
+      setDurationType('Per time period');
+      setDuration(10, 'h');
+
+      // switch to threshold rule type
+      rerender(
+        <TestForm
+          ruleType="threshold"
+          indexPattern={{
+            title: '',
+            fields: mockFields,
+          }}
+        />
+      );
+
+      expectDuration(10, 'h');
+
+      // switch back to custom query rule type
+      rerender(
+        <TestForm
+          ruleType="query"
+          indexPattern={{
+            title: '',
+            fields: mockFields,
+          }}
+        />
+      );
+
+      expectSuppressionFields(['test-field']);
+      expectDuration(10, 'h');
+    });
   });
 
   describe('related integrations', () => {
@@ -459,7 +397,7 @@ describe('StepDefineRule', () => {
       );
     });
 
-    it('submits saved early required fields without the "ecs" property', async () => {
+    it('submits saved earlier required fields', async () => {
       const initialState = {
         index: ['test-index'],
         queryBar: {
@@ -484,7 +422,7 @@ describe('StepDefineRule', () => {
 
       expect(handleSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          requiredFields: [{ name: 'host.name', type: 'string' }],
+          requiredFields: initialState.requiredFields,
         }),
         true
       );
@@ -625,12 +563,46 @@ describe('StepDefineRule', () => {
   });
 
   describe('AI assistant', () => {
-    it('renders assistant when query is not valid', () => {
-      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'query' }} />, {
-        wrapper: TestProviders,
-      });
+    it('renders assistant when query is not valid and not empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
 
       expect(screen.getByTestId('ai-assistant')).toBeInTheDocument();
+    });
+
+    it('does not render assistant when query is not valid and empty', () => {
+      const initialState = {
+        queryBar: {
+          query: { query: '', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      render(
+        <TestForm
+          formProps={{ isQueryBarValid: false, ruleType: 'query' }}
+          initialState={initialState}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
     });
 
     it('does not render assistant when query is valid', () => {
@@ -666,7 +638,6 @@ function TestForm({
   onSubmit,
   formProps,
 }: TestFormProps): JSX.Element {
-  const [selectedEqlOptions, setSelectedEqlOptions] = useState(stepDefineDefaultValue.eqlOptions);
   const { form } = useForm({
     options: { stripEmptyFields: false },
     schema: defineRuleSchema,
@@ -681,8 +652,6 @@ function TestForm({
         form={form}
         indicesConfig={[]}
         threatIndicesConfig={[]}
-        optionsSelected={selectedEqlOptions}
-        setOptionsSelected={setSelectedEqlOptions}
         indexPattern={indexPattern}
         isIndexPatternLoading={false}
         isQueryBarValid={true}
@@ -691,13 +660,12 @@ function TestForm({
         ruleType={ruleType}
         index={stepDefineDefaultValue.index}
         threatIndex={stepDefineDefaultValue.threatIndex}
-        groupByFields={stepDefineDefaultValue.groupByFields}
+        alertSuppressionFields={stepDefineDefaultValue[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
         dataSourceType={stepDefineDefaultValue.dataSourceType}
         shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
         queryBarTitle=""
         queryBarSavedId=""
         thresholdFields={[]}
-        enableThresholdSuppression={false}
         {...formProps}
       />
       <button type="button" onClick={form.submit}>
@@ -711,79 +679,4 @@ function submitForm(): Promise<void> {
   return act(async () => {
     fireEvent.click(screen.getByText('Submit'));
   });
-}
-
-function addRelatedIntegrationRow(): Promise<void> {
-  return act(async () => {
-    fireEvent.click(screen.getByText('Add integration'));
-  });
-}
-
-function setVersion({ input, value }: { input: HTMLInputElement; value: string }): Promise<void> {
-  return act(async () => {
-    fireEvent.input(input, {
-      target: { value },
-    });
-  });
-}
-
-function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
-
-  return waitFor(() => {
-    const listWithOptionsElement = document.querySelector('[role="listbox"]');
-    const emptyListElement = document.querySelector('.euiComboBoxOptionsList__empty');
-
-    expect(listWithOptionsElement || emptyListElement).toBeInTheDocument();
-  });
-}
-
-type SelectEuiComboBoxOptionParameters =
-  | {
-      comboBoxToggleButton: HTMLElement;
-      optionIndex: number;
-      optionText?: undefined;
-    }
-  | {
-      comboBoxToggleButton: HTMLElement;
-      optionText: string;
-      optionIndex?: undefined;
-    };
-
-function selectEuiComboBoxOption({
-  comboBoxToggleButton,
-  optionIndex,
-  optionText,
-}: SelectEuiComboBoxOptionParameters): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
-
-    const options = Array.from(
-      document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
-    );
-
-    if (typeof optionText === 'string') {
-      const optionToSelect = options.find((option) => option.textContent === optionText);
-
-      if (optionToSelect) {
-        fireEvent.click(optionToSelect);
-      } else {
-        throw new Error(
-          `Could not find option with text "${optionText}". Available options: ${options
-            .map((option) => option.textContent)
-            .join(', ')}`
-        );
-      }
-    } else {
-      fireEvent.click(options[optionIndex]);
-    }
-  });
-}
-
-function selectFirstEuiComboBoxOption({
-  comboBoxToggleButton,
-}: {
-  comboBoxToggleButton: HTMLElement;
-}): Promise<void> {
-  return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }

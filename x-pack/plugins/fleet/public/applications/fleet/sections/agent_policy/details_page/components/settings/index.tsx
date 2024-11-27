@@ -39,13 +39,13 @@ import {
 import { DevtoolsRequestFlyoutButton } from '../../../../../components';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
+import { UNKNOWN_SPACE } from '../../../../../../../../common/constants';
 
-const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
-  pick(agentPolicy, [
+const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) => {
+  const partialPolicy = pick(agentPolicy, [
     'name',
     'description',
     'namespace',
-    'space_ids',
     'monitoring_enabled',
     'unenroll_timeout',
     'inactivity_timeout',
@@ -57,7 +57,17 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'is_protected',
     'advanced_settings',
     'global_data_tags',
+    'monitoring_pprof_enabled',
+    'monitoring_http',
+    'monitoring_diagnostics',
   ]);
+  return {
+    ...partialPolicy,
+    ...(!agentPolicy.space_ids?.includes(UNKNOWN_SPACE) && {
+      space_ids: agentPolicy.space_ids,
+    }),
+  };
+};
 
 const FormWrapper = styled.div`
   max-width: 1200px;
@@ -87,6 +97,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       allowedNamespacePrefixes: spaceSettings?.allowedNamespacePrefixes,
     });
     const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
+    const [hasInvalidSpaceError, setInvalidSpaceError] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
       setAgentPolicy({
@@ -146,8 +157,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       if (isFleetEnabled) {
         setIsLoading(true);
         const { data } = await sendGetAgentStatus({ policyId: agentPolicy.id });
-        if (data?.results.total) {
-          setAgentCount(data.results.total);
+        if (data?.results.active) {
+          setAgentCount(data.results.active);
         } else {
           await submitUpdateAgentPolicy();
         }
@@ -180,6 +191,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           validation={validation}
           isEditing={true}
           updateAdvancedSettingsHasErrors={setHasAdvancedSettingsErrors}
+          setInvalidSpaceError={setInvalidSpaceError}
         />
 
         {hasChanges ? (
@@ -216,7 +228,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           isDisabled={
                             isLoading ||
                             Object.keys(validation).length > 0 ||
-                            hasAdvancedSettingsErrors
+                            hasAdvancedSettingsErrors ||
+                            hasInvalidSpaceError
                           }
                           btnProps={{
                             color: 'text',
@@ -239,8 +252,10 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                           !hasAllAgentPoliciesPrivileges ||
                           isLoading ||
                           Object.keys(validation).length > 0 ||
-                          hasAdvancedSettingsErrors
+                          hasAdvancedSettingsErrors ||
+                          hasInvalidSpaceError
                         }
+                        data-test-subj="agentPolicyDetailsSaveButton"
                         iconType="save"
                         color="primary"
                         fill

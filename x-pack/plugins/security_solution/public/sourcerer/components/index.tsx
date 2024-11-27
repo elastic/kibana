@@ -152,8 +152,8 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const { indicesExist, loading, sourcererDataView } = useSourcererDataView(scopeId);
 
   const activePatterns = useMemo(
-    () => (sourcererDataView?.title || '')?.split(',').filter(Boolean) as string[],
-    [sourcererDataView?.title]
+    () => (sourcererDataView.title || '')?.split(',').filter(Boolean) as string[],
+    [sourcererDataView.title]
   );
 
   const [missingPatterns, setMissingPatterns] = useState<string[]>(
@@ -255,7 +255,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const onChangeDataView = useCallback(
-    (newSelectedOption) => {
+    (newSelectedOption: string) => {
       setDataViewId(newSelectedOption);
       setIndexPatternsByDataView(newSelectedOption);
     },

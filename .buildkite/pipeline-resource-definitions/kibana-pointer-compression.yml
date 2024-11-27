@@ -36,3 +36,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+      tags:
+        - kibana

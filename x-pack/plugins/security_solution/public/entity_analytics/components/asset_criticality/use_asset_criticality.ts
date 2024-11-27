@@ -7,11 +7,9 @@
 
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import { useHasSecurityCapability } from '../../../helper_hooks';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { AssetCriticality, DeleteAssetCriticalityResponse } from '../../api/api';
@@ -34,12 +32,12 @@ export const useAssetCriticalityPrivileges = (
 ): UseQueryResult<EntityAnalyticsPrivileges, SecurityAppError> => {
   const { fetchAssetCriticalityPrivileges } = useEntityAnalyticsRoutes();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
-  const isEnabled = isAssetCriticalityEnabled && hasEntityAnalyticsCapability;
 
   return useQuery({
-    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, isEnabled],
-    queryFn: isEnabled ? fetchAssetCriticalityPrivileges : () => nonAuthorizedResponse,
+    queryKey: [ASSET_CRITICALITY_KEY, PRIVILEGES_KEY, queryKey, hasEntityAnalyticsCapability],
+    queryFn: hasEntityAnalyticsCapability
+      ? fetchAssetCriticalityPrivileges
+      : () => nonAuthorizedResponse,
   });
 };
 

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {
@@ -26,9 +27,13 @@ export const dashboardReadonlyBadge = {
 };
 
 export const dashboardManagedBadge = {
-  getTooltip: () =>
-    i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'Elastic manages this dashboard. Clone it to make changes.',
+  getDuplicateButtonAriaLabel: () =>
+    i18n.translate('dashboard.managedContentPopoverFooterText', {
+      defaultMessage: 'Click here to duplicate this dashboard',
+    }),
+  getBadgeAriaLabel: () =>
+    i18n.translate('dashboard.managedContentBadge.ariaLabel', {
+      defaultMessage: 'Elastic manages this dashboard. Duplicate it to make changes.',
     }),
 };
 
@@ -37,9 +42,13 @@ export const dashboardManagedBadge = {
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: boolean): string {
-  const isEditMode = viewMode === ViewMode.EDIT;
-  const dashboardTitle = isNew ? getNewDashboardTitle() : title;
+export function getDashboardTitle(
+  title: string | undefined,
+  viewMode: ViewMode,
+  isNew: boolean
+): string {
+  const isEditMode = viewMode === 'edit';
+  const dashboardTitle = isNew || !Boolean(title) ? getNewDashboardTitle() : (title as string);
   return isEditMode
     ? i18n.translate('dashboard.strings.dashboardEditTitle', {
         defaultMessage: 'Editing {title}',
@@ -66,21 +75,6 @@ export const unsavedChangesBadgeStrings = {
     i18n.translate('dashboard.hasRunMigrationsBadgeToolTipContent', {
       defaultMessage:
         'One or more panels on this dashboard have been updated to a new version. Save the dashboard so it loads faster next time.',
-    }),
-};
-
-export const leaveConfirmStrings = {
-  getLeaveTitle: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
-      defaultMessage: 'Unsaved changes',
-    }),
-  getLeaveSubtitle: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
-      defaultMessage: 'Leave Dashboard with unsaved work?',
-    }),
-  getLeaveCancelButtonText: () =>
-    i18n.translate('dashboard.appLeaveConfirmModal.cancelButtonLabel', {
-      defaultMessage: 'Cancel',
     }),
 };
 

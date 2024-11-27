@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { Fragment, useCallback } from 'react';
+
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiSwitch, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
+import { savedObjectsTaggingService } from '../../../../services/kibana_services';
 import type { DashboardSaveOptions } from '../../../types';
-import { pluginServices } from '../../../../services/plugin_services';
 
 /**
  * TODO: Portable Dashboard followup, use redux for the state.
@@ -78,12 +80,9 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
-    const {
-      savedObjectsTagging: { components },
-    } = pluginServices.getServices();
-
-    const tagSelector = components ? (
-      <components.SavedObjectSaveModalTagSelector
+    const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
+    const tagSelector = savedObjectsTaggingApi ? (
+      <savedObjectsTaggingApi.ui.components.SavedObjectSaveModalTagSelector
         initialSelection={selectedTags}
         onTagsSelected={(selectedTagIds) => {
           setSelectedTags(selectedTagIds);

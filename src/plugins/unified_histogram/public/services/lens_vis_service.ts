@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
-import { removeDropCommandsFromESQLQuery, appendToESQLQuery } from '@kbn/esql-utils';
+import {
+  removeDropCommandsFromESQLQuery,
+  appendToESQLQuery,
+  isESQLColumnSortable,
+  hasTransformationalCommand,
+} from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -22,11 +28,16 @@ import type {
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import {
+  getLensAttributesFromSuggestion,
+  ChartType,
+  mapVisToChartType,
+} from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { fieldSupportsBreakdown } from '@kbn/field-utils';
 import {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramSuggestionContext,
@@ -37,10 +48,9 @@ import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,
   type QueryParams,
+  injectESQLQueryIntoLensLayers,
 } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
-import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
-import { shouldDisplayHistogram } from '../layout/helpers';
 import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
@@ -57,7 +67,6 @@ export enum LensVisServiceStatus {
 
 interface LensVisServiceState {
   status: LensVisServiceStatus;
-  allSuggestions: Suggestion[] | undefined;
   currentSuggestionContext: UnifiedHistogramSuggestionContext;
   visContext: UnifiedHistogramVisContext | undefined;
 }
@@ -77,7 +86,6 @@ export class LensVisService {
   private lensSuggestionsApi: LensSuggestionsApi;
   status$: Observable<LensVisServiceState['status']>;
   currentSuggestionContext$: Observable<LensVisServiceState['currentSuggestionContext']>;
-  allSuggestions$: Observable<LensVisServiceState['allSuggestions']>;
   visContext$: Observable<LensVisServiceState['visContext']>;
   prevUpdateContext:
     | {
@@ -101,7 +109,6 @@ export class LensVisService {
 
     this.state$ = new BehaviorSubject<LensVisServiceState>({
       status: LensVisServiceStatus.initial,
-      allSuggestions: undefined,
       currentSuggestionContext: {
         suggestion: undefined,
         type: UnifiedHistogramSuggestionType.unsupported,
@@ -111,7 +118,6 @@ export class LensVisService {
 
     const stateSelector = stateSelectorFactory(this.state$);
     this.status$ = stateSelector((state) => state.status);
-    this.allSuggestions$ = stateSelector((state) => state.allSuggestions);
     this.currentSuggestionContext$ = stateSelector(
       (state) => state.currentSuggestionContext,
       isEqual
@@ -142,12 +148,9 @@ export class LensVisService {
       externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
     ) => void;
   }) => {
-    const allSuggestions = this.getAllSuggestions({ queryParams });
-
     const suggestionState = this.getCurrentSuggestionState({
       externalVisContext,
       queryParams,
-      allSuggestions,
       timeInterval,
       breakdownField,
     });
@@ -169,7 +172,6 @@ export class LensVisService {
 
     this.state$.next({
       status: LensVisServiceStatus.completed,
-      allSuggestions,
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       visContext: lensAttributesState.visContext,
     });
@@ -212,13 +214,11 @@ export class LensVisService {
   };
 
   private getCurrentSuggestionState = ({
-    allSuggestions,
     externalVisContext,
     queryParams,
     timeInterval,
     breakdownField,
   }: {
-    allSuggestions: Suggestion[];
     externalVisContext: UnifiedHistogramVisContext | undefined;
     queryParams: QueryParams;
     timeInterval: string | undefined;
@@ -229,27 +229,41 @@ export class LensVisService {
     let type = UnifiedHistogramSuggestionType.unsupported;
     let currentSuggestion: Suggestion | undefined;
 
-    // takes lens suggestions if provided
     const availableSuggestionsWithType: Array<{
       suggestion: UnifiedHistogramSuggestionContext['suggestion'];
       type: UnifiedHistogramSuggestionType;
     }> = [];
 
-    if (allSuggestions.length) {
-      availableSuggestionsWithType.push({
-        suggestion: allSuggestions[0],
-        type: UnifiedHistogramSuggestionType.lensSuggestion,
-      });
-    }
-
     if (queryParams.isPlainRecord) {
-      // appends an ES|QL histogram
-      const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({ queryParams });
-      if (histogramSuggestionForESQL) {
-        availableSuggestionsWithType.push({
-          suggestion: histogramSuggestionForESQL,
-          type: UnifiedHistogramSuggestionType.histogramForESQL,
-        });
+      if (isOfAggregateQueryType(queryParams.query)) {
+        if (hasTransformationalCommand(queryParams.query.esql)) {
+          // appends the first lens suggestion if available
+          const allSuggestions = this.getAllSuggestions({
+            queryParams,
+            preferredVisAttributes: externalVisContext?.attributes,
+          });
+
+          if (allSuggestions.length) {
+            availableSuggestionsWithType.push({
+              suggestion: allSuggestions[0],
+              type: UnifiedHistogramSuggestionType.lensSuggestion,
+            });
+          }
+        } else {
+          // appends an ES|QL histogram if available
+          const histogramSuggestionForESQL = this.getHistogramSuggestionForESQL({
+            queryParams,
+            breakdownField,
+            preferredVisAttributes: externalVisContext?.attributes,
+          });
+
+          if (histogramSuggestionForESQL) {
+            availableSuggestionsWithType.push({
+              suggestion: histogramSuggestionForESQL,
+              type: UnifiedHistogramSuggestionType.histogramForESQL,
+            });
+          }
+        }
       }
     } else {
       // appends histogram for the data view mode
@@ -389,7 +403,7 @@ export class LensVisService {
 
     const datasourceState = {
       layers: {
-        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns },
+        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns, indexPatternId: dataView.id },
       },
     };
 
@@ -451,16 +465,32 @@ export class LensVisService {
 
   private getHistogramSuggestionForESQL = ({
     queryParams,
+    breakdownField,
+    preferredVisAttributes,
   }: {
     queryParams: QueryParams;
+    breakdownField?: DataViewField;
+    preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion | undefined => {
-    const { dataView, query, timeRange } = queryParams;
-    if (dataView.isTimeBased() && query && isOfAggregateQueryType(query) && timeRange) {
-      const isOnHistogramMode = shouldDisplayHistogram(query);
-      if (!isOnHistogramMode) return undefined;
+    const { dataView, query, timeRange, columns } = queryParams;
+    const breakdownColumn = breakdownField?.name
+      ? columns?.find((column) => column.name === breakdownField.name)
+      : undefined;
 
+    if (
+      dataView.isTimeBased() &&
+      timeRange &&
+      isOfAggregateQueryType(query) &&
+      !hasTransformationalCommand(query.esql)
+    ) {
       const interval = computeInterval(timeRange, this.services.data);
-      const esqlQuery = this.getESQLHistogramQuery({ dataView, query, timeRange, interval });
+      const esqlQuery = this.getESQLHistogramQuery({
+        dataView,
+        query,
+        timeRange,
+        interval,
+        breakdownColumn,
+      });
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
@@ -484,9 +514,53 @@ export class LensVisService {
           esql: esqlQuery,
         },
       };
-      const suggestions = this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
+
+      if (breakdownColumn) {
+        context.textBasedColumns.push(breakdownColumn);
+      }
+
+      // here the attributes contain the main query and not the histogram one
+      const updatedAttributesWithQuery = preferredVisAttributes
+        ? injectESQLQueryIntoLensLayers(preferredVisAttributes, {
+            esql: esqlQuery,
+          })
+        : undefined;
+
+      const suggestions =
+        this.lensSuggestionsApi(
+          context,
+          dataView,
+          ['lnsDatatable'],
+          ChartType.XY,
+          updatedAttributesWithQuery
+        ) ?? [];
       if (suggestions.length) {
-        return suggestions[0];
+        const suggestion = suggestions[0];
+        const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
+        // the suggestions api will suggest a numeric column as a metric and not as a breakdown,
+        // so we need to adjust it here
+        if (
+          breakdownColumn &&
+          breakdownColumn.meta?.type === 'number' &&
+          suggestion &&
+          'layers' in suggestionVisualizationState &&
+          Array.isArray(suggestionVisualizationState.layers)
+        ) {
+          return {
+            ...suggestion,
+            visualizationState: {
+              ...(suggestionVisualizationState ?? {}),
+              layers: suggestionVisualizationState.layers.map((layer) => {
+                return {
+                  ...layer,
+                  accessors: ['results'],
+                  splitAccessor: breakdownColumn.name,
+                };
+              }),
+            },
+          };
+        }
+        return suggestion;
       }
     }
 
@@ -498,23 +572,53 @@ export class LensVisService {
     timeRange,
     query,
     interval,
+    breakdownColumn,
   }: {
     dataView: DataView;
     timeRange: TimeRange;
     query: AggregateQuery;
     interval?: string;
+    breakdownColumn?: DatatableColumn;
   }): string => {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
+    const breakdown = breakdownColumn ? `, \`${breakdownColumn.name}\`` : '';
+
+    // sort by breakdown column if it's sortable
+    const sortBy =
+      breakdownColumn && isESQLColumnSortable(breakdownColumn)
+        ? ` | sort \`${breakdownColumn.name}\` asc`
+        : '';
+
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown}${sortBy} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
     );
   };
 
-  private getAllSuggestions = ({ queryParams }: { queryParams: QueryParams }): Suggestion[] => {
+  private getAllSuggestions = ({
+    queryParams,
+    preferredVisAttributes,
+  }: {
+    queryParams: QueryParams;
+    preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
+  }): Suggestion[] => {
     const { dataView, columns, query, isPlainRecord } = queryParams;
+
+    if (!isPlainRecord || !isOfAggregateQueryType(query)) {
+      return [];
+    }
+
+    const preferredChartType = preferredVisAttributes
+      ? mapVisToChartType(preferredVisAttributes.visualizationType)
+      : undefined;
+
+    let visAttributes = preferredVisAttributes;
+
+    if (preferredVisAttributes) {
+      visAttributes = injectESQLQueryIntoLensLayers(preferredVisAttributes, query);
+    }
 
     const context = {
       dataViewSpec: dataView?.toSpec(),
@@ -522,11 +626,16 @@ export class LensVisService {
       textBasedColumns: columns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
     };
-    const allSuggestions = isPlainRecord
-      ? this.lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
-      : [];
 
-    return allSuggestions;
+    return (
+      this.lensSuggestionsApi(
+        context,
+        dataView,
+        ['lnsDatatable'],
+        preferredChartType,
+        visAttributes
+      ) ?? []
+    );
   };
 
   private getLensAttributesState = ({
@@ -547,7 +656,7 @@ export class LensVisService {
     externalVisContextStatus: UnifiedHistogramExternalVisContextStatus;
     visContext: UnifiedHistogramVisContext | undefined;
   } => {
-    const { dataView, query, filters, timeRange } = queryParams;
+    const { dataView, query, filters, timeRange, columns } = queryParams;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
 
     if (!suggestion || !suggestion.datasourceId || !query || !filters) {
@@ -562,13 +671,20 @@ export class LensVisService {
       dataViewId: dataView.id,
       timeField: dataView.timeFieldName,
       timeInterval: isTextBased ? undefined : timeInterval,
-      breakdownField: isTextBased ? undefined : breakdownField?.name,
+      breakdownField: breakdownField?.name,
     };
 
     const currentQuery =
       suggestionType === UnifiedHistogramSuggestionType.histogramForESQL && isTextBased && timeRange
         ? {
-            esql: this.getESQLHistogramQuery({ dataView, query, timeRange }),
+            esql: this.getESQLHistogramQuery({
+              dataView,
+              query,
+              timeRange,
+              breakdownColumn: breakdownField?.name
+                ? columns?.find((column) => column.name === breakdownField.name)
+                : undefined,
+            }),
           }
         : query;
 

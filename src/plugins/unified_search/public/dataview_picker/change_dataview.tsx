@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
@@ -16,6 +17,7 @@ import {
   EuiContextMenuItem,
   useEuiTheme,
   useGeneratedHtmlId,
+  useIsWithinBreakpoints,
   EuiIcon,
   EuiText,
   EuiContextMenuPanelProps,
@@ -24,10 +26,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getLanguageDisplayName } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
-import { type DataViewPickerPropsExtended } from './data_view_picker';
+import { type DataViewPickerProps } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
 import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
@@ -43,6 +44,10 @@ const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => 
   };
 };
 
+const shrinkableContainerCss = css`
+  min-width: 0;
+`;
+
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
@@ -53,26 +58,24 @@ export function ChangeDataView({
   onDataViewCreated,
   trigger,
   selectableProps,
-  textBasedLanguage,
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
-}: DataViewPickerPropsExtended) {
+}: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
-  const [triggerLabel, setTriggerLabel] = useState('');
-  const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
-    Boolean(textBasedLanguage)
-  );
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, dataViews, dataViewEditor } = kibana.services;
+
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const styles = changeDataViewStyles({
     fullWidth: trigger.fullWidth,
     dataViewsList,
     theme: euiTheme,
+    isMobile,
   });
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
@@ -91,20 +94,6 @@ export function ChangeDataView({
     fetchDataViews();
   }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
-  useEffect(() => {
-    if (textBasedLanguage) {
-      setTriggerLabel(getLanguageDisplayName(textBasedLanguage));
-    } else {
-      setTriggerLabel(trigger.label);
-    }
-  }, [textBasedLanguage, trigger.label]);
-
-  useEffect(() => {
-    if (Boolean(textBasedLanguage) !== isTextBasedLangSelected) {
-      setIsTextBasedLangSelected(Boolean(textBasedLanguage));
-    }
-  }, [isTextBasedLangSelected, textBasedLanguage]);
-
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
   }, [adHocDataViews, currentDataViewId]);
@@ -121,14 +110,14 @@ export function ChangeDataView({
         color={isMissingCurrent ? 'danger' : 'text'}
         iconSide="right"
         iconType="arrowDown"
-        title={triggerLabel}
+        title={trigger.label}
         disabled={isDisabled}
         textProps={{ className: 'eui-textTruncate' }}
         {...rest}
       >
         <>
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && !isTextBasedLangSelected && (
+          {isAdHocSelected && (
             <EuiIcon
               type={adhoc}
               color="primary"
@@ -137,7 +126,7 @@ export function ChangeDataView({
               `}
             />
           )}
-          {triggerLabel}
+          {trigger.label}
         </>
       </EuiButtonEmpty>
     );
@@ -256,24 +245,24 @@ export function ChangeDataView({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {!isTextBasedLangSelected && (
-        <>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  padding: 11px;
-                  border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
-                  background-color: ${euiTheme.colors.lightestShade};
-                  border: ${euiTheme.border.thin};
-                  border-right: 0;
-                `}
-              >
-                {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-                  defaultMessage: 'Data view',
-                })}
-              </EuiFlexItem>
+      <>
+        <EuiFlexItem grow={true} css={shrinkableContainerCss}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                padding: 11px;
+                border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
+                background-color: ${euiTheme.colors.lightestShade};
+                border: ${euiTheme.border.thin};
+                border-right: 0;
+              `}
+            >
+              {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+                defaultMessage: 'Data view',
+              })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={true} css={shrinkableContainerCss}>
               <EuiPopover
                 panelClassName="changeDataViewPopover"
                 button={createTrigger()}
@@ -283,7 +272,7 @@ export function ChangeDataView({
                 isOpen={isPopoverOpen}
                 closePopover={() => setPopoverIsOpen(false)}
                 panelPaddingSize="none"
-                initialFocus={`#${searchListInputId}`}
+                initialFocus={`[id="${searchListInputId}"]`}
                 display="block"
                 buffer={8}
               >
@@ -291,10 +280,10 @@ export function ChangeDataView({
                   <EuiContextMenuPanel size="s" items={getPanelItems()} />
                 </div>
               </EuiPopover>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </>
-      )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </>
     </EuiFlexGroup>
   );
 }

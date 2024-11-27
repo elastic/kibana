@@ -1,27 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type {
-  LensEmbeddableOutput,
-  LensPublicStart,
-  TypedLensByValueInput,
-  Suggestion,
-} from '@kbn/lens-plugin/public';
+import type { LensPublicStart, TypedLensByValueInput, Suggestion } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { Observable, Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -71,9 +68,9 @@ export interface UnifiedHistogramChartLoadEvent {
    */
   adapters: UnifiedHistogramAdapters;
   /**
-   * Observable of the lens embeddable output
+   * Observable for the data change subscription
    */
-  embeddableOutput$?: Observable<LensEmbeddableOutput>;
+  dataLoading$?: PublishingSubject<boolean | undefined>;
 }
 
 /**

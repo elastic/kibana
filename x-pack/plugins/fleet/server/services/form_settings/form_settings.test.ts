@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { schema } from '@kbn/config-schema';
 
 import type { SettingsConfig } from '../../../common/settings/types';
@@ -55,10 +55,10 @@ describe('form_settings', () => {
       ).not.toThrow();
     });
 
-    it('generate a valid API schema for api_field with default value', () => {
+    it('generate a valid API schema for api_field with default value but not add the value', () => {
       const apiSchema = schema.object(_getSettingsAPISchema(TEST_SETTINGS));
       const res = apiSchema.validate({ advanced_settings: {} });
-      expect(res).toEqual({ advanced_settings: { test_foo_default_value: 'test' } });
+      expect(res).toEqual({ advanced_settings: {} });
     });
   });
 

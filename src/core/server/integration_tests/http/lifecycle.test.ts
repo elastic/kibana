@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -1018,11 +1019,9 @@ describe('Auth', () => {
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
     expect(response.header['www-authenticate']).toBe('from auth interceptor');
-    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn[1]).toMatchInlineSnapshot(`
       Array [
-        Array [
-          "onPreResponseHandler rewrote a response header [www-authenticate].",
-        ],
+        "onPreResponseHandler rewrote a response header [www-authenticate].",
       ]
     `);
   });
@@ -1053,6 +1052,9 @@ describe('Auth', () => {
     expect(response.header['www-authenticate']).toBe('from auth interceptor');
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
+        Array [
+          "Access to uri [/] with method [get] is deprecated",
+        ],
         Array [
           "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
@@ -1287,11 +1289,9 @@ describe('OnPreResponse', () => {
 
     await supertest(innerServer.listener).get('/').expect(200);
 
-    expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
+    expect(loggingSystemMock.collect(logger).warn[1]).toMatchInlineSnapshot(`
       Array [
-        Array [
-          "onPreResponseHandler rewrote a response header [x-kibana-header].",
-        ],
+        "onPreResponseHandler rewrote a response header [x-kibana-header].",
       ]
     `);
   });

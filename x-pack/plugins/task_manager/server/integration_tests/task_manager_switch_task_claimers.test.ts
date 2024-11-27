@@ -52,13 +52,13 @@ describe('switch task claiming strategies', () => {
     jest.clearAllMocks();
   });
 
-  it('should switch from default to mget and still claim tasks', async () => {
+  it('should switch from default to update_by_query and still claim tasks', async () => {
     const setupResultDefault = await setupTestServers();
     const esServer = setupResultDefault.esServer;
     let kibanaServer = setupResultDefault.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     mockTaskTypeRunFn.mockImplementation(() => {
       return { state: {} };
@@ -90,17 +90,17 @@ describe('switch task claiming strategies', () => {
       await kibanaServer.stop();
     }
 
-    const setupResultMget = await setupKibanaServer({
+    const setupResultUbq = await setupKibanaServer({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'update_by_query',
         },
       },
     });
-    kibanaServer = setupResultMget.kibanaServer;
+    kibanaServer = setupResultUbq.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     // inject a task to run and ensure it is claimed and run
     const id2 = uuidV4();
@@ -132,19 +132,19 @@ describe('switch task claiming strategies', () => {
     }
   });
 
-  it('should switch from mget to default and still claim tasks', async () => {
-    const setupResultMget = await setupTestServers({
+  it('should switch from update_by_query to default and still claim tasks', async () => {
+    const setupResultUbq = await setupTestServers({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'update_by_query',
         },
       },
     });
-    const esServer = setupResultMget.esServer;
-    let kibanaServer = setupResultMget.kibanaServer;
+    const esServer = setupResultUbq.esServer;
+    let kibanaServer = setupResultUbq.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     mockTaskTypeRunFn.mockImplementation(() => {
       return { state: {} };
@@ -180,7 +180,7 @@ describe('switch task claiming strategies', () => {
     kibanaServer = setupResultDefault.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     // inject a task to run and ensure it is claimed and run
     const id2 = uuidV4();
@@ -212,13 +212,13 @@ describe('switch task claiming strategies', () => {
     }
   });
 
-  it('should switch from default to mget and claim tasks that were running during shutdown', async () => {
+  it('should switch from default to update_by_query and claim tasks that were running during shutdown', async () => {
     const setupResultDefault = await setupTestServers();
     const esServer = setupResultDefault.esServer;
     let kibanaServer = setupResultDefault.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     mockTaskTypeRunFn.mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -252,17 +252,17 @@ describe('switch task claiming strategies', () => {
       await kibanaServer.stop();
     }
 
-    const setupResultMget = await setupKibanaServer({
+    const setupResultUbq = await setupKibanaServer({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'update_by_query',
         },
       },
     });
-    kibanaServer = setupResultMget.kibanaServer;
+    kibanaServer = setupResultUbq.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     // task doc should still exist and be running
     const task = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.get<{
@@ -290,19 +290,19 @@ describe('switch task claiming strategies', () => {
     }
   });
 
-  it('should switch from mget to default and claim tasks that were running during shutdown', async () => {
-    const setupResultMget = await setupTestServers({
+  it('should switch from update_by_query to default and claim tasks that were running during shutdown', async () => {
+    const setupResultUbq = await setupTestServers({
       xpack: {
         task_manager: {
-          claim_strategy: 'unsafe_mget',
+          claim_strategy: 'update_by_query',
         },
       },
     });
-    const esServer = setupResultMget.esServer;
-    let kibanaServer = setupResultMget.kibanaServer;
+    const esServer = setupResultUbq.esServer;
+    let kibanaServer = setupResultUbq.kibanaServer;
     let taskClaimingOpts: TaskClaimingOpts = TaskClaimingMock.mock.calls[0][0];
 
-    expect(taskClaimingOpts.strategy).toBe('unsafe_mget');
+    expect(taskClaimingOpts.strategy).toBe('update_by_query');
 
     mockTaskTypeRunFn.mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -340,7 +340,7 @@ describe('switch task claiming strategies', () => {
     kibanaServer = setupResultDefault.kibanaServer;
 
     taskClaimingOpts = TaskClaimingMock.mock.calls[1][0];
-    expect(taskClaimingOpts.strategy).toBe('default');
+    expect(taskClaimingOpts.strategy).toBe('mget');
 
     // task doc should still exist and be running
     const task = await kibanaServer.coreStart.elasticsearch.client.asInternalUser.get<{

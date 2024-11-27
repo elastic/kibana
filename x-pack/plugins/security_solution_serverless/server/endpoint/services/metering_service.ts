@@ -7,8 +7,9 @@
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
+
+import { ENDPOINT_HEARTBEAT_INDEX_PATTERN } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
 import { METERING_SERVICE_BATCH_SIZE } from '../../constants';
 import { ProductLine, ProductTier } from '../../../common/product';
@@ -83,7 +84,7 @@ export class EndpointMeteringService {
   ): Promise<SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>> {
     return esClient.search<EndpointHeartbeat>(
       {
-        index: ENDPOINT_HEARTBEAT_INDEX,
+        index: ENDPOINT_HEARTBEAT_INDEX_PATTERN,
         sort: 'event.ingested',
         size: METERING_SERVICE_BATCH_SIZE,
         query: {

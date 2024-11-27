@@ -16307,7 +16307,7 @@
             "label": "validation",
             "description": [],
             "signature": [
-              "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"datetime\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+              "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
             ],
             "path": "node_modules/zod/lib/ZodError.d.ts",
             "deprecated": false,
@@ -18911,7 +18911,7 @@
         "label": "StringValidation",
         "description": [],
         "signature": [
-          "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"url\" | \"email\" | \"time\" | \"datetime\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
+          "\"ip\" | \"date\" | \"base64\" | \"uuid\" | \"duration\" | \"time\" | \"url\" | \"email\" | \"emoji\" | \"nanoid\" | \"cuid\" | \"cuid2\" | \"ulid\" | \"datetime\" | \"regex\" | { includes: string; position?: number | undefined; } | { startsWith: string; } | { endsWith: string; }"
         ],
         "path": "node_modules/zod/lib/ZodError.d.ts",
         "deprecated": false,
@@ -19198,7 +19198,7 @@
         "label": "ZodFirstPartySchemaTypes",
         "description": [],
         "signature": [
-          "Zod.ZodString | Zod.ZodBoolean | Zod.ZodNumber | Zod.ZodUnknown | Zod.ZodUndefined | Zod.ZodAny | Zod.ZodNull | Zod.ZodBigInt | Zod.ZodDate | Zod.ZodSymbol | Zod.ZodNever | Zod.ZodVoid | Zod.ZodTuple<any, any> | Zod.ZodNaN | Zod.ZodArray<any, any> | Zod.ZodObject<any, any, any, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodUnion<any> | Zod.ZodDiscriminatedUnion<any, any> | Zod.ZodIntersection<any, any> | Zod.ZodRecord<any, any> | Zod.ZodMap<any, Zod.ZodTypeAny> | Zod.ZodSet<any> | Zod.ZodFunction<any, any> | Zod.ZodLazy<any> | Zod.ZodLiteral<any> | Zod.ZodEnum<any> | Zod.ZodEffects<any, any, any> | Zod.ZodNativeEnum<any> | Zod.ZodOptional<any> | Zod.ZodNullable<any> | Zod.ZodDefault<any> | Zod.ZodCatch<any> | Zod.ZodPromise<any> | Zod.ZodBranded<any, any> | Zod.ZodPipeline<any, any> | Zod.ZodReadonly<any>"
+          "Zod.ZodString | Zod.ZodBoolean | Zod.ZodNumber | Zod.ZodNull | Zod.ZodUnknown | Zod.ZodAny | Zod.ZodUndefined | Zod.ZodBigInt | Zod.ZodDate | Zod.ZodSymbol | Zod.ZodNever | Zod.ZodVoid | Zod.ZodTuple<any, any> | Zod.ZodNaN | Zod.ZodArray<any, any> | Zod.ZodObject<any, any, any, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodUnion<any> | Zod.ZodDiscriminatedUnion<any, any> | Zod.ZodIntersection<any, any> | Zod.ZodRecord<any, any> | Zod.ZodMap<any, Zod.ZodTypeAny> | Zod.ZodSet<any> | Zod.ZodFunction<any, any> | Zod.ZodLazy<any> | Zod.ZodLiteral<any> | Zod.ZodEnum<any> | Zod.ZodEffects<any, any, any> | Zod.ZodNativeEnum<any> | Zod.ZodOptional<any> | Zod.ZodNullable<any> | Zod.ZodDefault<any> | Zod.ZodCatch<any> | Zod.ZodPromise<any> | Zod.ZodBranded<any, any> | Zod.ZodPipeline<any, any> | Zod.ZodReadonly<any>"
         ],
         "path": "node_modules/zod/lib/types.d.ts",
         "deprecated": false,

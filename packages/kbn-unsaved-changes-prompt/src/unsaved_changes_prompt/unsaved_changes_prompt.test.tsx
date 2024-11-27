@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createMemoryHistory } from 'history';
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+
+import { renderHook, act, cleanup, waitFor } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -72,7 +74,7 @@ describe('useUnsavedChangesPrompt', () => {
     act(() => history.push('/test'));
 
     // needed because we have an async useEffect
-    await act(() => new Promise((resolve) => resolve()));
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(navigateToUrl).toBeCalledWith('/mock/test', expect.anything());
     expect(coreStart.overlays.openConfirm).toBeCalled();

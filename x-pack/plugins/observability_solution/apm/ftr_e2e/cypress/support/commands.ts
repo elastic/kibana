@@ -38,29 +38,49 @@ Cypress.Commands.add('loginAsApmManageOwnAndCreateAgentKeys', () => {
   });
 });
 
+Cypress.Commands.add('loginAsApmAllPrivilegesWithoutWriteSettingsUser', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmAllPrivilegesWithoutWriteSettings,
+    password: 'changeme',
+  });
+});
+
+Cypress.Commands.add('loginAsApmReadPrivilegesWithWriteSettingsUser', () => {
+  return cy.loginAs({
+    username: ApmUsername.apmReadPrivilegesWithWriteSettings,
+    password: 'changeme',
+  });
+});
+
 Cypress.Commands.add(
   'loginAs',
   ({ username, password }: { username: string; password: string }) => {
-    // cy.session(username, () => {
-    const kibanaUrl = Cypress.env('KIBANA_URL');
-    cy.log(`Logging in as ${username} on ${kibanaUrl}`);
-    cy.visit('/');
-    cy.request({
-      log: true,
-      method: 'POST',
-      url: `${kibanaUrl}/internal/security/login`,
-      body: {
-        providerType: 'basic',
-        providerName: 'basic',
-        currentURL: `${kibanaUrl}/login`,
-        params: { username, password },
+    cy.session(
+      username,
+      () => {
+        const kibanaUrl = Cypress.env('KIBANA_URL');
+        cy.log(`Logging in as ${username} on ${kibanaUrl}`);
+        cy.visit('/');
+        cy.request({
+          log: true,
+          method: 'POST',
+          url: `${kibanaUrl}/internal/security/login`,
+          body: {
+            providerType: 'basic',
+            providerName: 'basic',
+            currentURL: `${kibanaUrl}/login`,
+            params: { username, password },
+          },
+          headers: {
+            'kbn-xsrf': 'e2e_test',
+          },
+        });
+        cy.visit('/');
       },
-      headers: {
-        'kbn-xsrf': 'e2e_test',
-      },
-      // });
-    });
-    cy.visit('/');
+      {
+        cacheAcrossSpecs: true,
+      }
+    );
   }
 );
 
@@ -73,8 +93,14 @@ Cypress.Commands.add('changeTimeRange', (value: string) => {
   cy.contains(value).click();
 });
 
-Cypress.Commands.add('visitKibana', (url: string) => {
-  cy.visit(url);
+Cypress.Commands.add('visitKibana', (url, options) => {
+  cy.visit(url, {
+    onBeforeLoad(win) {
+      if (options?.localStorageOptions && options.localStorageOptions.length > 0) {
+        options.localStorageOptions.forEach(([key, value]) => win.localStorage.setItem(key, value));
+      }
+    },
+  });
   cy.getByTestSubj('kbnLoadingMessage').should('exist');
   cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
     timeout: 50000,
@@ -88,18 +114,14 @@ Cypress.Commands.add('selectAbsoluteTimeRange', (start: string, end: string) => 
   const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
   cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
-  cy.contains('Start date')
-    .nextAll()
-    .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
-    .clear({ force: true })
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput').clear({ force: true });
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput')
     .type(moment(start).format(format), { force: true })
     .type('{enter}');
 
   cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
-  cy.contains('End date')
-    .nextAll()
-    .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
-    .clear({ force: true })
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput').clear({ force: true });
+  cy.getByTestSubj('superDatePickerAbsoluteDateInput')
     .type(moment(end).format(format), { force: true })
     .type('{enter}');
 });

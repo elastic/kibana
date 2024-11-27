@@ -8,7 +8,6 @@
 import React, { PropsWithChildren, ReactElement } from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { Provider } from 'react-redux';
-import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { RenderOptions, render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -20,17 +19,25 @@ import { mockVisualizationMap } from './visualization_mock';
 import { mockDatasourceMap } from './datasource_mock';
 import { makeDefaultServices } from './services_mock';
 
-export const mockStoreDeps = (deps?: {
-  lensServices?: LensAppServices;
-  datasourceMap?: DatasourceMap;
-  visualizationMap?: VisualizationMap;
-}) => {
-  return {
-    datasourceMap: deps?.datasourceMap || mockDatasourceMap(),
-    visualizationMap: deps?.visualizationMap || mockVisualizationMap(),
-    lensServices: deps?.lensServices || makeDefaultServices(),
-  };
-};
+export const mockStoreDeps = (
+  {
+    lensServices = makeDefaultServices(),
+    datasourceMap = mockDatasourceMap(),
+    visualizationMap = mockVisualizationMap(),
+  }: {
+    lensServices?: LensAppServices;
+    datasourceMap?: DatasourceMap;
+    visualizationMap?: VisualizationMap;
+  } = {
+    lensServices: makeDefaultServices(),
+    datasourceMap: mockDatasourceMap(),
+    visualizationMap: mockVisualizationMap(),
+  }
+) => ({
+  datasourceMap,
+  visualizationMap,
+  lensServices,
+});
 
 export function mockDatasourceStates() {
   return {
@@ -77,7 +84,7 @@ export const renderWithReduxStore = (
   const { store } = makeLensStore({ preloadedState, storeDeps });
   const { wrapper, ...options } = renderOptions || {};
 
-  const CustomWrapper = wrapper as React.ComponentType;
+  const CustomWrapper = wrapper as React.ComponentType<React.PropsWithChildren<{}>>;
 
   const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     return (
@@ -138,12 +145,7 @@ export const mountWithProvider = async (
   }
 ) => {
   const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
-
-  let instance: ReactWrapper = {} as ReactWrapper;
-
-  await act(async () => {
-    instance = mount(mountArgs.component, mountArgs.options);
-  });
+  const instance = mount(mountArgs.component, mountArgs.options);
   return { instance, lensStore, deps };
 };
 

@@ -8,7 +8,7 @@
 import {
   resetTransformsRequestSchema,
   type ResetTransformsRequestSchema,
-} from '../../../../common/api_schemas/reset_transforms';
+} from '../../api_schemas/reset_transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
 import type { RouteDependencies } from '../../../types';
@@ -33,6 +33,13 @@ export function registerRoute({ router, getLicense }: RouteDependencies) {
     .addVersion<undefined, undefined, ResetTransformsRequestSchema>(
       {
         version: '1',
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch',
+          },
+        },
         validate: {
           request: {
             body: resetTransformsRequestSchema,

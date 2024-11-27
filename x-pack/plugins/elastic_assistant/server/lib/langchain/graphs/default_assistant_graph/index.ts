@@ -6,7 +6,6 @@
  */
 
 import { StructuredTool } from '@langchain/core/tools';
-import { RetrievalQAChain } from 'langchain/chains';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import {
   createOpenAIFunctionsAgent,
@@ -14,36 +13,30 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import {
-  bedrockToolCallingAgentPrompt,
-  geminiToolCallingAgentPrompt,
-  openAIFunctionAgentPrompt,
-  structuredChatAgentPrompt,
-} from './prompts';
+import { formatPrompt, formatPromptStructured, systemPrompts } from './prompts';
+import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 
-/**
- * Drop in replacement for the existing `callAgentExecutor` that uses LangGraph
- */
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
-  bedrockChatEnabled,
   connectorId,
   conversationId,
   dataClients,
   esClient,
-  esStore,
+  inference,
   langChainMessages,
   llmType,
+  isOssModel,
   logger: parentLogger,
   isStream = false,
   onLlmResponse,
@@ -51,12 +44,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   replacements,
   request,
   size,
+  systemPrompt,
+  telemetry,
+  telemetryParams,
   traceOptions,
   responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai';
-  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
+  const isOpenAI = llmType === 'openai' && !isOssModel;
+  const llmClass = getLlmClass(llmType);
 
   /**
    * Creates a new instance of llmClass.
@@ -97,84 +93,105 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const latestMessage = langChainMessages.slice(-1); // the last message
 
-  const modelExists = await esStore.isModelInstalled();
-
-  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(createLlmInstance(), esStore.asRetriever(10));
-
-  // Check if KB is available
-  const isEnabledKnowledgeBase = (await dataClients?.kbDataClient?.isModelDeployed()) ?? false;
+  // Check if KB is available (not feature flag related)
+  const isEnabledKnowledgeBase =
+    (await dataClients?.kbDataClient?.isInferenceEndpointExists()) ?? false;
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
     alertsIndexPattern,
     anonymizationFields,
-    chain,
+    connectorId,
     esClient,
+    inference,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
     logger,
-    modelExists,
     onNewReplacements,
     replacements,
     request,
     size,
+    telemetry,
   };
 
   const tools: StructuredTool[] = assistantTools.flatMap(
-    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance() }) ?? []
+    (tool) => tool.getTool({ ...assistantToolParams, llm: createLlmInstance(), isOssModel }) ?? []
   );
+
+  // If KB enabled, fetch for any KB IndexEntries and generate a tool for each
+  if (isEnabledKnowledgeBase) {
+    const kbTools = await dataClients?.kbDataClient?.getAssistantTools({
+      esClient,
+    });
+    if (kbTools) {
+      tools.push(...kbTools);
+    }
+  }
 
   const agentRunnable = isOpenAI
     ? await createOpenAIFunctionsAgent({
         llm: createLlmInstance(),
         tools,
-        prompt: openAIFunctionAgentPrompt,
+        prompt: formatPrompt(systemPrompts.openai, systemPrompt),
         streamRunnable: isStream,
       })
-    : llmType && ['bedrock', 'gemini'].includes(llmType) && bedrockChatEnabled
+    : llmType && ['bedrock', 'gemini'].includes(llmType)
     ? await createToolCallingAgent({
         llm: createLlmInstance(),
         tools,
         prompt:
-          llmType === 'bedrock' ? bedrockToolCallingAgentPrompt : geminiToolCallingAgentPrompt,
+          llmType === 'bedrock'
+            ? formatPrompt(systemPrompts.bedrock, systemPrompt)
+            : formatPrompt(systemPrompts.gemini, systemPrompt),
         streamRunnable: isStream,
       })
-    : await createStructuredChatAgent({
+    : // used with OSS models
+      await createStructuredChatAgent({
         llm: createLlmInstance(),
         tools,
-        prompt: structuredChatAgentPrompt,
+        prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
         streamRunnable: isStream,
       });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-
+  const telemetryTracer = telemetryParams
+    ? new TelemetryTracer(
+        {
+          elasticTools: assistantTools.map(({ name }) => name),
+          totalTools: tools.length,
+          telemetry,
+          telemetryParams,
+        },
+        logger
+      )
+    : undefined;
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
-    conversationId,
     dataClients,
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
     tools,
-    responseLanguage,
     replacements,
-    llmType,
-    bedrockChatEnabled,
-    isStreaming: isStream,
   });
-  const inputs = { input: latestMessage[0]?.content as string };
+  const inputs: GraphInputs = {
+    responseLanguage,
+    conversationId,
+    llmType,
+    isStream,
+    isOssModel,
+    input: latestMessage[0]?.content as string,
+  };
 
   if (isStream) {
     return streamGraph({
       apmTracer,
       assistantGraph,
-      llmType,
-      bedrockChatEnabled,
       inputs,
       logger,
       onLlmResponse,
       request,
+      telemetryTracer,
       traceOptions,
     });
   }
@@ -184,6 +201,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     assistantGraph,
     inputs,
     onLlmResponse,
+    telemetryTracer,
     traceOptions,
   });
 

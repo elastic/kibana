@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { ruleParamsSchema } from '@kbn/response-ops-rule-params';
 import {
   ruleLastRunOutcomeValues,
   ruleExecutionStatusValues,
@@ -16,8 +17,8 @@ import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
+import { flappingSchema } from './flapping_schema';
 
-export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
 export const intervalScheduleSchema = schema.object({
@@ -56,18 +57,21 @@ export const ruleExecutionStatusSchema = schema.object({
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
+        schema.literal(ruleExecutionStatusWarningReason.EXECUTION),
       ]),
       message: schema.string(),
     })
   ),
 });
 
+const outcome = schema.oneOf([
+  schema.literal(ruleLastRunOutcomeValues.SUCCEEDED),
+  schema.literal(ruleLastRunOutcomeValues.WARNING),
+  schema.literal(ruleLastRunOutcomeValues.FAILED),
+]);
+
 export const ruleLastRunSchema = schema.object({
-  outcome: schema.oneOf([
-    schema.literal(ruleLastRunOutcomeValues.SUCCEEDED),
-    schema.literal(ruleLastRunOutcomeValues.WARNING),
-    schema.literal(ruleLastRunOutcomeValues.FAILED),
-  ]),
+  outcome,
   outcomeOrder: schema.maybe(schema.number()),
   warning: schema.maybe(
     schema.nullable(
@@ -83,6 +87,7 @@ export const ruleLastRunSchema = schema.object({
         schema.literal(ruleExecutionStatusWarningReason.MAX_EXECUTABLE_ACTIONS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_ALERTS),
         schema.literal(ruleExecutionStatusWarningReason.MAX_QUEUED_ACTIONS),
+        schema.literal(ruleExecutionStatusWarningReason.EXECUTION),
       ])
     )
   ),
@@ -102,7 +107,7 @@ export const monitoringSchema = schema.object({
         success: schema.boolean(),
         timestamp: schema.number(),
         duration: schema.maybe(schema.number()),
-        outcome: schema.maybe(ruleLastRunSchema),
+        outcome: schema.maybe(outcome),
       })
     ),
     calculated_metrics: schema.object({
@@ -175,6 +180,7 @@ export const ruleDomainSchema = schema.object({
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
+  flapping: schema.maybe(schema.nullable(flappingSchema)),
 });
 
 /**
@@ -215,4 +221,5 @@ export const ruleSchema = schema.object({
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
+  flapping: schema.maybe(schema.nullable(flappingSchema)),
 });

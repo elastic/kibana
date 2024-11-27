@@ -8,7 +8,11 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
+
+import { isEmpty } from 'lodash';
+
+import { inputsFormat } from '../../../common/constants';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
@@ -29,6 +33,8 @@ import type {
   BulkGetAgentPoliciesRequestSchema,
   AgentPolicy,
   FleetRequestHandlerContext,
+  GetAgentPolicyOutputsRequestSchema,
+  GetListAgentPolicyOutputsRequestSchema,
 } from '../../types';
 
 import type {
@@ -43,15 +49,13 @@ import type {
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPolicyOutputsResponse,
+  GetListAgentPolicyOutputsResponse,
 } from '../../../common/types';
-import {
-  defaultFleetErrorHandler,
-  AgentPolicyNotFoundError,
-  FleetUnauthorizedError,
-  FleetError,
-} from '../../errors';
+import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
+import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -65,7 +69,7 @@ export async function populateAssignedAgentsCount(
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
         })
         .then(({ total }) => (agentPolicy.agents = total));
       const unprivilegedAgents = agentClient
@@ -73,7 +77,7 @@ export async function populateAssignedAgentsCount(
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${UNPRIVILEGED_AGENT_KUERY}`,
+          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${UNPRIVILEGED_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.unprivileged_agents = total));
       return Promise.all([totalAgents, unprivilegedAgents]);
@@ -122,61 +126,94 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  try {
-    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
-    const soClient = fleetContext.internalSoClient;
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-    const {
-      full: withPackagePolicies = false,
-      noAgentCount = false,
-      ...restOfQuery
-    } = request.query;
-    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
-      throw new FleetUnauthorizedError(
-        'full query parameter require agent policies read permissions'
-      );
-    }
-    const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
-      withPackagePolicies,
-      esClient,
-      ...restOfQuery,
-    });
-
-    if (fleetContext.authz.fleet.readAgents && !noAgentCount) {
-      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
-    }
-
-    const body: GetAgentPoliciesResponse = {
-      items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForReadAgentOnly)
-        : items,
-      total,
-      page,
-      perPage,
-    };
-    return response.ok({ body });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+  const soClient = fleetContext.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const {
+    full: withPackagePolicies = false,
+    noAgentCount,
+    withAgentCount,
+    format,
+    ...restOfQuery
+  } = request.query;
+  if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+    throw new FleetUnauthorizedError(
+      'full query parameter require agent policies read permissions'
+    );
   }
+  const agentPoliciesResponse = await agentPolicyService.list(soClient, {
+    withPackagePolicies,
+    esClient,
+    ...restOfQuery,
+  });
+  let { items } = agentPoliciesResponse;
+  const { total, page, perPage } = agentPoliciesResponse;
+
+  if (fleetContext.authz.fleet.readAgents && (noAgentCount === false || withAgentCount)) {
+    await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
+  }
+
+  if (!fleetContext.authz.fleet.readAgentPolicies) {
+    items = items.map(sanitizeItemForReadAgentOnly);
+  } else if (withPackagePolicies && format === inputsFormat.Simplified) {
+    items.map((item) => {
+      if (isEmpty(item.package_policies)) {
+        return item;
+      }
+      return {
+        ...item,
+        package_policies: item.package_policies!.map((packagePolicy) =>
+          packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+        ),
+      };
+    });
+  }
+
+  const body: GetAgentPoliciesResponse = {
+    items,
+    total,
+    page,
+    perPage,
+  };
+  return response.ok({ body });
 };
 
 export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof BulkGetAgentPoliciesRequestSchema.query>,
   TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>
 > = async (context, request, response) => {
   try {
     const fleetContext = await context.fleet;
     const soClient = fleetContext.internalSoClient;
     const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
-    const items = await agentPolicyService.getByIDs(soClient, ids, {
+    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+      throw new FleetUnauthorizedError(
+        'full query parameter require agent policies read permissions'
+      );
+    }
+    let items = await agentPolicyService.getByIDs(soClient, ids, {
       withPackagePolicies,
       ignoreMissing,
     });
+    if (!fleetContext.authz.fleet.readAgentPolicies) {
+      items = items.map(sanitizeItemForReadAgentOnly);
+    } else if (withPackagePolicies && request.query.format === inputsFormat.Simplified) {
+      items.map((item) => {
+        if (isEmpty(item.package_policies)) {
+          return item;
+        }
+        return {
+          ...item,
+          package_policies: item.package_policies!.map((packagePolicy) =>
+            packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+          ),
+        };
+      });
+    }
+
     const body: BulkGetAgentPoliciesResponse = {
-      items: !fleetContext.authz.fleet.readAgentPolicies
-        ? items.map(sanitizeItemForReadAgentOnly)
-        : items,
+      items,
     };
     if (fleetContext.authz.fleet.readAgents) {
       await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
@@ -192,38 +229,47 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       });
     }
 
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
 export const getOneAgentPolicyHandler: FleetRequestHandler<
-  TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
+  TypeOf<typeof GetOneAgentPolicyRequestSchema.params>,
+  TypeOf<typeof GetOneAgentPolicyRequestSchema.query>
 > = async (context, request, response) => {
-  try {
-    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
-    const soClient = coreContext.savedObjects.client;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+  const soClient = coreContext.savedObjects.client;
 
-    const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
-    if (agentPolicy) {
-      if (fleetContext.authz.fleet.readAgents) {
-        await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
-      }
-      const body: GetOneAgentPolicyResponse = {
-        item: !fleetContext.authz.fleet.readAgentPolicies
-          ? sanitizeItemForReadAgentOnly(agentPolicy)
-          : agentPolicy,
-      };
-      return response.ok({
-        body,
-      });
-    } else {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent policy not found' },
-      });
+  const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
+  if (agentPolicy) {
+    if (fleetContext.authz.fleet.readAgents) {
+      await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
     }
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+    let item: any = agentPolicy;
+    if (!fleetContext.authz.fleet.readAgentPolicies) {
+      item = sanitizeItemForReadAgentOnly(agentPolicy);
+    } else if (
+      request.query.format === inputsFormat.Simplified &&
+      !isEmpty(agentPolicy.package_policies)
+    ) {
+      item = {
+        ...agentPolicy,
+        package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
+          packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+        ),
+      };
+    }
+    const body: GetOneAgentPolicyResponse = {
+      item,
+    };
+    return response.ok({
+      body,
+    });
+  } else {
+    return response.customError({
+      statusCode: 404,
+      body: { message: 'Agent policy not found' },
+    });
   }
 };
 
@@ -284,6 +330,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
+        options: { force },
       });
     }
 
@@ -297,13 +344,13 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
 export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
-  unknown,
+  TypeOf<typeof UpdateAgentPolicyRequestSchema.query>,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -326,6 +373,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         currentSpaceId: spaceId,
         newSpaceIds: spaceIds,
         authorizedSpaces,
+        options: { force },
       });
 
       spaceId = spaceIds[0];
@@ -338,7 +386,20 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       { force, user, spaceId }
     );
 
-    const body: UpdateAgentPolicyResponse = { item: agentPolicy };
+    let item: any = agentPolicy;
+    if (
+      request.query.format === inputsFormat.Simplified &&
+      !isEmpty(agentPolicy.package_policies)
+    ) {
+      item = {
+        ...agentPolicy,
+        package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
+          packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+        ),
+      };
+    }
+
+    const body: UpdateAgentPolicyResponse = { item };
     return response.ok({
       body,
     });
@@ -349,13 +410,13 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
 export const copyAgentPolicyHandler: RequestHandler<
   TypeOf<typeof CopyAgentPolicyRequestSchema.params>,
-  unknown,
+  TypeOf<typeof CopyAgentPolicyRequestSchema.query>,
   TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -371,12 +432,25 @@ export const copyAgentPolicyHandler: RequestHandler<
       { user }
     );
 
-    const body: CopyAgentPolicyResponse = { item: agentPolicy };
+    let item: any = agentPolicy;
+    if (
+      request.query.format === inputsFormat.Simplified &&
+      !isEmpty(agentPolicy.package_policies)
+    ) {
+      item = {
+        ...agentPolicy,
+        package_policies: agentPolicy.package_policies!.map((packagePolicy) =>
+          packagePolicyToSimplifiedPackagePolicy(packagePolicy)
+        ),
+      };
+    }
+
+    const body: CopyAgentPolicyResponse = { item };
     return response.ok({
       body,
     });
   } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+    throw error;
   }
 };
 
@@ -389,19 +463,16 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  try {
-    const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
-      soClient,
-      esClient,
-      request.body.agentPolicyId,
-      { user, force: request.body.force }
-    );
-    return response.ok({
-      body,
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
+
+  const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
+    soClient,
+    esClient,
+    request.body.agentPolicyId,
+    { user, force: request.body.force }
+  );
+  return response.ok({
+    body,
+  });
 };
 
 export const getFullAgentPolicy: FleetRequestHandler<
@@ -412,55 +483,47 @@ export const getFullAgentPolicy: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
 
   if (request.query.kubernetes === true) {
-    try {
-      const agentVersion =
-        await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
-      const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
-        soClient,
-        request.params.agentPolicyId,
-        agentVersion,
-        { standalone: request.query.standalone === true }
-      );
-      if (fullAgentConfigMap) {
-        const body: GetFullAgentConfigMapResponse = {
-          item: fullAgentConfigMap,
-        };
-        return response.ok({
-          body,
-        });
-      } else {
-        return response.customError({
-          statusCode: 404,
-          body: { message: 'Agent config map not found' },
-        });
-      }
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
+    const agentVersion =
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
+      soClient,
+      request.params.agentPolicyId,
+      agentVersion,
+      { standalone: request.query.standalone === true }
+    );
+    if (fullAgentConfigMap) {
+      const body: GetFullAgentConfigMapResponse = {
+        item: fullAgentConfigMap,
+      };
+      return response.ok({
+        body,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent config map not found' },
+      });
     }
   } else {
-    try {
-      const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
-        soClient,
-        request.params.agentPolicyId,
-        {
-          standalone: request.query.standalone === true,
-        }
-      );
-      if (fullAgentPolicy) {
-        const body: GetFullAgentPolicyResponse = {
-          item: fullAgentPolicy,
-        };
-        return response.ok({
-          body,
-        });
-      } else {
-        return response.customError({
-          statusCode: 404,
-          body: { message: 'Agent policy not found' },
-        });
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
+      soClient,
+      request.params.agentPolicyId,
+      {
+        standalone: request.query.standalone === true,
       }
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
+    );
+    if (fullAgentPolicy) {
+      const body: GetFullAgentPolicyResponse = {
+        item: fullAgentPolicy,
+      };
+      return response.ok({
+        body,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
     }
   }
 };
@@ -476,112 +539,19 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   } = request;
 
   if (request.query.kubernetes === true) {
-    try {
-      const agentVersion =
-        await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
-      const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
-        soClient,
-        request.params.agentPolicyId,
-        agentVersion,
-        { standalone: request.query.standalone === true }
-      );
-      if (fullAgentConfigMap) {
-        const body = fullAgentConfigMap;
-        const headers: ResponseHeaders = {
-          'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
-        };
-        return response.ok({
-          body,
-          headers,
-        });
-      } else {
-        return response.customError({
-          statusCode: 404,
-          body: { message: 'Agent config map not found' },
-        });
-      }
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
-    }
-  } else {
-    try {
-      const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
-        standalone: request.query.standalone === true,
-      });
-      if (fullAgentPolicy) {
-        const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);
-        const headers: ResponseHeaders = {
-          'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent.yml"`,
-        };
-        return response.ok({
-          body,
-          headers,
-        });
-      } else {
-        return response.customError({
-          statusCode: 404,
-          body: { message: 'Agent policy not found' },
-        });
-      }
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
-    }
-  }
-};
-
-export const getK8sManifest: FleetRequestHandler<
-  undefined,
-  TypeOf<typeof GetK8sManifestRequestSchema.query>
-> = async (context, request, response) => {
-  try {
-    const fleetServer = request.query.fleetServer ?? '';
-    const token = request.query.enrolToken ?? '';
-
-    const agentVersion = await getLatestAvailableAgentVersion();
-
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
-      fleetServer,
-      token,
-      agentVersion
+    const agentVersion =
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
+      soClient,
+      request.params.agentPolicyId,
+      agentVersion,
+      { standalone: request.query.standalone === true }
     );
-    if (fullAgentManifest) {
-      const body: GetFullAgentManifestResponse = {
-        item: fullAgentManifest,
-      };
-      return response.ok({
-        body,
-      });
-    } else {
-      return response.customError({
-        statusCode: 404,
-        body: { message: 'Agent manifest not found' },
-      });
-    }
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const downloadK8sManifest: FleetRequestHandler<
-  undefined,
-  TypeOf<typeof GetK8sManifestRequestSchema.query>
-> = async (context, request, response) => {
-  try {
-    const fleetServer = request.query.fleetServer ?? '';
-    const token = request.query.enrolToken ?? '';
-    const agentVersion = await getLatestAvailableAgentVersion();
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
-      fleetServer,
-      token,
-      agentVersion
-    );
-    if (fullAgentManifest) {
-      const body = fullAgentManifest;
+    if (fullAgentConfigMap) {
+      const body = fullAgentConfigMap;
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yml"`,
+        'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
       };
       return response.ok({
         body,
@@ -590,10 +560,140 @@ export const downloadK8sManifest: FleetRequestHandler<
     } else {
       return response.customError({
         statusCode: 404,
-        body: { message: 'Agent manifest not found' },
+        body: { message: 'Agent config map not found' },
       });
     }
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+  } else {
+    const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
+      standalone: request.query.standalone === true,
+    });
+    if (fullAgentPolicy) {
+      const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+      const headers: ResponseHeaders = {
+        'content-type': 'text/x-yaml',
+        'content-disposition': `attachment; filename="elastic-agent.yml"`,
+      };
+      return response.ok({
+        body,
+        headers,
+      });
+    } else {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
+    }
   }
+};
+
+export const getK8sManifest: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetK8sManifestRequestSchema.query>
+> = async (context, request, response) => {
+  const fleetServer = request.query.fleetServer ?? '';
+  const token = request.query.enrolToken ?? '';
+
+  const agentVersion = await getLatestAvailableAgentVersion();
+
+  const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+    fleetServer,
+    token,
+    agentVersion
+  );
+  if (fullAgentManifest) {
+    const body: GetFullAgentManifestResponse = {
+      item: fullAgentManifest,
+    };
+    return response.ok({
+      body,
+    });
+  } else {
+    return response.customError({
+      statusCode: 404,
+      body: { message: 'Agent manifest not found' },
+    });
+  }
+};
+
+export const downloadK8sManifest: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetK8sManifestRequestSchema.query>
+> = async (context, request, response) => {
+  const fleetServer = request.query.fleetServer ?? '';
+  const token = request.query.enrolToken ?? '';
+  const agentVersion = await getLatestAvailableAgentVersion();
+  const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+    fleetServer,
+    token,
+    agentVersion
+  );
+  if (fullAgentManifest) {
+    const body = fullAgentManifest;
+    const headers: ResponseHeaders = {
+      'content-type': 'text/x-yaml',
+      'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yml"`,
+    };
+    return response.ok({
+      body,
+      headers,
+    });
+  } else {
+    return response.customError({
+      statusCode: 404,
+      body: { message: 'Agent manifest not found' },
+    });
+  }
+};
+
+export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
+  TypeOf<typeof GetAgentPolicyOutputsRequestSchema.params>,
+  undefined
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
+
+  if (!agentPolicy) {
+    return response.customError({
+      statusCode: 404,
+      body: { message: 'Agent policy not found' },
+    });
+  }
+  const outputs = await agentPolicyService.getAllOutputsForPolicy(soClient, agentPolicy);
+
+  const body: GetAgentPolicyOutputsResponse = {
+    item: outputs,
+  };
+  return response.ok({
+    body,
+  });
+};
+
+export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetListAgentPolicyOutputsRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const { ids } = request.body;
+
+  if (!ids) {
+    return response.ok({
+      body: { items: [] },
+    });
+  }
+  const agentPolicies = await agentPolicyService.getByIDs(soClient, ids, {
+    withPackagePolicies: true,
+  });
+
+  const outputsList = await agentPolicyService.listAllOutputsForPolicies(soClient, agentPolicies);
+
+  const body: GetListAgentPolicyOutputsResponse = {
+    items: outputsList,
+  };
+
+  return response.ok({
+    body,
+  });
 };

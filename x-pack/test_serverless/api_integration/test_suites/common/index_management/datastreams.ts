@@ -80,6 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
+          indexMode: 'standard',
         });
       });
 
@@ -118,6 +119,10 @@ export default function ({ getService }: FtrProviderContext) {
           lifecycle: {
             enabled: true,
           },
+          meteringDocsCount: 0,
+          meteringStorageSize: '0b',
+          meteringStorageSizeBytes: 0,
+          indexMode: 'standard',
         });
       });
     });

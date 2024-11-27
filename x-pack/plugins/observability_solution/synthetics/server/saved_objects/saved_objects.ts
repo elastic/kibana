@@ -12,6 +12,7 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import { fromSettingsAttribute } from '../routes/settings/dynamic_settings';
 import {
   syntheticsSettings,
   syntheticsSettingsObjectId,
@@ -23,7 +24,10 @@ import {
   SYNTHETICS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
 } from './synthetics_param';
-import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
+import {
+  LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE,
+  PRIVATE_LOCATION_SAVED_OBJECT_TYPE,
+} from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
 import {
@@ -36,7 +40,8 @@ export const registerSyntheticsSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) => {
-  savedObjectsService.registerType(PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
+  savedObjectsService.registerType(LEGACY_PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE);
+  savedObjectsService.registerType(PRIVATE_LOCATION_SAVED_OBJECT_TYPE);
 
   savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
   savedObjectsService.registerType(syntheticsServiceApiKey);
@@ -62,7 +67,7 @@ export const savedObjectsAdapter = {
         syntheticsSettingsObjectType,
         syntheticsSettingsObjectId
       );
-      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+      return fromSettingsAttribute(obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         // If the object doesn't exist, check to see if uptime settings exist

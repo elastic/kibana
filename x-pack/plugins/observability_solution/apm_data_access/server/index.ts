@@ -10,10 +10,10 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/serv
 
 const configSchema = schema.object({
   indices: schema.object({
-    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*' }), // TODO: remove apm-* pattern in 9.0
-    span: schema.string({ defaultValue: 'traces-apm*,apm-*' }),
-    error: schema.string({ defaultValue: 'logs-apm*,apm-*' }),
-    metric: schema.string({ defaultValue: 'metrics-apm*,apm-*' }),
+    transaction: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }), // TODO: remove apm-* pattern in 9.0
+    span: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }),
+    error: schema.string({ defaultValue: 'logs-apm*,apm-*,logs-*.otel-*' }),
+    metric: schema.string({ defaultValue: 'metrics-apm*,apm-*,metrics-*.otel-*' }),
     onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
     sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
   }),
@@ -91,7 +91,6 @@ export type {
   APMEventESSearchRequest,
   APMLogEventESSearchRequest,
   DocumentSourcesRequest,
-  ApmDataAccessPrivilegesCheck,
   HostNamesRequest,
   GetDocumentTypeParams,
 } from './types';

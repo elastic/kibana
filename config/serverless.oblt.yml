@@ -129,6 +129,9 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
+## Enable event.ingested separately because agentIdVerification is disabled
+xpack.fleet.eventIngestedEnabled: true
+
 ## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
 ## The value need to be a featureId observability Or stackAlerts Or siem
 xpack.alerting.rules.overwriteProducer: 'observability'
@@ -143,10 +146,9 @@ xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.3'
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-xpack.fleet.internal.registry.spec.max: '3.0'
-# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
-xpack.fleet.internal.registry.spec.min: '1.0'
 xpack.fleet.internal.registry.excludePackages: [
     # Security integrations
     'endpoint',
@@ -184,14 +186,31 @@ xpack.apm.featureFlags.storageExplorerAvailable: false
 
 ## Set the AI Assistant type
 aiAssistantManagementSelection.preferredAIAssistantType: "observability"
+xpack.observabilityAIAssistant.scope: "observability"
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: observability
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
-xpack.ml.nlp.enabled: true
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+      medium:
+        min: 1
+        max: 32
+      high:
+        min: 1
+        max: 128
 xpack.ml.compatibleModuleType: 'observability'
 
 # Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
+
+# Disable role management (custom roles)
+xpack.security.roleManagementEnabled: false

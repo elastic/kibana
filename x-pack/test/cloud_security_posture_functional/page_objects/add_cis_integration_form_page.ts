@@ -154,6 +154,27 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const navigateToAddIntegrationWithVersionPage = async (
+    packageVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
+    await PageObjects.common.navigateToUrl(
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
+      options
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   const navigateToAddIntegrationCspmWithVersionPage = async (
     packageVersion: string,
     space?: string
@@ -195,6 +216,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const navigateToEditIntegrationPage = async () => {
     await testSubjects.click('integrationNameLink');
+  };
+
+  const navigateToEditAgentlessIntegrationPage = async () => {
+    await testSubjects.click('agentlessIntegrationNameLink');
   };
 
   const navigateToAddIntegrationKspmPage = async (space?: string) => {
@@ -285,6 +310,11 @@ export function AddCisIntegrationFormPageProvider({
     );
     await agentOption.click();
   };
+
+  const showSetupTechnologyComponent = async () => {
+    return await testSubjects.exists(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
+  };
+
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
     await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
@@ -459,7 +489,7 @@ export function AddCisIntegrationFormPageProvider({
     await navigateToIntegrationCspList();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    await navigateToEditIntegrationPage();
+    await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // Fill out form to edit an agentless integration
@@ -472,8 +502,12 @@ export function AddCisIntegrationFormPageProvider({
     // Check if the Direct Access Key is updated package policy api with successful toast
     expect(await testSubjects.exists('policyUpdateSuccessToast')).to.be(true);
 
-    await navigateToEditIntegrationPage();
+    await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const showSuccessfulToast = async (testSubjectId: string) => {
+    return await testSubjects.exists(testSubjectId);
   };
 
   const getFirstCspmIntegrationPageIntegration = async () => {
@@ -481,8 +515,19 @@ export function AddCisIntegrationFormPageProvider({
     return await integration.getVisibleText();
   };
 
+  const getFirstCspmIntegrationPageAgentlessIntegration = async () => {
+    const integration = await testSubjects.find('agentlessIntegrationNameLink');
+    return await integration.getVisibleText();
+  };
+
   const getFirstCspmIntegrationPageAgent = async () => {
     const agent = await testSubjects.find('agentPolicyNameLink');
+    // this is assuming that the agent was just created therefor should be the first element
+    return await agent.getVisibleText();
+  };
+
+  const getFirstCspmIntegrationPageAgentlessStatus = async () => {
+    const agent = await testSubjects.find('agentlessStatusBadge');
     // this is assuming that the agent was just created therefor should be the first element
     return await agent.getVisibleText();
   };
@@ -496,6 +541,7 @@ export function AddCisIntegrationFormPageProvider({
     cisAzure,
     cisAws,
     cisGcp,
+    navigateToAddIntegrationWithVersionPage,
     navigateToAddIntegrationCspmPage,
     navigateToAddIntegrationCspmWithVersionPage,
     navigateToAddIntegrationCnvmPage,
@@ -537,7 +583,13 @@ export function AddCisIntegrationFormPageProvider({
     testSubjectIds,
     inputIntegrationName,
     getFirstCspmIntegrationPageIntegration,
+    getFirstCspmIntegrationPageAgentlessIntegration,
     getFirstCspmIntegrationPageAgent,
+    getFirstCspmIntegrationPageAgentlessStatus,
     getAgentBasedPolicyValue,
+    showSuccessfulToast,
+    showSetupTechnologyComponent,
+    navigateToEditIntegrationPage,
+    navigateToEditAgentlessIntegrationPage,
   };
 }

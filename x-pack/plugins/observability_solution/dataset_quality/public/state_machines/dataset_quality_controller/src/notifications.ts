@@ -7,20 +7,12 @@
 
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { DataStreamType } from '../../../../common/types';
 
 export const fetchDatasetStatsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchDatasetStatsFailed', {
       defaultMessage: "We couldn't get your data sets.",
-    }),
-    text: error.message,
-  });
-};
-
-export const fetchDatasetDetailsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchDatasetDetailsFailed', {
-      defaultMessage: "We couldn't get your data set details.",
     }),
     text: error.message,
   });
@@ -35,10 +27,13 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
-export const fetchNonAggregatableDatasetsFailedNotifier = (toasts: IToasts, error: Error) => {
+export const fetchTotalDocsFailedNotifier = (toasts: IToasts, error: Error, meta: any) => {
+  const dataStreamType = meta._event.origin as DataStreamType;
+
   toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.fetchNonAggregatableDatasetsFailed', {
-      defaultMessage: "We couldn't get non aggregatable datasets information.",
+    title: i18n.translate('xpack.datasetQuality.fetchTotalDocsFailed', {
+      defaultMessage: "We couldn't get total docs information for {dataStreamType}.",
+      values: { dataStreamType },
     }),
     text: error.message,
   });
@@ -48,22 +43,6 @@ export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) =
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchIntegrationsFailed', {
       defaultMessage: "We couldn't get your integrations.",
-    }),
-    text: error.message,
-  });
-};
-
-export const noDatasetSelected = i18n.translate(
-  'xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected',
-  {
-    defaultMessage: 'No data set have been selected',
-  }
-);
-
-export const assertBreakdownFieldEcsFailedNotifier = (toasts: IToasts, error: Error) => {
-  toasts.addDanger({
-    title: i18n.translate('xpack.datasetQuality.assertBreakdownFieldEcsFailed', {
-      defaultMessage: "We couldn't retrieve breakdown field metadata.",
     }),
     text: error.message,
   });

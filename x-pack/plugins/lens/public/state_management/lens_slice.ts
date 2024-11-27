@@ -14,7 +14,6 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { SeriesType } from '@kbn/visualizations-plugin/common';
-import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
   VisualizeEditorContext,
@@ -34,6 +33,7 @@ import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../t
 import { selectDataViews, selectFramePublicAPI } from './selectors';
 import { onDropForVisualization } from '../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import type { LensAppServices } from '../app_plugin/types';
+import type { LensSerializedState } from '../react_embeddable/types';
 
 const getQueryFromContext = (
   context: VisualizeFieldContext | VisualizeEditorContext,
@@ -149,6 +149,13 @@ export interface SetExecutionContextPayload {
   resolvedDateRange?: DateRange;
 }
 
+export interface InitialAppState {
+  initialInput?: LensSerializedState;
+  redirectCallback?: (savedObjectId?: string) => void;
+  history?: History<unknown>;
+  inlineEditing?: boolean;
+}
+
 export const setState = createAction<Partial<LensAppState>>('lens/setState');
 export const setExecutionContext = createAction<SetExecutionContextPayload>(
   'lens/setExecutionContext'
@@ -201,12 +208,7 @@ export const switchAndCleanDatasource = createAction<{
   currentIndexPatternId?: string;
 }>('lens/switchAndCleanDatasource');
 export const navigateAway = createAction<void>('lens/navigateAway');
-export const loadInitial = createAction<{
-  initialInput?: LensEmbeddableInput;
-  redirectCallback?: (savedObjectId?: string) => void;
-  history?: History<unknown>;
-  inlineEditing?: boolean;
-}>('lens/loadInitial');
+export const loadInitial = createAction<InitialAppState>('lens/loadInitial');
 export const initEmpty = createAction(
   'initEmpty',
   function prepare({
@@ -620,6 +622,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         const {
           datasourceState: syncedDatasourceState,
           visualizationState: syncedVisualizationState,
+          frame,
         } = syncLinkedDimensions(
           currentState,
           visualizationMap,
@@ -627,7 +630,11 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           payload.datasourceId
         );
 
-        state.visualization.state = syncedVisualizationState;
+        const visualization = visualizationMap[state.visualization.activeId!];
+
+        state.visualization.state =
+          visualization.onDatasourceUpdate?.(syncedVisualizationState, frame) ??
+          syncedVisualizationState;
         state.datasourceStates[payload.datasourceId].state = syncedDatasourceState;
       })
       .addCase(updateVisualizationState, (state, { payload }) => {
@@ -1227,14 +1234,14 @@ function syncLinkedDimensions(
   const linkedDimensions = activeVisualization.getLinkedDimensions?.(visualizationState);
   const frame = selectFramePublicAPI({ lens: state }, datasourceMap);
 
-  const getDimensionGroups = (layerId: string) =>
-    activeVisualization.getConfiguration({
-      state: visualizationState,
-      layerId,
-      frame,
-    }).groups;
-
   if (linkedDimensions) {
+    const getDimensionGroups = (layerId: string) =>
+      activeVisualization.getConfiguration({
+        state: visualizationState,
+        layerId,
+        frame,
+      }).groups;
+
     const idAssuredLinks = linkedDimensions.map((link) => ({
       ...link,
       to: { ...link.to, columnId: link.to.columnId ?? generateId() },
@@ -1276,5 +1283,5 @@ function syncLinkedDimensions(
     });
   }
 
-  return { datasourceState, visualizationState };
+  return { datasourceState, visualizationState, frame };
 }

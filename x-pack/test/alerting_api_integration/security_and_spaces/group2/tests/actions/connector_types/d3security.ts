@@ -12,7 +12,9 @@ import {
   d3SecuritySuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/d3security_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 const connectorTypeId = '.d3security';
 const name = 'A D3 Security action';
@@ -24,6 +26,7 @@ const secrets = {
 export default function d3SecurityTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const createConnector = async (url: string) => {
     const { body } = await supertest
@@ -180,7 +183,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
           });
         });
 
@@ -248,6 +251,24 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
                 },
               },
             });
+
+            const events: IValidatedEvent[] = await retry.try(async () => {
+              return await getEventLog({
+                getService,
+                spaceId: 'default',
+                type: 'action',
+                id: d3SecurityActionId,
+                provider: 'actions',
+                actions: new Map([
+                  ['execute-start', { equal: 1 }],
+                  ['execute', { equal: 1 }],
+                ]),
+              });
+            });
+
+            const executeEvent = events[1];
+            expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(99);
+
             expect(body).to.eql({
               status: 'ok',
               connector_id: d3SecurityActionId,
@@ -290,7 +311,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
               message:
                 'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
               retry: false,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
             });
           });
         });

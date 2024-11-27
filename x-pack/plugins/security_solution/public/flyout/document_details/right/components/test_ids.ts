@@ -15,6 +15,8 @@ export const FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}FieldNameCellIcon` as const;
 export const FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}FieldNameCellText` as const;
+export const FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID =
+  `${FLYOUT_TABLE_TEST_ID}PreviewLinkField` as const;
 
 /* Header */
 
@@ -31,7 +33,17 @@ export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue`
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
 export const CHAT_BUTTON_TEST_ID = 'newChatByTitle' as const;
 
-export const ASSIGNEES_HEADER_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesHeader` as const;
+export const NOTES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesTitle` as const;
+export const NOTES_ADD_NOTE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesAddNoteButton` as const;
+export const NOTES_VIEW_NOTES_BUTTON_TEST_ID =
+  `${FLYOUT_HEADER_TEST_ID}NotesViewNotesButton` as const;
+export const NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID =
+  `${FLYOUT_HEADER_TEST_ID}NotesAddNoteIconButton` as const;
+export const NOTES_COUNT_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesCount` as const;
+export const NOTES_LOADING_TEST_ID = `${FLYOUT_HEADER_TEST_ID}NotesLoading` as const;
+
+export const ASSIGNEES_EMPTY_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesEmpty` as const;
+export const ASSIGNEES_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Assignees` as const;
 export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle` as const;
 export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton` as const;
 
@@ -94,8 +106,9 @@ export const INSIGHTS_CONTENT_TEST_ID = INSIGHTS_TEST_ID + CONTENT_TEST_ID;
 /* Summary row */
 
 export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
-export const SUMMARY_ROW_ICON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Icon`;
+export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
+export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
 
 /* Entities */
 
@@ -111,6 +124,10 @@ export const ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID =
   `${ENTITIES_USER_OVERVIEW_TEST_ID}LastSeen` as const;
 export const ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID =
   `${ENTITIES_USER_OVERVIEW_TEST_ID}RiskLevel` as const;
+export const ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID =
+  `${ENTITIES_USER_OVERVIEW_TEST_ID}AlertCount` as const;
+export const ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
+  `${ENTITIES_USER_OVERVIEW_TEST_ID}Misconfigurations` as const;
 
 export const ENTITIES_HOST_OVERVIEW_TEST_ID = `${INSIGHTS_ENTITIES_TEST_ID}HostOverview` as const;
 export const ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID =
@@ -122,10 +139,20 @@ export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen` as const;
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel` as const;
+export const ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID =
+  `${ENTITIES_HOST_OVERVIEW_TEST_ID}AlertCount` as const;
+export const ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID =
+  `${ENTITIES_HOST_OVERVIEW_TEST_ID}Misconfigurations` as const;
+export const ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID =
+  `${ENTITIES_HOST_OVERVIEW_TEST_ID}Vulnerabilities` as const;
 
 /* Threat intelligence */
 
 export const INSIGHTS_THREAT_INTELLIGENCE_TEST_ID = `${PREFIX}InsightsThreatIntelligence` as const;
+export const INSIGHTS_THREAT_INTELLIGENCE_THREAT_MATCHES_TEST_ID =
+  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}ThreatMatches` as const;
+export const INSIGHTS_THREAT_INTELLIGENCE_ENRICHED_WITH_THREAT_INTELLIGENCE_TEST_ID =
+  `${INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}EnrichedWithThreatIntelligence` as const;
 
 /* Correlations */
 
@@ -157,6 +184,9 @@ export const ANALYZER_PREVIEW_LOADING_TEST_ID = `${ANALYZER_PREVIEW_TEST_ID}Load
 export const SESSION_PREVIEW_TEST_ID = `${PREFIX}SessionPreview` as const;
 export const SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID =
   `${SESSION_PREVIEW_TEST_ID}RuleDetailsLink` as const;
+
+export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
+export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
 
 /* Response section */
 

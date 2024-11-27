@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { camelCase } from 'lodash';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { evalFunctionDefinitions } from '../../definitions/functions';
+import { parse } from '@kbn/esql-ast';
+import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
-import { statsAggregationFunctionDefinitions } from '../../definitions/aggs';
+import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
+import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
-import { TIME_SYSTEM_PARAMS } from '../factories';
-import { getFunctionSignatures } from '../../definitions/helpers';
+import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
 import { ESQLRealField } from '../../validation/types';
 import {
   FieldType,
@@ -121,7 +122,7 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string,
+  command: string | string[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
@@ -148,7 +149,7 @@ export function getFunctionSignaturesByReturnType(
 
   const list = [];
   if (agg) {
-    list.push(...statsAggregationFunctionDefinitions);
+    list.push(...aggregationFunctionDefinitions);
     // right now all grouping functions are agg functions too
     list.push(...groupingFunctionDefinitions);
   }
@@ -157,7 +158,7 @@ export function getFunctionSignaturesByReturnType(
   }
   // eval functions (eval is a special keyword in JS)
   if (scalar) {
-    list.push(...evalFunctionDefinitions);
+    list.push(...scalarFunctionDefinitions);
   }
   if (builtin) {
     list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
@@ -165,19 +166,23 @@ export function getFunctionSignaturesByReturnType(
 
   const deduped = Array.from(new Set(list));
 
+  const commands = Array.isArray(command) ? command : [command];
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
-      if (!supportedCommands.includes(command) && !supportedOptions?.includes(option || '')) {
+      if (
+        !commands.some((c) => supportedCommands.includes(c)) &&
+        !supportedOptions?.includes(option || '')
+      ) {
         return false;
       }
       const filteredByReturnType = signatures.filter(
         ({ returnType }) =>
           expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
-      if (!filteredByReturnType.length) {
+      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
         return false;
       }
       if (paramsTypes?.length) {
@@ -213,13 +218,9 @@ export function getFunctionSignaturesByReturnType(
           label: name.toUpperCase(),
         };
       }
-      const printedSignatures = getFunctionSignatures(definition, {
-        withTypes: true,
-        capitalize: true,
-      });
       return {
         text: `${name.toUpperCase()}($0)`,
-        label: printedSignatures[0].declaration,
+        label: name.toUpperCase(),
       };
     });
 }
@@ -229,7 +230,11 @@ export function getFieldNamesByType(
 ) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
-    .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
+    .filter(
+      ({ type }) =>
+        (requestedType.includes('any') || requestedType.includes(type)) &&
+        !NOT_SUGGESTED_TYPES.includes(type)
+    )
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
@@ -248,7 +253,17 @@ export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType
 }
 
 export function createCustomCallbackMocks(
-  customFields?: ESQLRealField[],
+  /**
+   * Columns that will come from Elasticsearch since the last command
+   * e.g. the test case may be `FROM index | EVAL foo = 1 | KEEP /`
+   *
+   * In this case, the columns available for the KEEP command will be the ones
+   * that were available after the EVAL command
+   *
+   * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
+   * will include "foo" as a column.
+   */
+  customColumnsSinceLastCommand?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -257,11 +272,13 @@ export function createCustomCallbackMocks(
     enrichFields: string[];
   }>
 ) {
-  const finalFields = customFields || fields;
+  const finalColumnsSinceLastCommand =
+    customColumnsSinceLastCommand ||
+    fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {
-    getFieldsFor: jest.fn(async () => finalFields),
+    getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
   };
@@ -279,10 +296,7 @@ export function createCompletionContext(triggerCharacter?: string) {
 export function getPolicyFields(policyName: string) {
   return policies
     .filter(({ name }) => name === policyName)
-    .flatMap(({ enrichFields }) =>
-      // ok, this is a bit of cheating as it's using the same logic as in the helper
-      enrichFields.map((field) => (/[^a-zA-Z\d_\.@]/.test(field) ? `\`${field}\`` : field))
-    );
+    .flatMap(({ enrichFields }) => enrichFields.map((field) => getSafeInsertText(field)));
 }
 
 export interface SuggestOptions {
@@ -309,7 +323,7 @@ export const setup = async (caret = '/') => {
       querySansCaret,
       pos,
       ctx,
-      getAstAndSyntaxErrors,
+      (_query: string | undefined) => parse(_query, { withFormatting: true }),
       opts.callbacks ?? callbacks
     );
   };
@@ -319,22 +333,28 @@ export const setup = async (caret = '/') => {
     expected: Array<string | PartialSuggestionWithText>,
     opts?: SuggestOptions
   ) => {
-    const result = await suggest(query, opts);
-    const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
+    try {
+      const result = await suggest(query, opts);
+      const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();
 
-    const expectedTexts = expected
-      .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
-      .sort();
+      const expectedTexts = expected
+        .map((suggestion) => (typeof suggestion === 'string' ? suggestion : suggestion.text ?? ''))
+        .sort();
 
-    expect(resultTexts).toEqual(expectedTexts);
+      expect(resultTexts).toEqual(expectedTexts);
 
-    const expectedNonStringSuggestions = expected.filter(
-      (suggestion) => typeof suggestion !== 'string'
-    ) as PartialSuggestionWithText[];
+      const expectedNonStringSuggestions = expected.filter(
+        (suggestion) => typeof suggestion !== 'string'
+      ) as PartialSuggestionWithText[];
 
-    for (const expectedSuggestion of expectedNonStringSuggestions) {
-      const suggestion = result.find((s) => s.text === expectedSuggestion.text);
-      expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      for (const expectedSuggestion of expectedNonStringSuggestions) {
+        const suggestion = result.find((s) => s.text === expectedSuggestion.text);
+        expect(suggestion).toEqual(expect.objectContaining(expectedSuggestion));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed query\n-------------\n${query}`);
+      throw error;
     }
   };
 
@@ -344,3 +364,17 @@ export const setup = async (caret = '/') => {
     assertSuggestions,
   };
 };
+
+/**
+ * Attaches the trigger command to an expected suggestion to make
+ * sure the suggestions menu will be opened when the suggestion is accepted.
+ */
+export const attachTriggerCommand = (
+  s: string | PartialSuggestionWithText
+): PartialSuggestionWithText =>
+  typeof s === 'string'
+    ? {
+        text: s,
+        command: TRIGGER_SUGGESTION_COMMAND,
+      }
+    : { ...s, command: TRIGGER_SUGGESTION_COMMAND };

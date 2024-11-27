@@ -9,6 +9,10 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
+import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/helpers';
+
+import { AgentNotFoundError } from '../..';
+
 import { AGENTS_INDEX } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
 import type { Agent } from '../../types';
@@ -24,6 +28,7 @@ import {
   openPointInTime,
   updateAgent,
   _joinFilters,
+  getByIds,
 } from './crud';
 
 jest.mock('../audit_logging');
@@ -41,6 +46,7 @@ jest.mock('./versions', () => {
 jest.mock('../spaces/helpers');
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
+const isSpaceAwarenessEnabledMock = _isSpaceAwarenessEnabled as jest.Mock;
 
 describe('Agents CRUD test', () => {
   const soClientMock = savedObjectsClientMock.create();
@@ -63,13 +69,22 @@ describe('Agents CRUD test', () => {
     appContextService.start(mockContract);
   });
 
-  function getEsResponse(ids: string[], total: number, status: AgentStatus) {
+  afterEach(() => {
+    isSpaceAwarenessEnabledMock.mockReset();
+  });
+
+  function getEsResponse(
+    ids: string[],
+    total: number,
+    status: AgentStatus,
+    generateSource: (id: string) => Partial<Agent> = () => ({})
+  ) {
     return {
       hits: {
         total,
         hits: ids.map((id: string) => ({
           _id: id,
-          _source: {},
+          _source: generateSource(id),
           fields: {
             status: [status],
           },
@@ -511,6 +526,50 @@ describe('Agents CRUD test', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: `User closing point in time query [pitId=test-pit]`,
       });
+    });
+  });
+
+  describe(`getByIds()`, () => {
+    let searchResponse: ReturnType<typeof getEsResponse>;
+
+    beforeEach(() => {
+      searchResponse = getEsResponse(['1', '2'], 2, 'online', (id) => {
+        return { id, namespaces: ['foo'] };
+      });
+      (soClientMock.getCurrentNamespace as jest.Mock).mockReturnValue('foo');
+      searchMock.mockImplementation(async () => searchResponse);
+    });
+
+    it('should return a list of agents', async () => {
+      await expect(getByIds(esClientMock, soClientMock, ['1', '2'])).resolves.toEqual([
+        expect.objectContaining({ id: '1' }),
+        expect.objectContaining({ id: '2' }),
+      ]);
+    });
+
+    it('should omit agents that are not found if `ignoreMissing` is true', async () => {
+      searchResponse.hits.hits = [searchResponse.hits.hits[0]];
+
+      await expect(
+        getByIds(esClientMock, soClientMock, ['1', '2'], { ignoreMissing: true })
+      ).resolves.toEqual([expect.objectContaining({ id: '1' })]);
+    });
+
+    it('should error if agent is not found and `ignoreMissing` is false', async () => {
+      searchResponse.hits.hits = [searchResponse.hits.hits[0]];
+
+      await expect(getByIds(esClientMock, soClientMock, ['1', '2'])).rejects.toThrow(
+        AgentNotFoundError
+      );
+    });
+
+    it('should error if agent is not part of current space', async () => {
+      searchResponse.hits.hits[0]._source.namespaces = ['bar'];
+      isSpaceAwarenessEnabledMock.mockResolvedValue(true);
+
+      await expect(getByIds(esClientMock, soClientMock, ['1', '2'])).rejects.toThrow(
+        AgentNotFoundError
+      );
     });
   });
 });

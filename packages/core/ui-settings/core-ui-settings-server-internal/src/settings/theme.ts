@@ -1,23 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-
-function parseThemeTags() {
-  if (!process.env.KBN_OPTIMIZER_THEMES || process.env.KBN_OPTIMIZER_THEMES === '*') {
-    return ['v8light', 'v8dark'];
-  }
-
-  return process.env.KBN_OPTIMIZER_THEMES.split(',').map((t) => t.trim());
-}
+import {
+  type UiSettingsParams,
+  parseThemeTags,
+  SUPPORTED_THEME_NAMES,
+} from '@kbn/core-ui-settings-common';
 
 function getThemeInfo(options: GetThemeSettingsOptions) {
   if (options?.isDist ?? true) {
@@ -26,7 +23,7 @@ function getThemeInfo(options: GetThemeSettingsOptions) {
     };
   }
 
-  const themeTags = parseThemeTags();
+  const themeTags = parseThemeTags(process.env.KBN_OPTIMIZER_THEMES);
   return {
     defaultDarkMode: themeTags[0].endsWith('dark'),
   };
@@ -34,6 +31,7 @@ function getThemeInfo(options: GetThemeSettingsOptions) {
 
 interface GetThemeSettingsOptions {
   isDist?: boolean;
+  isThemeSwitcherEnabled?: boolean;
 }
 
 export const getThemeSettings = (
@@ -50,9 +48,9 @@ export const getThemeSettings = (
       description: i18n.translate('core.ui_settings.params.darkModeText', {
         defaultMessage:
           `The UI theme that the Kibana UI should use. ` +
-          `Set to 'enabled' or 'disabled' to enable or disable the dark theme. ` +
-          `Set to 'system' to have the Kibana UI theme follow the system theme. ` +
-          `A page refresh is required for the setting to be applied.`,
+          `Set to 'Enabled' to enable the dark theme, or 'Disabled' to disable it. ` +
+          `Set to 'Sync with system' to have the Kibana UI theme follow the system theme. ` +
+          `A page reload is required for the setting to be applied.`,
       }),
       type: 'select',
       options: ['enabled', 'disabled', 'system'],
@@ -87,6 +85,35 @@ export const getThemeSettings = (
       value: 'v8' as ThemeVersion,
       readonly: true,
       schema: schema.literal('v8'),
+    },
+    /**
+     * Theme name is the (upcoming) replacement for theme versions.
+     */
+    'theme:name': {
+      name: i18n.translate('core.ui_settings.params.themeName', {
+        defaultMessage: 'Theme',
+      }),
+      type: 'select',
+      options: SUPPORTED_THEME_NAMES,
+      optionLabels: {
+        amsterdam: i18n.translate('core.ui_settings.params.themeName.options.amsterdam', {
+          defaultMessage: 'Amsterdam',
+        }),
+        borealis: i18n.translate('core.ui_settings.params.themeName.options.borealis', {
+          defaultMessage: 'Borealis',
+        }),
+      },
+      value: 'amsterdam',
+      readonly: Object.hasOwn(options, 'isThemeSwitcherEnabled')
+        ? !options.isThemeSwitcherEnabled
+        : true,
+      requiresPageReload: true,
+      schema: schema.oneOf([
+        schema.literal('amsterdam'),
+        schema.literal('borealis'),
+        // Allow experimental themes
+        schema.string(),
+      ]),
     },
   };
 };

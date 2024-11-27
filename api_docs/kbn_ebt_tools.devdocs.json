@@ -44,7 +44,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -161,6 +161,65 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.usePageReady",
+        "type": "Function",
+        "tags": [],
+        "label": "usePageReady",
+        "description": [],
+        "signature": [
+          "(state: { customMetrics?: ",
+          "CustomMetrics",
+          " | undefined; isReady: boolean; }) => void"
+        ],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.usePageReady.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ebt-tools",
+                "id": "def-common.usePageReady.$1.customMetrics",
+                "type": "Object",
+                "tags": [],
+                "label": "customMetrics",
+                "description": [],
+                "signature": [
+                  "CustomMetrics",
+                  " | undefined"
+                ],
+                "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ebt-tools",
+                "id": "def-common.usePageReady.$1.isReady",
+                "type": "boolean",
+                "tags": [],
+                "label": "isReady",
+                "description": [],
+                "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_page_ready.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],

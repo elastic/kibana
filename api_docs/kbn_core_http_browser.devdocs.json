@@ -218,11 +218,11 @@
             "parentPluginId": "@kbn/core-http-browser",
             "id": "def-public.HttpFetchOptions.version",
             "type": "string",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "version",
-            "description": [],
+            "description": [
+              "\nWhen defined, the API version string used to populate the ELASTIC_HTTP_VERSION_HEADER.\nDefaults to undefined."
+            ],
             "signature": [
               "string | undefined"
             ],

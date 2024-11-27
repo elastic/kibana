@@ -39,7 +39,7 @@ export function defineLoginRoutes({
           { unknowns: 'allow' }
         ),
       },
-      options: { authRequired: 'optional' },
+      options: { authRequired: 'optional', excludeFromOAS: true },
     },
     async (context, request, response) => {
       // Default to true if license isn't available or it can't be resolved for some reason.
@@ -57,7 +57,18 @@ export function defineLoginRoutes({
   );
 
   router.get(
-    { path: '/internal/security/login_state', validate: false, options: { authRequired: false } },
+    {
+      path: '/internal/security/login_state',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it only provides non-sensative information about authentication provider configuration',
+        },
+      },
+      validate: false,
+      options: { authRequired: false },
+    },
     async (context, request, response) => {
       const { allowLogin, layout = 'form' } = license.getFeatures();
       const { sortedProviders, selector } = config.authc;

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -37,6 +38,7 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
         field={field}
         closePopover={mockClose}
         onAddFieldToWorkspace={jest.fn()}
+        onAddBreakdownField={jest.fn()}
         onAddFilter={jest.fn()}
         onEditField={jest.fn()}
         onDeleteField={jest.fn()}
@@ -44,6 +46,9 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
     );
 
     expect(wrapper.text()).toBe(fieldName);
+    expect(
+      wrapper.find(`[data-test-subj="fieldPopoverHeader_addBreakdownField-${fieldName}"]`).exists()
+    ).toBeTruthy();
     expect(
       wrapper.find(`[data-test-subj="fieldPopoverHeader_addField-${fieldName}"]`).exists()
     ).toBeTruthy();
@@ -56,7 +61,29 @@ describe('UnifiedFieldList <FieldPopoverHeader />', () => {
     expect(
       wrapper.find(`[data-test-subj="fieldPopoverHeader_deleteField-${fieldName}"]`).exists()
     ).toBeTruthy();
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(4);
+    expect(wrapper.find(EuiButtonIcon)).toHaveLength(5);
+  });
+
+  it('should correctly handle add-breakdown-field action', async () => {
+    const mockClose = jest.fn();
+    const mockAddBreakdownField = jest.fn();
+    const fieldName = 'extension';
+    const field = dataView.fields.find((f) => f.name === fieldName)!;
+    const wrapper = mountWithIntl(
+      <FieldPopoverHeader
+        field={field}
+        closePopover={mockClose}
+        onAddBreakdownField={mockAddBreakdownField}
+      />
+    );
+
+    wrapper
+      .find(`[data-test-subj="fieldPopoverHeader_addBreakdownField-${fieldName}"]`)
+      .first()
+      .simulate('click');
+
+    expect(mockClose).toHaveBeenCalled();
+    expect(mockAddBreakdownField).toHaveBeenCalledWith(field);
   });
 
   it('should correctly handle add-field action', async () => {

@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(43);
+      expect(count).toBe(44);
     });
   });
 
@@ -86,6 +86,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -146,6 +147,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(true);
       expect(capabilities.canResetJob).toBe(true);
       expect(capabilities.canForecastJob).toBe(true);
+      expect(capabilities.canDeleteForecast).toBe(true);
       expect(capabilities.canStartStopDatafeed).toBe(true);
       expect(capabilities.canUpdateJob).toBe(true);
       expect(capabilities.canCreateDatafeed).toBe(true);
@@ -206,6 +208,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -266,6 +269,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -326,6 +330,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canCloseJob).toBe(false);
       expect(capabilities.canResetJob).toBe(false);
       expect(capabilities.canForecastJob).toBe(false);
+      expect(capabilities.canDeleteForecast).toBe(false);
       expect(capabilities.canStartStopDatafeed).toBe(false);
       expect(capabilities.canUpdateJob).toBe(false);
       expect(capabilities.canCreateDatafeed).toBe(false);
@@ -387,6 +392,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canCloseJob).toBe(false);
     expect(capabilities.canResetJob).toBe(false);
     expect(capabilities.canForecastJob).toBe(false);
+    expect(capabilities.canDeleteForecast).toBe(false);
     expect(capabilities.canStartStopDatafeed).toBe(false);
     expect(capabilities.canUpdateJob).toBe(false);
     expect(capabilities.canCreateDatafeed).toBe(false);

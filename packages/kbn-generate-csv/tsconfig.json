@@ -30,5 +30,6 @@
     "@kbn/es-types",
     "@kbn/data-views-plugin",
     "@kbn/search-types",
+    "@kbn/task-manager-plugin",
   ]
 }

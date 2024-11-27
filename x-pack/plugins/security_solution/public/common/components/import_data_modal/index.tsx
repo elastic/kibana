@@ -91,6 +91,7 @@ export const ImportDataModalComponent = ({
     setOverwriteExceptions(false);
     setOverwriteActionConnectors(false);
     setActionConnectorsWarnings([]);
+    setIsImporting(false);
   }, [closeModal, setOverwrite, setOverwriteExceptions]);
 
   const onImportComplete = useCallback(

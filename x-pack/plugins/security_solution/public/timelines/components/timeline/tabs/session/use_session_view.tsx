@@ -10,7 +10,9 @@ import { EuiButtonEmpty, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } 
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import type { TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -20,9 +22,7 @@ import {
 import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { useDetailPanel } from '../../../side_panel/hooks/use_detail_panel';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { isFullScreen } from '../../body/column_headers';
 import { SCROLLING_DISABLED_CLASS_NAME } from '../../../../../../common/constants';
 import { FULL_SCREEN } from '../../body/column_headers/translations';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
@@ -30,11 +30,12 @@ import {
   useTimelineFullScreen,
   useGlobalFullScreen,
 } from '../../../../../common/containers/use_full_screen';
-import { detectionsTimelineIds } from '../../../../containers/helpers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { DocumentEventTypes } from '../../../../../common/lib/telemetry';
+import { isFullScreen } from '../../helpers';
 
 const FullScreenButtonIcon = styled(EuiButtonIcon)`
   margin: 4px 0 4px 0;
@@ -242,7 +243,7 @@ export const useSessionViewNavigation = ({ scopeId }: { scopeId: string }) => {
 };
 
 export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: number }) => {
-  const { sessionView } = useKibana().services;
+  const { sessionView, telemetry } = useKibana().services;
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
       return timelineSelectors.getTimelineByIdSelector();
@@ -271,19 +272,29 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
     [globalFullScreen, scopeId, timelineFullScreen]
   );
 
-  const sourcererScope = useMemo(() => {
-    if (isActiveTimeline(scopeId)) {
-      return SourcererScopeName.timeline;
-    } else if (detectionsTimelineIds.includes(scopeId as TableId)) {
-      return SourcererScopeName.detections;
-    } else {
-      return SourcererScopeName.default;
-    }
-  }, [scopeId]);
-  const { openEventDetailsPanel } = useDetailPanel({
-    sourcererScope,
-    scopeId,
-  });
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
+
+  const { openFlyout } = useExpandableFlyoutApi();
+  const openAlertDetailsFlyout = useCallback(
+    (eventId?: string, onClose?: () => void) => {
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName: alertsIndex,
+            scopeId,
+          },
+        },
+      });
+      telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
+        location: scopeId,
+        panel: 'right',
+      });
+    },
+    [openFlyout, alertsIndex, scopeId, telemetry]
+  );
 
   const sessionViewComponent = useMemo(() => {
     const sessionViewSearchBarHeight = 118;
@@ -291,7 +302,7 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
     return sessionViewConfig !== null
       ? sessionView.getSessionView({
           ...sessionViewConfig,
-          loadAlertDetails: openEventDetailsPanel,
+          loadAlertDetails: openAlertDetailsFlyout,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
           canReadPolicyManagement,
@@ -301,13 +312,13 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
     height,
     sessionViewConfig,
     sessionView,
-    openEventDetailsPanel,
+    openAlertDetailsFlyout,
     fullScreen,
     canReadPolicyManagement,
   ]);
 
   return {
-    openEventDetailsPanel,
+    openEventDetailsPanel: openAlertDetailsFlyout,
     SessionView: sessionViewComponent,
   };
 };

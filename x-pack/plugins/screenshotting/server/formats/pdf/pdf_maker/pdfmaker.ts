@@ -22,7 +22,12 @@ import {
 } from './constants';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
-import type { GeneratePdfRequest, GeneratePdfResponse, WorkerData } from './worker';
+import {
+  GeneratePdfResponseType,
+  type GeneratePdfRequest,
+  type WorkerData,
+  GeneratePdfResponse,
+} from './worker';
 
 // Ensure that all dependencies are included in the release bundle.
 import './worker_dependencies';
@@ -32,6 +37,8 @@ export class PdfMaker {
   private content: Content[];
 
   private worker?: Worker;
+  private workerLogger: Logger;
+
   private pageCount: number = 0;
   private transferList: ArrayBuffer[] = [];
 
@@ -71,6 +78,7 @@ export class PdfMaker {
   ) {
     this.title = '';
     this.content = [];
+    this.workerLogger = logger.get('pdf-worker');
 
     // running in dist: `worker.ts` becomes `worker.js`
     // running in source: `worker_src_harness.ts` needs to be wrapped in JS and have a ts-node environment initialized.
@@ -209,26 +217,37 @@ export class PdfMaker {
         const { port1: myPort, port2: theirPort } = new MessageChannel();
         this.worker = this.createWorker(theirPort);
         this.worker.on('error', (workerError: NodeJS.ErrnoException) => {
+          this.workerLogger.error(`Worker error: ${workerError}`);
           if (workerError.code === 'ERR_WORKER_OUT_OF_MEMORY') {
             reject(new errors.PdfWorkerOutOfMemoryError(workerError.message));
           } else {
             reject(workerError);
           }
         });
-        this.worker.on('exit', () => {});
+        this.worker.on('exit', () => {
+          this.workerLogger.debug('Worker exited');
+        });
 
-        // We expect one message from the worker generating the PDF buffer.
-        myPort.on('message', ({ error, data }: GeneratePdfResponse) => {
-          if (error) {
+        myPort.on('message', ({ type, error, data, message }: GeneratePdfResponse) => {
+          if (type === GeneratePdfResponseType.Log && message) {
+            this.workerLogger.debug(message);
+            return;
+          }
+
+          if (type === GeneratePdfResponseType.Error) {
             reject(new Error(`PDF worker returned the following error: ${error}`));
             return;
           }
-          if (!data) {
+
+          if (type === GeneratePdfResponseType.Data && !data) {
             reject(new Error(`Worker did not generate a PDF!`));
             return;
           }
-          this.pageCount = data.metrics.pages;
-          resolve(data.buffer);
+
+          if (data) {
+            this.pageCount = data.metrics.pages;
+            resolve(data.buffer);
+          }
         });
 
         // Send the request

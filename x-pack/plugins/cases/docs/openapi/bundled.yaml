@@ -112,11 +112,11 @@ paths:
       tags:
         - cases
       parameters:
-        - $ref: '#/components/parameters/assignees'
+        - $ref: '#/components/parameters/assignees_filter'
         - $ref: '#/components/parameters/category'
         - $ref: '#/components/parameters/defaultSearchOperator'
         - $ref: '#/components/parameters/from'
-        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/owner_filter'
         - $ref: '#/components/parameters/page_index'
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/reporters'
@@ -168,12 +168,12 @@ paths:
       operationId: getCasesByAlertDefaultSpace
       description: |
         You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
-      x-technical-preview: true
+      x-state: Technical preview
       tags:
         - cases
       parameters:
         - $ref: '#/components/parameters/alert_id'
-        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/owner_filter'
       responses:
         '200':
           description: Indicates a successful call.
@@ -209,7 +209,7 @@ paths:
       tags:
         - cases
       parameters:
-        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/owner_filter'
       responses:
         '200':
           description: Indicates a successful call.
@@ -320,7 +320,7 @@ paths:
                             type: string
                             example: summary
                     owner:
-                      $ref: '#/components/schemas/owners'
+                      $ref: '#/components/schemas/owner'
                     templates:
                       $ref: '#/components/schemas/templates'
                     updated_at:
@@ -367,7 +367,7 @@ paths:
       summary: Add case settings
       operationId: setCaseConfigurationDefaultSpace
       description: |
-        Case settings include external connection details, custom fields, and templates.  Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.
+        Case settings include external connection details, custom fields, and templates. Connectors are used to interface with external systems. You must create a connector before you can use it in your cases. If you set a default connector, it is automatically selected when you create cases in Kibana. If you use the create case API, however, you must still specify all of the connector details. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where you are creating cases.
       tags:
         - cases
       parameters:
@@ -488,7 +488,7 @@ paths:
                           type: string
                           example: summary
                   owner:
-                    $ref: '#/components/schemas/owners'
+                    $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
                   updated_at:
@@ -658,7 +658,7 @@ paths:
                           type: string
                           example: summary
                   owner:
-                    $ref: '#/components/schemas/owners'
+                    $ref: '#/components/schemas/owner'
                   templates:
                     $ref: '#/components/schemas/templates'
                   updated_at:
@@ -710,7 +710,7 @@ paths:
       tags:
         - cases
       parameters:
-        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/owner_filter'
       responses:
         '200':
           description: Indicates a successful call.
@@ -760,7 +760,7 @@ paths:
       tags:
         - cases
       parameters:
-        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/owner_filter'
       responses:
         '200':
           description: Indicates a successful call.
@@ -790,7 +790,7 @@ paths:
       tags:
         - cases
       parameters:
-        - $ref: '#/components/parameters/owner'
+        - $ref: '#/components/parameters/owner_filter'
       responses:
         '200':
           description: Indicates a successful call.
@@ -844,7 +844,7 @@ paths:
       summary: Get all alerts for a case
       description: |
         You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
-      x-technical-preview: true
+      x-state: Technical preview
       operationId: getCaseAlertsDefaultSpace
       tags:
         - cases
@@ -1208,6 +1208,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/4xx_response'
+  /api/cases/{caseId}/files:
+    post:
+      summary: Attach a file to a case
+      operationId: addCaseFileDefaultSpace
+      description: |
+        Attach a file to a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. The request must include:
+        - The `Content-Type: multipart/form-data` HTTP header.
+        - The location of the file that is being uploaded.
+      tags:
+        - cases
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/case_id'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/add_case_file_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/case_response_properties'
+              examples:
+                addCaseFileResponse:
+                  $ref: '#/components/examples/add_comment_response'
+        '401':
+          description: Authorization information is missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/4xx_response'
 components:
   parameters:
     kbn_xsrf:
@@ -1230,30 +1265,23 @@ components:
           minItems: 1
           maxItems: 100
       example: d4e7abb0-b462-11ec-9a8d-698504725a43
-    assignees:
+    assignees_filter:
       in: query
       name: assignees
       description: |
         Filters the returned cases by assignees. Valid values are `none` or unique identifiers for the user profiles. These identifiers can be found by using the suggest user profile API.
       schema:
         oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-            maxItems: 100
+          - $ref: '#/components/schemas/string'
+          - $ref: '#/components/schemas/string_array'
     category:
       in: query
       name: category
       description: Filters the returned cases by category.
       schema:
         oneOf:
-          - type: string
-            example: my-category
-          - type: array
-            items:
-              type: string
-            maxItems: 100
+          - $ref: '#/components/schemas/case_category'
+          - $ref: '#/components/schemas/case_categories'
     defaultSearchOperator:
       in: query
       name: defaultSearchOperator
@@ -1270,17 +1298,15 @@ components:
       schema:
         type: string
         example: now-1d
-    owner:
+    owner_filter:
       in: query
       name: owner
       description: |
         A filter to limit the response to a specific set of applications. If this parameter is omitted, the response contains information about all the cases that the user has access to read.
       schema:
         oneOf:
+          - $ref: '#/components/schemas/owner'
           - $ref: '#/components/schemas/owners'
-          - type: array
-            items:
-              $ref: '#/components/schemas/owners'
       example: cases
     page_index:
       in: query
@@ -1305,11 +1331,8 @@ components:
       description: Filters the returned cases by the user name of the reporter.
       schema:
         oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-            maxItems: 100
+          - $ref: '#/components/schemas/string'
+          - $ref: '#/components/schemas/string_array'
       example: elastic
     search:
       in: query
@@ -1324,9 +1347,7 @@ components:
       schema:
         oneOf:
           - $ref: '#/components/schemas/searchFieldsType'
-          - type: array
-            items:
-              $ref: '#/components/schemas/searchFieldsType'
+          - $ref: '#/components/schemas/searchFieldsTypeArray'
     severity:
       in: query
       name: severity
@@ -1382,11 +1403,8 @@ components:
       description: Filters the returned cases by tags.
       schema:
         oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
-            maxItems: 100
+          - $ref: '#/components/schemas/string'
+          - $ref: '#/components/schemas/string_array'
       example: tag-1
     to:
       in: query
@@ -1770,7 +1788,7 @@ components:
       description: The description for the case.
       type: string
       maxLength: 30000
-    owners:
+    owner:
       type: string
       description: |
         The application that owns the cases: Stack Management, Observability, or Elastic Security.
@@ -1840,7 +1858,7 @@ components:
         description:
           $ref: '#/components/schemas/case_description'
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         settings:
           $ref: '#/components/schemas/settings'
         severity:
@@ -1954,7 +1972,7 @@ components:
             type: string
             example: .internal.alerts-security.alerts-default-000001
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         pushed_at:
           type: string
           format: date-time
@@ -2048,7 +2066,7 @@ components:
           type: string
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         pushed_at:
           type: string
           format: date-time
@@ -2304,7 +2322,7 @@ components:
           type: string
           example: 66b9aa00-94fa-11ea-9f74-e7e108796192
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         settings:
           $ref: '#/components/schemas/settings'
         severity:
@@ -2430,12 +2448,32 @@ components:
               version:
                 description: The current version of the case. To determine this value, use the get case or find cases APIs.
                 type: string
+    string:
+      type: string
+    string_array:
+      type: array
+      items:
+        $ref: '#/components/schemas/string'
+      maxItems: 100
+    case_categories:
+      type: array
+      items:
+        $ref: '#/components/schemas/case_category'
+      maxItems: 100
+    owners:
+      type: array
+      items:
+        $ref: '#/components/schemas/owner'
     searchFieldsType:
       type: string
       description: The fields to perform the `simple_query_string` parsed query against.
       enum:
         - description
         - title
+    searchFieldsTypeArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/searchFieldsType'
     closure_types:
       type: string
       description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
@@ -2465,7 +2503,7 @@ components:
         maxLength: 256
     templates:
       type: array
-      x-technical-preview: true
+      x-state: Technical preview
       items:
         type: object
         properties:
@@ -2495,7 +2533,7 @@ components:
                     $ref: '#/components/schemas/connector_types'
               customFields:
                 type: array
-                x-technical-preview: true
+                x-state: Technical preview
                 description: Custom field values in the template.
                 items:
                   type: object
@@ -2612,7 +2650,7 @@ components:
                   - text
                   - toggle
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         templates:
           $ref: '#/components/schemas/templates'
     update_case_configuration_request:
@@ -2721,7 +2759,7 @@ components:
         index:
           $ref: '#/components/schemas/alert_indices'
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         rule:
           $ref: '#/components/schemas/rule'
         type:
@@ -2741,7 +2779,7 @@ components:
           maxLength: 30000
           example: A new comment.
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         type:
           type: string
           description: The type of comment.
@@ -2762,7 +2800,7 @@ components:
           items:
             type: string
           maxItems: 1000
-      x-technical-preview: true
+      x-state: Technical preview
       example: 6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42
     alert_indices:
       title: Alert indices
@@ -2774,13 +2812,13 @@ components:
           items:
             type: string
           maxItems: 1000
-      x-technical-preview: true
+      x-state: Technical preview
     rule:
       title: Alerting rule
       description: |
         The rule that is associated with the alerts. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       type: object
-      x-technical-preview: true
+      x-state: Technical preview
       properties:
         id:
           description: The rule identifier.
@@ -2824,7 +2862,7 @@ components:
         index:
           $ref: '#/components/schemas/alert_indices'
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         rule:
           $ref: '#/components/schemas/rule'
         type:
@@ -2854,7 +2892,7 @@ components:
             The identifier for the comment. To retrieve comment IDs, use the get comments API.
           example: 8af6ac20-74f6-11ea-b83a-553aecdb28b6
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         type:
           type: string
           description: The type of comment.
@@ -2913,7 +2951,7 @@ components:
                   items:
                     type: string
             owner:
-              $ref: '#/components/schemas/owners'
+              $ref: '#/components/schemas/owner'
             rule:
               type: object
               properties:
@@ -3085,7 +3123,7 @@ components:
         description:
           type: string
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         settings:
           $ref: '#/components/schemas/settings'
         severity:
@@ -3152,7 +3190,7 @@ components:
             comment:
               type: string
             owner:
-              $ref: '#/components/schemas/owners'
+              $ref: '#/components/schemas/owner'
             type:
               type: string
               enum:
@@ -3226,7 +3264,7 @@ components:
             - full_name
             - username
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         payload:
           oneOf:
             - $ref: '#/components/schemas/payload_alert_comment'
@@ -3293,7 +3331,7 @@ components:
           type: string
           example: 22fd3e30-03b1-11ed-920c-974bfa104448
         owner:
-          $ref: '#/components/schemas/owners'
+          $ref: '#/components/schemas/owner'
         payload:
           oneOf:
             - $ref: '#/components/schemas/payload_alert_comment'
@@ -3328,6 +3366,20 @@ components:
             - settings
             - severity
           example: create_case
+    add_case_file_request:
+      title: Add case file request properties
+      required:
+        - file
+      description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
+      type: object
+      properties:
+        file:
+          description: The file being attached to the case.
+          type: string
+          format: binary
+        filename:
+          description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
+          type: string
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.

@@ -6,7 +6,10 @@
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
-import type { InferenceModelConfig, InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceInferenceEndpoint,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { RouteInitialization } from '../types';
 import { createInferenceSchema } from './schemas/inference_schema';
@@ -19,20 +22,17 @@ export function inferenceModelRoutes(
   { router, routeGuard }: RouteInitialization,
   cloud: CloudSetup
 ) {
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {put} /internal/ml/_inference/:taskType/:inferenceId Create Inference Endpoint
-   * @apiName CreateInferenceEndpoint
-   * @apiDescription Create Inference Endpoint
-   */
   router.versioned
     .put({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/{taskType}/{inferenceId}`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canCreateInferenceEndpoint'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canCreateInferenceEndpoint'],
+        },
       },
+      summary: 'Create an inference endpoint',
+      description: 'Create an inference endpoint',
     })
     .addVersion(
       {
@@ -51,7 +51,7 @@ export function inferenceModelRoutes(
             const body = await modelsProvider(client, mlClient, cloud).createInferenceEndpoint(
               inferenceId,
               taskType as InferenceTaskType,
-              request.body as InferenceModelConfig
+              request.body as InferenceInferenceEndpoint
             );
             const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
             await syncSavedObjects(false);
@@ -64,20 +64,18 @@ export function inferenceModelRoutes(
         }
       )
     );
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {put} /internal/ml/_inference/:taskType/:inferenceId Create Inference Endpoint
-   * @apiName CreateInferenceEndpoint
-   * @apiDescription Create Inference Endpoint
-   */
+
   router.versioned
     .get({
       path: `${ML_INTERNAL_BASE_PATH}/_inference/all`,
       access: 'internal',
-      options: {
-        tags: ['access:ml:canGetTrainedModels'],
+      security: {
+        authz: {
+          requiredPrivileges: ['ml:canGetTrainedModels'],
+        },
       },
+      summary: 'Get all inference endpoints',
+      description: 'Get all inference endpoints',
     })
     .addVersion(
       {

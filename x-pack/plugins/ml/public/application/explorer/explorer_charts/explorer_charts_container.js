@@ -86,25 +86,28 @@ function getChartId(series, randomId) {
 // Wrapper for a single explorer chart
 function ExplorerChartContainer({
   id,
+  isEmbeddable,
   series,
   severity,
   tooManyBuckets,
   wrapLabel,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   timeRange,
   onSelectEntity,
-  recentlyAccessed,
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
+  showFilterIcons,
 }) {
   const [explorerSeriesLink, setExplorerSeriesLink] = useState('');
   const [mapsLink, setMapsLink] = useState('');
 
   const {
     services: {
+      chrome: { recentlyAccessed },
       share,
       application: { navigateToApp },
     },
@@ -250,11 +253,13 @@ function ExplorerChartContainer({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <ExplorerChartLabel
+            isEmbeddable={isEmbeddable}
             detectorLabel={DetectorLabel}
             entityFields={entityFields}
             infoTooltip={{ ...series.infoTooltip, chartType }}
             wrapLabel={wrapLabel}
             onSelectEntity={onSelectEntity}
+            showFilterIcons={showFilterIcons}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -279,7 +284,7 @@ function ExplorerChartContainer({
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButtonEmpty
                   iconSide="right"
-                  iconType="visLine"
+                  iconType="singleMetricViewer"
                   size="xs"
                   href={explorerSeriesLink}
                   onClick={addToRecentlyAccessed}
@@ -331,6 +336,7 @@ function ExplorerChartContainer({
               {(tooltipService) => (
                 <ExplorerChartDistribution
                   id={id}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
@@ -351,6 +357,7 @@ function ExplorerChartContainer({
               {(tooltipService) => (
                 <ExplorerChartSingleMetric
                   id={id}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   tooManyBuckets={tooManyBuckets}
                   seriesConfig={series}
@@ -373,6 +380,7 @@ function ExplorerChartContainer({
 // Flex layout wrapper for all explorer charts
 export const ExplorerChartsContainerUI = ({
   id: uuid,
+  isEmbeddable,
   chartsPerRow,
   seriesToPlot,
   severity,
@@ -380,6 +388,7 @@ export const ExplorerChartsContainerUI = ({
   kibana,
   errorMessages,
   mlLocator,
+  tableData,
   timeBuckets,
   timefilter,
   timeRange,
@@ -387,13 +396,10 @@ export const ExplorerChartsContainerUI = ({
   tooManyBucketsCalloutMsg,
   showSelectedInterval,
   chartsService,
+  showFilterIcons = true,
 }) => {
   const {
-    services: {
-      chrome: { recentlyAccessed },
-      embeddable: embeddablePlugin,
-      maps: mapsPlugin,
-    },
+    services: { embeddable: embeddablePlugin, maps: mapsPlugin },
   } = kibana;
 
   let seriesToPlotFiltered;
@@ -443,19 +449,21 @@ export const ExplorerChartsContainerUI = ({
                 <ExplorerChartContainer
                   key={chartId}
                   id={chartId}
+                  isEmbeddable={isEmbeddable}
                   series={series}
                   severity={severity}
                   tooManyBuckets={tooManyBuckets}
                   wrapLabel={wrapLabel}
                   mlLocator={mlLocator}
+                  tableData={tableData}
                   timeBuckets={timeBuckets}
                   timefilter={timefilter}
                   timeRange={timeRange}
                   onSelectEntity={onSelectEntity}
-                  recentlyAccessed={recentlyAccessed}
                   tooManyBucketsCalloutMsg={tooManyBucketsCalloutMsg}
                   showSelectedInterval={showSelectedInterval}
                   chartsService={chartsService}
+                  showFilterIcons={showFilterIcons}
                 />
               </EuiFlexItem>
             );

@@ -6,15 +6,15 @@
  */
 
 import type { InfraConfig } from '../../common/plugin_config_types';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { PluginConfigProvider, usePluginConfig } from './plugin_config_context';
 
 describe('usePluginConfig()', () => {
   it('throws an error if the context value was not set before using the hook', () => {
-    const { result } = renderHook(() => usePluginConfig());
-
-    expect(result.error).not.toEqual(undefined);
+    expect(() => renderHook(() => usePluginConfig())).toThrow(
+      /PluginConfigContext value was not initialized./
+    );
   });
 
   it('returns the plugin config what was set through the provider', () => {
@@ -33,14 +33,13 @@ describe('usePluginConfig()', () => {
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {
-      wrapper: ({ children }) => {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => {
         return (
           <PluginConfigProvider value={config as InfraConfig}>{children}</PluginConfigProvider>
         );
       },
     });
 
-    expect(result.error).toEqual(undefined);
     expect(result.current).toEqual(config);
   });
 });

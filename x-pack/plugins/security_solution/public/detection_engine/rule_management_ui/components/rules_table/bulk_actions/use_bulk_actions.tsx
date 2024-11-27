@@ -16,7 +16,6 @@ import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constant
 import type { TimeRange } from '../../../../rule_gaps/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DuplicateOptions } from '../../../../../../common/detection_engine/rule_management/constants';
 import type {
   BulkActionEditPayload,
@@ -46,6 +45,7 @@ import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
 import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
+import { ManualRuleRunEventTypes } from '../../../../../common/lib/telemetry';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -89,7 +89,6 @@ export const useBulkActions = ({
     actions: { clearRulesSelection, setIsPreflightInProgress },
   } = rulesTableContext;
 
-  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
   const getBulkItemsPopoverContent = useCallback(
     (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
       const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
@@ -236,7 +235,7 @@ export const useBulkActions = ({
         }
 
         const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
-        startServices.telemetry.reportManualRuleRunOpenModal({
+        startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunOpenModal, {
           type: 'bulk',
         });
         if (modalManualRuleRunConfirmationResult === null) {
@@ -254,7 +253,7 @@ export const useBulkActions = ({
           },
         });
 
-        startServices.telemetry.reportManualRuleRunExecute({
+        startServices.telemetry.reportEvent(ManualRuleRunEventTypes.ManualRuleRunExecute, {
           rangeInMs: modalManualRuleRunConfirmationResult.endDate.diff(
             modalManualRuleRunConfirmationResult.startDate
           ),
@@ -448,18 +447,14 @@ export const useBulkActions = ({
               onClick: handleExportAction,
               icon: undefined,
             },
-            ...(isManualRuleRunEnabled
-              ? [
-                  {
-                    key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
-                    name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
-                    'data-test-subj': 'scheduleRuleRunBulk',
-                    disabled: containsLoading || (!containsEnabled && !isAllSelected),
-                    onClick: handleScheduleRuleRunAction,
-                    icon: undefined,
-                  },
-                ]
-              : []),
+            {
+              key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+              name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+              'data-test-subj': 'scheduleRuleRunBulk',
+              disabled: containsLoading || (!containsEnabled && !isAllSelected),
+              onClick: handleScheduleRuleRunAction,
+              icon: undefined,
+            },
             {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
@@ -600,7 +595,6 @@ export const useBulkActions = ({
       filterOptions,
       completeBulkEditForm,
       startServices,
-      isManualRuleRunEnabled,
     ]
   );
 

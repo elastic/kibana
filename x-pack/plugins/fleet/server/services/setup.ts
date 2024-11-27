@@ -36,12 +36,15 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
+import {
+  ensureFleetEventIngestedPipelineIsInstalled,
+  ensureFleetFinalPipelineIsInstalled,
+} from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
+import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
@@ -53,6 +56,10 @@ import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
 import { ensureSpaceSettings } from './preconfiguration/space_settings';
+import {
+  ensureDeleteUnenrolledAgentsSetting,
+  getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
+} from './preconfiguration/delete_unenrolled_agent_setting';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -195,6 +202,12 @@ async function createSetupSideEffects(
   logger.debug('Setting up Space settings');
   await ensureSpaceSettings(appContextService.getConfig()?.spaceSettings ?? []);
 
+  logger.debug('Setting up delete unenrolled agents setting');
+  await ensureDeleteUnenrolledAgentsSetting(
+    soClient,
+    getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig(appContextService.getConfig())
+  );
+
   logger.debug('Setting up Fleet outputs');
   await Promise.all([
     ensurePreconfiguredOutputs(
@@ -250,9 +263,7 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
-  const packagePolicyUpgradeErrors = (
-    await upgradeManagedPackagePolicies(soClient, esClient)
-  ).filter((result) => (result.errors ?? []).length > 0);
+  await setupUpgradeManagedPackagePolicies(soClient, esClient);
   stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
@@ -294,7 +305,6 @@ async function createSetupSideEffects(
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
-    ...packagePolicyUpgradeErrors,
     ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
   ];
 
@@ -329,6 +339,7 @@ export async function ensureFleetGlobalEsAssets(
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
+    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
   ]);
   const assetResults = globalAssetsRes.flat();
   if (assetResults.some((asset) => asset.isCreated)) {

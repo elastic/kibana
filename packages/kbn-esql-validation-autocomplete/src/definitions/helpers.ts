@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { CommandDefinition, FunctionDefinition, FunctionParameterType } from './types';
@@ -41,7 +42,7 @@ function handleAdditionalArgs(
   criteria: boolean,
   additionalArgs: Array<{
     name: string;
-    type: string | string[];
+    type: FunctionParameterType | FunctionParameterType[];
     optional?: boolean;
     reference?: string;
   }>,
@@ -55,14 +56,13 @@ function handleAdditionalArgs(
 }
 
 export function getCommandSignature(
-  { name, signature, options, examples }: CommandDefinition,
+  { name, signature, options, examples }: CommandDefinition<string>,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
-    declaration: `${name.toUpperCase()} ${printCommandArguments(
-      signature,
-      withTypes
-    )} ${options.map(
+    declaration: `${name.toUpperCase()} ${printCommandArguments(signature, withTypes)} ${(
+      options || []
+    ).map(
       (option) =>
         `${
           option.wrapped ? option.wrapped[0] : ''
@@ -75,7 +75,7 @@ export function getCommandSignature(
 }
 
 function printCommandArguments(
-  { multipleParams, params }: CommandDefinition['signature'],
+  { multipleParams, params }: CommandDefinition<string>['signature'],
   withTypes: boolean
 ): string {
   return `${params.map((arg) => printCommandArgument(arg, withTypes)).join(', `')}${
@@ -86,7 +86,7 @@ function printCommandArguments(
 }
 
 function printCommandArgument(
-  param: CommandDefinition['signature']['params'][number],
+  param: CommandDefinition<string>['signature']['params'][number],
   withTypes: boolean
 ): string {
   if (!withTypes) {

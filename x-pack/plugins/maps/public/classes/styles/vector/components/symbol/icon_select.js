@@ -8,7 +8,6 @@
 import React, { Component, Fragment } from 'react';
 import {
   EuiButton,
-  EuiFormControlLayout,
   EuiFieldText,
   EuiPopover,
   EuiPopoverTitle,
@@ -109,32 +108,25 @@ export class IconSelect extends Component {
   _renderPopoverButton() {
     const { value, svg, label } = this.props.icon;
     return (
-      <EuiFormControlLayout
+      <EuiFieldText
         icon={{ type: 'arrowDown', side: 'right' }}
+        onClick={this._togglePopover}
+        onKeyDown={this._handleKeyboardActivity}
+        value={label || value}
+        compressed
         readOnly
         fullWidth
-        compressed
-        onKeyDown={this._handleKeyboardActivity}
+        prepend={
+          <SymbolIcon
+            key={value}
+            className="mapIconSelectSymbol__inputButton"
+            symbolId={value}
+            svg={svg}
+            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+          />
+        }
         append={this.props.append}
-      >
-        <EuiFieldText
-          onClick={this._togglePopover}
-          onKeyDown={this._handleKeyboardActivity}
-          value={label || value}
-          compressed
-          readOnly
-          fullWidth
-          prepend={
-            <SymbolIcon
-              key={value}
-              className="mapIconSelectSymbol__inputButton"
-              symbolId={value}
-              svg={svg}
-              fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-            />
-          }
-        />
-      </EuiFormControlLayout>
+      />
     );
   }
 

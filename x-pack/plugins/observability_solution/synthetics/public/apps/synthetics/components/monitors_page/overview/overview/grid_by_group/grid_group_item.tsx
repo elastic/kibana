@@ -19,12 +19,13 @@ import {
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
-import { useKey } from 'react-use';
+import useKey from 'react-use/lib/useKey';
+import { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
-import { MonitorOverviewItem } from '../../types';
-import { FlyoutParamProps, OverviewGridItem } from '../overview_grid_item';
+import { OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { MetricItem } from '../metric_item';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -38,7 +39,7 @@ export const GroupGridItem = ({
   setFlyoutConfigCallback,
 }: {
   loaded: boolean;
-  groupMonitors: MonitorOverviewItem[];
+  groupMonitors: OverviewStatusMetaData[];
   groupLabel: string;
   fullScreenGroup: string;
   setFullScreenGroup: (group: string) => void;
@@ -50,7 +51,7 @@ export const GroupGridItem = ({
   const downMonitors = groupMonitors.filter((monitor) => {
     const downConfigs = overviewStatus?.downConfigs;
     if (downConfigs) {
-      return downConfigs[`${monitor.configId}-${monitor.location?.id}`]?.status === 'down';
+      return downConfigs[`${monitor.configId}-${monitor.locationId}`]?.status === 'down';
     }
   });
 
@@ -160,10 +161,10 @@ export const GroupGridItem = ({
         >
           {visibleMonitors.map((monitor) => (
             <EuiFlexItem
-              key={`${monitor.id}-${monitor.location?.id}`}
+              key={`${monitor.configId}-${monitor.locationId}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
-              <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+              <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>

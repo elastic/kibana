@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import {
-  getSAMLResponse,
   getSAMLRequestId,
+  getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { PluginSetupDependencies } from '.';
+
+import type { PluginSetupDependencies } from '.';
 
 export function initRoutes(
   pluginContext: PluginInitializerContext,

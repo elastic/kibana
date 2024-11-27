@@ -254,10 +254,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   const isPaginationVisible =
     (showSwimlane || isLoading) &&
     swimlaneLimit !== undefined &&
-    swimlaneLimit > (perPage ?? 5) &&
-    onPaginationChange &&
-    fromPage &&
-    perPage;
+    swimlaneLimit > 5 &&
+    !!onPaginationChange &&
+    !!fromPage &&
+    !!perPage;
 
   const rowsCount = swimlaneData?.laneLabels?.length ?? 0;
 

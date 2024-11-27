@@ -14,8 +14,8 @@ import { AssetCriticalityAccordion } from '../../../entity_analytics/components/
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { ManagedUser } from '../../../timelines/components/side_panel/new_user_detail/managed_user';
-import type { ManagedUserData } from '../../../timelines/components/side_panel/new_user_detail/types';
+import { ManagedUser } from './components/managed_user';
+import type { ManagedUserData } from './types';
 import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
@@ -23,6 +23,7 @@ import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 
 interface UserPanelContentProps {
   userName: string;
@@ -72,6 +73,7 @@ export const UserPanelContent = ({
         entity={{ name: userName, type: 'user' }}
         onChange={onAssetCriticalityChange}
       />
+      <EntityInsight value={userName} field={'user.name'} isPreviewMode={isPreviewMode} />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}

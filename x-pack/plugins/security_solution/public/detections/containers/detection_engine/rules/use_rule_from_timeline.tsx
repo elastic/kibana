@@ -9,8 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -31,14 +30,14 @@ export interface RuleFromTimeline {
   onOpenTimeline: (timeline: TimelineModel) => void;
 }
 
-type SetRuleQuery = ({
+export type SetRuleQuery = ({
   index,
   queryBar,
   eqlOptions,
 }: {
   index: string[];
   queryBar: FieldValueQueryBar;
-  eqlOptions?: EqlOptionsSelected;
+  eqlOptions?: EqlOptions;
 }) => void;
 
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
@@ -46,10 +45,6 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const { addError } = useAppToasts();
   const { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.timeline
-  );
-
-  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineDisabled'
   );
 
   const isEql = useRef(false);
@@ -200,11 +195,10 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         queryTimelineById({
           timelineId,
           onOpenTimeline,
-          unifiedComponentsInTimelineDisabled,
         });
       }
     },
-    [onOpenTimeline, queryTimelineById, selectedTimeline, unifiedComponentsInTimelineDisabled]
+    [onOpenTimeline, queryTimelineById, selectedTimeline]
   );
 
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);

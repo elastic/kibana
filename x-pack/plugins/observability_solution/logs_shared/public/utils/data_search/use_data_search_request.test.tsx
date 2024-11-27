@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { firstValueFrom, Observable, of, Subject } from 'rxjs';
 import type { ISearchGeneric, IKibanaSearchResponse } from '@kbn/search-types';
@@ -34,7 +34,9 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <KibanaContextProvider>{children}</KibanaContextProvider>
+        ),
       }
     );
 
@@ -79,7 +81,9 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <KibanaContextProvider>{children}</KibanaContextProvider>
+        ),
       }
     );
 
@@ -148,7 +152,9 @@ describe('useDataSearch hook', () => {
           parseResponses: noopParseResponse,
         }),
       {
-        wrapper: ({ children }) => <KibanaContextProvider>{children}</KibanaContextProvider>,
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <KibanaContextProvider>{children}</KibanaContextProvider>
+        ),
       }
     );
 

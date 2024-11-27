@@ -16,13 +16,11 @@ import type { HapiReadableStream } from '../../../../types';
 import {
   ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
   APP_ID,
-  ENABLE_ASSET_CRITICALITY_SETTING,
   API_VERSIONS,
 } from '../../../../../common/constants';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { transformCSVToUpsertRecords } from '../transform_csv_to_upsert_records';
 import { createAssetCriticalityProcessedFileEvent } from '../../../telemetry/event_based/events';
-import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -37,8 +35,12 @@ export const assetCriticalityPublicCSVUploadRoute = (
     .post({
       access: 'public',
       path: ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
+      },
       options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
         body: {
           output: 'stream',
           accepts: 'multipart/form-data',
@@ -82,7 +84,6 @@ export const assetCriticalityPublicCSVUploadRoute = (
         const telemetry = coreStart.analytics;
 
         try {
-          await assertAdvancedSettingsEnabled(await context.core, ENABLE_ASSET_CRITICALITY_SETTING);
           await checkAndInitAssetCriticalityResources(context, logger);
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
           const fileStream = request.body.file as HapiReadableStream;
@@ -101,6 +102,7 @@ export const assetCriticalityPublicCSVUploadRoute = (
             recordsStream,
             retries: errorRetries,
             flushBytes: maxBulkRequestBodySizeBytes,
+            streamIndexStart: 1, // It is the first line number
           });
           const end = new Date();
 

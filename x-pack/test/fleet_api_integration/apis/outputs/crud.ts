@@ -14,7 +14,6 @@ import {
 import { v4 as uuidV4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { enableSecrets, skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -22,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   let pkgVersion: string;
 
@@ -196,19 +196,20 @@ export default function (providerContext: FtrProviderContext) {
 
   const TEST_SPACE_ID = 'testspaceoutputs';
 
-  describe('fleet_outputs_crud', async function () {
+  describe('fleet_outputs_crud', function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
 
     let defaultOutputId: string;
     let ESOutputId: string;
     let fleetServerPolicyId: string;
     let fleetServerPolicyWithCustomOutputId: string;
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async function () {
       await enableSecrets(providerContext);
       await enableOutputSecrets();
@@ -444,7 +445,7 @@ export default function (providerContext: FtrProviderContext) {
             password: 'pass',
             is_default: true,
             is_default_monitoring: true,
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
           })
           .expect(400);
         expect(body.message).to.eql(
@@ -726,7 +727,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'kafka',
             hosts: ['test.fr:2000'],
             auth_type: 'ssl',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             config_yaml: 'shipper: {}',
             shipper: {
               disk_queue_enabled: true,
@@ -759,7 +760,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'kafka',
             hosts: ['test.fr:2000'],
             auth_type: 'ssl',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             config_yaml: 'shipper: {}',
             shipper: {
               disk_queue_enabled: true,
@@ -1106,7 +1107,7 @@ export default function (providerContext: FtrProviderContext) {
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
           })
           .expect(200);
 
@@ -1120,7 +1121,7 @@ export default function (providerContext: FtrProviderContext) {
           auth_type: 'user_pass',
           username: 'user',
           password: 'pass',
-          topics: [{ topic: 'topic1' }],
+          topic: 'topic1',
           broker_timeout: 10,
           required_acks: 1,
           client_id: 'Elastic',
@@ -1146,7 +1147,7 @@ export default function (providerContext: FtrProviderContext) {
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             is_default: true,
           })
           .expect(200);
@@ -1159,7 +1160,7 @@ export default function (providerContext: FtrProviderContext) {
           auth_type: 'user_pass',
           username: 'user',
           password: 'pass',
-          topics: [{ topic: 'topic1' }],
+          topic: 'topic1',
           is_default: true,
           is_default_monitoring: false,
           broker_timeout: 10,
@@ -1352,6 +1353,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      // eslint-disable-next-line mocha/no-identical-title
       it('should discard the shipper values when shipper is disabled', async function () {
         await supertest
           .post(`/api/fleet/outputs`)
@@ -1386,7 +1388,7 @@ export default function (providerContext: FtrProviderContext) {
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             config_yaml: 'shipper: {}',
             shipper: {
               disk_queue_enabled: true,
@@ -1446,7 +1448,7 @@ export default function (providerContext: FtrProviderContext) {
             auth_type: 'user_pass',
             username: 'user',
             password: 'pass',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             config_yaml: 'shipper: {}',
             shipper: {
               disk_queue_enabled: true,
@@ -1467,7 +1469,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'kafka',
             hosts: ['test.fr:2000'],
             auth_type: 'ssl',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             config_yaml: 'shipper: {}',
             shipper: {
               disk_queue_enabled: true,
@@ -1499,7 +1501,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'kafka',
             hosts: ['test.fr:2000'],
             auth_type: 'ssl',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             config_yaml: 'shipper: {}',
             shipper: {
               disk_queue_enabled: true,
@@ -1534,7 +1536,7 @@ export default function (providerContext: FtrProviderContext) {
             hosts: ['test.fr:2000'],
             auth_type: 'user_pass',
             username: 'user',
-            topics: [{ topic: 'topic1' }],
+            topic: 'topic1',
             config_yaml: 'shipper: {}',
             shipper: {
               disk_queue_enabled: true,
@@ -1701,6 +1703,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(400);
         });
 
+        // eslint-disable-next-line mocha/no-identical-title
         it('should return a 400 when deleting a default output ', async function () {
           await supertest
             .delete(`/api/fleet/outputs/${defaultMonitoringOutputId}`)
@@ -1808,7 +1811,7 @@ export default function (providerContext: FtrProviderContext) {
           username: 'user',
           password: 'pass',
           is_default: true,
-          topics: [{ topic: 'topic1' }],
+          topic: 'topic1',
         };
 
         before(async () => {
@@ -1855,7 +1858,7 @@ export default function (providerContext: FtrProviderContext) {
               type: 'kafka',
               hosts: ['test.fr:2000'],
               auth_type: 'ssl',
-              topics: [{ topic: 'topic1' }],
+              topic: 'topic1',
               config_yaml: 'shipper: {}',
               shipper: {
                 disk_queue_enabled: true,
@@ -1888,6 +1891,64 @@ export default function (providerContext: FtrProviderContext) {
           } catch (e) {
             // not found
           }
+        });
+
+        it('should update kafka output to logstash output', async function () {
+          // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
+          await clearAgents();
+          await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Kafka Output With Secret',
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'ssl',
+              topic: 'topic1',
+              config_yaml: '',
+              compression: 'none',
+              client_id: 'Elastic',
+              partition: 'random',
+              version: '1.0.0',
+              required_acks: 1,
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: {
+                ssl: {
+                  key: 'KEY',
+                },
+              },
+            })
+            .expect(200);
+
+          const outputWithSecretsId = res.body.item.id;
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${outputWithSecretsId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'kafka_to_logstash',
+              type: 'logstash',
+              hosts: ['logstash'],
+              is_default: false,
+              is_default_monitoring: false,
+              config_yaml: '',
+              ssl: { certificate: 'cert', certificate_authorities: ['ca'] },
+              secrets: { ssl: { key: 'key' } },
+              proxy_id: null,
+            })
+            .expect(200);
+
+          expect(updateRes.body.item.type).to.eql('logstash');
+          expect(updateRes.body.item.topic).to.eql(null);
+
+          await supertest
+            .delete(`/api/fleet/outputs/${outputWithSecretsId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
         });
       });
     });

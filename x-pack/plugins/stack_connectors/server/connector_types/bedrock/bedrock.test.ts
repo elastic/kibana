@@ -25,10 +25,12 @@ import {
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { AxiosError } from 'axios';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 // @ts-ignore
 const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
+const mockSend = jest.fn();
 describe('BedrockConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
@@ -37,6 +39,7 @@ describe('BedrockConnector', () => {
     completion: mockResponseString,
     stop_reason: 'stop_sequence',
   };
+  const logger = loggingSystemMock.createLogger();
 
   const claude3Response = {
     id: 'compl_01E7D3vTBHdNdKWCe6zALmLH',
@@ -57,11 +60,17 @@ describe('BedrockConnector', () => {
     headers: {},
     data: claude3Response,
   };
+  let connectorUsageCollector: ConnectorUsageCollector;
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockRequest = jest.fn().mockResolvedValue(mockResponse);
     mockError = jest.fn().mockImplementation(() => {
       throw new Error('API Error');
+    });
+    connectorUsageCollector = new ConnectorUsageCollector({
+      logger,
+      connectorId: 'test-connector-id',
     });
   });
 
@@ -73,7 +82,7 @@ describe('BedrockConnector', () => {
       defaultModel: DEFAULT_BEDROCK_MODEL,
     },
     secrets: { accessKey: '123', secret: 'secret' },
-    logger: loggingSystemMock.createLogger(),
+    logger,
     services: actionsMock.createServices(),
   });
 
@@ -81,11 +90,19 @@ describe('BedrockConnector', () => {
     beforeEach(() => {
       // @ts-ignore
       connector.request = mockRequest;
+      // @ts-ignore
+      connector.bedrockClient.send = mockSend;
     });
 
     describe('runApi', () => {
       it('the aws signature has non-streaming headers', async () => {
-        await connector.runApi({ body: DEFAULT_BODY });
+        await connector.runApi(
+          { body: DEFAULT_BODY },
+          new ConnectorUsageCollector({
+            logger,
+            connectorId: 'test-connector-id',
+          })
+        );
         expect(mockSigner).toHaveBeenCalledWith(
           {
             body: DEFAULT_BODY,
@@ -101,16 +118,19 @@ describe('BedrockConnector', () => {
         );
       });
       it('the Bedrock API call is successful with Claude 3 parameters; returns the response formatted for Claude 2 along with usage object', async () => {
-        const response = await connector.runApi({ body: DEFAULT_BODY });
+        const response = await connector.runApi({ body: DEFAULT_BODY }, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          timeout: DEFAULT_TIMEOUT_MS,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
-          method: 'post',
-          responseSchema: RunApiLatestResponseSchema,
-          data: DEFAULT_BODY,
-        });
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: DEFAULT_BODY,
+          },
+          connectorUsageCollector
+        );
         expect(response).toEqual({
           ...claude2Response,
           usage: claude3Response.usage,
@@ -128,16 +148,19 @@ describe('BedrockConnector', () => {
         });
         // @ts-ignore
         connector.request = mockRequest;
-        const response = await connector.runApi({ body: v2Body });
+        const response = await connector.runApi({ body: v2Body }, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          timeout: DEFAULT_TIMEOUT_MS,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
-          method: 'post',
-          responseSchema: RunActionResponseSchema,
-          data: v2Body,
-        });
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            method: 'post',
+            responseSchema: RunActionResponseSchema,
+            data: v2Body,
+          },
+          connectorUsageCollector
+        );
         expect(response).toEqual(claude2Response);
       });
 
@@ -145,7 +168,15 @@ describe('BedrockConnector', () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(connector.runApi({ body: DEFAULT_BODY })).rejects.toThrow('API Error');
+        await expect(
+          connector.runApi(
+            { body: DEFAULT_BODY },
+            new ConnectorUsageCollector({
+              logger,
+              connectorId: 'test-connector-id',
+            })
+          )
+        ).rejects.toThrow('API Error');
       });
     });
 
@@ -170,7 +201,7 @@ describe('BedrockConnector', () => {
       };
 
       it('the aws signature has streaming headers', async () => {
-        await connector.invokeStream(aiAssistantBody);
+        await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
 
         expect(mockSigner).toHaveBeenCalledWith(
           {
@@ -189,170 +220,197 @@ describe('BedrockConnector', () => {
       });
 
       it('the API call is successful with correct request parameters', async () => {
-        await connector.invokeStream(aiAssistantBody);
+        await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
-          method: 'post',
-          responseSchema: StreamingResponseSchema,
-          responseType: 'stream',
-          data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
-        });
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            responseType: 'stream',
+            data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
+          },
+          connectorUsageCollector
+        );
       });
 
       it('signal and timeout is properly passed to streamApi', async () => {
         const signal = jest.fn();
         const timeout = 180000;
-        await connector.invokeStream({ ...aiAssistantBody, timeout, signal });
+        await connector.invokeStream(
+          { ...aiAssistantBody, timeout, signal },
+          connectorUsageCollector
+        );
 
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
-          method: 'post',
-          responseSchema: StreamingResponseSchema,
-          responseType: 'stream',
-          data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
-          timeout,
-          signal,
-        });
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            responseType: 'stream',
+            data: JSON.stringify({ ...JSON.parse(DEFAULT_BODY), temperature: 0 }),
+            timeout,
+            signal,
+          },
+          connectorUsageCollector
+        );
       });
 
       it('ensureMessageFormat - formats messages from user, assistant, and system', async () => {
-        await connector.invokeStream({
-          messages: [
-            {
-              role: 'system',
-              content: 'Be a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
-              role: 'assistant',
-              content: 'Hi, I am a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'What is 2+2?',
-            },
-          ],
-        });
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          responseType: 'stream',
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
-          method: 'post',
-          responseSchema: StreamingResponseSchema,
-          data: JSON.stringify({
-            anthropic_version: 'bedrock-2023-05-31',
-            system: 'Be a good chatbot',
+        await connector.invokeStream(
+          {
             messages: [
-              { content: 'Hello world', role: 'user' },
-              { content: 'Hi, I am a good chatbot', role: 'assistant' },
-              { content: 'What is 2+2?', role: 'user' },
+              {
+                role: 'system',
+                content: 'Be a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'Hello world',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
             ],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-        });
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            responseType: 'stream',
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            data: JSON.stringify({
+              anthropic_version: 'bedrock-2023-05-31',
+              system: 'Be a good chatbot',
+              messages: [
+                { content: 'Hello world', role: 'user' },
+                { content: 'Hi, I am a good chatbot', role: 'assistant' },
+                { content: 'What is 2+2?', role: 'user' },
+              ],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+          },
+          connectorUsageCollector
+        );
       });
 
       it('ensureMessageFormat - formats messages from when double user/assistant occurs', async () => {
-        await connector.invokeStream({
-          messages: [
-            {
-              role: 'system',
-              content: 'Be a good chatbot',
-            },
-            {
-              role: 'assistant',
-              content: 'Hi, I am a good chatbot',
-            },
-            {
-              role: 'assistant',
-              content: 'But I can be naughty',
-            },
-            {
-              role: 'user',
-              content: 'What is 2+2?',
-            },
-            {
-              role: 'user',
-              content: 'I can be naughty too',
-            },
-            {
-              role: 'system',
-              content: 'This is extra tricky',
-            },
-          ],
-        });
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          responseType: 'stream',
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
-          method: 'post',
-          responseSchema: StreamingResponseSchema,
-          data: JSON.stringify({
-            anthropic_version: 'bedrock-2023-05-31',
-            system: 'Be a good chatbot\nThis is extra tricky',
+        await connector.invokeStream(
+          {
             messages: [
-              { content: 'Hi, I am a good chatbot\nBut I can be naughty', role: 'assistant' },
-              { content: 'What is 2+2?\nI can be naughty too', role: 'user' },
+              {
+                role: 'system',
+                content: 'Be a good chatbot',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'assistant',
+                content: 'But I can be naughty',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
+              {
+                role: 'user',
+                content: 'I can be naughty too',
+              },
+              {
+                role: 'system',
+                content: 'This is extra tricky',
+              },
             ],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-        });
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            responseType: 'stream',
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            data: JSON.stringify({
+              anthropic_version: 'bedrock-2023-05-31',
+              system: 'Be a good chatbot\nThis is extra tricky',
+              messages: [
+                { content: 'Hi, I am a good chatbot\nBut I can be naughty', role: 'assistant' },
+                { content: 'What is 2+2?\nI can be naughty too', role: 'user' },
+              ],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+          },
+          connectorUsageCollector
+        );
       });
 
       it('formats the system message as a user message for claude<2.1', async () => {
         const modelOverride = 'anthropic.claude-v2';
 
-        await connector.invokeStream({
-          messages: [
-            {
-              role: 'system',
-              content: 'Be a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
-              role: 'assistant',
-              content: 'Hi, I am a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'What is 2+2?',
-            },
-          ],
-          model: modelOverride,
-        });
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          responseType: 'stream',
-          url: `${DEFAULT_BEDROCK_URL}/model/${modelOverride}/invoke-with-response-stream`,
-          method: 'post',
-          responseSchema: StreamingResponseSchema,
-          data: JSON.stringify({
-            anthropic_version: 'bedrock-2023-05-31',
-            system: 'Be a good chatbot',
+        await connector.invokeStream(
+          {
             messages: [
-              { content: 'Hello world', role: 'user' },
-              { content: 'Hi, I am a good chatbot', role: 'assistant' },
-              { content: 'What is 2+2?', role: 'user' },
+              {
+                role: 'system',
+                content: 'Be a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'Hello world',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
             ],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-        });
+            model: modelOverride,
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            responseType: 'stream',
+            url: `${DEFAULT_BEDROCK_URL}/model/${modelOverride}/invoke-with-response-stream`,
+            method: 'post',
+            responseSchema: StreamingResponseSchema,
+            data: JSON.stringify({
+              anthropic_version: 'bedrock-2023-05-31',
+              system: 'Be a good chatbot',
+              messages: [
+                { content: 'Hello world', role: 'user' },
+                { content: 'Hi, I am a good chatbot', role: 'assistant' },
+                { content: 'What is 2+2?', role: 'user' },
+              ],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+          },
+          connectorUsageCollector
+        );
       });
 
       it('responds with a readable stream', async () => {
-        const response = await connector.invokeStream(aiAssistantBody);
+        const response = await connector.invokeStream(aiAssistantBody, connectorUsageCollector);
         expect(response instanceof PassThrough).toEqual(true);
       });
 
@@ -360,7 +418,9 @@ describe('BedrockConnector', () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(connector.invokeStream(aiAssistantBody)).rejects.toThrow('API Error');
+        await expect(
+          connector.invokeStream(aiAssistantBody, connectorUsageCollector)
+        ).rejects.toThrow('API Error');
       });
     });
 
@@ -376,177 +436,254 @@ describe('BedrockConnector', () => {
       };
 
       it('the API call is successful with correct parameters', async () => {
-        const response = await connector.invokeAI(aiAssistantBody);
+        const response = await connector.invokeAI(aiAssistantBody, connectorUsageCollector);
         expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          timeout: DEFAULT_TIMEOUT_MS,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
-          method: 'post',
-          responseSchema: RunApiLatestResponseSchema,
-          data: JSON.stringify({
-            ...JSON.parse(DEFAULT_BODY),
-            messages: [{ content: 'Hello world', role: 'user' }],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-        });
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              ...JSON.parse(DEFAULT_BODY),
+              messages: [{ content: 'Hello world', role: 'user' }],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+          },
+          connectorUsageCollector
+        );
         expect(response.message).toEqual(mockResponseString);
       });
 
       it('formats messages from user, assistant, and system', async () => {
-        const response = await connector.invokeAI({
-          messages: [
-            {
-              role: 'system',
-              content: 'Be a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
-              role: 'assistant',
-              content: 'Hi, I am a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'What is 2+2?',
-            },
-          ],
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          timeout: DEFAULT_TIMEOUT_MS,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
-          method: 'post',
-          responseSchema: RunApiLatestResponseSchema,
-          data: JSON.stringify({
-            anthropic_version: 'bedrock-2023-05-31',
-            system: 'Be a good chatbot',
+        const response = await connector.invokeAI(
+          {
             messages: [
-              { content: 'Hello world', role: 'user' },
-              { content: 'Hi, I am a good chatbot', role: 'assistant' },
-              { content: 'What is 2+2?', role: 'user' },
+              {
+                role: 'system',
+                content: 'Be a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'Hello world',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
             ],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-        });
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              anthropic_version: 'bedrock-2023-05-31',
+              system: 'Be a good chatbot',
+              messages: [
+                { content: 'Hello world', role: 'user' },
+                { content: 'Hi, I am a good chatbot', role: 'assistant' },
+                { content: 'What is 2+2?', role: 'user' },
+              ],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+          },
+          connectorUsageCollector
+        );
         expect(response.message).toEqual(mockResponseString);
       });
 
       it('adds system message from argument', async () => {
-        const response = await connector.invokeAI({
-          messages: [
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
-              role: 'assistant',
-              content: 'Hi, I am a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'What is 2+2?',
-            },
-          ],
-          system: 'This is a system message',
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          timeout: DEFAULT_TIMEOUT_MS,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
-          method: 'post',
-          responseSchema: RunApiLatestResponseSchema,
-          data: JSON.stringify({
-            anthropic_version: 'bedrock-2023-05-31',
-            system: 'This is a system message',
+        const response = await connector.invokeAI(
+          {
             messages: [
-              { content: 'Hello world', role: 'user' },
-              { content: 'Hi, I am a good chatbot', role: 'assistant' },
-              { content: 'What is 2+2?', role: 'user' },
+              {
+                role: 'user',
+                content: 'Hello world',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
             ],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-        });
+            system: 'This is a system message',
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              anthropic_version: 'bedrock-2023-05-31',
+              system: 'This is a system message',
+              messages: [
+                { content: 'Hello world', role: 'user' },
+                { content: 'Hi, I am a good chatbot', role: 'assistant' },
+                { content: 'What is 2+2?', role: 'user' },
+              ],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+          },
+          connectorUsageCollector
+        );
         expect(response.message).toEqual(mockResponseString);
       });
 
       it('combines argument system message with conversation system message', async () => {
-        const response = await connector.invokeAI({
-          messages: [
-            {
-              role: 'system',
-              content: 'Be a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
-              role: 'assistant',
-              content: 'Hi, I am a good chatbot',
-            },
-            {
-              role: 'user',
-              content: 'What is 2+2?',
-            },
-          ],
-          system: 'This is a system message',
-        });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          timeout: DEFAULT_TIMEOUT_MS,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
-          method: 'post',
-          responseSchema: RunApiLatestResponseSchema,
-          data: JSON.stringify({
-            anthropic_version: 'bedrock-2023-05-31',
-            system: 'This is a system message\nBe a good chatbot',
+        const response = await connector.invokeAI(
+          {
             messages: [
-              { content: 'Hello world', role: 'user' },
-              { content: 'Hi, I am a good chatbot', role: 'assistant' },
-              { content: 'What is 2+2?', role: 'user' },
+              {
+                role: 'system',
+                content: 'Be a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'Hello world',
+              },
+              {
+                role: 'assistant',
+                content: 'Hi, I am a good chatbot',
+              },
+              {
+                role: 'user',
+                content: 'What is 2+2?',
+              },
             ],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-        });
+            system: 'This is a system message',
+          },
+          connectorUsageCollector
+        );
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            timeout: DEFAULT_TIMEOUT_MS,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              anthropic_version: 'bedrock-2023-05-31',
+              system: 'This is a system message\nBe a good chatbot',
+              messages: [
+                { content: 'Hello world', role: 'user' },
+                { content: 'Hi, I am a good chatbot', role: 'assistant' },
+                { content: 'What is 2+2?', role: 'user' },
+              ],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+          },
+          connectorUsageCollector
+        );
         expect(response.message).toEqual(mockResponseString);
       });
       it('signal and timeout is properly passed to runApi', async () => {
         const signal = jest.fn();
         const timeout = 180000;
-        await connector.invokeAI({ ...aiAssistantBody, timeout, signal });
+        await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
 
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
-          method: 'post',
-          responseSchema: RunApiLatestResponseSchema,
-          data: JSON.stringify({
-            ...JSON.parse(DEFAULT_BODY),
-            messages: [{ content: 'Hello world', role: 'user' }],
-            max_tokens: DEFAULT_TOKEN_LIMIT,
-            temperature: 0,
-          }),
-          timeout,
-          signal,
-        });
+        expect(mockRequest).toHaveBeenCalledWith(
+          {
+            signed: true,
+            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            method: 'post',
+            responseSchema: RunApiLatestResponseSchema,
+            data: JSON.stringify({
+              ...JSON.parse(DEFAULT_BODY),
+              messages: [{ content: 'Hello world', role: 'user' }],
+              max_tokens: DEFAULT_TOKEN_LIMIT,
+              temperature: 0,
+            }),
+            timeout,
+            signal,
+          },
+          connectorUsageCollector
+        );
       });
       it('errors during API calls are properly handled', async () => {
         // @ts-ignore
         connector.request = mockError;
 
-        await expect(connector.invokeAI(aiAssistantBody)).rejects.toThrow('API Error');
+        await expect(connector.invokeAI(aiAssistantBody, connectorUsageCollector)).rejects.toThrow(
+          'API Error'
+        );
       });
     });
+
+    describe('bedrockClientSend', () => {
+      it('should send the command and return the response', async () => {
+        const command = { input: 'test' };
+        const response = { result: 'success' };
+        mockSend.mockResolvedValue(response);
+
+        const result = await connector.bedrockClientSend(
+          { signal: undefined, command },
+          connectorUsageCollector
+        );
+
+        expect(mockSend).toHaveBeenCalledWith(command, { abortSignal: undefined });
+        expect(result).toEqual(response);
+      });
+
+      it('should handle and split streaming response', async () => {
+        const command = { input: 'test' };
+        const stream = new PassThrough();
+        const response = { stream };
+        mockSend.mockResolvedValue(response);
+
+        const result = (await connector.bedrockClientSend(
+          { signal: undefined, command },
+          connectorUsageCollector
+        )) as unknown as {
+          stream?: unknown;
+          tokenStream?: unknown;
+        };
+
+        expect(mockSend).toHaveBeenCalledWith(command, { abortSignal: undefined });
+        expect(result.stream).toBeDefined();
+        expect(result.tokenStream).toBeDefined();
+      });
+
+      it('should handle non-streaming response', async () => {
+        const command = { input: 'test' };
+        const usage = { stats: 0 };
+        const response = { usage };
+        mockSend.mockResolvedValue(response);
+
+        const result = (await connector.bedrockClientSend(
+          { signal: undefined, command },
+          connectorUsageCollector
+        )) as unknown as {
+          usage?: unknown;
+        };
+        expect(result.usage).toBeDefined();
+      });
+    });
+
     describe('getResponseErrorMessage', () => {
       it('returns an unknown error message', () => {
         // @ts-expect-error expects an axios error as the parameter

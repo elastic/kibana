@@ -30,6 +30,7 @@ import type {
 } from '../../../common/types/timeline';
 import type { DataProviderType, RowRendererId } from '../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
+import type { PrimitiveOrArrayOfPrimitives } from '../../common/lib/kuery';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/timeline');
 
@@ -115,7 +116,7 @@ export const dataProviderEdited = actionCreator<{
   id: string;
   operator: QueryOperator;
   providerId: string;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
 }>('DATA_PROVIDER_EDITED');
 
 export const updateDataProviderType = actionCreator<{
@@ -187,13 +188,8 @@ export const toggleModalSaveTimeline = actionCreator<{
 export const updateEqlOptions = actionCreator<{
   id: string;
   field: FieldsEqlOptions;
-  value: string | undefined;
+  value: string | number | undefined;
 }>('UPDATE_EQL_OPTIONS_TIMELINE');
-
-export const updateIsLoading = actionCreator<{
-  id: string;
-  isLoading: boolean;
-}>('UPDATE_LOADING');
 
 export const setEventsLoading = actionCreator<{
   id: string;
@@ -291,7 +287,7 @@ export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_C
 export const updateColumnWidth = actionCreator<{
   columnId: string;
   id: string;
-  width: number;
+  width?: number;
 }>('UPDATE_COLUMN_WIDTH');
 
 export const updateRowHeight = actionCreator<{

@@ -16,12 +16,12 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiComboBox,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { ToolbarDivider } from '../toolbar_divider';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
@@ -230,7 +230,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
   onNestedLegendChange = noop,
   legendStats = [],
   onLegendStatsChange = noop,
-  groupPosition = 'right',
+  groupPosition = 'none',
   maxLines,
   onMaxLinesChange = noop,
   shouldTruncate,
@@ -315,7 +315,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
 
       {showsStatisticsSetting && (
         <>
-          <EuiHorizontalRule margin="s" />
+          <ToolbarDivider />
           <EuiFormRow
             display="columnCompressed"
             label={i18n.translate('xpack.lens.shared.legendStatistics', {
@@ -360,7 +360,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
       )}
       {showsShowValueSetting && (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
             defaultMessage: 'Show value',
           })}
@@ -415,7 +415,7 @@ export function LegendSettingsPopover<LegendStats extends LegendValue = XYLegend
 
       {isLegendNotHidden && renderNestedLegendSwitch && (
         <EuiFormRow
-          display="columnCompressedSwitch"
+          display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.nestedLegendLabel', {
             defaultMessage: 'Nested',
           })}

@@ -269,7 +269,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       <>
         {removeModal}
         <EuiPopover
-          id={this.props.layer.getId()}
           className="mapLayTocActions"
           button={
             <TOCEntryButton

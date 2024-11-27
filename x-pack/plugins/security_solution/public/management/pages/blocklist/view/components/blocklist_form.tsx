@@ -25,11 +25,15 @@ import {
 } from '@elastic/eui';
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
-import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
+import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
+import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { OS_TITLES } from '../../../../common/translations';
-import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
+import type {
+  ArtifactFormComponentOnChangeCallbackProps,
+  ArtifactFormComponentProps,
+} from '../../../../components/artifact_list_page';
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
@@ -46,6 +50,7 @@ import {
   VALUE_LABEL,
   ERRORS,
   VALUE_LABEL_HELPER,
+  SINGLE_VALUE_LABEL_HELPER,
 } from '../../translations';
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -60,12 +65,21 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
 
-export interface BlocklistEntry {
+interface BlocklistEntryMatch {
   field: BlocklistConditionEntryField;
-  operator: 'included';
-  type: 'match_any';
+  operator: ListOperatorEnum.INCLUDED;
+  type: ListOperatorTypeEnum.MATCH;
+  value: string;
+}
+
+interface BlocklistEntryMatchAny {
+  field: BlocklistConditionEntryField;
+  operator: ListOperatorEnum.INCLUDED;
+  type: ListOperatorTypeEnum.MATCH_ANY;
   value: string[];
 }
+
+export type BlocklistEntry = BlocklistEntryMatch | BlocklistEntryMatchAny;
 
 type ERROR_KEYS = keyof typeof ERRORS;
 
@@ -100,10 +114,8 @@ function isValid(itemValidation: ItemValidation): boolean {
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
   ({ item, policies, policiesIsLoading, onChange, mode }) => {
-    const [visited, setVisited] = useState<{ name: boolean; value: boolean }>({
-      name: false,
-      value: false,
-    });
+    const [nameVisited, setNameVisited] = useState(false);
+    const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
@@ -142,13 +154,18 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       if (!item.entries.length) {
         return {
           field: 'file.hash.*',
-          operator: 'included',
-          type: 'match_any',
+          operator: ListOperatorEnum.INCLUDED,
+          type: ListOperatorTypeEnum.MATCH_ANY,
           value: [],
         };
       }
       return item.entries[0] as BlocklistEntry;
     }, [item.entries]);
+
+    const windowsSignatureField = 'file.Ext.code_signature';
+    const isWindowsSignatureEntry = blocklistEntry.field === windowsSignatureField;
+    const displaySingleValueInput =
+      isWindowsSignatureEntry && blocklistEntry.type === ListOperatorTypeEnum.MATCH;
 
     const selectedOs = useMemo((): OperatingSystem => {
       if (!item?.os_types?.length) {
@@ -159,10 +176,19 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     }, [item?.os_types]);
 
     const selectedValues = useMemo(() => {
-      return blocklistEntry.value.map((label) => ({
-        label,
-        'data-test-subj': getTestId(`values-input-${label}`),
-      }));
+      if (Array.isArray(blocklistEntry.value)) {
+        return blocklistEntry.value.map((label) => ({
+          label,
+          'data-test-subj': getTestId(`values-input-${label}`),
+        }));
+      } else {
+        return [
+          {
+            label: blocklistEntry.value,
+            'data-test-subj': getTestId(`values-input-${blocklistEntry.value}`),
+          },
+        ];
+      }
     }, [blocklistEntry.value, getTestId]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
@@ -202,79 +228,114 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
       if (selectedOs === OperatingSystem.WINDOWS) {
         selectableFields.push({
-          value: 'file.Ext.code_signature',
-          inputDisplay: CONDITION_FIELD_TITLE['file.Ext.code_signature'],
-          dropdownDisplay: getDropdownDisplay('file.Ext.code_signature'),
-          'data-test-subj': getTestId('file.Ext.code_signature'),
+          value: windowsSignatureField,
+          inputDisplay: CONDITION_FIELD_TITLE[windowsSignatureField],
+          dropdownDisplay: getDropdownDisplay(windowsSignatureField),
+          'data-test-subj': getTestId(windowsSignatureField),
         });
       }
 
       return selectableFields;
     }, [selectedOs, getTestId]);
 
+    const operatorOptions: Array<EuiSuperSelectOption<ListOperatorTypeEnum>> = useMemo(() => {
+      return [
+        {
+          value: isOneOfOperator.type,
+          inputDisplay: isOneOfOperator.message,
+          dropdownDisplay: isOneOfOperator.message,
+        },
+        {
+          value: isOperator.type,
+          inputDisplay: isOperator.message,
+          dropdownDisplay: isOperator.message,
+        },
+      ];
+    }, []);
+
     const valueLabel = useMemo(() => {
       return (
         <div>
-          <EuiToolTip content={VALUE_LABEL_HELPER}>
+          <EuiToolTip
+            content={displaySingleValueInput ? SINGLE_VALUE_LABEL_HELPER : VALUE_LABEL_HELPER}
+          >
             <>
               {VALUE_LABEL} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
             </>
           </EuiToolTip>
         </div>
       );
-    }, []);
+    }, [displaySingleValueInput]);
 
-    const validateValues = useCallback((nextItem: ArtifactFormComponentProps['item']) => {
-      const os = ((nextItem.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
-      const {
-        field = 'file.hash.*',
-        type = 'match_any',
-        value: values = [],
-      } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
+    const validateValues = useCallback(
+      (nextItem: ArtifactFormComponentProps['item'], cleanState = false) => {
+        const os = ((nextItem.os_types ?? [])[0] as OperatingSystem) ?? OperatingSystem.WINDOWS;
+        const {
+          field = 'file.hash.*',
+          type = ListOperatorTypeEnum.MATCH_ANY,
+          value = [],
+        } = (nextItem.entries[0] ?? {}) as BlocklistEntry;
 
-      const newValueWarnings: ItemValidationNodes = {};
-      const newNameErrors: ItemValidationNodes = {};
-      const newValueErrors: ItemValidationNodes = {};
+        // value can be a string when isOperator is selected
+        const values = Array.isArray(value) ? value : [value].filter(Boolean);
 
-      // error if name empty
-      if (!nextItem.name.trim()) {
-        newNameErrors.NAME_REQUIRED = createValidationMessage(ERRORS.NAME_REQUIRED);
-      }
+        const newValueWarnings: ItemValidationNodes = cleanState
+          ? {}
+          : { ...warningsRef.current.value };
+        const newNameErrors: ItemValidationNodes = cleanState ? {} : { ...errorsRef.current.name };
+        const newValueErrors: ItemValidationNodes = cleanState
+          ? {}
+          : { ...errorsRef.current.value };
 
-      // error if no values
-      if (!values.length) {
-        newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
-      }
+        // error if name empty
+        if (!nextItem.name.trim()) {
+          newNameErrors.NAME_REQUIRED = createValidationMessage(ERRORS.NAME_REQUIRED);
+        } else {
+          delete newNameErrors.NAME_REQUIRED;
+        }
 
-      // error if invalid hash
-      if (field === 'file.hash.*' && values.some((value) => !isValidHash(value))) {
-        newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
-      }
+        // error if no values
+        if (!values.length) {
+          newValueErrors.VALUE_REQUIRED = createValidationMessage(ERRORS.VALUE_REQUIRED);
+        } else {
+          delete newValueErrors.VALUE_REQUIRED;
+        }
 
-      const isInvalidPath = values.some((value) => !isPathValid({ os, field, type, value }));
+        // error if invalid hash
+        if (field === 'file.hash.*' && values.some((v) => !isValidHash(v))) {
+          newValueErrors.INVALID_HASH = createValidationMessage(ERRORS.INVALID_HASH);
+        } else {
+          delete newValueErrors.INVALID_HASH;
+        }
 
-      // warn if invalid path
-      if (field !== 'file.hash.*' && isInvalidPath) {
-        newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
-      }
+        const isInvalidPath = values.some((v) => !isPathValid({ os, field, type, value: v }));
+        // warn if invalid path
+        if (field !== 'file.hash.*' && isInvalidPath) {
+          newValueWarnings.INVALID_PATH = createValidationMessage(ERRORS.INVALID_PATH);
+        } else {
+          delete newValueWarnings.INVALID_PATH;
+        }
+        // warn if duplicates
+        if (values.length !== uniq(values).length) {
+          newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
+        } else {
+          delete newValueWarnings.DUPLICATE_VALUES;
+        }
 
-      // warn if duplicates
-      if (values.length !== uniq(values).length) {
-        newValueWarnings.DUPLICATE_VALUES = createValidationMessage(ERRORS.DUPLICATE_VALUES);
-      }
-
-      warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
-      errorsRef.current = { name: newNameErrors, value: newValueErrors };
-    }, []);
+        warningsRef.current = { ...warningsRef.current, value: newValueWarnings };
+        errorsRef.current = { name: newNameErrors, value: newValueErrors };
+      },
+      []
+    );
 
     const handleOnNameBlur = useCallback(() => {
       validateValues(item);
-      setVisited((prevVisited) => ({ ...prevVisited, name: true }));
+      setNameVisited(true);
     }, [item, validateValues]);
 
     const handleOnValueBlur = useCallback(() => {
       validateValues(item);
-      setVisited((prevVisited) => ({ ...prevVisited, value: true }));
+      setValueVisited({ value: true });
     }, [item, validateValues]);
 
     const handleOnNameChange = useCallback(
@@ -320,12 +381,16 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             {
               ...blocklistEntry,
               field:
-                os !== OperatingSystem.WINDOWS && blocklistEntry.field === 'file.Ext.code_signature'
+                os !== OperatingSystem.WINDOWS && isWindowsSignatureEntry
                   ? 'file.hash.*'
                   : blocklistEntry.field,
+              type: ListOperatorTypeEnum.MATCH_ANY,
+              ...(typeof blocklistEntry.value === 'string'
+                ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
+                : {}),
             },
           ],
-        };
+        } as ArtifactFormComponentProps['item'];
 
         validateValues(nextItem);
         onChange({
@@ -334,15 +399,24 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         });
         setHasFormChanged(true);
       },
-      [validateValues, blocklistEntry, onChange, item]
+      [item, blocklistEntry, isWindowsSignatureEntry, validateValues, onChange]
     );
 
     const handleOnFieldChange = useCallback(
       (field: BlocklistConditionEntryField) => {
         const nextItem = {
           ...item,
-          entries: [{ ...blocklistEntry, field }],
-        };
+          entries: [
+            {
+              ...blocklistEntry,
+              field,
+              type: ListOperatorTypeEnum.MATCH_ANY,
+              ...(typeof blocklistEntry.value === 'string'
+                ? { value: blocklistEntry.value.length ? blocklistEntry.value.split(',') : [] }
+                : {}),
+            },
+          ],
+        } as ArtifactFormComponentProps['item'];
 
         validateValues(nextItem);
         onChange({
@@ -352,6 +426,41 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         setHasFormChanged(true);
       },
       [validateValues, onChange, item, blocklistEntry]
+    );
+
+    const generateBlocklistEntryValue = useCallback(
+      (value: string | string[], newOperator: ListOperatorTypeEnum) => {
+        if (newOperator === ListOperatorTypeEnum.MATCH) {
+          return { value: Array.isArray(value) ? value.join(',') : value };
+        } else {
+          return {
+            value: (typeof value === 'string' ? value.split(',') : value).filter(Boolean),
+          };
+        }
+      },
+      []
+    );
+
+    const handleOperatorUpdate = useCallback(
+      (newOperator: ListOperatorTypeEnum) => {
+        const nextItem = {
+          ...item,
+          entries: [
+            {
+              ...blocklistEntry,
+              type: newOperator,
+              ...generateBlocklistEntryValue(blocklistEntry.value, newOperator),
+            },
+          ],
+        };
+
+        onChange({
+          isValid: isValid(errorsRef.current),
+          // Type ListOperatorTypeEnum is not assignable to type "wildcard"
+          item: nextItem as ArtifactFormComponentOnChangeCallbackProps['item'],
+        });
+      },
+      [item, blocklistEntry, generateBlocklistEntryValue, onChange]
     );
 
     const handleOnValueTextChange = useCallback(
@@ -370,9 +479,27 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         };
 
         // trigger re-render without modifying item
-        setVisited((prevVisited) => ({ ...prevVisited }));
+        setValueVisited((prevState) => ({ ...prevState }));
       },
       [blocklistEntry]
+    );
+
+    const handleSingleValueUpdate = useCallback(
+      (event: React.ChangeEvent<HTMLInputElement>) => {
+        const nextItem = {
+          ...item,
+          entries: [{ ...blocklistEntry, value: event.target.value }],
+        } as ArtifactFormComponentProps['item'];
+
+        validateValues(nextItem);
+
+        onChange({
+          isValid: isValid(errorsRef.current),
+          item: nextItem,
+        });
+        setHasFormChanged(true);
+      },
+      [item, blocklistEntry, validateValues, onChange]
     );
 
     // only triggered on remove / clear
@@ -382,9 +509,9 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         const nextItem = {
           ...item,
           entries: [{ ...blocklistEntry, value }],
-        };
+        } as ArtifactFormComponentProps['item'];
 
-        validateValues(nextItem);
+        validateValues(nextItem, true);
         onChange({
           isValid: isValid(errorsRef.current),
           item: nextItem,
@@ -404,13 +531,13 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           entries: [{ ...blocklistEntry, value }],
         };
 
-        validateValues(nextItem);
+        validateValues(nextItem as ArtifactFormComponentProps['item']);
         nextItem.entries[0].value = uniq(nextItem.entries[0].value);
 
-        setVisited((prevVisited) => ({ ...prevVisited, value: true }));
+        setValueVisited({ value: true });
         onChange({
           isValid: isValid(errorsRef.current),
-          item: nextItem,
+          item: nextItem as ArtifactFormComponentProps['item'],
         });
         setHasFormChanged(true);
       },
@@ -452,7 +579,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
 
         <EuiFormRow
           label={NAME_LABEL}
-          isInvalid={visited.name && !!Object.keys(errorsRef.current.name).length}
+          isInvalid={nameVisited && !!Object.keys(errorsRef.current.name).length}
           error={Object.values(errorsRef.current.name)}
           fullWidth
         >
@@ -461,7 +588,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             value={item.name}
             onChange={handleOnNameChange}
             onBlur={handleOnNameBlur}
-            required={visited.name}
+            required={nameVisited}
             maxLength={256}
             data-test-subj={getTestId('name-input')}
             fullWidth
@@ -516,7 +643,23 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiFormRow label={OPERATOR_LABEL} fullWidth>
-                <EuiFieldText name="operator" value={isOneOfOperator.message} readOnly />
+                {isWindowsSignatureEntry ? (
+                  <EuiSuperSelect
+                    name="operator"
+                    options={operatorOptions}
+                    valueOfSelected={blocklistEntry.type}
+                    onChange={handleOperatorUpdate}
+                    data-test-subj={getTestId('operator-select-multi')}
+                    fullWidth
+                  />
+                ) : (
+                  <EuiFieldText
+                    name="operator"
+                    value={isOneOfOperator.message}
+                    data-test-subj={getTestId('operator-select-single')}
+                    readOnly
+                  />
+                )}
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={2} />
@@ -524,21 +667,32 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         </EuiFormRow>
         <EuiFormRow
           label={valueLabel}
-          isInvalid={visited.value && !!Object.keys(errorsRef.current.value).length}
+          isInvalid={valueVisited.value && !!Object.keys(errorsRef.current.value).length}
           helpText={Object.values(warningsRef.current.value)}
           error={Object.values(errorsRef.current.value)}
           fullWidth
         >
-          <EuiComboBox
-            selectedOptions={selectedValues}
-            onBlur={handleOnValueBlur}
-            onSearchChange={handleOnValueTextChange}
-            onChange={handleOnValueChange}
-            onCreateOption={handleOnValueAdd}
-            data-test-subj={getTestId('values-input')}
-            fullWidth
-            noSuggestions
-          />
+          {displaySingleValueInput ? (
+            <EuiFieldText
+              name="value"
+              value={blocklistEntry.value as string}
+              fullWidth
+              onChange={handleSingleValueUpdate}
+              onBlur={handleOnValueBlur}
+              data-test-subj={getTestId('value-input')}
+            />
+          ) : (
+            <EuiComboBox
+              selectedOptions={selectedValues}
+              onBlur={handleOnValueBlur}
+              onSearchChange={handleOnValueTextChange}
+              onChange={handleOnValueChange}
+              onCreateOption={handleOnValueAdd}
+              data-test-subj={getTestId('values-input')}
+              fullWidth
+              noSuggestions
+            />
+          )}
         </EuiFormRow>
 
         {showAssignmentSection && (

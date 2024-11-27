@@ -15,6 +15,7 @@ import {
   enableSecrets,
 } from '../../helpers';
 import { testUsers } from '../test_users';
+import { getInstallationInfo } from './helper';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -26,11 +27,6 @@ export default function (providerContext: FtrProviderContext) {
 
   const expectIdArraysEqual = (arr1: any[], arr2: any[]) => {
     expect(sortBy(arr1, 'id')).to.eql(sortBy(arr2, 'id'));
-  };
-
-  const getInstallationSavedObject = async (name: string, version: string) => {
-    const res = await supertest.get(`/api/fleet/epm/packages/${name}/${version}`).expect(200);
-    return res.body.item.savedObject.attributes;
   };
 
   const getPackagePolicyById = async (id: string) => {
@@ -56,7 +52,7 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  describe('Package Policy - update', async function () {
+  describe('Package Policy - update', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let managedAgentPolicyId: string;
@@ -70,12 +66,9 @@ export default function (providerContext: FtrProviderContext) {
 
     let inputOnlyBasePackagePolicy: NewPackagePolicy;
 
-    before(async () => {
+    before(async function () {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    before(async function () {
       if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
         return;
       }
@@ -274,9 +267,7 @@ export default function (providerContext: FtrProviderContext) {
         .delete(`/api/fleet/epm/packages/input_package/1.0.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
-    });
 
-    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -318,6 +309,35 @@ export default function (providerContext: FtrProviderContext) {
           },
         });
       expect(response.body.item.policy_ids).to.eql([agentPolicyId, managedAgentPolicyId]);
+    });
+
+    it('should work with no policy ids', async function () {
+      const { body: packagePolicyResponse } = await supertest
+        .post(`/api/fleet/package_policies`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-to-clear-policy',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          policy_ids: [agentPolicyId],
+          enabled: true,
+          inputs: [],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        });
+      const response = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyResponse.item.id}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          policy_ids: [],
+        })
+        .expect(200);
+      expect(response.body.item.policy_id).to.eql(null);
+      expect(response.body.item.policy_ids).to.eql([]);
     });
 
     it('should trim whitespace from name on update', async function () {
@@ -661,7 +681,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(400);
     });
 
-    describe('Simplified package policy', async () => {
+    describe('Simplified package policy', () => {
       it('should work with valid values', async function () {
         await supertest
           .put(`/api/fleet/package_policies/${packagePolicyId3}`)
@@ -911,7 +931,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        const installation = await getInstallationSavedObject('integration_to_input', '2.0.0');
+        const installation = await getInstallationInfo(supertest, 'integration_to_input', '2.0.0');
 
         expectIdArraysEqual(installation.installed_es, [
           // assets from version 1.0.0
@@ -924,6 +944,7 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'logs-somedataset', type: 'index_template' },
           { id: 'logs-somedataset@package', type: 'component_template' },
           { id: 'logs-somedataset@custom', type: 'component_template' },
+          { id: 'logs@custom', type: 'component_template' },
         ]);
 
         const dataset3PkgComponentTemplate = await getComponentTemplate('logs-somedataset@package');

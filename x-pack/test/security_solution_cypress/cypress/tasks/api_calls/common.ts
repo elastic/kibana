@@ -11,10 +11,10 @@ import { AllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connect
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTICSEARCH_PASSWORD, ELASTICSEARCH_USERNAME } from '../../env_var_names_constants';
 import { deleteAllDocuments } from './elasticsearch';
-import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 import { getSpaceUrl } from '../space';
+import { DEFAULT_ALERTS_INDEX_PATTERN } from './alerts';
 
-export const API_AUTH = Object.freeze({
+export const ESS_API_AUTH = Object.freeze({
   user: Cypress.env(ELASTICSEARCH_USERNAME),
   pass: Cypress.env(ELASTICSEARCH_PASSWORD),
 });
@@ -28,16 +28,44 @@ export const API_HEADERS = Object.freeze({
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
 export const rootRequest = <T = unknown>({
-  headers: optionHeaders,
+  headers: optionHeaders = {},
+  role = 'admin',
   ...restOptions
-}: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
-  cy.request<T>({
-    auth: API_AUTH,
-    headers: {
-      ...API_HEADERS,
-      ...(optionHeaders || {}),
-    },
-    ...restOptions,
+}: Partial<Cypress.RequestOptions> & { role?: string }): Cypress.Chainable<Cypress.Response<T>> => {
+  if (Cypress.env('IS_SERVERLESS')) {
+    return cy.task('getApiKeyForRole', role).then((response) => {
+      return cy.request<T>({
+        headers: {
+          ...API_HEADERS,
+          ...optionHeaders,
+          Authorization: `ApiKey ${response}`,
+        },
+        ...restOptions,
+      });
+    });
+  } else {
+    return cy.request<T>({
+      auth: ESS_API_AUTH,
+      headers: {
+        ...API_HEADERS,
+        ...optionHeaders,
+      },
+      ...restOptions,
+    });
+  }
+};
+
+// a helper function to wait for the root request to be successful
+// defaults to 5 second intervals for 3 attempts
+// can be helpful when waiting for a resource to be created before proceeding
+export const waitForRootRequest = <T = unknown>(
+  fn: Cypress.Chainable<Cypress.Response<T>>,
+  interval = 5000,
+  timeout = 15000
+) =>
+  cy.waitUntil(() => fn.then((response) => cy.wrap(response.status === 200)), {
+    interval,
+    timeout,
   });
 
 export const deleteAlertsAndRules = () => {
@@ -92,24 +120,7 @@ export const deleteConnectors = () => {
 };
 
 export const deletePrebuiltRulesAssets = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
-    method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'security-rule',
-              },
-            },
-          ],
-        },
-      },
-    },
-  });
+  cy.task('deleteSecurityRulesFromKibana');
 };
 
 export const postDataView = (indexPattern: string, name?: string, id?: string) => {

@@ -12,8 +12,13 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
+import type {
+  EuiDataGridControlColumn,
+  EuiDataGridCustomBodyProps,
+  EuiDataGridProps,
+} from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
@@ -43,7 +48,7 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import type { UnifiedTimelineDataGridCellContext } from '../../types';
+import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -161,7 +166,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             },
           },
         });
-        telemetry.reportDetailsFlyoutOpened({
+        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
           location: timelineId,
           panel: 'right',
         });
@@ -186,7 +191,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const onColumnResize = useCallback(
-      ({ columnId, width }: { columnId: string; width: number }) => {
+      ({ columnId, width }: { columnId: string; width?: number }) => {
         dispatch(
           timelineActions.updateColumnWidth({
             columnId,
@@ -198,14 +203,19 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId]
     );
 
-    const onResizeDataGrid = useCallback(
+    const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
       (colSettings) => {
-        onColumnResize({ columnId: colSettings.columnId, width: Math.round(colSettings.width) });
+        onColumnResize({
+          columnId: colSettings.columnId,
+          ...(colSettings.width ? { width: Math.round(colSettings.width) } : {}),
+        });
       },
       [onColumnResize]
     );
 
-    const onChangeItemsPerPage = useCallback(
+    const onChangeItemsPerPage = useCallback<
+      NonNullable<UnifiedDataTableProps['onUpdateRowsPerPage']>
+    >(
       (itemsChangedPerPage) => {
         dispatch(
           timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })
@@ -283,6 +293,23 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
+    const TimelineEventDetailRowRendererComp = useMemo<EuiDataGridControlColumn['rowCellRender']>(
+      () =>
+        function TimelineEventDetailRowRenderer(props) {
+          const { rowIndex, ...restProps } = props;
+          return (
+            <TimelineEventDetailRow
+              event={tableRows[rowIndex]}
+              rowIndex={rowIndex}
+              timelineId={timelineId}
+              enabledRowRenderers={enabledRowRenderers}
+              {...restProps}
+            />
+          );
+        },
+      [tableRows, timelineId, enabledRowRenderers]
+    );
+
     /**
      * Ref: https://eui.elastic.co/#/tabular-content/data-grid-advanced#custom-body-renderer
      */
@@ -290,31 +317,20 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       () => [
         {
           id: TIMELINE_EVENT_DETAIL_ROW_ID,
-          // The header cell should be visually hidden, but available to screen readers
           width: 0,
+          // The header cell should be visually hidden, but available to screen readers
           headerCellRender: () => <></>,
           headerCellProps: { className: 'euiScreenReaderOnly' },
 
           // The footer cell can be hidden to both visual & SR users, as it does not contain meaningful information
           footerCellProps: { style: { display: 'none' } },
 
-          // When rendering this custom cell, we'll want to override
-          // the automatic width/heights calculated by EuiDataGrid
-          rowCellRender: (props) => {
-            const { rowIndex, ...restProps } = props;
-            return (
-              <TimelineEventDetailRow
-                event={tableRows[rowIndex]}
-                rowIndex={rowIndex}
-                timelineId={timelineId}
-                enabledRowRenderers={enabledRowRenderers}
-                {...restProps}
-              />
-            );
-          },
+          rowCellRender: JEST_ENVIRONMENT
+            ? TimelineEventDetailRowRendererComp
+            : React.memo(TimelineEventDetailRowRendererComp),
         },
       ],
-      [enabledRowRenderers, tableRows, timelineId]
+      [TimelineEventDetailRowRendererComp]
     );
 
     /**
@@ -326,26 +342,26 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         visibleRowData,
         visibleColumns,
         setCustomGridBodyProps,
+        gridWidth,
+        headerRow,
+        footerRow,
       }: EuiDataGridCustomBodyProps) => (
         <CustomTimelineDataGridBody
           rows={tableRows}
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
+          headerRow={headerRow}
+          footerRow={footerRow}
           setCustomGridBodyProps={setCustomGridBodyProps}
           enabledRowRenderers={enabledRowRenderers}
           rowHeight={rowHeight}
+          gridWidth={gridWidth}
           refetch={refetch}
         />
       ),
       [tableRows, enabledRowRenderers, rowHeight, refetch]
     );
-
-    const cellContext: UnifiedTimelineDataGridCellContext = useMemo(() => {
-      return {
-        expandedEventId: expandedDoc?.id,
-      };
-    }, [expandedDoc]);
 
     const finalRenderCustomBodyCallback = useMemo(() => {
       return enabledRowRenderers.length > 0 ? renderCustomBodyCallback : undefined;
@@ -408,7 +424,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
-            cellContext={cellContext}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

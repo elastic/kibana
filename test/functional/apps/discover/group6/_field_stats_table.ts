@@ -1,15 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'header']);
+  const { common, discover, timePicker, header } = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'header',
+  ]);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -34,14 +40,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     [true, false].forEach((shouldSearchFieldsFromSource) => {
       describe(`discover:searchFieldsFromSource: ${shouldSearchFieldsFromSource}`, function () {
         before(async function () {
-          await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+          await timePicker.setDefaultAbsoluteRangeViaUiSettings();
           await kibanaServer.uiSettings.update({
             ...defaultSettings,
             'discover:searchFieldsFromSource': shouldSearchFieldsFromSource,
           });
-          await PageObjects.common.navigateToApp('discover');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await common.navigateToApp('discover');
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
         });
 
         after(async () => {
@@ -50,21 +56,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show Field Statistics data in data view mode', async () => {
           await testSubjects.click('dscViewModeFieldStatsButton');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('dataVisualizerTableContainer');
 
           await testSubjects.click('dscViewModeDocumentButton');
-          await PageObjects.header.waitUntilLoadingHasFinished();
+          await header.waitUntilLoadingHasFinished();
           await testSubjects.existOrFail('discoverDocTable');
         });
 
-        it('should show Field Statistics data in ES|QL mode', async () => {
-          await PageObjects.discover.selectTextBaseLang();
-          await PageObjects.discover.waitUntilSearchingHasFinished();
-
-          await testSubjects.click('dscViewModeFieldStatsButton');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          await testSubjects.existOrFail('dataVisualizerTableContainer');
+        it('should not show Field Statistics data in ES|QL mode', async () => {
+          await discover.selectTextBaseLang();
+          await header.waitUntilLoadingHasFinished();
+          await discover.waitUntilSearchingHasFinished();
+          await testSubjects.missingOrFail('dscViewModeFieldStatsButton');
         });
       });
     });

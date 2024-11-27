@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Criteria } from '@elastic/eui';
-import type { BoolQuery, Filter, Query, EsQueryConfig } from '@kbn/es-query';
+import type { Filter, Query, EsQueryConfig } from '@kbn/es-query';
 
 export interface FindingsBaseURLQuery {
   query: Query;
@@ -22,12 +22,6 @@ export interface FindingsBaseURLQuery {
 
 export interface FindingsBaseESQueryConfig {
   config: EsQueryConfig;
-}
-
-export interface FindingsBaseEsQuery {
-  query?: {
-    bool: BoolQuery;
-  };
 }
 
 export type Sort<T> = NonNullable<Criteria<T>['sort']>;

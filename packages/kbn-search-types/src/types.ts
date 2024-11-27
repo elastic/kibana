@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { estypes } from '@elastic/elasticsearch';
@@ -113,6 +114,11 @@ export interface ISearchOptions {
    * To pass an abort signal, use {@link ISearchOptions.abortSignal}
    */
   transport?: Omit<TransportRequestOptions, 'signal'>;
+
+  /**
+   * When set es results are streamed back to the caller without any parsing of the content.
+   */
+  stream?: boolean;
 }
 
 /**
@@ -129,4 +135,5 @@ export type ISearchOptionsSerializable = Pick<
   | 'isRestore'
   | 'retrieveResults'
   | 'executionContext'
+  | 'stream'
 >;

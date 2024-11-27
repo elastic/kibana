@@ -65,6 +65,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
           isTourAnchor={isAlert}
           step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
           tourId={SecurityStepId.alertsCases}
+          key={index}
         >
           <EuiTab
             onClick={() => onSelectedTabChanged(tab.id)}

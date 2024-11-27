@@ -12,12 +12,11 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiFieldText,
-  EuiForm,
   EuiButton,
   EuiSpacer,
   EuiFormRow,
   EuiText,
-  EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Connector } from '@kbn/search-connectors';
@@ -26,10 +25,11 @@ import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditDescriptionProps {
+  isDisabled?: boolean;
   connector: Connector;
 }
 
-export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) => {
+export const EditDescription: React.FC<EditDescriptionProps> = ({ connector, isDisabled }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newDescription, setNewDescription] = useState(connector.description || '');
   const { http } = useKibanaServices();
@@ -56,43 +56,50 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) =
   });
 
   return (
-    <EuiFlexGroup direction="row">
-      <EuiForm>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow
-            helpText={i18n.translate('xpack.serverlessSearch.connectors.descriptionHelpText', {
-              defaultMessage: 'Optional description for your connector.',
-            })}
-            label={i18n.translate('xpack.serverlessSearch.connectors.descriptionLabel', {
-              defaultMessage: 'Description',
-            })}
-            labelAppend={
-              <EuiButtonEmpty
-                data-test-subj="serverlessSearchEditDescriptionButton"
-                size="xs"
-                onClick={() => setIsEditing(true)}
-              >
-                {EDIT_LABEL}
-              </EuiButtonEmpty>
-            }
-          >
-            {isEditing ? (
-              <EuiFieldText
-                data-test-subj="serverlessSearchEditDescriptionFieldText"
-                onChange={(event) => setNewDescription(event.target.value)}
-                value={newDescription || ''}
-              />
-            ) : (
-              <EuiText size="s" data-test-subj="serverlessSearchConnectorDescription">
-                {connector.description}
-              </EuiText>
-            )}
-          </EuiFormRow>
+    <EuiFormRow
+      helpText={
+        !isEditing &&
+        i18n.translate('xpack.serverlessSearch.connectors.descriptionHelpText', {
+          defaultMessage: 'Optional description for your connector.',
+        })
+      }
+      label={i18n.translate('xpack.serverlessSearch.connectors.descriptionLabel', {
+        defaultMessage: 'Description',
+      })}
+      labelAppend={
+        isDisabled ? undefined : (
+          <EuiText size="xs">
+            <EuiLink
+              data-test-subj="serverlessSearchEditDescriptionButton"
+              onClick={() => setIsEditing(true)}
+              role="button"
+            >
+              {EDIT_LABEL}
+            </EuiLink>
+          </EuiText>
+        )
+      }
+      fullWidth
+    >
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexItem>
+          {isEditing ? (
+            <EuiFieldText
+              data-test-subj="serverlessSearchEditDescriptionFieldText"
+              onChange={(event) => setNewDescription(event.target.value)}
+              value={newDescription || ''}
+              fullWidth
+            />
+          ) : (
+            <EuiText size="s" data-test-subj="serverlessSearchConnectorDescription">
+              {connector.description}
+            </EuiText>
+          )}
         </EuiFlexItem>
         {isEditing && (
-          <>
+          <EuiFlexItem>
             <EuiSpacer size="s" />
-            <EuiFlexGroup direction="row" justifyContent="center" alignItems="center">
+            <EuiFlexGroup direction="row" justifyContent="flexStart" gutterSize="s">
               <EuiFlexItem
                 grow={false}
                 css={css`
@@ -130,9 +137,9 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector }) =
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
+          </EuiFlexItem>
         )}
-      </EuiForm>
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };

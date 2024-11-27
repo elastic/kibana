@@ -19,6 +19,7 @@ import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_
 
 import { getInferenceEndpoints } from '../../../../../../../services/api';
 import { getFieldByPathName } from '../../../../../lib/utils';
+
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
@@ -36,8 +37,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const { fields, mappingViewFields } = useMappingsState();
   const { fetchInferenceToModelIdMap } = useDetailsPageMappingsModelManagement();
   const dispatch = useDispatch();
-  const { showSuccessToasts, showErrorToasts, showSuccessfullyDeployedToast } =
-    useMLModelNotificationToasts();
+  const { showSuccessToasts, showErrorToasts } = useMLModelNotificationToasts();
 
   const fieldTypeValue = form.getFormData()?.type;
   useEffect(() => {
@@ -62,9 +62,6 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (!form.getFormData().reference_field) {
         form.setFieldValue('reference_field', referenceField);
       }
-      if (!form.getFormData().inference_id) {
-        form.setFieldValue('inference_id', 'elser_model_2');
-      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldTypeValue]);
@@ -86,7 +83,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
         : {
             service: defaultInferenceEndpointConfig.service,
             service_settings: {
-              num_allocations: 1,
+              adaptive_allocations: { enabled: true },
               num_threads: 1,
               model_id: trainedModelId,
             },
@@ -119,7 +116,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
     dispatch({ type: 'field.add', value: data });
     const inferenceEndpoints = await getInferenceEndpoints();
     const hasInferenceEndpoint = inferenceEndpoints.data?.some(
-      (inference) => inference.model_id === inferenceId
+      (inference) => inference.inference_id === inferenceId
     );
     // if inference endpoint exists already, do not create new inference endpoint
     if (hasInferenceEndpoint) {
@@ -127,28 +124,27 @@ export function useSemanticText(props: UseSemanticTextProps) {
     }
     try {
       // Only show toast if it's an internal Elastic model that hasn't been deployed yet
-      if (trainedModelId && inferenceData.isDeployable && !inferenceData.isDeployed) {
-        showSuccessToasts(trainedModelId);
-      }
       await createInferenceEndpoint(
         trainedModelId,
         data.inference_id,
         customInferenceEndpointConfig
       );
       if (trainedModelId) {
+        if (inferenceData.isDeployable && !inferenceData.isDeployed) {
+          showSuccessToasts(trainedModelId);
+        }
         // clear error because we've succeeded here
         setErrorsInTrainedModelDeployment?.((prevItems) => ({
           ...prevItems,
-          [trainedModelId]: undefined,
+          [data.inference_id]: undefined,
         }));
       }
-      showSuccessfullyDeployedToast(trainedModelId);
     } catch (error) {
       // trainedModelId is empty string when it's a third party model
       if (trainedModelId) {
         setErrorsInTrainedModelDeployment?.((prevItems) => ({
           ...prevItems,
-          [trainedModelId]: error,
+          [data.inference_id]: error,
         }));
       }
       showErrorToasts(error);

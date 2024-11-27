@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/expression-image-plugin",
-  "owner": "@elastic/kibana-presentation",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "description": "Adds 'image' function and renderer to expressions",
   "plugin": {
     "id": "expressionImage",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "expressions",
       "presentationUtil"

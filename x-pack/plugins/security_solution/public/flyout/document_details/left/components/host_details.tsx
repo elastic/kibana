@@ -18,7 +18,8 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiPanel,
-  EuiLink,
+  EuiHorizontalRule,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -36,7 +37,7 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { CellActions } from './cell_actions';
+import { CellActions } from '../../shared/components/cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { manageQuery } from '../../../../common/components/page/manage_query';
@@ -51,14 +52,26 @@ import {
   HOST_DETAILS_TEST_ID,
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
   HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_ALERT_COUNT_TEST_ID,
+  HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  HOST_DETAILS_VULNERABILITIES_TEST_ID,
 } from './test_ids';
+import {
+  USER_NAME_FIELD_NAME,
+  HOST_IP_FIELD_NAME,
+} from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { PreviewLink } from '../../../shared/components/preview_link';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import type { NarrowDateRange } from '../../../../common/components/ml/types';
+import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
+import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
+import { AlertCountInsight } from '../../shared/components/alert_count_insight';
+import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -99,7 +112,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const isPreviewEnabled = !useIsExperimentalFeatureEnabled('entityAlertPreviewDisabled');
 
-  const narrowDateRange = useCallback(
+  const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
@@ -122,29 +135,11 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         banner: HOST_PREVIEW_BANNER,
       },
     });
-    telemetry.reportDetailsFlyoutOpened({
+    telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
       location: scopeId,
       panel: 'preview',
     });
   }, [openPreviewPanel, hostName, scopeId, telemetry]);
-
-  const openUserPreview = useCallback(
-    (userName: string) => {
-      openPreviewPanel({
-        id: UserPreviewPanelKey,
-        params: {
-          userName,
-          scopeId,
-          banner: USER_PREVIEW_BANNER,
-        },
-      });
-      telemetry.reportDetailsFlyoutOpened({
-        location: scopeId,
-        panel: 'preview',
-      });
-    },
-    [openPreviewPanel, scopeId, telemetry]
-  );
 
   const [isHostLoading, { inspect, hostDetails, refetch }] = useHostDetails({
     id: hostDetailsQueryId,
@@ -180,14 +175,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         ),
         render: (user: string) => (
           <EuiText grow={false} size="xs">
-            <CellActions field={'user.name'} value={user}>
+            <CellActions field={USER_NAME_FIELD_NAME} value={user}>
               {isPreviewEnabled ? (
-                <EuiLink
+                <PreviewLink
+                  field={USER_NAME_FIELD_NAME}
+                  value={user}
+                  scopeId={scopeId}
                   data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
-                  onClick={() => openUserPreview(user)}
-                >
-                  {user}
-                </EuiLink>
+                />
               ) : (
                 <>{user}</>
               )}
@@ -207,10 +202,23 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           return (
             <DefaultFieldRenderer
               rowItems={ips}
-              attrName={'host.ip'}
+              attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
               isDraggable={false}
-              render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
+              render={(ip) =>
+                ip == null ? (
+                  getEmptyTagValue()
+                ) : isPreviewEnabled ? (
+                  <PreviewLink
+                    field={HOST_IP_FIELD_NAME}
+                    value={ip}
+                    scopeId={scopeId}
+                    data-test-subj={HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID}
+                  />
+                ) : (
+                  <NetworkDetailsLink ip={ip} />
+                )
+              }
               scopeId={scopeId}
             />
           );
@@ -234,7 +242,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId, isPreviewEnabled, openUserPreview]
+    [isEntityAnalyticsAuthorized, scopeId, isPreviewEnabled]
   );
 
   const relatedUsersCount = useMemo(
@@ -338,6 +346,30 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           )}
         </AnomalyTableProvider>
         <EuiSpacer size="s" />
+
+        <EuiHorizontalRule margin="s" />
+        <EuiFlexGrid responsive={false} columns={3} gutterSize="xl">
+          <AlertCountInsight
+            fieldName={'host.name'}
+            name={hostName}
+            direction="column"
+            data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
+          />
+          <MisconfigurationsInsight
+            fieldName={'host.name'}
+            name={hostName}
+            direction="column"
+            data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
+            telemetrySuffix={'host-details'}
+          />
+          <VulnerabilitiesInsight
+            hostName={hostName}
+            direction="column"
+            data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
+            telemetrySuffix={'host-details'}
+          />
+        </EuiFlexGrid>
+        <EuiSpacer size="l" />
         <EuiPanel hasBorder={true}>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>

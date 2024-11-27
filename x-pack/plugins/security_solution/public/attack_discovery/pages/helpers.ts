@@ -7,9 +7,6 @@
 
 export const getInitialIsOpen = (index: number) => index < 3;
 
-export const getFallbackActionTypeId = (actionTypeId: string | undefined): string =>
-  actionTypeId != null ? actionTypeId : '.gen-ai';
-
 interface ErrorWithStringMessage {
   body?: {
     error?: string;
@@ -50,10 +47,6 @@ export function isErrorWithStructuredMessage(error: any): error is ErrorWithStru
 
 export const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
-export const CACHED_ATTACK_DISCOVERIES_SESSION_STORAGE_KEY = 'cachedAttackDiscoveries';
-
-export const GENERATION_INTERVALS_LOCAL_STORAGE_KEY = 'generationIntervals';
-
 export const getErrorToastText = (
   error: ErrorWithStringMessage | ErrorWithStructuredMessage | unknown
 ): string => {
@@ -75,11 +68,14 @@ export const getErrorToastText = (
 
 export const showNoAlertsPrompt = ({
   alertsContextCount,
+  connectorId,
   isLoading,
 }: {
   alertsContextCount: number | null;
+  connectorId: string | undefined;
   isLoading: boolean;
-}): boolean => !isLoading && alertsContextCount != null && alertsContextCount === 0;
+}): boolean =>
+  connectorId != null && !isLoading && alertsContextCount != null && alertsContextCount === 0;
 
 export const showWelcomePrompt = ({
   aiConnectorsCount,
@@ -111,12 +107,26 @@ export const showLoading = ({
   loadingConnectorId: string | null;
 }): boolean => isLoading && (loadingConnectorId === connectorId || attackDiscoveriesCount === 0);
 
-export const showSummary = ({
+export const showSummary = (attackDiscoveriesCount: number) => attackDiscoveriesCount > 0;
+
+export const showFailurePrompt = ({
   connectorId,
-  attackDiscoveriesCount,
-  loadingConnectorId,
+  failureReason,
+  isLoading,
 }: {
   connectorId: string | undefined;
-  attackDiscoveriesCount: number;
-  loadingConnectorId: string | null;
-}): boolean => loadingConnectorId !== connectorId && attackDiscoveriesCount > 0;
+  failureReason: string | null;
+  isLoading: boolean;
+}): boolean => connectorId != null && !isLoading && failureReason != null;
+
+export const getSize = ({
+  defaultMaxAlerts,
+  localStorageAttackDiscoveryMaxAlerts,
+}: {
+  defaultMaxAlerts: number;
+  localStorageAttackDiscoveryMaxAlerts: string | undefined;
+}): number => {
+  const size = Number(localStorageAttackDiscoveryMaxAlerts);
+
+  return isNaN(size) || size <= 0 ? defaultMaxAlerts : size;
+};

@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -17,7 +18,6 @@ import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseError } from '../../common/error';
 import { fullJitterBackoffFactory } from './full_jitter_backoff';
-import { CoreKibanaRequest } from '@kbn/core/server';
 
 jest.mock('./cases_connector_executor');
 jest.mock('./full_jitter_backoff');
@@ -28,7 +28,7 @@ const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
 describe('CasesConnector', () => {
   const services = actionsMock.createServices();
   const logger = loggingSystemMock.createLogger();
-  const kibanaRequest = CoreKibanaRequest.from({ path: '/', headers: {} });
+  const kibanaRequest = kibanaRequestFactory({ path: '/', headers: {} });
 
   const groupingBy = ['host.name', 'dest.ip'];
   const rule = {
@@ -42,6 +42,7 @@ describe('CasesConnector', () => {
   const timeWindow = '7d';
   const reopenClosedCases = false;
   const maximumCasesToOpen = 5;
+  const templateId = null;
 
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
@@ -94,6 +95,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(CasesConnectorExecutorMock).toBeCalledWith({
@@ -114,6 +116,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(mockExecute).toBeCalledWith({
@@ -124,6 +127,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
   });
 
@@ -136,6 +140,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(getCasesClient).toBeCalled();
@@ -153,6 +158,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad request"`);
 
@@ -173,6 +179,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden"`);
 
@@ -193,6 +200,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
 
@@ -215,6 +223,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden: Server error"`);
 
@@ -237,6 +246,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(nextBackOff).toBeCalledTimes(2);
@@ -258,6 +268,7 @@ describe('CasesConnector', () => {
         timeWindow,
         reopenClosedCases,
         maximumCasesToOpen,
+        templateId,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Kibana request is not defined"`);
 
@@ -278,6 +289,7 @@ describe('CasesConnector', () => {
       timeWindow,
       reopenClosedCases,
       maximumCasesToOpen,
+      templateId,
     });
 
     expect(getCasesClient).not.toBeCalled();

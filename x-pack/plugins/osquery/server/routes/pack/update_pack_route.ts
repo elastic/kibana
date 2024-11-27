@@ -7,7 +7,7 @@
 
 import moment from 'moment-timezone';
 import { set } from '@kbn/safer-lodash-set';
-import { unset, has, difference, filter, find, map, mapKeys, uniq, some, isEmpty } from 'lodash';
+import { unset, has, difference, filter, map, mapKeys, uniq, some, isEmpty } from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -44,7 +44,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
     .put({
       access: 'public',
       path: '/api/osquery/packs/{id}',
-      options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
+      security: {
+        authz: {
+          requiredPrivileges: [`${PLUGIN_ID}-writePacks`],
+        },
+      },
     })
     .addVersion(
       {
@@ -194,8 +198,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
             await Promise.all(
               policyIds.map((agentPolicyId) => {
-                const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
-
+                const packagePolicy = packagePolicies.find((policy) =>
+                  policy.policy_ids.includes(agentPolicyId)
+                );
                 if (packagePolicy) {
                   return packagePolicyService?.update(
                     internalSavedObjectsClient,
@@ -224,7 +229,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           } else {
             await Promise.all(
               currentAgentPolicyIds.map((agentPolicyId) => {
-                const packagePolicy = find(currentPackagePolicies, ['policy_id', agentPolicyId]);
+                const packagePolicy = currentPackagePolicies.find((policy) =>
+                  policy.policy_ids.includes(agentPolicyId)
+                );
                 if (!packagePolicy) return;
 
                 return packagePolicyService?.update(
@@ -254,7 +261,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
           await Promise.all(
             agentPolicyIdsToRemove.map((agentPolicyId) => {
-              const packagePolicy = find(currentPackagePolicies, ['policy_id', agentPolicyId]);
+              const packagePolicy = currentPackagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
+              );
               if (packagePolicy) {
                 return packagePolicyService?.update(
                   internalSavedObjectsClient,
@@ -276,8 +285,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
           await Promise.all(
             agentPolicyIdsToUpdate.map((agentPolicyId) => {
-              const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
-
+              const packagePolicy = packagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
+              );
               if (packagePolicy) {
                 return packagePolicyService?.update(
                   internalSavedObjectsClient,
@@ -296,9 +306,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_ids[0]] // TODO
-                          ? policyShards[packagePolicy.policy_ids[0]]
-                          : 100,
+                        shard: policyShards[agentPolicyId] ?? 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
                     );
@@ -331,9 +339,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_ids[0]] // TODO
-                          ? policyShards[packagePolicy.policy_ids[0]]
-                          : 100,
+                        shard: policyShards[agentPolicyId] ?? 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
                     );

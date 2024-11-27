@@ -39,7 +39,13 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/console-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/discover-utils",
+    "@kbn/data-plugin",
+    "@kbn/search-index-documents",
   ],
   "exclude": [
     "target/**/*",

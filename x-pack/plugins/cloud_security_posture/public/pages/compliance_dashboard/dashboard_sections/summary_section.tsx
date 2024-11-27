@@ -15,6 +15,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import type { NavFilter } from '@kbn/cloud-security-posture/src/utils/query_utils';
+import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { useCspIntegrationLink } from '../../../common/navigation/use_csp_integration_link';
 import { DASHBOARD_COUNTER_CARDS, DASHBOARD_SUMMARY_CONTAINER } from '../test_subjects';
 import { CspCounterCard, CspCounterCardProps } from '../../../components/csp_counter_card';
@@ -27,13 +30,7 @@ import type {
   PosturePolicyTemplate,
 } from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
-import {
-  CSPM_POLICY_TEMPLATE,
-  KSPM_POLICY_TEMPLATE,
-  RULE_FAILED,
-  RULE_PASSED,
-} from '../../../../common/constants';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { AccountsEvaluatedWidget } from '../../../components/accounts_evaluated_widget';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 
@@ -43,13 +40,9 @@ export const dashboardColumnsGrow: Record<string, EuiFlexItemProps['grow']> = {
   third: 8,
 };
 
-export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => {
-  if (policyTemplate === CSPM_POLICY_TEMPLATE) {
-    return { 'rule.benchmark.posture_type': CSPM_POLICY_TEMPLATE };
-  }
-
-  return { 'rule.benchmark.posture_type': { value: CSPM_POLICY_TEMPLATE, negate: true } };
-};
+export const getPolicyTemplateQuery = (policyTemplate: PosturePolicyTemplate): NavFilter => ({
+  'rule.benchmark.posture_type': policyTemplate,
+});
 
 export const SummarySection = ({
   dashboardType,

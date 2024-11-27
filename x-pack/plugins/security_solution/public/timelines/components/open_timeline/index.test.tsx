@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, renderHook } from '@testing-library/react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import '../../../common/mock/formatted_relative';
@@ -30,7 +29,6 @@ import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
-import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
 import { useTimelineTypes } from './use_timeline_types';
 import { deleteTimelinesByIds } from '../../containers/api';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -165,7 +163,7 @@ describe('StatefulOpenTimeline', () => {
 
   describe("Template timelines' tab", () => {
     test("should land on correct timelines' tab with url timelines/default", () => {
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+      const { result } = renderHook(
         () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -181,7 +179,7 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.timelines,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+      const { result } = renderHook(
         () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -223,7 +221,7 @@ describe('StatefulOpenTimeline', () => {
         pageName: SecurityPageName.case,
       });
 
-      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+      const { result } = renderHook(
         () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -363,7 +361,7 @@ describe('StatefulOpenTimeline', () => {
 
       await waitFor(() => {
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
 
@@ -425,7 +423,7 @@ describe('StatefulOpenTimeline', () => {
 
       await waitFor(() => {
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
 
@@ -637,7 +635,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         expect(getSelectedItem().length).toEqual(0);
         wrapper
-          .find('.euiCheckbox__input')
+          .find('input.euiCheckbox__input')
           .first()
           .simulate('change', { target: { checked: true } });
         expect(getSelectedItem().length).toEqual(13);

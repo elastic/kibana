@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { MetricsAPISeriesRT, MetricsAPIRow } from '../metrics_api';
+import { MetricsAPISeriesRT, type MetricsAPIRow } from '@kbn/metrics-data-access-plugin/common';
 
 const AggValueRT = rt.type({
   value: rt.number,

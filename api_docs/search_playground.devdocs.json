@@ -4,7 +4,20 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-public.PlaygroundPageMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "PlaygroundPageMode",
+        "description": [],
+        "path": "x-pack/plugins/search_playground/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": [],
     "setup": {
@@ -50,14 +63,14 @@
             {
               "parentPluginId": "searchPlayground",
               "id": "def-public.SearchPlaygroundPluginStart.PlaygroundProvider.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -71,7 +84,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -87,7 +100,7 @@
           "signature": [
             "React.FunctionComponent<",
             "AppProps",
-            " & { children?: React.ReactNode; }>"
+            ">"
           ],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
@@ -97,14 +110,14 @@
             {
               "parentPluginId": "searchPlayground",
               "id": "def-public.SearchPlaygroundPluginStart.Playground.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -118,7 +131,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -132,7 +145,7 @@
           "label": "PlaygroundHeaderDocs",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            "React.FunctionComponent<{}>"
           ],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
@@ -142,14 +155,14 @@
             {
               "parentPluginId": "searchPlayground",
               "id": "def-public.SearchPlaygroundPluginStart.PlaygroundHeaderDocs.$1",
-              "type": "CompoundType",
+              "type": "Uncategorized",
               "tags": [],
               "label": "props",
               "description": [],
               "signature": [
-                "P & { children?: React.ReactNode; }"
+                "P"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             },
@@ -163,7 +176,7 @@
               "signature": [
                 "any"
               ],
-              "path": "node_modules/@types/react/index.d.ts",
+              "path": "node_modules/@types/react/ts5.0/index.d.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -245,8 +258,86 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.PLUGIN_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_PATH",
+        "description": [],
+        "signature": [
+          "\"/app/search_playground\""
+        ],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.SEARCH_MODE_FEATURE_FLAG_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SEARCH_MODE_FEATURE_FLAG_ID",
+        "description": [],
+        "signature": [
+          "\"searchPlayground:searchModeEnabled\""
+        ],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-common.DEFAULT_PAGINATION",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_PAGINATION",
+        "description": [],
+        "path": "x-pack/plugins/search_playground/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.DEFAULT_PAGINATION.from",
+            "type": "number",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.DEFAULT_PAGINATION.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "searchPlayground",
+            "id": "def-common.DEFAULT_PAGINATION.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "x-pack/plugins/search_playground/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

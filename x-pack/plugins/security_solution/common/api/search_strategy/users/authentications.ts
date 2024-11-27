@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { UsersQueries } from '../model/factory_query_type';
 
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';

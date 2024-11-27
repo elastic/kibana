@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { safeLoad } from 'js-yaml';
+import { load } from 'js-yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -136,33 +136,6 @@ export async function getFullAgentPolicy(
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
-  const defaultMonitoringConfig: FullAgentPolicyMonitoring = {
-    enabled: false,
-    logs: false,
-    metrics: false,
-  };
-
-  let monitoring: FullAgentPolicyMonitoring = { ...defaultMonitoringConfig };
-
-  // If the agent policy has monitoring enabled for at least one of "logs" or "metrics", generate
-  // a monitoring config for the resulting compiled agent policy
-  if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
-    monitoring = {
-      namespace: agentPolicy.namespace,
-      use_output: getOutputIdForAgentPolicy(monitoringOutput),
-      enabled: true,
-      logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
-      metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
-    };
-    // If the `keep_monitoring_alive` flag is set, enable monitoring but don't enable logs or metrics.
-    // This allows cloud or other environments to keep the monitoring server alive without tearing it down.
-  } else if (agentPolicy.keep_monitoring_alive) {
-    monitoring = {
-      enabled: true,
-      logs: false,
-      metrics: false,
-    };
-  }
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
@@ -185,7 +158,7 @@ export async function getFullAgentPolicy(
         sourceURI: downloadSourceUri,
         ...(downloadSourceProxyUri ? { proxy_url: downloadSourceProxyUri } : {}),
       },
-      monitoring,
+      monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
         enabled: agentPolicy.is_protected,
@@ -249,6 +222,7 @@ export async function getFullAgentPolicy(
     {
       logs: agentPolicy.monitoring_enabled?.includes(dataTypes.Logs) ?? false,
       metrics: agentPolicy.monitoring_enabled?.includes(dataTypes.Metrics) ?? false,
+      traces: agentPolicy.monitoring_enabled?.includes(dataTypes.Traces) ?? false,
     },
     agentPolicy.namespace
   );
@@ -389,7 +363,7 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? safeLoad(config_yaml) : {};
+  const configJs = config_yaml ? load(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -412,14 +386,11 @@ export function transformOutputToFullPolicyOutput(
       round_robin,
       hash,
       topic,
-      topics,
       headers,
       timeout,
       broker_timeout,
       required_acks,
     } = output;
-
-    const kafkaTopic = topic ? topic : topics?.filter((t) => !t.when)?.[0]?.topic;
 
     const transformPartition = () => {
       if (!partition) return {};
@@ -457,7 +428,7 @@ export function transformOutputToFullPolicyOutput(
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
-      topic: kafkaTopic,
+      topic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
@@ -540,17 +511,108 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', safeLoad);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
   }
 
   return newOutput;
+}
+
+export function getFullMonitoringSettings(
+  agentPolicy: Pick<
+    AgentPolicy,
+    | 'namespace'
+    | 'monitoring_enabled'
+    | 'keep_monitoring_alive'
+    | 'monitoring_pprof_enabled'
+    | 'monitoring_http'
+    | 'monitoring_diagnostics'
+  >,
+  monitoringOutput: Pick<Output, 'id' | 'is_default' | 'type'>
+): FullAgentPolicyMonitoring {
+  // Set base beats monitoring settings
+  const monitoring: FullAgentPolicyMonitoring = {
+    enabled: Boolean(
+      (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) ||
+        agentPolicy.monitoring_http?.enabled ||
+        agentPolicy.keep_monitoring_alive
+    ),
+    logs: false,
+    metrics: false,
+    traces: false,
+  };
+
+  // If the agent policy has monitoring enabled for at least one of "logs", "metrics", or "traces"
+  // generate a monitoring config for the resulting compiled agent policy
+  if (agentPolicy.monitoring_enabled && agentPolicy.monitoring_enabled.length > 0) {
+    monitoring.namespace = agentPolicy.namespace;
+    monitoring.use_output = getOutputIdForAgentPolicy(monitoringOutput);
+    monitoring.logs = agentPolicy.monitoring_enabled.includes(dataTypes.Logs);
+    monitoring.metrics = agentPolicy.monitoring_enabled.includes(dataTypes.Metrics);
+    monitoring.traces = agentPolicy.monitoring_enabled.includes(dataTypes.Traces);
+  }
+
+  if (agentPolicy.monitoring_pprof_enabled !== undefined) {
+    monitoring.pprof = {
+      enabled: agentPolicy.monitoring_pprof_enabled,
+    };
+  }
+
+  // Conditionally set http monitoring settings
+  if (agentPolicy.monitoring_http?.enabled) {
+    monitoring.http = {
+      enabled: agentPolicy.monitoring_http.enabled,
+      ...(agentPolicy.monitoring_http.host && { host: agentPolicy.monitoring_http.host }),
+      ...(agentPolicy.monitoring_http.port && { port: agentPolicy.monitoring_http.port }),
+    };
+  }
+
+  // Conditionally set diagnostics monitoring settings
+  if (agentPolicy.monitoring_diagnostics?.limit || agentPolicy.monitoring_diagnostics?.uploader) {
+    monitoring.diagnostics = {};
+
+    if (
+      agentPolicy.monitoring_diagnostics.limit &&
+      (agentPolicy.monitoring_diagnostics.limit.interval ||
+        typeof agentPolicy.monitoring_diagnostics.limit.burst === 'number')
+    ) {
+      monitoring.diagnostics.limit = {
+        ...(agentPolicy.monitoring_diagnostics.limit.interval && {
+          interval: agentPolicy.monitoring_diagnostics.limit.interval,
+        }),
+        ...(typeof agentPolicy.monitoring_diagnostics.limit.burst === 'number' && {
+          burst: agentPolicy.monitoring_diagnostics.limit.burst,
+        }),
+      };
+    }
+
+    if (
+      agentPolicy.monitoring_diagnostics.uploader &&
+      (typeof agentPolicy.monitoring_diagnostics.uploader.max_retries === 'number' ||
+        agentPolicy.monitoring_diagnostics.uploader.init_dur ||
+        agentPolicy.monitoring_diagnostics.uploader.max_dur)
+    ) {
+      monitoring.diagnostics.uploader = {
+        ...(typeof agentPolicy.monitoring_diagnostics.uploader.max_retries === 'number' && {
+          max_retries: agentPolicy.monitoring_diagnostics.uploader.max_retries,
+        }),
+        ...(agentPolicy.monitoring_diagnostics.uploader.init_dur && {
+          init_dur: agentPolicy.monitoring_diagnostics.uploader.init_dur,
+        }),
+        ...(agentPolicy.monitoring_diagnostics.uploader.max_dur && {
+          max_dur: agentPolicy.monitoring_diagnostics.uploader.max_dur,
+        }),
+      };
+    }
+  }
+
+  return monitoring;
 }
 
 /**
  * Get id used in full agent policy (sent to the agents)
  * we use "default" for the default policy to avoid breaking changes
  */
-function getOutputIdForAgentPolicy(output: Output) {
+function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 'type'>) {
   if (output.is_default && output.type === outputType.Elasticsearch) {
     return DEFAULT_OUTPUT.name;
   }

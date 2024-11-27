@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -36,7 +37,12 @@ export interface SavedObjectsType<Attributes = any> {
    * The hidden types will not be automatically exposed via the HTTP API.
    * Therefore, that should prevent unexpected behavior in the client code, as all the interactions will be done via the plugin API.
    *
+   * Hidden types must be listed to be accessible by the client.
+   *
+   * (await context.core).savedObjects.getClient({ includeHiddenTypes: [MY_PLUGIN_HIDDEN_SAVED_OBJECT_TYPE] })
+   *
    * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
+   *
    */
   hidden: boolean;
   /**

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useSelectedDocs } from './use_selected_docs';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
@@ -16,7 +17,7 @@ describe('useSelectedDocs', () => {
   const docs = generateEsHits(dataViewWithTimefieldMock, 5).map((hit) =>
     buildDataTableRecord(hit, dataViewWithTimefieldMock)
   );
-  const docsMap = new Map(docs.map((doc) => [doc.id, doc]));
+  const docsMap = new Map(docs.map((doc, docIndex) => [doc.id, { doc, docIndex }]));
 
   test('should have a correct default state', () => {
     const { result } = renderHook(() => useSelectedDocs(docsMap));
@@ -221,5 +222,31 @@ describe('useSelectedDocs', () => {
     expect(result.current.getCountOfFilteredSelectedDocs([docs[1].id])).toBe(1);
     expect(result.current.getCountOfFilteredSelectedDocs([docs[0].id])).toBe(0);
     expect(result.current.getCountOfFilteredSelectedDocs([docs[2].id, docs[3].id])).toBe(0);
+  });
+
+  test('should toggleMultipleDocsSelection correctly', () => {
+    const { result } = renderHook(() => useSelectedDocs(docsMap));
+    const docIds = docs.map((doc) => doc.id);
+
+    // select `0`
+    act(() => {
+      result.current.toggleDocSelection(docs[0].id);
+    });
+
+    expect(result.current.getCountOfFilteredSelectedDocs(docIds)).toBe(1);
+
+    // select from `0` to `4`
+    act(() => {
+      result.current.toggleMultipleDocsSelection(docs[4].id);
+    });
+
+    expect(result.current.getCountOfFilteredSelectedDocs(docIds)).toBe(5);
+
+    // deselect from `2` to `4`
+    act(() => {
+      result.current.toggleMultipleDocsSelection(docs[2].id);
+    });
+
+    expect(result.current.getCountOfFilteredSelectedDocs(docIds)).toBe(2);
   });
 });

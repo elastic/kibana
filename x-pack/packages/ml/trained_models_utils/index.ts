@@ -36,4 +36,5 @@ export {
   LATEST_ELSER_MODEL_ID,
   LATEST_E5_MODEL_ID,
   ElserModels,
+  isLocalModel,
 } from './src/constants/trained_models';

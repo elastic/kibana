@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../common/store';
 import { createSourcererDataView } from './create_sourcerer_data_view';
@@ -41,14 +41,12 @@ describe('useSignalHelpers', () => {
   );
 
   test('Default state, does not need init and does not need poll', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: wrapperContainer,
-      });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(false);
-      expect(result.current.pollForSignalIndex).toEqual(undefined);
+    const { result } = renderHook(() => useSignalHelpers(), {
+      wrapper: wrapperContainer,
     });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    expect(result.current.signalIndexNeedsInit).toEqual(false);
+    expect(result.current.pollForSignalIndex).toEqual(undefined);
   });
   test('Needs init and does not need poll when signal index is not yet in default data view', async () => {
     const state: State = {
@@ -70,14 +68,14 @@ describe('useSignalHelpers', () => {
       },
     };
     const store = createMockStore(state);
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(true);
-      expect(result.current.pollForSignalIndex).toEqual(undefined);
+    const { result } = renderHook(() => useSignalHelpers(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    expect(result.current.signalIndexNeedsInit).toEqual(true);
+    expect(result.current.pollForSignalIndex).toEqual(undefined);
   });
   test('Init happened and signal index does not have data yet, poll function becomes available', async () => {
     const state: State = {
@@ -99,14 +97,14 @@ describe('useSignalHelpers', () => {
       },
     };
     const store = createMockStore(state);
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(false);
-      expect(result.current.pollForSignalIndex).not.toEqual(undefined);
+    const { result } = renderHook(() => useSignalHelpers(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    expect(result.current.signalIndexNeedsInit).toEqual(false);
+    expect(result.current.pollForSignalIndex).not.toEqual(undefined);
   });
 
   test('Init happened and signal index does not have data yet, poll function becomes available but createSourcererDataView throws an abort error', async () => {
@@ -130,15 +128,15 @@ describe('useSignalHelpers', () => {
       },
     };
     const store = createMockStore(state);
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(false);
-      expect(result.current.pollForSignalIndex).not.toEqual(undefined);
-      expect(mockAddError).not.toHaveBeenCalled();
+    const { result } = renderHook(() => useSignalHelpers(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    expect(result.current.signalIndexNeedsInit).toEqual(false);
+    expect(result.current.pollForSignalIndex).not.toEqual(undefined);
+    expect(mockAddError).not.toHaveBeenCalled();
   });
 
   test('Init happened and signal index does not have data yet, poll function becomes available but createSourcererDataView throws a non-abort error', async () => {
@@ -164,15 +162,15 @@ describe('useSignalHelpers', () => {
       },
     };
     const store = createMockStore(state);
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
-        wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      expect(result.current.signalIndexNeedsInit).toEqual(false);
-      expect(result.current.pollForSignalIndex).not.toEqual(undefined);
-      result.current.pollForSignalIndex?.();
-      expect(mockAddError).toHaveBeenCalled();
+    const { result } = renderHook(() => useSignalHelpers(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+        <TestProviders store={store}>{children}</TestProviders>
+      ),
     });
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    expect(result.current.signalIndexNeedsInit).toEqual(false);
+    expect(result.current.pollForSignalIndex).not.toEqual(undefined);
+    result.current.pollForSignalIndex?.();
+    expect(mockAddError).toHaveBeenCalled();
   });
 });

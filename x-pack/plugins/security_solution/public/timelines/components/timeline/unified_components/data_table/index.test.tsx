@@ -8,7 +8,6 @@
 import { createMockStore, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import React from 'react';
 import { TimelineDataTable } from '.';
-import { defaultUdtHeaders } from '../default_headers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -18,6 +17,7 @@ import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { timelineActions } from '../../../../store';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 
 jest.mock('../../../../../sourcerer/containers');
 
@@ -229,7 +229,7 @@ describe('unified data table', () => {
     async () => {
       const rowHeight = {
         initial: 2,
-        new: 1,
+        new: 4,
       };
       const customMockStore = createMockStore();
 
@@ -240,7 +240,9 @@ describe('unified data table', () => {
         })
       );
 
-      render(<TestComponent store={customMockStore} />);
+      render(
+        <TestComponent store={customMockStore} events={[mockTimelineData[0]]} totalCount={1} />
+      );
 
       expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 

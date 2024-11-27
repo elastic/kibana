@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
-import { COLOR_MAPPING_SETTING, LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
+import { LEGACY_TIME_AXIS, palette, systemPalette } from '../common';
 
 interface SetupDependencies {
   expressions: ExpressionsServerSetup;
@@ -21,32 +22,6 @@ export class ChartsServerPlugin implements Plugin<object, object> {
     dependencies.expressions.registerFunction(palette);
     dependencies.expressions.registerFunction(systemPalette);
     core.uiSettings.register({
-      [COLOR_MAPPING_SETTING]: {
-        name: i18n.translate('charts.advancedSettings.visualization.colorMappingTitle', {
-          defaultMessage: 'Color mapping',
-        }),
-        value: JSON.stringify({
-          Count: '#00A69B',
-        }),
-        type: 'json',
-        description: i18n.translate('charts.advancedSettings.visualization.colorMappingText', {
-          defaultMessage:
-            'Maps values to specific colors in charts using the <strong>Compatibility</strong> palette.',
-          values: { strong: (chunks) => `<strong>${chunks}</strong>` },
-        }),
-        deprecation: {
-          message: i18n.translate(
-            'charts.advancedSettings.visualization.colorMappingTextDeprecation',
-            {
-              defaultMessage:
-                'This setting is deprecated and will not be supported in a future version.',
-            }
-          ),
-          docLinksKey: 'visualizationSettings',
-        },
-        category: ['visualization'],
-        schema: schema.string(),
-      },
       [LEGACY_TIME_AXIS]: {
         name: i18n.translate('charts.advancedSettings.visualization.useLegacyTimeAxis.name', {
           defaultMessage: 'Legacy chart time axis',

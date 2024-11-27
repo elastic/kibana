@@ -11,7 +11,7 @@ import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/d
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import type { EqlOptionsSelected } from '../../../../common/search_strategy';
+import type { EqlOptions } from '../../../../common/search_strategy';
 import {
   getValidationErrors,
   isErrorResponse,
@@ -31,22 +31,30 @@ interface Params {
   dataViewTitle: string;
   query: string;
   data: DataPublicPluginStart;
-  signal: AbortSignal;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
-  options: Omit<EqlOptionsSelected, 'query' | 'size'> | undefined;
+  eqlOptions: Omit<EqlOptions, 'query' | 'size'> | undefined;
+  signal?: AbortSignal;
+}
+
+export interface EqlResponseError {
+  code: EQL_ERROR_CODES;
+  messages?: string[];
+  error?: Error;
+}
+
+export interface ValidateEqlResponse {
+  valid: boolean;
+  error?: EqlResponseError;
 }
 
 export const validateEql = async ({
   data,
   dataViewTitle,
   query,
-  signal,
   runtimeMappings,
-  options,
-}: Params): Promise<{
-  valid: boolean;
-  error?: { code: EQL_ERROR_CODES; messages?: string[]; error?: Error };
-}> => {
+  eqlOptions,
+  signal,
+}: Params): Promise<ValidateEqlResponse> => {
   try {
     const { rawResponse: response } = await firstValueFrom(
       data.search.search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
@@ -54,9 +62,12 @@ export const validateEql = async ({
           params: {
             index: dataViewTitle,
             body: { query, runtime_mappings: runtimeMappings, size: 0 },
-            timestamp_field: options?.timestampField,
-            tiebreaker_field: options?.tiebreakerField || undefined,
-            event_category_field: options?.eventCategoryField,
+            // Prevent passing empty string values
+            timestamp_field: eqlOptions?.timestampField ? eqlOptions.timestampField : undefined,
+            tiebreaker_field: eqlOptions?.tiebreakerField ? eqlOptions.tiebreakerField : undefined,
+            event_category_field: eqlOptions?.eventCategoryField
+              ? eqlOptions.eventCategoryField
+              : undefined,
           },
           options: { ignore: [400] },
         },
@@ -71,19 +82,23 @@ export const validateEql = async ({
         valid: false,
         error: { code: EQL_ERROR_CODES.INVALID_SYNTAX, messages: getValidationErrors(response) },
       };
-    } else if (isVerificationErrorResponse(response) || isMappingErrorResponse(response)) {
+    }
+
+    if (isVerificationErrorResponse(response) || isMappingErrorResponse(response)) {
       return {
         valid: false,
         error: { code: EQL_ERROR_CODES.INVALID_EQL, messages: getValidationErrors(response) },
       };
-    } else if (isErrorResponse(response)) {
+    }
+
+    if (isErrorResponse(response)) {
       return {
         valid: false,
         error: { code: EQL_ERROR_CODES.FAILED_REQUEST, error: new Error(JSON.stringify(response)) },
       };
-    } else {
-      return { valid: true };
     }
+
+    return { valid: true };
   } catch (error) {
     if (error instanceof Error && error.message.startsWith('index_not_found_exception')) {
       return {
@@ -91,6 +106,7 @@ export const validateEql = async ({
         error: { code: EQL_ERROR_CODES.MISSING_DATA_SOURCE, messages: [error.message] },
       };
     }
+
     return {
       valid: false,
       error: {

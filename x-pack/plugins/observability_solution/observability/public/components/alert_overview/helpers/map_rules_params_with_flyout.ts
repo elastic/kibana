@@ -89,7 +89,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
   switch (ruleId) {
     case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const criteria = ruleCriteria[metricIndex] as CustomMetricExpressionParams;
+        const criteria = Array.isArray(ruleCriteria)
+          ? (ruleCriteria[metricIndex] as CustomMetricExpressionParams)
+          : (ruleCriteria as CustomMetricExpressionParams);
         const fields = criteria.metrics.map((metric) => metric.field || 'COUNT_AGG');
         const comparator = criteria.comparator;
         const threshold = criteria.threshold;
@@ -118,12 +120,20 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case METRIC_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const criteria = ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
-          metric: string;
-          customMetrics: Array<{
-            field?: string;
-          }>;
-        };
+        const criteria = Array.isArray(ruleCriteria)
+          ? (ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
+              metric: string;
+              customMetrics: Array<{
+                field?: string;
+              }>;
+            })
+          : (ruleCriteria as BaseMetricExpressionParams & {
+              metric: string;
+              customMetrics: Array<{
+                field?: string;
+              }>;
+            });
+
         let fields: string[] = [];
         const metric = criteria.metric;
         const customMetric = criteria.customMetrics;
@@ -157,14 +167,21 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
 
     case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const { threshold, customMetric, metric, comparator } = ruleCriteria[
-          metricIndex
-        ] as BaseMetricExpressionParams & {
-          metric: string;
-          customMetric: {
-            field: string;
-          };
-        };
+        const criteria = Array.isArray(ruleCriteria)
+          ? (ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
+              metric: string;
+              customMetric: {
+                field: string;
+              };
+            })
+          : (ruleCriteria as BaseMetricExpressionParams & {
+              metric: string;
+              customMetric: {
+                field: string;
+              };
+            });
+
+        const { threshold, customMetric, metric, comparator } = criteria;
         const metricField = customMetric?.field || metric;
         const thresholdFormatted = threshold.map((thresholdToFormat) => {
           if (
@@ -269,7 +286,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;
       const ESQueryFlyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
-        threshold: threshold.join(' AND '),
+        threshold: [threshold].flat().join(' AND '),
         comparator: thresholdComparator,
         pctAboveThreshold: getPctAboveThreshold(
           threshold,
