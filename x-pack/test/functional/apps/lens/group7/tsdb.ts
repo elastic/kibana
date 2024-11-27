@@ -37,8 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const tsdbIndex = 'kibana_sample_data_logstsdb';
     const tsdbDataView = tsdbIndex;
     const tsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb';
-    const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
-    const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
     before(async () => {
       log.info(`loading ${tsdbIndex} index...`);
@@ -53,9 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       log.info(`updating settings to use the "${tsdbDataView}" dataView...`);
       await kibanaServer.uiSettings.update({
-        'dateFormat:tz': 'UTC',
         defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
-        'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}" }`,
       });
     });
 
@@ -528,7 +524,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           it('should visualize data when moving the time window around the downgrade moment', async () => {
-            // check after the downgrade
+            await lens.removeLayer();
+            // check before the downgrade
             await lens.goToTimeRange(
               moment
                 .utc(fromTimeForScenarios, TIME_PICKER_FORMAT)

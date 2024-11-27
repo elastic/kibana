@@ -23,6 +23,11 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     deleteOriginal: false,
   };
 
+  async function existsDataStream(stream: string) {
+    log.info(`Check ${stream} data stream index existence...`);
+    return await es.indices.getDataStream({ name: stream });
+  }
+
   /**
    * Downsample a data-stream or a specific backing index
    * @param indexOrStream An index or a data stream
@@ -246,12 +251,21 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
 
     await updateDataStreamTemplate(streamIndex, mappings, mode);
 
-    log.info(`Creating ${streamIndex} data stream index...`);
-    await es.indices.createDataStream({
-      name: streamIndex,
-    });
-    // Uncomment only when needed
-    // log.debug(`PUT _data_stream/${streamIndex}`);
+    try {
+      log.info(`Creating ${streamIndex} data stream index...`);
+      await es.indices.createDataStream({
+        name: streamIndex,
+      });
+      // Uncomment only when needed
+      // log.debug(`PUT _data_stream/${streamIndex}`);
+    } catch (err) {
+      // If this specific error is met, delete it and try again
+      if (err.message.match(/resource_already_exists_exception/)) {
+        log.info(`Found resource_already_exists_exception: delete and rety again...`);
+        await deleteDataStream(streamIndex);
+        await createDataStream(streamIndex, mappings, mode);
+      }
+    }
   }
 
   /**
@@ -279,6 +293,7 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
 
   return {
     createDataStream,
+    existsDataStream,
     deleteDataStream,
     downsampleTSDBIndex,
     upgradeStream,

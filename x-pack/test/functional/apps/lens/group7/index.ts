@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 4', () => {
+  describe('lens app - group 7', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -53,11 +53,13 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       }
 
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+
+      const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
+      const toTime = 'Jun 16, 2023 @ 00:00:00.000';
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
+        'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}" }`,
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
@@ -71,13 +73,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./colors')); // 1m 2s
-    loadTestFile(require.resolve('./color_mapping'));
-    loadTestFile(require.resolve('./chart_data')); // 1m 10s
-    loadTestFile(require.resolve('./time_shift')); // 1m
-    loadTestFile(require.resolve('./dashboard')); // 6m 45s
-    loadTestFile(require.resolve('./show_underlying_data')); // 2m
-    loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
-    loadTestFile(require.resolve('./share')); // 1m 20s
+    loadTestFile(require.resolve('./tsdb'));
+    loadTestFile(require.resolve('./logsdb'));
   });
 };

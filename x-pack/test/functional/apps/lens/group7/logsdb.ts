@@ -41,8 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const logsdbIndex = 'kibana_sample_data_logslogsdb';
     const logsdbDataView = logsdbIndex;
     const logsdbEsArchive = 'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
-    const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
-    const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
     before(async () => {
       log.info(`loading ${logsdbIndex} index...`);
@@ -57,9 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       log.info(`updating settings to use the "${logsdbDataView}" dataView...`);
       await kibanaServer.uiSettings.update({
-        'dateFormat:tz': 'UTC',
         defaultIndex: '0ae0bc7a-e4ca-405c-ab67-f2b5913f2a51',
-        'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}" }`,
       });
     });
 
@@ -255,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 field: 'utc_time',
               });
 
-              // check the counter field works
+              // check that a basic agg on a field works
               await lens.configureDimension({
                 dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
                 operation: 'min',
@@ -281,7 +277,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 field: 'utc_time',
               });
 
-              // check the counter field works
               await lens.configureDimension({
                 dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
                 operation: 'min',
@@ -318,7 +313,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 field: 'utc_time',
               });
 
-              // check the counter field works
               await lens.configureDimension({
                 dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
                 operation: 'min',
@@ -350,6 +344,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             it('should visualize correctly ES|QL queries based on a LogsDB stream', async () => {
               await common.navigateToApp('discover');
+
+              await lens.goToTimeRange(
+                fromTimeForScenarios,
+                moment
+                  .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
+                  .add(2, 'hour')
+                  .format(TIME_PICKER_FORMAT)
+              );
               await discover.selectTextBaseLang();
               await header.waitUntilLoadingHasFinished();
               await monacoEditor.setCodeEditorValue(
@@ -546,9 +548,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
             it('should visualize correctly ES|QL queries based on a LogsDB stream', async () => {
               await common.navigateToApp('discover');
-              await discover.selectTextBaseLang();
 
-              // Use the lens page object here also for discover: both use the same timePicker object
               await lens.goToTimeRange(
                 fromTimeForScenarios,
                 moment
@@ -556,8 +556,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   .add(2, 'hour')
                   .format(TIME_PICKER_FORMAT)
               );
+              await discover.selectTextBaseLang();
 
-              await header.waitUntilLoadingHasFinished();
               await monacoEditor.setCodeEditorValue(
                 `from ${indexes
                   .map(({ index }) => index)

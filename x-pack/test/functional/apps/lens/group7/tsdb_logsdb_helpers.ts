@@ -361,13 +361,14 @@ export function setupScenarioRunner(
     scenarioMode: 'tsdb' | 'logsdb',
     testingFn: (indexes: ScenarioIndexes[]) => void
   ): void {
-    const { common, lens } = getPageObjects(['common', 'lens', 'dashboard']);
+    const { visualize, lens } = getPageObjects(['visualize', 'lens', 'dashboard']);
     const es = getService('es');
     const log = getService('log');
     const dataStreams = getService('dataStreams');
     const elasticChart = getService('elasticChart');
     const indexPatterns = getService('indexPatterns');
     const createDocs = getDocsGenerator(log, es, scenarioMode);
+    const kibanaServer = getService('kibanaServer');
 
     for (const { name, indexes } of getScenario(initialIndex)) {
       describe(name, () => {
@@ -437,16 +438,16 @@ export function setupScenarioRunner(
             },
             { override: true }
           );
-          await common.navigateToApp('lens');
+
+          await visualize.navigateToNewVisualization();
+          await visualize.clickLensWidget();
           await elasticChart.setNewChartUiDebugFlag(true);
-          // go to the
-          await lens.goToTimeRange(
-            fromTimeForScenarios,
-            moment
-              .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
-              .add(2, 'hour')
-              .format(TIME_PICKER_FORMAT) // consider also new documents
-          );
+
+          const finalToTimeForScenario = moment
+            .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
+            .add(2, 'hour')
+            .format(TIME_PICKER_FORMAT); // consider also new documents
+          await lens.goToTimeRange(fromTimeForScenarios, finalToTimeForScenario);
         });
 
         after(async () => {
@@ -464,11 +465,13 @@ export function setupScenarioRunner(
             // no need to cleant he specific downsample index as everything linked to the stream
             // is cleaned up automatically
           }
+          await kibanaServer.uiSettings.update({
+            'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}" }`,
+          });
         });
 
         beforeEach(async () => {
           await lens.switchDataPanelIndexPattern(dataViewName);
-          await lens.removeLayer();
         });
 
         testingFn(indexes);
