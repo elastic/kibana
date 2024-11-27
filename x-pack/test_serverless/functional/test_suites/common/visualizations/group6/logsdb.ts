@@ -17,11 +17,12 @@ import {
 } from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, lens, discover, header } = getPageObjects([
+  const { common, lens, discover, header, svlCommonPage } = getPageObjects([
     'common',
     'lens',
     'discover',
     'header',
+    'svlCommonPage',
   ]);
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -46,6 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 
     before(async () => {
+      await svlCommonPage.loginAsAdmin();
       log.info(`loading ${logsdbIndex} index...`);
       await esArchiver.loadIfNeeded(logsdbEsArchive);
       log.info(`creating a data view for "${logsdbDataView}"...`);
