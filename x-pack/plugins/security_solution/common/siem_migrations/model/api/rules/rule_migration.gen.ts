@@ -22,6 +22,7 @@ import {
   ElasticRulePartial,
   RuleMigrationTranslationResult,
   RuleMigrationComments,
+  RuleMigrationToInstall,
   RuleMigrationTaskStats,
   RuleMigration,
   RuleMigrationResourceData,
@@ -87,6 +88,41 @@ export type GetRuleMigrationStatsRequestParamsInput = z.input<
 
 export type GetRuleMigrationStatsResponse = z.infer<typeof GetRuleMigrationStatsResponse>;
 export const GetRuleMigrationStatsResponse = RuleMigrationTaskStats;
+
+export type InstallAllMigrationRulesRequestBody = z.infer<
+  typeof InstallAllMigrationRulesRequestBody
+>;
+export const InstallAllMigrationRulesRequestBody = z.object({
+  /**
+   * The migration id
+   */
+  migrationId: NonEmptyString,
+});
+export type InstallAllMigrationRulesRequestBodyInput = z.input<
+  typeof InstallAllMigrationRulesRequestBody
+>;
+
+export type InstallAllMigrationRulesResponse = z.infer<typeof InstallAllMigrationRulesResponse>;
+export const InstallAllMigrationRulesResponse = z.object({
+  /**
+   * Indicates rules migrations have been installed.
+   */
+  installed: z.boolean(),
+});
+
+export type InstallMigrationRulesRequestBody = z.infer<typeof InstallMigrationRulesRequestBody>;
+export const InstallMigrationRulesRequestBody = z.array(RuleMigrationToInstall);
+export type InstallMigrationRulesRequestBodyInput = z.input<
+  typeof InstallMigrationRulesRequestBody
+>;
+
+export type InstallMigrationRulesResponse = z.infer<typeof InstallMigrationRulesResponse>;
+export const InstallMigrationRulesResponse = z.object({
+  /**
+   * Indicates rules migrations have been installed.
+   */
+  installed: z.boolean(),
+});
 
 export type StartRuleMigrationRequestParams = z.infer<typeof StartRuleMigrationRequestParams>;
 export const StartRuleMigrationRequestParams = z.object({

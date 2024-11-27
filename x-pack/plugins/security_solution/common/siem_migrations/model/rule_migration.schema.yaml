@@ -217,6 +217,20 @@ components:
       items:
         type: string
 
+    RuleMigrationToInstall:
+      description: The rule migration to install.
+      type: object
+      required:
+        - id
+        - elastic_rule
+      properties:
+        id:
+          description: The rule migration id
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        elastic_rule:
+          description: The migrated elastic rule attributes to install.
+          $ref: '#/components/schemas/ElasticRule'
+
     ## Rule migration resources
 
     RuleMigrationResourceType:

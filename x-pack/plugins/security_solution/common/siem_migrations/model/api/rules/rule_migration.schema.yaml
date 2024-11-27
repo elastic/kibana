@@ -79,6 +79,70 @@ paths:
                     type: boolean
                     description: Indicates rules migrations have been updated.
 
+  /internal/siem_migrations/rules/install:
+    post:
+      summary: Installs translated migration rules
+      operationId: InstallMigrationRules
+      x-codegen-enabled: true
+      description: Installs migration rules
+      tags:
+        - SIEM Rule Migrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationToInstall'
+      responses:
+        200:
+          description: Indicates rules migrations have been installed correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - installed
+                properties:
+                  installed:
+                    type: boolean
+                    description: Indicates rules migrations have been installed.
+
+  /internal/siem_migrations/rules/install_all:
+    post:
+      summary: Installs all translated migration rules
+      operationId: InstallAllMigrationRules
+      x-codegen-enabled: true
+      description: Installs all translated migration rules
+      tags:
+        - SIEM Rule Migrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - migrationId
+              properties:
+                migrationId:
+                  description: The migration id
+                  $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates rules migrations have been installed correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - installed
+                properties:
+                  installed:
+                    type: boolean
+                    description: Indicates rules migrations have been installed.
+
   /internal/siem_migrations/rules/stats:
     get:
       summary: Retrieves the stats for all rule migrations

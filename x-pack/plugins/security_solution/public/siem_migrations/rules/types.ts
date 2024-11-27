@@ -5,9 +5,28 @@
  * 2.0.
  */
 
-import type { RuleMigrationTaskStats } from '../../../common/siem_migrations/model/rule_migration.gen';
+import type {
+  ElasticRule,
+  RuleMigrationTaskStats,
+  RuleMigrationToInstall,
+} from '../../../common/siem_migrations/model/rule_migration.gen';
 
 export interface RuleMigrationStats extends RuleMigrationTaskStats {
   /** The sequential number of the migration */
   number: number;
+}
+
+export interface InstallRule {
+  id: string;
+  elastic_rule: ElasticRule;
+}
+
+export interface InstallRulesProps {
+  rules: RuleMigrationToInstall[];
+  signal?: AbortSignal;
+}
+
+export interface InstallAllRulesProps {
+  migrationId: string;
+  signal?: AbortSignal;
 }
