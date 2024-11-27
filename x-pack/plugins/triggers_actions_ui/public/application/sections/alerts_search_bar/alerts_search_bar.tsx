@@ -65,14 +65,6 @@ export function AlertsSearchBar({
     toasts,
   });
 
-  // eslint-disable-next-line no-console
-  console.log(
-    'dataView.fields.length',
-    dataView?.fields?.length,
-    'dataView.fields',
-    JSON.stringify(dataView?.fields?.find((field) => field.name === 'kibana.alert.start'))
-  );
-
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns = useMemo(() => {

@@ -38,10 +38,10 @@ export const useFetchAlertsFieldsQuery = (
   );
 
   return useQuery({
-    // queryKey: queryKeyPrefix.concat(featureIds),
+    queryKey: queryKeyPrefix.concat(featureIds),
     queryFn: () => fetchAlertsFields({ http, featureIds: validFeatureIds }),
     placeholderData: { browserFields: {}, fields: [] },
-    // staleTime: 60 * 1000,
+    staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     ...options,
     enabled: validFeatureIds.length > 0 && (options?.enabled == null || options.enabled),
