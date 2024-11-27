@@ -1840,6 +1840,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.NewPackagePolicy.supports_agentless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supports_agentless",
+            "description": [],
+            "signature": [
+              "boolean | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3084,7 +3098,7 @@
                         "section": "def-common.PackagePolicyConfigRecord",
                         "text": "PackagePolicyConfigRecord"
                       },
-                      " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; }"
+                      " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; supports_agentless?: boolean | null | undefined; }"
                     ],
                     "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -24655,6 +24669,20 @@
             "description": [],
             "signature": [
               "{ inputs?: { [key: string]: any; } | undefined; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicy.supports_agentless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supports_agentless",
+            "description": [],
+            "signature": [
+              "boolean | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
