@@ -1446,10 +1446,13 @@ describe('UnifiedDataTable', () => {
         'Rows per page: 1'
       );
       findTestSubject(component, 'tablePaginationPopoverButton').simulate('click');
-      component.setProps({ rowsPerPageState: 4 });
+      component.setProps({
+        rowsPerPageState: 5,
+      });
+
       await waitFor(() => {
         expect(findTestSubject(component, 'tablePaginationPopoverButton').text()).toBe(
-          'Rows per page: 4'
+          'Rows per page: 5'
         );
       });
 

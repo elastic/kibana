@@ -421,6 +421,10 @@ export interface UnifiedDataTableProps {
    */
   getRowIndicator?: ColorIndicatorControlColumnParams['getRowIndicator'];
   /**
+   * `pageIndex` helps consumer to control pageIndex
+   */
+  pageIndex?: number;
+  /**
    *
    * this callback is triggered when user navigates to a different page
    *
@@ -500,6 +504,7 @@ export const UnifiedDataTable = ({
   dataGridDensityState,
   onUpdateDataGridDensity,
   onChangePage: onChangePageProp,
+  pageIndex = 0,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -525,6 +530,8 @@ export const UnifiedDataTable = ({
     replaceSelectedDocs,
     docIdsInSelectionOrder,
   } = selectedDocsState;
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(pageIndex);
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -603,73 +610,52 @@ export const UnifiedDataTable = ({
     typeof rowsPerPageState === 'number' && rowsPerPageState > 0
       ? rowsPerPageState
       : DEFAULT_ROWS_PER_PAGE;
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: currentPageSize,
-  });
+
   const rowCount = useMemo(() => (displayedRows ? displayedRows.length : 0), [displayedRows]);
   const pageCount = useMemo(
-    () => Math.ceil(rowCount / pagination.pageSize),
-    [rowCount, pagination]
+    () => Math.ceil(rowCount / currentPageSize),
+    [rowCount, currentPageSize]
   );
+
+  useEffect(() => {
+    // calculates and updates actual page index
+    const calculatedPageIndex = currentPageIndex > pageCount - 1 ? 0 : currentPageIndex;
+
+    if (calculatedPageIndex !== currentPageIndex) {
+      setCurrentPageIndex(calculatedPageIndex);
+    }
+  }, [currentPageIndex, pageCount, onChangePageProp]);
+
+  useEffect(() => {
+    // communicates the actual page index to the consumer
+    onChangePageProp?.(currentPageIndex);
+  }, [currentPageIndex, onChangePageProp]);
 
   const paginationObj = useMemo(() => {
     const onChangeItemsPerPage = (pageSize: number) => {
       onUpdateRowsPerPage?.(pageSize);
     };
 
-    const onChangePage = (pageIndex: number) => {
-      setPagination((paginationData) => ({ ...paginationData, pageIndex }));
+    const onChangePage = (newPageIndex: number) => {
+      setCurrentPageIndex(newPageIndex);
     };
 
     return isPaginationEnabled
       ? {
           onChangeItemsPerPage,
           onChangePage,
-          pageIndex: pagination.pageIndex > pageCount - 1 ? 0 : pagination.pageIndex,
-          pageSize: pagination.pageSize,
-          pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(pagination.pageSize),
+          pageIndex: currentPageIndex,
+          pageSize: currentPageSize,
+          pageSizeOptions: rowsPerPageOptions ?? getRowsPerPageOptions(currentPageSize),
         }
       : undefined;
   }, [
     isPaginationEnabled,
-    pagination.pageIndex,
-    pagination.pageSize,
-    pageCount,
     rowsPerPageOptions,
     onUpdateRowsPerPage,
+    currentPageSize,
+    currentPageIndex,
   ]);
-
-  useEffect(() => {
-    /*
-     * Only for pageSize
-     * Sync pageSize with consumer provided pageSize
-     */
-    setPagination((paginationData) =>
-      paginationData.pageSize === currentPageSize
-        ? paginationData
-        : { ...paginationData, pageSize: currentPageSize }
-    );
-  }, [currentPageSize]);
-
-  useEffect(() => {
-    /*
-     * Only for pageIndex
-     * Sync pagination with EUI calculated pageIndex
-     *
-     */
-    setPagination((prevPagination) => ({
-      ...prevPagination,
-      pageIndex: paginationObj?.pageIndex ?? 0,
-    }));
-  }, [paginationObj?.pageIndex]);
-
-  useEffect(() => {
-    /*
-     * Propagate new pageIndex to the consumer
-     */
-    onChangePageProp?.(pagination.pageIndex);
-  }, [pagination.pageIndex, onChangePageProp]);
 
   const unifiedDataTableContextValue = useMemo<DataTableContext>(
     () => ({
