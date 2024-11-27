@@ -1870,9 +1870,19 @@ describe('EPM template', () => {
 
     it('should fill constant keywords from previous mappings', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
       esClient.indices.getDataStream.mockResponse({
-        data_streams: [{ name: 'test-constant.keyword-default' }],
+        data_streams: [
+          {
+            name: 'test-constant.keyword-default',
+            indices: [
+              { index_name: '.ds-test-constant.keyword-default-0001' },
+              { index_name: '.ds-test-constant.keyword-default-0002' },
+            ],
+          },
+        ],
       } as any);
+
       esClient.indices.get.mockResponse({
         'test-constant.keyword-default': {
           mappings: {
@@ -1912,6 +1922,9 @@ describe('EPM template', () => {
           } as any,
         },
       ]);
+      expect(esClient.indices.get).toBeCalledWith({
+        index: '.ds-test-constant.keyword-default-0002',
+      });
       const putMappingsCalls = esClient.indices.putMapping.mock.calls;
       expect(putMappingsCalls).toHaveLength(1);
       expect(putMappingsCalls[0][0]).toEqual({

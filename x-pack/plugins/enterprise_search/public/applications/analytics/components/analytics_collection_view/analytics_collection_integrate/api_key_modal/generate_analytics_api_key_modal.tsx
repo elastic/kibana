@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
@@ -24,12 +24,13 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiText,
-  EuiSpacer,
-  EuiFormLabel,
   EuiCodeBlock,
+  EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { generateAnalyticsApiKeyLogic } from '../../../../api/generate_analytics_api_key/generate_analytics_api_key_logic';
 
@@ -47,15 +48,23 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
   const { keyName, apiKey, isLoading, isSuccess } = useValues(GenerateApiKeyModalLogic);
   const { setKeyName } = useActions(GenerateApiKeyModalLogic);
   const { makeRequest } = useActions(generateAnalyticsApiKeyLogic);
+  const copyApiKeyRef = useRef<HTMLAnchorElement>(null);
+  const modalTitleId = useGeneratedHtmlId();
+
+  useEffect(() => {
+    if (isSuccess) {
+      copyApiKeyRef.current?.focus();
+    }
+  }, [isSuccess]);
 
   useEffect(() => {
     setKeyName(`${collectionName} API key`);
   }, [collectionName]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate(
             'xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.title',
             {
@@ -66,15 +75,24 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
       </EuiModalHeader>
       <EuiModalBody>
         <>
-          <EuiPanel hasShadow={false} color="primary">
+          <EuiPanel hasShadow={false} color={!isSuccess ? 'primary' : 'success'}>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" alignItems="flexEnd">
                   {!isSuccess ? (
                     <>
                       <EuiFlexItem>
-                        <EuiFormRow label="Name your API key" fullWidth>
+                        <EuiFormRow
+                          label={
+                            <FormattedMessage
+                              id="xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.nameYourAPIKeyLabel"
+                              defaultMessage="Name your API key"
+                            />
+                          }
+                          fullWidth
+                        >
                           <EuiFieldText
+                            data-test-subj="enterpriseSearchGenerateAnalyticsApiKeyModalFieldText"
                             data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-editName"
                             fullWidth
                             placeholder="Type a name for your API key"
@@ -111,8 +129,20 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                     </>
                   ) : (
                     <EuiFlexItem>
-                      <EuiFormLabel>{keyName}</EuiFormLabel>
-                      <EuiSpacer size="xs" />
+                      <EuiCallOut
+                        title={
+                          <FormattedMessage
+                            id="xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.callOutMessage"
+                            defaultMessage="Done! The {name} API key was generated."
+                            values={{
+                              name: <strong>{keyName}</strong>,
+                            }}
+                          />
+                        }
+                        color="success"
+                        iconType="check"
+                        role="alert"
+                      />
                       <EuiFlexGroup alignItems="center">
                         <EuiFlexItem>
                           <EuiCodeBlock
@@ -127,6 +157,8 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiButtonIcon
+                            buttonRef={copyApiKeyRef}
+                            data-test-subj="enterpriseSearchGenerateAnalyticsApiKeyModalButton"
                             data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-csvDownloadButton"
                             aria-label={i18n.translate(
                               'xpack.enterpriseSearch.content.analytics.api.generateAnalyticsApiKeyModal.csvDownloadButton',
@@ -166,6 +198,7 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
       <EuiModalFooter>
         {apiKey ? (
           <EuiButton
+            data-test-subj="enterpriseSearchGenerateAnalyticsApiKeyModalDoneButton"
             data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-done"
             fill
             onClick={onClose}
@@ -179,6 +212,7 @@ export const GenerateAnalyticsApiKeyModal: React.FC<GenerateAnalyticsApiKeyModal
           </EuiButton>
         ) : (
           <EuiButtonEmpty
+            data-test-subj="enterpriseSearchGenerateAnalyticsApiKeyModalCancelButton"
             data-telemetry-id="entSearchContent-analyticss-api-generateAnalyticsApiKeyModal-cancel"
             onClick={onClose}
           >

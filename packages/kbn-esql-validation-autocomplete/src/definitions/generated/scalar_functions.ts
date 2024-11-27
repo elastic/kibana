@@ -818,6 +818,22 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'date_nanos',
+          optional: true,
+        },
+      ],
+      returnType: 'date_nanos',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
           type: 'geo_point',
           optional: false,
         },
@@ -1550,6 +1566,21 @@ const dateTruncDefinition: FunctionDefinition = {
       params: [
         {
           name: 'interval',
+          type: 'date_period',
+          optional: false,
+        },
+        {
+          name: 'date',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'interval',
           type: 'time_duration',
           optional: false,
         },
@@ -1560,6 +1591,21 @@ const dateTruncDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'interval',
+          type: 'time_duration',
+          optional: false,
+        },
+        {
+          name: 'date',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
   ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
@@ -1874,6 +1920,22 @@ const greatestDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'date_nanos',
+          optional: true,
+        },
+      ],
+      returnType: 'date_nanos',
       minParams: 1,
     },
     {
@@ -2388,6 +2450,22 @@ const leastDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'date_nanos',
+          optional: true,
+        },
+      ],
+      returnType: 'date_nanos',
       minParams: 1,
     },
     {
@@ -3322,7 +3400,7 @@ const matchDefinition: FunctionDefinition = {
   supportedOptions: [],
   validate: undefined,
   examples: [
-    'from books \n| where match(author, "Faulkner")\n| keep book_no, author \n| sort book_no \n| limit 5;',
+    'FROM books \n| WHERE MATCH(author, "Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5;',
   ],
 };
 
@@ -3732,6 +3810,16 @@ const mvCountDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
         },
@@ -3889,6 +3977,16 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
         },
@@ -4032,6 +4130,16 @@ const mvFirstDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -4195,6 +4303,16 @@ const mvLastDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
         },
@@ -4328,6 +4446,16 @@ const mvMaxDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -4573,6 +4701,16 @@ const mvMinDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -4952,6 +5090,26 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'start',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'end',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
         },
@@ -5179,6 +5337,22 @@ const mvSortDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          acceptedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'date_nanos',
     },
     {
       params: [
@@ -5937,7 +6111,7 @@ const qstrDefinition: FunctionDefinition = {
   supportedOptions: [],
   validate: undefined,
   examples: [
-    'from books \n| where qstr("author: Faulkner")\n| keep book_no, author \n| sort book_no \n| limit 5;',
+    'FROM books \n| WHERE QSTR("author: Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5;',
   ],
 };
 
@@ -7950,7 +8124,78 @@ const toDateNanosDefinition: FunctionDefinition = {
   }),
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+  ],
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
@@ -8022,6 +8267,16 @@ const toDatetimeDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -8604,6 +8859,16 @@ const toLongDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
         },
@@ -8808,6 +9073,16 @@ const toStringDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
           optional: false,
         },
       ],
