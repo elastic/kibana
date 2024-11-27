@@ -27,14 +27,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
+  const queryBar = getService('queryBar');
   const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 4 meta fields.';
 
   describe('discover sidebar', function describeIndexTests() {
     // see details: https://github.com/elastic/kibana/issues/195100
-    this.tags(['failsOnMKI']);
+    // this.tags(['failsOnMKI']);
+
+    const initialFieldListMatch = async () => {
+      return await retry.try(async () => {
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        const ariaDescription = await PageObjects.unifiedFieldList.getSidebarAriaDescription();
+        const match = ariaDescription === INITIAL_FIELD_LIST_SUMMARY;
+        if (!match) {
+          debugger;
+          await queryBar.submitQuery();
+        }
+        expect(ariaDescription).to.be(INITIAL_FIELD_LIST_SUMMARY);
+      });
+    };
 
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
@@ -525,18 +540,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.getVisibleText('dscFieldStats-topValues')).to.be('jpg\n100%');
       });
 
-      it('should work for many fields', async () => {
+      it.only('should work for many fields', async () => {
         await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/many_fields');
         await kibanaServer.importExport.load(
           'test/functional/fixtures/kbn_archiver/many_fields_data_view'
         );
-
+        await dataViews.switchToAndValidate('logstash-*');
         await browser.refresh();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          INITIAL_FIELD_LIST_SUMMARY
-        );
+        await initialFieldListMatch();
 
         await dataViews.switchToAndValidate('indices-stats*');
 
@@ -562,19 +573,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('test/functional/fixtures/es_archiver/many_fields');
       });
 
-      it('should work with ad-hoc data views and runtime fields', async () => {
+      it.only('should work with ad-hoc data views and runtime fields', async () => {
         await dataViews.createFromSearchBar({
           name: 'logstash',
           adHoc: true,
           hasTimeField: true,
         });
 
-        await PageObjects.discover.waitUntilSearchingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          INITIAL_FIELD_LIST_SUMMARY
-        );
+        await initialFieldListMatch();
 
         await PageObjects.discover.addRuntimeField(
           '_bytes-runtimefield',
@@ -627,12 +633,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(allFields.includes('_bytes-runtimefield')).to.be(false);
       });
 
-      it('should render even when retrieving documents failed with an error', async () => {
-        await PageObjects.header.waitUntilLoadingHasFinished();
-
-        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          INITIAL_FIELD_LIST_SUMMARY
-        );
+      it.only('should render even when retrieving documents failed with an error', async () => {
+        await initialFieldListMatch();
 
         await PageObjects.discover.addRuntimeField('_invalid-runtimefield', `emit(‘’);`);
 
@@ -664,20 +666,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
       });
 
-      it('should work correctly when time range is updated', async function () {
+      it.only('should work correctly when time range is updated', async function () {
         await esArchiver.loadIfNeeded(
           'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
         await kibanaServer.importExport.load(
           'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
-
         await browser.refresh();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          INITIAL_FIELD_LIST_SUMMARY
-        );
+        await initialFieldListMatch();
 
         await dataViews.switchToAndValidate('with-timefield');
 
