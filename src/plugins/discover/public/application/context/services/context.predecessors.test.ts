@@ -87,7 +87,6 @@ describe('context predecessors', function () {
           size,
           [],
           dataPluginMock,
-          false,
           discoverServiceMock
         );
       };
@@ -204,7 +203,7 @@ describe('context predecessors', function () {
     });
   });
 
-  describe('function fetchPredecessors with useNewFieldsApi set', function () {
+  describe('fetchPredecessors', function () {
     beforeEach(() => {
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
@@ -238,7 +237,6 @@ describe('context predecessors', function () {
           size,
           [],
           dataPluginMock,
-          true,
           discoverServiceMock
         );
       };

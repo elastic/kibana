@@ -113,7 +113,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsSource.map(build),
-      useNewFieldsApi: false,
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -139,7 +138,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsSource.map(build),
-      useNewFieldsApi: false,
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -166,7 +164,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsFields.map(build),
-      useNewFieldsApi: false,
       shouldShowFieldHandler: () => false,
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -196,7 +193,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
-      useNewFieldsApi: false,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -233,7 +229,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsSource.map(build),
-      useNewFieldsApi: false,
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -300,7 +295,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
-      useNewFieldsApi: false,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -341,7 +335,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
-      useNewFieldsApi: true,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -380,7 +373,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
-      useNewFieldsApi: true,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -418,7 +410,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsFields.map(build),
-      useNewFieldsApi: true,
       shouldShowFieldHandler: (fieldName: string) => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -495,7 +486,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
-      useNewFieldsApi: true,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -536,7 +526,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows,
-      useNewFieldsApi: true,
       shouldShowFieldHandler: showFieldHandler,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -574,7 +563,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsFieldsWithTopLevelObject.map(build),
-      useNewFieldsApi: true,
       shouldShowFieldHandler: () => false,
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -649,7 +637,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsFieldsWithTopLevelObject.map(build),
-      useNewFieldsApi: true,
       shouldShowFieldHandler: () => false,
       closePopover: closePopoverMockFn,
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -678,7 +665,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsFieldsWithTopLevelObject.map(build),
-      useNewFieldsApi: true,
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -713,7 +699,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsSource.map(build),
-      useNewFieldsApi: false,
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -739,7 +724,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsSource.map(build),
-      useNewFieldsApi: false,
       shouldShowFieldHandler: () => false,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
@@ -778,7 +762,6 @@ describe('Unified data table cell rendering', function () {
     const DataTableCellValue = getRenderCellValueFn({
       dataView: dataViewMock,
       rows: rowsFieldsUnmapped.map(build),
-      useNewFieldsApi: true,
       shouldShowFieldHandler: (fieldName: string) => ['unmapped'].includes(fieldName),
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,

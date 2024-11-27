@@ -414,7 +414,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderDocumentView={EmptyComponent}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}
-            useNewFieldsApi={true}
             maxDocFieldsDisplayed={50}
             consumer="timeline"
             totalHits={totalCount}

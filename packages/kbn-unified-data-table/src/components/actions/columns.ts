@@ -18,7 +18,6 @@ export function getStateColumnActions({
   capabilities,
   dataView,
   dataViews,
-  useNewFieldsApi,
   setAppState,
   columns,
   sort,
@@ -28,7 +27,6 @@ export function getStateColumnActions({
   capabilities: Capabilities;
   dataView: DataView;
   dataViews: DataViewsContract;
-  useNewFieldsApi: boolean;
   setAppState: (state: {
     columns: string[];
     sort?: string[][];
@@ -41,7 +39,7 @@ export function getStateColumnActions({
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
-    const nextColumns = addColumn(columns || [], columnName, useNewFieldsApi);
+    const nextColumns = addColumn(columns || [], columnName);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
     setAppState({ columns: nextColumns, sort: nextSort, settings });
   }
@@ -49,7 +47,7 @@ export function getStateColumnActions({
   function onRemoveColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
 
-    const nextColumns = removeColumn(columns || [], columnName, useNewFieldsApi);
+    const nextColumns = removeColumn(columns || [], columnName);
     // The state's sort property is an array of [sortByColumn,sortDirection]
     const nextSort = sort && sort.length ? sort.filter((subArr) => subArr[0] !== columnName) : [];
 
@@ -98,32 +96,28 @@ export function getStateColumnActions({
  * Helper function to provide a fallback to a single _source column if the given array of columns
  * is empty, and removes _source if there are more than 1 columns given
  * @param columns
- * @param useNewFieldsApi should a new fields API be used
  */
-function buildColumns(columns: string[], useNewFieldsApi = false) {
+function buildColumns(columns: string[]) {
   if (columns.length > 1 && columns.indexOf('_source') !== -1) {
     return columns.filter((col) => col !== '_source');
   } else if (columns.length !== 0) {
     return columns;
   }
-  return useNewFieldsApi ? [] : ['_source'];
+  return [];
 }
 
-function addColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
+function addColumn(columns: string[], columnName: string) {
   if (columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns([...columns, columnName], useNewFieldsApi);
+  return buildColumns([...columns, columnName]);
 }
 
-function removeColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {
+function removeColumn(columns: string[], columnName: string) {
   if (!columns.includes(columnName)) {
     return columns;
   }
-  return buildColumns(
-    columns.filter((col) => col !== columnName),
-    useNewFieldsApi
-  );
+  return buildColumns(columns.filter((col) => col !== columnName));
 }
 
 function moveColumn(columns: string[], columnName: string, newIndex: number) {

@@ -25,7 +25,7 @@ import {
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { DataViewField, type FieldSpec } from '@kbn/data-views-plugin/common';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
-import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
+import { FIELDS_LIMIT_SETTING } from '@kbn/discover-utils';
 import { FieldList } from '../../components/field_list';
 import { FieldListFilters } from '../../components/field_list_filters';
 import { FieldListGrouped, type FieldListGroupedProps } from '../../components/field_list_grouped';
@@ -174,10 +174,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   additionalFilters,
 }) => {
   const { dataViews, core } = services;
-  const useNewFieldsApi = useMemo(
-    () => !core.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
-    [core.uiSettings]
-  );
 
   const [selectedFieldsState, setSelectedFieldsState] = useState<SelectedFieldsResult>(
     INITIAL_SELECTED_FIELDS_RESULT
@@ -244,7 +240,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   useEffect(() => {
     if (
       searchMode !== 'documents' ||
-      !useNewFieldsApi ||
       stateService.creationOptions.disableMultiFieldsGroupingByParent
     ) {
       setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
@@ -257,7 +252,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     stateService.creationOptions.disableMultiFieldsGroupingByParent,
     selectedFieldsState.selectedFieldsMap,
     allFieldsModified,
-    useNewFieldsApi,
     setMultiFieldsMap,
     searchMode,
   ]);

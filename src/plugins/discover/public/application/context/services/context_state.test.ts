@@ -13,7 +13,6 @@ import { getState } from './context_state';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
@@ -32,8 +31,7 @@ describe('Test Discover Context State', () => {
       defaultSize: 4,
       history,
       uiSettings: {
-        get: <T>(key: string) =>
-          (key === SEARCH_FIELDS_FROM_SOURCE ? true : ['_source']) as unknown as T,
+        get: <T>(key: string) => ['_source'] as unknown as T,
       } as IUiSettingsClient,
       data: discoverServiceMock.data,
       dataView: dataViewMock,
@@ -46,9 +44,7 @@ describe('Test Discover Context State', () => {
   test('getState function default return', () => {
     expect(state.appState.getState()).toMatchInlineSnapshot(`
       Object {
-        "columns": Array [
-          "_source",
-        ],
+        "columns": Array [],
         "filters": Array [],
         "predecessorCount": 4,
         "successorCount": 4,
@@ -67,7 +63,7 @@ describe('Test Discover Context State', () => {
     state.setAppState({ predecessorCount: 10 });
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_a=(columns:!(_source),filters:!(),predecessorCount:10,successorCount:4)"`
+      `"/#?_a=(columns:!(),filters:!(),predecessorCount:10,successorCount:4)"`
     );
   });
   test('getState -> url to appState syncing', async () => {
@@ -172,7 +168,7 @@ describe('Test Discover Context State', () => {
     `);
     state.flushToUrl();
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match_phrase:(extension:(query:jpg))))))&_a=(columns:!(_source),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match_phrase:(extension:(query:png))))),predecessorCount:4,successorCount:4)"`
+      `"/#?_g=(filters:!(('$state':(store:globalState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!f,params:(query:jpg),type:phrase),query:(match_phrase:(extension:(query:jpg))))))&_a=(columns:!(),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'logstash-*',key:extension,negate:!t,params:(query:png),type:phrase),query:(match_phrase:(extension:(query:png))))),predecessorCount:4,successorCount:4)"`
     );
   });
 });

@@ -24,7 +24,6 @@ import {
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
   SHOW_FIELD_STATISTICS,
@@ -193,29 +192,6 @@ export const getUiSettings: (
     metric: {
       type: METRIC_TYPE.CLICK,
       name: 'discover:modifyColumnsOnSwitchTitle',
-    },
-  },
-  [SEARCH_FIELDS_FROM_SOURCE]: {
-    name: i18n.translate('discover.advancedSettings.discover.readFieldsFromSource', {
-      defaultMessage: 'Read fields from _source',
-    }),
-    description: i18n.translate(
-      'discover.advancedSettings.discover.readFieldsFromSourceDescription',
-      {
-        defaultMessage: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
-      }
-    ),
-    value: false,
-    category: ['discover'],
-    schema: schema.boolean(),
-    deprecation: {
-      message: i18n.translate(
-        'discover.advancedSettings.discover.readFieldsFromSourceDeprecation',
-        {
-          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
-        }
-      ),
-      docLinksKey: 'discoverSettings',
     },
   },
   [SHOW_FIELD_STATISTICS]: {

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { SEARCH_FIELDS_FROM_SOURCE, buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../plugin';
 
@@ -32,10 +32,6 @@ export interface EsDocSearchProps {
    * DataView entity
    */
   dataView: DataView;
-  /**
-   * If set, will always request source, regardless of the global `fieldsFromSource` setting
-   */
-  requestSource?: boolean;
   /**
    * Records fetched from text based query
    */
@@ -58,15 +54,13 @@ export function useEsDocSearch({
   id,
   index,
   dataView,
-  requestSource,
   textBasedHits,
   onBeforeFetch,
   onProcessRecord,
 }: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
   const [status, setStatus] = useState(ElasticRequestState.Loading);
   const [hit, setHit] = useState<DataTableRecord | null>(null);
-  const { data, uiSettings, analytics } = getUnifiedDocViewerServices();
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+  const { data, analytics } = getUnifiedDocViewerServices();
 
   const requestData = useCallback(async () => {
     if (!index) {
@@ -82,7 +76,7 @@ export function useEsDocSearch({
         data.search.search({
           params: {
             index: dataView.getIndexPattern(),
-            body: buildSearchBody(id, index, dataView, useNewFieldsApi, requestSource)?.body,
+            body: buildSearchBody(id, index, dataView)?.body,
           },
         })
       );
@@ -114,17 +108,7 @@ export function useEsDocSearch({
         duration: singleDocFetchingDuration,
       });
     }
-  }, [
-    analytics,
-    data.search,
-    dataView,
-    id,
-    index,
-    useNewFieldsApi,
-    requestSource,
-    onBeforeFetch,
-    onProcessRecord,
-  ]);
+  }, [analytics, data.search, dataView, id, index, onBeforeFetch, onProcessRecord]);
 
   useEffect(() => {
     if (textBasedHits) {
@@ -145,13 +129,7 @@ export function useEsDocSearch({
  * helper function to build a query body for Elasticsearch
  * https://www.elastic.co/guide/en/elasticsearch/reference/current//query-dsl-ids-query.html
  */
-export function buildSearchBody(
-  id: string,
-  index: string,
-  dataView: DataView,
-  useNewFieldsApi: boolean,
-  requestAllFields?: boolean
-): RequestBody | undefined {
+export function buildSearchBody(id: string, index: string, dataView: DataView): RequestBody {
   const computedFields = dataView.getComputedFields();
   const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
@@ -164,20 +142,10 @@ export function buildSearchBody(
       stored_fields: ['*'],
       script_fields: computedFields.scriptFields,
       version: true,
+      _source: true,
+      runtime_mappings: runtimeFields ? runtimeFields : {},
+      fields: [{ field: '*', include_unmapped: true }, ...(computedFields.docvalueFields || [])],
     },
   };
-  if (!request.body) {
-    return undefined;
-  }
-  if (useNewFieldsApi) {
-    request.body.fields = [{ field: '*', include_unmapped: true }];
-    request.body.runtime_mappings = runtimeFields ? runtimeFields : {};
-    if (requestAllFields) {
-      request.body._source = true;
-    }
-  } else {
-    request.body._source = true;
-  }
-  request.body.fields = [...(request.body?.fields || []), ...(computedFields.docvalueFields || [])];
   return request;
 }

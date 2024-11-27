@@ -18,10 +18,6 @@ export interface DataVisualizerDataViewManagementProps {
    * Currently selected data view
    */
   currentDataView?: DataView;
-  /**
-   * Read from the Fields API
-   */
-  useNewFieldsApi?: boolean;
 }
 
 export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewManagementProps) {
@@ -29,9 +25,9 @@ export function DataVisualizerDataViewManagement(props: DataVisualizerDataViewMa
     services: { dataViewFieldEditor, application },
   } = useDataVisualizerKibana();
 
-  const { useNewFieldsApi, currentDataView } = props;
+  const { currentDataView } = props;
   const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
-  const canEditDataViewField = !!dataViewFieldEditPermission && useNewFieldsApi;
+  const canEditDataViewField = !!dataViewFieldEditPermission;
   const [isAddDataViewFieldPopoverOpen, setIsAddDataViewFieldPopoverOpen] = useState(false);
 
   const closeFieldEditor = useRef<() => void | undefined>();

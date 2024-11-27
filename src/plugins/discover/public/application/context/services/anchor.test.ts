@@ -36,7 +36,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(() => {
         expect(searchSourceStub.fetch$.calledOnce).toBe(true);
@@ -49,7 +48,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(() => {
         const setParentSpy = searchSourceStub.setParent;
@@ -64,7 +62,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(() => {
         const setFieldSpy = searchSourceStub.setField;
@@ -78,7 +75,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(() => {
         const setVersionSpy = searchSourceStub.setField.withArgs('version');
@@ -93,7 +89,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(() => {
         const setSizeSpy = searchSourceStub.setField.withArgs('size');
@@ -108,7 +103,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(() => {
         const setQuerySpy = searchSourceStub.setField.withArgs('query');
@@ -134,7 +128,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(() => {
         const setSortSpy = searchSourceStub.setField.withArgs('sort');
@@ -146,27 +139,8 @@ describe('context app', function () {
       });
     });
 
-    it('should update search source correctly when useNewFieldsApi set to false', function () {
-      const searchSource = updateSearchSource(
-        savedSearchMock.searchSource,
-        'id',
-        [],
-        false,
-        dataViewMock
-      );
-      const searchRequestBody = searchSource.getSearchRequestBody();
-      expect(searchRequestBody._source).toBeInstanceOf(Object);
-      expect(searchRequestBody.track_total_hits).toBe(false);
-    });
-
-    it('should update search source correctly when useNewFieldsApi set to true', function () {
-      const searchSource = updateSearchSource(
-        savedSearchMock.searchSource,
-        'id',
-        [],
-        true,
-        dataViewMock
-      );
+    it('should update search source correctly', function () {
+      const searchSource = updateSearchSource(savedSearchMock.searchSource, 'id', [], dataViewMock);
       const searchRequestBody = searchSource.getSearchRequestBody();
       expect(searchRequestBody._source).toBe(false);
       expect(searchRequestBody.track_total_hits).toBe(false);
@@ -180,7 +154,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(
         () => {
@@ -203,7 +176,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         discoverServiceMock
       ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
@@ -229,7 +201,6 @@ describe('context app', function () {
         dataView,
         searchSourceStub,
         [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        false,
         services
       ).then(({ anchorRow, interceptedWarnings }) => {
         expect(anchorRow).toHaveProperty('raw._id', '1');
@@ -239,28 +210,22 @@ describe('context app', function () {
     });
   });
 
-  describe('useNewFields API', () => {
-    beforeEach(() => {
-      searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 't' }]);
-    });
+  it('should request fields', function () {
+    searchSourceStub = createSearchSourceStub([{ _id: 'hit1', _index: 't' }]);
+    searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
 
-    it('should request fields if useNewFieldsApi set', function () {
-      searchSourceStub._stubHits = [{ property1: 'value1' }, { property2: 'value2' }];
-
-      return fetchAnchor(
-        'id',
-        dataView,
-        searchSourceStub,
-        [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
-        true,
-        discoverServiceMock
-      ).then(() => {
-        const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
-        const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
-        expect(setFieldsSpy.calledOnce).toBe(true);
-        expect(removeFieldsSpy.calledOnce).toBe(true);
-        expect(setFieldsSpy.firstCall.args[1]).toEqual([{ field: '*', include_unmapped: true }]);
-      });
+    return fetchAnchor(
+      'id',
+      dataView,
+      searchSourceStub,
+      [{ '@timestamp': SortDirection.desc }, { _doc: SortDirection.desc }],
+      discoverServiceMock
+    ).then(() => {
+      const setFieldsSpy = searchSourceStub.setField.withArgs('fields');
+      const removeFieldsSpy = searchSourceStub.removeField.withArgs('fieldsFromSource');
+      expect(setFieldsSpy.calledOnce).toBe(true);
+      expect(removeFieldsSpy.calledOnce).toBe(true);
+      expect(setFieldsSpy.firstCall.args[1]).toEqual([{ field: '*', include_unmapped: true }]);
     });
   });
 });

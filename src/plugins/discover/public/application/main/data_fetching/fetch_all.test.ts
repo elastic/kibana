@@ -83,7 +83,6 @@ describe('test fetchAll', () => {
       }),
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
-      useNewFieldsApi: true,
       savedSearch: {
         ...savedSearchMock,
         searchSource,
@@ -256,7 +255,6 @@ describe('test fetchAll', () => {
       inspectorAdapters: { requests: new RequestAdapter() },
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
-      useNewFieldsApi: true,
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       getAppState: () => ({ query }),
@@ -379,7 +377,6 @@ describe('test fetchAll', () => {
         inspectorAdapters: { requests: new RequestAdapter() },
         searchSessionId: '123',
         initialFetchStatus: FetchStatus.UNINITIALIZED,
-        useNewFieldsApi: true,
         savedSearch: savedSearchMock,
         services: discoverServiceMock,
         getAppState: () => ({ query }),

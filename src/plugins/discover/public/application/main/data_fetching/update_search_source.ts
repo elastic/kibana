@@ -11,7 +11,7 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SEARCH_FIELDS_FROM_SOURCE, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../utils/sorting';
 
@@ -33,7 +33,6 @@ export function updateVolatileSearchSource(
   }
 ) {
   const { uiSettings, data } = services;
-  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
 
   const usedSort = getSortForSearchSource({
     sort,
@@ -55,10 +54,6 @@ export function updateVolatileSearchSource(
 
   searchSource.setField('filter', filters);
 
-  if (useNewFieldsApi) {
-    searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
-  } else {
-    searchSource.removeField('fields');
-  }
+  searchSource.removeField('fieldsFromSource');
+  searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
 }

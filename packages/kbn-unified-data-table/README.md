@@ -26,7 +26,6 @@ Props description:
 | **showFullScreenButton** | (optional)boolean | Determines whether the full screen button should be displayed. |
 | **isSortEnabled** | (optional)boolean | Manage user sorting control. |
 | **sort** | SortOrder[] | Current sort setting. |
-| **useNewFieldsApi** | boolean | How the data is fetched. |
 | **isPaginationEnabled** | (optional)boolean | Manage pagination control. |
 | **controlColumnIds** | (optional)string[] | List of used control columns (available: 'openDetails', 'select'). |
 | **rowHeightState** | (optional)number | Row height from state. |
@@ -145,7 +144,6 @@ Usage example:
       renderCustomGridBody={renderCustomGridBody}
       rowsPerPageOptions={[10, 30, 40, 100]}
       showFullScreenButton={false}
-      useNewFieldsApi={true}
       maxDocFieldsDisplayed={50}
       consumer="timeline"
       totalHits={
@@ -210,7 +208,6 @@ const {
     dataView,
     dataViews,
     setAppState: stateContainer.appState.update,
-    useNewFieldsApi,
     columns,
     sort,
   });

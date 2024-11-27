@@ -32,7 +32,6 @@ const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 export const getRenderCellValueFn = ({
   dataView,
   rows,
-  useNewFieldsApi,
   shouldShowFieldHandler,
   closePopover,
   fieldFormats,
@@ -43,7 +42,6 @@ export const getRenderCellValueFn = ({
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
-  useNewFieldsApi: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   closePopover: () => void;
   fieldFormats: FieldFormatsStart;
@@ -111,10 +109,7 @@ export const getRenderCellValueFn = ({
      * this is used for legacy stuff like displaying products of our ecommerce dataset
      */
     const useTopLevelObjectColumns = Boolean(
-      useNewFieldsApi &&
-        !field &&
-        row?.raw.fields &&
-        !(row.raw.fields as Record<string, unknown[]>)[columnId]
+      !field && row?.raw.fields && !(row.raw.fields as Record<string, unknown[]>)[columnId]
     );
 
     if (isDetails) {
