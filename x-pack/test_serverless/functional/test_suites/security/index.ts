@@ -8,8 +8,6 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  const isCloud = !!process.env.TEST_CLOUD;
-
   describe('serverless security UI', function () {
     this.tags(['esGate']);
 
