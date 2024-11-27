@@ -15,6 +15,7 @@ import { z } from '@kbn/zod';
 import datemath from '@elastic/datemath';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { preconditionFailed } from '@hapi/boom';
 import { createInvestigateAppServerRoute } from '../create_investigate_app_server_route';
 import { investigationRepositoryFactory } from '../../services/investigation_repository';
 
@@ -53,6 +54,10 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
       },
     } = params;
 
+    if (!plugins.observabilityAIAssistant) {
+      throw preconditionFailed('Observability AI Assistant plugin is not available');
+    }
+
     const start = datemath.parse(rangeFrom)?.valueOf()!;
     const end = datemath.parse(rangeTo)?.valueOf()!;
 
@@ -85,9 +90,9 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
         logger,
         plugin: 'investigateApp',
       }),
-      plugins.apmDataAccess.setup.getApmIndices(soClient),
-      plugins.observabilityAIAssistant
-        .start()
+      plugins.apmDataAccess.setup.getApmIndices(),
+      plugins
+        .observabilityAIAssistant!.start()
         .then((observabilityAIAssistantStart) =>
           observabilityAIAssistantStart.service.getClient({ request, scopes: ['observability'] })
         ),

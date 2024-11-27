@@ -34,7 +34,7 @@ export interface ConfigSchema {}
 export interface InvestigateAppSetupDependencies {
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  slo: SLOServerStart;
+  slo: SLOServerSetup;
   alerting: AlertingPluginSetup;
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
@@ -45,7 +45,7 @@ export interface InvestigateAppSetupDependencies {
 
 export interface InvestigateAppStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
-  slo: SLOServerSetup;
+  slo: SLOServerStart;
   alerting: AlertingPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
