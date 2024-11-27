@@ -82,6 +82,9 @@ export class ConnectorUsageReportingTask {
   }
 
   public start = async (taskManager?: TaskManagerStartContract) => {
+    if (!this.projectId) {
+      return;
+    }
     if (!taskManager) {
       this.logger.error(
         `Missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
@@ -111,10 +114,11 @@ export class ConnectorUsageReportingTask {
 
     if (!this.projectId) {
       this.logger.warn(
-        `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+        `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}, reporting task will be deleted`
       );
       return {
         state,
+        shouldDeleteTask: true,
       };
     }
 

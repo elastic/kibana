@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useColumns } from './use_data_grid_columns';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { configMock } from '../../__mocks__/config';

@@ -37,7 +37,6 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import { LensByReferenceInput } from '../embeddable';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
@@ -291,7 +290,6 @@ export const LensTopNavMenu = ({
     navigation,
     uiSettings,
     application,
-    attributeService,
     share,
     dataViewFieldEditor,
     dataViewEditor,
@@ -529,11 +527,9 @@ export const LensTopNavMenu = ({
 
   const topNavConfig = useMemo(() => {
     const showReplaceInDashboard =
-      initialContext?.originatingApp === 'dashboards' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'dashboards' && !initialInput?.savedObjectId;
     const showReplaceInCanvas =
-      initialContext?.originatingApp === 'canvas' &&
-      !(initialInput as LensByReferenceInput)?.savedObjectId;
+      initialContext?.originatingApp === 'canvas' && !initialInput?.savedObjectId;
     const contextFromEmbeddable =
       initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable;
 
@@ -690,8 +686,7 @@ export const LensTopNavMenu = ({
                   panelTimeRange: contextFromEmbeddable ? initialContext.panelTimeRange : undefined,
                 },
                 {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+                  saveToLibrary: Boolean(initialInput?.savedObjectId),
                 }
               );
             }
@@ -801,7 +796,6 @@ export const LensTopNavMenu = ({
     defaultLensTitle,
     onAppLeave,
     runSave,
-    attributeService,
     setIsSaveModalVisible,
     goBackToOriginatingApp,
     redirectToOrigin,
