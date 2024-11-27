@@ -42,7 +42,7 @@ import {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
-import { CONSOLE_COMMANDS } from '../../../common/translations';
+import { CONSOLE_COMMANDS, CROWDSTRIKE_CONSOLE_COMMANDS } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
@@ -164,6 +164,7 @@ export const getEndpointConsoleCommands = ({
   const featureFlags = ExperimentalFeaturesService.get();
 
   const isUploadEnabled = featureFlags.responseActionUploadEnabled;
+  const crowdstrikeRunScriptEnabled = featureFlags.crowdstrikeRunScriptEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
     // Agent capabilities is only validated for Endpoint agent types
@@ -520,6 +521,74 @@ export const getEndpointConsoleCommands = ({
       privileges: endpointPrivileges,
     }),
   });
+  if (crowdstrikeRunScriptEnabled) {
+    consoleCommands.push({
+      name: 'runscript',
+      about: getCommandAboutInfo({
+        aboutInfo: CROWDSTRIKE_CONSOLE_COMMANDS.execute.about,
+        isSupported: doesEndpointSupportCommand('runscript'),
+      }),
+      RenderComponent: ExecuteActionResult,
+      meta: {
+        agentType,
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: `C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true" \\n
+Run a script saved to the CrowdStrike cloud with the specified command line arguments \\n
+C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true" -Timeout=180 \\n
+Run a script saved to the CrowdStrike cloud with the specified command line arguments and 180 seconds timeout \\n
+C:\\> runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine="" \\n
+Run a raw script whose entire contents are provided in the "-Raw=" flag \\n
+C:\\> runscript -HostPath="C:\\temp\\LocalScript.ps1" -CommandLine="-Verbose true" \\n
+Run a script from a path on the remote host with the specified command line arguments`,
+      exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.execute.about,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
+      mustHaveArgs: true,
+      args: {
+        Raw: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.raw.about,
+          mustHaveValue: 'non-empty-string',
+        },
+        CloudFile: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.cloudFile.about,
+          mustHaveValue: 'non-empty-string',
+        },
+        CommandLine: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.commandLine.about,
+          mustHaveValue: 'non-empty-string',
+        },
+        HostPath: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.hostPath.about,
+          mustHaveValue: 'non-empty-string',
+        },
+        Timeout: {
+          required: false,
+          allowMultiples: false,
+          about: CROWDSTRIKE_CONSOLE_COMMANDS.execute.args.timeout.about,
+          mustHaveValue: 'non-empty-string',
+        },
+        ...commandCommentArgument(),
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 6,
+      helpDisabled: !doesEndpointSupportCommand('runscript'),
+      helpHidden: !getRbacControl({
+        commandName: 'runscript',
+        privileges: endpointPrivileges,
+      }),
+    });
+  }
 
   switch (agentType) {
     case 'sentinel_one':

@@ -215,6 +215,66 @@ export const CONSOLE_COMMANDS = {
   },
 };
 
+export const CROWDSTRIKE_CONSOLE_COMMANDS = {
+  execute: {
+    args: {
+      raw: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.raw.about',
+          {
+            defaultMessage: 'Raw script content',
+          }
+        ),
+      },
+      cloudFile: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.cloudFile.about',
+          {
+            defaultMessage: 'Script name in cloud storage',
+          }
+        ),
+      },
+      commandLine: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.commandLine.about',
+          {
+            defaultMessage: 'Command line arguments',
+          }
+        ),
+      },
+      hostPath: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.hostPath.about',
+          {
+            defaultMessage: 'Absolute or relative path of script on host machine',
+          }
+        ),
+      },
+      timeout: {
+        about: i18n.translate(
+          'xpack.securitySolution.crowdStrikeConsoleCommands.execute.args.timeout.about',
+          {
+            defaultMessage: 'Timeout in seconds',
+          }
+        ),
+      },
+    },
+    title: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.execute.title', {
+      defaultMessage: 'Isolate',
+    }),
+    about: i18n.translate('xpack.securitySolution.crowdStrikeConsoleCommands.execute.about', {
+      defaultMessage: 'Run a script on the host',
+    }),
+    privileges: i18n.translate(
+      'xpack.securitySolution.crowdStrikeConsoleCommands.execute.privileges',
+      {
+        defaultMessage:
+          'Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission.',
+      }
+    ),
+  },
+};
+
 export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
   return {
     title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {
