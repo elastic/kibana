@@ -64,6 +64,7 @@ export const GridPanel = forwardRef<
 
     useEffect(
       () => {
+        /** Update the styles of the panel via a subscription to prevent re-renders */
         const activePanelStyleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
           gridLayoutStateManager.gridLayout$,
@@ -130,7 +131,6 @@ export const GridPanel = forwardRef<
             }
           });
 
-        /** Update the styles of the panel via a subscription to prevent re-renders */
         const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {

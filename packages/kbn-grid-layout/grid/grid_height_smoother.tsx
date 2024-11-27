@@ -43,6 +43,7 @@ export const GridHeightSmoother = ({
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
     });
+
     const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
       (expandedPanelId) => {
         if (!smoothHeightRef.current) return;
@@ -50,11 +51,9 @@ export const GridHeightSmoother = ({
         if (expandedPanelId) {
           const smoothHeightRefY =
             smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
-
           const gutterSize = parseFloat(euiThemeVars.euiSizeL);
 
           // When panel is expanded, ensure the page occupies the full viewport height:
-
           smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px)`;
           smoothHeightRef.current.style.transition = 'none';
         } else {
