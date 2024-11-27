@@ -89,11 +89,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     getStyles(euiTheme)
   );
 
-  const buttonClassNames = classNames(
-    'sideNavItem',
-    { 'sideNavItem--isActive': isActive },
-    getButtonStyles(euiTheme, isActive)
-  );
+  const buttonClassNames = classNames('sideNavItem', getButtonStyles(euiTheme, isActive));
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -140,6 +136,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
         size="s"
         fullWidth
         className={buttonClassNames}
+        data-test-subj={dataTestSubj}
       >
         {title}
       </EuiButton>
