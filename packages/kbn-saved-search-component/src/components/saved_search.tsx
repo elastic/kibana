@@ -16,6 +16,7 @@ import type {
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
+import { css } from '@emotion/react';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
@@ -39,8 +40,10 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     height,
   } = props;
 
-  const { enableFlyout: flyoutEnabled = true, enableFilters: filtersEnabled = true } =
-    props.displayOptions ?? {};
+  const {
+    enableDocumentViewer: documentViewerEnabled = true,
+    enableFilters: filtersEnabled = true,
+  } = props.displayOptions ?? {};
 
   useEffect(() => {
     // Ensure we get a stabilised set of initial state incase dependencies change, as
@@ -72,7 +75,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
               attributes: { ...attributes, references },
               timeRange,
               nonPersistedDisplayOptions: {
-                enableFlyout: flyoutEnabled,
+                enableDocumentViewer: documentViewerEnabled,
                 enableFilters: filtersEnabled,
               },
             } as SearchEmbeddableSerializedState,
@@ -91,9 +94,9 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     };
   }, [
     dataViews,
+    documentViewerEnabled,
     filters,
     filtersEnabled,
-    flyoutEnabled,
     index,
     query,
     searchSourceService,
@@ -106,7 +109,14 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   }
 
   return initialSerializedState ? (
-    <div style={{ height: height ?? '100%' }}>
+    <div
+      css={css`
+        height: ${height ?? '100%'};
+        > [data-test-subj='embeddedSavedSearchDocTable'] {
+          height: 100%;
+        }
+      `}
+    >
       <SavedSearchComponentTable {...props} initialSerializedState={initialSerializedState} />
     </div>
   ) : null;
@@ -198,6 +208,7 @@ const SavedSearchComponentTable: React.FC<
       onApiAvailable={(api) => {
         embeddableApi.current = api;
       }}
+      hidePanelChrome
     />
   );
 };

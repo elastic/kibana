@@ -95,7 +95,7 @@ export function ClassicServiceLogsStream() {
       query={query}
       height={'60vh'}
       displayOptions={{
-        enableFlyout: true,
+        enableDocumentViewer: true,
         enableFilters: false,
       }}
     />

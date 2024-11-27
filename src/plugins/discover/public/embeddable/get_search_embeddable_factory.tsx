@@ -320,9 +320,10 @@ export const getSearchEmbeddableFactory = ({
                             ? undefined
                             : onAddFilter
                         }
-                        enableFlyout={
-                          initialState.nonPersistedDisplayOptions?.enableFlyout !== undefined
-                            ? initialState.nonPersistedDisplayOptions?.enableFlyout
+                        enableDocumentViewer={
+                          initialState.nonPersistedDisplayOptions?.enableDocumentViewer !==
+                          undefined
+                            ? initialState.nonPersistedDisplayOptions?.enableDocumentViewer
                             : true
                         }
                         stateManager={searchEmbeddable.stateManager}

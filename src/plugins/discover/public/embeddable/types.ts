@@ -62,7 +62,7 @@ export type SearchEmbeddableSerializedAttributes = Omit<
 // These are options that are not persisted in the saved object, but can be used by solutions
 // when utilising the SavedSearchComponent package outside of dashboard contexts.
 export interface NonPersistedDisplayOptions {
-  enableFlyout?: boolean;
+  enableDocumentViewer?: boolean;
   enableFilters?: boolean;
 }
 
@@ -73,7 +73,6 @@ export type SearchEmbeddableSerializedState = SerializedTitles &
     attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
     // by reference
     savedObjectId?: string;
-  } & {
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
@@ -83,7 +82,6 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     savedObjectTitle?: string;
     savedObjectId?: string;
     savedObjectDescription?: string;
-  } & {
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 

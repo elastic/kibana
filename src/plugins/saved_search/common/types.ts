@@ -68,8 +68,6 @@ export interface SavedSearchAttributes {
   breakdownField?: string;
   density?: DataGridDensity;
   visContext?: VisContextUnmapped;
-
-  enableFlyout?: boolean;
 }
 
 /** @internal **/
