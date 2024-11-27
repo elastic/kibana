@@ -5,15 +5,22 @@
  * 2.0.
  */
 
+import _ from 'lodash';
+
 import { getSavedObjectTypes } from '.';
 
 describe('space aware models', () => {
   it('should have the same mappings for space and non-space aware agent policies', () => {
     const soTypes = getSavedObjectTypes();
 
-    expect(soTypes['ingest-agent-policies'].mappings).toEqual(
-      soTypes['fleet-agent-policies'].mappings
+    const legacyMappings = _.omit(
+      soTypes['ingest-agent-policies'].mappings,
+      'properties.monitoring_diagnostics',
+      'properties.monitoring_http',
+      'properties.monitoring_pprof_enabled'
     );
+
+    expect(legacyMappings).toEqual(soTypes['fleet-agent-policies'].mappings);
   });
   it('should have the same mappings for space and non-space aware package policies', () => {
     const soTypes = getSavedObjectTypes();

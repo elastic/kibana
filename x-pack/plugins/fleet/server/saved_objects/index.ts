@@ -214,6 +214,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           schema_version: { type: 'version' },
@@ -305,6 +306,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '5': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -316,6 +325,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           schema_version: { type: 'version' },
@@ -348,9 +358,6 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
-          monitoring_pprof_enabled: { type: 'boolean', index: false },
-          monitoring_http: { type: 'flattened', index: false },
-          monitoring_diagnostics: { type: 'flattened', index: false },
         },
       },
       modelVersions: {
@@ -358,15 +365,7 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'mappings_addition',
-              addedMappings: {
-                monitoring_pprof_enabled: { type: 'boolean', index: false },
-                monitoring_http: { type: 'flattened', index: false },
-                monitoring_diagnostics: { type: 'flattened', index: false },
-              },
-            },
-            {
-              type: 'data_backfill',
-              backfillFn: backfillAgentPolicyToV4,
+              addedMappings: {},
             },
           ],
         },
