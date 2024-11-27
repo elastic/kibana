@@ -1257,6 +1257,28 @@ describe('ConfigureCases', () => {
     });
   });
 
+  describe('observable types', () => {
+    let appMockRender: AppMockRenderer;
+    const persistCaseConfigure = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false, isAtLeastGold: () => true });
+    });
+
+    it('should render observable types section', async () => {
+      appMockRender.render(<ConfigureCases />);
+
+      expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
+    });
+  });
+
   describe('rendering with license limitations', () => {
     let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
