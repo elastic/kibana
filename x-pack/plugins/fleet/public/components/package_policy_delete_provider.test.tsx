@@ -134,7 +134,8 @@ function createMockAgentPolicies(
   }
 }
 
-describe('PackagePolicyDeleteProvider', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/199204
+describe.skip('PackagePolicyDeleteProvider', () => {
   it('Should show delete integrations action and cancel modal', async () => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
     sendGetAgentsMock.mockResolvedValue({
