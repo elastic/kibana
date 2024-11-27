@@ -338,3 +338,9 @@ export async function syncStream({
     mappings: componentTemplate.template.mappings?.properties,
   });
 }
+
+export async function streamsEnabled({ scopedClusterClient }: BaseParams) {
+  return await scopedClusterClient.asInternalUser.indices.exists({
+    index: STREAMS_INDEX,
+  });
+}
