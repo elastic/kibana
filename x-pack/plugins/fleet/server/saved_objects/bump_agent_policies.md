@@ -17,7 +17,7 @@ When making changes to agent policy SO, the changes are not automatically deploy
 
 ## Package policy SO changes
 
-Similarly, package policy SO changes are not automatically trigger a redeploy of agent policies using them. To trigger an agent policy bump using package policies, add a new model version to the package policy SO type with `bump_agent_policy_revision: true`.
+Similarly, package policy SO changes do not automatically trigger a redeploy of agent policies using them. To trigger an agent policy bump using package policies, add a new model version to the package policy SO type with `bump_agent_policy_revision: true`.
 
 ```
    '2': {
