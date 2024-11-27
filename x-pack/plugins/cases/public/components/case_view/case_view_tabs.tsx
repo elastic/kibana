@@ -70,17 +70,17 @@ FilesBadge.displayName = 'FilesBadge';
 
 const ObservablesBadge = ({
   activeTab,
-  observableStatsData,
   isLoading,
   euiTheme,
+  count,
 }: {
   activeTab: string;
-  observableStatsData: { total: number } | undefined;
+  count: number;
   isLoading: boolean;
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <>
-    {!isLoading && observableStatsData && (
+    {!isLoading && count && (
       <EuiNotificationBadge
         css={css`
           margin-left: ${euiTheme.size.xs};
@@ -88,7 +88,7 @@ const ObservablesBadge = ({
         data-test-subj="case-view-observables-stats-badge"
         color={activeTab === CASE_VIEW_PAGE_TABS.OBSERVABLES ? 'accent' : 'subdued'}
       >
-        {observableStatsData.total > 0 ? observableStatsData.total : 0}
+        {count > 0 ? count : 0}
       </EuiNotificationBadge>
     )}
     <ExperimentalBadge compact />
@@ -216,7 +216,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         badge: (
           <ObservablesBadge
             isLoading={isLoadingObservables}
-            observableStatsData={observableStatsData}
+            count={observableStatsData.total}
             activeTab={activeTab}
             euiTheme={euiTheme}
           />
