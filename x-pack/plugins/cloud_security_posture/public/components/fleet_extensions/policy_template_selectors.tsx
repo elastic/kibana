@@ -155,6 +155,19 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
             </p>
           </EuiText>
         </EuiCallOut>
+        <EuiSpacer size="m" />
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.cnvm.awsSupportText"
+          defaultMessage="We currently support <b>AWS(Amazon Web Services)</b> cloud provider"
+          values={{
+            b: (chunks) => <b>{chunks}</b>,
+          }}
+        />
+        <EuiSpacer size="s" />
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.cnvm.chooseNameAndDescriptionText"
+          defaultMessage="Choose a name and description to help identify this integration"
+        />
       </>
     )}
   </EuiText>
