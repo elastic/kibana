@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { validateDateRangeWithinMinMax } from './utils';
+import { isDateRangeValid } from './utils';
 
-describe('validateDateRangeWithinMinMax', () => {
+describe('isDateRangeValid', () => {
   describe('Valid ranges', () => {
     it.each([
       ['both start and end date is `now`', { start: 'now', end: 'now' }],
       ['start date is `now-10s` and end date is `now`', { start: 'now-10s', end: 'now' }],
       ['bounded within the min and max date range', { start: 'now-8d', end: 'now-4s' }],
     ])('should return true if %s', (_, { start, end }) => {
-      expect(validateDateRangeWithinMinMax(start, end)).toBe(true);
+      expect(isDateRangeValid({ start, end })).toBe(true);
     });
   });
 
@@ -27,7 +27,7 @@ describe('validateDateRangeWithinMinMax', () => {
         { start: 'now-3s', end: 'now-10s' },
       ],
     ])('should return false if the date range %s', (_, { start, end }) => {
-      expect(validateDateRangeWithinMinMax(start, end)).toBe(false);
+      expect(isDateRangeValid({ start, end })).toBe(false);
     });
   });
 });

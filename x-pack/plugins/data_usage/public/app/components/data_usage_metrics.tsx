@@ -20,7 +20,7 @@ import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
 import {
   DEFAULT_DATE_RANGE_OPTIONS,
   transformToUTCtime,
-  validateDateRangeWithinMinMax,
+  isDateRangeValid,
 } from '../../../common/utils';
 import { useDateRangePicker } from '../hooks/use_date_picker';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
@@ -118,7 +118,10 @@ export const DataUsageMetrics = memo(
 
     const isValidDateRange = useMemo(
       () =>
-        validateDateRangeWithinMinMax(dateRangePickerState.startDate, dateRangePickerState.endDate),
+        isDateRangeValid({
+          start: dateRangePickerState.startDate,
+          end: dateRangePickerState.endDate,
+        }),
       [dateRangePickerState.endDate, dateRangePickerState.startDate]
     );
 

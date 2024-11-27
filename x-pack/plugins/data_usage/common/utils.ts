@@ -38,7 +38,7 @@ export const transformToUTCtime = ({
   };
 };
 
-export const validateDateRangeWithinMinMax = (start: string, end: string): boolean => {
+export const isDateRangeValid = ({ start, end }: { start: string; end: string }): boolean => {
   const startDate = momentDateParser(start);
   const endDate = momentDateParser(end);
 
