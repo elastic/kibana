@@ -32,7 +32,7 @@ Go through the relevant title, description and data sources from the above query
 - Always reply with a JSON object with the key "query" and the value as the semantic search query inside three backticks as shown in the below example.
 </guidelines>
 
-<example>
+<example_response>
 U: <query>
 Title: Processes created by netsh
 Description: This search looks for processes launching netsh.exe to execute various commands via the netsh command-line utility. Netsh.exe is a command-line scripting utility that allows you to, either locally or remotely, display or modify the network configuration of a computer that is currently running. Netsh can be used as a persistence proxy technique to execute a helper .dll when netsh.exe is executed. In this search, we are looking for processes spawned by netsh.exe that are executing commands via the command line. Deprecated because we have another detection of the same type.
@@ -42,7 +42,7 @@ A: Please find the query keywords JSON object below:
 \`\`\`json
 {{"query": "windows host endpoint netsh.exe process creation command-line utility network configuration persistence proxy dll execution sysmon event id 1"}}
 \`\`\`
-</example>`,
+</example_response>`,
   ],
   ['ai', 'Please find the query keywords JSON object below:'],
 ]);
