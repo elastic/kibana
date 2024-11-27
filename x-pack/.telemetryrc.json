@@ -10,5 +10,25 @@
     "output": "plugins/telemetry_collection_xpack/schema/xpack_monitoring.json",
     "root": "plugins/monitoring/server/telemetry_collection/",
     "exclude": []
+  },
+  {
+    "output": "plugins/telemetry_collection_xpack/schema/xpack_platform.json",
+    "root": "platform/",
+    "exclude": []
+  },
+  {
+    "output": "plugins/telemetry_collection_xpack/schema/xpack_observability.json",
+    "root": "solutions/observability",
+    "exclude": []
+  },
+  {
+    "output": "plugins/telemetry_collection_xpack/schema/xpack_search.json",
+    "root": "solutions/search",
+    "exclude": []
+  },
+  {
+    "output": "plugins/telemetry_collection_xpack/schema/xpack_security.json",
+    "root": "solutions/security",
+    "exclude": []
   }
 ]
