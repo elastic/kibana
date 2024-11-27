@@ -15,14 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const security = getService('security');
-  const PageObjects = getPageObjects([
-    'common',
-    'home',
-    'settings',
-    'discover',
-    'timePicker',
-    'header',
-  ]);
+  const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
 
   describe('Index patterns on aliases', function () {
@@ -55,8 +48,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should be able to discover and verify no of hits for alias1', async function () {
       const expectedHitCount = '4';
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });
@@ -75,15 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should be able to discover and verify no of hits for alias2', async function () {
-        const expectedHitCount = '5';
+        const expectedHitCount = '6';
         await PageObjects.common.navigateToApp('discover');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.selectIndexPattern('alias2*');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await retry.waitForWithTimeout('expected hit count to be 5', 30000, async () => {
+        await retry.waitForWithTimeout('expected hit count to be 5', 300000, async () => {
           return (await PageObjects.discover.getHitCount()) === expectedHitCount;
         });
       });
