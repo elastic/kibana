@@ -54,11 +54,9 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
     </>
   );
 
-  return disabled && disabledText ? (
-    <EuiToolTip position="right" content={disabledText}>
+  return (
+    <EuiToolTip position="right" content={disabled && disabledText}>
       {content}
     </EuiToolTip>
-  ) : (
-    content
   );
 });
