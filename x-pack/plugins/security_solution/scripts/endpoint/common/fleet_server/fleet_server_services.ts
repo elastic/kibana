@@ -361,8 +361,17 @@ const startFleetServerWithDocker = async ({
         }
 
         fleetServerVersionInfo = isServerless
-          ? // `/usr/bin/fleet-server` process does not seem to support a `--version` type of argument
-            'Running latest standalone fleet server'
+          ? (
+              await execa
+                .command(`docker exec ${containerName} /usr/bin/fleet-server --version`)
+                .catch((err) => {
+                  log.verbose(
+                    `Failed to retrieve fleet-server (serverless/standalone) version information from running instance.`,
+                    err
+                  );
+                  return { stdout: 'Unable to retrieve version information' };
+                })
+            ).stdout
           : (
               await execa('docker', [
                 'exec',
