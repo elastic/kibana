@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/css';
-import { EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { EuiText, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
@@ -22,6 +22,7 @@ interface ThreatMatchIndexFieldProps {
 export const ThreatMatchIndexField = memo(function ThreatIndexField({
   field,
 }: ThreatMatchIndexFieldProps): JSX.Element {
+  const { euiTheme } = useEuiTheme();
   const [defaultThreatIndices] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const isIndexModified = !isEqual(field.value, defaultThreatIndices);
 
@@ -40,7 +41,9 @@ export const ThreatMatchIndexField = memo(function ThreatIndexField({
       labelAppend={
         isIndexModified ? (
           <EuiButtonEmpty
-            className={xxsHeight}
+            className={css`
+              height: ${euiTheme.size.base};
+            `}
             size="xs"
             iconType="refresh"
             onClick={handleResetIndices}
@@ -60,7 +63,3 @@ const EUI_COMBOBOX_PROPS = {
 };
 
 const helpText = <EuiText size="xs">{i18n.THREAT_MATCH_INDEX_FIELD_HELP_TEXT}</EuiText>;
-
-const xxsHeight = css`
-  height: 16px;
-`;
