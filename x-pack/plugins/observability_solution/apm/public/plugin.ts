@@ -350,12 +350,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     core.application.register({
       id: 'apm',
-      title: 'APM',
+      title: 'Applications',
       order: 8300,
       euiIconType: 'logoObservability',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      keywords: ['apm'],
       deepLinks: [
         {
           id: 'service-groups-list',
