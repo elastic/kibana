@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
+import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants';
 import type { CaseUI } from '../../../common';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
@@ -21,9 +21,10 @@ export const useCaseObservables = (caseData: CaseUI) => {
       };
     }
 
-    const availableTypesSet = new Set(
-      [...OBSERVABLE_TYPES_BUILTIN, ...currentConfiguration.observableTypes].map(({ key }) => key)
-    );
+    const availableTypesSet = new Set([
+      OBSERVABLE_TYPES_BUILTIN_KEYS,
+      ...currentConfiguration.observableTypes.map(({ key }) => key),
+    ]);
 
     return {
       observables: caseData.observables.filter(({ typeKey }) => availableTypesSet.has(typeKey)),

@@ -325,3 +325,5 @@ export const OBSERVABLE_TYPES_BUILTIN = [
     ...OBSERVABLE_TYPE_DOMAIN,
   },
 ];
+
+export const OBSERVABLE_TYPES_BUILTIN_KEYS = OBSERVABLE_TYPES_BUILTIN.map(({ key }) => key);
