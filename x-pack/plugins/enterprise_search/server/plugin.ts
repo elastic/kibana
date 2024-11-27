@@ -13,7 +13,6 @@ import {
   Logger,
   SavedObjectsServiceStart,
   IRouter,
-  KibanaRequest,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
@@ -65,7 +64,6 @@ import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } 
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
-import { checkAccess } from './lib/check_access';
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
 import {
   EnterpriseSearchRequestHandler,
@@ -141,17 +139,9 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   public setup(
-    {
-      capabilities,
-      elasticsearch,
-      http,
-      savedObjects,
-      getStartServices,
-      uiSettings,
-    }: CoreSetup<PluginsStart>,
+    { elasticsearch, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
     {
       usageCollection,
-      security,
       features,
       globalSearch,
       logsShared,
@@ -227,40 +217,6 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register Enterprise Search UI Settings
      */
     uiSettings.register(enterpriseSearchUISettings);
-
-    /**
-     * Register user access to the Enterprise Search plugins
-     */
-    capabilities.registerSwitcher(
-      async (request: KibanaRequest) => {
-        const [, { spaces }] = await getStartServices();
-
-        const dependencies = {
-          config,
-          security,
-          spaces,
-          request,
-          log,
-          ml,
-        };
-
-        const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-
-        return {
-          navLinks: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          },
-          catalogue: {
-            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          },
-        };
-      },
-      {
-        capabilityPath: ['navLinks.*', 'catalogue.*'],
-      }
-    );
 
     /**
      * Register routes
