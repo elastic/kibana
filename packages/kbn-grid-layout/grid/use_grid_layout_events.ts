@@ -14,8 +14,16 @@ import { GridPanelData, GridLayoutStateManager } from './types';
 import { isGridDataEqual } from './utils/equality_checks';
 
 const scrollOnInterval = (direction: 'up' | 'down') => {
+  let count = 0;
   const interval = setInterval(() => {
-    window.scrollBy({ top: direction === 'down' ? 50 : -50, behavior: 'smooth' });
+    // calculate the speed based on how long the interval has been going to create an ease effect
+    // via the parabola formula `y = a(x - h)^2 + k`
+    // - the starting speed is k = 50
+    // - the maximum speed is 250
+    // - the rate at which the speed increases is controlled by a = 0.75
+    const speed = Math.min(0.75 * count ** 2 + 50, 250);
+    window.scrollBy({ top: direction === 'down' ? speed : -speed, behavior: 'smooth' });
+    count++;
   }, 100);
   return interval;
 };
