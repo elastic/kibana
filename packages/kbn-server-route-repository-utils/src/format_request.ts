@@ -12,11 +12,7 @@ import { parseEndpoint } from './parse_endpoint';
 export function formatRequest(endpoint: string, pathParams: Record<string, any> = {}) {
   const { method, pathname: rawPathname, version } = parseEndpoint(endpoint);
   const optionalReg = /(\/\{\w+\?\})/g; // /{param?}
-  const optionalMidReg = /(\/\{\w+\?\}\/)/g; // /{param?}/
 
-  if ((rawPathname.match(optionalMidReg) ?? []).length > 0) {
-    throw new Error('An optional parameter is allowed only at the end of the path');
-  }
   const optionalOrRequiredParamsReg = /(\/{)((.+?))(\})/g;
   if (Object.keys(pathParams)?.length === 0) {
     const pathname = rawPathname.replace(optionalOrRequiredParamsReg, '');
@@ -26,11 +22,12 @@ export function formatRequest(endpoint: string, pathParams: Record<string, any> 
   const pathname = Object.keys(pathParams).reduce((acc, paramName) => {
     return acc
       .replace(`{${paramName}}`, pathParams[paramName])
-      .replace(
-        optionalReg,
-        rawPathname?.includes(`/{${paramName}?}`) ? `/${pathParams[paramName]}` : ''
-      );
+      .replace(`{${paramName}?}`, pathParams[paramName]);
   }, rawPathname);
+
+  if ((pathname.match(optionalReg) ?? [])?.length > 0) {
+    throw new Error(`Missing parameters: ${pathname.match(optionalReg)}`);
+  }
 
   return { method, pathname, version };
 }

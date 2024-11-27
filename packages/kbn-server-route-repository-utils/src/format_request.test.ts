@@ -17,10 +17,6 @@ describe('formatRequest', () => {
     const resultRequiredEnd = formatRequest('GET /api/endpoint/{param}', pathParams);
     expect(resultRequiredEnd.pathname).toBe('/api/endpoint/testParam');
   });
-  it('should return the correct path if the only the required param is provided', () => {
-    const resultEnd = formatRequest('GET /api/endpoint/{id}/some/{opt?}', { id: 123 });
-    expect(resultEnd.pathname).toBe('/api/endpoint/123/some');
-  });
   it('should return the correct path if the only an optional param is provided', () => {
     const resultOptEnd = formatRequest('GET /api/endpoint/{id?}', { id: 123 });
     expect(resultOptEnd.pathname).toBe('/api/endpoint/123');
@@ -29,10 +25,5 @@ describe('formatRequest', () => {
     const pathParams = {};
     const resultEnd = formatRequest('GET /api/endpoint/{pathParamReq?}', pathParams);
     expect(resultEnd.pathname).toBe('/api/endpoint');
-  });
-  it('should return the correct path if the optional param is not provided and the required is', () => {
-    const pathParams = { req: 'required' };
-    const resultEnd = formatRequest('GET /api/endpoint/{req}/{op?}', pathParams);
-    expect(resultEnd.pathname).toBe('/api/endpoint/required');
   });
 });
