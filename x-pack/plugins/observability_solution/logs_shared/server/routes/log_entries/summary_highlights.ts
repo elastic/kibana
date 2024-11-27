@@ -12,6 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { schema } from '@kbn/config-schema';
 
+import { i18n } from '@kbn/i18n';
 import { logEntriesV1 } from '../../../common/http_api';
 import { throwErrors } from '../../../common/runtime_types';
 
@@ -35,6 +36,20 @@ export const initLogEntriesSummaryHighlightsRoute = ({
       {
         version: '1',
         validate: { request: { body: escapeHatch } },
+        options: {
+          deprecated: {
+            documentationUrl: '',
+            severity: 'warning',
+            message: i18n.translate(
+              'xpack.logsShared.deprecations.postLogEntriesSummaryHighlightsRoute.message',
+              {
+                defaultMessage:
+                  'Given the deprecation of the LogStream feature, this API will not return reliable data in upcoming versions of Kibana.',
+              }
+            ),
+            reason: { type: 'deprecate' },
+          },
+        },
       },
       async (requestContext, request, response) => {
         const payload = pipe(

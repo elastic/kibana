@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { logViewsV1 } from '../../../common/http_api';
 import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import { createValidationFunction } from '../../../common/runtime_types';
@@ -27,6 +28,17 @@ export const initGetLogViewRoute = ({
         validate: {
           request: {
             params: createValidationFunction(logViewsV1.getLogViewRequestParamsRT),
+          },
+        },
+        options: {
+          deprecated: {
+            documentationUrl: '',
+            severity: 'warning',
+            message: i18n.translate('xpack.logsShared.deprecations.getLogViewRoute.message', {
+              defaultMessage:
+                'Given the deprecation of the LogStream feature, this API will not have any effect configuring upcoming versions of Kibana.',
+            }),
+            reason: { type: 'deprecate' },
           },
         },
       },
