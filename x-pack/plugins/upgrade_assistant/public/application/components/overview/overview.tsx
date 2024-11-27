@@ -98,7 +98,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           <EuiText>
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajorMessage"
-              defaultMessage="Check the {link}. To safely proceed to the next major ensure you are on the latest minor of version."
+              defaultMessage="Check the {link}. Before upgrading to a new major version, you must first upgrade to the latest minor of this major version."
               values={{
                 link: (
                   <EuiLink
