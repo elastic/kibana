@@ -18,6 +18,7 @@ import { mockHistory, Router } from '../../../../common/mock/router';
 import { render, act, fireEvent } from '@testing-library/react';
 import { resolveTimeline } from '../../../../timelines/containers/api';
 import { mockTimeline } from '../../../../../server/lib/timeline/__mocks__/create_timelines';
+import type { ResolveTimelineResponse } from '../../../../../common/api/timeline';
 
 jest.mock('../../../../timelines/containers/api');
 jest.mock('../../../../common/lib/kibana', () => {
@@ -49,6 +50,11 @@ jest.mock('../../../../timelines/containers/all', () => {
   };
 });
 
+const resolvedTimeline: ResolveTimelineResponse = {
+  timeline: { ...mockTimeline, savedObjectId: '1', version: 'abc' },
+  outcome: 'exactMatch',
+};
+
 describe('QueryBarDefineRule', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,11 +65,7 @@ describe('QueryBarDefineRule', () => {
       totalCount: mockOpenTimelineQueryResults.totalCount,
       refetch: jest.fn(),
     });
-    (resolveTimeline as jest.Mock).mockResolvedValue({
-      data: {
-        timeline: { mockTimeline },
-      },
-    });
+    (resolveTimeline as jest.Mock).mockResolvedValue(resolvedTimeline);
   });
 
   it('renders correctly', () => {

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { METRIC_TYPE_VALUES, MetricTypes } from '../../../common/rest_types';
+import { METRIC_TYPE_VALUES, type MetricTypes } from '../../../common/rest_types';
 import { getDataUsageMetricsFiltersFromUrlParams } from './use_charts_url_params';
 
 describe('#getDataUsageMetricsFiltersFromUrlParams', () => {
@@ -57,12 +56,12 @@ describe('#getDataUsageMetricsFiltersFromUrlParams', () => {
   it('should use given relative startDate and endDate values URL params', () => {
     expect(
       getDataUsageMetricsFiltersFromUrlParams({
-        startDate: moment().subtract(24, 'hours').toISOString(),
-        endDate: moment().toISOString(),
+        startDate: 'now-9d',
+        endDate: 'now-24h/h',
       })
     ).toEqual({
-      endDate: moment().toISOString(),
-      startDate: moment().subtract(24, 'hours').toISOString(),
+      endDate: 'now-24h/h',
+      startDate: 'now-9d',
     });
   });
 

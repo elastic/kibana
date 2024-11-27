@@ -1,5 +1,9 @@
 {
   "type": "shared-server",
   "id": "@kbn/server-http-tools",
-  "owner": "@elastic/kibana-core"
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }

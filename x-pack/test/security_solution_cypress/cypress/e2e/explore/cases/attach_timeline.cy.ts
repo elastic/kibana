@@ -28,7 +28,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
       deleteTimelines();
       deleteCases();
       createTimeline().then((response) => {
-        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline');
+        cy.wrap(response.body).as('myTimeline');
       });
     });
 
@@ -63,9 +63,7 @@ describe('attach timeline to case', { tags: ['@ess', '@serverless'] }, () => {
       login();
       deleteTimelines();
       deleteCases();
-      createTimeline().then((response) =>
-        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
-      );
+      createTimeline().then((response) => cy.wrap(response.body.savedObjectId).as('timelineId'));
       createCase(getCase1()).then((response) => cy.wrap(response.body.id).as('caseId'));
     });
 
