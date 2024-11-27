@@ -10,7 +10,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
