@@ -32,7 +32,6 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.agentless.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.agentless_api.ts
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
