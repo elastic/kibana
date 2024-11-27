@@ -7479,18 +7479,21 @@ paths:
             enum:
               - '2023-10-31'
             type: string
-        - description: The page number to return.
+        - description: The page number to return. Default is "1".
           in: query
           name: page
           required: false
           schema:
             default: 1
+            minimum: 1
             type: number
-        - description: The number of dashboards to display on each page.
+        - description: The number of dashboards to display on each page (max 1000). Default is "20".
           in: query
           name: perPage
           required: false
           schema:
+            maximum: 1000
+            minimum: 1
             type: number
       responses:
         '200':
