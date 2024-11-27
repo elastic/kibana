@@ -448,8 +448,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         templates,
       });
 
-      setFlyOutVisibility({ type: 'observableTypes', visible: false });
-      setObservableTypeToEdit(null);
+      onCloseObservableTypesFlyout();
     },
     [
       observableTypes,
@@ -460,6 +459,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
       closureType,
       customFields,
       templates,
+      onCloseObservableTypesFlyout,
     ]
   );
 
