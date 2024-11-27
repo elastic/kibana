@@ -92,7 +92,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
               title={
                 <FormattedMessage
                   id="xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.title"
-                  defaultMessage="The {settingName} setting has been set to {indexMode} within template {logisticsLink}. Any changes to {settingName} set on this page will be overwritten by the Logistics selection."
+                  defaultMessage="The {settingName} setting has been set to {indexMode} within the {logisticsLink}. Any changes to {settingName} set on this page will be overwritten by the Logistics selection."
                   values={{
                     settingName: (
                       <EuiCode>
@@ -110,7 +110,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
                         {i18n.translate(
                           'xpack.idxMgmt.formWizard.stepSettings.indexModeCallout.logisticsLinkLabel',
                           {
-                            defaultMessage: 'Logistics',
+                            defaultMessage: 'Logistics step',
                           }
                         )}
                       </EuiLink>

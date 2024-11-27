@@ -225,7 +225,7 @@ describe('Home page', () => {
         cy.getByTestSubj('inventoryEntityActionOpenInDiscover').click();
         cy.url().should(
           'include',
-          "query:'container.id:%20foo%20AND%20entity.definition_id%20:%20builtin*"
+          "query:'container.id:%20%22foo%22%20AND%20entity.definition_id%20:%20builtin*"
         );
       });
     });
