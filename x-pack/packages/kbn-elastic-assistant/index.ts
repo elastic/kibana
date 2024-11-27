@@ -83,7 +83,7 @@ export {
   /** The default maximum number of alerts to be sent as context when generating Attack discoveries */
   DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS,
   DEFAULT_LATEST_ALERTS,
-  ENDPOINT_INSIGHTS_STORAGE_KEY,
+  DEFEND_INSIGHTS_STORAGE_KEY,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   /** The local storage key that specifies the maximum number of alerts to send as context */
   MAX_ALERTS_LOCAL_STORAGE_KEY,

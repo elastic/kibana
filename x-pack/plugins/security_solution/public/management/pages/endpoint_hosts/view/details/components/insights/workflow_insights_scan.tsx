@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import {
   AssistantAvatar,
-  ENDPOINT_INSIGHTS_STORAGE_KEY,
+  DEFEND_INSIGHTS_STORAGE_KEY,
   ConnectorSelectorInline,
   DEFAULT_ASSISTANT_NAMESPACE,
   useLoadConnectors,
@@ -18,10 +18,10 @@ import { noop } from 'lodash/fp';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { some } from 'lodash';
 import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
-import { ENDPOINT_INSIGHTS } from '../../../translations';
+import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 
-export const EndpointInsightsScanSection = () => {
+export const WorkflowInsightsScanSection = () => {
   const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
   const spaceId = useSpaceId() ?? 'default';
@@ -31,21 +31,21 @@ export const EndpointInsightsScanSection = () => {
   });
 
   // Store the selected connector id in local storage so that it persists across page reloads
-  const [localStorageEndpointInsightsConnectorId, setLocalStorageEndpointInsightsConnectorId] =
+  const [localStorageWorkflowInsightsConnectorId, setLocalStorageWorkflowInsightsConnectorId] =
     useLocalStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${ENDPOINT_INSIGHTS_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${DEFEND_INSIGHTS_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
     );
 
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
-    localStorageEndpointInsightsConnectorId
+    localStorageWorkflowInsightsConnectorId
   );
 
   const onConnectorIdSelected = useCallback(
     (selectedConnectorId: string) => {
       setConnectorId(selectedConnectorId);
-      setLocalStorageEndpointInsightsConnectorId(selectedConnectorId);
+      setLocalStorageWorkflowInsightsConnectorId(selectedConnectorId);
     },
-    [setLocalStorageEndpointInsightsConnectorId]
+    [setLocalStorageWorkflowInsightsConnectorId]
   );
 
   // Check if the selected connector exists in the list of connectors, i.e. it is not deleted
@@ -61,7 +61,7 @@ export const EndpointInsightsScanSection = () => {
     }
     return (
       <EuiFlexItem grow={false}>
-        <EuiButton size="s">{ENDPOINT_INSIGHTS.scan.button}</EuiButton>
+        <EuiButton size="s">{WORKFLOW_INSIGHTS.scan.button}</EuiButton>
       </EuiFlexItem>
     );
   }, [connectorExists]);
@@ -76,7 +76,7 @@ export const EndpointInsightsScanSection = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <h4>{ENDPOINT_INSIGHTS.scan.title}</h4>
+                <h4>{WORKFLOW_INSIGHTS.scan.title}</h4>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

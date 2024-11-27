@@ -11,7 +11,7 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
   defaultMessage: 'Overview',
 });
 
-export const ENDPOINT_INSIGHTS = {
+export const WORKFLOW_INSIGHTS = {
   title: i18n.translate('xpack.securitySolution.endpointDetails.endpointInsights.sectionTitle', {
     defaultMessage: 'Issues',
   }),

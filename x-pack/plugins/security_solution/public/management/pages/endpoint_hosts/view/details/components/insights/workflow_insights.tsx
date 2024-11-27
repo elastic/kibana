@@ -7,15 +7,15 @@
 
 import { EuiHorizontalRule, EuiAccordion, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
+import { WorkflowInsightsResults } from './workflow_insights_results';
+import { WorkflowInsightsScanSection } from './workflow_insights_scan';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../../common/hooks/use_experimental_features';
-import { EndpointInsightsResults } from './endpoint_insights_results';
-import { ENDPOINT_INSIGHTS } from '../../../translations';
-import { EndpointInsightsScanSection } from './endpoint_insights_scan';
+import { WORKFLOW_INSIGHTS } from '../../../translations';
 
-export const EndpointInsights = () => {
-  const isEndpointInsightsEnabled = useIsExperimentalFeatureEnabled('defendInsights');
+export const WorkflowInsights = () => {
+  const isWorkflowInsightsEnabled = useIsExperimentalFeatureEnabled('defendInsights');
 
-  if (!isEndpointInsightsEnabled) {
+  if (!isWorkflowInsightsEnabled) {
     return null;
   }
 
@@ -27,7 +27,7 @@ export const EndpointInsights = () => {
     }
     return (
       <EuiText color={'subdued'} size={'xs'}>
-        {ENDPOINT_INSIGHTS.titleRight}
+        {WORKFLOW_INSIGHTS.titleRight}
       </EuiText>
     );
   };
@@ -35,10 +35,10 @@ export const EndpointInsights = () => {
   return (
     <>
       <EuiAccordion
-        id={'endpoint-insights-wrapper'}
+        id={'workflow-insights-wrapper'}
         buttonContent={
           <EuiText size={'m'}>
-            <h4>{ENDPOINT_INSIGHTS.title}</h4>
+            <h4>{WORKFLOW_INSIGHTS.title}</h4>
           </EuiText>
         }
         initialIsOpen
@@ -46,9 +46,9 @@ export const EndpointInsights = () => {
         paddingSize={'none'}
       >
         <EuiSpacer size={'m'} />
-        <EndpointInsightsScanSection />
+        <WorkflowInsightsScanSection />
         <EuiSpacer size={'m'} />
-        <EndpointInsightsResults results={true} />
+        <WorkflowInsightsResults results={true} />
         <EuiHorizontalRule />
       </EuiAccordion>
       <EuiSpacer size="l" />

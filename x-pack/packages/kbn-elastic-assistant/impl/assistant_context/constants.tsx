@@ -8,7 +8,7 @@
 import { KnowledgeBaseConfig } from '../assistant/types';
 
 export const ATTACK_DISCOVERY_STORAGE_KEY = 'attackDiscovery';
-export const ENDPOINT_INSIGHTS_STORAGE_KEY = 'endpointInsights';
+export const DEFEND_INSIGHTS_STORAGE_KEY = 'defendInsights';
 export const DEFAULT_ASSISTANT_NAMESPACE = 'elasticAssistantDefault';
 export const LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY = 'lastConversationId';
 export const MAX_ALERTS_LOCAL_STORAGE_KEY = 'maxAlerts';

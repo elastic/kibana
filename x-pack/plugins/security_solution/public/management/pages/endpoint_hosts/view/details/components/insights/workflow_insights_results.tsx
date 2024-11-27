@@ -17,9 +17,9 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { ENDPOINT_INSIGHTS } from '../../../translations';
+import { WORKFLOW_INSIGHTS } from '../../../translations';
 
-interface EndpointInsightsResultsProps {
+interface WorkflowInsightsResultsProps {
   results: boolean;
 }
 
@@ -29,7 +29,7 @@ const CustomEuiCallOut = styled(EuiCallOut)`
   }
 `;
 
-export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProps) => {
+export const WorkflowInsightsResults = ({ results }: WorkflowInsightsResultsProps) => {
   const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(true);
   const hideEmptyStateCallout = () => setShowEmptyResultsCallout(false);
   if (!results) {
@@ -39,7 +39,7 @@ export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProp
   return (
     <>
       <EuiText size={'s'}>
-        <h4>{ENDPOINT_INSIGHTS.issues.title}</h4>
+        <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
       </EuiText>
       <EuiSpacer size={'s'} />
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
@@ -71,7 +71,7 @@ export const EndpointInsightsResults = ({ results }: EndpointInsightsResultsProp
       </EuiPanel>
       {showEmptyResultsCallout && (
         <CustomEuiCallOut onDismiss={hideEmptyStateCallout} color={'success'}>
-          {ENDPOINT_INSIGHTS.issues.emptyResults}
+          {WORKFLOW_INSIGHTS.issues.emptyResults}
         </CustomEuiCallOut>
       )}
     </>
