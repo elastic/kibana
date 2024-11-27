@@ -99,6 +99,7 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/discover-shared-plugin",
     "@kbn/server-route-repository-client",
-    "@kbn/server-route-repository-utils"
+    "@kbn/server-route-repository-utils",
+    "@kbn/security-plugin-types-public"
   ]
 }
