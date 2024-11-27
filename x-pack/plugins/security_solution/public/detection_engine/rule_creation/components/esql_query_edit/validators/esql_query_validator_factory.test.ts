@@ -143,7 +143,7 @@ describe('esqlQueryValidator', () => {
   });
 
   describe('when getESQLQueryColumns fails', () => {
-    it('returns an empty array', () => {
+    it('returns a validation error', () => {
       // suppress the expected error messages
       jest.spyOn(console, 'error').mockReturnValue();
 
