@@ -508,7 +508,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "`);
+              "value": "${expectedStatus}",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+      `);
     });
 
     it('should create a filter for multiple status values', () => {
@@ -572,7 +578,13 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "`);
+              "value": "${expectedSeverity}",
+            },
+          ],
+          "function": "is",
+          "type": "function",
+        }
+        `);
     });
 
     it('should create a filter for multiple severity values', () => {
@@ -1102,7 +1114,9 @@ describe('utils', () => {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "\\"`);
+          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
+        }
+      `);
     });
 
     it('search value not changed and no rootSearchFields when search is non-uuid', () => {
