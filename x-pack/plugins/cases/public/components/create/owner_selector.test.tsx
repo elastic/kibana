@@ -6,29 +6,19 @@
  */
 
 import React from 'react';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, render } from '@testing-library/react';
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { OBSERVABILITY_OWNER, OWNER_INFO } from '../../../common/constants';
 import { CreateCaseOwnerSelector } from './owner_selector';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
 
-// FLAKY: https://github.com/elastic/kibana/issues/188488
-describe.skip('Case Owner Selection', () => {
+describe('Case Owner Selection', () => {
   const onOwnerChange = jest.fn();
   const selectedOwner = SECURITY_SOLUTION_OWNER;
 
-  let appMockRender: AppMockRenderer;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
   it('renders all options', async () => {
-    appMockRender.render(
+    render(
       <CreateCaseOwnerSelector
         availableOwners={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
         isLoading={false}
@@ -49,7 +39,7 @@ describe.skip('Case Owner Selection', () => {
   it.each([[SECURITY_SOLUTION_OWNER], [OBSERVABILITY_OWNER]])(
     'only displays %s option if available',
     async (available) => {
-      appMockRender.render(
+      render(
         <CreateCaseOwnerSelector
           availableOwners={[available]}
           isLoading={false}
@@ -67,7 +57,7 @@ describe.skip('Case Owner Selection', () => {
   );
 
   it('changes the selection', async () => {
-    appMockRender.render(
+    render(
       <CreateCaseOwnerSelector
         availableOwners={[OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER]}
         isLoading={false}

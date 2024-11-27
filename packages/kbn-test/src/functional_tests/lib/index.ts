@@ -10,3 +10,11 @@
 export { runKibanaServer } from './run_kibana_server';
 export { runElasticsearch } from './run_elasticsearch';
 export * from './run_ftr';
+export {
+  parseRawFlags,
+  getArgValue,
+  remapPluginPaths,
+  getKibanaCliArg,
+  getKibanaCliLoggers,
+} from './kibana_cli_args';
+export { initLogsDir } from './logs_dir';

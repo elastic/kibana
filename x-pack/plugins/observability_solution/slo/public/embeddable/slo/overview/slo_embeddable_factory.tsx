@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +22,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createBrowserHistory } from 'history';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import styled from 'styled-components';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
@@ -165,11 +165,21 @@ export const getOverviewEmbeddableFactory = ({
               const kqlQuery = groupFilters?.kqlQuery ?? '';
               const groups = groupFilters?.groups ?? [];
               return (
-                <Wrapper>
+                <div
+                  css={({ euiTheme }: UseEuiTheme) => css`
+                    width: 100%;
+                    padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                    overflow: scroll;
+
+                    .euiAccordion__buttonContent {
+                      min-width: ${euiTheme.base * 6}px;
+                    }
+                  `}
+                >
                   <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
                     <EuiFlexItem
-                      css={`
-                        margin-top: 20px;
+                      css={({ euiTheme }: UseEuiTheme) => css`
+                        margin-top: ${euiTheme.base * 1.25}px;
                       `}
                     >
                       <GroupSloView
@@ -182,7 +192,7 @@ export const getOverviewEmbeddableFactory = ({
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </Wrapper>
+                </div>
               );
             } else {
               return (
@@ -230,13 +240,3 @@ export const getOverviewEmbeddableFactory = ({
   };
   return factory;
 };
-
-const Wrapper = styled.div`
-  width: 100%;
-  padding: 5px 15px;
-  overflow: scroll;
-
-  .euiAccordion__buttonContent {
-    min-width: 100px;
-  }
-`;

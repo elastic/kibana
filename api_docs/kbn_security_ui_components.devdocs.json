@@ -1,26 +1,10 @@
 {
   "id": "@kbn/security-ui-components",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/security-ui-components",
-        "id": "def-common.FeatureTable",
+        "id": "def-public.FeatureTable",
         "type": "Class",
         "tags": [],
         "label": "FeatureTable",
@@ -28,9 +12,9 @@
         "signature": [
           {
             "pluginId": "@kbn/security-ui-components",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecurityUiComponentsPluginApi",
-            "section": "def-common.FeatureTable",
+            "section": "def-public.FeatureTable",
             "text": "FeatureTable"
           },
           " extends React.Component<Props, State, any>"
@@ -41,7 +25,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.FeatureTable.defaultProps",
+            "id": "def-public.FeatureTable.defaultProps",
             "type": "Object",
             "tags": [],
             "label": "defaultProps",
@@ -52,7 +36,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.FeatureTable.defaultProps.privilegeIndex",
+                "id": "def-public.FeatureTable.defaultProps.privilegeIndex",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -63,21 +47,10 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.FeatureTable.defaultProps.showLocks",
+                "id": "def-public.FeatureTable.defaultProps.showLocks",
                 "type": "boolean",
                 "tags": [],
                 "label": "showLocks",
-                "description": [],
-                "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.FeatureTable.defaultProps.showTitle",
-                "type": "boolean",
-                "tags": [],
-                "label": "showTitle",
                 "description": [],
                 "path": "x-pack/packages/security/ui_components/src/kibana_privilege_table/feature_table.tsx",
                 "deprecated": false,
@@ -87,7 +60,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.FeatureTable.Unnamed",
+            "id": "def-public.FeatureTable.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -101,7 +74,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.FeatureTable.Unnamed.$1",
+                "id": "def-public.FeatureTable.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "props",
@@ -119,7 +92,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.FeatureTable.render",
+            "id": "def-public.FeatureTable.render",
             "type": "Function",
             "tags": [],
             "label": "render",
@@ -138,7 +111,7 @@
       },
       {
         "parentPluginId": "@kbn/security-ui-components",
-        "id": "def-common.PrivilegeFormCalculator",
+        "id": "def-public.PrivilegeFormCalculator",
         "type": "Class",
         "tags": [],
         "label": "PrivilegeFormCalculator",
@@ -151,7 +124,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.Unnamed",
+            "id": "def-public.PrivilegeFormCalculator.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -165,7 +138,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.Unnamed.$1",
+                "id": "def-public.PrivilegeFormCalculator.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "kibanaPrivileges",
@@ -186,7 +159,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.Unnamed.$2",
+                "id": "def-public.PrivilegeFormCalculator.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "role",
@@ -210,7 +183,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.getBasePrivilege",
+            "id": "def-public.PrivilegeFormCalculator.getBasePrivilege",
             "type": "Function",
             "tags": [],
             "label": "getBasePrivilege",
@@ -234,7 +207,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getBasePrivilege.$1",
+                "id": "def-public.PrivilegeFormCalculator.getBasePrivilege.$1",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -254,7 +227,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.isWildcardBasePrivilege",
+            "id": "def-public.PrivilegeFormCalculator.isWildcardBasePrivilege",
             "type": "Function",
             "tags": [],
             "label": "isWildcardBasePrivilege",
@@ -270,7 +243,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.isWildcardBasePrivilege.$1",
+                "id": "def-public.PrivilegeFormCalculator.isWildcardBasePrivilege.$1",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -290,7 +263,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId",
+            "id": "def-public.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId",
             "type": "Function",
             "tags": [],
             "label": "getDisplayedPrimaryFeaturePrivilegeId",
@@ -306,7 +279,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$1",
+                "id": "def-public.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$1",
                 "type": "string",
                 "tags": [],
                 "label": "featureId",
@@ -323,7 +296,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$2",
+                "id": "def-public.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$2",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -340,7 +313,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$3",
+                "id": "def-public.PrivilegeFormCalculator.getDisplayedPrimaryFeaturePrivilegeId.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "allSpacesSelected",
@@ -360,7 +333,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges",
+            "id": "def-public.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges",
             "type": "Function",
             "tags": [],
             "label": "hasCustomizedSubFeaturePrivileges",
@@ -376,7 +349,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$1",
+                "id": "def-public.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$1",
                 "type": "string",
                 "tags": [],
                 "label": "featureId",
@@ -393,7 +366,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$2",
+                "id": "def-public.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$2",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -410,7 +383,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$3",
+                "id": "def-public.PrivilegeFormCalculator.hasCustomizedSubFeaturePrivileges.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "allSpacesSelected",
@@ -430,7 +403,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege",
+            "id": "def-public.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege",
             "type": "Function",
             "tags": [],
             "label": "getEffectivePrimaryFeaturePrivilege",
@@ -454,7 +427,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$1",
+                "id": "def-public.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$1",
                 "type": "string",
                 "tags": [],
                 "label": "featureId",
@@ -471,7 +444,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$2",
+                "id": "def-public.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$2",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -488,7 +461,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$3",
+                "id": "def-public.PrivilegeFormCalculator.getEffectivePrimaryFeaturePrivilege.$3",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "allSpacesSelected",
@@ -508,7 +481,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted",
+            "id": "def-public.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted",
             "type": "Function",
             "tags": [],
             "label": "isIndependentSubFeaturePrivilegeGranted",
@@ -524,7 +497,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$1",
+                "id": "def-public.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$1",
                 "type": "string",
                 "tags": [],
                 "label": "featureId",
@@ -541,7 +514,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$2",
+                "id": "def-public.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$2",
                 "type": "string",
                 "tags": [],
                 "label": "privilegeId",
@@ -558,7 +531,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$3",
+                "id": "def-public.PrivilegeFormCalculator.isIndependentSubFeaturePrivilegeGranted.$3",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -578,7 +551,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege",
+            "id": "def-public.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege",
             "type": "Function",
             "tags": [],
             "label": "getSelectedMutuallyExclusiveSubFeaturePrivilege",
@@ -610,7 +583,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$1",
+                "id": "def-public.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$1",
                 "type": "string",
                 "tags": [],
                 "label": "featureId",
@@ -627,7 +600,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$2",
+                "id": "def-public.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "subFeatureGroup",
@@ -650,7 +623,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$3",
+                "id": "def-public.PrivilegeFormCalculator.getSelectedMutuallyExclusiveSubFeaturePrivilege.$3",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -670,7 +643,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges",
+            "id": "def-public.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges",
             "type": "Function",
             "tags": [],
             "label": "canCustomizeSubFeaturePrivileges",
@@ -686,7 +659,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges.$1",
+                "id": "def-public.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges.$1",
                 "type": "string",
                 "tags": [],
                 "label": "featureId",
@@ -703,7 +676,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges.$2",
+                "id": "def-public.PrivilegeFormCalculator.canCustomizeSubFeaturePrivileges.$2",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -723,7 +696,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization",
+            "id": "def-public.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization",
             "type": "Function",
             "tags": [],
             "label": "updateSelectedFeaturePrivilegesForCustomization",
@@ -739,7 +712,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$1",
+                "id": "def-public.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$1",
                 "type": "string",
                 "tags": [],
                 "label": "featureId",
@@ -756,7 +729,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$2",
+                "id": "def-public.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$2",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -773,7 +746,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$3",
+                "id": "def-public.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "willBeCustomizing",
@@ -790,7 +763,7 @@
               },
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$4",
+                "id": "def-public.PrivilegeFormCalculator.updateSelectedFeaturePrivilegesForCustomization.$4",
                 "type": "boolean",
                 "tags": [],
                 "label": "allSpacesSelected",
@@ -810,7 +783,7 @@
           },
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.PrivilegeFormCalculator.hasSupersededInheritedPrivileges",
+            "id": "def-public.PrivilegeFormCalculator.hasSupersededInheritedPrivileges",
             "type": "Function",
             "tags": [],
             "label": "hasSupersededInheritedPrivileges",
@@ -826,7 +799,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/security-ui-components",
-                "id": "def-common.PrivilegeFormCalculator.hasSupersededInheritedPrivileges.$1",
+                "id": "def-public.PrivilegeFormCalculator.hasSupersededInheritedPrivileges.$1",
                 "type": "number",
                 "tags": [],
                 "label": "privilegeIndex",
@@ -851,7 +824,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/security-ui-components",
-        "id": "def-common.FeatureTableCell",
+        "id": "def-public.FeatureTableCell",
         "type": "Function",
         "tags": [],
         "label": "FeatureTableCell",
@@ -865,7 +838,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/security-ui-components",
-            "id": "def-common.FeatureTableCell.$1",
+            "id": "def-public.FeatureTableCell.$1",
             "type": "Object",
             "tags": [],
             "label": "{ feature, className }",
@@ -883,6 +856,22 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
