@@ -17,11 +17,11 @@ describe('getUserActionsRoute', () => {
     expect(router.routerOptions?.access).toBe('internal');
     expect(router.routerOptions?.deprecated).toMatchInlineSnapshot(
       {
-        documentationUrl: expect.stringMatching(/breaking-201004$/),
+        documentationUrl: expect.stringMatching(/#breaking-201004$/),
       },
       `
       Object {
-        "documentationUrl": StringMatching /breaking-201004\\$/,
+        "documentationUrl": StringMatching /#breaking-201004\\$/,
         "reason": Object {
           "newApiMethod": "GET",
           "newApiPath": "/api/cases/<case_id>/user_actions/_find",
