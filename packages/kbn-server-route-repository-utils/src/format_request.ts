@@ -13,20 +13,19 @@ export function formatRequest(endpoint: string, pathParams: Record<string, any> 
   const { method, pathname: rawPathname, version } = parseEndpoint(endpoint);
   const optionalReg = /(\/\{\w+\?\})/g; // /{param?}
   const optionalMidReg = /(\/\{\w+\?\}\/)/g; // /{param?}/
-  const requiredReg = /(\{\w+\})/g; // {param}
 
   if ((rawPathname.match(optionalMidReg) ?? []).length > 0) {
     throw new Error('An optional parameter is allowed only at the end of the path');
   }
-  const paramsReg = /(\/{)((.+?))(\})/g;
+  const optionalOrRequiredParamsReg = /(\/{)((.+?))(\})/g;
   if (Object.keys(pathParams)?.length === 0) {
-    const pathname = rawPathname.replace(paramsReg, '');
+    const pathname = rawPathname.replace(optionalOrRequiredParamsReg, '');
     return { method, pathname, version };
   }
 
   const pathname = Object.keys(pathParams).reduce((acc, paramName) => {
     return acc
-      .replace(requiredReg, pathParams[paramName])
+      .replace(`{${paramName}}`, pathParams[paramName])
       .replace(
         optionalReg,
         rawPathname?.includes(`/{${paramName}?}`) ? `/${pathParams[paramName]}` : ''
