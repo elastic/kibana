@@ -10,7 +10,16 @@ This directory serves as a centralized location to place the security solution t
 
 ## Overview
 
-Test suites and cases are prefixed with specific tags (see [this docs link](https://docs.elastic.dev/security-solution/teams/analyst-experience/automation/serverless/2.labeling.mdx) for more information on the tags we are using) to determine their execution in particular environments or to exclude them from specific environments.
+Test suites and cases are prefixed with specific tags to determine their execution in particular environments or to exclude them from specific environments:
+* `@ess`: Runs in an ESS environment (on-prem installation) as part of the CI validation on PRs.
+
+* `@serverless`: Runs in an simulated serverless environment as part of the CI validation on PRs and in the periodic pipeline.
+
+* `@serverlessQA`: Runs in the Kibana QA quality gate.
+
+* `@skipInEss`: Skipped for ESS environment.
+* `@skipInServerless`: Skipped for all quality gates and periodic pipeline.
+* `@skipInServerlessMKI`: Skipped from being executed in any MKI environment (periodic pipeline and Kibana QA quality gate), but executed as part of the first quality gate if the `@serverless` tag is present.
 
 For example:
 ```typescript
