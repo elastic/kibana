@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
 import type { DatasourceLayerSettingsProps } from '../../types';
-import type { FormBasedPrivateState } from './types';
+import type { FormBasedLayer, FormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
@@ -24,10 +24,11 @@ export function LayerSettingsPanel({
   setState,
   layerId,
 }: DatasourceLayerSettingsProps<FormBasedPrivateState>) {
-  const isSamplingValueDisabled = !isSamplingValueEnabled(state.layers[layerId]);
+  const layer = state.layers[layerId] as FormBasedLayer;
+  const isSamplingValueDisabled = !isSamplingValueEnabled(layer);
   const currentValue = isSamplingValueDisabled
     ? samplingValues[samplingValues.length - 1]
-    : state.layers[layerId].sampling;
+    : layer.sampling;
 
   return (
     <>
@@ -87,7 +88,7 @@ export function LayerSettingsPanel({
               layers: {
                 ...state.layers,
                 [layerId]: {
-                  ...state.layers[layerId],
+                  ...layer,
                   sampling: newSamplingValue,
                 },
               },
@@ -96,11 +97,11 @@ export function LayerSettingsPanel({
         />
       </EuiFormRow>
       <IgnoreGlobalFilterRowControl
-        checked={!state.layers[layerId].ignoreGlobalFilters}
+        checked={!layer.ignoreGlobalFilters}
         onChange={() => {
           const newLayer = {
             ...state.layers[layerId],
-            ignoreGlobalFilters: !state.layers[layerId].ignoreGlobalFilters,
+            ignoreGlobalFilters: !layer.ignoreGlobalFilters,
           };
           const newLayers = { ...state.layers };
           newLayers[layerId] = newLayer;
