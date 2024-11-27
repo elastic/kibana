@@ -2434,8 +2434,6 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 /x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
 /x-pack/test/cloud_security_posture_api/ @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/plugins/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
 /x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
