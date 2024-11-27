@@ -123,9 +123,13 @@ describe('muteAllAlertRoute', () => {
 
     const [config] = router.post.mock.calls[0];
 
-    expect(config.options?.deprecated).toMatchInlineSnapshot(`
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
       Object {
-        "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/breaking-changes-summary.html#breaking-201550",
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
         "reason": Object {
           "newApiMethod": "POST",
           "newApiPath": "/api/alerting/rule/{id}/_mute_all",
@@ -133,6 +137,7 @@ describe('muteAllAlertRoute', () => {
         },
         "severity": "warning",
       }
-    `);
+    `
+    );
   });
 });
