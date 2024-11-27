@@ -311,21 +311,20 @@ export const getTimesliderControlFactory = (): ControlFactory<
               closePopover={() => isPopoverOpen$.next(false)}
               panelPaddingSize="s"
             >
-              <div onMouseUp={() => debouncedOnChange(localTimeslice)}>
-                <TimeSliderPopoverContent
-                  isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
-                  setIsAnchored={setIsAnchored}
-                  value={localTimeslice}
-                  onChange={(value) => {
-                    setLocalTimeslice(value as Timeslice);
-                  }}
-                  stepSize={timeRangeMeta.stepSize}
-                  ticks={timeRangeMeta.ticks}
-                  timeRangeMin={timeRangeMeta.timeRangeMin}
-                  timeRangeMax={timeRangeMeta.timeRangeMax}
-                  compressed={isCompressed(api)}
-                />
-              </div>
+              <TimeSliderPopoverContent
+                isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
+                setIsAnchored={setIsAnchored}
+                value={localTimeslice}
+                onChange={(value) => {
+                  setLocalTimeslice(value as Timeslice);
+                  debouncedOnChange(localTimeslice);
+                }}
+                stepSize={timeRangeMeta.stepSize}
+                ticks={timeRangeMeta.ticks}
+                timeRangeMin={timeRangeMeta.timeRangeMin}
+                timeRangeMax={timeRangeMeta.timeRangeMax}
+                compressed={isCompressed(api)}
+              />
             </EuiInputPopover>
           );
         },
