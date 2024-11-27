@@ -27,6 +27,7 @@ import {
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
 import { MalformedChildren } from '../../lib/streams/errors/malformed_children';
+import { validateCondition } from '../../lib/streams/helpers/condition_fields';
 
 export const editStreamRoute = createServerRoute({
   endpoint: 'PUT /api/streams/{id}',
@@ -150,7 +151,7 @@ async function updateParentStream(
 async function validateStreamChildren(
   scopedClusterClient: IScopedClusterClient,
   id: string,
-  children: Array<{ id: string }>
+  children: StreamDefinition['children']
 ) {
   try {
     const { definition: oldDefinition } = await readStream({
@@ -159,6 +160,9 @@ async function validateStreamChildren(
     });
     const oldChildren = oldDefinition.children.map((child) => child.id);
     const newChildren = new Set(children.map((child) => child.id));
+    children.forEach((child) => {
+      validateCondition(child.condition);
+    });
     if (oldChildren.some((child) => !newChildren.has(child))) {
       throw new MalformedChildren(
         'Cannot remove children from a stream, please delete the stream instead'

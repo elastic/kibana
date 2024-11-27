@@ -117,6 +117,24 @@ export function ConditionForm(props: {
   );
 }
 
+const operatorMap = {
+  eq: i18n.translate('xpack.streams.filter.equals', { defaultMessage: 'equals' }),
+  neq: i18n.translate('xpack.streams.filter.notEquals', { defaultMessage: 'not equals' }),
+  lt: i18n.translate('xpack.streams.filter.lessThan', { defaultMessage: 'less than' }),
+  lte: i18n.translate('xpack.streams.filter.lessThanOrEquals', {
+    defaultMessage: 'less than or equals',
+  }),
+  gt: i18n.translate('xpack.streams.filter.greaterThan', { defaultMessage: 'greater than' }),
+  gte: i18n.translate('xpack.streams.filter.greaterThanOrEquals', {
+    defaultMessage: 'greater than or equals',
+  }),
+  contains: i18n.translate('xpack.streams.filter.contains', { defaultMessage: 'contains' }),
+  startsWith: i18n.translate('xpack.streams.filter.startsWith', { defaultMessage: 'starts with' }),
+  endsWith: i18n.translate('xpack.streams.filter.endsWith', { defaultMessage: 'ends with' }),
+  exists: i18n.translate('xpack.streams.filter.exists', { defaultMessage: 'exists' }),
+  notExists: i18n.translate('xpack.streams.filter.notExists', { defaultMessage: 'not exists' }),
+};
+
 function FilterForm(props: {
   condition: FilterCondition;
   onConditionChange: (condition: FilterCondition) => void;
@@ -143,52 +161,12 @@ function FilterForm(props: {
             defaultMessage: 'Operator',
           })}
           data-test-subj="streamsAppFilterFormSelect"
-          options={[
-            {
-              value: 'eq',
-              text: 'equals',
-            },
-            {
-              value: 'neq',
-              text: 'not equals',
-            },
-            {
-              value: 'lt',
-              text: 'less than',
-            },
-            {
-              value: 'lte',
-              text: 'less than or equals',
-            },
-            {
-              value: 'gt',
-              text: 'greater than',
-            },
-            {
-              value: 'gte',
-              text: 'greater than or equals',
-            },
-            {
-              value: 'contains',
-              text: 'contains',
-            },
-            {
-              value: 'startsWith',
-              text: 'starts with',
-            },
-            {
-              value: 'endsWith',
-              text: 'ends with',
-            },
-            {
-              value: 'exists',
-              text: 'exists',
-            },
-            {
-              value: 'notExists',
-              text: 'not exists',
-            },
-          ]}
+          options={
+            Object.entries(operatorMap).map(([value, text]) => ({
+              value,
+              text,
+            })) as Array<{ value: FilterCondition['operator']; text: string }>
+          }
           value={props.condition.operator}
           compressed
           onChange={(e) => {
@@ -256,7 +234,7 @@ export function ConditionDisplay(props: { condition: Condition }) {
 function OrDisplay(props: { condition: OrCondition }) {
   return (
     <div>
-      {i18n.translate('xpack.streams.orDisplay.div.orLabel', { defaultMessage: 'Or' })}
+      {i18n.translate('xpack.streams.orDisplay.orLabel', { defaultMessage: 'Or' })}
       <div
         className={css`
           margin-left: 10px;
@@ -273,7 +251,7 @@ function OrDisplay(props: { condition: OrCondition }) {
 function AndDisplay(props: { condition: AndCondition }) {
   return (
     <div>
-      {i18n.translate('xpack.streams.andDisplay.div.andLabel', { defaultMessage: 'And' })}
+      {i18n.translate('xpack.streams.andDisplay.andLabel', { defaultMessage: 'And' })}
       <div
         className={css`
           margin-left: 10px;
@@ -293,6 +271,7 @@ function FilterDisplay(props: { condition: FilterCondition }) {
       gutterSize="xs"
       alignItems="center"
       className={css`
+        // don't try to wrap the condition, render it as one line
         overflow-x: scroll;
         white-space: nowrap;
       `}

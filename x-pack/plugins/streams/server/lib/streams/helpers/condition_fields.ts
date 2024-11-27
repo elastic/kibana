@@ -26,7 +26,6 @@ export function getFields(
 ): Array<{ name: string; type: 'number' | 'string' }> {
   const fields = collectFields(condition);
   // deduplicate fields, if mapped as string and number, keep as number
-
   const uniqueFields = new Map<string, 'number' | 'string'>();
   fields.forEach((field) => {
     const existing = uniqueFields.get(field.name);
@@ -73,5 +72,14 @@ function getFieldTypeForFilterCondition(condition: FilterCondition): 'number' | 
       return 'string';
     default:
       return 'string';
+  }
+}
+
+export function validateCondition(condition: Condition) {
+  if (isFilterCondition(condition)) {
+    // check whether a field is specified
+    if (!condition.field.trim()) {
+      throw new Error('Field is required in conditions');
+    }
   }
 }

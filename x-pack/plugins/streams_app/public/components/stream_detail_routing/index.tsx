@@ -19,6 +19,7 @@ import {
   EuiResizableContainer,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -67,6 +68,7 @@ export function StreamDetailRouting({
   definition?: ReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
+  const theme = useEuiTheme().euiTheme;
   const routingAppState = useRoutingState();
 
   if (!definition) {
@@ -77,12 +79,12 @@ export function StreamDetailRouting({
 
   return (
     <>
-      {routingAppState.showDeleteModal && routingAppState.debouncedChildUnderEdit && (
+      {routingAppState.showDeleteModal && routingAppState.childUnderEdit && (
         <StreamDeleteModal
           closeModal={closeModal}
           clearChildUnderEdit={() => routingAppState.setChildUnderEdit(undefined)}
           refreshDefinition={refreshDefinition}
-          id={routingAppState.debouncedChildUnderEdit.child.id}
+          id={routingAppState.childUnderEdit.child.id}
         />
       )}
       <EuiFlexGroup
@@ -92,66 +94,52 @@ export function StreamDetailRouting({
           overflow: auto;
         `}
       >
-        <EuiFlexItem
-          grow
+        <EuiPanel
+          hasShadow={false}
+          hasBorder
           className={css`
+            display: flex;
+            max-width: 100%;
             overflow: auto;
+            flex-grow: 1;
           `}
+          paddingSize="xs"
         >
-          <EuiPanel
-            hasShadow={false}
-            hasBorder
-            className={css`
-              display: flex;
-              max-width: 100%;
-              overflow: auto;
-            `}
-            paddingSize="xs"
-          >
-            <EuiFlexGroup
-              direction="row"
-              className={css`
-                max-width: 100%;
-                overflow: auto;
-              `}
-            >
-              <EuiResizableContainer>
-                {(EuiResizablePanel, EuiResizableButton) => (
-                  <>
-                    <EuiResizablePanel
-                      initialSize={30}
-                      minSize="300px"
-                      tabIndex={0}
-                      paddingSize="s"
-                      className={css`
-                        background-color: #f5f7fa;
-                        overflow: auto;
-                        display: flex;
-                      `}
-                    >
-                      <ChildStreamList definition={definition} routingAppState={routingAppState} />
-                    </EuiResizablePanel>
+          <EuiResizableContainer>
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  initialSize={30}
+                  minSize="300px"
+                  tabIndex={0}
+                  paddingSize="s"
+                  className={css`
+                    background-color: ${theme.colors.backgroundBaseSubdued};
+                    overflow: auto;
+                    display: flex;
+                  `}
+                >
+                  <ChildStreamList definition={definition} routingAppState={routingAppState} />
+                </EuiResizablePanel>
 
-                    <EuiResizableButton accountForScrollbars="both" />
+                <EuiResizableButton accountForScrollbars="both" />
 
-                    <EuiResizablePanel
-                      initialSize={70}
-                      tabIndex={0}
-                      minSize="300px"
-                      paddingSize="s"
-                      className={css`
-                        display: flex;
-                        flex-direction: column;
-                      `}
-                    >
-                      <PreviewPanel definition={definition} routingAppState={routingAppState} />
-                    </EuiResizablePanel>
-                  </>
-                )}
-              </EuiResizableContainer>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
+                <EuiResizablePanel
+                  initialSize={70}
+                  tabIndex={0}
+                  minSize="300px"
+                  paddingSize="s"
+                  className={css`
+                    display: flex;
+                    flex-direction: column;
+                  `}
+                >
+                  <PreviewPanel definition={definition} routingAppState={routingAppState} />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
+        </EuiPanel>
         <EuiFlexItem grow={false}>
           <ControlBar
             definition={definition}
@@ -268,6 +256,7 @@ function ControlBar({
         title: i18n.translate('xpack.streams.failedToSave', {
           defaultMessage: 'Failed to save',
         }),
+        toastMessage: 'body' in error ? error.body.message : error.message,
       });
     }
   }
@@ -521,7 +510,7 @@ function PreviewPanelIllustration({
 
 function ChildStreamList({
   definition,
-  routingAppState,
+  routingAppState: { childUnderEdit, setChildUnderEdit },
 }: {
   definition: ReadStreamDefinition;
   routingAppState: ReturnType<typeof useRoutingState>;
@@ -560,20 +549,20 @@ function ChildStreamList({
           <NestedView key={i}>
             <RoutingStreamEntry
               child={
-                child.id === routingAppState.childUnderEdit?.child.id
-                  ? routingAppState.childUnderEdit.child
+                !childUnderEdit?.isNew && child.id === childUnderEdit?.child.id
+                  ? childUnderEdit.child
                   : child
               }
-              edit={child.id === routingAppState.childUnderEdit?.child.id}
+              edit={!childUnderEdit?.isNew && child.id === childUnderEdit?.child.id}
               onEditStateChange={() => {
-                if (child.id === routingAppState.childUnderEdit?.child.id) {
-                  routingAppState.setChildUnderEdit(undefined);
+                if (child.id === childUnderEdit?.child.id) {
+                  setChildUnderEdit(undefined);
                 } else {
-                  routingAppState.setChildUnderEdit({ isNew: false, child });
+                  setChildUnderEdit({ isNew: false, child });
                 }
               }}
               onChildChange={(newChild) => {
-                routingAppState.setChildUnderEdit({
+                setChildUnderEdit({
                   isNew: false,
                   child: newChild,
                 });
@@ -581,16 +570,16 @@ function ChildStreamList({
             />
           </NestedView>
         ))}
-        {routingAppState.childUnderEdit?.isNew ? (
+        {childUnderEdit?.isNew ? (
           <NestedView last>
             <NewRoutingStreamEntry
-              child={routingAppState.childUnderEdit.child}
+              child={childUnderEdit.child}
               onChildChange={(newChild) => {
                 if (!newChild) {
-                  routingAppState.setChildUnderEdit(undefined);
+                  setChildUnderEdit(undefined);
                   return;
                 }
-                routingAppState.setChildUnderEdit({
+                setChildUnderEdit({
                   isNew: true,
                   child: newChild,
                 });
@@ -604,7 +593,7 @@ function ChildStreamList({
                 iconType="plus"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={() => {
-                  routingAppState.setChildUnderEdit({
+                  setChildUnderEdit({
                     isNew: true,
                     child: {
                       id: `${definition.id}.child`,
