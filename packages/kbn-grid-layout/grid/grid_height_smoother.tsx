@@ -13,9 +13,6 @@ import { combineLatest } from 'rxjs';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { GridLayoutStateManager } from './types';
 
-const getViewportHeight = () =>
-  window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-
 export const GridHeightSmoother = ({
   children,
   gridLayoutStateManager,
@@ -23,29 +20,14 @@ export const GridHeightSmoother = ({
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const subscription = combineLatest([
+    const interactionStyleSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
-      gridLayoutStateManager.expandedPanelId$,
-    ]).subscribe(([dimensions, interactionEvent, expandedPanelId]) => {
+    ]).subscribe(([dimensions, interactionEvent]) => {
       if (!smoothHeightRef.current) return;
-
-      if (expandedPanelId) {
-        const viewPortHeight = getViewportHeight();
-        const smoothHeightRefY =
-          smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
-
-        // When panel is expanded, ensure the page occupies the full viewport height, no more, no less, so
-        // smoothHeight height = viewport height - smoothHeight position - EuiPanel padding.
-
-        const height = viewPortHeight - smoothHeightRefY - parseFloat(euiThemeVars.euiSizeL);
-        smoothHeightRef.current.style.height = height + 'px';
-        smoothHeightRef.current.style.transition = 'none';
+      if (gridLayoutStateManager.expandedPanelId$.getValue()) {
         return;
-      } else {
-        smoothHeightRef.current.style.transition = '';
       }
-
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
         return;
@@ -61,7 +43,30 @@ export const GridHeightSmoother = ({
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
     });
-    return () => subscription.unsubscribe();
+    const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+      (expandedPanelId) => {
+        if (!smoothHeightRef.current) return;
+
+        if (expandedPanelId) {
+          const smoothHeightRefY =
+            smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
+
+          const gutterSize = parseFloat(euiThemeVars.euiSizeL);
+
+          // When panel is expanded, ensure the page occupies the full viewport height:
+
+          smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px)`;
+          smoothHeightRef.current.style.transition = 'none';
+        } else {
+          smoothHeightRef.current.style.display = '';
+          smoothHeightRef.current.style.transition = '';
+        }
+      }
+    );
+    return () => {
+      interactionStyleSubscription.unsubscribe();
+      expandedPanelSubscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
