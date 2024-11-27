@@ -81,6 +81,7 @@ import { THREAT_MATCH_MAPPING_FIELD_LABEL } from '../../../rule_creation/compone
 import { THREAT_MATCH_QUERY_FIELD_LABEL } from '../../../rule_creation/components/threat_match_query_edit/translations';
 import { THREAT_MATCH_INDEX_FIELD_LABEL } from '../../../rule_creation/components/threat_match_index_edit/translations';
 import { THREAT_MATCH_INDICATOR_PATH_FIELD_LABEL } from '../../../rule_creation/components/threat_match_indicator_path_edit/translations';
+import type { FieldValueQueryBar } from '../query_bar';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
@@ -334,15 +335,15 @@ export const getDescriptionItem = (
     const values: string[] = get(field, data);
     return buildStringArrayDescription(THREAT_MATCH_INDEX_FIELD_LABEL, field, values);
   } else if (field === 'threatQueryBar') {
-    const filters = addFilterStateIfNotThere(get('threatQueryBar.filters', data) ?? []);
-    const query = get('threatQueryBar.query.query', data);
-    const savedId = get('threatQueryBar.saved_id', data);
+    const threatQueryBar = get('threatQueryBar', data) as FieldValueQueryBar;
+
     return buildQueryBarDescription({
       field,
-      filters,
+      filters: addFilterStateIfNotThere(threatQueryBar.filters ?? []),
       filterManager,
-      query,
-      savedId,
+      query: threatQueryBar.query.query as string,
+      queryLanguage: threatQueryBar.query.language,
+      savedId: threatQueryBar.saved_id ?? '',
       indexPatterns,
       queryLabel: THREAT_MATCH_QUERY_FIELD_LABEL,
     });

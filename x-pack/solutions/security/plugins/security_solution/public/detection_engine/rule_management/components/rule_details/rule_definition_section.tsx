@@ -798,6 +798,21 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
+  if ('threat_language' in rule && rule.threat_language) {
+    definitionSectionListItems.push({
+      title: (
+        <span data-test-subj="threatQueryLanguagePropertyTitle">
+          {i18n.THREAT_QUERY_LANGUAGE_LABEL}
+        </span>
+      ),
+      description: (
+        <span data-test-subj="threatQueryLanguagePropertyValue">
+          {getQueryLanguageLabel(rule.threat_language)}
+        </span>
+      ),
+    });
+  }
+
   if ('threat_mapping' in rule && rule.threat_mapping) {
     definitionSectionListItems.push({
       title: (
