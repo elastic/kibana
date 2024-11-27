@@ -9,9 +9,6 @@ import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { termsQuery } from '@kbn/observability-plugin/server';
-import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
-import { DataTier } from '@kbn/observability-shared-plugin/common';
-import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
 import { castArray } from 'lodash';
 import { EVENT_MODULE, METRICSET_MODULE } from '../../../common/constants';
 import {
@@ -212,9 +209,6 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
     async (context, request, response) => {
       try {
         const modules = castArray(request.query.modules);
-        const { uiSettings } = await context.core;
-
-        const excludedDataTiers = await uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
 
         if (modules.length > MAX_MODULES) {
           throw Boom.badRequest(
@@ -237,18 +231,15 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
             size: 0,
             ...(modules.length > 0
               ? {
-                  query: getDataTierFilterCombined({
-                    filter: {
-                      bool: {
-                        should: [
-                          ...termsQuery(EVENT_MODULE, ...modules),
-                          ...termsQuery(METRICSET_MODULE, ...modules),
-                        ],
-                        minimum_should_match: 1,
-                      },
+                  query: {
+                    bool: {
+                      should: [
+                        ...termsQuery(EVENT_MODULE, ...modules),
+                        ...termsQuery(METRICSET_MODULE, ...modules),
+                      ],
+                      minimum_should_match: 1,
                     },
-                    excludedDataTiers,
-                  }),
+                  },
                 }
               : {}),
           },

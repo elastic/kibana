@@ -6,6 +6,9 @@
  */
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
+import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
+import { DataTier } from '@kbn/observability-shared-plugin/common';
+import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
 import type { InfraPluginRequestHandlerContext } from '../../types';
 import type { InfraBackendLibs } from '../infra_types';
 
@@ -29,6 +32,9 @@ export async function getInfraMetricsClient({
 }) {
   const { framework } = libs;
   const infraContext = await context.infra;
+  const { uiSettings } = await context.core;
+
+  const excludedDataTiers = await uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
   const metricsIndices = await infraContext.getMetricsIndices();
 
   return {
@@ -42,6 +48,13 @@ export async function getInfraMetricsClient({
           ...searchParams,
           ignore_unavailable: true,
           index: metricsIndices,
+          body: {
+            ...searchParams.body,
+            query: getDataTierFilterCombined({
+              filter: searchParams.body.query,
+              excludedDataTiers,
+            }),
+          },
         },
         request
       ) as Promise<any>;
