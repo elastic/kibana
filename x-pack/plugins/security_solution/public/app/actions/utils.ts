@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
+import { isLensApi } from '@kbn/lens-plugin/public';
 import type { Serializable } from '@kbn/utility-types';
 
 // All cell actions are disabled for these fields in Security
@@ -16,8 +16,10 @@ const FIELDS_WITHOUT_CELL_ACTIONS = [
   'kibana.alert.reason',
 ];
 
-export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmbeddable => {
-  return embeddable.type === LENS_EMBEDDABLE_TYPE;
+// @TODO: this is a temporary fix. It needs a better refactor on the consumer side here to
+// adapt to the new Embeddable architecture
+export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is IEmbeddable => {
+  return isLensApi(embeddable);
 };
 
 export const fieldHasCellActions = (field?: string): boolean => {

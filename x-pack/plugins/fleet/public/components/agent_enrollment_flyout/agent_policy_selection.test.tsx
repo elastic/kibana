@@ -15,7 +15,8 @@ import type { AgentPolicy } from '../../types';
 
 import { AgentPolicySelection } from '.';
 
-describe('step select agent policy', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/200777
+describe.skip('step select agent policy', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let agentPolicies: AgentPolicy[] = [];
