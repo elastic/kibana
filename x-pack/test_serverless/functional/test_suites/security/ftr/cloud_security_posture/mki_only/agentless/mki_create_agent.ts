@@ -48,6 +48,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await pageObjects.header.waitUntilLoadingHasFinished();
 
+      if (process.env.CSPM_AWS_ACCOUNT_ID && process.env.CSPM_AWS_SECRET_KEY) {
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
+          process.env.CSPM_AWS_ACCOUNT_ID
+        );
+
+        await cisIntegration.fillInTextField(
+          cisIntegration.testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID,
+          process.env.CSPM_AWS_SECRET_KEY
+        );
+      }
+
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
