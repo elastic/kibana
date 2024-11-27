@@ -22,7 +22,7 @@ export const ReadOnlyConnectorMessage: React.FC<{
     <>
       <EuiText>
         {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.descriptionText', {
-          defaultMessage: 'This connector is readonly.',
+          defaultMessage: 'This connector is read-only.',
         })}
       </EuiText>
       <EuiLink data-test-subj="read-only-link" href={href} target="_blank">
