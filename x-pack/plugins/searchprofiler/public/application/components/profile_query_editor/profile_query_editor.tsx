@@ -97,7 +97,7 @@ export const ProfileQueryEditor = memo(() => {
   const isDisabled = !licenseEnabled || !hasIndices;
   const tooltipContent = !licenseEnabled
     ? i18n.translate('xpack.searchProfiler.formProfileButton.noLicenseTooltip', {
-        defaultMessage: 'You do not have the license to use Search Profiler',
+        defaultMessage: 'You need an active license to use Search Profiler',
       })
     : i18n.translate('xpack.searchProfiler.formProfileButton.noIndicesTooltip', {
         defaultMessage: 'You must have at least one index to use Search Profiler',
