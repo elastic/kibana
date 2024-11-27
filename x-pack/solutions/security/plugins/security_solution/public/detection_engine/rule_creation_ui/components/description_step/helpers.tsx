@@ -47,6 +47,8 @@ import type {
 import { AlertSuppressionDurationType } from '../../../../detections/pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
+import { THREAT_QUERY_LANGUAGE_LABEL } from '../../../rule_management/components/rule_details/translations';
+import { getQueryLanguageLabel } from '../../../rule_management/components/rule_details/helpers';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionLabel } from './alert_suppression_label';
 import type { FieldValueThreshold } from '../threshold_input';
@@ -91,57 +93,57 @@ export const buildQueryBarDescription = ({
   filters,
   filterManager,
   query,
+  queryLanguage,
   savedId,
   savedQueryName,
   indexPatterns,
   queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
-  let items: ListItems[] = [];
+  const items: ListItems[] = [];
   const isLoadedFromSavedQuery = !isEmpty(savedId) && !isEmpty(savedQueryName);
+
   if (isLoadedFromSavedQuery) {
-    items = [
-      ...items,
-      {
-        title: <>{i18n.SAVED_QUERY_NAME_LABEL} </>,
-        description: <>{savedQueryName} </>,
-      },
-    ];
+    items.push({
+      title: <>{i18n.SAVED_QUERY_NAME_LABEL} </>,
+      description: <>{savedQueryName} </>,
+    });
   }
 
   if (!isEmpty(filters)) {
     filterManager.setFilters(filters);
-    items = [
-      ...items,
-      {
-        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_FILTERS_LABEL : i18n.FILTERS_LABEL} </>,
-        description: (
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {filterManager.getFilters().map((filter, index) => (
-              <EuiFlexItem grow={false} key={`${field}-filter-${index}`} css={{ width: '100%' }}>
-                <EuiBadgeWrap color="hollow">
-                  {indexPatterns != null ? (
-                    <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
-                  ) : (
-                    <EuiLoadingSpinner size="m" />
-                  )}
-                </EuiBadgeWrap>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ),
-      },
-    ];
+    items.push({
+      title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_FILTERS_LABEL : i18n.FILTERS_LABEL} </>,
+      description: (
+        <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+          {filterManager.getFilters().map((filter, index) => (
+            <EuiFlexItem grow={false} key={`${field}-filter-${index}`} css={{ width: '100%' }}>
+              <EuiBadgeWrap color="hollow">
+                {indexPatterns != null ? (
+                  <FilterBadgeGroup filters={[filter]} dataViews={[indexPatterns]} />
+                ) : (
+                  <EuiLoadingSpinner size="m" />
+                )}
+              </EuiBadgeWrap>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ),
+    });
   }
   if (!isEmpty(query)) {
-    items = [
-      ...items,
-      {
-        title: (
-          <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : queryLabel ?? i18n.QUERY_LABEL}</>
-        ),
-        description: <Query>{query}</Query>,
-      },
-    ];
+    items.push({
+      title: (
+        <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : queryLabel ?? i18n.QUERY_LABEL}</>
+      ),
+      description: <Query>{query}</Query>,
+    });
+  }
+
+  if (queryLanguage) {
+    items.push({
+      title: THREAT_QUERY_LANGUAGE_LABEL,
+      description: getQueryLanguageLabel(queryLanguage),
+    });
   }
 
   return items;
