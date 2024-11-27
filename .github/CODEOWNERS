@@ -778,6 +778,9 @@ x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
 x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
+x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/packages/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/packages/kbn-elastic-assistant-common @elastic/security-generative-ai
@@ -840,6 +843,7 @@ x-pack/packages/observability/synthetics_test_data @elastic/obs-ux-management-te
 x-pack/packages/rollup @elastic/kibana-management
 x-pack/packages/search/shared_ui @elastic/search-kibana
 x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-investigations
+x-pack/packages/security-solution/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/features @elastic/security-threat-hunting-explore
 x-pack/packages/security-solution/navigation @elastic/security-threat-hunting-explore
@@ -865,11 +869,13 @@ x-pack/plugins/banners @elastic/appex-sharedux
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/plugins/cases @elastic/response-ops
 x-pack/plugins/cloud @elastic/kibana-core
+x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_links @elastic/kibana-core
+x-pack/plugins/cloud_security_posture @elastic/kibana-cloud-security-posture
 x-pack/plugins/cross_cluster_replication @elastic/kibana-management
 x-pack/plugins/custom_branding @elastic/appex-sharedux
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
@@ -899,6 +905,7 @@ x-pack/plugins/index_management @elastic/kibana-management
 x-pack/plugins/inference @elastic/appex-ai-infra
 x-pack/plugins/ingest_pipelines @elastic/kibana-management
 x-pack/plugins/integration_assistant @elastic/security-scalability
+x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/plugins/lens @elastic/kibana-visualizations
 x-pack/plugins/license_api_guard @elastic/kibana-management
 x-pack/plugins/license_management @elastic/kibana-management
@@ -966,6 +973,7 @@ x-pack/plugins/security_solution_serverless @elastic/security-solution
 x-pack/plugins/serverless @elastic/appex-sharedux
 x-pack/plugins/serverless_observability @elastic/obs-ux-management-team
 x-pack/plugins/serverless_search @elastic/search-kibana
+x-pack/plugins/session_view @elastic/kibana-cloud-security-posture
 x-pack/plugins/snapshot_restore @elastic/kibana-management
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/plugins/stack_alerts @elastic/response-ops
