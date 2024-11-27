@@ -308,6 +308,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonExistsInMoreOptions();
           await pageObjects.svlSearchIndexDetailPage.expectDeleteIndexButtonToBeDisabled();
         });
+        it('show no privileges to create api key', async () => {
+          await pageObjects.svlApiKeys.expectAPIKeyNoPrivileges();
+        });
       });
     });
   });
