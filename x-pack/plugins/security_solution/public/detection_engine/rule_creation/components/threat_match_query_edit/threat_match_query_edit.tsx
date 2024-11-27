@@ -11,7 +11,7 @@ import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
 import { QueryBarDefineRule } from '../../../rule_creation_ui/components/query_bar';
-import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
+import { threatMatchQueryRequiredValidator } from './validators/threat_match_query_required_validator';
 import { kueryValidatorFactory } from '../../../rule_creation_ui/validators/kuery_validator_factory';
 import * as i18n from './translations';
 
@@ -47,7 +47,7 @@ const THREAT_MATCH_QUERY_FIELD_CONFIG: FieldConfig<FieldValueQueryBar> = {
   label: i18n.THREAT_MATCH_QUERY_FIELD_LABEL,
   validations: [
     {
-      validator: queryRequiredValidatorFactory('threat_match'),
+      validator: threatMatchQueryRequiredValidator,
     },
     {
       validator: kueryValidatorFactory(),

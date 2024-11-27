@@ -6,3 +6,4 @@
  */
 
 export * from './threat_match_mapping_edit';
+export { DEFAULT_THREAT_MAPPING_VALUE } from './threat_match_mapping_field';
