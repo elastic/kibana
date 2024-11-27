@@ -413,9 +413,9 @@ x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
-x-pack/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/packages/kbn-entities-schema @elastic/obs-entities
 x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+x-pack/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/plugins/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
