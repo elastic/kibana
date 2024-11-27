@@ -347,8 +347,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis || searchQueryUpdated}
         analysisInfo={<LogRateAnalysisInfoPopover />}
-        runAnalysisDisabled={isAnalysisControlsDisabled}
-        resetDisabled={isAnalysisControlsDisabled}
+        isAnalysisControlsDisabled={isAnalysisControlsDisabled}
       >
         <>
           {embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD && (

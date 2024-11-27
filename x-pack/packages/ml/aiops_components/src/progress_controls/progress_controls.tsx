@@ -40,7 +40,7 @@ interface ProgressControlProps {
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
   analysisInfo?: React.ReactNode;
-  resetDisabled?: boolean;
+  isAnalysisControlsDisabled?: boolean;
 }
 
 /**
@@ -64,7 +64,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
     analysisInfo = null,
-    resetDisabled = false,
+    isAnalysisControlsDisabled = false,
   } = props;
 
   const progressOutput = Math.round(progress * 100);
@@ -75,54 +75,61 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        {!isRunning && (
-          <EuiButton
-            disabled={runAnalysisDisabled}
-            data-test-subj={`aiopsRerunAnalysisButton${shouldRerunAnalysis ? ' shouldRerun' : ''}`}
-            size="s"
-            onClick={onRefresh}
-            color={shouldRerunAnalysis ? 'warning' : 'primary'}
-          >
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <FormattedMessage
-                  id="xpack.aiops.rerunAnalysisButtonTitle"
-                  defaultMessage="Run analysis"
-                />
-              </EuiFlexItem>
-              {shouldRerunAnalysis && (
-                <>
-                  <EuiFlexItem>
-                    <EuiIconTip
-                      aria-label="Warning"
-                      type="warning"
-                      color="warning"
-                      content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
-                        defaultMessage:
-                          'Analysis data may be out of date due to selection update. Rerun analysis.',
-                      })}
-                    />
-                  </EuiFlexItem>
-                </>
-              )}
-            </EuiFlexGroup>
-          </EuiButton>
-        )}
-        {isRunning && (
-          <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
-            <FormattedMessage id="xpack.aiops.cancelAnalysisButtonTitle" defaultMessage="Cancel" />
-          </EuiButton>
-        )}
-      </EuiFlexItem>
-      {(progress === 1 || isRunning === false) && !isBrushCleared ? (
+      {!isAnalysisControlsDisabled && (
+        <EuiFlexItem grow={false}>
+          {!isRunning && (
+            <EuiButton
+              disabled={runAnalysisDisabled}
+              data-test-subj={`aiopsRerunAnalysisButton${
+                shouldRerunAnalysis ? ' shouldRerun' : ''
+              }`}
+              size="s"
+              onClick={onRefresh}
+              color={shouldRerunAnalysis ? 'warning' : 'primary'}
+            >
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.aiops.rerunAnalysisButtonTitle"
+                    defaultMessage="Run analysis"
+                  />
+                </EuiFlexItem>
+                {shouldRerunAnalysis && (
+                  <>
+                    <EuiFlexItem>
+                      <EuiIconTip
+                        aria-label="Warning"
+                        type="warning"
+                        color="warning"
+                        content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
+                          defaultMessage:
+                            'Analysis data may be out of date due to selection update. Rerun analysis.',
+                        })}
+                      />
+                    </EuiFlexItem>
+                  </>
+                )}
+              </EuiFlexGroup>
+            </EuiButton>
+          )}
+          {isRunning && (
+            <EuiButton data-test-subj="aiopsCancelAnalysisButton" size="s" onClick={onCancel}>
+              <FormattedMessage
+                id="xpack.aiops.cancelAnalysisButtonTitle"
+                defaultMessage="Cancel"
+              />
+            </EuiButton>
+          )}
+        </EuiFlexItem>
+      )}
+
+      {(progress === 1 || isRunning === false) && !isBrushCleared && !isAnalysisControlsDisabled ? (
         <EuiFlexItem grow={false}>
           <EuiButton
             data-test-subj="aiopsClearSelectionBadge"
             size="s"
             onClick={onReset}
             color="text"
-            disabled={resetDisabled}
           >
             <FormattedMessage id="xpack.aiops.resetLabel" defaultMessage="Reset" />
           </EuiButton>

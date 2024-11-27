@@ -51,7 +51,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
     embeddingOrigin === AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD || isCasesEmbedding;
 
   if (documentCountStats === undefined) {
-    return totalCount !== undefined && embeddingOrigin !== AIOPS_EMBEDDABLE_ORIGIN.DASHBOARD ? (
+    return totalCount !== undefined && !isEmbeddedInDashboardOrCases ? (
       <TotalCountHeader totalCount={totalCount} sampleProbability={sampleProbability} />
     ) : null;
   }
