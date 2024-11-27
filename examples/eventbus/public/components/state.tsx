@@ -25,12 +25,15 @@ export const State: FC = () => {
         const index = esql.split('|')[0].trim().split(' ')[1];
         const resp = await dataPlugin.dataViews.find(index);
         const dataView = resp[0];
-        console.log('dataView.fields', dataView.fields);
+        // console.log('dataView.fields', dataView.fields);
         const fields = dataView.fields
           .filter((d) => !d.spec.runtimeField)
           .reduce<Record<string, string>>((acc, d) => {
+            // console.log('field', d.spec);
             // reduce to Record<string, string>
-            acc[d.spec.name] = d.spec.type;
+            if (Array.isArray(d.spec.esTypes)) {
+              acc[d.spec.name] = d.spec.esTypes[0];
+            }
             return acc;
           }, {});
 

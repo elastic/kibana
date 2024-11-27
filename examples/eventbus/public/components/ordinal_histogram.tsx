@@ -21,8 +21,6 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 import { useFetchESQL } from '../hooks/use_fetch_esql';
 
-const height = 120;
-
 function truncateString(str: string, n: number) {
   // Check if the string length exceeds the limit
   if (str.length > n) {
@@ -43,16 +41,19 @@ const debounce = (callback, wait) => {
   };
 };
 
-interface DateHistogramProps {
+interface OrdinalHistogramProps {
   field: string;
+  width: number;
+  height: number;
 }
 
-export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
-  const iframeID = `date_histogram_${field}`;
+export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
+  const { field } = props;
+  const fieldWithoutKeyword = field.replace(/\./g, '_');
+  const iframeID = `ordinal_histogram_${fieldWithoutKeyword}`;
   const state = useEventBusExampleState();
   const esql = state.useState((s) => s.esql);
   const filters = state.useState((s) => s.filters);
-  const width = state.useState((s) => s.chartWidth);
 
   const panelFilters = useMemo(() => {
     const pfs = cloneDeep(filters);
@@ -68,9 +69,9 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
     if (esql === '') return null;
 
     const els = esql.split('|').map((d) => d.trim());
-    els.push(
-      `STATS count = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
-    );
+    els.push(`STATS count = COUNT(*) BY ${field}`);
+    els.push('SORT count DESC');
+    els.push('LIMIT 10');
 
     return els.join('\n| ');
   }, [esql, field]);
@@ -83,16 +84,15 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
       els.splice(1, 0, `WHERE ${filter}`);
     });
 
-    els.push(
-      `STATS count = COUNT(*) BY date = BUCKET(${field}, 1, "2024-07-01T00:00:00.000Z", "2024-07-01T23:59:00.000Z")`
-    );
+    els.push(`STATS count = COUNT(*) BY ${field}`);
+    els.push('SORT count DESC');
+    els.push('LIMIT 10');
 
     return els.join('\n| ');
   }, [esql, field, panelFilters]);
 
   const rawDataContext = useFetchESQL(esqlContext);
   const rawDataWithFilters = useFetchESQL(esqlWithFilters);
-  // console.log('date histogram raw data', rawData);
 
   const [initialized, setInitialized] = React.useState(false);
   const wrapperRef = React.useRef(null);
@@ -117,19 +117,22 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
       return [];
     }
 
+    console.log('wideFormatFull', wideFormatFull);
+
     return [
       // crossfilter
       ...crossfilter.map((d) => ({
         ...d,
-        type: 'crossfilter',
-        typeOrder: 0,
+        type: '01_filter',
       })),
       // global
       ...wideFormatFull.map((d, i) => ({
         ...d,
-        count: d.count - (crossfilter.find((d2) => d2.date === d.date)?.count ?? 0),
-        type: 'context',
-        typeOrder: 1,
+        count:
+          d.count -
+          (crossfilter.find((d2) => d2[fieldWithoutKeyword] === d[fieldWithoutKeyword])?.count ??
+            0),
+        type: '02_context',
       })),
     ];
   }, [rawDataContext, rawDataWithFilters]);
@@ -137,14 +140,13 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
   React.useEffect(() => {
     if (vegaRef.current) {
       const view = vegaRef.current;
-      // console.log('---- rerender date histogram', props.width, props.height);
+      // console.log('---- data change', view);
       view.data('table', data);
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 1);
     }
   }, [data, initialized]);
-  // console.log('vegaRef.current', vegaRef.current);
 
   React.useEffect(() => {
     // setup API options
@@ -153,18 +155,13 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
         // Vega-Lite default configuration
       },
       init: (view) => {
-        // console.log('init', view);
         vegaRef.current = view;
         // initialize tooltip handler
         view.tooltip(new vegaTooltip.Handler().call);
 
-        view.addSignalListener('brushX', function (event, item) {
-          if (item.date) {
-            dispatch(
-              `@timestamp >= "${new Date(item.date[0]).toISOString()}" AND @timestamp < "${new Date(
-                item.date[1]
-              ).toISOString()}"`
-            );
+        view.addSignalListener('ordinal_listener', function (event, item) {
+          if (item[fieldWithoutKeyword]) {
+            dispatch(`${field}=="${item[fieldWithoutKeyword]}"`);
           } else {
             dispatch('');
           }
@@ -180,30 +177,43 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
     // register vega and vega-lite with the API
     vl.register(vega, vegaLite, options);
 
-    const brush = vl.selectInterval().name('brushX').encodings('x');
+    const click = vl.selectMulti().encodings('y').name('ordinal_listener');
 
     // now you can use the API!
     const spec = vl
-      .markBar({ tooltip: true, width: 15 })
+      .markBar({ tooltip: true })
       .data({ name: 'table' })
       .encode(
         // https://vega.github.io/vega-lite/docs/timeunit.html
-        vl.x().fieldT('date').axis({ title: '', grid: false }),
-        vl.y().sum('count').axis({ title: '' }),
+        vl.x().sum('count').axis({ title: '' }),
+        vl.y().fieldN(fieldWithoutKeyword).sort('-x').axis({ title: '' }),
         vl
           .color()
           .fieldN('type')
-          .scale({ range: ['#ccc', '#00a69b'] })
+          .scale({ range: ['#00a69b', '#ccc'] })
           .legend({ disable: true }),
-        vl.opacity().condition({ test: "datum['type'] == 'context'", value: 0.7 }).value(1),
-        vl.order().field('typeOrder'),
-        vl.tooltip([vl.fieldT('date'), vl.fieldQ('count')])
+        vl
+          .opacity()
+          .condition([
+            {
+              test: `datum['type'] == '02_context'`,
+              empty: false,
+              value: 0.7,
+            },
+            {
+              param: `ordinal_listener`,
+              empty: false,
+              value: 0.7,
+            },
+          ])
+          .value(1),
+        vl.tooltip([vl.fieldN(fieldWithoutKeyword), vl.fieldQ('count')])
       )
       .title({ text: field, anchor: 'start' })
       .width('container')
-      .height(height - 50)
+      .height(props.height - 15)
       .config({ view: { stroke: null } })
-      .params(brush);
+      .params(click);
 
     spec.render().then((viewElement) => {
       // render returns a promise to a DOM element containing the chart
@@ -216,10 +226,9 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
     return () => {
       state.actions.setCrossfilter({ id: iframeID, filter: '' });
     };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // console.log('filters', filters);
 
   return (
     <div css={{ position: 'relative' }}>
@@ -239,8 +248,8 @@ export const DateHistogram: FC<DateHistogramProps> = ({ field }) => {
       <div
         ref={wrapperRef}
         style={{
-          width,
-          height,
+          width: '100%',
+          height: '100%',
         }}
       />
     </div>
