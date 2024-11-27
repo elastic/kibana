@@ -91,6 +91,7 @@ export function initAPIAuthorization(
             return operatorPrivilegeIndex !== -1
               ? {
                   anyRequired: privilege.anyRequired,
+                  // @ts-expect-error wrong types for `toSpliced`
                   allRequired: privilege.allRequired?.toSpliced(
                     operatorPrivilegeIndex,
                     1,
