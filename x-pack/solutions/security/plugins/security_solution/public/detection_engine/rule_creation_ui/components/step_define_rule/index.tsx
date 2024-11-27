@@ -257,10 +257,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 =======
   usePersistentThreatMatchState({
     form,
-    ruleTypePath: 'ruleType',
-    indexPatternPath: 'threatIndex',
-    queryPath: 'threatQueryBar',
-    mappingPath: 'threatMapping',
   });
 >>>>>>> 49853eaf618 (add threat mapping persistence functionality)
 
