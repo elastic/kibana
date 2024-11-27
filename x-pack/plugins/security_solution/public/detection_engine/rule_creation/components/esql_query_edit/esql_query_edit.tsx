@@ -13,7 +13,7 @@ import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
 import { QueryBarField } from '../../../rule_creation_ui/components/query_bar_field';
-import { esqlQueryRequiredValidatorFactory } from './validators/esql_query_required_validator_factory';
+import { esqlQueryRequiredValidator } from './validators/esql_query_required_validator';
 import { esqlQueryValidatorFactory } from './validators/esql_query_validator_factory';
 import { EsqlInfoIcon } from './esql_info_icon';
 import * as i18n from './translations';
@@ -62,7 +62,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
         ...(required
           ? [
               {
-                validator: esqlQueryRequiredValidatorFactory(),
+                validator: esqlQueryRequiredValidator,
               },
             ]
           : []),

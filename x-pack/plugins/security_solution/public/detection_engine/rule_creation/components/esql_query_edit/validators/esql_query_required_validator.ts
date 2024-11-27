@@ -9,22 +9,14 @@ import { fieldValidators, type FormData, type ValidationFunc } from '../../../..
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import * as i18n from './translations';
 
-export function esqlQueryRequiredValidatorFactory(): ValidationFunc<
-  FormData,
-  string,
-  FieldValueQueryBar
-> {
-  return async (data) => {
-    const { value } = data;
-    const esqlQuery = value.query.query as string;
+export const esqlQueryRequiredValidator: ValidationFunc<FormData, string, FieldValueQueryBar> = (
+  data
+) => {
+  const { value } = data;
+  const esqlQuery = value.query.query as string;
 
-    if (esqlQuery.trim() === '') {
-      return;
-    }
-
-    return fieldValidators.emptyField(i18n.ESQL_QUERY_VALIDATION_REQUIRED)({
-      ...data,
-      value: esqlQuery,
-    });
-  };
-}
+  return fieldValidators.emptyField(i18n.ESQL_QUERY_VALIDATION_REQUIRED)({
+    ...data,
+    value: esqlQuery,
+  });
+};
