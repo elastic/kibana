@@ -18,10 +18,12 @@ import {
   themeServiceMock,
   scopedHistoryMock,
   executionContextServiceMock,
-  applicationServiceMock,
   fatalErrorsServiceMock,
   httpServiceMock,
+  applicationServiceMock,
 } from '@kbn/core/public/mocks';
+
+import type { Capabilities } from '@kbn/core/public';
 
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -62,6 +64,10 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
 });
 
+const capabilities = {
+  index_management: { manageIndexTemplate: true, manageEnrich: true },
+} as unknown as Capabilities;
+
 const appDependencies = {
   services,
   history,
@@ -71,6 +77,7 @@ const appDependencies = {
     http: httpServiceMock.createSetupContract(),
     application: applicationServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
+    capabilities,
   },
   plugins: {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
@@ -102,6 +109,7 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   kibanaVersion: {
     get: () => kibanaVersion,
   },
+  capabilities,
 });
 
 export const setupEnvironment = () => {

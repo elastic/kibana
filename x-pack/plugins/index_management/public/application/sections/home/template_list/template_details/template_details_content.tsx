@@ -36,7 +36,7 @@ import {
 import { SectionLoading, UseRequestResponse } from '../../../../../shared_imports';
 import { TemplateDeleteModal, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
-import { useServices } from '../../../../app_context';
+import { useServices, useAppContext } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
 import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
 import { TabSummary, TabPreview } from './tabs';
@@ -104,6 +104,9 @@ export const TemplateDetailsContent = ({
   reload,
 }: Props) => {
   const { uiMetricService } = useServices();
+  const {
+    core: { capabilities },
+  } = useAppContext();
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(templateName, isLegacy);
   const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const [templateToDelete, setTemplateToDelete] = useState<
@@ -248,7 +251,7 @@ export const TemplateDetailsContent = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {templateDetails && (
+          {templateDetails && capabilities.index_management.manageIndexTemplate && (
             <EuiFlexItem grow={false}>
               {/* Manage templates context menu */}
               <EuiPopover

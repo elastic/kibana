@@ -31,10 +31,7 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
     this.config = initContext.config.get();
   }
 
-  setup(
-    { http, getStartServices }: CoreSetup,
-    { features, security }: Dependencies
-  ): IndexManagementPluginSetup {
+  setup({ http }: CoreSetup, { features, security }: Dependencies): IndexManagementPluginSetup {
     features.registerElasticsearchFeature({
       id: PLUGIN.id,
       management: {
@@ -42,10 +39,18 @@ export class IndexMgmtServerPlugin implements Plugin<IndexManagementPluginSetup,
       },
       privileges: [
         {
+          requiredClusterPrivileges: ['manage_enrich'],
+          ui: ['manageEnrich'],
+        },
+        {
+          requiredClusterPrivileges: ['manage_index_templates'],
+          ui: ['manageIndexTemplate'],
+        },
+        {
           // manage_index_templates is also required, but we will disable specific parts of the
           // UI if this privilege is missing.
           requiredClusterPrivileges: ['monitor'],
-          ui: [],
+          ui: ['enabled'],
         },
       ],
     });

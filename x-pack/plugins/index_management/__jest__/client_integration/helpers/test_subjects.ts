@@ -108,7 +108,6 @@ export type TestSubjects =
   | 'viewIlmPolicyLink'
   | 'viewAllIndicesLink'
   | 'dataRetentionEnabledField.input'
-  | 'enrichPoliciesInsuficientPrivileges'
   | 'dataRetentionDetail'
   | 'createIndexSaveButton'
   | 'createIndexMessage'

@@ -16,7 +16,7 @@ import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
-import { useServices } from '../../../../app_context';
+import { useAppContext, useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 import { getComponentTemplatesLink, getTemplateDetailsLink } from '../../../../services/routing';
@@ -39,11 +39,62 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   cloneTemplate,
   history,
 }) => {
+  const {
+    core: { capabilities },
+  } = useAppContext();
+
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
   const [templatesToDelete, setTemplatesToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
+
+  const actions: any[] = [
+    {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
+        defaultMessage: 'Edit',
+      }),
+      isPrimary: true,
+      description: i18n.translate('xpack.idxMgmt.templateList.table.actionEditDecription', {
+        defaultMessage: 'Edit this template',
+      }),
+      icon: 'pencil',
+      type: 'icon',
+      onClick: ({ name }: TemplateListItem) => {
+        editTemplate(name);
+      },
+      enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+    },
+    {
+      type: 'icon',
+      name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
+        defaultMessage: 'Clone',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneDescription', {
+        defaultMessage: 'Clone this template',
+      }),
+      icon: 'copy',
+      onClick: ({ name }: TemplateListItem) => {
+        cloneTemplate(name);
+      },
+    },
+    {
+      name: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteText', {
+        defaultMessage: 'Delete',
+      }),
+      description: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteDecription', {
+        defaultMessage: 'Delete this template',
+      }),
+      icon: 'trash',
+      color: 'danger',
+      type: 'icon',
+      onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
+        setTemplatesToDelete([{ name, isLegacy }]);
+      },
+      isPrimary: true,
+      enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+    },
+  ];
 
   const columns: Array<EuiBasicTableColumn<TemplateListItem>> = [
     {
@@ -143,52 +194,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Actions',
       }),
       width: '120px',
-      actions: [
-        {
-          name: i18n.translate('xpack.idxMgmt.templateList.table.actionEditText', {
-            defaultMessage: 'Edit',
-          }),
-          isPrimary: true,
-          description: i18n.translate('xpack.idxMgmt.templateList.table.actionEditDecription', {
-            defaultMessage: 'Edit this template',
-          }),
-          icon: 'pencil',
-          type: 'icon',
-          onClick: ({ name }: TemplateListItem) => {
-            editTemplate(name);
-          },
-          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-        },
-        {
-          type: 'icon',
-          name: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneTitle', {
-            defaultMessage: 'Clone',
-          }),
-          description: i18n.translate('xpack.idxMgmt.templateList.table.actionCloneDescription', {
-            defaultMessage: 'Clone this template',
-          }),
-          icon: 'copy',
-          onClick: ({ name }: TemplateListItem) => {
-            cloneTemplate(name);
-          },
-        },
-        {
-          name: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteText', {
-            defaultMessage: 'Delete',
-          }),
-          description: i18n.translate('xpack.idxMgmt.templateList.table.actionDeleteDecription', {
-            defaultMessage: 'Delete this template',
-          }),
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: ({ name, _kbnMeta: { isLegacy } }: TemplateListItem) => {
-            setTemplatesToDelete([{ name, isLegacy }]);
-          },
-          isPrimary: true,
-          enabled: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-        },
-      ],
+      // todo better types
+      actions: capabilities.index_management.manageIndexTemplate ? actions : [],
     },
   ];
 
@@ -207,21 +214,44 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     pageSizeOptions: PAGE_SIZE_OPTIONS,
   };
 
-  const selectionConfig = {
-    onSelectionChange: setSelection,
-    selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
-    selectableMessage: (selectable: boolean) => {
-      if (!selectable) {
-        return i18n.translate(
-          'xpack.idxMgmt.templateList.table.deleteCloudManagedTemplateTooltip',
-          {
-            defaultMessage: 'You cannot delete a cloud-managed template.',
+  const selectionConfig = capabilities.index_management.manageIndexTemplate
+    ? {
+        onSelectionChange: setSelection,
+        selectable: ({ _kbnMeta: { type } }: TemplateListItem) => type !== 'cloudManaged',
+        selectableMessage: (selectable: boolean) => {
+          if (!selectable) {
+            return i18n.translate(
+              'xpack.idxMgmt.templateList.table.deleteCloudManagedTemplateTooltip',
+              {
+                defaultMessage: 'You cannot delete a cloud-managed template.',
+              }
+            );
           }
-        );
+          return '';
+        },
       }
-      return '';
-    },
-  };
+    : undefined;
+
+  const createTemplateButton = (
+    <EuiButton
+      iconType="plusInCircle"
+      data-test-subj="createTemplateButton"
+      key="createTemplateButton"
+      fill
+      {...reactRouterNavigate(history, '/create_template')}
+    >
+      <FormattedMessage
+        id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
+        defaultMessage="Create template"
+      />
+    </EuiButton>
+  );
+
+  const toolsRight: React.JSX.Element[] = [];
+
+  if (capabilities.index_management.manageIndexTemplate) {
+    toolsRight.push(createTemplateButton);
+  }
 
   const searchConfig = {
     box: {
@@ -248,20 +278,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           />
         </EuiButton>
       ) : undefined,
-    toolsRight: [
-      <EuiButton
-        iconType="plusInCircle"
-        data-test-subj="createTemplateButton"
-        key="createTemplateButton"
-        fill
-        {...reactRouterNavigate(history, '/create_template')}
-      >
-        <FormattedMessage
-          id="xpack.idxMgmt.templateList.table.createTemplatesButtonLabel"
-          defaultMessage="Create template"
-        />
-      </EuiButton>,
-    ],
+    toolsRight,
   };
 
   const goToList = () => {

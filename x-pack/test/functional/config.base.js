@@ -609,6 +609,26 @@ export default async function ({ readConfigFile }) {
             },
           ],
         },
+
+        index_management_monitor: {
+          elasticsearch: {
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
+            ],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
         // https://www.elastic.co/guide/en/elasticsearch/reference/master/snapshots-register-repository.html#snapshot-repo-prereqs
         snapshot_restore_user: {
           elasticsearch: {

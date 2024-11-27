@@ -14,6 +14,7 @@ import {
   NotificationsSetup,
   CoreStart,
   ExecutionContextStart,
+  Capabilities,
 } from '@kbn/core/public';
 import { IndexManagementStartServices } from '../../../types';
 import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
@@ -29,6 +30,7 @@ interface Props {
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
   startServices: IndexManagementStartServices;
+  capabilities: Capabilities;
 }
 
 interface Context {
@@ -41,6 +43,7 @@ interface Context {
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
   startServices: IndexManagementStartServices;
+  capabilities: Capabilities;
 }
 
 export const ComponentTemplatesProvider = ({
@@ -59,6 +62,7 @@ export const ComponentTemplatesProvider = ({
     getUrlForApp,
     executionContext,
     startServices,
+    capabilities,
   } = value;
 
   const useRequest = getUseRequest(httpClient);
@@ -79,6 +83,7 @@ export const ComponentTemplatesProvider = ({
         getUrlForApp,
         executionContext,
         startServices,
+        capabilities,
       }}
     >
       {children}

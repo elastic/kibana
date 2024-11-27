@@ -74,6 +74,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     getUrlForApp: application.getUrlForApp,
     executionContext,
     startServices,
+    capabilities: core.application.capabilities,
   };
 
   return (

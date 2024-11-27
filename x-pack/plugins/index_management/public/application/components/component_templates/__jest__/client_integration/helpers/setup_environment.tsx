@@ -8,7 +8,7 @@
 import React from 'react';
 import { LocationDescriptorObject } from 'history';
 
-import type { CoreStart, HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup, Capabilities } from '@kbn/core/public';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import {
@@ -43,6 +43,10 @@ const appDependencies = {
 
 export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => {
   const coreMockStart = coreMock.createStart();
+
+  const capabilities = {
+    index_management: { manageIndexTemplate: true },
+  } as unknown as Capabilities;
   return {
     overlays: coreStart?.overlays ?? coreMockStart.overlays,
     httpClient: httpSetup,
@@ -53,6 +57,7 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?:
     getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
     executionContext: executionContextServiceMock.createInternalStartContract(),
     startServices: coreStart ?? coreMockStart,
+    capabilities,
   };
 };
 
