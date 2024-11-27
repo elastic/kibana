@@ -14,23 +14,35 @@ import type {
 import type { StoredRuleMigrationResource } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
+export type CreateRuleMigrationResourceInput = Omit<RuleMigrationResource, 'id'>;
+
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
  * The 500 number was chosen as a reasonable number to avoid large payloads. It can be adjusted if needed.
  */
 const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseClient {
-  public async upsert(resources: RuleMigrationResource[]): Promise<void> {
+  public async upsert(resources: CreateRuleMigrationResourceInput[]): Promise<void> {
     const index = await this.getIndexName();
 
-    let resourcesSlice: RuleMigrationResource[];
+    let resourcesSlice: CreateRuleMigrationResourceInput[];
+
+    const createdAt = new Date().toISOString();
+    const dateFields = {
+      '@timestamp': createdAt,
+      updated_by: this.username,
+      updated_at: createdAt,
+    };
     while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
       await this.esClient
         .bulk({
           refresh: 'wait_for',
           operations: resourcesSlice.flatMap((resource) => [
             { update: { _id: this.createId(resource), _index: index } },
-            { doc: resource, doc_as_upsert: true },
+            {
+              doc: { ...resource, ...dateFields },
+              doc_as_upsert: true,
+            },
           ]),
         })
         .catch((error) => {
@@ -65,7 +77,7 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
       });
   }
 
-  private createId(resource: RuleMigrationResource): string {
+  private createId(resource: CreateRuleMigrationResourceInput): string {
     const key = `${resource.migration_id}-${resource.type}-${resource.name}`;
     return sha256.create().update(key).hex();
   }
