@@ -8,12 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-
-export interface ErrorMessageWithLink {
-  link: string;
-  linkText: string;
-  errorMessage: string;
-}
+import type { ErrorMessageWithLink } from '../../../../../../common/api/generation_error';
 
 interface ErrorMessageProps {
   error: string | null | ErrorMessageWithLink;

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import type { ErrorMessageWithLink } from '../../public/components/create_integration/create_integration_assistant/steps/data_stream_step/error_with_link';
 import type { GenerationErrorCode } from '../constants';
 
 // Errors raised by the generation process should provide information through this interface.
 export interface GenerationErrorBody {
   message: string;
   attributes: GenerationErrorAttributes;
+}
+
+export interface ErrorMessageWithLink {
+  link: string;
+  linkText: string;
+  errorMessage: string;
 }
 
 export function isGenerationErrorBody(obj: unknown | undefined): obj is GenerationErrorBody {

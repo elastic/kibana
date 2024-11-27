@@ -28,7 +28,7 @@ import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
 import type { AIConnector, IntegrationSettings } from '../../types';
-import type { ErrorMessageWithLink } from './error_with_link';
+import type { ErrorMessageWithLink } from '../../../../../../common/api/generation_error';
 import { GenerationErrorCode } from '../../../../../../common/constants';
 
 export type OnComplete = (result: State['result']) => void;
