@@ -70,7 +70,6 @@ export const getInitialMultiConsumer = ({
     validConsumers,
   });
 
-  // if only one consumer is authorized, use that
   if (authorizedConsumers.length === 1) {
     return authorizedConsumers[0];
   }
