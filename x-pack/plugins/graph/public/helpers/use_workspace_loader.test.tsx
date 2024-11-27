@@ -10,7 +10,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
-import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { ContentClient } from '@kbn/content-management-plugin/public';
 
 jest.mock('react-router-dom', () => {
@@ -51,15 +51,16 @@ describe('use_workspace_loader', () => {
   };
 
   it('should not redirect if outcome is exactMatch', async () => {
-    await act(async () => {
-      renderHook(
-        () => useWorkspaceLoader(defaultProps),
-        defaultProps as RenderHookOptions<UseWorkspaceLoaderProps>
-      );
+    renderHook((props) => useWorkspaceLoader(props), {
+      initialProps: defaultProps,
     });
-    expect(defaultProps.spaces?.ui.redirectLegacyUrl).not.toHaveBeenCalled();
-    expect(defaultProps.store.dispatch).toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(defaultProps.spaces?.ui.redirectLegacyUrl).not.toHaveBeenCalled();
+      expect(defaultProps.store.dispatch).toHaveBeenCalled();
+    });
   });
+
   it('should redirect if outcome is aliasMatch', async () => {
     const props = {
       ...defaultProps,
@@ -77,16 +78,16 @@ describe('use_workspace_loader', () => {
       },
     } as unknown as UseWorkspaceLoaderProps;
 
-    await act(async () => {
-      renderHook(
-        () => useWorkspaceLoader(props),
-        props as RenderHookOptions<UseWorkspaceLoaderProps>
-      );
+    renderHook((_props) => useWorkspaceLoader(_props), {
+      initialProps: props,
     });
-    expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
-      path: '#/workspace/aliasTargetId?query={}',
-      aliasPurpose: 'savedObjectConversion',
-      objectNoun: 'Graph',
-    });
+
+    await waitFor(() =>
+      expect(props.spaces?.ui.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: '#/workspace/aliasTargetId?query={}',
+        aliasPurpose: 'savedObjectConversion',
+        objectNoun: 'Graph',
+      })
+    );
   });
 });

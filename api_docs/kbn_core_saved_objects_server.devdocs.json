@@ -10748,10 +10748,6 @@
                 "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
               },

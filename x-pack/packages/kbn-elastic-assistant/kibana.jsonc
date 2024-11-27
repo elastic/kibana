@@ -1,5 +1,9 @@
 {
+  "type": "shared-browser",
   "id": "@kbn/elastic-assistant",
-  "owner": "@elastic/security-generative-ai",
-  "type": "shared-browser"
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }
