@@ -10,19 +10,18 @@
 import React from 'react';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 
-import { buildMockDashboard } from '../../../mocks';
+import { buildMockDashboardApi } from '../../../mocks';
 import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
-import { DashboardApi } from '../../../dashboard_api/types';
+import { DashboardInternalContext } from '../../../dashboard_api/use_dashboard_internal_api';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   const original = jest.requireActual('@kbn/embeddable-plugin/public');
 
   return {
     ...original,
-    EmbeddablePanel: (props: DashboardGridItemProps) => {
+    ReactEmbeddableRenderer: (props: DashboardGridItemProps) => {
       return (
         <div className="embedPanel" id={`mockEmbedPanel_${props.id}`}>
           mockEmbeddablePanel
@@ -32,34 +31,40 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
   };
 });
 
+// Value of panel type does not effect test output
+// since test mocks ReactEmbeddableRenderer to render static content regardless of embeddable type
+const TEST_EMBEDDABLE = 'TEST_EMBEDDABLE';
+
 const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   const panels = {
     '1': {
       gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-      type: CONTACT_CARD_EMBEDDABLE,
+      type: TEST_EMBEDDABLE,
       explicitInput: { id: '1' },
     },
     '2': {
       gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
-      type: CONTACT_CARD_EMBEDDABLE,
+      type: TEST_EMBEDDABLE,
       explicitInput: { id: '2' },
     },
   };
-  const dashboardApi = buildMockDashboard({ overrides: { panels } }) as DashboardApi;
+  const { api, internalApi } = buildMockDashboardApi({ overrides: { panels } });
 
   const component = mountWithIntl(
-    <DashboardContext.Provider value={dashboardApi}>
-      <Item {...props} />
+    <DashboardContext.Provider value={api}>
+      <DashboardInternalContext.Provider value={internalApi}>
+        <Item {...props} />
+      </DashboardInternalContext.Provider>
     </DashboardContext.Provider>
   );
-  return { dashboardApi, component };
+  return { dashboardApi: api, component };
 };
 
 test('renders Item', async () => {
   const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
-    type: CONTACT_CARD_EMBEDDABLE,
+    type: TEST_EMBEDDABLE,
   });
   const panelElements = component.find('.embedPanel');
   expect(panelElements.length).toBe(1);
@@ -75,7 +80,7 @@ test('renders expanded panel', async () => {
   const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
-    type: CONTACT_CARD_EMBEDDABLE,
+    type: TEST_EMBEDDABLE,
     expandedPanelId: '1',
   });
   expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--expanded')).toBe(true);
@@ -86,7 +91,7 @@ test('renders hidden panel', async () => {
   const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
-    type: CONTACT_CARD_EMBEDDABLE,
+    type: TEST_EMBEDDABLE,
     expandedPanelId: '2',
   });
   expect(component.find('#panel-1').hasClass('dshDashboardGrid__item--expanded')).toBe(false);
@@ -97,7 +102,7 @@ test('renders focused panel', async () => {
   const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
-    type: CONTACT_CARD_EMBEDDABLE,
+    type: TEST_EMBEDDABLE,
     focusedPanelId: '1',
   });
 
@@ -109,7 +114,7 @@ test('renders blurred panel', async () => {
   const { component } = createAndMountDashboardGridItem({
     id: '1',
     key: '1',
-    type: CONTACT_CARD_EMBEDDABLE,
+    type: TEST_EMBEDDABLE,
     focusedPanelId: '2',
   });
 

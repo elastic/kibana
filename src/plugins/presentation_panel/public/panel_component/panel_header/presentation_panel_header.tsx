@@ -23,6 +23,7 @@ export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPane
   hideTitle?: boolean;
   panelTitle?: string;
   panelDescription?: string;
+  dragHandleRef: React.MutableRefObject<HTMLDivElement>;
 } & Pick<PresentationPanelInternalProps, 'showBadges' | 'getActions' | 'showNotifications'>;
 
 export const PresentationPanelHeader = <
@@ -35,6 +36,7 @@ export const PresentationPanelHeader = <
   hideTitle,
   panelTitle,
   panelDescription,
+  dragHandleRef,
   showBadges = true,
   showNotifications = true,
 }: PresentationPanelHeaderProps<ApiType>) => {
@@ -71,7 +73,7 @@ export const PresentationPanelHeader = <
       className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
     >
-      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses}>
+      <h2 data-test-subj="dashboardPanelTitle" className={titleClasses} ref={dragHandleRef}>
         {ariaLabelElement}
         <PresentationPanelTitle
           api={api}

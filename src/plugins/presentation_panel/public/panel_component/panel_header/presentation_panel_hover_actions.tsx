@@ -107,6 +107,7 @@ export const PresentationPanelHoverActions = ({
   viewMode,
   showNotifications = true,
   showBorder,
+  dragHandleRef,
 }: {
   index?: number;
   api: DefaultPresentationPanelApi | null;
@@ -117,6 +118,7 @@ export const PresentationPanelHoverActions = ({
   viewMode?: ViewMode;
   showNotifications?: boolean;
   showBorder?: boolean;
+  dragHandleRef: React.MutableRefObject<HTMLDivElement>;
 }) => {
   const [quickActions, setQuickActions] = useState<AnyApiAction[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
@@ -125,7 +127,6 @@ export const PresentationPanelHoverActions = ({
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
   const hoverActionsRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
-  const leftHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
   const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
   const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
@@ -138,7 +139,7 @@ export const PresentationPanelHoverActions = ({
     const anchorWidth = anchorRef.current.offsetWidth;
     const hoverActionsWidth =
       (rightHoverActionsRef.current?.offsetWidth ?? 0) +
-      (leftHoverActionsRef.current?.offsetWidth ?? 0) +
+      (dragHandleRef.current?.offsetWidth ?? 0) +
       parseInt(euiThemeVars.euiSize, 10) * 2;
     const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
 
@@ -443,18 +444,20 @@ export const PresentationPanelHoverActions = ({
   );
 
   const dragHandle = (
-    <EuiIcon
-      type="move"
-      color="text"
-      className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
-      aria-label={i18n.translate('presentationPanel.dragHandle', {
-        defaultMessage: 'Move panel',
-      })}
-      data-test-subj="embeddablePanelDragHandle"
-      css={css`
-        margin: ${euiThemeVars.euiSizeXS};
-      `}
-    />
+    <div ref={dragHandleRef}>
+      <EuiIcon
+        type="move"
+        color="text"
+        className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
+        aria-label={i18n.translate('presentationPanel.dragHandle', {
+          defaultMessage: 'Move panel',
+        })}
+        data-test-subj="embeddablePanelDragHandle"
+        css={css`
+          margin: ${euiThemeVars.euiSizeXS};
+        `}
+      />
+    </div>
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
@@ -535,7 +538,6 @@ export const PresentationPanelHoverActions = ({
         >
           {viewMode === 'edit' && !combineHoverActions ? (
             <div
-              ref={leftHoverActionsRef}
               data-test-subj="embPanel__hoverActions__left"
               className={classNames(
                 'embPanel__hoverActions',

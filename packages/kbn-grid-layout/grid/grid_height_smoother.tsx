@@ -8,9 +8,13 @@
  */
 
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { GridLayoutStateManager } from './types';
+
+const getViewportHeight = () =>
+  window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
 export const GridHeightSmoother = ({
   children,
@@ -19,13 +23,33 @@ export const GridHeightSmoother = ({
   // set the parent div size directly to smooth out height changes.
   const smoothHeightRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    const subscription = combineLatest([
+    const heightSubscription = combineLatest([
       gridLayoutStateManager.gridDimensions$,
       gridLayoutStateManager.interactionEvent$,
-    ]).subscribe(([dimensions, interactionEvent]) => {
+      gridLayoutStateManager.expandedPanelId$,
+    ]).subscribe(([dimensions, interactionEvent, expandedPanelId]) => {
       if (!smoothHeightRef.current) return;
+
+      if (expandedPanelId) {
+        const { gutterSize } = gridLayoutStateManager.runtimeSettings$.getValue();
+
+        // const viewPortHeight = getViewportHeight();
+        const smoothHeightRefY =
+          smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
+
+        // When panel is expanded, ensure the page occupies the full viewport height, no more, no less, so
+        // smoothHeight height = viewport height - smoothHeight position - EuiPanel padding.
+        // const height = viewPortHeight - smoothHeightRefY - gutterSize;
+        smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY}px - ${gutterSize}px)`;
+        smoothHeightRef.current.style.transition = 'none';
+        return;
+      } else {
+        smoothHeightRef.current.style.transition = '';
+      }
+
       if (!interactionEvent) {
         smoothHeightRef.current.style.height = `${dimensions.height}px`;
+        smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
 
@@ -38,8 +62,24 @@ export const GridHeightSmoother = ({
         dimensions.height ?? 0,
         smoothHeightRef.current.getBoundingClientRect().height
       )}px`;
+      smoothHeightRef.current.style.userSelect = 'none';
     });
-    return () => subscription.unsubscribe();
+
+    const marginSubscription = gridLayoutStateManager.runtimeSettings$
+      .pipe(
+        map(({ gutterSize }) => gutterSize),
+        distinctUntilChanged()
+      )
+      .subscribe((gutterSize) => {
+        if (!smoothHeightRef.current) return;
+        smoothHeightRef.current.style.margin = `${gutterSize}px`;
+      });
+
+    return () => {
+      marginSubscription.unsubscribe();
+      heightSubscription.unsubscribe();
+      // expandPanelSubscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

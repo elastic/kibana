@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle, transparentize } from '@elastic/eui';
@@ -24,7 +24,10 @@ export const GridRow = forwardRef<
   {
     rowIndex: number;
     toggleIsCollapsed: () => void;
-    renderPanelContents: (panelId: string) => React.ReactNode;
+    renderPanelContents: (
+      panelId: string,
+      setDragHandles: (refs: Array<HTMLElement | null>) => void
+    ) => React.ReactNode;
     setInteractionEvent: (interactionData?: PanelInteractionEvent) => void;
     gridLayoutStateManager: GridLayoutStateManager;
   }
@@ -39,6 +42,8 @@ export const GridRow = forwardRef<
     },
     gridRef
   ) => {
+    const rowContainer = useRef<HTMLDivElement | null>(null);
+
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
     const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
@@ -115,6 +120,35 @@ export const GridRow = forwardRef<
             }
           });
 
+        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
+          (expandedPanelId) => {
+            const rowContainerRef = rowContainer.current;
+            if (!rowContainerRef) return;
+
+            const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+            if (expandedPanelId) {
+              // If any panel is expanded, move all rows with their panels out of the viewport.
+              // The expanded panel is repositioned to its original location in the GridPanel component
+              // and stretched to fill the viewport.
+
+              rowContainerRef.style.transform = 'translate(-9999px, -9999px)';
+
+              const panelsIds = Object.keys(gridLayout[rowIndex].panels);
+              const includesExpandedPanel = panelsIds.includes(expandedPanelId);
+              if (includesExpandedPanel) {
+                // Stretch the row with the expanded panel to occupy the entire remaining viewport
+                rowContainerRef.style.height = '100%';
+              } else {
+                // Hide the row if it does not contain the expanded panel
+                rowContainerRef.style.height = '0';
+              }
+            } else {
+              rowContainerRef.style.transform = ``;
+              rowContainerRef.style.height = ``;
+            }
+          }
+        );
+
         /**
          * The things that should trigger a re-render are title, collapsed state, and panel ids - panel positions
          * are being controlled via CSS styles, so they do not need to trigger a re-render. This subscription ensures
@@ -149,10 +183,44 @@ export const GridRow = forwardRef<
         return () => {
           styleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
+          expandedPanelSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [rowIndex]
+    );
+
+    const interactionStart = useCallback(
+      (
+        panelId: string,
+        type: PanelInteractionEvent['type'] | 'drop',
+        e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
+      ) => {
+        if (e.button !== 0) return;
+
+        e.stopPropagation();
+        const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+        if (!panelRef) return;
+
+        const panelRect = panelRef.getBoundingClientRect();
+        if (type === 'drop') {
+          setInteractionEvent(undefined);
+        } else {
+          setInteractionEvent({
+            type,
+            id: panelId,
+            panelDiv: panelRef,
+            targetRowIndex: rowIndex,
+            mouseOffsets: {
+              top: e.clientY - panelRect.top,
+              left: e.clientX - panelRect.left,
+              right: e.clientX - panelRect.right,
+              bottom: e.clientY - panelRect.bottom,
+            },
+          });
+        }
+      },
+      [gridLayoutStateManager.panelRefs, rowIndex, setInteractionEvent]
     );
 
     /**
@@ -166,30 +234,7 @@ export const GridRow = forwardRef<
           rowIndex={rowIndex}
           gridLayoutStateManager={gridLayoutStateManager}
           renderPanelContents={renderPanelContents}
-          interactionStart={(type, e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            if (!panelRef) return;
-
-            const panelRect = panelRef.getBoundingClientRect();
-            if (type === 'drop') {
-              setInteractionEvent(undefined);
-            } else {
-              setInteractionEvent({
-                type,
-                id: panelId,
-                panelDiv: panelRef,
-                targetRowIndex: rowIndex,
-                mouseOffsets: {
-                  top: e.clientY - panelRect.top,
-                  left: e.clientX - panelRect.left,
-                  right: e.clientX - panelRect.right,
-                  bottom: e.clientY - panelRect.bottom,
-                },
-              });
-            }
-          }}
+          interactionStart={interactionStart}
           ref={(element) => {
             if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
               gridLayoutStateManager.panelRefs.current[rowIndex] = {};
@@ -198,10 +243,10 @@ export const GridRow = forwardRef<
           }}
         />
       ));
-    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
+    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, interactionStart]);
 
     return (
-      <>
+      <div ref={rowContainer}>
         {rowIndex !== 0 && (
           <>
             <EuiSpacer size="s" />
@@ -235,7 +280,7 @@ export const GridRow = forwardRef<
             <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
           </div>
         )}
-      </>
+      </div>
     );
   }
 );

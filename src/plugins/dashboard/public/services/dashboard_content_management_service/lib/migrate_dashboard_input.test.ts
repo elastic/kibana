@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../../../mocks';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { getSampleDashboardState, getSampleDashboardPanel } from '../../../mocks';
 import { embeddableService } from '../../kibana_services';
 import { SavedDashboardInput } from '../types';
 import { migrateDashboardInput } from './migrate_dashboard_input';
@@ -23,7 +24,12 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 
 describe('Migrate dashboard input', () => {
   it('should run factory migrations on all Dashboard content', () => {
-    const dashboardInput: SavedDashboardInput = getSampleDashboardInput();
+    const dashboardInput = {
+      ...getSampleDashboardState(),
+      id: '1',
+      viewMode: ViewMode.VIEW,
+      executionContext: { type: 'dashboard' },
+    } as SavedDashboardInput;
     dashboardInput.panels = {
       panel1: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel1' } }),
       panel2: getSampleDashboardPanel({ type: 'superLens', explicitInput: { id: 'panel2' } }),

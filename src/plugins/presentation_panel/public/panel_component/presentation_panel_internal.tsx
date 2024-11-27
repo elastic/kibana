@@ -15,7 +15,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
@@ -30,6 +30,8 @@ export const PresentationPanelInternal = <
   showShadow,
   showBorder,
 
+  setDragHandles,
+
   showBadges,
   showNotifications,
   getActions,
@@ -40,6 +42,16 @@ export const PresentationPanelInternal = <
 }: PresentationPanelInternalProps<ApiType, ComponentPropsType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
+
+  const dragHandleRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+
+  const setDragHandle = useCallback(
+    (node: HTMLElement | null) => {
+      dragHandleRefs.current.test = node;
+      setDragHandles?.(Object.values(dragHandleRefs.current).filter((value) => Boolean(value)));
+    },
+    [setDragHandles]
+  );
 
   const viewModeSubject = (() => {
     if (apiPublishesViewMode(api)) return api.viewMode;
@@ -92,7 +104,17 @@ export const PresentationPanelInternal = <
 
   return (
     <PresentationPanelHoverActions
-      {...{ index, api, getActions, actionPredicate, viewMode, showNotifications, showBorder }}
+      {...{
+        index,
+        api,
+        getActions,
+        actionPredicate,
+        viewMode,
+        showNotifications,
+        showBorder,
+        dragHandleRef: setDragHandle,
+        // dragHandleRef: (node) => setDragHandle('hoverAction', node),
+      }}
     >
       <EuiPanel
         role="figure"
@@ -116,6 +138,8 @@ export const PresentationPanelInternal = <
             showNotifications={showNotifications}
             panelTitle={panelTitle ?? defaultPanelTitle}
             panelDescription={panelDescription ?? defaultPanelDescription}
+            // dragHandleRef={(node) => setDragHandle('header', node)}
+            dragHandleRef={setDragHandle}
           />
         )}
         {blockingError && api && (

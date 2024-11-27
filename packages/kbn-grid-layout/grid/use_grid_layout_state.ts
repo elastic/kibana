@@ -14,25 +14,49 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 
 import {
   ActivePanel,
+  GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
   GridSettings,
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
+import { shouldShowMobileView } from './utils/mobile_view';
 
 export const useGridLayoutState = ({
   layout,
   gridSettings,
+  expandedPanelId,
+  accessMode,
 }: {
   layout: GridLayoutData;
   gridSettings: GridSettings;
+  expandedPanelId?: string;
+  accessMode: GridAccessMode;
 }): {
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
   const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+
+  const expandedPanelId$ = useMemo(
+    () => new BehaviorSubject<string | undefined>(expandedPanelId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    expandedPanelId$.next(expandedPanelId);
+  }, [expandedPanelId, expandedPanelId$]);
+
+  const accessMode$ = useMemo(
+    () => new BehaviorSubject<GridAccessMode>(accessMode),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  useEffect(() => {
+    accessMode$.next(accessMode);
+  }, [accessMode, accessMode$]);
 
   const gridLayoutStateManager = useMemo(() => {
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(layout);
@@ -56,6 +80,10 @@ export const useGridLayoutState = ({
       gridDimensions$,
       runtimeSettings$,
       interactionEvent$,
+      expandedPanelId$,
+      isMobileView$: new BehaviorSubject<boolean>(
+        accessMode$.getValue() === 'VIEW' && shouldShowMobileView()
+      ),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -73,6 +101,9 @@ export const useGridLayoutState = ({
           gridSettings.columnCount;
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
+        gridLayoutStateManager.isMobileView$.next(
+          accessMode$.getValue() === 'VIEW' && shouldShowMobileView()
+        );
       });
 
     return () => {

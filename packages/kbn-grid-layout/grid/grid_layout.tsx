@@ -7,23 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
+import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import { compactGridRow } from './utils/resolve_grid_row';
+import { resolveGridRow } from './utils/resolve_grid_row';
 
 interface GridLayoutProps {
   layout: GridLayoutData;
   gridSettings: GridSettings;
-  renderPanelContents: (panelId: string) => React.ReactNode;
+  renderPanelContents: (
+    panelId: string,
+    setDragHandles: (refs: Array<HTMLElement | null>) => void
+  ) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
+  expandedPanelId?: string;
+  accessMode?: GridAccessMode;
 }
 
 export const GridLayout = ({
@@ -31,10 +38,14 @@ export const GridLayout = ({
   gridSettings,
   renderPanelContents,
   onLayoutChange,
+  expandedPanelId,
+  accessMode = 'EDIT',
 }: GridLayoutProps) => {
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
     gridSettings,
+    expandedPanelId,
+    accessMode,
   });
   useGridLayoutEvents({ gridLayoutStateManager });
 
@@ -53,7 +64,7 @@ export const GridLayout = ({
        * so, we need to loop through each row and ensure it is compacted
        */
       newLayout.forEach((row, rowIndex) => {
-        newLayout[rowIndex] = compactGridRow(row);
+        newLayout[rowIndex] = resolveGridRow(row);
       });
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
@@ -132,15 +143,28 @@ export const GridLayout = ({
     });
   }, [rowCount, gridLayoutStateManager, renderPanelContents]);
 
+  const gridClassNames = classNames('kbnGrid', {
+    'kbnGrid--static': expandedPanelId || accessMode === 'VIEW',
+    'kbnGrid--hasExpandedPanel': Boolean(expandedPanelId),
+  });
+
   return (
-    <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-      <div
-        ref={(divElement) => {
-          setDimensionsRef(divElement);
-        }}
-      >
-        {children}
-      </div>
-    </GridHeightSmoother>
+    <>
+      <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
+        <div
+          ref={(divElement) => {
+            setDimensionsRef(divElement);
+          }}
+          className={gridClassNames}
+          css={css`
+            &.kbnGrid--hasExpandedPanel {
+              height: 100%;
+            }
+          `}
+        >
+          {children}
+        </div>
+      </GridHeightSmoother>
+    </>
   );
 };
