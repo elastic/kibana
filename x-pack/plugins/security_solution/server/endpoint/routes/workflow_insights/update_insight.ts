@@ -6,19 +6,21 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { securityWorkflowInsightsService } from '../../services';
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
 } from '../../../../common/api/endpoint/workflow_insights/update_insights';
 import { UpdateWorkflowInsightRequestSchema } from '../../../../common/api/endpoint/workflow_insights/update_insights';
 import { errorHandler } from '../error_handler';
-import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../common/endpoint/constants';
+import { WORKFLOW_INSIGHTS_UPDATE_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
+import type { SecurityWorkflowInsight } from '../../../../common/endpoint/types/workflow_insights';
 
 export const registerUpdateInsightsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -27,7 +29,7 @@ export const registerUpdateInsightsRoute = (
   router.versioned
     .put({
       access: 'internal',
-      path: WORKFLOW_INSIGHTS_ROUTE,
+      path: WORKFLOW_INSIGHTS_UPDATE_ROUTE,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -60,12 +62,16 @@ const updateInsightsRouteHandler = (
 > => {
   const logger = endpointContext.logFactory.get('workflowInsights');
 
-  return async (context, request, response) => {
+  return async (_, request, response) => {
     const { insightId } = request.params;
 
     logger.debug(`Updating insight ${insightId}`);
     try {
-      return response.ok({ body: { data: ['ok'] } });
+      const body = await securityWorkflowInsightsService.update(
+        insightId,
+        request.body as Partial<SecurityWorkflowInsight>
+      );
+      return response.ok({ body });
     } catch (e) {
       return errorHandler(logger, response, e);
     }

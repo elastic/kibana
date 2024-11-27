@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { IKibanaResponse, RequestHandler } from '@kbn/core/server';
+import type {
+  SearchParams,
+  SecurityWorkflowInsight,
+} from '../../../../common/endpoint/types/workflow_insights';
+import { securityWorkflowInsightsService } from '../../services';
 import type { GetWorkflowInsightsRequestQueryParams } from '../../../../common/api/endpoint/workflow_insights/get_insights';
 import { GetWorkflowInsightsRequestSchema } from '../../../../common/api/endpoint/workflow_insights/get_insights';
 import { errorHandler } from '../error_handler';
@@ -47,7 +52,7 @@ export const registerGetInsightsRoute = (
     );
 };
 
-const getInsightsRouteHandler = (
+export const getInsightsRouteHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
   never,
@@ -57,12 +62,17 @@ const getInsightsRouteHandler = (
 > => {
   const logger = endpointContext.logFactory.get('workflowInsights');
 
-  return async (context, request, response) => {
-    const { targetType: insightType, targetId: endpointId } = request.query;
-
-    logger.debug(`Getting insights of type ${insightType} for endpoint ${endpointId} `);
+  return async (_, request, response): Promise<IKibanaResponse<SecurityWorkflowInsight[]>> => {
     try {
-      return response.ok({ body: { data: ['ok'] } });
+      logger.debug('Fetching workflow insights');
+
+      const insightsResponse = await securityWorkflowInsightsService.fetch(
+        request.query as SearchParams
+      );
+
+      const body = insightsResponse.flatMap((insight) => insight._source || []);
+
+      return response.ok({ body });
     } catch (e) {
       return errorHandler(logger, response, e);
     }
