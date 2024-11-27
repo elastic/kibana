@@ -136,10 +136,6 @@ export function Histogram({
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
 
-      console.log('data view pattern', dataView?.getIndexPattern());
-      console.log('prev total hits', hits?.total);
-      console.log('computed total hits', totalHits);
-
       if (response?._shards?.failed || response?.timed_out) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
       } else {

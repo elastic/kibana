@@ -139,7 +139,6 @@ export const useStateProps = ({
 
   const onTotalHitsChange = useCallback(
     (newTotalHitsStatus: UnifiedHistogramFetchStatus, newTotalHitsResult?: number | Error) => {
-      console.log('new total hits =>>', newTotalHitsResult, newTotalHitsStatus);
       stateService?.setTotalHits({
         totalHitsStatus: newTotalHitsStatus,
         totalHitsResult: newTotalHitsResult,
