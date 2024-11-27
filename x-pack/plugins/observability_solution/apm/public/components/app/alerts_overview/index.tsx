@@ -75,6 +75,13 @@ export function AlertsOverview() {
     [history]
   );
 
+  const alertsTableFeatureIds = [
+    AlertConsumers.APM,
+    AlertConsumers.OBSERVABILITY,
+    AlertConsumers.SLO,
+    AlertConsumers.LOGS,
+  ];
+
   return (
     <EuiPanel borderRadius="none" hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -107,12 +114,7 @@ export function AlertsOverview() {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={[
-                AlertConsumers.APM,
-                AlertConsumers.OBSERVABILITY,
-                AlertConsumers.SLO,
-                AlertConsumers.LOGS,
-              ]}
+              featureIds={alertsTableFeatureIds}
               query={esQuery}
               showAlertStatusWithFlapping
               cellContext={{ observabilityRuleTypeRegistry }}
