@@ -28,7 +28,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
       loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,
-      isInstallAllRulesMutationPending,
+      isInstallingAllRules,
       hasRulesToInstall,
     },
     actions: { installAllRules, installSelectedRules },
@@ -39,7 +39,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRuleInstalling = loadingRules.length > 0;
+  const isRuleInstalling = loadingRules.length > 0 || isInstallingAllRules;
   const isRequestInProgress = isRuleInstalling || isRefetching || isUpgradingSecurityPackages;
 
   const [isOverflowPopoverOpen, setOverflowPopover] = useBoolean(false);
@@ -112,12 +112,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           iconType="plusInCircle"
           data-test-subj="installAllRulesButton"
           onClick={installAllRules}
-          disabled={
-            !canUserEditRules ||
-            !hasRulesToInstall ||
-            isRequestInProgress ||
-            isInstallAllRulesMutationPending
-          }
+          disabled={!canUserEditRules || !hasRulesToInstall || isRequestInProgress}
           aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
         >
           {i18n.INSTALL_ALL}

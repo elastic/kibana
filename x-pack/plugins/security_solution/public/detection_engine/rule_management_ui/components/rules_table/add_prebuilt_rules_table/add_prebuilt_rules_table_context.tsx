@@ -65,7 +65,7 @@ export interface AddPrebuiltRulesTableState {
   /**
    * Is true when performing Install All Rules mutation
    */
-  isInstallAllRulesMutationPending: boolean;
+  isInstallingAllRules: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -119,10 +119,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
-  const noOfPendingInstallAllMutations = useIsMutating({
-    mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,
-  });
-  const isInstallAllRulesMutationPending = noOfPendingInstallAllMutations > 0;
+  const isInstallingAllRules =
+    useIsMutating({
+      mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,
+    }) > 0;
 
   const {
     data: { rules, stats: { tags } } = {
@@ -280,7 +280,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         loadingRules,
         isRefetching,
         isUpgradingSecurityPackages,
-        isInstallAllRulesMutationPending,
+        isInstallingAllRules,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -296,7 +296,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     loadingRules,
     isRefetching,
     isUpgradingSecurityPackages,
-    isInstallAllRulesMutationPending,
+    isInstallingAllRules,
     selectedRules,
     dataUpdatedAt,
     actions,
