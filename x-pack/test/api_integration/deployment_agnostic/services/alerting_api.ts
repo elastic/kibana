@@ -1141,7 +1141,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         .set(samlAuth.getInternalRequestHeader());
     },
 
-    async deleteRules({ roleAuthc, filter }: { roleAuthc: RoleCredentials; filter: string }) {
+    async deleteRules({ roleAuthc, filter = '' }: { roleAuthc: RoleCredentials; filter?: string }) {
       const response = await this.searchRules(roleAuthc, filter);
       return Promise.all(
         response.body.data.map((rule: any) => this.deleteRuleById({ roleAuthc, ruleId: rule.id }))
@@ -1193,9 +1193,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
     }) {
       return Promise.allSettled([
         // Delete the rule by ID
-        ruleId
-          ? this.deleteRuleById({ roleAuthc, ruleId })
-          : this.deleteRules({ roleAuthc, filter: '' }),
+        ruleId ? this.deleteRuleById({ roleAuthc, ruleId }) : this.deleteRules({ roleAuthc }),
         // Delete all documents in the alert index if specified
         alertIndexName
           ? es.deleteByQuery({
