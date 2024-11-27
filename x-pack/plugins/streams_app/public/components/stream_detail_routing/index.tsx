@@ -16,10 +16,16 @@ import {
   EuiIcon,
   EuiImage,
   EuiLoadingSpinner,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -92,7 +98,10 @@ export function StreamDetailRouting({
         },
       });
     },
-    [definition, debouncedChildUnderEdit, streamsRepositoryClient, start, end]
+    [definition, debouncedChildUnderEdit, streamsRepositoryClient, start, end],
+    {
+      disableToastOnError: true,
+    }
   );
 
   const dataViewsFetch = useAbortableAsync(() => {
@@ -112,419 +121,526 @@ export function StreamDetailRouting({
 
   const fetchedDataViews = useMemo(() => dataViewsFetch.value ?? [], [dataViewsFetch.value]);
   const [saveInProgress, setSaveInProgress] = React.useState(false);
+  const [deleteInProgress, setDeleteInProgress] = React.useState(false);
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const modalTitleId = useGeneratedHtmlId();
 
   if (!definition) {
     return null;
   }
 
+  const closeModal = () => setShowDeleteModal(false);
+
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      className={css`
-        overflow: auto;
-      `}
-    >
-      <EuiFlexItem
-        grow
+    <>
+      {showDeleteModal && (
+        <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id={modalTitleId}>
+              {i18n.translate('xpack.streams.streamDetailRouting.deleteModalTitle', {
+                defaultMessage: 'Are you sure you want to delete this data stream?',
+              })}
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <EuiText>
+              {i18n.translate('xpack.streams.streamDetailRouting.deleteModalDescription', {
+                defaultMessage:
+                  'Deleting this stream will remove all of its children and the data will no longer be routed. All existing data will be removed as well.',
+              })}
+            </EuiText>
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiButtonEmpty
+                data-test-subj="streamsAppStreamDetailRoutingCancelButton"
+                onClick={closeModal}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.deleteModalCancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+              <EuiButton
+                data-test-subj="streamsAppStreamDetailRoutingDeleteButton"
+                color="danger"
+                fill
+                onClick={async () => {
+                  if (!childUnderEdit) {
+                    return;
+                  }
+                  try {
+                    setDeleteInProgress(true);
+                    await streamsRepositoryClient.fetch('DELETE /api/streams/{id}', {
+                      signal: updateAbortController.signal,
+                      params: {
+                        path: {
+                          id: childUnderEdit.child.id,
+                        },
+                      },
+                    });
+                    setDeleteInProgress(false);
+                    notifications.toasts.addSuccess({
+                      title: i18n.translate('xpack.streams.streamDetailRouting.deleted', {
+                        defaultMessage: 'Stream deleted',
+                      }),
+                    });
+                    setShowDeleteModal(false);
+                    setChildUnderEdit(undefined);
+                    refreshDefinition();
+                  } catch (error) {
+                    setDeleteInProgress(false);
+                    notifications.toasts.addError(error, {
+                      title: i18n.translate('xpack.streams.failedToDelete', {
+                        defaultMessage: 'Failed to delete stream {id}',
+                        values: {
+                          id: childUnderEdit.child.id,
+                        },
+                      }),
+                    });
+                  }
+                }}
+                isLoading={deleteInProgress}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.delete', {
+                  defaultMessage: 'Delete',
+                })}
+              </EuiButton>
+            </EuiFlexGroup>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="s"
         className={css`
           overflow: auto;
         `}
       >
-        <EuiPanel
-          hasShadow={false}
-          hasBorder
+        <EuiFlexItem
+          grow
           className={css`
-            display: flex;
-            max-width: 100%;
             overflow: auto;
           `}
-          paddingSize="xs"
         >
-          <EuiFlexGroup
-            direction="row"
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
             className={css`
+              display: flex;
               max-width: 100%;
               overflow: auto;
             `}
+            paddingSize="xs"
           >
-            <EuiResizableContainer>
-              {(EuiResizablePanel, EuiResizableButton) => (
-                <>
-                  <EuiResizablePanel
-                    initialSize={30}
-                    minSize="300px"
-                    tabIndex={0}
-                    paddingSize="s"
-                    className={css`
-                      background-color: #f5f7fa;
-                      overflow: auto;
-                      display: flex;
-                    `}
-                  >
-                    <EuiFlexGroup
-                      direction="column"
-                      gutterSize="s"
+            <EuiFlexGroup
+              direction="row"
+              className={css`
+                max-width: 100%;
+                overflow: auto;
+              `}
+            >
+              <EuiResizableContainer>
+                {(EuiResizablePanel, EuiResizableButton) => (
+                  <>
+                    <EuiResizablePanel
+                      initialSize={30}
+                      minSize="300px"
+                      tabIndex={0}
+                      paddingSize="s"
                       className={css`
+                        background-color: #f5f7fa;
                         overflow: auto;
+                        display: flex;
                       `}
                     >
-                      <EuiFlexItem grow={false}>
-                        <EuiText
-                          size="s"
-                          className={css`
-                            height: 40px;
-                            align-content: center;
-                          `}
-                        >
-                          {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
-                            defaultMessage: 'Routing rules',
-                          })}
-                        </EuiText>
-                      </EuiFlexItem>
                       <EuiFlexGroup
                         direction="column"
-                        gutterSize="xs"
+                        gutterSize="s"
                         className={css`
                           overflow: auto;
                         `}
                       >
-                        <CurrentStreamEntry definition={definition} />
-                        {definition.children.map((child, i) => (
-                          <NestedView key={i}>
-                            <RoutingStreamEntry
-                              child={
-                                child.id === childUnderEdit?.child.id ? childUnderEdit.child : child
-                              }
-                              edit={child.id === childUnderEdit?.child.id}
-                              onEditStateChange={() => {
-                                if (child.id === childUnderEdit?.child.id) {
-                                  setChildUnderEdit(undefined);
-                                } else {
-                                  setChildUnderEdit({ isNew: false, child });
-                                }
-                              }}
-                              onChildChange={(newChild) => {
-                                setChildUnderEdit({ isNew: false, child: newChild });
-                              }}
-                            />
-                          </NestedView>
-                        ))}
-                        {childUnderEdit?.isNew ? (
-                          <NestedView last>
-                            <NewRoutingStreamEntry
-                              child={childUnderEdit.child}
-                              onChildChange={(newChild) => {
-                                if (!newChild) {
-                                  setChildUnderEdit(undefined);
-                                  return;
-                                }
-                                setChildUnderEdit({ isNew: true, child: newChild });
-                              }}
-                            />
-                          </NestedView>
-                        ) : (
-                          <NestedView last>
-                            <EuiPanel hasShadow={false} hasBorder paddingSize="none">
-                              <EuiButtonEmpty
-                                iconType="plus"
-                                data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                                disabled={childUnderEdit?.isNew}
-                                onClick={() => {
-                                  setChildUnderEdit({
-                                    isNew: true,
-                                    child: {
-                                      id: `${definition.id}.child`,
-                                      condition: {
-                                        field: '',
-                                        operator: 'eq',
-                                        value: '',
-                                      },
-                                    },
-                                  });
-                                }}
-                              >
-                                {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-                                  defaultMessage: 'Create a new child stream',
-                                })}
-                              </EuiButtonEmpty>
-                            </EuiPanel>
-                          </NestedView>
-                        )}
-                      </EuiFlexGroup>
-                    </EuiFlexGroup>
-                  </EuiResizablePanel>
-
-                  <EuiResizableButton accountForScrollbars="both" />
-
-                  <EuiResizablePanel
-                    initialSize={70}
-                    tabIndex={0}
-                    minSize="300px"
-                    paddingSize="s"
-                    className={css`
-                      display: flex;
-                      flex-direction: column;
-                    `}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup alignItems="center">
-                        <EuiFlexItem grow>
-                          <EuiText size="s">
-                            <EuiFlexGroup gutterSize="s" alignItems="center">
-                              <EuiIcon type="inspect" />
-                              {i18n.translate('xpack.streams.streamDetail.preview.header', {
-                                defaultMessage: 'Data Preview',
-                              })}
-                              {previewSampleFetch.loading && <EuiLoadingSpinner size="s" />}
-                            </EuiFlexGroup>
-                          </EuiText>
-                        </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <StreamsAppSearchBar
-                            onQuerySubmit={({ dateRange }, isUpdate) => {
-                              if (!isUpdate) {
-                                previewSampleFetch.refresh();
-                                return;
-                              }
-
-                              if (dateRange) {
-                                setTimeRange({
-                                  from: dateRange.from,
-                                  to: dateRange?.to,
-                                  mode: dateRange.mode,
-                                });
-                              }
-                            }}
-                            onRefresh={() => {
-                              previewSampleFetch.refresh();
-                            }}
-                            dataViews={fetchedDataViews}
-                            dateRangeFrom={timeRange.from}
-                            dateRangeTo={timeRange.to}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiSpacer size="s" />
-                    {previewSampleFetch.error && (
-                      <EuiText color="danger">
-                        {i18n.translate('xpack.streams.streamDetail.preview.error', {
-                          defaultMessage: 'Error loading preview',
-                        })}
-                      </EuiText>
-                    )}
-                    {previewSampleFetch.value?.documents &&
-                    previewSampleFetch.value.documents.length ? (
-                      <EuiFlexItem grow>
-                        <PreviewTable documents={previewSampleFetch.value?.documents ?? []} />
-                      </EuiFlexItem>
-                    ) : (
-                      <EuiFlexItem grow>
-                        <EuiFlexGroup alignItems="center" justifyContent="center">
-                          <EuiFlexItem
-                            grow={false}
+                          <EuiText
+                            size="s"
                             className={css`
-                              max-width: 350px;
+                              height: 40px;
+                              align-content: center;
                             `}
                           >
-                            <EuiImage
-                              src={illustration}
-                              alt="Illustration"
-                              className={css`
-                                width: 250px;
-                              `}
+                            {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
+                              defaultMessage: 'Routing rules',
+                            })}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexGroup
+                          direction="column"
+                          gutterSize="xs"
+                          className={css`
+                            overflow: auto;
+                          `}
+                        >
+                          <CurrentStreamEntry definition={definition} />
+                          {definition.children.map((child, i) => (
+                            <NestedView key={i}>
+                              <RoutingStreamEntry
+                                child={
+                                  child.id === childUnderEdit?.child.id
+                                    ? childUnderEdit.child
+                                    : child
+                                }
+                                edit={child.id === childUnderEdit?.child.id}
+                                onEditStateChange={() => {
+                                  if (child.id === childUnderEdit?.child.id) {
+                                    setChildUnderEdit(undefined);
+                                  } else {
+                                    setChildUnderEdit({ isNew: false, child });
+                                  }
+                                }}
+                                onChildChange={(newChild) => {
+                                  setChildUnderEdit({ isNew: false, child: newChild });
+                                }}
+                              />
+                            </NestedView>
+                          ))}
+                          {childUnderEdit?.isNew ? (
+                            <NestedView last>
+                              <NewRoutingStreamEntry
+                                child={childUnderEdit.child}
+                                onChildChange={(newChild) => {
+                                  if (!newChild) {
+                                    setChildUnderEdit(undefined);
+                                    return;
+                                  }
+                                  setChildUnderEdit({ isNew: true, child: newChild });
+                                }}
+                              />
+                            </NestedView>
+                          ) : (
+                            <NestedView last>
+                              <EuiPanel hasShadow={false} hasBorder paddingSize="none">
+                                <EuiButtonEmpty
+                                  iconType="plus"
+                                  data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                                  disabled={childUnderEdit?.isNew}
+                                  onClick={() => {
+                                    setChildUnderEdit({
+                                      isNew: true,
+                                      child: {
+                                        id: `${definition.id}.child`,
+                                        condition: {
+                                          field: '',
+                                          operator: 'eq',
+                                          value: '',
+                                        },
+                                      },
+                                    });
+                                  }}
+                                >
+                                  {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
+                                    defaultMessage: 'Create a new child stream',
+                                  })}
+                                </EuiButtonEmpty>
+                              </EuiPanel>
+                            </NestedView>
+                          )}
+                        </EuiFlexGroup>
+                      </EuiFlexGroup>
+                    </EuiResizablePanel>
+
+                    <EuiResizableButton accountForScrollbars="both" />
+
+                    <EuiResizablePanel
+                      initialSize={70}
+                      tabIndex={0}
+                      minSize="300px"
+                      paddingSize="s"
+                      className={css`
+                        display: flex;
+                        flex-direction: column;
+                      `}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup alignItems="center">
+                          <EuiFlexItem grow>
+                            <EuiText size="s">
+                              <EuiFlexGroup gutterSize="s" alignItems="center">
+                                <EuiIcon type="inspect" />
+                                {i18n.translate('xpack.streams.streamDetail.preview.header', {
+                                  defaultMessage: 'Data Preview',
+                                })}
+                                {previewSampleFetch.loading && <EuiLoadingSpinner size="s" />}
+                              </EuiFlexGroup>
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <StreamsAppSearchBar
+                              onQuerySubmit={({ dateRange }, isUpdate) => {
+                                if (!isUpdate) {
+                                  previewSampleFetch.refresh();
+                                  return;
+                                }
+
+                                if (dateRange) {
+                                  setTimeRange({
+                                    from: dateRange.from,
+                                    to: dateRange?.to,
+                                    mode: dateRange.mode,
+                                  });
+                                }
+                              }}
+                              onRefresh={() => {
+                                previewSampleFetch.refresh();
+                              }}
+                              dataViews={fetchedDataViews}
+                              dateRangeFrom={timeRange.from}
+                              dateRangeTo={timeRange.to}
                             />
-                            {previewSampleFetch.loading ? (
-                              <EuiText size="xs" textAlign="center">
-                                <EuiLoadingSpinner size="m" />
-                              </EuiText>
-                            ) : (
-                              <>
-                                {debouncedChildUnderEdit && debouncedChildUnderEdit.isNew && (
-                                  <EuiText size="xs" textAlign="center">
-                                    {i18n.translate('xpack.streams.streamDetail.preview.empty', {
-                                      defaultMessage: 'No documents to preview',
-                                    })}
-                                  </EuiText>
-                                )}
-                                {debouncedChildUnderEdit && !debouncedChildUnderEdit.isNew && (
-                                  <>
-                                    <EuiText size="m" textAlign="center">
-                                      {i18n.translate(
-                                        'xpack.streams.streamDetail.preview.editPreviewMessage',
-                                        {
-                                          defaultMessage:
-                                            'Preview is not available while editing streams',
-                                        }
-                                      )}
-                                    </EuiText>
-                                    <EuiText size="xs" textAlign="center">
-                                      {i18n.translate(
-                                        'xpack.streams.streamDetail.preview.editPreviewMessageDescription',
-                                        {
-                                          defaultMessage:
-                                            'You will find here the result from the conditions you have made once you save the changes',
-                                        }
-                                      )}
-                                    </EuiText>
-                                  </>
-                                )}
-                                {!debouncedChildUnderEdit && (
-                                  <>
-                                    <EuiText size="m" textAlign="center">
-                                      {i18n.translate(
-                                        'xpack.streams.streamDetail.preview.editPreviewMessageEmpty',
-                                        {
-                                          defaultMessage: 'Your preview will appear here',
-                                        }
-                                      )}
-                                    </EuiText>
-                                    <EuiText size="xs" textAlign="center">
-                                      {i18n.translate(
-                                        'xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription',
-                                        {
-                                          defaultMessage:
-                                            'Select a stream to preview it’s data, here you will see the stream and all it’s children.',
-                                        }
-                                      )}
-                                    </EuiText>
-                                  </>
-                                )}
-                              </>
-                            )}
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       </EuiFlexItem>
-                    )}
-                  </EuiResizablePanel>
-                </>
-              )}
-            </EuiResizableContainer>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {childUnderEdit ? (
-            <>
-              <EuiButtonEmpty
-                size="s"
-                data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
-                onClick={() => {
-                  setChildUnderEdit(undefined);
-                }}
-              >
-                {i18n.translate('xpack.streams.streamDetailRouting.remove', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-              {childUnderEdit.isNew ? (
-                <EuiButton
-                  isLoading={saveInProgress}
-                  onClick={async () => {
-                    try {
-                      setSaveInProgress(true);
-                      await streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
-                        signal: updateAbortController.signal,
-                        params: {
-                          path: {
-                            id: definition.id,
-                          },
-                          body: {
-                            condition: childUnderEdit.child.condition,
-                            stream: {
-                              id: childUnderEdit.child.id,
-                              processing: [],
-                              fields: [],
+                      <EuiSpacer size="s" />
+                      {childUnderEdit?.isNew && previewSampleFetch.error && (
+                        <EuiText color="danger">
+                          {i18n.translate('xpack.streams.streamDetail.preview.error', {
+                            defaultMessage: 'Error loading preview',
+                          })}
+                        </EuiText>
+                      )}
+                      {childUnderEdit?.isNew &&
+                      previewSampleFetch.value?.documents &&
+                      previewSampleFetch.value.documents.length ? (
+                        <EuiFlexItem grow>
+                          <PreviewTable documents={previewSampleFetch.value?.documents ?? []} />
+                        </EuiFlexItem>
+                      ) : (
+                        <EuiFlexItem grow>
+                          <EuiFlexGroup alignItems="center" justifyContent="center">
+                            <EuiFlexItem
+                              grow={false}
+                              className={css`
+                                max-width: 350px;
+                              `}
+                            >
+                              <EuiImage
+                                src={illustration}
+                                alt="Illustration"
+                                className={css`
+                                  width: 250px;
+                                `}
+                              />
+                              {previewSampleFetch.loading ? (
+                                <EuiText size="xs" textAlign="center">
+                                  <EuiLoadingSpinner size="m" />
+                                </EuiText>
+                              ) : (
+                                <>
+                                  {debouncedChildUnderEdit && debouncedChildUnderEdit.isNew && (
+                                    <EuiText size="xs" textAlign="center">
+                                      {i18n.translate('xpack.streams.streamDetail.preview.empty', {
+                                        defaultMessage: 'No documents to preview',
+                                      })}
+                                    </EuiText>
+                                  )}
+                                  {debouncedChildUnderEdit && !debouncedChildUnderEdit.isNew && (
+                                    <>
+                                      <EuiText size="m" textAlign="center">
+                                        {i18n.translate(
+                                          'xpack.streams.streamDetail.preview.editPreviewMessage',
+                                          {
+                                            defaultMessage:
+                                              'Preview is not available while editing streams',
+                                          }
+                                        )}
+                                      </EuiText>
+                                      <EuiText size="xs" textAlign="center">
+                                        {i18n.translate(
+                                          'xpack.streams.streamDetail.preview.editPreviewMessageDescription',
+                                          {
+                                            defaultMessage:
+                                              'You will find here the result from the conditions you have made once you save the changes',
+                                          }
+                                        )}
+                                      </EuiText>
+                                    </>
+                                  )}
+                                  {!debouncedChildUnderEdit && (
+                                    <>
+                                      <EuiText size="m" textAlign="center">
+                                        {i18n.translate(
+                                          'xpack.streams.streamDetail.preview.editPreviewMessageEmpty',
+                                          {
+                                            defaultMessage: 'Your preview will appear here',
+                                          }
+                                        )}
+                                      </EuiText>
+                                      <EuiText size="xs" textAlign="center">
+                                        {i18n.translate(
+                                          'xpack.streams.streamDetail.preview.editPreviewMessageEmptyDescription',
+                                          {
+                                            defaultMessage:
+                                              'Select a stream to preview it’s data, here you will see the stream and all it’s children.',
+                                          }
+                                        )}
+                                      </EuiText>
+                                    </>
+                                  )}
+                                </>
+                              )}
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                      )}
+                    </EuiResizablePanel>
+                  </>
+                )}
+              </EuiResizableContainer>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            {childUnderEdit ? (
+              <>
+                {!childUnderEdit.isNew && (
+                  <>
+                    <EuiButton
+                      color="danger"
+                      size="s"
+                      disabled={saveInProgress}
+                      data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
+                      onClick={() => {
+                        setShowDeleteModal(true);
+                      }}
+                    >
+                      {i18n.translate('xpack.streams.streamDetailRouting.remove', {
+                        defaultMessage: 'Remove',
+                      })}
+                    </EuiButton>
+                    <EuiFlexItem grow />
+                  </>
+                )}
+                <EuiButtonEmpty
+                  size="s"
+                  data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
+                  disabled={saveInProgress}
+                  onClick={() => {
+                    setChildUnderEdit(undefined);
+                  }}
+                >
+                  {i18n.translate('xpack.streams.streamDetailRouting.cancel', {
+                    defaultMessage: 'Cancel',
+                  })}
+                </EuiButtonEmpty>
+                {childUnderEdit.isNew ? (
+                  <EuiButton
+                    isLoading={saveInProgress}
+                    onClick={async () => {
+                      try {
+                        setSaveInProgress(true);
+                        await streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
+                          signal: updateAbortController.signal,
+                          params: {
+                            path: {
+                              id: definition.id,
+                            },
+                            body: {
+                              condition: childUnderEdit.child.condition,
+                              stream: {
+                                id: childUnderEdit.child.id,
+                                processing: [],
+                                fields: [],
+                              },
                             },
                           },
-                        },
-                      });
-                      setSaveInProgress(false);
-                      notifications.toasts.addSuccess({
-                        title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
-                          defaultMessage: 'Stream saved',
-                        }),
-                      });
-                      setChildUnderEdit(undefined);
-                      refreshDefinition();
-                    } catch (error) {
-                      setSaveInProgress(false);
-                      notifications.toasts.addError(error, {
-                        title: i18n.translate('xpack.streams.failedToSave', {
-                          defaultMessage: 'Failed to create sub stream for {id}',
-                          values: {
-                            id: definition.id,
+                        });
+                        setSaveInProgress(false);
+                        notifications.toasts.addSuccess({
+                          title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
+                            defaultMessage: 'Stream saved',
+                          }),
+                        });
+                        setChildUnderEdit(undefined);
+                        refreshDefinition();
+                      } catch (error) {
+                        setSaveInProgress(false);
+                        notifications.toasts.addError(error, {
+                          title: i18n.translate('xpack.streams.failedToSave', {
+                            defaultMessage: 'Failed to create sub stream for {id}',
+                            values: {
+                              id: definition.id,
+                            },
+                          }),
+                        });
+                      }
+                    }}
+                    data-test-subj="streamsAppStreamDetailRoutingSaveButton"
+                  >
+                    {i18n.translate('xpack.streams.streamDetailRouting.add', {
+                      defaultMessage: 'Save',
+                    })}
+                  </EuiButton>
+                ) : (
+                  <EuiButton
+                    onClick={async () => {
+                      try {
+                        setSaveInProgress(true);
+                        const { inheritedFields, id, ...definitionToUpdate } = definition;
+                        await streamsRepositoryClient.fetch('PUT /api/streams/{id}', {
+                          signal: updateAbortController.signal,
+                          params: {
+                            path: {
+                              id: definition.id,
+                            },
+                            body: {
+                              ...definitionToUpdate,
+                              children: definition.children.map((child) =>
+                                child.id === childUnderEdit.child.id ? childUnderEdit.child : child
+                              ),
+                            },
                           },
-                        }),
-                      });
-                    }
-                  }}
-                  data-test-subj="streamsAppStreamDetailRoutingSaveButton"
-                >
-                  {i18n.translate('xpack.streams.streamDetailRouting.add', {
-                    defaultMessage: 'Save',
-                  })}
-                </EuiButton>
-              ) : (
-                <EuiButton
-                  onClick={async () => {
-                    try {
-                      setSaveInProgress(true);
-                      const { inheritedFields, id, ...definitionToUpdate } = definition;
-                      await streamsRepositoryClient.fetch('PUT /api/streams/{id}', {
-                        signal: updateAbortController.signal,
-                        params: {
-                          path: {
-                            id: definition.id,
-                          },
-                          body: {
-                            ...definitionToUpdate,
-                            children: definition.children.map((child) =>
-                              child.id === childUnderEdit.child.id ? childUnderEdit.child : child
-                            ),
-                          },
-                        },
-                      });
-                      setSaveInProgress(false);
-                      notifications.toasts.addSuccess({
-                        title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
-                          defaultMessage: 'Stream saved',
-                        }),
-                      });
-                      setChildUnderEdit(undefined);
-                      refreshDefinition();
-                    } catch (error) {
-                      setSaveInProgress(false);
-                      notifications.toasts.addError(error, {
-                        title: i18n.translate('xpack.streams.failedToSave', {
-                          defaultMessage: 'Failed to update stream {id}',
-                          values: {
-                            id: definition.id,
-                          },
-                        }),
-                      });
-                    }
-                  }}
-                  data-test-subj="streamsAppStreamDetailRoutingChangeStreamButton"
-                >
-                  {i18n.translate('xpack.streams.streamDetailRouting.change', {
-                    defaultMessage: 'Change routing',
-                  })}
-                </EuiButton>
-              )}
-            </>
-          ) : (
-            <EuiButton disabled data-test-subj="streamsAppStreamDetailRoutingSaveButton">
-              {i18n.translate('xpack.streams.streamDetailRouting.save', {
-                defaultMessage: 'Save',
-              })}
-            </EuiButton>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+                        });
+                        setSaveInProgress(false);
+                        notifications.toasts.addSuccess({
+                          title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
+                            defaultMessage: 'Stream saved',
+                          }),
+                        });
+                        setChildUnderEdit(undefined);
+                        refreshDefinition();
+                      } catch (error) {
+                        setSaveInProgress(false);
+                        notifications.toasts.addError(error, {
+                          title: i18n.translate('xpack.streams.failedToSave', {
+                            defaultMessage: 'Failed to update stream {id}',
+                            values: {
+                              id: definition.id,
+                            },
+                          }),
+                        });
+                      }
+                    }}
+                    data-test-subj="streamsAppStreamDetailRoutingChangeStreamButton"
+                  >
+                    {i18n.translate('xpack.streams.streamDetailRouting.change', {
+                      defaultMessage: 'Change routing',
+                    })}
+                  </EuiButton>
+                )}
+              </>
+            ) : (
+              <EuiButton disabled data-test-subj="streamsAppStreamDetailRoutingSaveButton">
+                {i18n.translate('xpack.streams.streamDetailRouting.save', {
+                  defaultMessage: 'Save',
+                })}
+              </EuiButton>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 
