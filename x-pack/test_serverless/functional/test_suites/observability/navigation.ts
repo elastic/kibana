@@ -132,5 +132,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'fleet' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Fleet', 'Agents']);
     });
+
+    it('navigates to maintenance windows', async () => {
+      await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await testSubjects.click('app-card-maintenanceWindows');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Management',
+        'Maintenance Windows',
+      ]);
+    });
   });
 }
