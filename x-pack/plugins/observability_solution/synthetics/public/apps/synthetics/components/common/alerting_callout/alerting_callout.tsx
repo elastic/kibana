@@ -308,13 +308,14 @@ export const MISSING_DEFAULT_CONNECTOR_LABEL = i18n.translate(
 export const MISSING_MONITOR_STATUS_HEADER = i18n.translate(
   'xpack.synthetics.alerting.noMonitorStatus.header',
   {
-    defaultMessage: 'Monitor Status Alerts will not be sent',
+    defaultMessage: 'Monitor Status alerts will not be sent',
   }
 );
 export const MISSING_MONITOR_STATUS_CONTENT = i18n.translate(
   'xpack.synthetics.alerting.noMonitorStatus.content',
   {
-    defaultMessage: 'You have Monitors enabled that are not covered by alerts',
+    defaultMessage:
+      'You have monitors enabled that are not covered by alerts Synthetics Monitor Status rules.',
   }
 );
 export const MISSING_TLS_RULE_CONTENT = i18n.translate('xpack.synthetics.alerting.noTls.header', {
