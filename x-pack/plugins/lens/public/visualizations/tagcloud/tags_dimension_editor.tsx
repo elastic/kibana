@@ -13,7 +13,6 @@ import {
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
   PaletteOutput,
-  getColorsFromMapping,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
@@ -22,7 +21,7 @@ import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalettes } from '@kbn/palettes';
 import type { TagcloudState } from './types';
-import { PalettePanelContainer, PalettePicker } from '../../shared_components';
+import { PalettePanelContainer, PalettePicker, getColorStops } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
@@ -54,7 +53,13 @@ export function TagsDimensionEditor({
     });
   const [useNewColorMapping, setUseNewColorMapping] = useState(state.colorMapping ? true : false);
 
-  const colors = getColorsFromMapping(palettes, isDarkMode, state.colorMapping);
+  const colors = getColorStops(
+    paletteService,
+    palettes,
+    isDarkMode,
+    state.palette,
+    state.colorMapping
+  );
   const table = frame.activeData?.[state.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], state.tagAccessor);
 

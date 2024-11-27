@@ -14,7 +14,6 @@ import {
   PaletteRegistry,
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
-  getColorsFromMapping,
 } from '@kbn/coloring';
 import { ColorPicker } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
@@ -24,7 +23,7 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import { KbnPalette, KbnPalettes } from '@kbn/palettes';
 import { PieVisualizationState } from '../../../common/types';
 import { VisualizationDimensionEditorProps } from '../../types';
-import { PalettePanelContainer, PalettePicker } from '../../shared_components';
+import { PalettePanelContainer, PalettePicker, getColorStops } from '../../shared_components';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import {
   getDefaultColorForMultiMetricDimension,
@@ -119,7 +118,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
     : undefined;
 
-  const colors = getColorsFromMapping(props.palettes, props.isDarkMode, currentLayer.colorMapping);
+  const colors = getColorStops(
+    props.paletteService,
+    props.palettes,
+    props.isDarkMode,
+    props.state.palette,
+    currentLayer.colorMapping
+  );
   const table = props.frame.activeData?.[currentLayer.layerId];
   const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
 
