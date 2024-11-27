@@ -49,6 +49,14 @@ export function registerCases(
         };
       }),
     }),
+    getAttachmentRemovalObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.changePointDetection.cases.attachmentRemovalEvent"
+          defaultMessage="removed change point chart"
+        />
+      ),
+    }),
   });
 
   const LogPatternAttachmentComponent = getPatternAnalysisComponent(coreStart, pluginStart);
@@ -72,6 +80,14 @@ export function registerCases(
 
         return { default: initComponent(pluginStart.fieldFormats, LogPatternAttachmentComponent) };
       }),
+    }),
+    getAttachmentRemovalObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.logPatternAnalysis.cases.attachmentRemovalEvent"
+          defaultMessage="removed log pattern analysis"
+        />
+      ),
     }),
   });
 
@@ -104,6 +120,14 @@ export function registerCases(
           ),
         };
       }),
+    }),
+    getAttachmentRemovalObject: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.aiops.logRateAnalysis.cases.attachmentRemovalEvent"
+          defaultMessage="removed log rate analysis"
+        />
+      ),
     }),
   });
 }
