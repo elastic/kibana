@@ -466,6 +466,7 @@ packages/kbn-rrule @elastic/response-ops
 packages/kbn-rule-data-utils @elastic/security-detections-response @elastic/response-ops @elastic/obs-ux-management-team
 packages/kbn-safer-lodash-set @elastic/kibana-security
 packages/kbn-saved-objects-settings @elastic/appex-sharedux
+packages/kbn-scout @elastic/appex-qa
 packages/kbn-screenshotting-server @elastic/appex-sharedux
 packages/kbn-search-api-keys-components @elastic/search-kibana
 packages/kbn-search-api-keys-server @elastic/search-kibana
@@ -1049,8 +1050,10 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 
 
 # Data Discovery
+/x-pack/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
+/test/functional/fixtures/es_archiver/makelogs @elastic/kibana-data-discovery
+/test/functional/fixtures/es_archiver/large_fields @elastic/kibana-data-discovery # Assigned per only use: test/functional/apps/management/data_views/_test_huge_fields.ts
 /x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/discover/async_scripted_fields.ts#L35
-/x-pack/test/functional/es_archives/getting_started/shakespeare @elastic/kibana-data-discovery
 /x-pack/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
 /test/functional/fixtures/kbn_archiver/unmapped_fields.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L28
 /test/functional/fixtures/kbn_archiver/testlargestring.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L28
@@ -1237,8 +1240,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### Observability Plugins
 
 # Observability AI Assistant
-/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant
-/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
@@ -1351,6 +1354,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
 # Fleet
+/x-pack/test/common/services/ingest_manager.ts @elastic/fleet # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859018893
 /x-pack/test/functional/es_archives/fleet @elastic/fleet
 /x-pack/test/api_integration/services/fleet_and_agents.ts @elastic/fleet
 /x-pack/test/fleet_api_integration @elastic/fleet
@@ -1430,6 +1434,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### END Observability Plugins
 
 # Presentation
+/x-pack/test/upgrade/screenshots @elastic/kibana-presentation
+/x-pack/test/functional/screenshots @elastic/kibana-presentation
 /test/functional/fixtures/kbn_archiver/legacy.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/200934#discussion_r1856407606
 /x-pack/test/functional/fixtures/kbn_archiver/maps.json @elastic/kibana-presentation
 /x-pack/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
@@ -1550,6 +1556,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.eslintignore @elastic/kibana-operations
 
 # QA - Appex QA
+/x-pack/plugins/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
@@ -2144,6 +2151,8 @@ x-pack/test/security_solution_api_integration/test_suites/explore @elastic/secur
 x-pack/test/security_solution_api_integration/test_suites/investigations @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 /x-pack/test/common/utils/security_solution/detections_response @elastic/security-detections-response
+/x-pack/test/functional/es_archives/signals @elastic/security-detections-response
+/x-pack/test/functional/es_archives/rule_keyword_family @elastic/security-detections-response
 
 # Security Solution sub teams
 

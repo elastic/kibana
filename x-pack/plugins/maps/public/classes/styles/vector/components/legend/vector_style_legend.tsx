@@ -8,6 +8,11 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { StyleError } from './style_error';
+import {
+  DynamicStyleProperty,
+  IDynamicStyleProperty,
+} from '../../properties/dynamic_style_property';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 import { Mask } from '../../../../layers/vector_layer/mask';
 import { IStyleProperty } from '../../properties/style_property';
@@ -33,12 +38,22 @@ export function VectorStyleLegend({
   const legendRows = [];
 
   for (let i = 0; i < styles.length; i++) {
-    const row = styles[i].renderLegendDetailRow({
-      isLinesOnly,
-      isPointsOnly,
-      symbolId,
-      svg,
-    });
+    const styleMetaDataRequest = styles[i].isDynamic()
+      ? (styles[i] as IDynamicStyleProperty<object>).getStyleMetaDataRequest()
+      : undefined;
+
+    const error = styleMetaDataRequest?.getError();
+
+    const row = error ? (
+      <StyleError error={error} style={styles[i] as DynamicStyleProperty<object>} />
+    ) : (
+      styles[i].renderLegendDetailRow({
+        isLinesOnly,
+        isPointsOnly,
+        symbolId,
+        svg,
+      })
+    );
 
     legendRows.push(
       <div key={i} className="vectorStyleLegendSpacer">

@@ -48,6 +48,7 @@ describe('useLoadConnectorTypes', () => {
         useLoadConnectorTypes({
           http,
           includeSystemActions: true,
+          featureId: 'alerting',
         }),
       { wrapper }
     );
@@ -68,6 +69,11 @@ describe('useLoadConnectorTypes', () => {
         supportedFeatureIds: ['alerting'],
       },
     ]);
+    expect(http.get).toHaveBeenCalledWith('/internal/actions/connector_types', {
+      query: {
+        feature_id: 'alerting',
+      },
+    });
   });
 
   test('should call the correct endpoint if system actions is true', async () => {
