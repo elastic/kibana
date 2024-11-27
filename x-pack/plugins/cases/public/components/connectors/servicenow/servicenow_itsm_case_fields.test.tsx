@@ -39,6 +39,7 @@ describe('ServiceNowITSM Fields', () => {
     impact: '3',
     category: 'software',
     subcategory: 'os',
+    additionalFields: '{}',
   };
 
   beforeEach(() => {
@@ -67,6 +68,7 @@ describe('ServiceNowITSM Fields', () => {
     expect(await screen.findByTestId('impactSelect')).toBeInTheDocument();
     expect(await screen.findByTestId('categorySelect')).toBeInTheDocument();
     expect(await screen.findByTestId('subcategorySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('additionalFieldsEditor')).toBeInTheDocument();
   });
 
   it('transforms the categories to options correctly', async () => {

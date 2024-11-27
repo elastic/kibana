@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ServiceNowITSMFieldsType } from '../../../common/types/domain';
 import type { ICasesConnector } from '../types';
 
 interface CorrelationValues {
@@ -13,6 +12,7 @@ interface CorrelationValues {
   correlation_display: string | null;
 }
 
+// ServiceNow SIR
 export interface ServiceNowSIRFieldsType extends CorrelationValues {
   dest_ip: string[] | null;
   source_ip: string[] | null;
@@ -31,11 +31,19 @@ export type AlertFieldMappingAndValues = Record<
 >;
 
 // ServiceNow ITSM
-export type ServiceNowITSMCasesConnector = ICasesConnector<ServiceNowITSMFieldsType>;
-export type ServiceNowITSMFormat = ICasesConnector<
-  ServiceNowITSMFieldsType & CorrelationValues
->['format'];
-export type ServiceNowITSMGetMapping = ICasesConnector<ServiceNowITSMFieldsType>['getMapping'];
+export interface ServiceNowSIRFieldsTypeConnector extends CorrelationValues {
+  impact: string | null;
+  severity: string | null;
+  urgency: string | null;
+  category: string | null;
+  subcategory: string | null;
+  additional_fields: string | null;
+}
+
+export type ServiceNowITSMCasesConnector = ICasesConnector<ServiceNowSIRFieldsTypeConnector>;
+export type ServiceNowITSMFormat = ICasesConnector<ServiceNowSIRFieldsTypeConnector>['format'];
+export type ServiceNowITSMGetMapping =
+  ICasesConnector<ServiceNowSIRFieldsTypeConnector>['getMapping'];
 
 // ServiceNow SIR
 export type ServiceNowSIRCasesConnector = ICasesConnector<ServiceNowSIRFieldsType>;
