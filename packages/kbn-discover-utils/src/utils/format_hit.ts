@@ -72,7 +72,7 @@ export function formatHit(
     // If the field is a mapped field, we first check if it should be shown,
     // if not we always include it into the result.
     if (displayKey) {
-      if (shouldShowFieldHandler(key)) {
+      if (highlights[key] || shouldShowFieldHandler(key)) {
         pairs.push([displayKey, undefined, key]);
       }
     } else {
