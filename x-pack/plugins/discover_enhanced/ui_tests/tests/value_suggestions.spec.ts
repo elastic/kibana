@@ -16,12 +16,10 @@ test.describe('Discover app - value suggestions', () => {
     );
     await kbnClient.uiSettings.update({
       defaultIndex: 'logstash-*', // TODO: investigate why it is required for `node scripts/playwright_test.js` run
-      'doc_table:legacy': false,
     });
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.unset('doc_table:legacy');
     await kbnClient.uiSettings.unset('defaultIndex');
     await kbnClient.savedObjects.cleanStandardList();
   });

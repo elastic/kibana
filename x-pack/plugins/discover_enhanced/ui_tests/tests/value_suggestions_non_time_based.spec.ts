@@ -18,12 +18,10 @@ test.describe('Discover app - value suggestions non-time based', () => {
     );
     await kbnClient.uiSettings.update({
       defaultIndex: 'without-timefield',
-      'doc_table:legacy': false,
     });
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.unset('doc_table:legacy');
     await kbnClient.uiSettings.unset('defaultIndex');
     await kbnClient.savedObjects.cleanStandardList();
   });
