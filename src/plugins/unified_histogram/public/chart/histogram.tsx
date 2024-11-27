@@ -171,6 +171,9 @@ export function Histogram({
     onLoad,
   });
 
+  console.log('attributes', JSON.stringify(attributes, null, 2));
+  console.log('lensProps', JSON.stringify(lensProps, null, 2));
+
   const { euiTheme } = useEuiTheme();
   const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
   0 1px 5px -2px ${euiTheme.colors.mediumShade}`;
