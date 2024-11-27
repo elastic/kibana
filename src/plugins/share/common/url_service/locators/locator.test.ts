@@ -122,6 +122,15 @@ describe('Locator', () => {
         'http://localhost:5601/app/r?l=TEST_LOCATOR&v=1.2.3&lz=N4IgZg9hIFwghiANCARvAXrNIC%2BQ'
       );
     });
+
+    test('returns URL of the redirect endpoint with untouched spaceId', async () => {
+      const { locator } = setup({ baseUrl: 'http://localhost:5601/s/space-id' });
+      const url = await locator.getRedirectUrl({ foo: 'a', baz: 'b' });
+
+      expect(url).toBe(
+        'http://localhost:5601/s/space-id/app/r?l=TEST_LOCATOR&v=1.2.3&lz=N4IgZg9hIFwghiANCARvAXrNIC%2BQ'
+      );
+    });
   });
 
   describe('.navigate()', () => {

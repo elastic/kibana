@@ -9,7 +9,6 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { FormatSearchParamsOptions } from './format_search_params';
-import type {} from './space_url_parser';
 
 /**
  * @public

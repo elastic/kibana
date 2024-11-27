@@ -109,8 +109,13 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
       lzCompress: options.lzCompress ?? true,
     };
     const search = formatSearchParams(redirectOptions, formatOptions).toString();
+    const path = '/app/r?' + search;
 
-    return addSpaceIdToPath(baseUrl, options.spaceId, '/app/r?' + search);
+    if (options.spaceId) {
+      return addSpaceIdToPath(baseUrl, options.spaceId, path);
+    } else {
+      return baseUrl + path;
+    }
   }
 
   public async navigate(
