@@ -373,6 +373,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     datasourceLayers,
     dataViews.indexPatterns,
     framePublicAPI.dateRange,
+    framePublicAPI.forceDSL,
     plugins.data.nowProvider,
     searchSessionId,
     addUserMessages,
