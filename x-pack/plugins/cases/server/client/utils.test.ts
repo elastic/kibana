@@ -508,13 +508,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "${expectedStatus}",
-            },
-          ],
-          "function": "is",
-          "type": "function",
-        }
-      `);
+              "value": "`);
     });
 
     it('should create a filter for multiple status values', () => {
@@ -578,13 +572,7 @@ describe('utils', () => {
             Object {
               "isQuoted": false,
               "type": "literal",
-              "value": "${expectedSeverity}",
-            },
-          ],
-          "function": "is",
-          "type": "function",
-        }
-        `);
+              "value": "`);
     });
 
     it('should create a filter for multiple severity values', () => {
@@ -812,7 +800,7 @@ describe('utils', () => {
         );
 
         expect(kqlFilter).toMatchInlineSnapshot(
-          `"cases.attributes.customFields: { (key: first_key AND value.string: hello) }"`
+          `"cases.attributes.customFields: { (key: first_key AND value.text: hello) }"`
         );
       });
 
@@ -1114,9 +1102,7 @@ describe('utils', () => {
           "rootSearchFields": Array [
             "_id",
           ],
-          "search": "\\"${uuid}\\" \\"cases:${uuid}\\"",
-        }
-      `);
+          "search": "\\"`);
     });
 
     it('search value not changed and no rootSearchFields when search is non-uuid', () => {

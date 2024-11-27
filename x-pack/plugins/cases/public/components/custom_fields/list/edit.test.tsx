@@ -25,8 +25,8 @@ describe('Edit ', () => {
     jest.clearAllMocks();
   });
 
-  const customField = customFieldsMock[4] as CaseCustomFieldList;
-  const customFieldConfiguration = customFieldsConfigurationMock[4] as ListCustomFieldConfiguration;
+  const customField = customFieldsMock[6] as CaseCustomFieldList;
+  const customFieldConfiguration = customFieldsConfigurationMock[6] as ListCustomFieldConfiguration;
   it('renders correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
@@ -40,9 +40,9 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(await screen.findByTestId('case-list-custom-field-test_key_5')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-list-custom-field-test_key_7')).toBeInTheDocument();
     expect(
-      await screen.findByTestId('case-list-custom-field-edit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-edit-button-test_key_7')
     ).toBeInTheDocument();
     expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
     expect(await screen.findByText('Option 1')).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe('Edit ', () => {
     );
 
     expect(
-      screen.queryByTestId('case-list-custom-field-edit-button-test_key_5')
+      screen.queryByTestId('case-list-custom-field-edit-button-test_key_7')
     ).not.toBeInTheDocument();
   });
 
@@ -80,7 +80,7 @@ describe('Edit ', () => {
     );
 
     expect(
-      screen.queryByTestId('case-list-custom-field-edit-button-test_key_5')
+      screen.queryByTestId('case-list-custom-field-edit-button-test_key_7')
     ).not.toBeInTheDocument();
   });
 
@@ -98,7 +98,7 @@ describe('Edit ', () => {
     );
 
     expect(
-      await screen.findByTestId('case-list-custom-field-loading-test_key_5')
+      await screen.findByTestId('case-list-custom-field-loading-test_key_7')
     ).toBeInTheDocument();
   });
 
@@ -132,7 +132,7 @@ describe('Edit ', () => {
 
     expect(await screen.findByText('No value is added')).toBeInTheDocument();
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-edit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-edit-button-test_key_7')
     );
 
     expect(
@@ -143,13 +143,13 @@ describe('Edit ', () => {
     ).toBeInTheDocument();
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-submit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-submit-button-test_key_7')
     );
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        value: customFieldConfiguration.defaultValue,
+        value: { option_1: 'Option 1' },
       });
     });
   });
@@ -166,7 +166,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.queryByTestId('list-custom-field-view-test_key_5')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('list-custom-field-view-test_key_7')).not.toBeInTheDocument();
   });
 
   it('does not show the value when the value is null', async () => {
@@ -182,7 +182,7 @@ describe('Edit ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.queryByTestId('list-custom-field-view-test_key_5')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('list-custom-field-view-test_key_7')).not.toBeInTheDocument();
   });
 
   it('does not show the form when the user does not have permissions', async () => {
@@ -199,13 +199,13 @@ describe('Edit ', () => {
     );
 
     expect(
-      screen.queryByTestId('case-list-custom-field-form-field-test_key_5')
+      screen.queryByTestId('case-list-custom-field-form-field-test_key_7')
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('case-list-custom-field-submit-button-test_key_5')
+      screen.queryByTestId('case-list-custom-field-submit-button-test_key_7')
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('case-list-custom-field-cancel-button-test_key_5')
+      screen.queryByTestId('case-list-custom-field-cancel-button-test_key_7')
     ).not.toBeInTheDocument();
   });
 
@@ -223,25 +223,25 @@ describe('Edit ', () => {
     );
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-edit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-edit-button-test_key_7')
     );
     await userEvent.selectOptions(
-      await screen.findByTestId('case-list-custom-field-form-field-test_key_5'),
+      await screen.findByTestId('case-list-custom-field-form-field-test_key_7'),
       await screen.findByRole('option', { name: 'Option 2' })
     );
 
     expect(
-      await screen.findByTestId('case-list-custom-field-submit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-submit-button-test_key_7')
     ).not.toBeDisabled();
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-submit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-submit-button-test_key_7')
     );
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        value: 'option_2',
+        value: { option_2: 'Option 2' },
       });
     });
   });
@@ -263,25 +263,25 @@ describe('Edit ', () => {
     );
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-edit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-edit-button-test_key_7')
     );
 
     expect(await screen.findByText(POPULATED_WITH_DEFAULT)).toBeInTheDocument();
-    expect(await screen.findByTestId('case-list-custom-field-form-field-test_key_5')).toHaveValue(
+    expect(await screen.findByTestId('case-list-custom-field-form-field-test_key_7')).toHaveValue(
       customFieldConfiguration.defaultValue as string
     );
     expect(
-      await screen.findByTestId('case-list-custom-field-submit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-submit-button-test_key_7')
     ).not.toBeDisabled();
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-submit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-submit-button-test_key_7')
     );
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith({
         ...customField,
-        value: customFieldConfiguration.defaultValue,
+        value: { option_1: 'Option 1' },
       });
     });
   });
@@ -300,19 +300,19 @@ describe('Edit ', () => {
     );
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-edit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-edit-button-test_key_7')
     );
 
     expect(
-      await screen.findByTestId('case-list-custom-field-form-field-test_key_5')
+      await screen.findByTestId('case-list-custom-field-form-field-test_key_7')
     ).toBeInTheDocument();
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-cancel-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-cancel-button-test_key_7')
     );
 
     expect(
-      screen.queryByTestId('case-list-custom-field-form-field-test_key_5')
+      screen.queryByTestId('case-list-custom-field-form-field-test_key_7')
     ).not.toBeInTheDocument();
   });
 
@@ -330,29 +330,29 @@ describe('Edit ', () => {
     );
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-edit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-edit-button-test_key_7')
     );
     await userEvent.selectOptions(
-      await screen.findByTestId('case-list-custom-field-form-field-test_key_5'),
+      await screen.findByTestId('case-list-custom-field-form-field-test_key_7'),
       await screen.findByRole('option', { name: 'Option 2' })
     );
 
     expect(
-      await screen.findByTestId('case-list-custom-field-submit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-submit-button-test_key_7')
     ).not.toBeDisabled();
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-cancel-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-cancel-button-test_key_7')
     );
 
     expect(
-      screen.queryByTestId('case-list-custom-field-form-field-test_key_5')
+      screen.queryByTestId('case-list-custom-field-form-field-test_key_7')
     ).not.toBeInTheDocument();
 
     await userEvent.click(
-      await screen.findByTestId('case-list-custom-field-edit-button-test_key_5')
+      await screen.findByTestId('case-list-custom-field-edit-button-test_key_7')
     );
-    expect(await screen.findByTestId('case-list-custom-field-form-field-test_key_5')).toHaveValue(
+    expect(await screen.findByTestId('case-list-custom-field-form-field-test_key_7')).toHaveValue(
       'option_1'
     );
   });
