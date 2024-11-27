@@ -81,7 +81,7 @@ async function upsertInternalStream({ definition, scopedClusterClient }: BasePar
   return scopedClusterClient.asInternalUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
-    document: definition,
+    document: { definition, managed: true },
     refresh: 'wait_for',
   });
 }
@@ -101,13 +101,30 @@ export async function listStreams({
     size: 10000,
     sort: [{ id: 'asc' }],
   });
+
+  const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
   const definitions = response.hits.hits.map((hit) => hit._source!);
   const total = response.hits.total!;
 
   return {
-    definitions,
-    total: typeof total === 'number' ? total : total.value,
+    definitions: [...definitions, ...dataStreams],
+    total: (typeof total === 'number' ? total : total.value) + dataStreams.length,
   };
+}
+
+export async function listDataStreamsAsStreams({
+  scopedClusterClient,
+}: ListStreamsParams): Promise<StreamDefinition[]> {
+  const response = await scopedClusterClient.asInternalUser.indices.getDataStream();
+  return response.data_streams
+    .filter((dataStream) => dataStream.name !== 'logs')
+    .map((dataStream) => ({
+      id: dataStream.name,
+      managed: false,
+      children: [],
+      fields: [],
+      processing: [],
+    }));
 }
 
 interface ReadStreamParams extends BaseParams {
@@ -141,10 +158,35 @@ export async function readStream({
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
-      throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+      return readDataStreamAsStream({ id, scopedClusterClient, skipAccessCheck });
     }
     throw e;
   }
+}
+
+export async function readDataStreamAsStream({
+  id,
+  scopedClusterClient,
+  skipAccessCheck,
+}: ReadStreamParams) {
+  const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name: id });
+  if (response.data_streams.length === 1) {
+    const definition = {
+      id,
+      managed: false,
+      children: [],
+      fields: [],
+      processing: [],
+    };
+    if (!skipAccessCheck) {
+      const hasAccess = await checkReadAccess({ id, scopedClusterClient });
+      if (!hasAccess) {
+        throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
+      }
+    }
+    return { definition };
+  }
+  throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
 }
 
 interface ReadAncestorsParams extends BaseParams {
