@@ -22,15 +22,14 @@ interface Props {
 
 export function ObservabilityOnboardingHeaderActionMenu({ setHeaderActionMenu, theme$ }: Props) {
   const {
-    services: { serverless },
+    services: { context },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const location = useLocation();
   const normalizedPathname = location.pathname.replace(/\/$/, '');
 
   const isRootPage = normalizedPathname === '';
-  const isServerless = Boolean(serverless);
 
-  if (!isServerless && !isRootPage) {
+  if (!context.isServerless && !isRootPage) {
     return (
       <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
         <EuiButton

@@ -14,7 +14,6 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
 import {
   ObservabilityOnboardingPlugin,
   ObservabilityOnboardingPluginSetup,
@@ -46,7 +45,6 @@ export interface ObservabilityOnboardingAppServices {
   config: ConfigSchema;
   docLinks: DocLinksStart;
   chrome: ChromeStart;
-  serverless?: ServerlessPluginStart;
 }
 
 export const plugin: PluginInitializer<
