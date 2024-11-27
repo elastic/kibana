@@ -8,7 +8,6 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
@@ -345,10 +344,3 @@ const getInvalidOriginError = (monitor: SyntheticsMonitor) => {
     },
   };
 };
-
-const NO_MANAGE_PRIVATE_LOCATIONS = i18n.translate(
-  'xpack.synthetics.server.monitor.noManagePrivateLocations',
-  {
-    defaultMessage: 'User does not have permission to manage private locations',
-  }
-);
