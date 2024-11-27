@@ -29,8 +29,8 @@ export const UpgradeFlyoutSubHeader = memo(function UpgradeFlyoutSubHeader({
         {':'}
       </strong>{' '}
       {i18n.UPDATED_BY_AND_WHEN(
-        ruleUpgradeState.target_rule.created_by,
-        <FormattedDate value={ruleUpgradeState.target_rule.created_at} fieldName="" />
+        ruleUpgradeState.current_rule.updated_by,
+        <FormattedDate value={ruleUpgradeState.current_rule.updated_at} fieldName="" />
       )}
     </EuiText>
   );
