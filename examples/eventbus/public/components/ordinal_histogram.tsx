@@ -16,8 +16,6 @@ import * as vegaTooltip from 'vega-tooltip';
 
 import { EuiBadge } from '@elastic/eui';
 
-import type { ESQLSearchResponse } from '@kbn/es-types';
-
 import { useEventBusExampleState } from '../hooks/use_event_bus_example_state';
 import { useFetchESQL } from '../hooks/use_fetch_esql';
 
@@ -79,7 +77,6 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
       els.push(
         `STATS count = COUNT(*) WHERE ${filter}, context = COUNT(*) WHERE NOT(${filter}), total = COUNT(*) BY ${field}`
       );
-      els.push('SORT total DESC');
     }
 
     els.push('SORT total DESC');
@@ -87,10 +84,8 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
 
     return els.join('\n| ');
   }, [esql, field, panelFilters]);
-  console.log('esqlWithFilters', esqlWithFilters);
 
   const rawDataWithFilters = useFetchESQL(esqlWithFilters);
-  console.log('rawDataWithFilters', rawDataWithFilters);
 
   const [initialized, setInitialized] = React.useState(false);
   const wrapperRef = React.useRef(null);
@@ -117,7 +112,6 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
       return acc;
     }, []);
 
-    console.log('longFormat', longFormat);
     return longFormat;
   }, [rawDataWithFilters]);
 
