@@ -12,7 +12,7 @@ import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_o
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
 import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { OverViewItem } from './overview_item';
+import { OverviewItem } from './overview_item';
 
 export function SLOOverviewAlerts({
   data,
@@ -55,7 +55,7 @@ export function SLOOverviewAlerts({
 
       <EuiSpacer size="xs" />
       <EuiFlexGroup justifyContent="spaceBetween">
-        <OverViewItem
+        <OverviewItem
           title={data?.burnRateActiveAlerts}
           description={i18n.translate('xpack.slo.sLOsOverview.euiStat.burnRateActiveAlerts', {
             defaultMessage: 'Active alerts',
@@ -66,7 +66,7 @@ export function SLOOverviewAlerts({
             application.navigateToUrl(getAlertsUrl('active'));
           }}
         />
-        <OverViewItem
+        <OverviewItem
           title={data?.burnRateRecoveredAlerts}
           description={i18n.translate('xpack.slo.sLOsOverview.euiStat.burnRateRecoveredAlerts', {
             defaultMessage: 'Recovered alerts',
@@ -77,7 +77,7 @@ export function SLOOverviewAlerts({
             application.navigateToUrl(getAlertsUrl('recovered'));
           }}
         />
-        <OverViewItem
+        <OverviewItem
           title={data?.burnRateRules}
           description={i18n.translate('xpack.slo.sLOsOverview.euiStat.burnRateRules', {
             defaultMessage: 'Rules',
