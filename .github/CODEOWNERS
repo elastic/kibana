@@ -143,6 +143,7 @@ packages/core/http/core-http-router-server-mocks @elastic/kibana-core
 packages/core/http/core-http-server @elastic/kibana-core
 packages/core/http/core-http-server-internal @elastic/kibana-core
 packages/core/http/core-http-server-mocks @elastic/kibana-core
+packages/core/http/core-http-server-utils @elastic/kibana-core
 packages/core/i18n/core-i18n-browser @elastic/kibana-core
 packages/core/i18n/core-i18n-browser-internal @elastic/kibana-core
 packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
@@ -919,6 +920,7 @@ x-pack/plugins/observability_solution/apm_data_access @elastic/obs-knowledge-tea
 x-pack/plugins/observability_solution/apm/ftr_e2e @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/dataset_quality @elastic/obs-ux-logs-team
 x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
+x-pack/plugins/observability_solution/entity_manager_app @elastic/obs-entities
 x-pack/plugins/observability_solution/exploratory_view @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/observability_solution/inventory @elastic/obs-ux-infra_services-team
@@ -960,6 +962,7 @@ x-pack/plugins/search_indices @elastic/search-kibana
 x-pack/plugins/search_inference_endpoints @elastic/search-kibana
 x-pack/plugins/search_notebooks @elastic/search-kibana
 x-pack/plugins/search_playground @elastic/search-kibana
+x-pack/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/plugins/security @elastic/kibana-security
 x-pack/plugins/security_solution @elastic/security-solution
@@ -1183,7 +1186,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/saved_object_tagging/ @elastic/appex-sharedux
 
 ### Kibana React (to be deprecated)
-/src/plugins/kibana_react/public/@elastic/appex-sharedux @elastic/kibana-presentation
+/src/plugins/kibana_react/public/ @elastic/appex-sharedux @elastic/kibana-presentation
 
 ### Home Plugin and Packages
 /src/plugins/home/public @elastic/appex-sharedux
@@ -1355,6 +1358,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
 
 # obs-ux-logs-team
+/x-pack/test/functional/es_archives/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/test/api_integration/deployment_agnostic/apis/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/config.* @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/landing_page.ts @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/navigation.ts @elastic/obs-ux-logs-team
@@ -1776,6 +1781,15 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 
 # Kibana Platform Security
 # security
+/x-pack/test/functional/es_archives/security @elastic/kibana-security
+/x-pack/test/functional/fixtures/kbn_archiver/spaces @elastic/kibana-security
+/x-pack/test/functional/fixtures/kbn_archiver/security @elastic/kibana-security
+/x-pack/test/ftr_apis/common/lib @elastic/kibana-security
+/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/space_1.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/test/ftr_apis/common/fixtures/es_archiver/base_data/default_space.json @elastic/kibana-security # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/ftr_apis/security_and_spaces/apis/test_utils.ts#L33
+/x-pack/test/api_integration/apis/cloud @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/198444
+/test/plugin_functional/snapshots/baseline/hardening/prototype.json @elastic/kibana-security # Assigned per https://github.com/elastic/kibana/pull/190716
+/test/functional/page_objects/login_page.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/observability/role_management @elastic/kibana-security
 /x-pack/test/functional/config_security_basic.ts @elastic/kibana-security
 /x-pack/test/functional/page_objects/user_profile_page.ts @elastic/kibana-security
@@ -2096,6 +2110,7 @@ x-pack/test/security_solution_api_integration/test_suites/sources @elastic/secur
 
 /x-pack/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
+/x-pack/plugins/security_solution/public/siem_migrations @elastic/security-threat-hunting
 
 ## Security Solution Threat Hunting areas - Threat Hunting Investigations
 

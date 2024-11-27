@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/observability-utils-common",
-  "owner": "@elastic/observability-ui"
+  "owner": [
+    "@elastic/observability-ui"
+  ],
+  "group": "observability",
+  "visibility": "private"
 }
