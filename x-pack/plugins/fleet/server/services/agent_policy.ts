@@ -97,6 +97,11 @@ import type { FullAgentConfigMap } from '../../common/types/models/agent_cm';
 
 import { fullAgentConfigMapToYaml } from '../../common/services/agent_cm_to_yaml';
 
+import {
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
+  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
+} from '../constants';
+
 import { appContextService } from '.';
 
 import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
@@ -124,7 +129,6 @@ import { agentlessAgentService } from './agents/agentless_agent';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 
 const KEY_EDITABLE_FOR_MANAGED_POLICIES = ['namespace'];
-const MAX_CONCURRENT_FLEETSERVER_POLICIES_OPERATIONS = 50;
 
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
@@ -551,7 +555,7 @@ class AgentPolicyService {
         }
         return agentPolicy;
       },
-      { concurrency: 50 }
+      { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
     );
 
     const result = agentPolicies.filter(
@@ -658,7 +662,7 @@ class AgentPolicyService {
 
           return agentPolicy;
         },
-        { concurrency: 50 }
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
       );
     }
 
@@ -956,7 +960,7 @@ class AgentPolicyService {
           );
         },
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
       await pMap(
@@ -971,7 +975,7 @@ class AgentPolicyService {
           });
         },
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }
@@ -1015,7 +1019,7 @@ class AgentPolicyService {
             }
           ),
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }
@@ -1084,7 +1088,7 @@ class AgentPolicyService {
           this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
             spaceId: policy.namespaces?.[0],
           }),
-        { concurrency: 50 }
+        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
       );
     }
 
@@ -1353,7 +1357,7 @@ class AgentPolicyService {
           agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
         }),
       {
-        concurrency: 20,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
     );
 
@@ -1445,7 +1449,7 @@ class AgentPolicyService {
           { force: true }
         ),
       {
-        concurrency: MAX_CONCURRENT_FLEETSERVER_POLICIES_OPERATIONS,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
       }
     );
   }
@@ -1592,7 +1596,7 @@ class AgentPolicyService {
             }
           ),
         {
-          concurrency: 50,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
         }
       );
     }
@@ -1893,7 +1897,7 @@ class AgentPolicyService {
           return { integrationPolicyName: pkgPolicy?.name, id: pkgPolicy?.output_id ?? '' };
         },
         {
-          concurrency: 20,
+          concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
         }
       );
     }
@@ -1926,7 +1930,7 @@ class AgentPolicyService {
         return { agentPolicyId: agentPolicy.id, ...output };
       },
       {
-        concurrency: 50,
+        concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
       }
     );
     return allOutputs;

@@ -15,8 +15,7 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
 
 import { retryTransientEsErrors } from '../retry';
-
-import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from './transform_utils';
+import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 
 export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {

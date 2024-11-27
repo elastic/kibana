@@ -34,6 +34,8 @@ import { getAgentIdsForAgentPolicies } from '../agent_policies/agent_policies_to
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
 
+import { MAX_CONCURRENT_CREATE_ACTIONS } from '../../constants';
+
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
@@ -41,7 +43,6 @@ const ONE_MONTH_IN_MS = 2592000000;
 export const NO_EXPIRATION = 'NONE';
 
 const SIGNED_ACTIONS: Set<Partial<AgentActionType>> = new Set(['UNENROLL', 'UPGRADE']);
-const MAX_CONCURRENT_CREATE_ACTIONS = 100;
 
 export async function createAgentAction(
   esClient: ElasticsearchClient,

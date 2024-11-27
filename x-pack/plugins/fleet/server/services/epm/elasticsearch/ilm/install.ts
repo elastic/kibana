@@ -17,7 +17,7 @@ import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 import { PackageInvalidArchiveError } from '../../../../errors';
 import type { PackageInstallContext } from '../../../../../common/types';
-const MAX_CONCURRENT_ILM_POLICIES_INSTALLS = 50;
+import { MAX_CONCURRENT_ILM_POLICIES_OPERATIONS } from '../../../../constants';
 
 export async function installILMPolicy(
   packageInstallContext: PackageInstallContext,
@@ -68,7 +68,7 @@ export async function installILMPolicy(
       }
     },
     {
-      concurrency: MAX_CONCURRENT_ILM_POLICIES_INSTALLS,
+      concurrency: MAX_CONCURRENT_ILM_POLICIES_OPERATIONS,
     }
   );
 

@@ -39,6 +39,7 @@ import {
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
+  MAX_CONCURRENT_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -60,7 +61,6 @@ import { buildDefaultSettings } from './default_settings';
 import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
-export const MAX_CONCURRENT_COMPONENT_TEMPLATES = 50;
 
 export const prepareToInstallTemplates = (
   packageInstallContext: PackageInstallContext,

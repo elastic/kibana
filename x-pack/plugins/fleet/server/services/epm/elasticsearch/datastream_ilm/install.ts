@@ -19,8 +19,9 @@ import { getAssetFromAssetsMap } from '../../archive';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
 
+import { MAX_CONCURRENT_DATASTREAMS_ILM_OPERATIONS } from '../../../../constants';
+
 import { deleteIlms } from './remove';
-const MAX_CONCURRENT_DATASTREAMS_ILM_INSTALLS = 50;
 
 interface IlmInstallation {
   installationName: string;
@@ -119,7 +120,7 @@ export const installIlmForDataStream = async (
         return handleIlmInstall({ esClient, ilmInstallation, logger });
       },
       {
-        concurrency: MAX_CONCURRENT_DATASTREAMS_ILM_INSTALLS,
+        concurrency: MAX_CONCURRENT_DATASTREAMS_ILM_OPERATIONS,
       }
     ).then((results) => results.flat());
   }

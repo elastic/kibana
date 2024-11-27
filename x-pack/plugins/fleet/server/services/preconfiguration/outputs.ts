@@ -33,6 +33,8 @@ import { appContextService } from '../app_context';
 
 import { isDifferent } from './utils';
 
+export const MAX_CONCURRENT_OUTPUTS_OPERATIONS = 50;
+
 export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   const { outputs: outputsOrUndefined } = config;
 
@@ -140,7 +142,7 @@ export async function createOrUpdatePreconfiguredOutputs(
   };
 
   await pMap(outputs, (output) => updateOrConfigureOutput(output), {
-    concurrency: 20,
+    concurrency: MAX_CONCURRENT_OUTPUTS_OPERATIONS,
   });
 }
 

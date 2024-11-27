@@ -7,7 +7,6 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-export const MAX_CONCURRENT_TRANSFORMS_OPERATIONS = 20;
 interface TransformAliasSetting {
   alias: string;
   // When move_on_creation: true, all the other indices are removed from the alias,

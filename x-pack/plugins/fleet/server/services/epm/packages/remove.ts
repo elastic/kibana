@@ -22,6 +22,7 @@ import pMap from 'p-map';
 import { updateIndexSettings } from '../elasticsearch/index/update_settings';
 
 import {
+  MAX_CONCURRENT_ES_ASSETS_OPERATIONS,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
@@ -50,8 +51,6 @@ import { FleetError, PackageRemovalError } from '../../../errors';
 
 import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies/populate_package_policy_assigned_agents_count';
 import * as Registry from '../registry';
-
-import { MAX_CONCURRENT_ES_ASSETS_OPERATIONS } from '../elasticsearch/transform/common';
 
 import { getInstallation, kibanaSavedObjectTypes } from '.';
 

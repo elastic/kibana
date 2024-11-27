@@ -19,6 +19,7 @@ import {
   FLEET_EVENT_INGESTED_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
 } from '../../../../constants/fleet_es_assets';
+import { MAX_CONCURRENT_DATASTREAM_OPERATIONS } from '../../../../constants';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -45,9 +46,6 @@ import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
-
-// Limit concurrent putMapping/rollover requests to avoid overwhelming ES cluster
-const MAX_CONCURRENT_DATASTREAM_OPERATIONS = 20;
 
 interface Properties {
   [key: string]: any;

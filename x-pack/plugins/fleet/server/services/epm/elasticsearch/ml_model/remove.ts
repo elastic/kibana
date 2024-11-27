@@ -8,9 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import pMap from 'p-map';
-const MAX_CONCURRENT_ML_MODELS_DELETIONS = 50;
 
 import { appContextService } from '../../../app_context';
+import { MAX_CONCURRENT_ML_MODELS_OPERATIONS } from '../../../../constants';
 
 export const deleteMlModel = async (esClient: ElasticsearchClient, mlModelIds: string[]) => {
   const logger = appContextService.getLogger();
@@ -24,7 +24,7 @@ export const deleteMlModel = async (esClient: ElasticsearchClient, mlModelIds: s
       logger.info(`Deleted: ${modelId}`);
     },
     {
-      concurrency: MAX_CONCURRENT_ML_MODELS_DELETIONS,
+      concurrency: MAX_CONCURRENT_ML_MODELS_OPERATIONS,
     }
   );
 };

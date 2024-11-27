@@ -9,5 +9,3 @@
 export const TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX = '.latest';
 // Index alias that points to all of the destination indices from all the package versions
 export const TRANSFORM_DEST_IDX_ALIAS_ALL_SFX = '.all';
-
-export const MAX_CONCURRENT_ES_ASSETS_OPERATIONS = 50;

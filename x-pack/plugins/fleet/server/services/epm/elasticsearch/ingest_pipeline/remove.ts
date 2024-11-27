@@ -14,8 +14,7 @@ import { ElasticsearchAssetType } from '../../../../types';
 import { FleetError } from '../../../../errors';
 import type { EsAssetReference } from '../../../../../common/types';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
-
-const MAX_CONCURRENT_PIPELINES_DELETIONS = 50;
+import { MAX_CONCURRENT_PIPELINES_DELETIONS } from '../../../../constants';
 
 export const deletePreviousPipelines = async (
   esClient: ElasticsearchClient,

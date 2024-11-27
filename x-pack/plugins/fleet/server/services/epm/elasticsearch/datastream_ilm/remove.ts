@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import pMap from 'p-map';
 
 import { appContextService } from '../../../app_context';
-const MAX_CONCURRENT_ILM_POLICIES_DELETIONS = 50;
+import { MAX_CONCURRENT_ILM_POLICIES_OPERATIONS } from '../../../../constants';
 
 export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: string[]) => {
   const logger = appContextService.getLogger();
@@ -30,7 +30,7 @@ export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: st
       logger.debug(`Deleted ilm policy with id: ${ilmPolicyId}`);
     },
     {
-      concurrency: MAX_CONCURRENT_ILM_POLICIES_DELETIONS,
+      concurrency: MAX_CONCURRENT_ILM_POLICIES_OPERATIONS,
     }
   );
 };

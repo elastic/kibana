@@ -21,8 +21,9 @@ import { getFileMetadataIndexName } from '../../../common/services';
 
 import { ES_SEARCH_LIMIT } from '../../../common/constants';
 
+import { MAX_CONCURRENT_AGENT_FILES_UPLOADS } from '../../constants';
+
 import { parseFileStorageIndex } from './utils';
-const MAX_CONCURRENT_AGENT_FILES_UPLOADS = 50;
 
 /**
  * Gets files with given status from the files metadata index. Includes both files

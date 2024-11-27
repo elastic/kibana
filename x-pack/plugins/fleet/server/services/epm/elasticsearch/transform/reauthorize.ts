@@ -20,8 +20,7 @@ import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 
 import { retryTransientEsErrors } from '../retry';
-
-import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from './transform_utils';
+import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 
 interface FleetTransformMetadata {
   fleet_transform_version?: string;
