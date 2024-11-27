@@ -21,7 +21,7 @@ import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
   query: ListWithKuery & {
-    showInactive: boolean;
+    showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
   };
