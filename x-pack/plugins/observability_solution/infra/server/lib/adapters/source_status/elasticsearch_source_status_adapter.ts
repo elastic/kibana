@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DataTier } from '@kbn/observability-shared-plugin/common';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { searchExcludedDataTiers } from '@kbn/observability-plugin/common/ui_settings_keys';
-import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
+import { excludeTiersQuery } from '@kbn/observability-utils-common/es/queries/exclude_tiers_query';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { isNoSuchRemoteClusterMessage, NoSuchRemoteClusterError } from '../../sources/errors';
-import { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
-import { InfraDatabaseGetIndicesResponse } from '../framework';
-import { KibanaFramework } from '../framework/kibana_framework_adapter';
+import type { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_status';
+import type { InfraDatabaseGetIndicesResponse } from '../framework';
+import type { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
   constructor(private readonly framework: KibanaFramework) {}
@@ -53,6 +53,8 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
 
     const excludedDataTiers = await uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
 
+    const filter = excludedDataTiers.length ? excludeTiersQuery(excludedDataTiers) : [];
+
     return await this.framework
       .callWithRequest(requestContext, 'search', {
         ignore_unavailable: true,
@@ -61,7 +63,7 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         size: 0,
         terminate_after: 1,
         track_total_hits: 1,
-        query: getDataTierFilterCombined({ excludedDataTiers }),
+        query: { bool: { filter } },
       })
       .then(
         (response) => {
