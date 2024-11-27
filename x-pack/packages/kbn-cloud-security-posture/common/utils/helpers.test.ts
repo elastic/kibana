@@ -165,7 +165,61 @@ describe('test helper methods', () => {
       expect(buildEntityFlyoutPreviewQuery(field, query)).toEqual(expectedQuery);
     });
 
-    it('should return the correct query when given field and empty query', () => {
+    it('should return the correct query when given field, query, status and queryType Misconfiguration', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const status = 'pass';
+      const queryType = 'Misconfiguration';
+      const expectedQuery = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [{ term: { 'result.evaluation': 'pass' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      expect(buildEntityFlyoutPreviewQuery(field, query, status, queryType)).toEqual(expectedQuery);
+    });
+
+    it('should return the correct query when given field, query, status and queryType Vulnerability', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const status = 'low';
+      const queryType = 'Vulnerability';
+      const expectedQuery = {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [{ term: { 'host.name': 'exampleHost' } }],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              bool: {
+                should: [{ term: { 'vulnerability.severity': 'low' } }],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      expect(buildEntityFlyoutPreviewQuery(field, query, status, queryType)).toEqual(expectedQuery);
+    });
+
+    it('should return the correct query when given field and empty query and empty status', () => {
       const field = 'host.name';
       const expectedQuery = {
         bool: {

@@ -9,8 +9,10 @@ import React, { memo, useEffect, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
-// import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
+import {
+  buildEntityFlyoutPreviewQuery,
+  type VulnSeverity,
+} from '@kbn/cloud-security-posture-common';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesFindings } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
 import type {
@@ -30,7 +32,6 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
-import { buildEntityVulnerabilityQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
@@ -57,8 +58,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   const [currentFilter, setCurrentFilter] = useState<string>('');
 
   const { data } = useVulnerabilitiesFindings({
-    // query: buildEntityFlyoutPreviewQuery('host.name', value),
-    query: buildEntityVulnerabilityQuery('host.name', value, currentFilter),
+    query: buildEntityFlyoutPreviewQuery('host.name', value, currentFilter, 'Vulnerability'),
     sort: [],
     enabled: true,
     pageSize: 1,

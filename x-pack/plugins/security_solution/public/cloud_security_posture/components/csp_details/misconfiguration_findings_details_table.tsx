@@ -11,7 +11,6 @@ import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon } from '@elastic/e
 import { useMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_findings';
 import { i18n } from '@kbn/i18n';
 import type { CspFinding, CspFindingResult } from '@kbn/cloud-security-posture-common';
-import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type { CspBenchmarkRuleMetadata } from '@kbn/cloud-security-posture-common/schema/rules/latest';
@@ -26,6 +25,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { buildEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 
 type MisconfigurationFindingDetailFields = Pick<CspFinding, 'result' | 'rule' | 'resource'>;
@@ -92,7 +92,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const [currentFilter, setCurrentFilter] = useState<string>('');
 
     const { data } = useMisconfigurationFindings({
-      query: buildEntityFlyoutPreviewQuery(field, value, currentFilter),
+      query: buildEntityFlyoutPreviewQuery(field, value, currentFilter, 'Misconfiguration'),
       sort: [],
       enabled: true,
       pageSize: 1,
