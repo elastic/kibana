@@ -504,7 +504,7 @@ describe('description_step', () => {
         expect(result[0].title).toEqual('Threshold label');
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toContain(
-          'Results aggregated by user.name >= 100 when unique value count of host.test_value >= 10'
+          'Results aggregated by user.name >= 100 when unique values count of host.test_value >= 10'
         );
       });
     });
