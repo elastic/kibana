@@ -127,6 +127,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
+          .query({ per_page: 500 })
           .send()
           .expect(200);
 
@@ -141,6 +142,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
+            per_page: 500,
           })
           .send()
           .expect(200);
@@ -225,6 +227,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
+          .query({ per_page: 500 })
           .send()
           .expect(200);
 
@@ -243,6 +246,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
+            per_page: 500,
           })
           .send()
           .expect(200);
@@ -326,6 +330,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set(editorUser.apiKeyHeader)
+          .query({ per_page: 500 })
           .set(samlAuth.getInternalRequestHeader())
           .send()
           .expect(200);
@@ -345,6 +350,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
+            per_page: 500,
           })
           .send()
           .expect(200);
@@ -427,6 +433,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const firstPageResponse = await supertest
           .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set(editorUser.apiKeyHeader)
+          .query({ per_page: 500 })
           .set(samlAuth.getInternalRequestHeader())
           .send()
           .expect(200);
@@ -446,6 +453,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
+            per_page: 500,
           })
           .send()
           .expect(200);
@@ -543,6 +551,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               encodeURI(projectName)
             )
           )
+          .query({ per_page: 500 })
           .set(editorUser.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send()
@@ -568,6 +577,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .set(samlAuth.getInternalRequestHeader())
           .query({
             search_after: afterKey,
+            per_page: 500,
           })
           .send()
           .expect(200);
