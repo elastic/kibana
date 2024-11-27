@@ -183,7 +183,6 @@ describe('EntityStoreEnablementModal', () => {
 
     it('should render additional charges message when available', async () => {
       const EnablementModalCalloutMock = () => <span data-test-subj="enablement-modal-test" />;
-      // Mock the return value of `useContractComponents` with the correct key
       mockUseContractComponents.mockReturnValue({
         EnablementModalCallout: EnablementModalCalloutMock,
       });
