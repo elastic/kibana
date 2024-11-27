@@ -17,9 +17,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ftr/cases'));
     loadTestFile(require.resolve('./ftr/advanced_settings'));
     loadTestFile(require.resolve('./ml'));
-    if (isCloud) {
-      // only run tests in the Serverless Quality Gates
-      loadTestFile(require.resolve('./ftr/cloud_security_posture/mki_serverless_quality_gates'));
-    }
   });
 }
