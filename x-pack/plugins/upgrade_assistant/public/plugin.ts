@@ -33,7 +33,6 @@ export class UpgradeAssistantUIPlugin
       const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
 
       const kibanaVersionInfo = {
-        currentVersion: `${kibanaVersion.major}.${kibanaVersion.minor}.${kibanaVersion.patch}`,
         currentMajor: kibanaVersion.major,
         prevMajor: kibanaVersion.major - 1,
         nextMajor: kibanaVersion.major + 1,

@@ -37,7 +37,6 @@ type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
     featureSet: { migrateSystemIndices },
-    kibanaVersionInfo: { currentVersion },
     services: {
       breadcrumbs,
       core: { docLinks },
@@ -77,9 +76,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage:
-              'This is version {currentVersion} of the Elastic Stack, get ready for the next version!',
-            values: { currentVersion },
+            defaultMessage: 'Get ready for the next version of the Elastic Stack!',
           })}
           rightSideItems={[
             <EuiButtonEmpty
