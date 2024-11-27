@@ -561,7 +561,7 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          "> ? TRouteParamsRT extends ",
+          " | undefined> ? TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -912,15 +912,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRouteCreateOptions",
-            "text": "ServerRouteCreateOptions"
-          },
-          "> ? TReturnType extends ",
+          "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",

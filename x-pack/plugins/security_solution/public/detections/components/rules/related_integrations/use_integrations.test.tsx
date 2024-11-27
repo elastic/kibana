@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { cleanup, waitFor, renderHook } from '@testing-library/react';
 
 import { useIntegrations } from './use_integrations';
 
@@ -39,11 +39,9 @@ describe('useIntegrations', () => {
   it('calls the API via fetchAllIntegrations', async () => {
     const fetchAllIntegrations = jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations');
 
-    const { waitForNextUpdate } = render();
+    render();
 
-    await waitForNextUpdate();
-
-    expect(fetchAllIntegrations).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fetchAllIntegrations).toHaveBeenCalledTimes(1));
   });
 
   it('does not call the API when skip is true', async () => {
@@ -55,7 +53,7 @@ describe('useIntegrations', () => {
   });
 
   it('fetches data from the API', async () => {
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -63,10 +61,9 @@ describe('useIntegrations', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents returns
-    await waitForNextUpdate();
+    await waitFor(() => expect(result.current.isLoading).toEqual(false));
 
     // It switches to a success state
-    expect(result.current.isLoading).toEqual(false);
     expect(result.current.isSuccess).toEqual(true);
     expect(result.current.isError).toEqual(false);
     expect(result.current.data).toEqual([
@@ -105,7 +102,7 @@ describe('useIntegrations', () => {
     const exception = new Error('Boom!');
     jest.spyOn(fleetIntegrationsApi, 'fetchAllIntegrations').mockRejectedValue(exception);
 
-    const { result, waitForNextUpdate } = render();
+    const { result } = render();
 
     // It starts from a loading state
     expect(result.current.isLoading).toEqual(true);
@@ -113,7 +110,7 @@ describe('useIntegrations', () => {
     expect(result.current.isError).toEqual(false);
 
     // When fetchRuleExecutionEvents throws
-    await waitForNextUpdate();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     // It switches to an error state
     expect(result.current.isLoading).toEqual(false);
