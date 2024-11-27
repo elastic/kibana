@@ -400,6 +400,7 @@ describe('bootstrapRenderer', () => {
     expect(renderTemplateMock).toHaveBeenCalledTimes(1);
     expect(renderTemplateMock).toHaveBeenCalledWith({
       themeTag: 'customThemeTag',
+      themeName: 'amsterdam',
       jsDependencyPaths: ['path-1', 'path-2'],
       publicPathMap: expect.any(String),
     });
