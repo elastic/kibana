@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate, EuiLink } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -23,7 +23,7 @@ import {
 
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
-import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
+import { BASE_PATH, SLM_STATE, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';
 import {
   useLoadPolicies,
@@ -31,12 +31,11 @@ import {
   useLoadSlmStatus,
 } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
-import { useAppContext, useServices } from '../../../app_context';
+import { useAppContext, useCore, useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
 import { PolicyRetentionSchedule } from './policy_retention_schedule';
-import { SlmStatus } from './slm_status';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];
@@ -57,6 +56,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
 
   const { uiMetricService } = useServices();
   const { core } = useAppContext();
+  const { docLinks } = useCore();
 
   // Load retention cluster settings
   const {
@@ -164,9 +164,32 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
     const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
     const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
+    const isSlmRunning = slmStatus?.operation_mode === SLM_STATE.RUNNING;
 
     content = (
       <section data-test-subj="policyList">
+        {!isSlmRunning ? (
+          <Fragment>
+            <EuiCallOut
+              title="Snapshot lifecycle management (SLM) is not running"
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                Policies are not executed. You must restart SLM{' '}
+                <EuiLink
+                  href={docLinks.links.snapshotRestore.slmStart}
+                  external={true}
+                  target="_blank"
+                >
+                  by using the API.
+                </EuiLink>
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </Fragment>
+        ) : null}
+
         {hasDuplicateSchedules ? (
           <Fragment>
             <EuiCallOut
@@ -181,7 +204,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.policyScheduleWarningDescription"
-                defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit or delete the policies."
+                defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit the policies to run on different schedules, or delete redundant policies."
               />
             </EuiCallOut>
             <EuiSpacer />
@@ -196,8 +219,6 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             error={retentionSettingsError}
           />
         ) : null}
-
-        <SlmStatus status={slmStatus?.operation_mode} />
 
         <PolicyTable
           policies={policies || []}
