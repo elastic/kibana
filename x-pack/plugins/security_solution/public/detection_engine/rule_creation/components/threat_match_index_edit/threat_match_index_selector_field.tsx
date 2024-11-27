@@ -15,13 +15,13 @@ import { useUiSetting$ } from '../../../../common/lib/kibana';
 import type { FieldHook } from '../../../../shared_imports';
 import * as i18n from './translations';
 
-interface ThreatMatchIndexFieldProps {
+interface ThreatMatchIndexSelectorFieldProps {
   field: FieldHook<string[]>;
 }
 
-export const ThreatMatchIndexField = memo(function ThreatIndexField({
+export const ThreatMatchIndexSelectorField = memo(function ThreatIndexField({
   field,
-}: ThreatMatchIndexFieldProps): JSX.Element {
+}: ThreatMatchIndexSelectorFieldProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
   const [defaultThreatIndices] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
   const isIndexModified = !isEqual(field.value, defaultThreatIndices);
