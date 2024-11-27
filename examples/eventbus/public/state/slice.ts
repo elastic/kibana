@@ -13,6 +13,7 @@ import { createSlice } from '@reduxjs/toolkit';
 type AllFields = Record<string, string>;
 
 interface EventBusExampleState {
+  chartWidth: number;
   esql: string;
   allFields: AllFields;
   selectedFields: string[];
@@ -37,6 +38,9 @@ export const eventBusExampleSlice = createSlice({
   name: 'eventBusExampleState',
   initialState: getDefaultState(),
   reducers: {
+    setChartWidth: (state: EventBusExampleState, action: PayloadAction<number>) => {
+      state.chartWidth = action.payload;
+    },
     setESQL: (state: EventBusExampleState, action: PayloadAction<string>) => {
       state.esql = action.payload;
     },
@@ -60,7 +64,7 @@ export const eventBusExampleSlice = createSlice({
       state: EventBusExampleState,
       action: PayloadAction<SetCrossfilterActionPayload>
     ) => {
-      if (action.payload.filter) {
+      if (action.payload.filter !== '') {
         state.filters[action.payload.id] = action.payload.filter;
       } else {
         delete state.filters[action.payload.id];
