@@ -778,9 +778,7 @@ x-pack/packages/kbn-ai-assistant @elastic/search-kibana
 x-pack/packages/kbn-ai-assistant-common @elastic/search-kibana
 x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
-x-pack/packages/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
-x-pack/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
-x-pack/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 x-pack/packages/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/packages/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/packages/kbn-elastic-assistant-common @elastic/security-generative-ai
@@ -2426,7 +2424,6 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 /x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture
 /x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
 /x-pack/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
-/x-pack/packages/kbn-cloud-security-posture @elastic/kibana-cloud-security-posture
 /x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.* @elastic/kibana-cloud-security-posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
