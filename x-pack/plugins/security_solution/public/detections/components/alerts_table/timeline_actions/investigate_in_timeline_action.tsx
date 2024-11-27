@@ -8,6 +8,7 @@
 import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ActionIconItem } from '../../../../common/components/header_actions/action_icon_item';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 import {
   ACTION_INVESTIGATE_IN_TIMELINE,
@@ -32,6 +33,10 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     ecsRowData,
     onInvestigateInTimelineAlertClick,
   });
+  const {
+    timelinePrivileges: { crud, read },
+  } = useUserPrivileges();
+  const cannotReadNorWriteTimeline = !crud && !read;
 
   return (
     <ActionIconItem
@@ -40,7 +45,7 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"
       onClick={investigateInTimelineAlertClick}
-      isDisabled={false}
+      isDisabled={cannotReadNorWriteTimeline}
       buttonType={buttonType}
     />
   );

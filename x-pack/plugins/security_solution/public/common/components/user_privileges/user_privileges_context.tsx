@@ -12,6 +12,7 @@ import { useFetchListPrivileges } from '../../../detections/components/user_priv
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
+import { extractTimelineCapabilities } from '../../utils/timeline_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
@@ -52,21 +53,20 @@ export const UserPrivilegesProvider = ({
   const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(read);
   const endpointPrivileges = useEndpointPrivileges();
 
-  const [timelinePrivileges, setTimelinePrivileges] = useState({
-    crud: kibanaCapabilities.securitySolutionTimeline.crud === true,
-    read: kibanaCapabilities.securitySolutionTimeline.read === true,
-  });
+  const [timelinePrivileges, setTimelinePrivileges] = useState(
+    extractTimelineCapabilities(kibanaCapabilities)
+  );
 
   useEffect(() => {
     setTimelinePrivileges((currPrivileges) => {
-      const timelineCrud = kibanaCapabilities.securitySolutionTimeline.crud === true;
-      const timelineRead = kibanaCapabilities.securitySolutionTimeline.read === true;
+      const { read: timelineRead, crud: timelineCrud } =
+        extractTimelineCapabilities(kibanaCapabilities);
       if (currPrivileges.read !== timelineRead || currPrivileges.crud !== timelineCrud) {
         return { read: timelineRead, crud: timelineCrud };
       }
       return currPrivileges;
     });
-  }, [kibanaCapabilities.securitySolutionTimeline]);
+  }, [kibanaCapabilities]);
 
   useEffect(() => {
     setKibanaSecuritySolutionsPrivileges((currPrivileges) => {

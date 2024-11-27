@@ -17,6 +17,7 @@ import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { addProvider } from '../../../../timelines/store/actions';
 import { TimelineId } from '../../../../../common/types';
 import type { SecurityAppStore } from '../../../../common/store';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 import { fieldHasCellActions } from '../../utils';
 import {
   ADD_TO_TIMELINE,
@@ -38,17 +39,22 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
     store: SecurityAppStore;
     services: StartServices;
   }): CellActionTemplate<SecurityCellAction> => {
-    const { notifications: notificationsService } = services;
-
+    const {
+      notifications: notificationsService,
+      application: { capabilities },
+    } = services;
+    const timelineCapabilities = extractTimelineCapabilities(capabilities);
     return {
       type: SecurityCellActionType.ADD_TO_TIMELINE,
       getIconType: () => ADD_TO_TIMELINE_ICON,
       getDisplayName: () => ADD_TO_TIMELINE,
       getDisplayNameTooltip: () => ADD_TO_TIMELINE,
-      isCompatible: async ({ data }) => {
+
+      isCompatible: async ({ data, metadata }) => {
         const field = data[0]?.field;
 
         return (
+          (timelineCapabilities.read || timelineCapabilities.crud) &&
           data.length === 1 && // TODO Add support for multiple values
           fieldHasCellActions(field.name) &&
           isValidDataProviderField(field.name, field.type) &&
