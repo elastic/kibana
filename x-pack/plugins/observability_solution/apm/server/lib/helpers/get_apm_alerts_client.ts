@@ -31,7 +31,12 @@ export async function getApmAlertsClient({
 
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
   const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(request);
-  const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(['apm']);
+  const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices([
+    'logs',
+    'apm',
+    'slo',
+    'observability',
+  ]);
 
   if (!apmAlertsIndices || isEmpty(apmAlertsIndices)) {
     throw Error('No alert indices exist for "apm"');
