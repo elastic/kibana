@@ -28,20 +28,15 @@ export class ThemeService {
 
   public setup({ injectedMetadata }: ThemeServiceSetupDeps): ThemeServiceSetup {
     const themeMetadata = injectedMetadata.getTheme();
-
     this.themeMetadata = themeMetadata;
 
-    let darkMode: boolean;
+    let theme: CoreTheme;
     if (themeMetadata.darkMode === 'system' && browsersSupportsSystemTheme()) {
-      darkMode = systemThemeIsDark();
+      theme = { darkMode: systemThemeIsDark() };
     } else {
-      darkMode = themeMetadata.darkMode === 'system' ? false : themeMetadata.darkMode;
+      const darkMode = themeMetadata.darkMode === 'system' ? false : themeMetadata.darkMode;
+      theme = { darkMode };
     }
-
-    const theme: CoreTheme = {
-      darkMode,
-      name: themeMetadata.name,
-    };
 
     this.applyTheme(theme);
 
@@ -78,13 +73,11 @@ export class ThemeService {
     });
 
     _setDarkMode(darkMode);
-    updateKbnThemeTag(theme);
+    updateKbnThemeTag(darkMode);
   }
 }
 
-const updateKbnThemeTag = (theme: CoreTheme) => {
-  const name = theme.name === 'amsterdam' ? 'v8' : theme.name;
-
+const updateKbnThemeTag = (darkMode: boolean) => {
   const globals: any = typeof window === 'undefined' ? {} : window;
-  globals.__kbnThemeTag__ = `${name}${theme.darkMode ? 'dark' : 'light'}`;
+  globals.__kbnThemeTag__ = darkMode ? 'v8dark' : 'v8light';
 };

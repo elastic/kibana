@@ -99,7 +99,7 @@ export const StorybookContext: React.FC<{
       settings: getSettings(),
       theme: {
         theme$: EMPTY,
-        getTheme: () => ({ darkMode: false, name: 'amsterdam' }),
+        getTheme: () => ({ darkMode: false }),
       },
       security: {} as unknown as SecurityServiceStart,
       userProfile: {} as unknown as UserProfileServiceStart,

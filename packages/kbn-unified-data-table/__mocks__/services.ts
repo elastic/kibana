@@ -43,7 +43,7 @@ export function createServicesMock() {
     ...uiSettingsMock,
   };
 
-  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'amsterdam' });
+  const theme = themeServiceMock.createSetupContract({ darkMode: false });
   corePluginMock.theme = theme;
 
   const dataPlugin = dataPluginMock.createStartContract();

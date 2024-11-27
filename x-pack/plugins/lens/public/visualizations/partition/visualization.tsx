@@ -494,10 +494,7 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    }).darkMode;
+    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     return <DimensionEditor {...props} paletteService={paletteService} isDarkMode={isDarkMode} />;
   },
   DimensionEditorDataExtraComponent(props) {

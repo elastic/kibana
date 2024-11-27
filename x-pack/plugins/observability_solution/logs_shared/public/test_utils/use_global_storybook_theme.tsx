@@ -53,8 +53,8 @@ export const decorateWithGlobalStorybookThemeProviders: DecoratorFn = (
 const euiThemeFromId = (themeId: string): CoreTheme => {
   switch (themeId) {
     case 'v8.dark':
-      return { darkMode: true, name: 'amsterdam' };
+      return { darkMode: true };
     default:
-      return { darkMode: false, name: 'amsterdam' };
+      return { darkMode: false };
   }
 };

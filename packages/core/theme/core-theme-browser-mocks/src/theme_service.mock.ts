@@ -14,7 +14,6 @@ import type { ThemeService } from '@kbn/core-theme-browser-internal';
 
 const mockTheme: CoreTheme = {
   darkMode: false,
-  name: 'amsterdam',
 };
 
 const createThemeMock = (): CoreTheme => {

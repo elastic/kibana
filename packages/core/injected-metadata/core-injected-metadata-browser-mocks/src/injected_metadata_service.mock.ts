@@ -57,7 +57,6 @@ const createSetupContractMock = () => {
   setupContract.getPlugins.mockReturnValue([]);
   setupContract.getTheme.mockReturnValue({
     darkMode: false,
-    name: 'amsterdam',
     version: 'v8',
     stylesheetPaths: {
       default: ['light-1.css'],

@@ -51,7 +51,7 @@ export const LinkToApp = memo<LinkToAppProps>(
             {children}
           </EuiButton>
         ) : (
-          <EuiLink {...(otherProps as EuiLinkProps)} onClick={handleOnClick}>
+          <EuiLink {...otherProps} onClick={handleOnClick}>
             {children}
           </EuiLink>
         )}
