@@ -201,12 +201,19 @@ export function registerAPIRoutes({
         request: {
           query: schema.object({
             page: schema.number({
-              meta: { description: 'The page number to return.' },
+              meta: { description: 'The page number to return. Default is "1".' },
+              min: 1,
               defaultValue: 1,
             }),
             perPage: schema.maybe(
               schema.number({
-                meta: { description: 'The number of dashboards to display on each page.' },
+                meta: {
+                  description:
+                    'The number of dashboards to display on each page (max 1000). Default is "20".',
+                },
+                defaultValue: 20,
+                min: 1,
+                max: 1000,
               })
             ),
           }),
