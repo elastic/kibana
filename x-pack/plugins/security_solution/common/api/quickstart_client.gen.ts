@@ -299,14 +299,8 @@ import type {
   CreateTimelinesRequestBodyInput,
   CreateTimelinesResponse,
 } from './timeline/create_timelines/create_timelines_route.gen';
-import type {
-  DeleteNoteRequestBodyInput,
-  DeleteNoteResponse,
-} from './timeline/delete_note/delete_note_route.gen';
-import type {
-  DeleteTimelinesRequestBodyInput,
-  DeleteTimelinesResponse,
-} from './timeline/delete_timelines/delete_timelines_route.gen';
+import type { DeleteNoteRequestBodyInput } from './timeline/delete_note/delete_note_route.gen';
+import type { DeleteTimelinesRequestBodyInput } from './timeline/delete_timelines/delete_timelines_route.gen';
 import type {
   ExportTimelinesRequestQueryInput,
   ExportTimelinesRequestBodyInput,
@@ -768,7 +762,7 @@ If a record already exists for the specified entity, that record is overwritten 
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
-      .request<DeleteNoteResponse>({
+      .request({
         path: '/api/note',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -801,7 +795,7 @@ If a record already exists for the specified entity, that record is overwritten 
   async deleteTimelines(props: DeleteTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
     return this.kbnClient
-      .request<DeleteTimelinesResponse>({
+      .request({
         path: '/api/timeline',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
