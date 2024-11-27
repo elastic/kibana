@@ -4,6 +4,7 @@ Fleet provides a web-based UI in Kibana for centrally managing Elastic Agents an
 
 Official documentation: https://www.elastic.co/guide/en/fleet/current/index.html.
 
+
 ## Plugin overview
 
 The Fleet plugin is enabled by default. The Fleet API and UI can be disabled by setting the `xpack.fleet.agents.enabled` Kibana setting to `false`.
