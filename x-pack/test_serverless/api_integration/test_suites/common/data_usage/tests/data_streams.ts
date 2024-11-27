@@ -50,5 +50,14 @@ export default function ({ getService }: FtrProviderContext) {
         return true;
       });
     });
+    it('does not return created data streams without size', async () => {
+      const res = await supertestAdminWithCookieCredentials
+        .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
+        .set('elastic-api-version', '1');
+      const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
+      const foundStream = dataStreams.find((stream) => stream.name === testDataStreamName);
+      expect(res.statusCode).to.be(200);
+      expect(foundStream).to.be(undefined);
+    });
   });
 }
