@@ -44,24 +44,10 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           (fId) => fId !== 'siem'
         );
 
-        // eslint-disable-next-line no-console
-        console.log(
-          'get_browser_fields_by_feature_id',
-          'onlyO11yFeatureIds',
-          JSON.stringify(onlyO11yFeatureIds, null, 4)
-        );
-
         const o11yIndices =
           (onlyO11yFeatureIds
             ? await alertsClient.getAuthorizedAlertsIndices(onlyO11yFeatureIds)
             : []) ?? [];
-
-        // eslint-disable-next-line no-console
-        console.log(
-          'get_browser_fields_by_feature_id',
-          'o11yIndices',
-          JSON.stringify(o11yIndices, null, 4)
-        );
 
         if (o11yIndices.length === 0) {
           return response.notFound({
@@ -78,16 +64,6 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
         });
-
-        // eslint-disable-next-line no-console
-        console.log('get_browser_fields_by_feature_id', 'fields', fields?.fields?.length);
-
-        // eslint-disable-next-line no-console
-        console.log(
-          'get_browser_fields_by_feature_id',
-          'browserFields',
-          Object.keys(fields?.browserFields)?.length
-        );
 
         return response.ok({
           body: fields,
