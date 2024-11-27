@@ -9,6 +9,10 @@ import { withSpan } from '@kbn/apm-utils';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ESQLColumn, ESQLRow, ESQLSearchResponse } from '@kbn/es-types';
 
+export interface SourceAs<T> {
+  _source: T;
+}
+
 export async function runESQLQuery<T>(
   operationName: string,
   {

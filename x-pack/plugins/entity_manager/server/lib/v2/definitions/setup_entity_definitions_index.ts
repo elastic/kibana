@@ -23,12 +23,21 @@ const definitionsIndexTemplate = {
       [DEFINITIONS_ALIAS]: {},
     },
     mappings: {
+      dynamic: false,
       properties: {
         template_version: {
           type: 'short',
         },
         definition_type: {
           type: 'keyword',
+        },
+        source: {
+          type: 'object',
+          properties: {
+            type_id: {
+              type: 'keyword',
+            },
+          },
         },
       },
     },

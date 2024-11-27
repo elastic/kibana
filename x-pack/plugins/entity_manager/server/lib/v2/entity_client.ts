@@ -107,7 +107,6 @@ export class EntityClient {
           end,
           limit,
         });
-        this.options.logger.debug(`Entity query: ${query}`);
 
         const rawEntities = await runESQLQuery<EntityV2>('resolve entities', {
           query,

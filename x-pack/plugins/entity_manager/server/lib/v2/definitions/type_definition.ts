@@ -8,7 +8,7 @@
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
 import { EntityTypeDefinition, StoredEntityTypeDefinition } from '../types';
-import { runESQLQuery } from '../run_esql_query';
+import { SourceAs, runESQLQuery } from '../run_esql_query';
 import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
 
 export async function storeTypeDefinition(
@@ -20,7 +20,7 @@ export async function storeTypeDefinition(
 
   const types = await runESQLQuery('fetch type definition for conflict check', {
     esClient,
-    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "type" AND _id == "type:${type.id}"`,
+    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "type" AND _id == "type:${type.id}" | KEEP _id`,
     logger,
   });
 
@@ -49,11 +49,14 @@ export async function readTypeDefinitions(
 ): Promise<EntityTypeDefinition[]> {
   const esClient = clusterClient.asInternalUser;
 
-  const types = await runESQLQuery<StoredEntityTypeDefinition>('fetch all type definitions', {
-    esClient,
-    query: `FROM ${DEFINITIONS_ALIAS} | WHERE definition_type == "type"`,
-    logger,
-  });
+  const types = await runESQLQuery<SourceAs<StoredEntityTypeDefinition>>(
+    'fetch all type definitions',
+    {
+      esClient,
+      query: `FROM ${DEFINITIONS_ALIAS} METADATA _source | WHERE definition_type == "type" | KEEP _source`,
+      logger,
+    }
+  );
 
-  return types.map((storedTypeDefinition) => storedTypeDefinition.type);
+  return types.map((storedTypeDefinition) => storedTypeDefinition._source.type);
 }
