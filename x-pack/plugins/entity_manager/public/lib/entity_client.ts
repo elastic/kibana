@@ -92,15 +92,12 @@ export class EntityClient {
     id: string
   ): Promise<{ definitions: EntityDefinition[] | EntityDefinitionWithState[] }> {
     try {
-      return await this.repositoryClient(
-        'GET /internal/entities/definition/{id}' as unknown as keyof EntityManagerRouteRepository,
-        {
-          params: {
-            path: { id },
-            query: { page: 1, perPage: 1 },
-          },
-        }
-      );
+      return await this.repositoryClient('GET /internal/entities/definition/{id?}', {
+        params: {
+          path: { id },
+          query: { page: 1, perPage: 1 },
+        },
+      });
     } catch (err) {
       if (isHttpFetchError(err) && err.body?.statusCode === 403) {
         throw new EntityManagerUnauthorizedError(err.body.message);
