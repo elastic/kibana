@@ -8,8 +8,8 @@ keystore, and the `kibana-keystore` tool to manage the settings in the keystore.
 [NOTE]
 ====
 * Run all commands as the user who runs {kib}.
-* Only the settings with the `(Secure)` qualifier should be stored in the keystore.
-   Unsupported, extraneous or invalid JSON-string settings cause {kib} to fail to start up.
+* Any valid {kib} setting be stored in the keystore securely.
+   Unsupported, extraneous or invalid settings will cause {kib} to fail to start up.
 ====
 
 [float]
