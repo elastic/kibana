@@ -56,8 +56,8 @@ export const AddDocumentsCodeExample = ({
     [usageTracker]
   );
   const sampleDocuments = useMemo(() => {
-    return [1, 2, 3].map((num) =>
-      generateSampleDocument(codeSampleMappings, `Example text ${num}`)
+    return ['Ironman', 'Black Widow', 'Batman'].map((text) =>
+      generateSampleDocument(codeSampleMappings, text)
     );
   }, [codeSampleMappings]);
   const { apiKey, apiKeyIsVisible } = useSearchApiKey();
