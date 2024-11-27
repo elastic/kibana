@@ -52,19 +52,19 @@ const streamsAppRoutes = {
               />
             ),
           },
-          '/{key}/{tab}': {
-            element: <StreamDetailView />,
-            params: t.type({
-              path: t.type({
-                tab: t.string,
-              }),
-            }),
-          },
           '/{key}/management/{subtab}': {
             element: <StreamDetailView />,
             params: t.type({
               path: t.type({
                 subtab: t.string,
+              }),
+            }),
+          },
+          '/{key}/{tab}': {
+            element: <StreamDetailView />,
+            params: t.type({
+              path: t.type({
+                tab: t.string,
               }),
             }),
           },
