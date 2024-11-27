@@ -48,6 +48,7 @@ export const ErrorMessage = React.memo<ErrorMessageProps>(({ error }) => {
     <>
       {isErrorMessageWithLink(error) ? (
         <FormattedMessage
+          id="xpack.integrationAssistant.createIntegration.generateErrorWithLink"
           defaultMessage="{errorMessage} {link}"
           values={{
             errorMessage: error.errorMessage,
