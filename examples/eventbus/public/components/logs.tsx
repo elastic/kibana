@@ -25,7 +25,7 @@ export const Logs: FC = () => {
 
     const els = esql.split('|').map((d) => d.trim());
     Object.values(crossfilter).forEach((filter) => {
-      els.splice(1, 0, filter);
+      els.splice(1, 0, `WHERE ${filter}`);
     });
 
     els.push('LIMIT 100');
