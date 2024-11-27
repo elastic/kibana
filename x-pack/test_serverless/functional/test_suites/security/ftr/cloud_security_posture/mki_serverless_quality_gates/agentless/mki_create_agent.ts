@@ -6,12 +6,10 @@
  */
 
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
-import * as http from 'http';
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
-  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'cspSecurity',
@@ -26,16 +24,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // This test suite is only running in the Serverless Quality Gates environment
   describe('Agentless API Serverless', function () {
-    let mockApiServer: http.Server;
+    this.tags(['cloud_security_posture_agentless']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
-    });
-
-    after(async () => {
-      mockApiServer.close();
     });
 
     it(`should create agentless-agent`, async () => {

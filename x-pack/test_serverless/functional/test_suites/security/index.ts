@@ -18,12 +18,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ftr/advanced_settings'));
     loadTestFile(require.resolve('./ml'));
     if (isCloud) {
-      // only run the agentless API tests in the Serverless Quality Gates
-      loadTestFile(
-        require.resolve(
-          './ftr/cloud_security_posture/agentless/agentless_mki_serverless_quality_gates.ts'
-        )
-      );
+      // only run tests in the Serverless Quality Gates
+      loadTestFile(require.resolve('./ftr/cloud_security_posture/mki_serverless_quality_gates'));
     }
   });
 }

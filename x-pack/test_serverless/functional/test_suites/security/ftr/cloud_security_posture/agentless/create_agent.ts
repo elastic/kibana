@@ -11,8 +11,6 @@ import expect from '@kbn/expect';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
-  const retry = getService('retry');
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'svlCommonPage',
@@ -27,12 +25,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
   describe('Agentless API Serverless', function () {
+    this.tags(['skipMKI', 'cloud_security_posture_agentless']);
     let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      // If process.env.TEST_CLOUD is set, then the test is running in the Serverless Quality Gates
-      // and this MSW server will be listening for a request that will never come.
       mockApiServer = mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8089
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
@@ -69,6 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       const resStatus = await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus();
+      // The status can only be Pending because the agentless agent will never be created
       expect(resStatus).to.be('Pending');
     });
 
