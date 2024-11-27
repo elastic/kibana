@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
 
-  describe('Index patterns on aliases', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/201744
+  describe.skip('Index patterns on aliases', function () {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
