@@ -6,10 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { MappingDenseVectorProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
+import { isEqual } from 'lodash';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { useKibana } from '../../hooks/use_kibana';
@@ -24,7 +25,11 @@ import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
-const basicExampleTexts = ['Ironman', 'Black Widow', 'Batman'];
+const basicExampleTexts = [
+  'Yellowstone National Park',
+  'Yosemite National Park',
+  'Rocky Mountain National Park',
+];
 const exampleTextsWithCustomMapping = ['Example text 1', 'Example text 2', 'Example text 3'];
 
 export interface AddDocumentsCodeExampleProps {
@@ -59,10 +64,19 @@ export const AddDocumentsCodeExample = ({
     [usageTracker]
   );
   const sampleDocuments = useMemo(() => {
-    const sampleTexts = indexHasMappings ? exampleTextsWithCustomMapping : basicExampleTexts;
+    // If the default mapping was used, we need to exclude generated vector fields
+    const copyCodeSampleMappings = {
+      ...codeSampleMappings,
+      vector: {
+        type: codeSampleMappings.vector?.type,
+        dims: (codeSampleMappings.vector as MappingDenseVectorProperty)?.dims,
+      },
+    };
+    const isDefaultMapping = isEqual(copyCodeSampleMappings, ingestCodeExamples.defaultMapping);
+    const sampleTexts = isDefaultMapping ? basicExampleTexts : exampleTextsWithCustomMapping;
 
     return sampleTexts.map((text) => generateSampleDocument(codeSampleMappings, text));
-  }, [indexHasMappings, codeSampleMappings]);
+  }, [codeSampleMappings, ingestCodeExamples.defaultMapping]);
   const { apiKey, apiKeyIsVisible } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
