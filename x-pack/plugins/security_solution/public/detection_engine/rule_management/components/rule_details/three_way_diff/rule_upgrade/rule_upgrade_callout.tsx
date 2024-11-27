@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import type { RuleUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
-import { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import { ActionRequiredBadge } from '../badges/action_required';
 import { ReviewRequiredBadge } from '../badges/review_required_badge';
 import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
@@ -19,26 +18,10 @@ interface RuleUpgradeCalloutProps {
 }
 
 export function RuleUpgradeCallout({ ruleUpgradeState }: RuleUpgradeCalloutProps): JSX.Element {
-  const fieldsUpgradeState = ruleUpgradeState.fieldsUpgradeState;
-  const { numOfNonSolvableConflicts, numOfSolvableConflicts } = useMemo(() => {
-    let numOfFieldsWithNonSolvableConflicts = 0;
-    let numOfFieldsWithSolvableConflicts = 0;
-
-    for (const fieldName of Object.keys(fieldsUpgradeState)) {
-      if (fieldsUpgradeState[fieldName] === FieldUpgradeState.NonSolvableConflict) {
-        numOfFieldsWithNonSolvableConflicts++;
-      }
-
-      if (fieldsUpgradeState[fieldName] === FieldUpgradeState.SolvableConflict) {
-        numOfFieldsWithSolvableConflicts++;
-      }
-    }
-
-    return {
-      numOfNonSolvableConflicts: numOfFieldsWithNonSolvableConflicts,
-      numOfSolvableConflicts: numOfFieldsWithSolvableConflicts,
-    };
-  }, [fieldsUpgradeState]);
+  const numOfNonSolvableConflicts = ruleUpgradeState.diff.num_fields_with_non_solvable_conflicts;
+  const numOfSolvableConflicts =
+    ruleUpgradeState.diff.num_fields_with_conflicts -
+    ruleUpgradeState.diff.num_fields_with_non_solvable_conflicts;
 
   if (numOfNonSolvableConflicts > 0) {
     return (
