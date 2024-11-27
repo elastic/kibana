@@ -1053,7 +1053,6 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 /test/functional/fixtures/es_archiver/makelogs @elastic/kibana-data-discovery
 /test/functional/fixtures/es_archiver/large_fields @elastic/kibana-data-discovery # Assigned per only use: test/functional/apps/management/data_views/_test_huge_fields.ts
 /x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/discover/async_scripted_fields.ts#L35
-/x-pack/test/functional/es_archives/getting_started/shakespeare @elastic/kibana-data-discovery
 /x-pack/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
 /test/functional/fixtures/kbn_archiver/unmapped_fields.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group7/_indexpattern_with_unmapped_fields.ts#L28
 /test/functional/fixtures/kbn_archiver/testlargestring.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/test/functional/apps/discover/group5/_large_string.ts#L28
