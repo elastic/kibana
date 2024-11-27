@@ -19,9 +19,9 @@ export const builtInKubernetesReplicaSetSemConvEntityDefinition: EntityDefinitio
     name: 'Kubernetes ReplicaSet from SemConv data',
     description:
       'This definition extracts Kubernetes replica set entities using data collected with OpenTelemetry',
-    type: 'kubernetes_replica_set_semconv',
+    type: 'k8s.replicaset.otel',
     indexPatterns: commonOtelIndexPatterns,
-    identityFields: ['k8s.replicaset.name'],
+    identityFields: ['k8s.replicaset.uid'],
     displayNameTemplate: '{{k8s.replicaset.name}}',
     latest: {
       timestampField: '@timestamp',
@@ -30,5 +30,12 @@ export const builtInKubernetesReplicaSetSemConvEntityDefinition: EntityDefinitio
         frequency: '5m',
       },
     },
-    metadata: commonOtelMetadata,
+    metadata: [
+      ...commonOtelMetadata,
+      {
+        source: 'k8s.replicaset.name',
+        destination: 'k8s.replicaset.name',
+        aggregation: { type: 'top_value', sort: { '@timestamp': 'desc' } },
+      },
+    ],
   });

@@ -33,7 +33,7 @@ import type {
   SuggestionRequest,
 } from '../../types';
 import { buildExpression } from './expression_helpers';
-import { Document } from '../../persistence/saved_object_store';
+import { LensDocument } from '../../persistence/saved_object_store';
 import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import type { DatasourceState, DatasourceStates, VisualizationState } from '../../state_management';
 import { readFromStorage } from '../../settings_storage';
@@ -353,12 +353,13 @@ export interface DocumentToExpressionReturnType {
   indexPatterns: IndexPatternMap;
   indexPatternRefs: IndexPatternRef[];
   activeVisualizationState: unknown;
+  activeDatasourceState: unknown;
 }
 
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
-  doc: Document,
+  doc: LensDocument,
   services: {
     uiSettings: IUiSettingsClient;
     storage: IStorageWrapper;
@@ -382,7 +383,13 @@ export async function persistedStateToExpression(
     description,
   } = doc;
   if (!visualizationType) {
-    return { ast: null, indexPatterns: {}, indexPatternRefs: [], activeVisualizationState: null };
+    return {
+      ast: null,
+      indexPatterns: {},
+      indexPatternRefs: [],
+      activeVisualizationState: null,
+      activeDatasourceState: null,
+    };
   }
 
   const annotationGroups = await initializeEventAnnotationGroups(
@@ -436,6 +443,7 @@ export async function persistedStateToExpression(
       indexPatterns,
       indexPatternRefs,
       activeVisualizationState,
+      activeDatasourceState: null,
     };
   }
 
@@ -456,6 +464,7 @@ export async function persistedStateToExpression(
       nowInstant: services.nowProvider.get(),
     }),
     activeVisualizationState,
+    activeDatasourceState: datasourceStates[datasourceId]?.state,
     indexPatterns,
     indexPatternRefs,
   };

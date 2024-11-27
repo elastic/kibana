@@ -1,5 +1,9 @@
 {
   "type": "shared-common",
   "id": "@kbn/cell-actions",
-  "owner": "@elastic/security-threat-hunting-explore"
+  "owner": [
+    "@elastic/security-threat-hunting-explore"
+  ],
+  "group": "platform",
+  "visibility": "shared"
 }
