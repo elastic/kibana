@@ -309,3 +309,10 @@ export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
     defaultMessage: 'Entity risk score engine ran successfully',
   }
 );
+
+export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
+  'xpack.securitySolution.riskScore.configurationSuccess',
+  {
+    defaultMessage: 'Risk engine Saved Object configuration updated successfully',
+  }
+);

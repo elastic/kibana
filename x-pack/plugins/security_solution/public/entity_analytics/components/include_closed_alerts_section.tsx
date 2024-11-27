@@ -17,6 +17,10 @@ import {
   EuiBottomBar,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import * as i18n from '../translations';
+
+import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
 
 export const IncludeClosedAlertsSection = ({
   includeClosedAlerts,
@@ -34,7 +38,8 @@ export const IncludeClosedAlertsSection = ({
   const [start, setFrom] = useState(from);
   const [end, setTo] = useState(to);
   const [isLoading, setIsLoading] = useState(false);
-  const [showBar, setShowBar] = useState(false); // State to control the visibility of EuiBottomBar;
+  const [showBar, setShowBar] = useState(false);
+  const { addSuccess } = useAppToasts();
 
   const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
     setFrom(newStart);
@@ -48,12 +53,19 @@ export const IncludeClosedAlertsSection = ({
     setShowBar(true);
   };
 
+  const { mutate } = useConfigureSORiskEngineMutation();
+
   const handleSave = () => {
-    // Logic to save the changes
-    // configureRiskEngineMutation.mutate({
-    //     includeClosedAlerts,
-    //     range: { start, end },
-    // });
+    mutate({
+      includeClosedAlerts,
+      range: { start, end },
+    });
+
+    setShowBar(false);
+    setIsLoading(false);
+    if (!isLoading) {
+      addSuccess(i18n.RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS, { toastLifeTimeMs: 5000 });
+    }
   };
 
   return (

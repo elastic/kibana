@@ -157,7 +157,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
         must: [],
         filter: includeClosedAlerts
           ? [{ terms: { 'kibana.alert.workflow_status': ['closed', 'open'] } }]
-          : [],
+          : [{ terms: { 'kibana.alert.workflow_status': ['open'] } }],
         should: [],
         must_not: [],
       },
