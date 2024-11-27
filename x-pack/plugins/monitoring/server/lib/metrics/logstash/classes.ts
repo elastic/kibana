@@ -446,7 +446,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
               terms: {
                 field: 'logstash_stats.pipelines.id',
                 size: 1000,
-                ...termAggExtras,
+                ...(termAggExtras.include.length !== 0 ? termAggExtras : undefined),
               },
               aggs: {
                 to_root: {
@@ -472,7 +472,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
               terms: {
                 field: 'logstash.node.stats.pipelines.id',
                 size: 1000,
-                ...termAggExtras,
+                ...(termAggExtras.include.length !== 0 ? termAggExtras : undefined),
               },
               aggs: {
                 to_root: {
@@ -480,7 +480,7 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
                   aggs: {
                     node_count: {
                       cardinality: {
-                        field: this.field,
+                        field: this.mbField,
                       },
                     },
                   },
