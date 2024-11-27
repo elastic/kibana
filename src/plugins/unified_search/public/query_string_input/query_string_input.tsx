@@ -801,6 +801,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
       'kbnQueryBar__textareaWrap--withSuggestionVisible':
         isSuggestionsVisible && !isEmpty(this.state.suggestions),
     });
+
     return (
       <div className={containerClassName} onFocus={this.onFocusWithin} onBlur={this.onBlurWithin}>
         {prependElement}
