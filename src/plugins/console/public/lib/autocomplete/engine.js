@@ -119,7 +119,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     editor
   );
   if (includeAutoComplete) {
-    let autoCompleteSet = [];
+    let autoCompleteSet = new Map();
     _.each(walkStates, function (ws) {
       const contextForState = passThroughContext(context, ws.contextExtensionList);
       _.each(ws.components, function (component) {
@@ -127,14 +127,16 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
           if (!_.isObject(term)) {
             term = { name: term };
           }
-          // Make sure we don't have duplicates
-          if (!_.find(autoCompleteSet, { name: term.name })) {
-            autoCompleteSet.push(term);
+
+          // Add the term to the autoCompleteSet if it doesn't already exist
+          if (!autoCompleteSet.has(term.name)) {
+            autoCompleteSet.set(term.name, term);
           }
         });
       });
     });
-    autoCompleteSet = _.uniq(autoCompleteSet);
+    // Convert Map values to an array of objects
+    autoCompleteSet = Array.from(autoCompleteSet.values());
     context.autoCompleteSet = autoCompleteSet;
   }
 
