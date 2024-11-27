@@ -57,9 +57,10 @@ export function LensEmbeddableComponent({
   const rootRef = useDispatcher(hasRendered, api);
 
   // Publish the data attributes only if avaialble/visible
-  const title = api.hidePanelTitle?.getValue()
-    ? undefined
-    : { 'data-title': api.panelTitle?.getValue() ?? api.defaultPanelTitle?.getValue() };
+  const title =
+    api.hidePanelTitle?.getValue() || internalApi.getDisplayOptions()?.noPanelTitle
+      ? undefined
+      : { 'data-title': api.panelTitle?.getValue() ?? api.defaultPanelTitle?.getValue() };
   const description = api.panelDescription?.getValue()
     ? {
         'data-description':

@@ -10,16 +10,18 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
+  LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
   LensRuntimeState,
 } from '../types';
-import { apiHasAbortController } from '../type_guards';
+import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
 import type { UserMessage } from '../../types';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
-  parentApi: unknown
+  parentApi: unknown,
+  { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
@@ -87,5 +89,23 @@ export function initializeInternalApi(
       validationMessages$.next([]);
     },
     setAsCreated: () => isNewlyCreated$.next(false),
+    getDisplayOptions: () => {
+      const latestAttributes = attributes$.getValue();
+      if (!latestAttributes.visualizationType) {
+        return {};
+      }
+
+      let displayOptions =
+        visualizationMap[latestAttributes.visualizationType]?.getDisplayOptions?.() ?? {};
+
+      if (apiHasLensComponentProps(parentApi) && parentApi.noPadding != null) {
+        displayOptions = {
+          ...displayOptions,
+          noPadding: parentApi.noPadding,
+        };
+      }
+
+      return displayOptions;
+    },
   };
 }

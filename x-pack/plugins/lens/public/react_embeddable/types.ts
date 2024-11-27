@@ -80,6 +80,7 @@ import type {
   SharingSavedObjectProps,
   Simplify,
   UserMessage,
+  VisualizationDisplayOptions,
   VisualizationMap,
 } from '../types';
 import type { LensPluginStartDependencies } from '../plugin';
@@ -411,6 +412,7 @@ export type LensInternalApi = Simplify<
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       resetAllMessages: () => void;
+      getDisplayOptions: () => VisualizationDisplayOptions;
     }
 >;
 
