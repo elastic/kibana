@@ -178,6 +178,7 @@ export function initializeDashboardServices(
       className: getUnchangingComparator<LensSharedProps, 'className'>(),
       overrides: overridesComparator,
       disableTriggers: disabledTriggersComparator,
+      forceDSL: getUnchangingComparator<LensSharedProps, 'forceDSL'>(),
       isNewPanel: getUnchangingComparator<{ isNewPanel?: boolean }, 'isNewPanel'>(),
     },
     cleanup: noop,
