@@ -17,13 +17,18 @@ export const setupToolingLogLevel = (config: Cypress.PluginConfigOptions) => {
   const defaultToolingLogLevel = config.env.TOOLING_LOG_LEVEL;
 
   log.info(`
+Cypress Configuration File: ${config.configFile}
 
-Cypress config 'env.TOOLING_LOG_LEVEL': ${defaultToolingLogLevel}
+'env.TOOLING_LOG_LEVEL' set to: ${defaultToolingLogLevel}
+
+*** FYI: ***  To help with test failures, an environmental variable named 'TOOLING_LOG_LEVEL' can be set
+              with a value of 'verbose' in order to capture more data in the logs. This environment
+              property can be set either in the runtime environment (ex. local shell or buildkite) or
+              directly in the Cypress configuration file \`env: {}\` section.
 
   `);
 
   if (defaultToolingLogLevel && defaultToolingLogLevel !== createToolingLogger.defaultLogLevel) {
     createToolingLogger.defaultLogLevel = defaultToolingLogLevel;
-    log.info(`Default log level for 'createToolingLogger()' set to ${defaultToolingLogLevel}`);
   }
 };
