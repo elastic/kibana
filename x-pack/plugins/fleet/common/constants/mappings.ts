@@ -72,6 +72,7 @@ export const PACKAGE_POLICIES_MAPPINGS = {
       properties: {},
     },
     secret_references: { properties: { id: { type: 'keyword' } } },
+    supports_agentless: { type: 'boolean' },
     revision: { type: 'integer' },
     updated_at: { type: 'date' },
     updated_by: { type: 'keyword' },
