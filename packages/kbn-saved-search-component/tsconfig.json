@@ -20,10 +20,10 @@
     "@kbn/embeddable-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/discover-utils",
-    "@kbn/saved-search-plugin",
     "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
     "@kbn/presentation-containers",
+    "@kbn/i18n",
   ]
 }
