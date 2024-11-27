@@ -8191,14 +8191,6 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
           },
@@ -9203,7 +9195,7 @@
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
+          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
@@ -9317,7 +9309,7 @@
                     "section": "def-public.PresentationPanelProps",
                     "text": "PresentationPanelProps"
                   },
-                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\"> | undefined"
+                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\"> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -14475,12 +14467,7 @@
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/plugin.ts"
-            }
-          ],
+          "references": [],
           "returnComment": [],
           "children": [
             {
@@ -14699,12 +14686,7 @@
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/plugin.ts"
-            }
-          ],
+          "references": [],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -15058,10 +15040,6 @@
           "deprecated": true,
           "trackAdoption": false,
           "references": [
-            {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-            },
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.ts"
