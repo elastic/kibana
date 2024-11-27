@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, type FC } from 'react';
+import React, { useCallback, type FC } from 'react';
 import { throttle } from 'lodash';
 
 import {
@@ -18,7 +18,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { Aiops } from '../../components/aiops';
 import { DateHistogram } from '../../components/date_histogram';
+import { HistogramWrapper } from '../../components/histogram_wrapper';
 import { Esql } from '../../components/esql';
 import { Fields } from '../../components/fields';
 import { Logs } from '../../components/logs';
@@ -39,14 +41,13 @@ export const App: FC = () => {
       })
       .map((d) => d[0])
   );
-  const [chartWidth, setChartWidth] = useState<number>(0);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      setChartWidth(Math.round(e.width));
+      state.actions.setChartWidth(Math.round(e.width));
     }, RESIZE_THROTTLE_TIME_MS),
-    [chartWidth]
+    []
   );
 
   return (
@@ -64,25 +65,14 @@ export const App: FC = () => {
               <EuiFlexItem css={{ minWidth: 0, overflow: 'hidden' }}>
                 <EuiResizeObserver onResize={resizeHandler}>
                   {(resizeRef) => (
-                    <EuiFlexGroup
-                      gutterSize={'s'}
-                      direction={'column'}
-                      ref={resizeRef}
-                      css={{
-                        width: '100%',
-                        height: '100%',
-                        overflow: 'hidden',
-                      }}
-                    >
+                    <div ref={resizeRef}>
                       {dateFields.map((field) => (
-                        <EuiFlexItem key={field} grow={false}>
-                          <DateHistogram field={field} width={chartWidth} height={100} />
-                        </EuiFlexItem>
+                        <DateHistogram key={field} field={field} />
                       ))}
-                      <EuiFlexItem>
-                        <Logs />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                      <HistogramWrapper />
+                      <Aiops field={'response.keyword'} />
+                      <Logs />
+                    </div>
                   )}
                 </EuiResizeObserver>
               </EuiFlexItem>
