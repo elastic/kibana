@@ -16,12 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
-  const { common, dashboard, header, timePicker } = getPageObjects([
-    'common',
-    'dashboard',
-    'header',
-    'timePicker',
-  ]);
+  const { dashboard, header, timePicker } = getPageObjects(['dashboard', 'header', 'timePicker']);
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
 
