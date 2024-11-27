@@ -127,8 +127,6 @@ export function Histogram({
         | undefined;
       const response = json?.rawResponse;
 
-      console.log('Response', JSON.stringify(response, null, 2));
-
       if (requestFailed) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
@@ -170,9 +168,6 @@ export function Histogram({
     visContext,
     onLoad,
   });
-
-  console.log('attributes', JSON.stringify(attributes, null, 2));
-  console.log('lensProps', JSON.stringify(lensProps, null, 2));
 
   const { euiTheme } = useEuiTheme();
   const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
