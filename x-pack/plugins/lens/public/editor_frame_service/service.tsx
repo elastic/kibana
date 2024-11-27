@@ -95,7 +95,7 @@ export class EditorFrameService {
    */
   public documentToExpression = async (
     doc: LensDocument,
-    services: EditorFramePlugins  & { forceDSL?: boolean }
+    services: EditorFramePlugins & { forceDSL?: boolean }
   ) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
       this.loadDatasources(),
