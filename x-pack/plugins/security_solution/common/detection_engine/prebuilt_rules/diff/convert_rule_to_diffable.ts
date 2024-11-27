@@ -175,11 +175,15 @@ const extractDiffableEqlFieldsFromRuleObject = (
 ): RequiredOptional<DiffableEqlFields> => {
   return {
     type: rule.type,
-    eql_query: extractRuleEqlQuery(rule.query, rule.language, rule.filters),
+    eql_query: extractRuleEqlQuery({
+      query: rule.query,
+      language: rule.language,
+      filters: rule.filters,
+      eventCategoryOverride: rule.event_category_override,
+      timestampField: rule.timestamp_field,
+      tiebreakerField: rule.tiebreaker_field,
+    }),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
-    event_category_override: rule.event_category_override,
-    timestamp_field: rule.timestamp_field,
-    tiebreaker_field: rule.tiebreaker_field,
     alert_suppression: rule.alert_suppression,
   };
 };

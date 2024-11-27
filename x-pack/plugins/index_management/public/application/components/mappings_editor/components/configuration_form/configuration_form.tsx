@@ -39,6 +39,31 @@ interface SerializedSourceField {
   excludes?: string[];
 }
 
+const serializeSourceField = (sourceField: any): SerializedSourceField | undefined => {
+  if (sourceField?.option === SYNTHETIC_SOURCE_OPTION) {
+    return { mode: SYNTHETIC_SOURCE_OPTION };
+  }
+  if (sourceField?.option === DISABLED_SOURCE_OPTION) {
+    return { enabled: false };
+  }
+  if (sourceField?.option === STORED_SOURCE_OPTION) {
+    return {
+      mode: 'stored',
+      includes: sourceField.includes,
+      excludes: sourceField.excludes,
+    };
+  }
+  if (sourceField?.includes || sourceField?.excludes) {
+    // If sourceField?.option is undefined, the user hasn't explicitly selected
+    // this option, so don't include the `mode` property
+    return {
+      includes: sourceField.includes,
+      excludes: sourceField.excludes,
+    };
+  }
+  return undefined;
+};
+
 export const formSerializer = (formData: GenericObject) => {
   const { dynamicMapping, sourceField, metaField, _routing, _size, subobjects } = formData;
 
@@ -48,30 +73,12 @@ export const formSerializer = (formData: GenericObject) => {
     ? 'strict'
     : dynamicMapping?.enabled;
 
-  const _source =
-    sourceField?.option === SYNTHETIC_SOURCE_OPTION
-      ? { mode: SYNTHETIC_SOURCE_OPTION }
-      : sourceField?.option === DISABLED_SOURCE_OPTION
-      ? { enabled: false }
-      : sourceField?.option === STORED_SOURCE_OPTION
-      ? {
-          mode: 'stored',
-          includes: sourceField?.includes,
-          excludes: sourceField?.excludes,
-        }
-      : sourceField?.includes || sourceField?.excludes
-      ? {
-          includes: sourceField?.includes,
-          excludes: sourceField?.excludes,
-        }
-      : undefined;
-
   const serialized = {
     dynamic,
     numeric_detection: dynamicMapping?.numeric_detection,
     date_detection: dynamicMapping?.date_detection,
     dynamic_date_formats: dynamicMapping?.dynamic_date_formats,
-    _source: _source as SerializedSourceField,
+    _source: serializeSourceField(sourceField),
     _meta: metaField,
     _routing,
     _size,
