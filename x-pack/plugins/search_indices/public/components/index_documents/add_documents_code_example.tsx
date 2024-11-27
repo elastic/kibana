@@ -24,6 +24,9 @@ import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
+const basicExampleTexts = ['Ironman', 'Black Widow', 'Batman'];
+const exampleTextsWithCustomMapping = ['Example text 1', 'Example text 2', 'Example text 3'];
+
 export interface AddDocumentsCodeExampleProps {
   indexName: string;
   mappingProperties: Record<string, MappingProperty>;
@@ -56,10 +59,10 @@ export const AddDocumentsCodeExample = ({
     [usageTracker]
   );
   const sampleDocuments = useMemo(() => {
-    return ['Ironman', 'Black Widow', 'Batman'].map((text) =>
-      generateSampleDocument(codeSampleMappings, text)
-    );
-  }, [codeSampleMappings]);
+    const sampleTexts = indexHasMappings ? exampleTextsWithCustomMapping : basicExampleTexts;
+
+    return sampleTexts.map((text) => generateSampleDocument(codeSampleMappings, text));
+  }, [indexHasMappings, codeSampleMappings]);
   const { apiKey, apiKeyIsVisible } = useSearchApiKey();
   const codeParams: IngestCodeSnippetParameters = useMemo(() => {
     return {
