@@ -58,11 +58,13 @@ export const getViewInAppUrl = ({
     query.query = searchConfigurationQuery;
   }
 
-  return logsExplorerLocator?.getRedirectUrl({
-    dataset,
-    timeRange,
-    query,
-    spaceId,
-    filters: [...searchConfigurationFilters, ...groupFilters],
-  });
+  return logsExplorerLocator?.getRedirectUrl(
+    {
+      dataset,
+      timeRange,
+      query,
+      filters: [...searchConfigurationFilters, ...groupFilters],
+    },
+    { spaceId }
+  );
 };
