@@ -452,6 +452,7 @@ export const dashboardSearchOptionsSchema = schema.maybe(
     {
       onlyTitle: schema.maybe(schema.boolean()),
       fields: schema.maybe(schema.arrayOf(schema.string())),
+      includeReferences: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('tag')]))),
       kuery: schema.maybe(schema.string()),
       cursor: schema.maybe(schema.number()),
       limit: schema.maybe(schema.number()),

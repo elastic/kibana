@@ -62,8 +62,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const [hasLockedHoverActions, dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
-    api.hasLockedHoverActions$,
+  const [dataViews, parentViewMode] = useBatchedOptionalPublishingSubjects(
     api.parentApi?.dataViews,
     getViewModeSubject(api ?? undefined)
   );
@@ -77,7 +76,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
             if (apiCanLockHoverActions(api)) {
-              api?.lockHoverActions(!hasLockedHoverActions);
+              api?.lockHoverActions(!api.hasLockedHoverActions$.value);
             }
           }}
           data-test-subj={`embeddablePanelNotification-${api.uuid}`}

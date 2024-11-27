@@ -82,7 +82,7 @@ export function InsightBase({
                   position="right"
                 />
               </EuiFlexGroup>
-              <EuiText size="s" css={{ color: euiTheme.colors.subduedText }}>
+              <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>{description}</span>
               </EuiText>
             </EuiFlexItem>

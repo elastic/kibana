@@ -34,6 +34,7 @@ const networkLinks: LinkItem = {
       defaultMessage: 'Network',
     }),
   ],
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
       id: SecurityPageName.networkFlows,
@@ -68,6 +69,7 @@ const networkLinks: LinkItem = {
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
+      capabilities: ['ml.canGetJobs'],
       path: `${NETWORK_PATH}/anomalies`,
       licenseType: 'gold',
     },
@@ -95,6 +97,7 @@ const usersLinks: LinkItem = {
       defaultMessage: 'Users',
     }),
   ],
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
       id: SecurityPageName.usersAll,
@@ -115,6 +118,7 @@ const usersLinks: LinkItem = {
       title: i18n.translate('xpack.securitySolution.appLinks.users.anomalies', {
         defaultMessage: 'Anomalies',
       }),
+      capabilities: ['ml.canGetJobs'],
       path: `${USERS_PATH}/anomalies`,
       licenseType: 'gold',
     },
@@ -148,6 +152,7 @@ const hostsLinks: LinkItem = {
       defaultMessage: 'Hosts',
     }),
   ],
+  capabilities: [`${SERVER_APP_ID}.show`],
   links: [
     {
       id: SecurityPageName.hostsAll,
@@ -169,6 +174,7 @@ const hostsLinks: LinkItem = {
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.anomalies', {
         defaultMessage: 'Anomalies',
       }),
+      capabilities: ['ml.canGetJobs'],
       path: `${HOSTS_PATH}/anomalies`,
       licenseType: 'gold',
     },

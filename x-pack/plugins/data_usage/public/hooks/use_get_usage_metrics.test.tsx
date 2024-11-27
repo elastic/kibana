@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useGetDataUsageMetrics } from './use_get_usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
-import { dataUsageTestQueryClientOptions } from '../../common/test_utils/test_query_client_options';
+import { dataUsageTestQueryClientOptions, timeXMinutesAgo } from '../../common/test_utils';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -41,8 +41,8 @@ jest.mock('../utils/use_kibana', () => {
 });
 
 const defaultUsageMetricsRequestBody = {
-  from: 'now-15m',
-  to: 'now',
+  from: timeXMinutesAgo(15),
+  to: timeXMinutesAgo(0),
   metricTypes: ['ingest_rate'],
   dataStreams: ['ds-1'],
 };

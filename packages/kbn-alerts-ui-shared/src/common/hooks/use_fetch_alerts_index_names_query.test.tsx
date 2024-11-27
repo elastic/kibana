@@ -9,7 +9,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_query';
 import { fetchAlertsIndexNames } from '../apis/fetch_alerts_index_names';
@@ -56,14 +56,14 @@ describe('useFetchAlertsIndexNamesQuery', () => {
   });
 
   it('correctly caches the index names', async () => {
-    const { result, rerender, waitForValueToChange } = renderHook(
+    const { result, rerender } = renderHook(
       () => useFetchAlertsIndexNamesQuery({ http: mockHttpClient, featureIds: ['apm'] }),
       {
         wrapper,
       }
     );
 
-    await waitForValueToChange(() => result.current.data);
+    await waitFor(() => result.current.data);
 
     expect(mockFetchAlertsIndexNames).toHaveBeenCalledTimes(1);
 

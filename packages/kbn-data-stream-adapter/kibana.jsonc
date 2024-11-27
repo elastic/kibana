@@ -1,6 +1,9 @@
 {
   "type": "shared-server",
   "id": "@kbn/data-stream-adapter",
-  "owner": "@elastic/security-threat-hunting",
-  "visibility": "shared"
+  "owner": [
+    "@elastic/security-threat-hunting"
+  ],
+  "group": "security",
+  "visibility": "private"
 }

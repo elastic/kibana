@@ -218,7 +218,7 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
     ],
   },
   mv_sort: {
-    signatures: new Array(9).fill({
+    signatures: new Array(10).fill({
       params: [{}, { acceptedValues: ['asc', 'desc'] }],
     }),
   },

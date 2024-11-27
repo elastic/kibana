@@ -375,3 +375,4 @@ enabled:
   - x-pack/test/custom_branding/config.ts
   # stateful config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
+  - x-pack/test/api_integration/apis/cloud/config.ts
