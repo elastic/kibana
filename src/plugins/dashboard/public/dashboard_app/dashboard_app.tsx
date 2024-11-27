@@ -194,7 +194,7 @@ export function DashboardApp({
   const locator = useMemo(() => shareService?.url.locators.get(DASHBOARD_APP_LOCATOR), []);
 
   return showNoDataPage ? (
-    <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+    <DashboardAppNoDataPage showPage={() => setShowNoDataPage(false)} />
   ) : (
     <>
       {dashboardApi && (
