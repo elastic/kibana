@@ -20,7 +20,7 @@ export function getRuleMigrationAgent({
   connectorId,
   logger,
 }: MigrateRuleGraphParams) {
-  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap, logger });
+  const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({ model, prebuiltRulesMap });
   const translationSubGraph = getTranslateRuleGraph({
     model,
     inferenceClient,
