@@ -138,6 +138,13 @@ Divide the query up into separate section and go through each section one at a t
 - You must respond only with the modified query inside a \`\`\`spl code block, nothing else similar to the example response below.
 </guidelines>
 
+<example_response>
+A: Please find the modified SPL query below:
+\`\`\`json
+{{"match": "Linux User Account Creation"}}
+\`\`\`
+</example_response>
+
 `,
   ],
   ['ai', 'Please find the modified SPL query below:'],
