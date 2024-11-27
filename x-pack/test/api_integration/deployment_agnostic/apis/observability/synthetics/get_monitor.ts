@@ -140,8 +140,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('with single monitorQueryId filter', async () => {
+        const uuid = uuidv4();
         const [_, { id: id2 }] = await Promise.all(
-          monitors.map((mon) => ({ ...mon, name: mon.name + '2' })).map((mon) => saveMonitor(mon))
+          monitors
+            .map((mon, i) => ({ ...mon, name: `mon.name-${uuid}-${i}` }))
+            .map((mon) => saveMonitor(mon))
         );
 
         const resp = await supertest
