@@ -669,17 +669,6 @@ export interface ESQLColumn {
 
 export type ESQLRow = unknown[];
 
-export type ESQLLookupTableColumns = Record<
-  string,
-  { long: Array<number | null> } | { keyword: Array<string | null> }
->;
-
-export type ESQLLookupTables = Record<string, ESQLLookupTableColumns>;
-
-export interface ESQLRequest extends estypesWithoutBodyKey.EsqlQueryRequest {
-  tables?: ESQLLookupTables;
-}
-
 export interface ESQLSearchResponse {
   columns: ESQLColumn[];
   // In case of ?drop_null_columns in the query, then

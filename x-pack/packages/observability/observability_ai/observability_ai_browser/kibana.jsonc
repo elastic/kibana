@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/observability-ai-browser",
-  "owner": "@elastic/obs-ai-assistant"
-}

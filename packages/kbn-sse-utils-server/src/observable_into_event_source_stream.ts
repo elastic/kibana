@@ -61,6 +61,8 @@ export function observableIntoEventSourceStream(
   const stream = new PassThrough();
 
   const intervalId = setInterval(() => {
+    // `:` denotes a comment - this is to keep the connection open
+    // it will be ignored by the SSE parser on the client
     stream.write(': keep-alive');
   }, 10000);
 
@@ -88,6 +90,7 @@ export function observableIntoEventSourceStream(
 
   signal.addEventListener('abort', () => {
     subscription.unsubscribe();
+    stream.end();
   });
 
   return stream;
