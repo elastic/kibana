@@ -240,7 +240,7 @@ export const GridRow = forwardRef<
     return (
       <div ref={rowContainer}>
         {rowIndex !== 0 && (
-          <GridRowSummary
+          <GridRowHeader
             isCollapsed={isCollapsed}
             toggleIsCollapsed={toggleIsCollapsed}
             rowTitle={rowTitle}
@@ -265,7 +265,7 @@ export const GridRow = forwardRef<
   }
 );
 
-const GridRowSummary = ({
+const GridRowHeader = ({
   isCollapsed,
   toggleIsCollapsed,
   rowTitle,
