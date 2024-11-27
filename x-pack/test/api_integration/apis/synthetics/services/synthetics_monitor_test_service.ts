@@ -175,7 +175,7 @@ export class SyntheticsMonitorTestService {
     }
   }
 
-  async addsNewSpace() {
+  async addsNewSpace(uptimePermissions: string[] = ['all']) {
     const username = 'admin';
     const password = `${username}-password`;
     const roleName = 'uptime-role';
@@ -190,7 +190,8 @@ export class SyntheticsMonitorTestService {
       kibana: [
         {
           feature: {
-            uptime: ['all'],
+            uptime: uptimePermissions,
+            slo: ['all'],
           },
           spaces: ['*'],
         },
@@ -202,7 +203,7 @@ export class SyntheticsMonitorTestService {
       full_name: 'a kibana user',
     });
 
-    return { username, password, SPACE_ID };
+    return { username, password, SPACE_ID, roleName };
   }
 
   async deleteMonitor(monitorId?: string | string[], statusCode = 200, spaceId?: string) {

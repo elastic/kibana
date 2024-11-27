@@ -5,118 +5,130 @@
  * 2.0.
  */
 
-import { get, has, merge, uniq } from 'lodash/fp';
-import { EventHit, TimelineEdges, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import { get, has } from 'lodash/fp';
+import {
+  EventHit,
+  TimelineEdges,
+  TimelineNonEcsData,
+  EventSource,
+} from '../../../../../common/search_strategy';
 import { toStringArray } from '../../../../../common/utils/to_array';
-import { getDataFromFieldsHits, getDataSafety } from '../../../../../common/utils/field_formatters';
+import { getDataFromFieldsHits } from '../../../../../common/utils/field_formatters';
 import { getTimestamp } from './get_timestamp';
 import { getNestedParentPath } from './get_nested_parent_path';
 import { buildObjectRecursive } from './build_object_recursive';
-import { ECS_METADATA_FIELDS } from './constants';
+import { ECS_METADATA_FIELDS, TIMELINE_EVENTS_FIELDS } from './constants';
 
-export const formatTimelineData = async (
-  dataFields: readonly string[],
-  ecsFields: readonly string[],
-  hit: EventHit
-) =>
-  uniq([...ecsFields, ...dataFields]).reduce<Promise<TimelineEdges>>(
-    async (acc, fieldName) => {
-      const flattenedFields: TimelineEdges = await acc;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      flattenedFields.node._id = hit._id!;
-      flattenedFields.node._index = hit._index;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      flattenedFields.node.ecs._id = hit._id!;
-      flattenedFields.node.ecs.timestamp = getTimestamp(hit);
-      flattenedFields.node.ecs._index = hit._index;
-      if (hit.sort && hit.sort.length > 1) {
-        flattenedFields.cursor.value = hit.sort[0];
-        flattenedFields.cursor.tiebreaker = hit.sort[1];
-      }
-      const waitForIt = await mergeTimelineFieldsWithHit(
-        fieldName,
-        flattenedFields,
-        hit,
-        dataFields,
-        ecsFields
-      );
-      return Promise.resolve(waitForIt);
-    },
-    Promise.resolve({
-      node: { ecs: { _id: '' }, data: [], _id: '', _index: '' },
-      cursor: {
-        value: '',
-        tiebreaker: null,
-      },
-    })
-  );
+const createBaseTimelineEdges = (): TimelineEdges => ({
+  node: {
+    ecs: { _id: '' },
+    data: [],
+    _id: '',
+    _index: '',
+  },
+  cursor: {
+    value: '',
+    tiebreaker: null,
+  },
+});
 
-const getValuesFromFields = async (
+function deepMerge(target: EventSource, source: EventSource) {
+  for (const key in source) {
+    if (source && source[key] instanceof Object && target && target[key] instanceof Object) {
+      deepMerge(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+const processMetadataField = (fieldName: string, hit: EventHit): TimelineNonEcsData[] => [
+  {
+    field: fieldName,
+    value: toStringArray(get(fieldName, hit)),
+  },
+];
+
+const processFieldData = (
   fieldName: string,
   hit: EventHit,
   nestedParentFieldName?: string
-): Promise<TimelineNonEcsData[]> => {
-  if (ECS_METADATA_FIELDS.includes(fieldName)) {
-    return [{ field: fieldName, value: toStringArray(get(fieldName, hit)) }];
-  }
+): TimelineNonEcsData[] => {
+  const fieldToEval = nestedParentFieldName
+    ? { [nestedParentFieldName]: hit.fields[nestedParentFieldName] }
+    : { [fieldName]: hit.fields[fieldName] };
 
-  let fieldToEval;
-
-  if (nestedParentFieldName == null) {
-    fieldToEval = {
-      [fieldName]: hit.fields[fieldName],
-    };
-  } else {
-    fieldToEval = {
-      [nestedParentFieldName]: hit.fields[nestedParentFieldName],
-    };
-  }
-  const formattedData = await getDataSafety(getDataFromFieldsHits, fieldToEval);
-  return formattedData.reduce((acc: TimelineNonEcsData[], { field, values }) => {
-    // nested fields return all field values, pick only the one we asked for
+  const formattedData = getDataFromFieldsHits(fieldToEval);
+  const fieldsData: TimelineNonEcsData[] = [];
+  return formattedData.reduce((agg, { field, values }) => {
     if (field.includes(fieldName)) {
-      acc.push({ field, value: values });
+      agg.push({
+        field,
+        value: values,
+      });
     }
-    return acc;
-  }, []);
+    return agg;
+  }, fieldsData);
 };
 
-const mergeTimelineFieldsWithHit = async <T>(
-  fieldName: string,
-  flattenedFields: T,
-  hit: EventHit,
-  dataFields: readonly string[],
-  ecsFields: readonly string[]
-) => {
-  if (fieldName != null) {
-    const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
-    if (
-      nestedParentPath != null ||
-      has(fieldName, hit.fields) ||
-      ECS_METADATA_FIELDS.includes(fieldName)
-    ) {
-      const objectWithProperty = {
-        node: {
-          ...get('node', flattenedFields),
-          data: dataFields.includes(fieldName)
-            ? [
-                ...get('node.data', flattenedFields),
-                ...(await getValuesFromFields(fieldName, hit, nestedParentPath)),
-              ]
-            : get('node.data', flattenedFields),
-          ecs: ecsFields.includes(fieldName)
-            ? {
-                ...get('node.ecs', flattenedFields),
-                ...buildObjectRecursive(fieldName, hit.fields),
-              }
-            : get('node.ecs', flattenedFields),
-        },
-      };
-      return merge(flattenedFields, objectWithProperty);
+export const formatTimelineData = async (
+  hits: EventHit[],
+  fieldRequested: readonly string[],
+  excludeEcsData: boolean
+): Promise<TimelineEdges[]> => {
+  const ecsFields = excludeEcsData ? [] : TIMELINE_EVENTS_FIELDS;
+
+  const uniqueFields = new Set([...ecsFields, ...fieldRequested]);
+  const dataFieldSet = new Set(fieldRequested);
+  const ecsFieldSet = new Set(ecsFields);
+
+  const results: TimelineEdges[] = new Array(hits.length);
+
+  for (let i = 0; i < hits.length; i++) {
+    const hit = hits[i];
+    if (hit._id) {
+      const result = createBaseTimelineEdges();
+
+      result.node._id = hit._id;
+      result.node._index = hit._index;
+      result.node.ecs._id = hit._id;
+      result.node.ecs.timestamp = getTimestamp(hit);
+      result.node.ecs._index = hit._index;
+
+      if (hit.sort?.length > 1) {
+        result.cursor.value = hit.sort[0];
+        result.cursor.tiebreaker = hit.sort[1];
+      }
+
+      result.node.data = [];
+
+      for (const fieldName of uniqueFields) {
+        const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
+        const isEcs = ECS_METADATA_FIELDS.includes(fieldName);
+        if (!nestedParentPath && !has(fieldName, hit.fields) && !isEcs) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        if (dataFieldSet.has(fieldName)) {
+          const values = isEcs
+            ? processMetadataField(fieldName, hit)
+            : processFieldData(fieldName, hit, nestedParentPath);
+
+          result.node.data.push(...values);
+        }
+
+        if (ecsFieldSet.has(fieldName)) {
+          deepMerge(result.node.ecs, buildObjectRecursive(fieldName, hit.fields));
+        }
+      }
+
+      results[i] = result;
     } else {
-      return flattenedFields;
+      results[i] = createBaseTimelineEdges();
     }
-  } else {
-    return flattenedFields;
   }
+
+  return results;
 };

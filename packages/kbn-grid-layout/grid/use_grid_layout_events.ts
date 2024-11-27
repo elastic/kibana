@@ -13,6 +13,21 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
 import { isGridDataEqual } from './utils/equality_checks';
 
+const scrollOnInterval = (direction: 'up' | 'down') => {
+  let count = 0;
+  const interval = setInterval(() => {
+    // calculate the speed based on how long the interval has been going to create an ease effect
+    // via the parabola formula `y = a(x - h)^2 + k`
+    // - the starting speed is k = 50
+    // - the maximum speed is 250
+    // - the rate at which the speed increases is controlled by a = 0.75
+    const speed = Math.min(0.75 * count ** 2 + 50, 250);
+    window.scrollBy({ top: direction === 'down' ? speed : -speed, behavior: 'smooth' });
+    count++;
+  }, 100);
+  return interval;
+};
+
 export const useGridLayoutEvents = ({
   gridLayoutStateManager,
 }: {
@@ -20,14 +35,27 @@ export const useGridLayoutEvents = ({
 }) => {
   const mouseClientPosition = useRef({ x: 0, y: 0 });
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
+  const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
   // -----------------------------------------------------------------------------------------
   // Set up drag events
   // -----------------------------------------------------------------------------------------
   useEffect(() => {
     const { runtimeSettings$, interactionEvent$, gridLayout$ } = gridLayoutStateManager;
+
+    const stopAutoScrollIfNecessary = () => {
+      if (scrollInterval.current) {
+        clearInterval(scrollInterval.current);
+        scrollInterval.current = null;
+      }
+    };
+
     const calculateUserEvent = (e: Event) => {
-      if (!interactionEvent$.value) return;
+      if (!interactionEvent$.value) {
+        // if no interaction event, stop auto scroll (if necessary) and return early
+        stopAutoScrollIfNecessary();
+        return;
+      }
       e.stopPropagation();
 
       const gridRowElements = gridLayoutStateManager.rowRefs.current;
@@ -121,6 +149,20 @@ export const useGridLayoutEvents = ({
         requestedGridData.row = targetRow;
       }
 
+      // auto scroll when an event is happening close to the top or bottom of the screen
+      const heightPercentage =
+        100 - ((window.innerHeight - mouseTargetPixel.y) / window.innerHeight) * 100;
+      const startScrollingUp = !isResize && heightPercentage < 5; // don't scroll up when resizing
+      const startScrollingDown = heightPercentage > 95;
+      if (startScrollingUp || startScrollingDown) {
+        if (!scrollInterval.current) {
+          // only start scrolling if it's not already happening
+          scrollInterval.current = scrollOnInterval(startScrollingUp ? 'up' : 'down');
+        }
+      } else {
+        stopAutoScrollIfNecessary();
+      }
+
       // resolve the new grid layout
       if (
         hasChangedGridRow ||
@@ -152,6 +194,8 @@ export const useGridLayoutEvents = ({
     };
 
     const onMouseMove = (e: MouseEvent) => {
+      // Note: When an item is being interacted with, `mousemove` events continue to be fired, even when the
+      // mouse moves out of the window (i.e. when a panel is being dragged around outside the window).
       mouseClientPosition.current = { x: e.clientX, y: e.clientY };
       calculateUserEvent(e);
     };

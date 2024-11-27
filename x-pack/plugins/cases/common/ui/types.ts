@@ -11,6 +11,8 @@ import type {
   DELETE_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
+  CREATE_COMMENT_CAPABILITY,
+  CASES_REOPEN_CAPABILITY,
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
@@ -35,7 +37,6 @@ import type {
 import type {
   CasePatchRequest,
   CasesFindResponse,
-  CasesStatusResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   GetCaseUsersResponse,
@@ -103,7 +104,6 @@ export type CasesUI = CaseUI[];
 export type CasesFindResponseUI = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & {
   cases: CasesUI;
 };
-export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
 export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 export type CaseUpdateRequest = SnakeToCamelCase<CasePatchRequest>;
 export type CaseConnectors = SnakeToCamelCase<GetCaseConnectorsResponse>;
@@ -305,6 +305,8 @@ export interface CasesPermissions {
   push: boolean;
   connectors: boolean;
   settings: boolean;
+  reopenCase: boolean;
+  createComment: boolean;
 }
 
 export interface CasesCapabilities {
@@ -315,4 +317,6 @@ export interface CasesCapabilities {
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
   [CASES_SETTINGS_CAPABILITY]: boolean;
+  [CREATE_COMMENT_CAPABILITY]: boolean;
+  [CASES_REOPEN_CAPABILITY]: boolean;
 }

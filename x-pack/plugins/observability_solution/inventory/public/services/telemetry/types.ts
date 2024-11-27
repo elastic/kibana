@@ -27,13 +27,7 @@ export interface EntityInventoryViewedParams {
 
 export interface EntityInventorySearchQuerySubmittedParams {
   kuery_fields: string[];
-  entity_types: string[];
   action: 'submit' | 'refresh';
-}
-
-export interface EntityInventoryEntityTypeFilteredParams {
-  kuery_fields: string[];
-  entity_types: string[];
 }
 
 export interface EntityViewClickedParams {
@@ -45,7 +39,6 @@ export type TelemetryEventParams =
   | InventoryAddDataParams
   | EntityInventoryViewedParams
   | EntityInventorySearchQuerySubmittedParams
-  | EntityInventoryEntityTypeFilteredParams
   | EntityViewClickedParams;
 
 export interface ITelemetryClient {
@@ -54,7 +47,6 @@ export interface ITelemetryClient {
   reportEntityInventorySearchQuerySubmitted(
     params: EntityInventorySearchQuerySubmittedParams
   ): void;
-  reportEntityInventoryEntityTypeFiltered(params: EntityInventoryEntityTypeFilteredParams): void;
   reportEntityViewClicked(params: EntityViewClickedParams): void;
 }
 

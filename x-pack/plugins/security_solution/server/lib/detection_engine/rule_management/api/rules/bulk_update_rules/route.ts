@@ -37,8 +37,12 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
     .put({
       access: 'public',
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         timeout: {
           idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
         },

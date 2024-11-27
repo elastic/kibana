@@ -171,7 +171,12 @@ export function queryTopNCommon({
   router.get(
     {
       path: pathName,
-      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
+      security: {
+        authz: {
+          requiredPrivileges: ['profiling'],
+        },
+      },
+      options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
       validate: {
         query: schema.object({
           timeFrom: schema.number(),

@@ -6324,6 +6324,14 @@
             "path": "x-pack/plugins/canvas/server/routes/workpad/find.ts"
           },
           {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
+            "plugin": "canvas",
+            "path": "x-pack/plugins/canvas/server/routes/workpad/has_workpads.ts"
+          },
+          {
             "plugin": "enterpriseSearch",
             "path": "x-pack/plugins/enterprise_search/server/collectors/lib/telemetry.ts"
           },
@@ -10628,16 +10636,16 @@
                 "path": "x-pack/plugins/spaces/server/saved_objects/saved_objects_service.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
-              },
-              {
                 "plugin": "share",
                 "path": "src/plugins/share/server/url_service/saved_objects/register_url_service_saved_object_type.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/saved_objects/index.ts"
               },
               {
                 "plugin": "data",
@@ -10654,6 +10662,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "@kbn/core-saved-objects-migration-server-mocks",
@@ -10736,10 +10748,6 @@
                 "path": "x-pack/plugins/ml/server/saved_objects/saved_objects.ts"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/server/saved_objects/log_view/log_view_saved_object.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/server/saved_objects/graph_workspace.ts"
               },
@@ -10802,10 +10810,6 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/plugins/observability_solution/uptime/server/legacy_uptime/lib/saved_objects/uptime_settings.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "eventAnnotation",
@@ -11323,6 +11327,10 @@
                 "path": "src/plugins/data/server/search/saved_objects/search_session.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
                 "plugin": "savedSearch",
                 "path": "src/plugins/saved_search/server/saved_objects/search.ts"
               },
@@ -11337,10 +11345,6 @@
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/server/saved_objects/visualization.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "@kbn/core-test-helpers-so-type-serializer",
@@ -11495,6 +11499,10 @@
                 "path": "x-pack/plugins/alerting/server/saved_objects/index.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
+              },
+              {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/server/saved_objects.ts"
               },
@@ -11565,10 +11573,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_saved_object_mappings.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
               {
                 "plugin": "@kbn/core-test-helpers-so-type-serializer",

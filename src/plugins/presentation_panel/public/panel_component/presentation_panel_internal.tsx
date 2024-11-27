@@ -125,6 +125,7 @@ export const PresentationPanelInternal = <
         actionPredicate,
         viewMode,
         showNotifications,
+        showBorder,
         dragHandleRef: (node) => setDragHandle('hoverAction', node),
       }}
     >
@@ -135,7 +136,6 @@ export const PresentationPanelInternal = <
           'embPanel--editing': viewMode === 'edit',
         })}
         hasShadow={showShadow}
-        hasBorder={showBorder}
         aria-labelledby={headerId}
         data-test-subj="embeddablePanel"
         {...contentAttrs}

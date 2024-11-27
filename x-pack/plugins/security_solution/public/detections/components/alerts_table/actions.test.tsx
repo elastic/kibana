@@ -25,12 +25,11 @@ import {
   getThresholdDetectionAlertAADMock,
   mockEcsDataWithAlert,
   mockTimelineDetails,
-  mockTimelineResult,
   mockAADEcsDataWithAlert,
   mockGetOneTimelineResult,
   mockTimelineData,
 } from '../../../common/mock';
-import type { CreateTimeline, UpdateTimelineLoading } from './types';
+import type { CreateTimeline } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
@@ -127,7 +126,6 @@ describe('alert actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
   const unix = moment(anchor).valueOf();
   let createTimeline: CreateTimeline;
-  let updateTimelineIsLoading: UpdateTimelineLoading;
   let searchStrategyClient: jest.Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
   let mockKibanaServices: jest.Mock;
@@ -270,7 +268,6 @@ describe('alert actions', () => {
     mockGetExceptionFilter = jest.fn().mockResolvedValue(undefined);
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
-    updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
     mockKibanaServices = KibanaServices.get as jest.Mock;
 
     fetchMock = jest.fn();
@@ -285,7 +282,7 @@ describe('alert actions', () => {
       search: jest.fn().mockImplementation(() => of({ data: mockTimelineDetails })),
     };
 
-    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResult);
+    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockGetOneTimelineResult);
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -296,28 +293,10 @@ describe('alert actions', () => {
 
   describe('sendAlertToTimelineAction', () => {
     describe('timeline id is NOT empty string and apollo client exists', () => {
-      test('it invokes updateTimelineIsLoading to set to true', async () => {
-        await sendAlertToTimelineAction({
-          createTimeline,
-          ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
-          searchStrategyClient,
-          getExceptionFilter: mockGetExceptionFilter,
-        });
-
-        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
-        expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-      });
-
       test('it invokes createTimeline with designated timeline template if "timelineTemplate" exists', async () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -375,7 +354,6 @@ describe('alert actions', () => {
               eventCategoryField: 'event.category',
               query: '',
               size: 100,
-              tiebreakerField: '',
               timestampField: '@timestamp',
             },
             eventIdToNoteIds: {},
@@ -407,7 +385,6 @@ describe('alert actions', () => {
             indexNames: [],
             isFavorite: false,
             isLive: false,
-            isLoading: false,
             isSaving: false,
             isSelectAllChecked: false,
             itemsPerPage: 25,
@@ -463,11 +440,13 @@ describe('alert actions', () => {
 
       test('it invokes createTimeline with kqlQuery.filterQuery.kuery.kind as "kuery" if not specified in returned timeline template', async () => {
         const mockTimelineResultModified = {
-          ...mockTimelineResult,
-          kqlQuery: {
-            filterQuery: {
-              kuery: {
-                expression: [''],
+          body: {
+            ...mockGetOneTimelineResult,
+            kqlQuery: {
+              filterQuery: {
+                kuery: {
+                  expression: [''],
+                },
               },
             },
           },
@@ -477,12 +456,10 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
         const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
-
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
@@ -496,7 +473,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -505,14 +481,6 @@ describe('alert actions', () => {
         delete defaultTimelinePropsWithoutNote.ruleNote;
         delete defaultTimelinePropsWithoutNote.ruleAuthor;
 
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: true,
-        });
-        expect(updateTimelineIsLoading).toHaveBeenCalledWith({
-          id: TimelineId.active,
-          isLoading: false,
-        });
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
@@ -544,7 +512,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -552,7 +519,6 @@ describe('alert actions', () => {
         const expectedTimelineProps = structuredClone(defaultTimelineProps);
         expectedTimelineProps.timeline.excludedRowRendererIds = [];
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
@@ -574,7 +540,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -582,7 +547,6 @@ describe('alert actions', () => {
         const expectedTimelineProps = structuredClone(defaultTimelineProps);
         expectedTimelineProps.timeline.excludedRowRendererIds = [];
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
@@ -608,12 +572,10 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
@@ -655,12 +617,10 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(expectedTimelineProps);
@@ -732,7 +692,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -740,7 +699,6 @@ describe('alert actions', () => {
         const expectedFrom = '2021-01-10T21:11:45.839Z';
         const expectedTo = '2021-01-10T21:12:45.839Z';
 
-        expect(updateTimelineIsLoading).not.toHaveBeenCalled();
         expect(mockGetExceptionFilter).toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
@@ -861,7 +819,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimelineAndNoFilters,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -886,7 +843,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -894,7 +850,6 @@ describe('alert actions', () => {
         const expectedFrom = '2021-01-10T21:11:45.839Z';
         const expectedTo = '2021-01-10T21:12:45.839Z';
 
-        expect(updateTimelineIsLoading).toHaveBeenCalled();
         expect(mockGetExceptionFilter).toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
@@ -1046,7 +1001,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });
@@ -1141,7 +1095,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
-          updateTimelineIsLoading,
           searchStrategyClient,
           getExceptionFilter: mockGetExceptionFilter,
         });

@@ -6,6 +6,8 @@
  */
 
 export { Graph } from './graph/graph';
+export { GraphPopover } from './graph/graph_popover';
+export { useGraphPopover } from './graph/use_graph_popover';
 export type { GraphProps } from './graph/graph';
 export type {
   NodeViewModel,

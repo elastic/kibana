@@ -36,7 +36,10 @@ import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
-import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
+import {
+  ensureFleetEventIngestedPipelineIsInstalled,
+  ensureFleetFinalPipelineIsInstalled,
+} from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
@@ -336,6 +339,7 @@ export async function ensureFleetGlobalEsAssets(
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
+    ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
   ]);
   const assetResults = globalAssetsRes.flat();
   if (assetResults.some((asset) => asset.isCreated)) {

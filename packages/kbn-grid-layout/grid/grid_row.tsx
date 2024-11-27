@@ -158,6 +158,51 @@ export const GridRow = forwardRef<
       [rowIndex]
     );
 
+    /**
+     * Memoize panel children components to prevent unnecessary re-renders
+     */
+    const children = useMemo(() => {
+      return panelIds.map((panelId) => (
+        <GridPanel
+          key={panelId}
+          panelId={panelId}
+          rowIndex={rowIndex}
+          gridLayoutStateManager={gridLayoutStateManager}
+          renderPanelContents={renderPanelContents}
+          interactionStart={(type, e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+            if (!panelRef) return;
+
+            const panelRect = panelRef.getBoundingClientRect();
+            if (type === 'drop') {
+              setInteractionEvent(undefined);
+            } else {
+              setInteractionEvent({
+                type,
+                id: panelId,
+                panelDiv: panelRef,
+                targetRowIndex: rowIndex,
+                mouseOffsets: {
+                  top: e.clientY - panelRect.top,
+                  left: e.clientX - panelRect.left,
+                  right: e.clientX - panelRect.right,
+                  bottom: e.clientY - panelRect.bottom,
+                },
+              });
+            }
+          }}
+          ref={(element) => {
+            if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
+              gridLayoutStateManager.panelRefs.current[rowIndex] = {};
+            }
+            gridLayoutStateManager.panelRefs.current[rowIndex][panelId] = element;
+          }}
+        />
+      ));
+    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
+
     return (
       <>
         {rowIndex !== 0 && (
@@ -189,47 +234,7 @@ export const GridRow = forwardRef<
               ${initialStyles};
             `}
           >
-            {panelIds.map((panelId) => (
-              <GridPanel
-                key={panelId}
-                panelId={panelId}
-                rowIndex={rowIndex}
-                gridLayoutStateManager={gridLayoutStateManager}
-                renderPanelContents={renderPanelContents}
-                interactionStart={(type, e) => {
-                  if (e.button !== 0) return;
-
-                  e.stopPropagation();
-                  const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-                  if (!panelRef) return;
-
-                  const panelRect = panelRef.getBoundingClientRect();
-                  if (type === 'drop') {
-                    setInteractionEvent(undefined);
-                  } else {
-                    setInteractionEvent({
-                      type,
-                      id: panelId,
-                      panelDiv: panelRef,
-                      targetRowIndex: rowIndex,
-                      mouseOffsets: {
-                        top: e.clientY - panelRect.top,
-                        left: e.clientX - panelRect.left,
-                        right: e.clientX - panelRect.right,
-                        bottom: e.clientY - panelRect.bottom,
-                      },
-                    });
-                  }
-                }}
-                ref={(element) => {
-                  if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
-                    gridLayoutStateManager.panelRefs.current[rowIndex] = {};
-                  }
-                  gridLayoutStateManager.panelRefs.current[rowIndex][panelId] = element;
-                }}
-              />
-            ))}
-
+            {children}
             <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />
           </div>
         )}

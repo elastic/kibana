@@ -209,6 +209,9 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
           })}
         </EuiLink>,
       ]}
+      ariaLabel={i18n.translate('xpack.ml.overview.adJobsPanel.ariaLabel', {
+        defaultMessage: 'anomaly detection panel',
+      })}
     >
       {noAdJobs ? <AnomalyDetectionEmptyState /> : null}
 

@@ -437,8 +437,10 @@ export const defineGetCspStatusRoute = (
     .get({
       access: 'internal',
       path: STATUS_ROUTE_PATH,
-      options: {
-        tags: ['access:cloud-security-posture-read'],
+      security: {
+        authz: {
+          requiredPrivileges: ['cloud-security-posture-read'],
+        },
       },
     })
     .addVersion(

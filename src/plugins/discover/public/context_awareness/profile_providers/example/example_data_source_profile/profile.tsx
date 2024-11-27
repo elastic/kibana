@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiLink, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
 import {
   AppMenuActionId,
   AppMenuActionType,
@@ -89,12 +89,12 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
               title: 'Example',
               order: 0,
               component: () => (
-                <EuiFlyoutBody>
+                <EuiPanel color="transparent" hasShadow={false}>
                   <div data-test-subj="exampleDataSourceProfileDocView">Example Doc View</div>
                   <pre data-test-subj="exampleDataSourceProfileDocViewRecord">
                     {context.formatRecord(params.record.flattened)}
                   </pre>
-                </EuiFlyoutBody>
+                </EuiPanel>
               ),
             });
 

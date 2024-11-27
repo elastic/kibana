@@ -8,7 +8,7 @@
  */
 
 import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, debounceTime, skip, tap } from 'rxjs';
+import { combineLatest, skip } from 'rxjs';
 
 import { EuiIcon, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -36,7 +36,7 @@ export const GridPanel = forwardRef<
     { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
     panelRef
   ) => {
-    const resizeHandleRef = useRef<HTMLDivElement | null>(null);
+    // const resizeHandleRef = useRef<HTMLDivElement | null>(null);
     const removeEventListenersRef = useRef<(() => void) | null>(null);
     const [dragHandleCount, setDragHandleCount] = useState<number>(0);
 
@@ -203,84 +203,86 @@ export const GridPanel = forwardRef<
       []
     );
 
-    return (
-      <div ref={panelRef} css={initialStyles}>
-        <div
-          css={css`
-            position: relative;
-            height: 100%;
+    /**
+     * Memoize panel contents to prevent unnecessary re-renders
+     */
+    const panelContents = useMemo(() => {
+      return renderPanelContents(panelId, setDragHandles);
+    }, [panelId, setDragHandles, renderPanelContents]);
 
-            &:hover,
-            &:active {
-              & .dragHandle,
-              & .resizeHandle {
-                opacity: 1;
-              }
-            }
-          `}
-        >
-          {/* drag handle */}
-          {!dragHandleCount && (
+    return (
+      <>
+        <div ref={panelRef} css={initialStyles}>
+          <div
+            css={css`
+              padding: 0;
+              position: relative;
+              height: 100%;
+            `}
+          >
+            {/* drag handle */}
+            {!dragHandleCount && (
+              <div
+                className="dragHandle"
+                css={css`
+                  opacity: 0;
+                  display: flex;
+                  cursor: move;
+                  position: absolute;
+                  align-items: center;
+                  justify-content: center;
+                  top: -${euiThemeVars.euiSizeL};
+                  width: ${euiThemeVars.euiSizeL};
+                  height: ${euiThemeVars.euiSizeL};
+                  z-index: ${euiThemeVars.euiZLevel3};
+                  margin-left: ${euiThemeVars.euiSizeS};
+                  border: 1px solid ${euiTheme.border.color};
+                  background-color: ${euiTheme.colors.emptyShade};
+                  border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
+                  &:hover {
+                    cursor: grab;
+                    opacity: 1 !important;
+                  }
+                  &:active {
+                    cursor: grabbing;
+                    opacity: 1 !important;
+                  }
+                `}
+                onMouseDown={(e) => interactionStart('drag', e)}
+                onMouseUp={(e) => interactionStart('drop', e)}
+              >
+                <EuiIcon type="grabOmnidirectional" />
+              </div>
+            )}
+            {/* Resize handle */}
             <div
-              className="dragHandle"
+              className="resizeHandle"
+              onMouseDown={(e) => interactionStart('resize', e)}
+              onMouseUp={(e) => interactionStart('drop', e)}
               css={css`
+                right: 0;
+                bottom: 0;
                 opacity: 0;
-                display: flex;
-                cursor: move;
+                margin: -2px;
                 position: absolute;
-                align-items: center;
-                justify-content: center;
-                top: -${euiThemeVars.euiSizeL};
                 width: ${euiThemeVars.euiSizeL};
                 height: ${euiThemeVars.euiSizeL};
-                z-index: ${euiThemeVars.euiZLevel3};
-                margin-left: ${euiThemeVars.euiSizeS};
-                border: 1px solid ${euiTheme.border.color};
-                background-color: ${euiTheme.colors.emptyShade};
-                border-radius: ${euiThemeVars.euiBorderRadius} ${euiThemeVars.euiBorderRadius} 0 0;
-                &:hover {
-                  cursor: grab;
-                  opacity: 1 !important;
-                }
-                &:active {
-                  cursor: grabbing;
-                  opacity: 1 !important;
+                transition: opacity 0.2s, border 0.2s;
+                border-radius: 7px 0 7px 0;
+                border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
+                border-right: 2px solid ${euiThemeVars.euiColorSuccess};
+                :hover {
+                  opacity: 1;
+                  background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
+                  cursor: se-resize;
                 }
               `}
-              onMouseDown={(e) => interactionStart('drag', e)}
-            >
-              <EuiIcon type="grabOmnidirectional" />
-            </div>
-          )}
-          {/* Resize handle */}
-          <div
-            ref={resizeHandleRef}
-            className="resizeHandle"
-            onMouseDown={(e) => interactionStart('resize', e)}
-            css={css`
-              right: 0;
-              bottom: 0;
-              opacity: 0;
-              margin: -2px;
-              z-index: 1000;
-              position: absolute;
-              width: ${euiThemeVars.euiSizeL};
-              height: ${euiThemeVars.euiSizeL};
-              transition: opacity 0.2s, border 0.2s;
-              border-radius: 7px 0 7px 0;
-              border-bottom: 2px solid ${euiThemeVars.euiColorSuccess};
-              border-right: 2px solid ${euiThemeVars.euiColorSuccess};
-              :hover {
-                opacity: 1;
-                background-color: ${transparentize(euiThemeVars.euiColorSuccess, 0.05)};
-                cursor: se-resize;
-              }
-            `}
-          />
+            />
 
-          {renderPanelContents(panelId, setDragHandles)}
+            {panelContents}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 );

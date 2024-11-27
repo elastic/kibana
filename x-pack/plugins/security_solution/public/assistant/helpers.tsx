@@ -16,10 +16,6 @@ import { SendToTimelineButton } from './send_to_timeline';
 import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from '../detections/pages/detection_engine/translations';
 export const LOCAL_STORAGE_KEY = `securityAssistant`;
 import { UpdateQueryInFormButton } from './update_query_in_form';
-export interface QueryField {
-  field: string;
-  values: string;
-}
 
 export const getPromptContextFromDetectionRules = (rules: Rule[]): string => {
   const data = rules.map((rule) => `Rule Name:${rule.name}\nRule Description:${rule.description}`);
@@ -27,24 +23,10 @@ export const getPromptContextFromDetectionRules = (rules: Rule[]): string => {
   return data.join('\n\n');
 };
 
-export const getAllFields = (data: TimelineEventsDetailsItem[]): QueryField[] =>
-  data
-    .filter(({ field }) => !field.startsWith('signal.'))
-    .map(({ field, values }) => ({ field, values: values?.join(',') ?? '' }));
-
 export const getRawData = (data: TimelineEventsDetailsItem[]): Record<string, string[]> =>
   data
     .filter(({ field }) => !field.startsWith('signal.'))
     .reduce((acc, { field, values }) => ({ ...acc, [field]: values ?? [] }), {});
-
-export const getFieldsAsCsv = (queryFields: QueryField[]): string =>
-  queryFields.map(({ field, values }) => `${field},${values}`).join('\n');
-
-export const getPromptContextFromEventDetailsItem = (data: TimelineEventsDetailsItem[]): string => {
-  const allFields = getAllFields(data);
-
-  return getFieldsAsCsv(allFields);
-};
 
 const sendToTimelineEligibleQueryTypes: Array<CodeBlockDetails['type']> = [
   'kql',
