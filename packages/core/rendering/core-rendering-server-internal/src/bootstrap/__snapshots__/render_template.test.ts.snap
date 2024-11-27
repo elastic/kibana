@@ -34,6 +34,7 @@ function kbnBundlesLoader() {
 var kbnCsp = JSON.parse(document.querySelector('kbn-csp').getAttribute('data'));
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 window.__kbnThemeTag__ = \\"v8light\\";
+window.__euiTheme__ = \\"amsterdam\\";
 window.__kbnPublicPath__ = {\\"foo\\": \\"bar\\"};
 window.__kbnBundles__ = kbnBundlesLoader();
 
