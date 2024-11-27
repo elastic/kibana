@@ -19,6 +19,9 @@ disabled:
   - x-pack/test_serverless/functional/config.base.ts
   - x-pack/test_serverless/shared/config.base.ts
 
+  # MKI only configs files
+  - x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.ts
