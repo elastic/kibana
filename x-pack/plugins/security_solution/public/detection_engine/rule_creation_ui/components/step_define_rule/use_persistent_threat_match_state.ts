@@ -10,38 +10,24 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useFormData } from '../../../../shared_imports';
-import { type DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 
 interface UsePersistentThreatMatchStateParams {
-  form: FormHook<DefineStepRule>;
-  ruleTypePath: string;
-  indexPatternPath: string;
-  queryPath: string;
-  mappingPath: string;
+  form: FormHook;
 }
 
 interface LastThreatMatchState {
-  indexPattern: unknown;
-  query: unknown;
-  mapping: unknown;
+  threatIndexPatterns: unknown;
+  threatQueryBar: unknown;
+  threatMapping: unknown;
 }
 
-export function usePersistentThreatMatchState({
-  form,
-  ruleTypePath,
-  indexPatternPath,
-  queryPath,
-  mappingPath,
-}: UsePersistentThreatMatchStateParams): void {
+/**
+ * Persists threat match form data when switching between threat match and the other rule types.
+ */
+export function usePersistentThreatMatchState({ form }: UsePersistentThreatMatchStateParams): void {
   const lastThreatMatchState = useRef<LastThreatMatchState | undefined>();
-  const [
-    {
-      [ruleTypePath]: ruleType,
-      [indexPatternPath]: indexPattern,
-      [queryPath]: query,
-      [mappingPath]: mapping,
-    },
-  ] = useFormData({ form, watch: [ruleTypePath, indexPatternPath, queryPath, mappingPath] });
+  const [{ ruleType, threatIndex: threatIndexPatterns, threatQueryBar, threatMapping }] =
+    useFormData({ form, watch: ['ruleType', 'threatIndex', 'threatQueryBar', 'threatMapping'] });
   const previousRuleType = usePrevious(ruleType);
 
   useEffect(() => {
@@ -51,26 +37,16 @@ export function usePersistentThreatMatchState({
       lastThreatMatchState.current
     ) {
       form.updateFieldValues({
-        [indexPatternPath]: lastThreatMatchState.current.indexPattern,
-        [queryPath]: lastThreatMatchState.current.query,
-        [mappingPath]: lastThreatMatchState.current.mapping,
+        threatIndex: lastThreatMatchState.current.threatIndexPatterns,
+        threatQueryBar: lastThreatMatchState.current.threatQueryBar,
+        threatMapping: lastThreatMatchState.current.threatMapping,
       });
 
       return;
     }
 
     if (isThreatMatchRule(ruleType)) {
-      lastThreatMatchState.current = { indexPattern, query, mapping };
+      lastThreatMatchState.current = { threatIndexPatterns, threatQueryBar, threatMapping };
     }
-  }, [
-    form,
-    ruleType,
-    previousRuleType,
-    indexPatternPath,
-    queryPath,
-    mappingPath,
-    indexPattern,
-    query,
-    mapping,
-  ]);
+  }, [form, ruleType, previousRuleType, threatIndexPatterns, threatQueryBar, threatMapping]);
 }

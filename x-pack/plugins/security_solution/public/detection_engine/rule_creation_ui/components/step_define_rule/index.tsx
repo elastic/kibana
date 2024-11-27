@@ -237,10 +237,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   usePersistentAlertSuppressionState({ form });
   usePersistentThreatMatchState({
     form,
-    ruleTypePath: 'ruleType',
-    indexPatternPath: 'threatIndex',
-    queryPath: 'threatQueryBar',
-    mappingPath: 'threatMapping',
   });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
