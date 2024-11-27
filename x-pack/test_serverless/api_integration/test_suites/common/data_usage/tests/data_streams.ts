@@ -14,7 +14,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const es = getService('es');
   const retry = getService('retry');
   let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
   const testDataStreamName = 'test-data-stream';
@@ -28,43 +27,25 @@ export default function ({ getService }: FtrProviderContext) {
           withInternalHeaders: true,
         }
       );
-      // index some data into the data stream to prevent from api filtering it out
-      await es.bulk({
-        refresh: true,
-        body: [
-          { create: { _index: testDataStreamName } },
-          {
-            '@timestamp': new Date().toISOString(),
-            field1: `bulk-doc-1}`,
-            field2: 1,
-          },
-        ],
-      });
     });
     after(async () => {
       await svlDatastreamsHelpers.deleteDataStream(testDataStreamName);
     });
 
     it('returns created data streams', async () => {
-      // can take some time for metering api to update with storage size and do ccount
-      await retry.tryForTime(60000, async () => {
+      await retry.tryForTime(10000, async () => {
         const res = await supertestAdminWithCookieCredentials
           .get(DATA_USAGE_DATA_STREAMS_API_ROUTE)
+          .query({ includeZeroStorage: true })
           .set('elastic-api-version', '1');
-
         const dataStreams: DataStreamsResponseBodySchemaBody = res.body;
-
         const foundStream = dataStreams.find((stream) => stream.name === testDataStreamName);
-        if (!foundStream || foundStream.storageSizeBytes <= 0) {
-          throw new Error(
-            `Data stream "${testDataStreamName}" not found or has zero storage size. Retrying...`
-          );
+        if (!foundStream) {
+          throw new Error(`Data stream "${testDataStreamName}" not found. Retrying...`);
         }
-
         expect(res.statusCode).to.be(200);
-        expect(foundStream.name).to.be(testDataStreamName);
-        expect(foundStream.storageSizeBytes).to.be.greaterThan(0);
-
+        expect(foundStream?.name).to.be(testDataStreamName);
+        expect(foundStream?.storageSizeBytes).to.be(0);
         return true;
       });
     });
