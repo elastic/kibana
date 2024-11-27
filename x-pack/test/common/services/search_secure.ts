@@ -8,7 +8,7 @@
 // NOTE: This is pretty much a copy/paste from packages/kbn-ftr-common-functional-services/services/bsearch.ts
 // but with the ability to provide custom auth
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
