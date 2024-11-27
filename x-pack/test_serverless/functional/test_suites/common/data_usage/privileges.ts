@@ -32,14 +32,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('privileges', function () {
-    // plugin needs to be enabled in serverless
-    this.tags(['skipMKI']);
-
     it('renders for the admin role', async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
       await navigateAndVerify(true);
     });
-
     it('does not render for viewer', async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
       await navigateAndVerify(false);
