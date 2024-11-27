@@ -134,37 +134,45 @@ maintaining the future ability to query fields if necessary.
 Here's an example of what NOT to do:
 
 ```ts
-mappings: {
-  properties: {
-    metadata: {
-      enabled: false,  // ❌ Don't do this
-      properties: {
-        created_by: { type: 'keyword' }
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      metadata: {
+        enabled: false,  // ❌ Don't do this
+        properties: {
+          created_by: { type: 'keyword' }
+        }
+      },
+      description: {
+        index: false,    // ❌ Don't do this
+        type: 'text'
       }
-    },
-    description: {
-      index: false,    // ❌ Don't do this
-      type: 'text'
     }
   }
-}
+};
 ```
-
 
 Instead, use `dynamic: false` if you want to persist data which does not need to be queryable.
-```
-mappings: {
-  properties: {
-    dynamic: false,  // ✅ Do this instead
-    metadata: {
-      // dynamic: false gets inherited from above
-      properties: {
-        // `created_by` can now be stored but won't be queryable
-      }
-    },
-    // `description` can now be stored but won't be queryable
+```ts
+export const dashboardVisualization: SavedObjectsType = {
+  name: 'dashboard_visualization',
+  ...
+  mappings: {
+    properties: {
+      dynamic: false,  // ✅ Do this instead
+      metadata: {
+        // dynamic: false gets inherited from above
+        properties: {
+          // `created_by` can now be stored but won't be queryable
+        }
+      },
+      // `description` can now be stored but won't be queryable
+    }
   }
-}
+};
+```
 
 This approach maintains flexibility while ensuring all fields remain queryable if needed in the future.
 
