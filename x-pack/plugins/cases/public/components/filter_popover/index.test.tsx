@@ -6,31 +6,21 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
-import { waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
-
 import { FilterPopover } from '.';
 
 describe('FilterPopover ', () => {
-  let appMockRender: AppMockRenderer;
   const onSelectedOptionsChanged = jest.fn();
   const tags: string[] = ['coke', 'pepsi'];
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
-  });
-
   it('renders button label correctly', async () => {
-    appMockRender.render(
+    render(
       <FilterPopover
         buttonLabel={'Tags'}
         onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -43,7 +33,7 @@ describe('FilterPopover ', () => {
   });
 
   it('renders empty label correctly', async () => {
-    appMockRender.render(
+    render(
       <FilterPopover
         buttonLabel={'Tags'}
         onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -61,7 +51,7 @@ describe('FilterPopover ', () => {
   });
 
   it('renders string type options correctly', async () => {
-    appMockRender.render(
+    render(
       <FilterPopover
         buttonLabel={'Tags'}
         onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -79,7 +69,7 @@ describe('FilterPopover ', () => {
   });
 
   it('should call onSelectionChange with selected option', async () => {
-    appMockRender.render(
+    render(
       <FilterPopover
         buttonLabel={'Tags'}
         onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -100,7 +90,7 @@ describe('FilterPopover ', () => {
   });
 
   it('should call onSelectionChange with empty array when option is deselected', async () => {
-    appMockRender.render(
+    render(
       <FilterPopover
         buttonLabel={'Tags'}
         onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -126,7 +116,7 @@ describe('FilterPopover ', () => {
     const maxLengthLabel = `You have selected maximum number of ${maxLength} tags to filter`;
 
     it('should show message when maximum options are selected', async () => {
-      appMockRender.render(
+      render(
         <FilterPopover
           buttonLabel={'Tags'}
           onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -152,7 +142,7 @@ describe('FilterPopover ', () => {
     });
 
     it('should not show message when maximum length label is missing', async () => {
-      appMockRender.render(
+      render(
         <FilterPopover
           buttonLabel={'Tags'}
           onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -176,7 +166,7 @@ describe('FilterPopover ', () => {
     });
 
     it('should not show message and disable options when maximum length property is missing', async () => {
-      appMockRender.render(
+      render(
         <FilterPopover
           buttonLabel={'Tags'}
           onSelectedOptionsChanged={onSelectedOptionsChanged}
@@ -198,7 +188,7 @@ describe('FilterPopover ', () => {
     });
 
     it('should allow to select more options when maximum length property is missing', async () => {
-      appMockRender.render(
+      render(
         <FilterPopover
           buttonLabel={'Tags'}
           onSelectedOptionsChanged={onSelectedOptionsChanged}

@@ -14051,10 +14051,6 @@
                 "path": "x-pack/plugins/canvas/public/components/datasource/datasource_component.js"
               },
               {
-                "plugin": "logsShared",
-                "path": "x-pack/plugins/observability_solution/logs_shared/common/log_views/resolved_log_view.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
@@ -14205,10 +14201,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/eql_query_bar/validators.ts"
               },
               {
                 "plugin": "timelines",
@@ -26663,6 +26655,20 @@
           "\nData View type. Default or rollup"
         ],
         "path": "src/plugins/data_views/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.HasEsDataFailureReason",
+        "type": "Enum",
+        "tags": [],
+        "label": "HasEsDataFailureReason",
+        "description": [
+          "\nValid `failureReason` attribute values for `has_es_data` API error responses"
+        ],
+        "path": "src/plugins/data_views/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

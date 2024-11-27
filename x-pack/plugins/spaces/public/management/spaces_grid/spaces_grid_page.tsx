@@ -34,7 +34,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { addSpaceIdToPath, type Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -317,23 +317,8 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         truncateText: true,
-        width: '40%',
       },
     ];
-
-    config.push({
-      field: 'id',
-      name: i18n.translate('xpack.spaces.management.spacesGridPage.identifierColumnName', {
-        defaultMessage: 'Identifier',
-      }),
-      sortable: true,
-      render(id: string) {
-        if (id === DEFAULT_SPACE_ID) {
-          return '';
-        }
-        return id;
-      },
-    });
 
     if (this.props.allowSolutionVisibility) {
       config.push({
@@ -345,7 +330,7 @@ export class SpacesGridPage extends Component<Props, State> {
         render: (solution: Space['solution'], record: Space) => (
           <SpaceSolutionBadge solution={solution} data-test-subj={`${record.id}-solution`} />
         ),
-        width: '10%',
+        width: '18%',
       });
     }
 
@@ -431,6 +416,7 @@ export class SpacesGridPage extends Component<Props, State> {
           'data-test-subj': (rowRecord) => `${rowRecord.id}-deleteSpace`,
         },
       ],
+      width: '18%',
     });
 
     return config;
