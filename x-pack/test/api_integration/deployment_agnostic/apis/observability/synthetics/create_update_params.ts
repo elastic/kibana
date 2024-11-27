@@ -11,7 +11,6 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
@@ -32,7 +31,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       value: 'test',
     };
     const testPrivateLocations = new PrivateLocationTestService(getService);
-    const monitorTestService = new SyntheticsMonitorTestService(getService);
 
     before(async () => {
       await testPrivateLocations.installSyntheticsPackage();
