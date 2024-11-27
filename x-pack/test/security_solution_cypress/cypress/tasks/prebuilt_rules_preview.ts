@@ -321,7 +321,7 @@ export const assertThresholdPropertyShown = (threshold: Threshold) => {
   if (threshold.cardinality) {
     cy.get(THRESHOLD_VALUE).should(
       'contain',
-      `when unique value count of ${threshold.cardinality[0].field} >= ${threshold.cardinality[0].value}`
+      `when unique values count of ${threshold.cardinality[0].field} >= ${threshold.cardinality[0].value}`
     );
   }
 };
