@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { estypes } from '@elastic/elasticsearch';
-import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 import { handleWarnings } from '@kbn/search-response-warnings';
 import {
   CoreSetup,
@@ -78,7 +77,6 @@ import { ISearchSetup, ISearchStart } from './types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
@@ -106,13 +104,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup,
-    {
-      bfetch,
-      expressions,
-      usageCollection,
-      nowProvider,
-      management,
-    }: SearchServiceSetupDependencies
+    { expressions, usageCollection, nowProvider, management }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const { http, getStartServices, notifications, uiSettings, executionContext } = core;
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
@@ -130,7 +122,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
      * all pending search requests, as well as getting the number of pending search requests.
      */
     this.searchInterceptor = new SearchInterceptor({
-      bfetch,
       toasts: notifications.toasts,
       executionContext,
       http,
