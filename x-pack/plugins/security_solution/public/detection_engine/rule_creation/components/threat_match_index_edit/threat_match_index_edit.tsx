@@ -8,7 +8,7 @@
 import React from 'react';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
-import { ThreatMatchIndexField } from './threat_match_index_field';
+import { ThreatMatchIndexSelectorField } from './threat_match_index_selector_field';
 import { threatIndexPatternsRequiredValidator } from './validators/threat_index_patterns_required_validator';
 import { forbiddenIndexPatternValidator } from './validators/forbidden_index_pattern_validator';
 
@@ -20,7 +20,7 @@ export function ThreatMatchIndexEdit({ path }: ThreatMatchIndexEditProps): JSX.E
   return (
     <UseField
       path={path}
-      component={ThreatMatchIndexField}
+      component={ThreatMatchIndexSelectorField}
       config={THREAT_MATCH_INDEX_FIELD_CONFIG}
     />
   );
