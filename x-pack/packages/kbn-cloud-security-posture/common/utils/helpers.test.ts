@@ -185,7 +185,7 @@ describe('test helper methods', () => {
   });
 
   describe('buildEntityAlertsQuery', () => {
-    const getExpectedAlertsQuery = (size?: number) => {
+    const getExpectedAlertsQuery = (size?: number, severity?: string) => {
       return {
         size: size || 0,
         _source: false,
@@ -202,20 +202,30 @@ describe('test helper methods', () => {
             filter: [
               {
                 bool: {
-                  must: [],
-                  filter: [
+                  should: [
                     {
-                      match_phrase: {
-                        'host.name': {
-                          query: 'exampleHost',
-                        },
+                      term: {
+                        'host.name': 'exampleHost',
                       },
                     },
                   ],
-                  should: [],
-                  must_not: [],
+                  minimum_should_match: 1,
                 },
               },
+              severity
+                ? {
+                    bool: {
+                      should: [
+                        {
+                          term: {
+                            'kibana.alert.severity': 'low',
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  }
+                : undefined,
               {
                 range: {
                   '@timestamp': {
@@ -229,7 +239,7 @@ describe('test helper methods', () => {
                   'kibana.alert.workflow_status': ['open', 'acknowledged'],
                 },
               },
-            ],
+            ].filter(Boolean),
           },
         },
       };
@@ -255,6 +265,19 @@ describe('test helper methods', () => {
       const size = undefined;
 
       expect(buildEntityAlertsQuery(field, to, from, query)).toEqual(getExpectedAlertsQuery(size));
+    });
+
+    it('should return the correct query when given severity query', () => {
+      const field = 'host.name';
+      const query = 'exampleHost';
+      const to = 'Tomorrow';
+      const from = 'Today';
+      const size = undefined;
+      const severity = 'low';
+
+      expect(buildEntityAlertsQuery(field, to, from, query, size, severity)).toEqual(
+        getExpectedAlertsQuery(size, 'low')
+      );
     });
   });
 });

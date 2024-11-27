@@ -77,7 +77,7 @@ export const buildEntityFlyoutPreviewQuery = (
               },
             }
           : undefined,
-      ],
+      ].filter(Boolean),
     },
   };
 };
@@ -117,7 +117,7 @@ export const buildEntityVulnerabilityQuery = (
               },
             }
           : undefined,
-      ],
+      ].filter(Boolean),
     },
   };
 };
@@ -127,7 +127,8 @@ export const buildEntityAlertsQuery = (
   to: string,
   from: string,
   queryValue?: string,
-  size?: number
+  size?: number,
+  severity?: string
 ) => {
   return {
     size: size || 0,
@@ -145,20 +146,30 @@ export const buildEntityAlertsQuery = (
         filter: [
           {
             bool: {
-              must: [],
-              filter: [
+              should: [
                 {
-                  match_phrase: {
-                    [field]: {
-                      query: queryValue,
-                    },
+                  term: {
+                    [field]: `${queryValue || ''}`,
                   },
                 },
               ],
-              should: [],
-              must_not: [],
+              minimum_should_match: 1,
             },
           },
+          severity
+            ? {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'kibana.alert.severity': severity,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              }
+            : undefined,
           {
             range: {
               '@timestamp': {
@@ -172,7 +183,7 @@ export const buildEntityAlertsQuery = (
               'kibana.alert.workflow_status': ['open', 'acknowledged'],
             },
           },
-        ],
+        ].filter(Boolean),
       },
     },
   };

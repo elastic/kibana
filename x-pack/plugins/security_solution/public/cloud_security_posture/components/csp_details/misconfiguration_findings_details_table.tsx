@@ -225,7 +225,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
             <EuiIcon type={'popout'} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
-          <EuiSpacer size="xl" />
           <DistributionBar
             stats={getFindingsStats(
               passedFindings,
