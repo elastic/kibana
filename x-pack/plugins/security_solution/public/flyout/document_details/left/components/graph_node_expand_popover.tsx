@@ -68,7 +68,7 @@ export const GraphNodeExpandPopover: React.FC<GraphNodeExpandPopoverProps> = mem
             iconType="visTagCloud"
             label={i18n.translate(
               'xpack.securitySolution.flyout.documentDetails.left.graphNodeExpandPopover.exploreRelatedEntities',
-              { defaultMessage: 'Explore related entities' }
+              { defaultMessage: 'Show related events' }
             )}
             onClick={onExploreRelatedEntitiesClick}
             data-test-subj={GRAPH_NODE_POPOVER_EXPLORE_RELATED_ITEM_ID}
