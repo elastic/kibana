@@ -318,7 +318,7 @@ export const MISSING_MONITOR_STATUS_CONTENT = i18n.translate(
   }
 );
 export const MISSING_TLS_RULE_CONTENT = i18n.translate('xpack.synthetics.alerting.noTls.header', {
-  defaultMessage: 'You have HTTP Monitors enabled that are not covered by TLS alerts',
+  defaultMessage: 'You have HTTP monitors enabled that are not covered by TLS alerts',
 });
 export const MISSING_TLS_RULE_HEADER = i18n.translate('xpack.synthetics.alerting.noTls.content', {
   defaultMessage: 'TLS Alerts will not be sent',
