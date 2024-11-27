@@ -362,7 +362,7 @@ export const initializeDashboard = async ({
         hidePanelTitles: panelToUpdate.explicitInput.hidePanelTitles,
       };
       if (embeddableService.reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
-        //panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
+        // panelToUpdate.explicitInput = { id: panelToUpdate.explicitInput.id };
         runtimePanelsToRestore[incomingEmbeddable.embeddableId] = nextRuntimeState;
       } else {
         panelToUpdate.explicitInput = nextRuntimeState;
