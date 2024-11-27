@@ -215,7 +215,7 @@ async function bulkDeleteSavedObjects(
 export const deleteESAsset = async (
   installedObject: EsAssetReference,
   esClient: ElasticsearchClient
-): Promise<unknown> => {
+): Promise<void> => {
   const { id, type } = installedObject;
   const assetType = type as AssetType;
   if (assetType === ElasticsearchAssetType.ingestPipeline) {
@@ -235,10 +235,10 @@ export const deleteESAsset = async (
   }
 };
 
-export const deleteESAssets = async (
+export const deleteESAssets = (
   installedObjects: EsAssetReference[],
   esClient: ElasticsearchClient
-) => {
+): Array<Promise<void>> => {
   return installedObjects.map((installedObject) => deleteESAsset(installedObject, esClient));
 };
 
@@ -356,7 +356,7 @@ async function deleteAssets(
   try {
     const packageInfo = await Registry.fetchInfo(name, version);
     await Promise.all([
-      ...(await deleteESAssets(otherAssets, esClient)),
+      ...deleteESAssets(otherAssets, esClient),
       deleteKibanaAssets({ installedObjects: installedKibana, spaceId, packageInfo }),
       Object.entries(installedInAdditionalSpacesKibana).map(([additionalSpaceId, kibanaAssets]) =>
         deleteKibanaAssets({
