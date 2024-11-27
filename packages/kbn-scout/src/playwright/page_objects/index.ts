@@ -11,12 +11,14 @@ import { ScoutPage } from '../fixtures/types';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
+import { FilterBar } from './fiter_bar';
 import { createLazyPageObject } from './utils';
 
 export interface PageObjects {
   datePicker: DatePicker;
   discover: DiscoverApp;
   dashboard: DashboardApp;
+  filterBar: FilterBar;
 }
 
 /**
@@ -30,6 +32,7 @@ export function createCorePageObjects(page: ScoutPage): PageObjects {
     datePicker: createLazyPageObject(DatePicker, page),
     dashboard: createLazyPageObject(DashboardApp, page),
     discover: createLazyPageObject(DiscoverApp, page),
+    filterBar: createLazyPageObject(FilterBar, page),
     // Add new page objects here
   };
 }

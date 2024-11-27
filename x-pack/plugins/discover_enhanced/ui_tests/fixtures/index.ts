@@ -14,7 +14,7 @@ import {
 } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
-interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
+export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
   };

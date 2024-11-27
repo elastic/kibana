@@ -34,7 +34,7 @@ function extendPageWithTestSubject(page: Page) {
   ];
 
   const extendedMethods: Partial<Record<keyof Page, Function>> & {
-    typeSlowly?: (selector: string, text: string) => Promise<void>;
+    typeWithDelay?: ScoutPage['testSubj']['typeWithDelay'];
   } = {};
 
   for (const method of methods) {
@@ -46,7 +46,7 @@ function extendPageWithTestSubject(page: Page) {
   }
 
   // custom method to type text slowly
-  extendedMethods.typeSlowly = async (selector: string, text: string) => {
+  extendedMethods.typeWithDelay = async (selector: string, text: string) => {
     for (const char of text) {
       const testSubjSelector = subj(selector);
       await page.locator(testSubjSelector).click();
@@ -56,7 +56,7 @@ function extendPageWithTestSubject(page: Page) {
   };
 
   return extendedMethods as Record<keyof Page, any> & {
-    typeSlowly: ScoutPage['testSubj']['typeSlowly'];
+    typeWithDelay: ScoutPage['testSubj']['typeWithDelay'];
   };
 }
 
@@ -93,6 +93,9 @@ export const scoutPageFixture = base.extend<{ page: ScoutPage; kbnUrl: KibanaUrl
 
     // Method to navigate to specific Kibana apps
     page.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+
+    page.waitForLoadingIndicatorHidden = () =>
+      page.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
 
     await use(page);
   },

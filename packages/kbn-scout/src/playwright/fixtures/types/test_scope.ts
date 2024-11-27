@@ -24,6 +24,7 @@ export interface LoginFixture {
 
 export type ScoutPage = Page & {
   gotoApp: (appName: string, options?: Parameters<Page['goto']>[1]) => ReturnType<Page['goto']>;
+  waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
   testSubj: {
     check: (selector: string, options?: Parameters<Page['check']>[1]) => ReturnType<Page['check']>;
     click: (selector: string, options?: Parameters<Page['click']>[1]) => ReturnType<Page['click']>;
@@ -72,6 +73,6 @@ export type ScoutPage = Page & {
       options?: Parameters<Page['waitForSelector']>[1]
     ) => ReturnType<Page['waitForSelector']>;
     // custom methods
-    typeSlowly: (selector: string, text: string) => Promise<void>;
+    typeWithDelay: (selector: string, text: string) => Promise<void>;
   };
 };
