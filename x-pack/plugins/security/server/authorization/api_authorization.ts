@@ -116,7 +116,10 @@ export function initAPIAuthorization(
               : [privilegeEntry];
 
           for (const privilege of privileges) {
-            if (isReservedPrivilegeSet(privilege)) {
+            if (
+              isReservedPrivilegeSet(privilege) &&
+              !acc.requestedReservedPrivileges.includes(privilege)
+            ) {
               acc.requestedReservedPrivileges.push(privilege);
             } else {
               acc.requestedPrivileges.push(privilege);
