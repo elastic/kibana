@@ -66,11 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should be able to discover and verify no of hits for alias2', async function () {
-        const expectedHitCount = '6';
+        const expectedHitCount = '5';
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('alias2*');
 
-        await retry.waitForWithTimeout('expected hit count to be 5', 300000, async () => {
+        await retry.waitForWithTimeout('expected hit count to be 5', 30000, async () => {
           return (await PageObjects.discover.getHitCount()) === expectedHitCount;
         });
       });
