@@ -432,9 +432,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
       let updatedObservableTypes = [];
 
       if (existingObservableIndex === -1) {
-        updatedObservableTypes = [...observableTypes, data];
+        updatedObservableTypes = [...structuredClone(observableTypes), data];
       } else {
-        updatedObservableTypes = [...observableTypes];
+        updatedObservableTypes = structuredClone(observableTypes);
         updatedObservableTypes[existingObservableIndex] = data;
       }
 
