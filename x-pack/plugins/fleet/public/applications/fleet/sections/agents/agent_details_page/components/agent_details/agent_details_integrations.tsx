@@ -15,7 +15,8 @@ import { AgentDetailsIntegration } from './agent_details_integration';
 export const AgentDetailsIntegrations: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+  linkToLogs?: boolean;
+}> = memo(({ agent, agentPolicy, linkToLogs = true }) => {
   if (!agentPolicy || !agentPolicy.package_policies) {
     return null;
   }
@@ -31,6 +32,7 @@ export const AgentDetailsIntegrations: React.FunctionComponent<{
               agent={agent}
               agentPolicy={agentPolicy}
               packagePolicy={packagePolicy}
+              linkToLogs={linkToLogs}
               data-test-subj={`${testSubj}-accordion`}
             />
           </EuiFlexItem>
