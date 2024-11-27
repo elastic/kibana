@@ -195,7 +195,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     void core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
         core,
-        config,
         dependencies: {
           pluginsSetup: {
             ...plugins,
