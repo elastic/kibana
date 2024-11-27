@@ -100,35 +100,31 @@ const buildIngestPipeline = ({
     // },
     {
       script: {
+        on_failure: [
+          {
+            set: {
+              field: 'error.message',
+              value:
+                'Processor {{ _ingest.on_failure_processor_type }} with tag {{ _ingest.on_failure_processor_tag }} in pipeline {{ _ingest.on_failure_pipeline }} failed with message {{ _ingest.on_failure_message }}',
+            },
+          },
+        ],
         lang: 'painless',
         source: `
 Map merged = ctx;
 def id = ctx.entity.id;
 for (meta in ctx.entities.keyword) {
     Object json = Processors.json(meta);
-    // Here we can have some smarter merging logic
+    
     for (entry in ((Map)json)[id].entrySet()) {
-        String key = entry.getKey();
-        Object value = entry.getValue();
-        // Check if the key already exists in merged map
-        if (merged.containsKey(key)) {
-            // Ensure the existing value is a list and add the new value
-            ((List) merged.get(key)).add(value);
-        } else {
-            // Create a new list and add the value
-            def values = [value]; // Groovy list syntax
-            merged.put(key, values);
-        }
+      String key = entry.getKey();
+      Object value = entry.getValue();
+      merged.put(key, value);
     }
 }
 merged.entity.id = id;
 ctx = merged;
 `,
-      },
-    },
-    {
-      remove: {
-        field: 'collected_metadata',
       },
     },
   ];
