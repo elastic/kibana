@@ -162,7 +162,7 @@ describe('LicenseFetcher', () => {
     expect(clusterClient.asInternalUser.xpack.info).toBeCalledTimes(1);
 
     const licensePromise = fetcher();
-    jest.advanceTimersByTimeAsync(sumOfRetryTimes);
+    await jest.advanceTimersByTimeAsync(sumOfRetryTimes);
     license = await licensePromise;
     expect(license.uid).toEqual('license-1');
     // should be called once in the successful mock, once in the error mock
