@@ -119,3 +119,54 @@ export const hasTemplateSnippet = (str: string = '') => {
   //  * And followed by }}}
   return /{{{.+}}}/.test(str);
 };
+
+const escapeLiteralStrings = (data: string): string[] => {
+  const splitData = data.split(`"""`);
+  for (let i = 1; i < splitData.length - 1; i += 2) {
+    splitData[i] = JSON.stringify(splitData[i]);
+  }
+  return splitData;
+};
+
+const convertProcessorValueToJson = (data: string): any => {
+  if (!data) {
+    return undefined;
+  }
+
+  try {
+    const escapedData = escapeLiteralStrings(data);
+    return JSON.parse(escapedData.join(''));
+  } catch (error) {
+    return data;
+  }
+};
+
+export const collapseEscapedStrings = (data: string): string => {
+  if (data) {
+    return escapeLiteralStrings(data).join('');
+  }
+  return data;
+};
+
+const fieldToConvertToJson = [
+  'inference_config',
+  'field_map',
+  'params',
+  'pattern_definitions',
+  'processor',
+];
+
+export const convertProccesorsToJson = (obj: { [key: string]: any }): { [key: string]: any } => {
+  return Object.fromEntries(
+    Object.entries(obj).flatMap(([key, value]) => {
+      if (key === 'customOptions') {
+        const convertedValue = convertProcessorValueToJson(value);
+        return Object.entries(convertedValue);
+      } else if (fieldToConvertToJson.includes(key)) {
+        return [[key, convertProcessorValueToJson(value)]];
+      } else {
+        return [[key, value]];
+      }
+    })
+  );
+};

@@ -211,7 +211,7 @@ export const SEARCH_RELEVANCE_PLUGIN = {
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
     defaultMessage: 'Manage your inference endpoints for semantic search and AI use cases.',
   }),
-  URL: '/app/enterprise_search/relevance',
+  URL: '/app/elasticsearch/relevance',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };

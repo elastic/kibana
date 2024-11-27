@@ -1840,6 +1840,20 @@
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.NewPackagePolicy.supports_agentless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supports_agentless",
+            "description": [],
+            "signature": [
+              "boolean | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3084,7 +3098,7 @@
                         "section": "def-common.PackagePolicyConfigRecord",
                         "text": "PackagePolicyConfigRecord"
                       },
-                      " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; }"
+                      " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; supports_agentless?: boolean | null | undefined; }"
                     ],
                     "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -20134,6 +20148,57 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.createOutputClient",
+          "type": "Function",
+          "tags": [],
+          "label": "createOutputClient",
+          "description": [
+            "\nCreate a Fleet Output Client instance"
+          ],
+          "signature": [
+            "(request: ",
+            {
+              "pluginId": "@kbn/core-http-server",
+              "scope": "server",
+              "docId": "kibKbnCoreHttpServerPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any>) => Promise<",
+            "OutputClientInterface",
+            ">"
+          ],
+          "path": "x-pack/plugins/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "fleet",
+              "id": "def-server.FleetStartContract.createOutputClient.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/core-http-server",
+                  "scope": "server",
+                  "docId": "kibKbnCoreHttpServerPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/plugins/fleet/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -22472,7 +22537,7 @@
             "signature": [
               "{ monitoring: ",
               "FullAgentPolicyMonitoring",
-              "; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; } | undefined"
+              "; download: { sourceURI: string; }; features: Record<string, { enabled: boolean; }>; protection?: { enabled: boolean; uninstall_token_hash: string; signing_key: string; } | undefined; logging?: { level?: string | undefined; to_files?: boolean | undefined; files?: { rotateeverybytes?: number | undefined; keepfiles?: number | undefined; interval?: string | undefined; } | undefined; } | undefined; limits?: { go_max_procs?: number | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
@@ -24604,6 +24669,20 @@
             "description": [],
             "signature": [
               "{ inputs?: { [key: string]: any; } | undefined; } | null | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicy.supports_agentless",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supports_agentless",
+            "description": [],
+            "signature": [
+              "boolean | null | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,

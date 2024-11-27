@@ -22,6 +22,7 @@ export function ExplorerChartLabel({
   isEmbeddable,
   wrapLabel = false,
   onSelectEntity,
+  showFilterIcons,
 }) {
   // Depending on whether we wrap the entityField badges to a new line, we render this differently:
   //
@@ -51,13 +52,15 @@ export function ExplorerChartLabel({
     return (
       <Fragment key={`badge-wrapper-${key}`}>
         <ExplorerChartLabelBadge entity={entity} />
-        {onSelectEntity !== undefined && (
+        {onSelectEntity !== undefined && showFilterIcons === true ? (
           <EntityFilter
             isEmbeddable={isEmbeddable}
             onFilter={applyFilter}
             influencerFieldName={entity.fieldName}
             influencerFieldValue={entity.fieldValue}
           />
+        ) : (
+          <>&nbsp;</>
         )}
       </Fragment>
     );
@@ -94,7 +97,7 @@ export function ExplorerChartLabel({
 }
 ExplorerChartLabel.propTypes = {
   detectorLabel: PropTypes.object.isRequired,
-  isEmbeddable: PropTypes.boolean,
+  isEmbeddable: PropTypes.bool,
   entityFields: PropTypes.arrayOf(ExplorerChartLabelBadge.propTypes.entity),
   infoTooltip: PropTypes.object.isRequired,
   wrapLabel: PropTypes.bool,

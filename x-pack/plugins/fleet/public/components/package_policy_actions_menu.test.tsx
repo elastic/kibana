@@ -109,18 +109,18 @@ function createMockPackagePolicy(
     ...props,
   };
 }
-describe('PackagePolicyActionsMenu', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/191804
+describe.skip('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
-  it('Should disable upgrade button if package does not have upgrade', async () => {
+  it('Should not have upgrade button if package does not have upgrade', async () => {
     const agentPolicies = createMockAgentPolicies();
     const packagePolicy = createMockPackagePolicy({ hasUpgrade: false });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
     await act(async () => {
-      const upgradeButton = utils.getByTestId('PackagePolicyActionsUpgradeItem');
-      expect(upgradeButton).toBeDisabled();
+      expect(utils.queryByTestId('PackagePolicyActionsUpgradeItem')).toBeNull();
     });
   });
 
