@@ -41,7 +41,7 @@ export const config: PluginConfigDescriptor<ObservabilityLogsExplorerConfig> = {
       'xpack.observabilityLogsExplorer.enabled',
       { level: 'warning' }
     ),
-    unused('xpack.observabilityLogsExplorer.navigation.showAppLink', { level: 'warning' }),
+    unused('navigation.showAppLink', { level: 'warning' }),
   ],
   exposeToBrowser: {
     navigation: {

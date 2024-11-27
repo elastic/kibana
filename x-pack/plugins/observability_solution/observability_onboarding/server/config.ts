@@ -30,7 +30,7 @@ export const config: PluginConfigDescriptor<ObservabilityOnboardingConfig> = {
   },
   schema: configSchema,
   deprecations: ({ unused }) => [
-    unused('xpack.observabilityOnboarding.ui.enabled', { level: 'warning' }),
-    unused('xpack.observabilityOnboarding.serverless.enabled', { level: 'warning' }),
+    unused('ui.enabled', { level: 'warning' }),
+    unused('serverless.enabled', { level: 'warning' }),
   ],
 };
