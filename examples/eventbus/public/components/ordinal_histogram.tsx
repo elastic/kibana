@@ -65,34 +65,32 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
     state.actions.setCrossfilter({ id: iframeID, filter });
   }, 50);
 
-  const esqlContext = useMemo(() => {
-    if (esql === '') return null;
-
-    const els = esql.split('|').map((d) => d.trim());
-    els.push(`STATS count = COUNT(*) BY ${field}`);
-    els.push('SORT count DESC');
-    els.push('LIMIT 10');
-
-    return els.join('\n| ');
-  }, [esql, field]);
-
   const esqlWithFilters = useMemo(() => {
     if (esql === '') return null;
 
     const els = esql.split('|').map((d) => d.trim());
-    Object.values(panelFilters).forEach((filter) => {
-      els.splice(1, 0, `WHERE ${filter}`);
-    });
 
-    els.push(`STATS count = COUNT(*) BY ${field}`);
-    els.push('SORT count DESC');
+    if (Object.values(panelFilters).length === 0) {
+      els.push(
+        `STATS count = COUNT(*), context = COUNT(*) WHERE ${field}=="", total = COUNT(*) BY ${field}`
+      );
+    } else {
+      const filter = Object.values(panelFilters).join(' AND ');
+      els.push(
+        `STATS count = COUNT(*) WHERE ${filter}, context = COUNT(*) WHERE NOT(${filter}), total = COUNT(*) BY ${field}`
+      );
+      els.push('SORT total DESC');
+    }
+
+    els.push('SORT total DESC');
     els.push('LIMIT 10');
 
     return els.join('\n| ');
   }, [esql, field, panelFilters]);
+  console.log('esqlWithFilters', esqlWithFilters);
 
-  const rawDataContext = useFetchESQL(esqlContext);
   const rawDataWithFilters = useFetchESQL(esqlWithFilters);
+  console.log('rawDataWithFilters', rawDataWithFilters);
 
   const [initialized, setInitialized] = React.useState(false);
   const wrapperRef = React.useRef(null);
@@ -101,41 +99,27 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
   // https://observablehq.com/@vega/vega-lite-api
 
   const data = React.useMemo(() => {
-    function transformData(rawData: ESQLSearchResponse) {
-      return rawData.values.map((row) => {
-        return row.reduce((acc, val, idx) => {
-          acc[rawData.columns[idx].name.replace(/\./g, '_')] = val;
-          return acc;
-        }, {});
-      });
+    if (!rawDataWithFilters) {
+      return null;
     }
 
-    const wideFormatFull = rawDataContext ? transformData(rawDataContext) : null;
-    const crossfilter = rawDataWithFilters ? transformData(rawDataWithFilters) : null;
-
-    if (wideFormatFull === null || crossfilter === null) {
-      return [];
-    }
-
-    console.log('wideFormatFull', wideFormatFull);
-
-    return [
-      // crossfilter
-      ...crossfilter.map((d) => ({
-        ...d,
+    const longFormat = rawDataWithFilters.values.reduce((acc, val, idx) => {
+      acc.push({
+        name: val[3],
+        count: val[0],
         type: '01_filter',
-      })),
-      // global
-      ...wideFormatFull.map((d, i) => ({
-        ...d,
-        count:
-          d.count -
-          (crossfilter.find((d2) => d2[fieldWithoutKeyword] === d[fieldWithoutKeyword])?.count ??
-            0),
+      });
+      acc.push({
+        name: val[3],
+        count: val[1],
         type: '02_context',
-      })),
-    ];
-  }, [rawDataContext, rawDataWithFilters]);
+      });
+      return acc;
+    }, []);
+
+    console.log('longFormat', longFormat);
+    return longFormat;
+  }, [rawDataWithFilters]);
 
   React.useEffect(() => {
     if (vegaRef.current) {
@@ -160,8 +144,8 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
         view.tooltip(new vegaTooltip.Handler().call);
 
         view.addSignalListener('ordinal_listener', function (event, item) {
-          if (item[fieldWithoutKeyword]) {
-            dispatch(`${field}=="${item[fieldWithoutKeyword]}"`);
+          if (item.name) {
+            dispatch(`${field}=="${item.name}"`);
           } else {
             dispatch('');
           }
@@ -186,7 +170,7 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
       .encode(
         // https://vega.github.io/vega-lite/docs/timeunit.html
         vl.x().sum('count').axis({ title: '' }),
-        vl.y().fieldN(fieldWithoutKeyword).sort('-x').axis({ title: '' }),
+        vl.y().fieldN('name').sort('-x').axis({ title: '' }),
         vl
           .color()
           .fieldN('type')
@@ -207,7 +191,7 @@ export const OrdinalHistogram: FC<OrdinalHistogramProps> = (props) => {
             },
           ])
           .value(1),
-        vl.tooltip([vl.fieldN(fieldWithoutKeyword), vl.fieldQ('count')])
+        vl.tooltip([vl.fieldN('name'), vl.fieldQ('count')])
       )
       .title({ text: field, anchor: 'start' })
       .width('container')
