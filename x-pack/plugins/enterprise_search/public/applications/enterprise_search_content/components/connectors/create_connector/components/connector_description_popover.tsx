@@ -6,6 +6,8 @@
  */
 import React, { useState } from 'react';
 
+import { css } from '@emotion/react';
+
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -20,6 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import connectorLogo from '../../../../../../assets/images/connector.svg';
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 const nativePopoverPanels = [
   {
@@ -83,13 +86,15 @@ const connectorClientPopoverPanels = [
 ];
 
 export interface ConnectorDescriptionPopoverProps {
-  isDisabled: boolean;
   isNative: boolean;
+  isOnlySelfManagedAvailable: boolean;
+  isRunningLocally?: boolean;
 }
 
 export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
-  isDisabled,
+  isOnlySelfManagedAvailable,
+  isRunningLocally,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;
@@ -111,55 +116,111 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
         setIsPopoverOpen(false);
       }}
     >
-      <EuiPanel hasBorder={false} hasShadow={false}>
-        {isDisabled && (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiCallOut
-                title={i18n.translate(
-                  'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.notAvailableTitle',
-                  {
-                    defaultMessage:
-                      'This connector is not available as an Elastic-managed Connector',
+      <EuiPanel
+        css={css`
+          max-width: 700px;
+        `}
+        hasBorder={false}
+        hasShadow={false}
+      >
+        {(isOnlySelfManagedAvailable || isRunningLocally) && (
+          <>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiCallOut
+                  title={
+                    isOnlySelfManagedAvailable
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
+                          {
+                            defaultMessage:
+                              'This connector is not available as an Elastic-managed Connector',
+                          }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isRunningLocallyTitle',
+                          {
+                            defaultMessage:
+                              'Elastic-managed connectors are available in Elastic Cloud',
+                          }
+                        )
                   }
-                )}
-                size="s"
-                iconType="warning"
-                color="warning"
-              />
-            </EuiFlexItem>
+                  size="s"
+                  iconType="warning"
+                  color="warning"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </>
+        )}
+
+        {!isRunningLocally && (
+          <EuiFlexGroup>
+            {panels.map((panel) => {
+              return (
+                <EuiFlexItem grow={false} key={panel.id}>
+                  <EuiFlexGroup
+                    direction="column"
+                    alignItems="center"
+                    gutterSize="s"
+                    style={{ maxWidth: 200 }}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup responsive={false} gutterSize="s">
+                        {panel.icons.map((icon, index) => (
+                          <EuiFlexItem grow={false} key={index}>
+                            {icon}
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" grow={false} textAlign="center">
+                        <p>{panel.description}</p>
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
         )}
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          {panels.map((panel) => {
-            return (
-              <EuiFlexItem grow={false} key={panel.id}>
-                <EuiFlexGroup
-                  direction="column"
-                  alignItems="center"
-                  gutterSize="s"
-                  style={{ maxWidth: 200 }}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup responsive={false} gutterSize="s">
-                      {panel.icons.map((icon, index) => (
-                        <EuiFlexItem grow={false} key={index}>
-                          {icon}
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="s" grow={false} textAlign="center">
-                      <p>{panel.description}</p>
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+        {isRunningLocally && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="column" justifyContent="center">
+              <EuiFlexItem grow>
+                <EuiText textAlign="center">
+                  <h3>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.learnMore',
+                      { defaultMessage: 'Start a 30-day trial' }
+                    )}
+                  </h3>
+                </EuiText>
               </EuiFlexItem>
-            );
-          })}
-        </EuiFlexGroup>
+              <EuiFlexItem grow>
+                <EuiText size="s" textAlign="center" color="subdued">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.learnMore',
+                    {
+                      defaultMessage:
+                        "Take advantage of Elastic's generative AI capabilities to address search, observability, and security challenges across your organization in real time, at scale",
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
+                  {i18n.translate('xpack.enterpriseSearch.createConnector.startTrialButtonLabel', {
+                    defaultMessage: 'Start free trial',
+                  })}
+                </EuiButtonTo>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </EuiPanel>
     </EuiPopover>
   );
