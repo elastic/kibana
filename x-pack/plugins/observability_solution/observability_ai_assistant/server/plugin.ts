@@ -120,14 +120,16 @@ export class ObservabilityAIAssistantPlugin
       config: this.config,
     }));
 
-    setupConversationAndKbIndexAssets({ core, logger: this.logger })
-      .then(() => {
-        return registerMigrateKnowledgeBaseEntriesTask({
-          core,
-          taskManager: plugins.taskManager,
-          logger: this.logger,
-          config: this.config,
-        });
+    setupConversationAndKbIndexAssets({ core, logger: this.logger, config: this.config })
+      .then((didSetupAssets) => {
+        if (didSetupAssets) {
+          return registerMigrateKnowledgeBaseEntriesTask({
+            core,
+            taskManager: plugins.taskManager,
+            logger: this.logger,
+            config: this.config,
+          });
+        }
       })
       .catch((e) => {
         this.logger.error(
