@@ -16,7 +16,7 @@ import {
   getUnchangingComparator,
   initializeTitles,
 } from '@kbn/presentation-publishing';
-import { apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import { buildObservableVariable, isTextBasedLanguage } from '../helper';
 import type {
   LensComponentProps,
@@ -27,6 +27,7 @@ import type {
   LensSharedProps,
   IntegrationCallbacks,
   LensInternalApi,
+  LensApi,
 } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import { StateManagementConfig } from './initialize_state_management';
@@ -39,9 +40,12 @@ export interface DashboardServicesConfig {
     PublishesWritablePanelDescription &
     HasInPlaceLibraryTransforms &
     HasLibraryTransforms<LensRuntimeState> &
+    Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   serialize: () => SerializedProps;
-  comparators: StateComparators<SerializedProps & { isNewPanel?: boolean }>;
+  comparators: StateComparators<
+    SerializedProps & Pick<LensApi, 'parentApi'> & { isNewPanel?: boolean }
+  >;
   cleanup: () => void;
 }
 
@@ -78,6 +82,7 @@ export function initializeDashboardServices(
 
   return {
     api: {
+      parentApi: apiIsPresentationContainer(parentApi) ? parentApi : undefined,
       defaultPanelTitle: defaultPanelTitle$,
       defaultPanelDescription: defaultPanelDescription$,
       ...titlesApi,
@@ -179,6 +184,7 @@ export function initializeDashboardServices(
       overrides: overridesComparator,
       disableTriggers: disabledTriggersComparator,
       isNewPanel: getUnchangingComparator<{ isNewPanel?: boolean }, 'isNewPanel'>(),
+      parentApi: getUnchangingComparator<Pick<LensApi, 'parentApi'>, 'parentApi'>(),
     },
     cleanup: noop,
   };
