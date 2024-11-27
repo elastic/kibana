@@ -75,7 +75,7 @@ export const GridRow = forwardRef<
     useEffect(
       () => {
         /** Update the styles of the grid row via a subscription to prevent re-renders */
-        const styleSubscription = combineLatest([
+        const interactionStyleSubscription = combineLatest([
           gridLayoutStateManager.interactionEvent$,
           gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.runtimeSettings$,
@@ -116,7 +116,7 @@ export const GridRow = forwardRef<
             }
           });
 
-        const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$
+        const expandedPanelStyleSubscription = gridLayoutStateManager.expandedPanelId$
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
           .subscribe((expandedPanelId) => {
             const rowContainerRef = rowContainer.current;
@@ -178,9 +178,9 @@ export const GridRow = forwardRef<
           });
 
         return () => {
-          styleSubscription.unsubscribe();
+          interactionStyleSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
-          expandedPanelSubscription.unsubscribe();
+          expandedPanelStyleSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
