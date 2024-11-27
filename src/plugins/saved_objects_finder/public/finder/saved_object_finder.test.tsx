@@ -38,16 +38,18 @@ describe('SavedObjectsFinder', () => {
   const doc = {
     id: '1',
     type: 'search',
-    attributes: { title: 'Example title' },
+    attributes: { title: 'Example title', description: 'example description' },
   };
 
   const doc2 = {
     id: '2',
     type: 'search',
-    attributes: { title: 'Another title' },
+    attributes: { title: 'Another title', description: 'another description' },
   };
 
   const doc3 = { type: 'vis', id: '3', attributes: { title: 'Vis' } };
+
+  const doc4 = { type: 'search', id: '4', attributes: { title: 'Search' } };
 
   const searchMetaData = [
     {
@@ -216,6 +218,30 @@ describe('SavedObjectsFinder', () => {
           </EuiButton>
         </React.Fragment>
       `);
+    });
+
+    it('render description if provided', async () => {
+      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ hits: [doc, doc2, doc4] })
+      );
+
+      const wrapper = shallow(
+        <SavedObjectFinder
+          {...baseProps}
+          services={{ uiSettings, contentClient, savedObjectsTagging }}
+          savedObjectMetaData={searchMetaData}
+        />
+      );
+
+      wrapper.instance().componentDidMount!();
+      await nextTick();
+      expect(
+        wrapper
+          .find(EuiInMemoryTable)
+          .prop('items')
+          .filter((item: any) => item.attributes.description)
+          .map((item: any) => item.attributes.description)
+      ).toEqual([doc.attributes.description, doc2.attributes.description]);
     });
   });
 
