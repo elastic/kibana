@@ -35,7 +35,15 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
         },
       }}
     >
-      <EuiPanel paddingSize="none" color="subdued" hasShadow={false} hasBorder={false}>
+      <EuiPanel
+        paddingSize="none"
+        color="subdued"
+        hasShadow={false}
+        hasBorder={false}
+        className={css`
+          display: flex;
+        `}
+      >
         <EuiSpacer size="m" />
         {children}
       </EuiPanel>
