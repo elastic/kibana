@@ -202,6 +202,275 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.DedicatedTaskRunner",
+        "type": "Class",
+        "tags": [],
+        "label": "DedicatedTaskRunner",
+        "description": [],
+        "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.getPort",
+            "type": "Function",
+            "tags": [],
+            "label": "getPort",
+            "description": [],
+            "signature": [
+              "(uiPort: number) => number"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.DedicatedTaskRunner.getPort.$1",
+                "type": "number",
+                "tags": [],
+                "label": "uiPort",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.getUuid",
+            "type": "Function",
+            "tags": [],
+            "label": "getUuid",
+            "description": [],
+            "signature": [
+              "(mainUuid: string) => string"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.DedicatedTaskRunner.getUuid.$1",
+                "type": "string",
+                "tags": [],
+                "label": "mainUuid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "\nTrue when the FTR config indicates that Kibana has a dedicated task runner process, otherwise false. If this\nproperty is false then all other methods on this class will throw when they are called, so if you're not\ncertain where your code will be run make sure to check `dedicatedTaskRunner.enabled` before calling\nother methods."
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.DedicatedTaskRunner.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.Config",
+                    "text": "Config"
+                  }
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.DedicatedTaskRunner.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  }
+                ],
+                "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.getPort",
+            "type": "Function",
+            "tags": [],
+            "label": "getPort",
+            "description": [
+              "\nThe port number that the dedicated task runner is running on"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.getUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getUrl",
+            "description": [
+              "\nThe full URL for the dedicated task runner process"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.hasUuid",
+            "type": "Function",
+            "tags": [],
+            "label": "hasUuid",
+            "description": [
+              "\nReturns true if the `--server.uuid` setting was passed to the Kibana server, allowing the UUID to\nbe deterministic and ensuring that `dedicatedTaskRunner.getUuid()` won't throw."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.getUuid",
+            "type": "Function",
+            "tags": [],
+            "label": "getUuid",
+            "description": [
+              "\nIf `--server.uuid` is passed to Kibana in the FTR config file then the dedicated task runner will\nuse a UUID derived from that and it will be synchronously available to users via this function.\nOtherwise this function will through."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.getClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getClient",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.KbnClient",
+                "text": "KbnClient"
+              }
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "a `KbnClient` instance that is configured to talk directly to the dedicated task runner. Not really sure how useful this is."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.DedicatedTaskRunner.getSupertest",
+            "type": "Function",
+            "tags": [],
+            "label": "getSupertest",
+            "description": [],
+            "signature": [
+              "() => ",
+              "node_modules/@types/supertest/lib/agent",
+              "<",
+              "SuperTestStatic",
+              ".Test>"
+            ],
+            "path": "packages/kbn-test/src/functional_test_runner/lib/dedicated_task_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "a Supertest instance that will send requests to the dedicated task runner."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.DockerServersService",
         "type": "Class",
         "tags": [],
@@ -2335,6 +2604,63 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.getArgValue",
+        "type": "Function",
+        "tags": [],
+        "label": "getArgValue",
+        "description": [
+          "\nGet the value of an arg from the CliArg flags."
+        ],
+        "signature": [
+          "(args: ",
+          "KibanaCliArg",
+          "[], name: string) => ",
+          "ArgValue",
+          " | ",
+          "ArgValue",
+          "[] | undefined"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.getArgValue.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "KibanaCliArg",
+              "[]"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.getArgValue.$2",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.getDockerFileMountPath",
         "type": "Function",
         "tags": [],
@@ -2515,6 +2841,103 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.initLogsDir",
+        "type": "Function",
+        "tags": [],
+        "label": "initLogsDir",
+        "description": [],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ", logsDir: string) => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/logs_dir.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.initLogsDir.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/logs_dir.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.initLogsDir.$2",
+            "type": "string",
+            "tags": [],
+            "label": "logsDir",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/logs_dir.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.parseRawFlags",
+        "type": "Function",
+        "tags": [],
+        "label": "parseRawFlags",
+        "description": [],
+        "signature": [
+          "(rawFlags: string[]) => ",
+          "KibanaCliArg",
+          "[]"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.parseRawFlags.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rawFlags",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.readConfigFile",
         "type": "Function",
         "tags": [],
@@ -2634,6 +3057,61 @@
               "(vars: any) => any"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/config_loading.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.remapPluginPaths",
+        "type": "Function",
+        "tags": [],
+        "label": "remapPluginPaths",
+        "description": [
+          "\nParse the list of Kibana CLI Arg flags and extract the loggers config so that they can be extended\nin a subsequent FTR config"
+        ],
+        "signature": [
+          "(args: ",
+          "KibanaCliArg",
+          "[], kibanaInstallDir: string) => ",
+          "KibanaCliArg",
+          "[]"
+        ],
+        "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.remapPluginPaths.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "KibanaCliArg",
+              "[]"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.remapPluginPaths.$2",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaInstallDir",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-test/src/functional_tests/lib/kibana_cli_args.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4195,7 +4673,13 @@
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
-              "DedicatedTaskRunner",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.DedicatedTaskRunner",
+                "text": "DedicatedTaskRunner"
+              },
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -4269,7 +4753,13 @@
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
-              "DedicatedTaskRunner",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.DedicatedTaskRunner",
+                "text": "DedicatedTaskRunner"
+              },
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -4343,7 +4833,13 @@
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
-              "DedicatedTaskRunner",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.DedicatedTaskRunner",
+                "text": "DedicatedTaskRunner"
+              },
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -4417,7 +4913,13 @@
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
-              "DedicatedTaskRunner",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.DedicatedTaskRunner",
+                "text": "DedicatedTaskRunner"
+              },
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -4491,7 +4993,13 @@
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
-              "DedicatedTaskRunner",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.DedicatedTaskRunner",
+                "text": "DedicatedTaskRunner"
+              },
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -4565,7 +5073,13 @@
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
-              "DedicatedTaskRunner",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.DedicatedTaskRunner",
+                "text": "DedicatedTaskRunner"
+              },
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -4639,7 +5153,13 @@
                 "text": "EsVersion"
               },
               "; (serviceName: \"dedicatedTaskRunner\"): ",
-              "DedicatedTaskRunner",
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.DedicatedTaskRunner",
+                "text": "DedicatedTaskRunner"
+              },
               "; <T extends keyof ServiceMap>(serviceName: T): ServiceMap[T]; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
@@ -5579,6 +6099,104 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/fake_mocha_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.UrlParts",
+        "type": "Interface",
+        "tags": [],
+        "label": "UrlParts",
+        "description": [],
+        "path": "packages/kbn-test/kbn_test_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.UrlParts.protocol",
+            "type": "string",
+            "tags": [],
+            "label": "protocol",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/kbn_test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.UrlParts.hostname",
+            "type": "string",
+            "tags": [],
+            "label": "hostname",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/kbn_test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.UrlParts.port",
+            "type": "number",
+            "tags": [],
+            "label": "port",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/kbn-test/kbn_test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.UrlParts.auth",
+            "type": "string",
+            "tags": [],
+            "label": "auth",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/kbn_test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.UrlParts.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/kbn_test_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.UrlParts.password",
+            "type": "string",
+            "tags": [],
+            "label": "password",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-test/kbn_test_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
