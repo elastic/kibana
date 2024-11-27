@@ -73,6 +73,7 @@ export const finalizeSignalsMigrationRoute = (
           });
 
           const spaceId = securitySolution.getSpaceId();
+          const legacySiemSignalsAlias = appClient.getSignalsIndex();
           const signalsAlias = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
           const finalizeResults = await Promise.all(
             migrations.map(async (migration) => {
@@ -80,6 +81,7 @@ export const finalizeSignalsMigrationRoute = (
                 const finalizedMigration = await migrationService.finalize({
                   migration,
                   signalsAlias,
+                  legacySiemSignalsAlias,
                 });
 
                 if (isMigrationFailed(finalizedMigration)) {

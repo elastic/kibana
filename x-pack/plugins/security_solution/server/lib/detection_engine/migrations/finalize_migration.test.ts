@@ -40,6 +40,7 @@ describe('finalizeMigration', () => {
       signalsAlias: 'my-signals-alias',
       soClient,
       username: 'username',
+      legacySiemSignalsAlias: '.siem-signals-default',
     });
 
     expect(updateMigrationSavedObject).not.toHaveBeenCalled();
@@ -54,6 +55,7 @@ describe('finalizeMigration', () => {
       signalsAlias: 'my-signals-alias',
       soClient,
       username: 'username',
+      legacySiemSignalsAlias: '.siem-signals-default',
     });
 
     expect(updateMigrationSavedObject).not.toHaveBeenCalled();
@@ -72,6 +74,7 @@ describe('finalizeMigration', () => {
       signalsAlias: 'my-signals-alias',
       soClient,
       username: 'username',
+      legacySiemSignalsAlias: '.siem-signals-default',
     });
 
     expect(updateMigrationSavedObject).toHaveBeenCalledWith(
