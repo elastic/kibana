@@ -31,7 +31,6 @@ export const useEntityEngineStatusNew = (opts: Options = {}) => {
     queryKey: ['GET_ENTITY_STORE_STATUS', opts.withComponents],
     queryFn: () => getEntityStoreStatus(opts.withComponents),
     cacheTime: 0,
-    // enabled: !skip,
     refetchOnWindowFocus: true,
     keepPreviousData: true,
   });

@@ -55,7 +55,7 @@ const installedStatuses = ['stopped', 'enabled', 'error'];
 
 enum TabId {
   Import = 'import',
-  Resources = 'resources',
+  Status = 'status',
 }
 
 export const EntityStoreManagementPage = () => {
@@ -269,8 +269,7 @@ export const EntityStoreManagementPage = () => {
         alignItems="center"
         rightSideItems={
           !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
-            ? // !isEntityStoreFeatureFlagDisabled && true
-              [
+            ? [
                 <EnablementButton
                   isLoading={
                     isMutationLoading ||
@@ -284,7 +283,7 @@ export const EntityStoreManagementPage = () => {
                 />,
                 canDeleteEntityEngine ? <ClearEntityDataButton /> : null,
               ]
-            : []
+            : undefined
         }
       />
       <EuiSpacer size="s" />
@@ -311,16 +310,22 @@ export const EntityStoreManagementPage = () => {
           isSelected={selectedTabId === TabId.Import}
           onClick={() => setSelectedTabId(TabId.Import)}
         >
-          {'Import Entities'}
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.importEntities.tabTitle"
+            defaultMessage="Import Entities"
+          />
         </EuiTab>
 
         {installedStatuses.includes(entityStoreStatus.status) && privileges?.has_all_required && (
           <EuiTab
-            key={TabId.Resources}
-            isSelected={selectedTabId === TabId.Resources}
-            onClick={() => setSelectedTabId(TabId.Resources)}
+            key={TabId.Status}
+            isSelected={selectedTabId === TabId.Status}
+            onClick={() => setSelectedTabId(TabId.Status)}
           >
-            {'Engine Status'}
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.engineStatus.tabTitle"
+              defaultMessage="Engine Status"
+            />
           </EuiTab>
         )}
       </EuiTabs>
@@ -328,7 +333,7 @@ export const EntityStoreManagementPage = () => {
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xl">
         {selectedTabId === TabId.Import && <FileUploadSection />}
-        {selectedTabId === TabId.Resources && <EngineStatus />}
+        {selectedTabId === TabId.Status && <EngineStatus />}
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column">
             {initEntityEngineMutation.isError && (
