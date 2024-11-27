@@ -48,11 +48,16 @@ const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
-  const [expandedPanelId, setExpandedPanelId] = useState<string | undefined>();
+  const [expandedPanelId, setExpandedPanelId] = useState<string | undefined>('panel1');
   const [accessMode, setAccessMode] = useState<GridAccessMode>('EDIT');
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
+  const [isExtraElementVisible, setIsExtraElementVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    setTimeout(() => setIsExtraElementVisible(true), 3000);
+  }, []);
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
 
@@ -128,6 +133,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             defaultMessage: 'Grid Layout Example',
           })}
         />
+        {isExtraElementVisible && <EuiSpacer size="xl" />}
         <EuiPageTemplate.Section color="subdued">
           <EuiCallOut
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {

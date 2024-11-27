@@ -49,14 +49,20 @@ export const GridHeightSmoother = ({
         if (!smoothHeightRef.current) return;
 
         if (expandedPanelId) {
-          const smoothHeightRefY =
-            smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
           const gutterSize = parseFloat(euiThemeVars.euiSizeL);
 
           // When panel is expanded, ensure the page occupies the full viewport height:
-          smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px)`;
+
+          smoothHeightRef.current.style.height = `-webkit-fill-available`;
+          smoothHeightRef.current.style.position = 'fixed';
+          smoothHeightRef.current.style.marginBottom = gutterSize + 'px';
+          smoothHeightRef.current.style.width = `calc(100vw - ${2 * gutterSize}px)`;
           smoothHeightRef.current.style.transition = 'none';
         } else {
+          smoothHeightRef.current.style.height = ``;
+          smoothHeightRef.current.style.position = '';
+          smoothHeightRef.current.style.marginBottom = '';
+          smoothHeightRef.current.style.width = ``;
           smoothHeightRef.current.style.display = '';
           smoothHeightRef.current.style.transition = '';
         }
