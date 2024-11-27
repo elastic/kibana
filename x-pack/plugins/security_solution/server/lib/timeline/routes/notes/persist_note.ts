@@ -53,10 +53,9 @@ export const persistNoteRoute = (router: SecuritySolutionPluginRouter) => {
             note,
             overrideOwner: true,
           });
-          const body: PersistNoteRouteResponse = { data: { persistNote: res } };
 
           return response.ok({
-            body,
+            body: res,
           });
         } catch (err) {
           const error = transformError(err);

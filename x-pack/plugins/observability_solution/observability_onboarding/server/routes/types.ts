@@ -46,10 +46,8 @@ export interface ObservabilityOnboardingRouteHandlerResources {
 }
 
 export interface ObservabilityOnboardingRouteCreateOptions {
-  options: {
-    tags: string[];
-    xsrfRequired?: boolean;
-  };
+  tags: string[];
+  xsrfRequired?: boolean;
 }
 
 export const IntegrationRT = t.intersection([

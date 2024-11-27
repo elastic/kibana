@@ -81,7 +81,7 @@ describe('utils', () => {
       ],
       [
         { caseId: null },
-        'invalid features: [not-exists], please only provide valid features: [mttr]',
+        'invalid features: [not-exists], please only provide valid features: [mttr, status]',
       ],
     ])('throws if the feature is not supported: %s', async (opts, msg) => {
       expect(() =>
