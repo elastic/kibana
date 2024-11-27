@@ -235,9 +235,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const { setPersistentEqlQuery, setPersistentEqlOptions } = usePersistentQuery({ form });
   usePersistentAlertSuppressionState({ form });
-  usePersistentThreatMatchState({
-    form,
-  });
+  usePersistentThreatMatchState({ form });
 
   const handleSetRuleFromTimeline = useCallback<SetRuleQuery>(
     ({ index: timelineIndex, queryBar: timelineQueryBar, eqlOptions }) => {
