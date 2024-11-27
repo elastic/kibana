@@ -9,6 +9,7 @@ import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ObservableTypesForm, type ObservableTypesFormProps } from './form';
+import { screen } from '@testing-library/react';
 
 describe('ObservableTypesForm ', () => {
   let appMock: AppMockRenderer;
@@ -25,5 +26,6 @@ describe('ObservableTypesForm ', () => {
 
   it('renders correctly', async () => {
     appMock.render(<ObservableTypesForm {...props} />);
+    expect(await screen.findByTestId('observable-types-form')).toBeInTheDocument();
   });
 });

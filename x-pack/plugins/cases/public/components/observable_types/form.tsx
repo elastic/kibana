@@ -37,7 +37,7 @@ const FormComponent: React.FC<ObservableTypesFormProps> = ({ onChange, initialVa
   }, [onChange, isValid, submit]);
 
   return (
-    <Form form={form}>
+    <Form form={form} data-test-subj="observable-types-form">
       <FormFields isSubmitting={isSubmitting} />
     </Form>
   );
