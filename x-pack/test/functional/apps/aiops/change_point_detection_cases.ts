@@ -47,7 +47,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         reporter: USER.ML_POWERUSER,
       };
 
+      await ml.testExecution.logTestStep('attaches chart to a case');
       await aiops.changePointDetectionPage.attachChartsToCases(0, caseParams);
+
+      await ml.testExecution.logTestStep('checks if attachment is present in the case');
       await ml.cases.assertCaseWithChangePointDetectionChartsAttachment(caseParams);
     });
   });

@@ -130,8 +130,7 @@ export function CasesCreateViewServiceProvider(
     async createCaseFromModal(params: CreateCaseParams) {
       await casesCommon.assertCaseModalVisible(true);
       await testSubjects.click('cases-table-add-case-filter-bar');
-
-      await casesCommon.assertCaseModalVisible(false);
+      await testSubjects.waitForHidden('all-cases-modal', 5000);
       await this.creteCaseFromFlyout(params);
     },
   };
