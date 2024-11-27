@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { SupertestWithRoleScopeType } from '../../../services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  const config = getService('config');
+  const isServerless = config.get('serverless');
   const correctPrivileges = {
     applications: [],
-    cluster: ['monitor', 'read_pipeline', 'read_ilm'],
+    cluster: ['monitor', 'read_pipeline', ...(!isServerless ? ['read_ilm'] : [])],
     indices: [
       {
         allow_restricted_indices: false,
@@ -62,6 +64,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         (apiKey: any) => apiKey.name.includes('synthetics-api-key') && apiKey.invalidated === false
       );
     };
+
+    before(async () => {
+      supertestWithEditorScope = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+        withInternalHeaders: true,
+        useCookieHeader: true,
+      });
+      supertestWithAdminScope = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+        withInternalHeaders: true,
+        useCookieHeader: true,
+      });
+    });
 
     describe('[PUT] /internal/uptime/service/enablement', () => {
       before(async () => {
@@ -276,10 +289,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      // kibana.spaces.create fails with 401
       it('is space agnostic', async () => {
-        const SPACE_ID = 'test-space';
-        const SPACE_NAME = 'test-space-name';
+        const SPACE_ID = `test-space-${uuidv4()}`;
+        const SPACE_NAME = `test-space-name-${uuidv4()}`;
         await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
         // can enable synthetics in default space when enabled in a non default space
@@ -306,7 +318,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(apiResponse.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
@@ -324,7 +336,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(apiResponse2.body).eql({
           areApiKeysEnabled: true,
-          canManageApiKeys: false,
+          canManageApiKeys: true,
           canEnable: true,
           isEnabled: true,
           isValidApiKey: true,
