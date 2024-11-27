@@ -77,6 +77,6 @@ steps:
     async: true
     build:
       env:
-        IMAGES_CONFIG="kibana/images.yml"
-        RETRY="1"
+        IMAGES_CONFIG: "kibana/images.yml"
+        RETRY: "1"
 EOF

@@ -400,7 +400,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         content: (
           <EuiPanel paddingSize={'s'}>
             <EuiSpacer size={'s'} />
-            <EuiForm data-test-subj="aiopsChangePointDetectionCasedAttachmentForm">
+            <EuiForm data-test-subj="aiopsChangePointDetectionCaseAttachmentForm">
               <ViewTypeSelector
                 value={caseAttachment.viewType}
                 onChange={(v) => {

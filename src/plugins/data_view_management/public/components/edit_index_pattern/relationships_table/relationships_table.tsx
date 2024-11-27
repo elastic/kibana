@@ -18,6 +18,7 @@ import {
 import { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 import {
   SavedObjectRelation,
@@ -139,12 +140,20 @@ export const RelationshipsTable = ({
     ] as SearchFilterConfig[],
   };
 
+  const { pageSize, onTableChange } = useEuiTablePersist<SavedObjectRelation>({
+    tableId: 'dataViewMgmtRelationships',
+    initialPageSize: 10,
+  });
+
   return (
     <RedirectAppLinks currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}>
       <EuiInMemoryTable<SavedObjectRelation>
         items={relationships}
         columns={columns}
-        pagination={true}
+        pagination={{
+          pageSize,
+        }}
+        onTableChange={onTableChange}
         search={search}
         rowProps={() => ({
           'data-test-subj': `relationshipsTableRow`,

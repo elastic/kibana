@@ -63,7 +63,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             'data-test-subj': 'config.apiProvider-select',
             options: providerOptions,
             fullWidth: true,
-            hasNoInitialSelection: true,
+            hasNoInitialSelection: false,
             disabled: readOnly,
             readOnly,
           },

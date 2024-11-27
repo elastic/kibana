@@ -25,7 +25,13 @@ describe('Grouped Inventory Accordion', () => {
         },
       ],
     };
-    render(<InventoryGroupAccordion group={props.groups[0]} groupBy={props.groupBy} />);
+    render(
+      <InventoryGroupAccordion
+        groupValue={props.groups[0]['entity.type']}
+        groupCount={props.groups[0].count}
+        groupBy={props.groupBy}
+      />
+    );
     expect(screen.getByText(props.groups[0]['entity.type'])).toBeInTheDocument();
     const container = screen.getByTestId('inventoryPanelBadgeEntitiesCount_entity.type_host');
     expect(within(container).getByText('Entities:')).toBeInTheDocument();

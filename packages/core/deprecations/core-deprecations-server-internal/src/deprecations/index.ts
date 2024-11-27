@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { buildApiDeprecationId, registerApiDeprecationsInfo } from './api_deprecations';
+export {
+  buildApiDeprecationId,
+  registerApiDeprecationsInfo,
+  getIsAccessApiDeprecation,
+  getIsRouteApiDeprecation,
+} from './api_deprecations';
 export { registerConfigDeprecationsInfo } from './config_deprecations';

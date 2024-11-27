@@ -12,7 +12,13 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover', 'header', 'unifiedFieldList']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'header',
+    'unifiedFieldList',
+    'context',
+  ]);
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
@@ -29,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
         let alert = await browser.getAlert();
         try {
@@ -37,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         } finally {
           await alert?.dismiss();
         }
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
         alert = await browser.getAlert();
         try {
@@ -57,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 2);
+        await dataGrid.clickCellExpandButton(0, { columnName: 'message' });
         expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
           true
         );
@@ -76,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
           false
         );
@@ -94,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchTo('my-example-logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
         let alert = await browser.getAlert();
         try {
@@ -102,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         } finally {
           await alert?.dismiss();
         }
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
         alert = await browser.getAlert();
         try {
@@ -118,7 +124,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await PageObjects.context.waitUntilContextLoadingHasFinished();
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
         alert = await browser.getAlert();
         try {
@@ -126,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         } finally {
           await alert?.dismiss();
         }
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
         alert = await browser.getAlert();
         try {
@@ -143,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchTo('my-example-logs');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 2);
+        await dataGrid.clickCellExpandButton(0, { columnName: 'message' });
         expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
           true
         );
@@ -159,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dataViews.switchTo('my-example-metrics');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
+        await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         expect(await dataGrid.cellExpandPopoverActionExists('example-data-source-action')).to.be(
           false
         );

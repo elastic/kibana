@@ -429,7 +429,6 @@ describe('validation logic', () => {
         [],
         ['Invalid option ["bogus"] for mv_sort. Supported options: ["asc", "desc"].']
       );
-
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "ASC")`, []);
       testErrorsAndWarnings(`row var = mv_sort(["a", "b"], "DESC")`, []);
 
@@ -507,7 +506,7 @@ describe('validation logic', () => {
     });
 
     describe('lookup', () => {
-      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP t ON a', []);
+      testErrorsAndWarnings('ROW a=1::LONG | LOOKUP JOIN t ON a', []);
     });
 
     describe('keep', () => {
@@ -1693,6 +1692,16 @@ describe('validation logic', () => {
       testErrorsAndWarnings(
         'from a_index | eval to_lower(to_upper(trim(doubleField)::keyword)::keyword)',
         ['Argument of [trim] must be [keyword], found value [doubleField] type [double]']
+      );
+    });
+
+    describe('unsupported fields', () => {
+      testErrorsAndWarnings(
+        `from a_index | keep unsupportedField`,
+        [],
+        [
+          'Field [unsupportedField] cannot be retrieved, it is unsupported or not indexed; returning null',
+        ]
       );
     });
   });

@@ -16,6 +16,7 @@ import { AssetCriticalityResultStep } from './components/result_step';
 import { useEntityAnalyticsRoutes } from '../../api/api';
 import { useFileValidation, useNavigationSteps } from './hooks';
 import type { OnCompleteParams } from './types';
+import { EntityEventTypes } from '../../../common/lib/telemetry';
 
 export const AssetCriticalityFileUploader: React.FC = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
@@ -24,7 +25,7 @@ export const AssetCriticalityFileUploader: React.FC = () => {
 
   const onValidationComplete = useCallback(
     ({ validatedFile, processingStartTime, processingEndTime, tookMs }: OnCompleteParams) => {
-      telemetry.reportAssetCriticalityCsvPreviewGenerated({
+      telemetry.reportEvent(EntityEventTypes.AssetCriticalityCsvPreviewGenerated, {
         file: {
           size: validatedFile.size,
         },
