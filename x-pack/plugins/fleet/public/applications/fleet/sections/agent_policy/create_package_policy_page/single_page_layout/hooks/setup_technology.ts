@@ -60,6 +60,7 @@ export function useSetupTechnology({
   setNewAgentPolicy,
   newAgentPolicy,
   updateAgentPolicies,
+  updatePackagePolicy,
   setSelectedPolicyTab,
   packageInfo,
   packagePolicy,
@@ -69,6 +70,7 @@ export function useSetupTechnology({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicies: (policies: AgentPolicy[]) => void;
+  updatePackagePolicy: (policy: Partial<NewPackagePolicy>) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
   packagePolicy: NewPackagePolicy;
@@ -107,16 +109,33 @@ export function useSetupTechnology({
         updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
       }
     }
+    if (
+      selectedSetupTechnology === SetupTechnology.AGENTLESS &&
+      !packagePolicy.supports_agentless
+    ) {
+      updatePackagePolicy({
+        supports_agentless: true,
+      });
+    } else if (
+      selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+      packagePolicy.supports_agentless
+    ) {
+      updatePackagePolicy({
+        supports_agentless: false,
+      });
+    }
   }, [
     isAgentlessEnabled,
     isEditPage,
     newAgentlessPolicy,
     packagePolicy.name,
+    packagePolicy.supports_agentless,
     selectedSetupTechnology,
     updateAgentPolicies,
     setNewAgentPolicy,
     agentPolicies,
     setSelectedSetupTechnology,
+    updatePackagePolicy,
   ]);
 
   const handleSetupTechnologyChange = useCallback(
@@ -137,9 +156,15 @@ export function useSetupTechnology({
           setSelectedPolicyTab(SelectedPolicyTab.NEW);
           updateAgentPolicies([agentlessPolicy] as AgentPolicy[]);
         }
+        updatePackagePolicy({
+          supports_agentless: true,
+        });
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         setNewAgentPolicy({
           ...newAgentBasedPolicy.current,
+          supports_agentless: false,
+        });
+        updatePackagePolicy({
           supports_agentless: false,
         });
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
@@ -150,11 +175,12 @@ export function useSetupTechnology({
     [
       isAgentlessEnabled,
       selectedSetupTechnology,
+      updatePackagePolicy,
       setNewAgentPolicy,
       newAgentlessPolicy,
+      packageInfo,
       setSelectedPolicyTab,
       updateAgentPolicies,
-      packageInfo,
     ]
   );
 

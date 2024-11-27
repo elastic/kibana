@@ -115,6 +115,7 @@ describe('useAgentless', () => {
 describe('useSetupTechnology', () => {
   const setNewAgentPolicy = jest.fn();
   const updateAgentPoliciesMock = jest.fn();
+  const updatePackagePolicyMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
   const newAgentPolicyMock = {
     name: 'mock_new_agent_policy',
@@ -183,6 +184,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -212,6 +214,7 @@ describe('useSetupTechnology', () => {
         packagePolicy: packagePolicyMock,
         isEditPage: true,
         agentPolicies: [{ id: 'agentless-policy-id', supports_agentless: true } as any],
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -239,6 +242,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -248,6 +252,7 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
     await waitFor(() => {
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
@@ -278,6 +283,7 @@ describe('useSetupTechnology', () => {
       updateAgentPolicies: updateAgentPoliciesMock,
       setSelectedPolicyTab: setSelectedPolicyTabMock,
       packagePolicy: packagePolicyMock,
+      updatePackagePolicy: updatePackagePolicyMock,
     };
 
     const { result, rerender } = renderHook((props = initialProps) => useSetupTechnology(props), {
@@ -291,6 +297,7 @@ describe('useSetupTechnology', () => {
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
       inactivity_timeout: 3600,
       name: 'Agentless policy for endpoint-1',
@@ -306,9 +313,11 @@ describe('useSetupTechnology', () => {
         ...packagePolicyMock,
         name: 'endpoint-2',
       },
+      updatePackagePolicy: updatePackagePolicyMock,
     });
 
     await waitFor(() => {
+      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
         inactivity_timeout: 3600,
@@ -332,6 +341,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -366,6 +376,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -376,12 +387,14 @@ describe('useSetupTechnology', () => {
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
+    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
 
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
+    expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: false });
 
     await waitFor(() => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
@@ -397,6 +410,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -410,6 +424,7 @@ describe('useSetupTechnology', () => {
 
     expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
 
+    expect(updatePackagePolicyMock).not.toHaveBeenCalled();
     expect(setNewAgentPolicy).not.toHaveBeenCalled();
     expect(setSelectedPolicyTabMock).not.toHaveBeenCalled();
   });
@@ -435,6 +450,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -454,6 +470,7 @@ describe('useSetupTechnology', () => {
         supports_agentless: true,
         inactivity_timeout: 3600,
       });
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: true });
     });
 
     act(() => {
@@ -463,6 +480,7 @@ describe('useSetupTechnology', () => {
     await waitFor(() => {
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
       expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
+      expect(updatePackagePolicyMock).toHaveBeenCalledWith({ supports_agentless: false });
     });
   });
 
@@ -489,6 +507,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -533,6 +552,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -582,6 +602,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -627,6 +648,7 @@ describe('useSetupTechnology', () => {
         updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
@@ -673,6 +695,7 @@ describe('useSetupTechnology', () => {
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
+        updatePackagePolicy: updatePackagePolicyMock,
       })
     );
 
