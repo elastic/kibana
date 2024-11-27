@@ -81,6 +81,7 @@ import {
   deleteAgentPolicy,
   fetchAgentPolicyEnrollmentKey,
   getOrCreateDefaultAgentPolicy,
+  setAgentLoggingLevel,
 } from '../../../../scripts/endpoint/common/fleet_services';
 import { startElasticAgentWithDocker } from '../../../../scripts/endpoint/common/elastic_agent_service';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -439,6 +440,7 @@ ${s1Info.status}
                   log,
                   kbnClient,
                 });
+            await setAgentLoggingLevel(kbnClient, newHost.agentId, 'debug', log);
             await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
             return newHost;
           } catch (err) {
@@ -490,58 +492,6 @@ ${s1Info.status}
       path: string;
       content: string;
     }): Promise<null> => {
-      // --------- FIXME:PT DO NOT COMMIT TO MAIN - dev debug only
-      const { log } = await stackServicesPromise;
-
-      log.info(`---------------------------
-
-
-NODE RUNTIME ENV.:
-
-${Object.entries(process.env)
-  .map(([key, value]) => `${key}=${value}`)
-  .join('\n')}
-
-
-
-WHERE AM I:
-      ${(await execa.command('pwd').catch((e) => ({ stdout: `ERROR: ${e.message}` }))).stdout}
-
-
-
-WHATS INSIDE OF ${process.env.PWD}/target:
-
-${
-  (
-    await execa
-      .command(`find ${process.env.PWD}/target`)
-      .catch((e) => ({ stdout: `ERROR: ${e.message}` }))
-  ).stdout
-}
-
-
-WHATS INSIDE OF ${process.env.PWD.substring(0, process.env.PWD.indexOf('/kibana/'))}/kibana/target:
-
-${
-  (
-    await execa
-      .command(
-        `find ${process.env.PWD.substring(0, process.env.PWD.indexOf('/kibana/'))}/kibana/target`
-      )
-      .catch((e) => ({ stdout: `ERROR: ${e.message}` }))
-  ).stdout
-}
-
-
-
-
-
-
----------------------------
-`);
-
-      // --------- FIXME:PT DO NOT COMMIT TO MAIN - dev debug only
-
       await getHostVmClient(hostname).exec(`echo ${content} > ${filePath}`);
       return null;
     },

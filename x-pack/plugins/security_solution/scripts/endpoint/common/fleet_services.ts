@@ -1387,6 +1387,8 @@ export const setAgentLoggingLevel = async (
   logLevel: 'debug' | 'info' | 'warning' | 'error',
   log: ToolingLog = createToolingLogger()
 ): Promise<PostNewAgentActionResponse> => {
+  log.debug(`Setting fleet agent [${agentId}] logging level to [${logLevel}]`);
+
   const response = await kbnClient
     .request<PostNewAgentActionResponse>({
       method: 'POST',
@@ -1397,9 +1399,13 @@ export const setAgentLoggingLevel = async (
     .then((res) => res.data);
 
   // Wait to see if the action completes, but don't `throw` if it does not
-  await waitForFleetAgentActionToComplete(kbnClient, response.item.id).catch((err) => {
-    log.debug(err.message);
-  });
+  await waitForFleetAgentActionToComplete(kbnClient, response.item.id)
+    .then(() => {
+      log.debug(`Fleet action to set agent [${agentId}] logging level to [${logLevel}] completed!`);
+    })
+    .catch((err: Error) => {
+      log.debug(err.message);
+    });
 
   return response;
 };
@@ -1433,7 +1439,7 @@ export const waitForFleetAgentActionToComplete = async (
   kbnClient: KbnClient,
   actionId: string,
   timeout: number = 20_000
-): Promsie<void> => {
+): Promise<void> => {
   await pRetry(
     async (attempts) => {
       const { items: actionList } = await fetchFleetAgentActionStatus(kbnClient);

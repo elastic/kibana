@@ -22,7 +22,6 @@ import {
   getAgentDownloadUrl,
   getAgentFileName,
   getOrCreateDefaultAgentPolicy,
-  setAgentLoggingLevel,
   waitForHostToEnroll,
 } from '../../../../scripts/endpoint/common/fleet_services';
 import type { DownloadedAgentInfo } from '../../../../scripts/endpoint/common/agent_downloads_service';
@@ -147,8 +146,6 @@ export const createAndEnrollEndpointHostCI = async ({
     5 * 60 * 1000,
     esClient
   );
-
-  await setAgentLoggingLevel(kbnClient, agentId, 'debug');
 
   return {
     hostname: hostVm.name,

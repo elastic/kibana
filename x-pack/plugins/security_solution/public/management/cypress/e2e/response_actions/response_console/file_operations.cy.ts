@@ -68,7 +68,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     afterEach(function () {
-      if (this.currentTest.isFailed() && createdHost) {
+      if (Cypress.env('IS_CI') && this.currentTest?.isFailed() && createdHost) {
         cy.task('captureHostVmAgentDiagnostics', { hostname: createdHost.hostname });
       }
     });
