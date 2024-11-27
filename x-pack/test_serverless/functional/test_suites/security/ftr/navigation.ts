@@ -74,5 +74,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await testSubjects.existOrFail('cases-all-title');
       });
     });
+    it('navigates to maintenance windows', async () => {
+      await svlCommonPage.loginAsAdmin();
+      await svlSecNavigation.navigateToLandingPage();
+      await svlCommonNavigation.sidenav.openSection('category-management');
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await testSubjects.click('app-card-maintenanceWindows');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Maintenance Windows' });
+    });
   });
 }
