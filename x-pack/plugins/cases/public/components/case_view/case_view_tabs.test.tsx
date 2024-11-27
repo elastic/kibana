@@ -230,4 +230,24 @@ describe('CaseViewTabs', () => {
       await screen.findByTestId('case-view-alerts-table-experimental-badge')
     ).toBeInTheDocument();
   });
+
+  it('should show the observables tab', async () => {
+    appMockRenderer = createAppMockRenderer();
+
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-observables')).toBeInTheDocument();
+  });
+
+  it('should show the similar cases tab', async () => {
+    appMockRenderer = createAppMockRenderer();
+
+    appMockRenderer.render(
+      <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.ALERTS} />
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
+  });
 });

@@ -80,7 +80,7 @@ const ObservablesBadge = ({
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <>
-    {!isLoading && count && (
+    {!isLoading && (
       <EuiNotificationBadge
         css={css`
           margin-left: ${euiTheme.size.xs};
@@ -88,7 +88,7 @@ const ObservablesBadge = ({
         data-test-subj="case-view-observables-stats-badge"
         color={activeTab === CASE_VIEW_PAGE_TABS.OBSERVABLES ? 'accent' : 'subdued'}
       >
-        {count > 0 ? count : 0}
+        {count}
       </EuiNotificationBadge>
     )}
     <ExperimentalBadge compact />
