@@ -174,6 +174,7 @@ describe('utils', () => {
 
       expect(res).toEqual({
         incident: {
+          additional_fields: null,
           category: null,
           subcategory: null,
           correlation_display: 'Elastic Case',

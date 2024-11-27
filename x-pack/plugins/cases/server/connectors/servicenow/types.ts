@@ -21,6 +21,7 @@ export interface ServiceNowSIRFieldsType extends CorrelationValues {
   malware_hash: string[] | null;
   malware_url: string[] | null;
   priority: string | null;
+  additional_fields: string | null;
 }
 
 export type SirFieldKey = 'dest_ip' | 'source_ip' | 'malware_hash' | 'malware_url';
