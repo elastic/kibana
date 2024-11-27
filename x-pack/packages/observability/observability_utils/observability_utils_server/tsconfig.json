@@ -25,6 +25,8 @@
     "@kbn/rule-registry-plugin",
     "@kbn/rule-data-utils",
     "@kbn/aiops-log-pattern-analysis",
-    "@kbn/calculate-auto"
+    "@kbn/calculate-auto",
+    "@kbn/utility-types",
+    "@kbn/task-manager-plugin",
   ]
 }

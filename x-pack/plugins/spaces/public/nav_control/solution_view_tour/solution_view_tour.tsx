@@ -28,7 +28,7 @@ const LearnMoreLink = () => (
 
 const solutionMap: Record<SolutionId, string> = {
   es: i18n.translate('xpack.spaces.navControl.tour.esSolution', {
-    defaultMessage: 'Search',
+    defaultMessage: 'Elasticsearch',
   }),
   security: i18n.translate('xpack.spaces.navControl.tour.securitySolution', {
     defaultMessage: 'Security',

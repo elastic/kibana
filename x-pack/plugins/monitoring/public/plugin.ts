@@ -101,6 +101,7 @@ export class MonitoringPlugin
           element: params.element,
           core: coreStart,
           data: pluginsStart.data,
+          share: pluginsStart.share,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig,
@@ -124,6 +125,7 @@ export class MonitoringPlugin
           appMountParameters: deps.appMountParameters,
           dataViews: deps.dataViews,
           infra: deps.infra,
+          share: deps.share,
         });
 
         const config = Object.fromEntries(externalConfig);

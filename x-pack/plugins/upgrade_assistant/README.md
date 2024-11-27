@@ -21,14 +21,14 @@ When we want to enable ML model snapshot deprecation warnings again we need to c
 
 There are three sources of deprecation information:
 
-* [**Elasticsearch Deprecation Info API.**](https://www.elastic.co/guide/en/elasticsearch/reference/master/migration-api-deprecation.html)
+* [**Elasticsearch Deprecation Info API.**](https://www.elastic.co/guide/en/elasticsearch/reference/main/migration-api-deprecation.html)
 This is information about Elasticsearch cluster, node, Machine Learning, and index-level settings that use deprecated features that will be removed or changed in the next major version. ES server engineers are responsible for adding deprecations to the Deprecation Info API.
 * [**Elasticsearch deprecation logs.**](https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging)
 These surface runtime deprecations, e.g. a Painless script that uses a deprecated accessor or a
 request to a deprecated API. These are also generally surfaced as deprecation headers within the
 response. Even if the cluster state is good, app maintainers need to watch the logs in case
 deprecations are discovered as data is migrated. Starting in 7.x, deprecation logs can be written to a file or a data stream ([#58924](https://github.com/elastic/elasticsearch/pull/58924)). When the data stream exists, the Upgrade Assistant provides a way to analyze the logs through Observability or Discover ([#106521](https://github.com/elastic/kibana/pull/106521)).
-* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/master/src/core/server/deprecations/README.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team. 
+* [**Kibana deprecations API.**](https://github.com/elastic/kibana/blob/main/src/core/server/deprecations/README.mdx) This is information about deprecated features and configs in Kibana. These deprecations are only communicated to the user if the deployment is using these features. Kibana engineers are responsible for adding deprecations to the deprecations API for their respective team.
 
 ### Fixing problems
 
@@ -36,14 +36,20 @@ deprecations are discovered as data is migrated. Starting in 7.x, deprecation lo
 
 Elasticsearch deprecations can be handled in a number of ways:
 
-* **Reindexing.** When a user's index contains deprecations (e.g. mappings) a reindex solves them. Currently, the Upgrade Assistant only automates reindexing for old indices. For example, if you are currently on 7.x, and want to migrate to 8.0, but you still have indices that were created on 6.x. For this scenario, the user will see a "Reindex" button that they can click, which will perform the reindex.
-  * Reindexing is an atomic process in Upgrade Assistant, so that ingestion is never disrupted.
-    It works like this:
-    * Create a new index with a "reindexed-" prefix ([#30114](https://github.com/elastic/kibana/pull/30114)).
-    * Create an index alias pointing from the original index name to the prefixed index name.
-    * Reindex from the original index into the prefixed index.
-    * Delete the old index and rename the prefixed index.
-Currently reindexing deprecations are only enabled for major version upgrades  by setting the config `featureSet.reindexCorrectiveActions` to `true` on the `x.last` version of the stack.
+* **Reindexing.** When a user's index contains deprecations (e.g. mappings) a reindex solves them. The Upgrade Assistant only automates reindexing for indices. For example, if you are currently on 7.x, and want to migrate to 8.0, but you still have indices that were created on 6.x. For this scenario, the user will see a "Reindex" button that they can click, which will perform the reindex.
+  * Reindexing is an idempotent action in Upgrade Assistant. It works like this ([overview in code](https://github.com/elastic/kibana/blob/b320a37d8b703b2fa101a93b6971b36ee2c37f06/x-pack/plugins/upgrade_assistant/server/lib/reindexing/reindex_service.ts#L498-L540)):
+    1. Set a write-block on the original index, no new data can be written during reindexing.
+    2. Create a target index with the following name `reindexed-v{majorVersion}-{originalIndex}`. E.g., if `my-index` is the original, the target will be named `reindexed-v8-my-index`.
+    3. [Reindex](https://www.elastic.co/guide/en/elasticsearch/reference/master/docs-reindex.html) from the original index to the target index. Kibana will continuously report reindexing status.
+    4. Once reindexing is done, in one atomic operation via the aliases API:
+      1. Create an alias from the original index to the target index. All existing aliases referencing the original index will be re-pointed to the target index. E.g., `my-index` will be an alias referencing `reindexed-v8-my-index`.
+      2. Delete the original index.
+      3. **NOTE:** writing/indexing will effectively be re-enabled at this point via the alias, unless the original was write-blocked by users. This and other index settings are inherited from the original.
+    5. The Upgrade Assistant's reindex action is complete at this point.
+       1. If the original index was closed before reindexing, the new target will also be closed at this point.
+
+    Currently reindexing deprecations are only enabled for major version upgrades  by setting the config `featureSet.reindexCorrectiveActions` to `true` on the `x.last` version of the stack.
+
 Reindexing at the moment includes some logic that is specific to the [8.0 upgrade](https://github.com/elastic/kibana/blob/main/x-pack/plugins/upgrade_assistant/server/lib/reindexing/index_settings.ts). End users could get into a bad situation if this is enabled before this logic is fixed.
 * **Removing settings.** Some index and cluser settings are deprecated and need to be removed. The Upgrade Assistant provides a way to auto-resolve these settings via a "Remove deprecated settings" button. Migrating system indices should only be enabled for major version upgrades. This is controlled by the config `featureSet.migrateSystemIndices` which hides the second step from the UA UI for migrating system indices.
 * **Upgrading or deleting snapshots**. This is specific to Machine Learning. If a user has old Machine Learning job model snapshots, they will need to be upgraded or deleted. The Upgrade Assistant provides a way to resolve this automatically for the user ([#100066](https://github.com/elastic/kibana/pull/100066)).
@@ -72,7 +78,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   PUT my_index
   ```
 
-  Next, point to the 6.x data directory when running from a 7.x cluster. 
+  Next, point to the 6.x data directory when running from a 7.x cluster.
 
   ```
   yarn es snapshot -E path.data=./path_to_6.x_indices
@@ -101,7 +107,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
 
 **2. Upgrading or deleting ML job model snapshots**
 
-  Similar to the reindex action, the ML action requires setting up a cluster on the previous major version. It also requires the trial license to be enabled. Then, you will need to create a few ML jobs in order to trigger snapshots. 
+  Similar to the reindex action, the ML action requires setting up a cluster on the previous major version. It also requires the trial license to be enabled. Then, you will need to create a few ML jobs in order to trigger snapshots.
 
   - Add the Kibana sample data.
   - Navigate to Machine Learning > Create new job.
@@ -111,7 +117,7 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
   - Click "Create job"
   - View the job created and click the "Start datafeed" action associated with it. Select a subset of time and click "Start". You should now have two snapshots created. If you want to add more, repeat the steps above.
 
-  Next, point to the 6.x data directory when running from a 7.x cluster. 
+  Next, point to the 6.x data directory when running from a 7.x cluster.
 
   ```
   yarn es snapshot --license trial -E path.data=./path_to_6.x_ml_snapshots
@@ -119,8 +125,8 @@ To test the Elasticsearch deprecations page ([#107053](https://github.com/elasti
 
 **3. Removing deprecated settings**
 
-  The Upgrade Assistant supports removing deprecated index and cluster settings. This is determined based on the `actions` array returned from the deprecation info API. It currently does not support removing affix settings. See https://github.com/elastic/elasticsearch/pull/84246 for more details. 
-  
+  The Upgrade Assistant supports removing deprecated index and cluster settings. This is determined based on the `actions` array returned from the deprecation info API. It currently does not support removing affix settings. See https://github.com/elastic/elasticsearch/pull/84246 for more details.
+
   Run the following Console commands to trigger deprecation issues for cluster and index settings:
 
 ```
@@ -233,7 +239,7 @@ PUT /_cluster/settings
   ```
   PUT _template/field_names_enabled
   {
-    "index_patterns": ["foo"], 
+    "index_patterns": ["foo"],
     "mappings": {
       "_field_names": {
         "enabled": false
@@ -284,23 +290,27 @@ yarn start --plugin-path=examples/routing_example --plugin-path=examples/develop
 The following comprehensive deprecated routes examples are registered inside the folder: `examples/routing_example/server/routes/deprecated_routes`
 
 Run them in the console to trigger the deprecation condition so they show up in the UA:
+We need to explicitly set the query param `elasticInternalOrigin` to `false` to track the request as non-internal origin.
 
 ```
-# Versioned routes: Version 1 is deprecated
-GET kbn:/api/routing_example/d/versioned?apiVersion=1
-GET kbn:/api/routing_example/d/versioned?apiVersion=2
+# Route deprecations for Versioned routes
+GET kbn:/api/routing_example/d/versioned_route?apiVersion=2023-10-31&elasticInternalOrigin=false
 
-# Non-versioned routes
-GET kbn:/api/routing_example/d/removed_route
-GET kbn:/api/routing_example/d/deprecated_route
-POST kbn:/api/routing_example/d/migrated_route
+# Route deprecations for Non-versioned routes
+GET kbn:/api/routing_example/d/removed_route?elasticInternalOrigin=false
+GET kbn:/api/routing_example/d/deprecated_route?elasticInternalOrigin=false
+POST kbn:/api/routing_example/d/migrated_route?elasticInternalOrigin=false
 {}
+
+# Access deprecations
+GET kbn:/api/routing_example/d/internal_deprecated_route?elasticInternalOrigin=false
+GET kbn:/internal/routing_example/d/internal_only_route?elasticInternalOrigin=false
+GET kbn:/internal/routing_example/d/internal_versioned_route?apiVersion=1&elasticInternalOrigin=false
 ```
 
 1. You can also mark as deprecated in the UA to remove the deprecation from the list.
 2. Check the telemetry response to see the reported data about the deprecated route.
-3. Calling version 2 of the API  does not do anything since it is not deprecated unlike version `1` (`GET kbn:/api/routing_example/d/versioned?apiVersion=2`)
-4. Internally you can see the deprecations counters from the dev console by running the following:
+3. Internally you can see the deprecations counters from the dev console by running the following:
 ```
 GET .kibana_usage_counters/_search
 {
@@ -327,11 +337,11 @@ This is a non-exhaustive list of different error scenarios in Upgrade Assistant.
 - **Error updating deprecation logging status.** Mock a `404` status code to `PUT /api/upgrade_assistant/deprecation_logging`. Alternatively, edit [this line](https://github.com/elastic/kibana/blob/545c1420c285af8f5eee56f414bd6eca735aea11/x-pack/plugins/upgrade_assistant/public/application/lib/api.ts#L77) locally and replace `deprecation_logging` with `fake_deprecation_logging`.
 - **Unauthorized error fetching ES deprecations.** Mock a `403` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 403 }`
 - **Partially upgraded error fetching ES deprecations.** Mock a `426` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 426, "attributes": { "allNodesUpgraded": false } }`
-- **Upgraded error fetching ES deprecations.** Mock a `426` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 426, "attributes": { "allNodesUpgraded": true } }` 
+- **Upgraded error fetching ES deprecations.** Mock a `426` status code to `GET /api/upgrade_assistant/es_deprecations` with the response payload: `{ "statusCode": 426, "attributes": { "allNodesUpgraded": true } }`
 
 ### Telemetry
 
-The Upgrade Assistant tracks several triggered events in the UI, using Kibana Usage Collection service's [UI counters](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#ui-counters).
+The Upgrade Assistant tracks several triggered events in the UI, using Kibana Usage Collection service's [UI counters](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#ui-counters).
 
 **Overview page**
 - Component loaded
@@ -350,6 +360,6 @@ The Upgrade Assistant tracks several triggered events in the UI, using Kibana Us
 - Component loaded
 - Click event for "Quick resolve" button
 
-In addition to UI counters, the Upgrade Assistant has a [custom usage collector](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#custom-collector). It currently is only responsible for tracking whether the user has deprecation logging enabled or not.
+In addition to UI counters, the Upgrade Assistant has a [custom usage collector](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#custom-collector). It currently is only responsible for tracking whether the user has deprecation logging enabled or not.
 
-For testing instructions, refer to the [Kibana Usage Collection service README](https://github.com/elastic/kibana/blob/master/src/plugins/usage_collection/README.mdx#testing).
+For testing instructions, refer to the [Kibana Usage Collection service README](https://github.com/elastic/kibana/blob/main/src/plugins/usage_collection/README.mdx#testing).

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { ReactNode } from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTabs } from './use_tabs';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';

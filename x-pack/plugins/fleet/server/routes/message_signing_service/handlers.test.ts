@@ -12,8 +12,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import { appContextService } from '../../services';
 import type { FleetRequestHandlerContext } from '../../types';
+import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 
 import { rotateKeyPairHandler } from './handlers';
+
+const rotateKeyPairHandlerWithErrorHandler = withDefaultErrorHandler(rotateKeyPairHandler);
 
 describe('FleetMessageSigningServiceHandler', () => {
   let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
@@ -51,7 +54,7 @@ describe('FleetMessageSigningServiceHandler', () => {
       messageSigningService: undefined,
     });
 
-    await rotateKeyPairHandler(
+    await rotateKeyPairHandlerWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
       response
@@ -65,7 +68,7 @@ describe('FleetMessageSigningServiceHandler', () => {
   });
 
   it('POST /message_signing_service/rotate_key_pair?acknowledge=true succeeds with `acknowledge=true`', async () => {
-    await rotateKeyPairHandler(
+    await rotateKeyPairHandlerWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,
       response
@@ -89,7 +92,7 @@ describe('FleetMessageSigningServiceHandler', () => {
         Error(error)
       );
 
-      await rotateKeyPairHandler(
+      await rotateKeyPairHandlerWithErrorHandler(
         coreMock.createCustomRequestHandlerContext(context),
         request,
         response

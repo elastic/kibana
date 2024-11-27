@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
@@ -81,46 +82,48 @@ const renderPrivilegeRolesForm = ({
   preSelectedRoles?: Role[];
 } = {}) => {
   return render(
-    <IntlProvider locale="en">
-      <EditSpaceProvider
-        {...{
-          logger,
-          i18n,
-          http,
-          theme,
-          overlays,
-          notifications,
-          spacesManager,
-          serverBasePath: '',
-          getUrlForApp: jest.fn((_) => _),
-          navigateToUrl: jest.fn(),
-          license: licenseMock,
-          isRoleManagementEnabled: true,
-          capabilities: {
-            navLinks: {},
-            management: {},
-            catalogue: {},
-            spaces: { manage: true },
-          },
-          dispatch: dispatchMock,
-          state: {
-            roles: new Map(),
-            fetchRolesError: false,
-          },
-          invokeClient: spacesClientsInvocatorMock,
-        }}
-      >
-        <PrivilegesRolesForm
+    <EuiThemeProvider>
+      <IntlProvider locale="en">
+        <EditSpaceProvider
           {...{
-            space,
-            features: kibanaFeatures,
-            closeFlyout,
-            defaultSelected: preSelectedRoles,
-            onSaveCompleted,
+            logger,
+            i18n,
+            http,
+            theme,
+            overlays,
+            notifications,
+            spacesManager,
+            serverBasePath: '',
+            getUrlForApp: jest.fn((_) => _),
+            navigateToUrl: jest.fn(),
+            license: licenseMock,
+            isRoleManagementEnabled: true,
+            capabilities: {
+              navLinks: {},
+              management: {},
+              catalogue: {},
+              spaces: { manage: true },
+            },
+            dispatch: dispatchMock,
+            state: {
+              roles: new Map(),
+              fetchRolesError: false,
+            },
+            invokeClient: spacesClientsInvocatorMock,
           }}
-        />
-      </EditSpaceProvider>
-    </IntlProvider>
+        >
+          <PrivilegesRolesForm
+            {...{
+              space,
+              features: kibanaFeatures,
+              closeFlyout,
+              defaultSelected: preSelectedRoles,
+              onSaveCompleted,
+            }}
+          />
+        </EditSpaceProvider>
+      </IntlProvider>
+    </EuiThemeProvider>
   );
 };
 
@@ -137,6 +140,15 @@ describe('PrivilegesRolesForm', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("would open the 'manage roles' link in a new tab", () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(screen.getByText('Manage roles')).toHaveAttribute('target', '_blank');
   });
 
   it('does not display the privilege selection buttons or customization form when no role is selected', async () => {
@@ -165,6 +177,23 @@ describe('PrivilegesRolesForm', () => {
     await waitFor(() => null);
 
     expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+  });
+
+  it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', () => {
+    getRolesSpy.mockResolvedValue([]);
+    getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
+
+    renderPrivilegeRolesForm();
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(1);
+
+    // trigger click on manage roles link, which is perquisite for page visibility handler to trigger role refetch
+    fireEvent.click(screen.getByText(/manage roles/i));
+
+    // trigger page visibility change
+    fireEvent(document, new Event('visibilitychange'));
+
+    expect(getRolesSpy).toHaveBeenCalledTimes(2);
   });
 
   it('renders with the assign roles button disabled when no base privileges or feature privileges are selected', async () => {

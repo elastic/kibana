@@ -97,8 +97,7 @@ export class InspectorService extends FtrService {
    * @param size rows count
    */
   public async setTablePageSize(size: number): Promise<void> {
-    const panel = await this.testSubjects.find('inspectorPanel');
-    await this.find.clickByButtonText('Rows per page: 20', panel);
+    await this.testSubjects.click('tablePaginationPopoverButton');
     // The buttons for setting table page size are in a popover element. This popover
     // element appears as if it's part of the inspectorPanel but it's really attached
     // to the body element by a portal.

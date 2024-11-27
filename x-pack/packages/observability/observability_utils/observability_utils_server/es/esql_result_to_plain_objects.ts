@@ -7,10 +7,10 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
-export function esqlResultToPlainObjects<T extends Record<string, any>>(
-  result: ESQLSearchResponse
-): T[] {
-  return result.values.map((row) => {
+export function esqlResultToPlainObjects<
+  TDocument extends Record<string, any> = Record<string, unknown>
+>(result: ESQLSearchResponse): TDocument[] {
+  return result.values.map((row): TDocument => {
     return row.reduce<Record<string, unknown>>((acc, value, index) => {
       const column = result.columns[index];
 
@@ -18,13 +18,12 @@ export function esqlResultToPlainObjects<T extends Record<string, any>>(
         return acc;
       }
 
-      // Removes the type suffix from the column name
-      const name = column.name.replace(/\.(text|keyword)$/, '');
+      const name = column.name;
       if (!acc[name]) {
         acc[name] = value;
       }
 
       return acc;
-    }, {});
-  }) as T[];
+    }, {}) as TDocument;
+  });
 }

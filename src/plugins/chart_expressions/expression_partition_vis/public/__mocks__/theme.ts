@@ -11,6 +11,6 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { ThemeService } from '@kbn/charts-plugin/public/services';
 
 const theme = new ThemeService();
-theme.init(themeServiceMock.createSetupContract({ darkMode: false }));
+theme.init(themeServiceMock.createSetupContract({ darkMode: false, name: 'amsterdam' }));
 
 export { theme };

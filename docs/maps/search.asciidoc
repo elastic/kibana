@@ -85,7 +85,7 @@ Create filters from your map to focus in on just the data you want. *Maps* provi
 
 To filter your dashboard by your map bounds as you pan and zoom your map:
 
-. Open the main menu, and then click *Dashboard*.
+. Go to *Dashboards*.
 . Select your dashboard from the list or click *Create dashboard*.
 . If your dashboard does not have a map, add a map panel.
 . Click the gear icon image:maps/images/gear_icon.png[gear icon] to open the map panel menu.

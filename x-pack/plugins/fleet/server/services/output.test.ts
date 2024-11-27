@@ -824,7 +824,7 @@ describe('Output Service', () => {
               is_default_monitoring: false,
               name: 'Test',
               type: 'kafka',
-              topics: [{ topic: 'test' }],
+              topic: 'test',
             },
             { id: 'output-test' }
           )
@@ -1206,7 +1206,6 @@ describe('Output Service', () => {
         ssl: null,
         timeout: null,
         topic: null,
-        topics: null,
         headers: null,
         username: null,
         version: null,
@@ -1330,7 +1329,6 @@ describe('Output Service', () => {
         sasl: null,
         timeout: null,
         topic: null,
-        topics: null,
         headers: null,
         username: null,
         version: null,

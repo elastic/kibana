@@ -21,8 +21,7 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const esArchiver = getService('esArchiver');
   const utils = getService('securitySolutionUtils');
 
-  // Failing: See https://github.com/elastic/kibana/issues/199372
-  describe.skip('Network DNS', () => {
+  describe('Network DNS', () => {
     let supertest: TestAgent;
     let search: SearchService;
     describe('With packetbeat', () => {

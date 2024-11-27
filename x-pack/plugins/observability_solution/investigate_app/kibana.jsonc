@@ -24,18 +24,19 @@
       "observability",
       "licensing",
       "ruleRegistry",
-      "observabilityAIAssistant",
-      "observabilityAIAssistantApp",
       "inference",
       "alerting",
       "spaces",
       "slo",
-      "apmDataAccess"
+      "apmDataAccess",
+      "usageCollection"
     ],
     "requiredBundles": [
       "esql",
       "kibanaReact",
-      "kibanaUtils"
+      "kibanaUtils",
+      "observabilityAIAssistant",
+      "observabilityAIAssistantApp",
     ],
     "extraPublicDirs": []
   }

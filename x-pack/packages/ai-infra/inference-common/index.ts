@@ -37,6 +37,9 @@ export {
   type ChatCompleteStreamResponse,
   type ChatCompleteResponse,
   type ChatCompletionTokenCount,
+  type BoundChatCompleteAPI,
+  type BoundChatCompleteOptions,
+  type UnboundChatCompleteOptions,
   withoutTokenCountEvents,
   withoutChunkEvents,
   isChatCompletionMessageEvent,
@@ -62,6 +65,9 @@ export {
   type OutputUpdateEvent,
   type Output,
   type OutputEvent,
+  type BoundOutputAPI,
+  type BoundOutputOptions,
+  type UnboundOutputOptions,
   isOutputCompleteEvent,
   isOutputUpdateEvent,
   isOutputEvent,
@@ -85,4 +91,4 @@ export {
   isInferenceRequestError,
 } from './src/errors';
 
-export { truncateList } from './src/util/truncate_list';
+export { truncateList } from './src/truncate_list';

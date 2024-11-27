@@ -69,7 +69,13 @@ export async function withSpan<T>(
   ];
 
   if (!agent.isStarted()) {
-    return cb().then(...withLogTook);
+    const promise = cb();
+    // make sure tests that mock out the callback with a sync
+    // function don't fail.
+    if (typeof promise === 'object' && 'then' in promise) {
+      return promise.then(...withLogTook);
+    }
+    return promise;
   }
 
   let createdSpan: Span | undefined;

@@ -47,7 +47,9 @@
     "@kbn/ai-assistant-common",
     "@kbn/observability-utils-server",
     "@kbn/inference-common",
-    "@kbn/inference-plugin"
+    "@kbn/inference-plugin",
+    "@kbn/core-lifecycle-server",
+    "@kbn/server-route-repository-utils",
   ],
   "exclude": ["target/**/*"]
 }

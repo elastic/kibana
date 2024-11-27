@@ -12,7 +12,9 @@
     "**/*.tsx",
   ],
   "kbn_references": [
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/config",
+    "@kbn/core-metrics-server"
   ],
   "exclude": [
     "target/**/*",

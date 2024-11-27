@@ -16,14 +16,14 @@ export interface SloClient {
   getSummaryIndices(): Promise<string[]>;
 }
 
-export async function getSloClientWithRequest({
+export function getSloClientWithRequest({
   esClient,
   soClient,
 }: {
   request: KibanaRequest;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
-}): Promise<SloClient> {
+}): SloClient {
   const getListOfSummaryIndicesOnce = once(async () => {
     const settings = await getSloSettings(soClient);
 

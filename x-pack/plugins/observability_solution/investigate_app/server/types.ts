@@ -14,7 +14,7 @@ import type {
   PluginStartContract as AlertingPluginStart,
   PluginSetupContract as AlertingPluginSetup,
 } from '@kbn/alerting-plugin/server/plugin';
-import type { SloPluginSetup, SloPluginStart } from '@kbn/slo-plugin/server';
+import type { SLOServerStart, SLOServerSetup } from '@kbn/slo-plugin/server';
 import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
@@ -25,6 +25,7 @@ import type {
   ObservabilityAIAssistantServerStart,
   ObservabilityAIAssistantServerSetup,
 } from '@kbn/observability-ai-assistant-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -33,22 +34,23 @@ export interface ConfigSchema {}
 export interface InvestigateAppSetupDependencies {
   observability: ObservabilityPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
-  slo: SloPluginSetup;
+  slo: SLOServerStart;
   alerting: AlertingPluginSetup;
   inference: InferenceServerSetup;
   spaces?: SpacesPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantServerSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface InvestigateAppStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
-  slo: SloPluginStart;
+  slo: SLOServerSetup;
   alerting: AlertingPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantServerStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantServerStart;
 }
 
 export interface InvestigateAppServerSetup {}

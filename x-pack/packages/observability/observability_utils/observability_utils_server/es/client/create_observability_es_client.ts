@@ -10,19 +10,70 @@ import type {
   FieldCapsRequest,
   FieldCapsResponse,
   MsearchRequest,
+  ScalarValue,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ESQLSearchResponse, ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { Required } from 'utility-types';
-import { ESQLRequest } from '@kbn/es-types/src/search';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { Required, ValuesType } from 'utility-types';
+import { DedotObject } from '@kbn/utility-types';
+import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
+import { esqlResultToPlainObjects } from '../esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
   track_total_hits: number | boolean;
   size: number | boolean;
 };
+
+export interface EsqlOptions {
+  transform?: 'none' | 'plain' | 'unflatten';
+}
+
+export type EsqlValue = ScalarValue | ScalarValue[];
+
+export type EsqlOutput = Record<string, EsqlValue>;
+
+type MaybeUnflatten<T extends Record<string, any>, TApply> = TApply extends true
+  ? DedotObject<T>
+  : T;
+
+interface UnparsedEsqlResponseOf<TOutput extends EsqlOutput> {
+  columns: Array<{ name: keyof TOutput; type: string }>;
+  values: Array<Array<ValuesType<TOutput>>>;
+}
+
+interface ParsedEsqlResponseOf<
+  TOutput extends EsqlOutput,
+  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+> {
+  hits: Array<
+    MaybeUnflatten<
+      {
+        [key in keyof TOutput]: TOutput[key];
+      },
+      TOptions extends { transform: 'unflatten' } ? true : false
+    >
+  >;
+}
+
+export type InferEsqlResponseOf<
+  TOutput extends EsqlOutput,
+  TOptions extends EsqlOptions | undefined = { transform: 'none' }
+> = TOptions extends { transform: 'plain' | 'unflatten' }
+  ? ParsedEsqlResponseOf<TOutput, TOptions>
+  : UnparsedEsqlResponseOf<TOutput>;
+
+export type ObservabilityESSearchRequest = SearchRequest;
+
+export type ObservabilityEsQueryRequest = Omit<EsqlQueryRequest, 'format' | 'columnar'>;
+
+export type ParsedEsqlResponse = ParsedEsqlResponseOf<EsqlOutput, EsqlOptions>;
+export type UnparsedEsqlResponse = UnparsedEsqlResponseOf<EsqlOutput>;
+
+export type EsqlQueryResponse = UnparsedEsqlResponse | ParsedEsqlResponse;
+
 /**
  * An Elasticsearch Client with a fully typed `search` method and built-in
  * APM instrumentation.
@@ -42,7 +93,18 @@ export interface ObservabilityElasticsearchClient {
     operationName: string,
     request: Required<FieldCapsRequest, 'index_filter' | 'fields' | 'index'>
   ): Promise<FieldCapsResponse>;
-  esql(operationName: string, parameters: ESQLRequest): Promise<ESQLSearchResponse>;
+  esql<TOutput extends EsqlOutput = EsqlOutput>(
+    operationName: string,
+    parameters: ObservabilityEsQueryRequest
+  ): Promise<InferEsqlResponseOf<TOutput, { transform: 'none' }>>;
+  esql<
+    TOutput extends EsqlOutput = EsqlOutput,
+    TEsqlOptions extends EsqlOptions = { transform: 'none' }
+  >(
+    operationName: string,
+    parameters: ObservabilityEsQueryRequest,
+    options: TEsqlOptions
+  ): Promise<InferEsqlResponseOf<TOutput, TEsqlOptions>>;
   client: ElasticsearchClient;
 }
 
@@ -87,23 +149,40 @@ export function createObservabilityEsClient({
         });
       });
     },
-    esql(operationName: string, parameters: EsqlQueryRequest) {
+    esql(
+      operationName: string,
+      parameters: ObservabilityEsQueryRequest,
+      options?: EsqlOptions
+    ): Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>> {
       return callWithLogger(operationName, parameters, () => {
-        return client.esql.transport.request(
-          {
-            path: '_query',
-            method: 'POST',
-            body: JSON.stringify(parameters),
-            querystring: {
-              drop_null_columns: true,
-            },
-          },
-          {
-            headers: {
-              'content-type': 'application/json',
-            },
-          }
-        ) as unknown as Promise<ESQLSearchResponse>;
+        return client.esql
+          .query(
+            { ...parameters },
+            {
+              querystring: {
+                drop_null_columns: true,
+              },
+            }
+          )
+          .then((response) => {
+            const esqlResponse = response as unknown as UnparsedEsqlResponseOf<EsqlOutput>;
+
+            const transform = options?.transform ?? 'none';
+
+            if (transform === 'none') {
+              return esqlResponse;
+            }
+
+            const parsedResponse = { hits: esqlResultToPlainObjects(esqlResponse) };
+
+            if (transform === 'plain') {
+              return parsedResponse;
+            }
+
+            return {
+              hits: parsedResponse.hits.map((hit) => unflattenObject(hit)),
+            };
+          }) as Promise<InferEsqlResponseOf<EsqlOutput, EsqlOptions>>;
       });
     },
     search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(

@@ -22,6 +22,7 @@ export type AbortableAsyncStateOf<T extends AbortableAsyncState<any>> =
 
 interface UseAbortableAsyncOptions<T> {
   clearValueOnNext?: boolean;
+  unsetValueOnError?: boolean;
   defaultValue?: () => T;
   onError?: (error: Error) => void;
 }
@@ -41,6 +42,7 @@ export function useAbortableAsync<T>(
   options?: UseAbortableAsyncOptions<T>
 ): AbortableAsyncState<T> {
   const clearValueOnNext = options?.clearValueOnNext;
+  const unsetValueOnError = options?.unsetValueOnError;
 
   const controllerRef = useRef(new AbortController());
 
@@ -63,7 +65,9 @@ export function useAbortableAsync<T>(
 
     function handleError(err: Error) {
       setError(err);
-      // setValue(undefined);
+      if (unsetValueOnError) {
+        setValue(undefined);
+      }
       setLoading(false);
       options?.onError?.(err);
     }

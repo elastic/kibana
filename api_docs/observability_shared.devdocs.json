@@ -340,7 +340,7 @@
         "label": "allCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1157,7 +1157,7 @@
         "label": "noCasesPermissions",
         "description": [],
         "signature": [
-          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; }"
+          "() => { all: boolean; create: boolean; read: boolean; update: boolean; delete: boolean; push: boolean; connectors: boolean; settings: boolean; createComment: boolean; reopenCase: boolean; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/utils/cases_permissions.ts",
         "deprecated": false,
@@ -1723,6 +1723,69 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.useControlPanels",
+        "type": "Function",
+        "tags": [],
+        "label": "useControlPanels",
+        "description": [],
+        "signature": [
+          "(controlPanelConfigs: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }) => void]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useControlPanels.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "controlPanelConfigs",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useControlPanels.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.useEditableSettings",
         "type": "Function",
         "tags": [],
@@ -2008,6 +2071,30 @@
           "InspectorContextValue"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/public/contexts/inspector/use_inspector_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useKibanaQuerySettings",
+        "type": "Function",
+        "tags": [],
+        "label": "useKibanaQuerySettings",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.EsQueryConfig",
+            "text": "EsQueryConfig"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_kibana_query_settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -2336,6 +2423,179 @@
                   " | undefined"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_track_metric.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useUrlState",
+        "type": "Function",
+        "tags": [],
+        "label": "useUrlState",
+        "description": [],
+        "signature": [
+          "<State>({ defaultState, decodeUrlState, encodeUrlState, urlStateKey, writeDefaultState, }: { defaultState: State; decodeUrlState: (value: ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          },
+          " | undefined) => State | undefined; encodeUrlState: (value: State) => ",
+          {
+            "pluginId": "@kbn/rison",
+            "scope": "common",
+            "docId": "kibKbnRisonPluginApi",
+            "section": "def-common.RisonValue",
+            "text": "RisonValue"
+          },
+          " | undefined; urlStateKey: string; writeDefaultState?: boolean | undefined; }) => [State, (patch: State | ((prevState: State) => State) | undefined) => void]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useUrlState.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  defaultState,\n  decodeUrlState,\n  encodeUrlState,\n  urlStateKey,\n  writeDefaultState = false,\n}",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.defaultState",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "defaultState",
+                "description": [],
+                "signature": [
+                  "State"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.decodeUrlState",
+                "type": "Function",
+                "tags": [],
+                "label": "decodeUrlState",
+                "description": [],
+                "signature": [
+                  "(value: ",
+                  {
+                    "pluginId": "@kbn/rison",
+                    "scope": "common",
+                    "docId": "kibKbnRisonPluginApi",
+                    "section": "def-common.RisonValue",
+                    "text": "RisonValue"
+                  },
+                  " | undefined) => State | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.useUrlState.$1.decodeUrlState.$1",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "value",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/rison",
+                        "scope": "common",
+                        "docId": "kibKbnRisonPluginApi",
+                        "section": "def-common.RisonValue",
+                        "text": "RisonValue"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": false
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.encodeUrlState",
+                "type": "Function",
+                "tags": [],
+                "label": "encodeUrlState",
+                "description": [],
+                "signature": [
+                  "(value: State) => ",
+                  {
+                    "pluginId": "@kbn/rison",
+                    "scope": "common",
+                    "docId": "kibKbnRisonPluginApi",
+                    "section": "def-common.RisonValue",
+                    "text": "RisonValue"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "observabilityShared",
+                    "id": "def-public.useUrlState.$1.encodeUrlState.$1",
+                    "type": "Uncategorized",
+                    "tags": [],
+                    "label": "value",
+                    "description": [],
+                    "signature": [
+                      "State"
+                    ],
+                    "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.urlStateKey",
+                "type": "string",
+                "tags": [],
+                "label": "urlStateKey",
+                "description": [],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.useUrlState.$1.writeDefaultState",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "writeDefaultState",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_url_state.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3512,9 +3772,24 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCases\""
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.ControlPanels",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlPanels",
+        "description": [],
+        "signature": [
+          "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: string[] | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_shared/public/hooks/use_control_panels_url_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6659,7 +6934,7 @@
         "label": "casesFeatureId",
         "description": [],
         "signature": [
-          "\"observabilityCases\""
+          "\"observabilityCasesV2\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/index.ts",
         "deprecated": false,
@@ -9142,13 +9417,13 @@
     "objects": [
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.ENTITY_TYPES",
+        "id": "def-common.BUILT_IN_ENTITY_TYPES",
         "type": "Object",
         "tags": [],
-        "label": "ENTITY_TYPES",
+        "label": "BUILT_IN_ENTITY_TYPES",
         "description": [],
         "signature": [
-          "{ readonly HOST: \"host\"; readonly CONTAINER: \"container\"; readonly SERVICE: \"service\"; readonly KUBERNETES: { readonly CLUSTER: { ecs: \"kubernetes_cluster_ecs\"; semconv: \"kubernetes_cluster_semconv\"; }; readonly CONTAINER: { ecs: \"kubernetes_container_ecs\"; semconv: \"kubernetes_container_semconv\"; }; readonly CRONJOB: { ecs: \"kubernetes_cron_job_ecs\"; semconv: \"kubernetes_cron_job_semconv\"; }; readonly DAEMONSET: { ecs: \"kubernetes_daemon_set_ecs\"; semconv: \"kubernetes_daemon_set_semconv\"; }; readonly DEPLOYMENT: { ecs: \"kubernetes_deployment_ecs\"; semconv: \"kubernetes_deployment_semconv\"; }; readonly JOB: { ecs: \"kubernetes_job_ecs\"; semconv: \"kubernetes_job_semconv\"; }; readonly NAMESPACE: { ecs: \"kubernetes_namespace_ecs\"; semconv: \"kubernetes_namespace_semconv\"; }; readonly NODE: { ecs: \"kubernetes_node_ecs\"; semconv: \"kubernetes_node_semconv\"; }; readonly POD: { ecs: \"kubernetes_pod_ecs\"; semconv: \"kubernetes_pod_semconv\"; }; readonly STATEFULSET: { ecs: \"kubernetes_stateful_set_ecs\"; semconv: \"kubernetes_stateful_set_semconv\"; }; }; }"
+          "{ readonly HOST: \"host\"; readonly CONTAINER: \"container\"; readonly SERVICE: \"service\"; readonly KUBERNETES: { readonly CLUSTER: { ecs: \"k8s.cluster.ecs\"; semconv: \"k8s.cluster.semconv\"; }; readonly CONTAINER: { ecs: \"k8s.container.ecs\"; semconv: \"k8s.container.semconv\"; }; readonly CRONJOB: { ecs: \"k8s.cron_job.ecs\"; semconv: \"k8s.cron_job.semconv\"; }; readonly DAEMONSET: { ecs: \"k8s.daemonset.ecs\"; semconv: \"k8s.daemonset.semconv\"; }; readonly DEPLOYMENT: { ecs: \"k8s.deployment.ecs\"; semconv: \"k8s.deployment.semconv\"; }; readonly JOB: { ecs: \"k8s.job.ecs\"; semconv: \"k8s.job.semconv\"; }; readonly NAMESPACE: { ecs: \"k8s.namespace.ecs\"; semconv: \"k8s.namespace.semconv\"; }; readonly NODE: { ecs: \"k8s.node.ecs\"; semconv: \"k8s.node.semconv\"; }; readonly POD: { ecs: \"k8s.pod.ecs\"; semconv: \"k8s.pod.semconv\"; }; readonly SERVICE: { ecs: \"k8s.service.ecs\"; semconv: \"k8s.service.semconv\"; }; readonly STATEFULSET: { ecs: \"k8s.statefulset.ecs\"; semconv: \"k8s.statefulset.semconv\"; }; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/observability_shared/common/entity/entity_types.ts",
         "deprecated": false,

@@ -954,6 +954,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
       rules: {
@@ -961,7 +962,7 @@ module.exports = {
           'error',
           {
             additionalHooks:
-              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient)$',
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
       },
@@ -970,6 +971,7 @@ module.exports = {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
+        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
         'src/plugins/ai_assistant_management/**/*.tsx',
         'x-pack/packages/observability/**/*.{ts,tsx}',
       ],
@@ -986,6 +988,7 @@ module.exports = {
     {
       files: [
         'x-pack/plugins/observability_solution/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/plugins/{streams,streams_app}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/packages/observability/logs_overview/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
@@ -1997,9 +2000,6 @@ module.exports = {
         // logsShared depends on o11y/private plugins, but platform plugins depend on it
         'x-pack/plugins/observability_solution/logs_shared/**',
 
-        // this plugin depends on visTypeTimeseries plugin (for TSVB viz) which is platform/private ATM
-        'x-pack/plugins/observability_solution/infra/**',
-
         // TODO @kibana/operations
         'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
         'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
@@ -2018,6 +2018,15 @@ module.exports = {
       rules: {
         '@kbn/imports/no_group_crossing_manifests': 'warn',
         '@kbn/imports/no_group_crossing_imports': 'warn',
+      },
+    },
+    {
+      files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
+      rules: {
+        // disabling it since package is a CLI tool
+        'no-console': 'off',
+        // disabling it since package is marked as module and it requires extension for files written
+        '@kbn/imports/uniform_imports': 'off',
       },
     },
   ],

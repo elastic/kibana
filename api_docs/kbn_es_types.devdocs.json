@@ -137,12 +137,13 @@
           {
             "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchParams.params",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "Record<string, string | undefined>[] | undefined"
+              "ScalarValue",
+              "[] | Record<string, string | undefined>[] | undefined"
             ],
             "path": "packages/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -493,6 +494,8 @@
           "AggregationsRateAggregation",
           "; reverse_nested: ",
           "AggregationsReverseNestedAggregation",
+          "; random_sampler: ",
+          "AggregationsRandomSamplerAggregation",
           "; sampler: ",
           "AggregationsSamplerAggregation",
           "; scripted_metric: ",
@@ -515,6 +518,8 @@
           "AggregationsSumBucketAggregation",
           "; terms: ",
           "AggregationsTermsAggregation",
+          "; time_series: ",
+          "AggregationsTimeSeriesAggregation",
           "; top_hits: ",
           "AggregationsTopHitsAggregation",
           "; t_test: ",

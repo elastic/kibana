@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { MessageRole, ToolCall, ToolChoiceType } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
-import { createInferenceClient } from '../inference_client';
+import { createClient as createInferenceClient } from '../inference_client';
 import { InferenceServerStart, InferenceStartDependencies } from '../types';
 import { observableIntoEventSourceStream } from '../util/observable_into_event_source_stream';
 
@@ -121,6 +121,12 @@ export function registerChatCompleteRoute({
   router.post(
     {
       path: '/internal/inference/chat_complete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: chatCompleteBodySchema,
       },

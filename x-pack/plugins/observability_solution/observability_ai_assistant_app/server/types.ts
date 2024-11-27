@@ -37,7 +37,8 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { InferenceServerStart, InferenceServerSetup } from '@kbn/inference-plugin/server';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
-import type { SloPluginStart, SloPluginSetup } from '@kbn/slo-plugin/server';
+import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import type { SLOServerStart, SLOServerSetup } from '@kbn/slo-plugin/server';
 import type { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -59,8 +60,9 @@ export interface ObservabilityAIAssistantAppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   inference: InferenceServerStart;
   logsDataAccess: LogsDataAccessPluginStart;
-  slo: SloPluginStart;
+  slo: SLOServerStart;
   spaces: SpacesPluginStart;
+  llmTasks: LlmTasksPluginStart;
 }
 
 export interface ObservabilityAIAssistantAppPluginSetupDependencies {
@@ -77,6 +79,6 @@ export interface ObservabilityAIAssistantAppPluginSetupDependencies {
   cloud?: CloudSetup;
   serverless?: ServerlessPluginSetup;
   inference: InferenceServerSetup;
-  slo: SloPluginSetup;
+  slo: SLOServerSetup;
   spaces: SpacesPluginSetup;
 }
