@@ -282,6 +282,7 @@ export function StreamDetailRouting({
                             overflow: auto;
                           `}
                         >
+                          <PreviousStreamEntry definition={definition} />
                           <CurrentStreamEntry definition={definition} />
                           {definition.children.map((child, i) => (
                             <NestedView key={i}>
@@ -717,6 +718,38 @@ function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }
           })}
         </EuiText>
       </EuiPanel>
+    </EuiFlexItem>
+  );
+}
+
+function PreviousStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
+  const router = useStreamsAppRouter();
+
+  const parentId = definition.id.split('.').slice(0, -1).join('.');
+  if (parentId === '') {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="streamsAppPreviousStreamEntryPreviousStreamButton"
+            href={router.link('/{key}/{tab}/{subtab}', {
+              path: {
+                key: parentId,
+                tab: 'management',
+                subtab: 'route',
+              },
+            })}
+          >
+            {i18n.translate('xpack.streams.streamDetailRouting.previousStream', {
+              defaultMessage: '.. (Previous stream)',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 }
