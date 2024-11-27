@@ -81,7 +81,7 @@ async function upsertInternalStream({ definition, scopedClusterClient }: BasePar
   return scopedClusterClient.asInternalUser.index({
     id: definition.id,
     index: STREAMS_INDEX,
-    document: { definition, managed: true },
+    document: { ...definition, managed: true },
     refresh: 'wait_for',
   });
 }
@@ -117,7 +117,7 @@ export async function listDataStreamsAsStreams({
 }: ListStreamsParams): Promise<StreamDefinition[]> {
   const response = await scopedClusterClient.asInternalUser.indices.getDataStream();
   return response.data_streams
-    .filter((dataStream) => dataStream.name !== 'logs')
+    .filter((dataStream) => dataStream.template.endsWith('@stream') === false)
     .map((dataStream) => ({
       id: dataStream.name,
       managed: false,
