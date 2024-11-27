@@ -8,7 +8,7 @@ keystore, and the `kibana-keystore` tool to manage the settings in the keystore.
 [NOTE]
 ====
 * Run all commands as the user who runs {kib}.
-* Any valid {kib} setting be stored in the keystore securely.
+* Any valid {kib} setting can be stored in the keystore securely.
    Unsupported, extraneous or invalid settings will cause {kib} to fail to start up.
 ====
 
