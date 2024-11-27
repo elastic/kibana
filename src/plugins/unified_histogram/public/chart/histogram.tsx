@@ -59,32 +59,6 @@ export interface HistogramProps {
   withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
 }
 
-/**
- * To prevent flakiness in the chart, we need to ensure that the data view config is valid.
- * This requires that there are not multiple different data view ids in the given configuration.
- * @param dataView
- * @param visContext
- * @param adHocDataViews
- */
-const checkValidDataViewConfig = (
-  dataView: DataView,
-  visContext: UnifiedHistogramVisContext,
-  adHocDataViews: { [key: string]: DataViewSpec } | undefined
-) => {
-  if (!dataView.id) {
-    return false;
-  }
-
-  if (!dataView.isPersisted() && !adHocDataViews?.[dataView.id]) {
-    return false;
-  }
-
-  if (dataView.id !== visContext.requestData.dataViewId) {
-    return false;
-  }
-  return true;
-};
-
 const computeTotalHits = (
   hasLensSuggestions: boolean,
   adapterTables:
@@ -229,10 +203,6 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
-
-  if (!checkValidDataViewConfig(dataView, visContext, lensProps.attributes.state.adHocDataViews)) {
-    return <></>;
-  }
 
   return (
     <>

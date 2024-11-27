@@ -329,8 +329,13 @@ export class LensVisService {
     queryParams: QueryParams;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
-  }): Suggestion => {
+  }): Suggestion | undefined => {
     const { dataView } = queryParams;
+
+    if (!dataView.isTimeBased() || !dataView.timeFieldName) {
+      return undefined;
+    }
+
     const showBreakdown = breakdownField && fieldSupportsBreakdown(breakdownField);
 
     let columnOrder = ['date_column', 'count_column'];
