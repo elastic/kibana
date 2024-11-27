@@ -21,7 +21,6 @@ import {
   type ResolveTimelineResponse,
 } from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, resolveTimelineOrNull } from '../../../saved_object/timelines';
-import type { SavedTimeline, ResolvedTimeline } from '../../../../../../common/api/timeline';
 
 export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -42,28 +41,39 @@ export const resolveTimelineRoute = (router: SecuritySolutionPluginRouter) => {
         },
       },
       async (context, request, response): Promise<IKibanaResponse<ResolveTimelineResponse>> => {
+        const siemResponse = buildSiemResponse(response);
+
         try {
           const frameworkRequest = await buildFrameworkRequest(context, request);
           const query = request.query ?? {};
           const { template_timeline_id: templateTimelineId, id } = query;
 
-          let res: SavedTimeline | ResolvedTimeline | null = null;
-
           if (templateTimelineId != null && id == null) {
             // Template timelineId is not a SO id, so it does not need to be updated to use resolve
-            res = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
+            const timeline = await getTimelineTemplateOrNull(frameworkRequest, templateTimelineId);
+            if (timeline) {
+              return response.ok({
+                body: { timeline, outcome: 'exactMatch' },
+              });
+            }
           } else if (templateTimelineId == null && id != null) {
             // In the event the objectId is defined, run the resolve call
-            res = await resolveTimelineOrNull(frameworkRequest, id);
+            const timelineOrNull = await resolveTimelineOrNull(frameworkRequest, id);
+            if (timelineOrNull) {
+              return response.ok({
+                body: timelineOrNull,
+              });
+            }
           } else {
             throw new Error('please provide id or template_timeline_id');
           }
 
-          return response.ok({ body: res ? { data: res } : {} });
+          return siemResponse.error({
+            statusCode: 404,
+            body: 'Could not resolve timeline',
+          });
         } catch (err) {
           const error = transformError(err);
-          const siemResponse = buildSiemResponse(response);
-
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,

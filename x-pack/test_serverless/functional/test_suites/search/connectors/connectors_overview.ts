@@ -18,7 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  describe('connectors', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/197019
+  describe.skip('connectors', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
       await pageObjects.svlCommonNavigation.sidenav.clickLink({

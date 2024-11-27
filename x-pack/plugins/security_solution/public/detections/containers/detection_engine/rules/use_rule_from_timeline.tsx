@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type { EqlOptionsSelected } from '@kbn/timelines-plugin/common';
+import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
@@ -37,7 +37,7 @@ export type SetRuleQuery = ({
 }: {
   index: string[];
   queryBar: FieldValueQueryBar;
-  eqlOptions?: EqlOptionsSelected;
+  eqlOptions?: EqlOptions;
 }) => void;
 
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
