@@ -40,7 +40,7 @@ const TemplatesComponent: React.FC<Props> = ({
   onDeleteTemplate,
 }) => {
   const { permissions } = useCasesContext();
-  const canAddTemplates = permissions.create && permissions.update;
+  const canAddTemplates = permissions.settings;
   const [error, setError] = useState<boolean>(false);
 
   const handleAddTemplate = useCallback(() => {
