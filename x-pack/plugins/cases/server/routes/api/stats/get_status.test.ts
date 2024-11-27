@@ -15,15 +15,20 @@ describe('getStatusRoute', () => {
     const router = getStatusRoute({ isServerless: true, docLinks });
 
     expect(router.routerOptions?.access).toBe('internal');
-    expect(router.routerOptions?.deprecated).toMatchInlineSnapshot(`
+    expect(router.routerOptions?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201004$/),
+      },
+      `
       Object {
-        "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/breaking-changes-summary.html#breaking-201004",
+        "documentationUrl": StringMatching /#breaking-201004\\$/,
         "reason": Object {
           "type": "remove",
         },
         "severity": "warning",
       }
-    `);
+    `
+    );
   });
 
   it('marks the endpoint public in non-serverless', async () => {

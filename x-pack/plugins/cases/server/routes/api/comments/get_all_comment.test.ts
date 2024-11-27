@@ -25,9 +25,13 @@ describe('getAllCommentsRoute', () => {
 
   it('should be deprecated', () => {
     const router = getAllCommentsRoute({ docLinks });
-    expect(router.routerOptions?.deprecated).toMatchInlineSnapshot(`
+    expect(router.routerOptions?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201004$/),
+      },
+      `
       Object {
-        "documentationUrl": "https://www.elastic.co/guide/en/kibana/test-branch/breaking-changes-summary.html#breaking-201004",
+        "documentationUrl": StringMatching /#breaking-201004\\$/,
         "reason": Object {
           "newApiMethod": "GET",
           "newApiPath": "/api/cases/{case_id}/comments/_find",
@@ -35,6 +39,7 @@ describe('getAllCommentsRoute', () => {
         },
         "severity": "warning",
       }
-    `);
+    `
+    );
   });
 });
