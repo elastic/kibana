@@ -91,7 +91,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/discover/README.md[discover]
-|Contains the Discover application and the saved search embeddable.
+|Contains the Discover application and the Discover Session embeddable (former Saved Search embeddable).
 
 
 |{kib-repo}blob/{branch}/src/plugins/discover_shared/README.md[discoverShared]
@@ -309,6 +309,7 @@ oss plugins.
 
 |{kib-repo}blob/{branch}/src/plugins/saved_search/README.md[savedSearch]
 |Contains the saved search saved object definition and helpers.
+It's called Discover Session in UI.
 
 
 |{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]
