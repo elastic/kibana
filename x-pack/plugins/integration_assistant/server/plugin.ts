@@ -98,7 +98,7 @@ export class IntegrationAssistantPlugin
     licensing.license$.subscribe((license) => {
       this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
     });
-    
+
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     // Load the TaskManagerStartContract to the ValidateCelTask
     this.validateCelTask?.startTaskManager(dependencies.taskManager, esClient);

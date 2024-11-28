@@ -39,7 +39,7 @@ export class ValidateCelTask {
   }
 
   private runTask = async (taskInstance: ConcreteTaskInstance) => {
-    console.log("Start time in BG task: " + Date.now());
+    console.log(`Start time in BG task: ${Date.now()}`);
     const { params, state } = taskInstance;
     if (params.celProgram) {
       const formattedProgram = await validate(params.celProgram);
@@ -59,7 +59,7 @@ export class ValidateCelTask {
         },
         { meta: true }
       );
-      console.log("End time in BG task: " + Date.now());
+      console.log(`End time in BG task: ${Date.now()}`);
       return {
         state: stateUpdated,
       };
