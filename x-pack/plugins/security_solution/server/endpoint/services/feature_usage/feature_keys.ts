@@ -26,6 +26,7 @@ export const FEATURE_KEYS = {
   SCAN: 'Scan files',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
+  RUNSCRIPT: 'Run script',
 } as const;
 
 export type FeatureKeys = keyof typeof FEATURE_KEYS;
@@ -41,6 +42,7 @@ const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<Record<ResponseActionsApiCommandNam
     execute: 'EXECUTE',
     upload: 'UPLOAD',
     scan: 'SCAN',
+    runscript: 'RUNSCRIPT',
   };
 
 export const getResponseActionFeatureKey = (
