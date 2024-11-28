@@ -128,7 +128,12 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             defaultMessage: 'Grid Layout Example',
           })}
         />
-        <EuiPageTemplate.Section color="subdued">
+        <EuiPageTemplate.Section
+          color="subdued"
+          contentProps={{
+            css: { display: 'flex', flexFlow: 'column nowrap', flexGrow: 1 },
+          }}
+        >
           <EuiCallOut
             title={i18n.translate('examples.gridExample.sessionStorageCallout', {
               defaultMessage:

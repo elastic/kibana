@@ -53,10 +53,16 @@ export const GridHeightSmoother = ({
             smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
           const gutterSize = parseFloat(euiThemeVars.euiSizeL);
 
-          // When panel is expanded, ensure the page occupies the full viewport height:
-          smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px)`;
+          // When panel is expanded, ensure the page occupies the full viewport height
+          // If the parent element is a flex container (preferred approach):
+          smoothHeightRef.current.style.flexBasis = `100%`;
+
+          // fallback in case parent is not a flex container (less reliable if shifts happen after the time we calculate smoothHeightRefY)
+          smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px`;
           smoothHeightRef.current.style.transition = 'none';
         } else {
+          smoothHeightRef.current.style.flexBasis = '';
+          smoothHeightRef.current.style.height = '';
           smoothHeightRef.current.style.transition = '';
         }
       }
