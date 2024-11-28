@@ -34,7 +34,7 @@ export const ViewRuleDetailsAlertAction = memo(
       },
     },
   }: AlertActionsProps) => {
-    const ruleId = alert[ALERT_RULE_UUID]?.[0] ?? null;
+    const ruleId = (alert[ALERT_RULE_UUID]?.[0] as string) ?? null;
     const pagePath = ruleId && tableId && resolveRulePagePath?.(ruleId, tableId);
     const linkToRule = pagePath ? prepend(pagePath) : null;
 

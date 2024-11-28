@@ -30,7 +30,7 @@ export const ViewAlertDetailsAlertAction = memo(
       },
     },
   }: AlertActionsProps) => {
-    const alertId = alert[ALERT_UUID]?.[0] ?? null;
+    const alertId = (alert[ALERT_UUID]?.[0] as string) ?? null;
     const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
     const linkToAlert = pagePath ? prepend(pagePath) : null;
 

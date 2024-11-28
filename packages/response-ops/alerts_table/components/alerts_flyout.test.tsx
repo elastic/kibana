@@ -10,21 +10,21 @@
 import React, { ComponentProps } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { Alert } from '@kbn/alerting-types';
 import { AlertsFlyout } from './alerts_flyout';
 import { AlertsField, FlyoutSectionRenderer } from '../types';
+import { createPartialObjectMock } from '../utils/test';
 
 type FlyoutProps = ComponentProps<FlyoutSectionRenderer>;
 
 const onClose = jest.fn();
 const onPaginate = jest.fn();
-const props = {
+const props = createPartialObjectMock<FlyoutProps>({
   alert: {
-    [AlertsField.name]: ['one'],
-    [AlertsField.reason]: ['two'],
     _id: '0123456789',
     _index: '.alerts-default',
-  } as unknown as Alert,
+    [AlertsField.name]: ['one'],
+    [AlertsField.reason]: ['two'],
+  },
   tableId: 'test',
   columns: [
     {
@@ -51,7 +51,7 @@ const props = {
   isLoading: false,
   onClose,
   onPaginate,
-} as unknown as FlyoutProps;
+});
 
 describe('AlertsFlyout', () => {
   afterEach(() => {

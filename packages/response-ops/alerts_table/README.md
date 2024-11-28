@@ -48,10 +48,7 @@ components, allowing hooks, context, and other React concepts to be used.
 
 ```tsx
 const CustomCellValue: GetAlertsTableProp<'renderCellValue'> = ({ alert }) => {
-  return (
-...
-)
-  ;
+  // ...
 };
 
 <AlertsTable renderCellValue={CustomCellValue} />

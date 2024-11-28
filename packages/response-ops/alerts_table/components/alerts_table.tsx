@@ -25,10 +25,6 @@ import {
   EuiDataGridColumn,
   EuiProgress,
   EuiDataGridSorting,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiCode,
-  EuiCopy,
   EuiDataGridControlColumn,
   EuiDataGridRefProps,
 } from '@elastic/eui';
@@ -48,6 +44,7 @@ import deepEqual from 'fast-deep-equal';
 import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/constants';
+import { ErrorFallback } from './error_fallback';
 import { defaultAlertsTableColumns } from '../configuration';
 import { Storage } from '../utils/storage';
 import { queryKeys } from '../constants';
@@ -60,11 +57,6 @@ import {
   AlertsTableImperativeApi,
   AlertsTableProps,
 } from '../types';
-import {
-  ALERTS_TABLE_UNKNOWN_ERROR_TITLE,
-  ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE,
-  ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL,
-} from '../translations';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { useColumns } from '../hooks/use_columns';
 import { InspectButtonContainer } from './alerts_query_inspector';
@@ -72,11 +64,11 @@ import { alertsTableQueryClient } from '../query_client';
 import { useBulkGetCasesQuery } from '../hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindowsQuery } from '../hooks/use_bulk_get_maintenance_windows';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
-import { ErrorBoundary, FallbackComponent } from './error_boundary';
+import { ErrorBoundary } from './error_boundary';
 import { usePagination } from '../hooks/use_pagination';
 import { typedForwardRef } from '../utils/react';
 
-export interface AlertsTableStorage {
+export interface AlertsTablePersistedConfiguration {
   columns: EuiDataGridColumn[];
   visibleColumns?: string[];
   sort: SortCombinations[];
@@ -93,13 +85,13 @@ const getCaseIdsFromAlerts = (alerts: Alert[]) => [
         const caseIds = alert[ALERT_CASE_IDS];
         return caseIds != null && caseIds.length > 0;
       })
-      .map((alert) => alert[ALERT_CASE_IDS])
+      .map((alert) => alert[ALERT_CASE_IDS] as string[])
       .flat()
   ),
 ];
 
 const getRuleIdsFromAlerts = (alerts: Alert[]) => [
-  ...new Set(alerts.map((a) => a[ALERT_RULE_UUID]![0])),
+  ...new Set(alerts.map((a) => a[ALERT_RULE_UUID]![0] as string)),
 ];
 
 const getMaintenanceWindowIdsFromAlerts = (alerts: Alert[]) => [
@@ -109,7 +101,7 @@ const getMaintenanceWindowIdsFromAlerts = (alerts: Alert[]) => [
         const maintenanceWindowIds = alert[ALERT_MAINTENANCE_WINDOW_IDS];
         return maintenanceWindowIds != null && maintenanceWindowIds.length > 0;
       })
-      .map((alert) => alert[ALERT_MAINTENANCE_WINDOW_IDS])
+      .map((alert) => alert[ALERT_MAINTENANCE_WINDOW_IDS] as string[])
       .flat()
   ),
 ];
@@ -130,33 +122,8 @@ const initialBulkActionsState = {
   updatedAt: Date.now(),
 };
 
-const ErrorBoundaryFallback: FallbackComponent = ({ error }) => {
-  return (
-    <EuiEmptyPrompt
-      iconType="error"
-      color="danger"
-      title={<h2>{ALERTS_TABLE_UNKNOWN_ERROR_TITLE}</h2>}
-      body={
-        <>
-          <p>{ALERTS_TABLE_UNKNOWN_ERROR_MESSAGE}</p>
-          {error.message && <EuiCode>{error.message}</EuiCode>}
-        </>
-      }
-      actions={
-        <EuiCopy textToCopy={[error.message, error.stack].filter(Boolean).join('\n')}>
-          {(copy) => (
-            <EuiButton onClick={copy} color="danger" fill>
-              {ALERTS_TABLE_UNKNOWN_ERROR_COPY_TO_CLIPBOARD_LABEL}
-            </EuiButton>
-          )}
-        </EuiCopy>
-      }
-    />
-  );
-};
-
 /**
- * An `EuiDataGrid` abstraction to render alert documents.
+ * An `EuiDataGrid` abstraction to render alert documents
  *
  * It manages the paginated and cached fetching of alerts based on the
  * provided `featureIds` (the final query can be refined through the
@@ -180,12 +147,13 @@ export const AlertsTable = memo(
   forwardRef((props, ref) => {
     return (
       <QueryClientProvider client={alertsTableQueryClient} context={AlertsQueryContext}>
-        <ErrorBoundary fallback={ErrorBoundaryFallback}>
+        <ErrorBoundary fallback={ErrorFallback}>
           <AlertsTableContent {...props} ref={ref} />
         </ErrorBoundary>
       </QueryClientProvider>
     );
   })
+  // Type cast to avoid losing the generic type
 ) as typeof AlertsTableContent;
 
 (AlertsTable as FC).displayName = 'AlertsTable';
@@ -236,7 +204,9 @@ const AlertsTableContent = typedForwardRef(
     const queryClient = useQueryClient({ context: AlertsQueryContext });
     const storage = useRef(new Storage(window.localStorage));
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-    const localStorageAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
+    const localStorageAlertsTableConfig = storage.current.get(
+      id
+    ) as Partial<AlertsTablePersistedConfiguration>;
 
     const columnsLocal = useMemo(
       () =>
@@ -260,7 +230,7 @@ const AlertsTableContent = typedForwardRef(
       }),
       [columnsLocal, localStorageAlertsTableConfig, initialSort]
     );
-    const storageAlertsTable = useRef<AlertsTableStorage>(getStorageConfig());
+    const storageAlertsTable = useRef<AlertsTablePersistedConfiguration>(getStorageConfig());
 
     storageAlertsTable.current = getStorageConfig();
 
@@ -636,6 +606,7 @@ const AlertsTableContent = typedForwardRef(
   }
 );
 
+// Default export to simplify lazy loading
 // eslint-disable-next-line import/no-default-export
 export { AlertsTable as default };
 export type AlertsTable = typeof AlertsTable;

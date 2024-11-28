@@ -16,7 +16,7 @@ import { BulkActionsState } from '../types';
 import { AdditionalContext, RenderContext } from '../types';
 import { EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
-import { getJsDomPerformanceFix } from '../test_utils';
+import { getJsDomPerformanceFix } from '../utils/test';
 import { createCasesServiceMock } from '../mocks/cases.mock';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';

@@ -59,6 +59,6 @@ describe('useGetMutedAlertsQuery', () => {
     });
 
     await waitFor(() => expect(spy).toHaveBeenCalled());
-    expect(addErrorMock).toHaveBeenCalled();
+    await waitFor(() => expect(addErrorMock).toHaveBeenCalled());
   });
 });

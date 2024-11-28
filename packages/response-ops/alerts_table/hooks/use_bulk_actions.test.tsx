@@ -18,14 +18,16 @@ import { createCasesServiceMock } from '../mocks/cases.mock';
 import { BulkActionsVerbs, type PublicAlertsDataGridProps } from '../types';
 import { AdditionalContext, RenderContext } from '../types';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
-import { testQueryClientConfig } from '../test_utils';
+import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
 jest.mock('./bulk_get_cases');
 jest.mock('../contexts/alerts_table_context');
-jest.mocked(useAlertsTableContext).mockReturnValue({
-  bulkActionsStore: [{}, jest.fn()],
-} as unknown as RenderContext<AdditionalContext>);
+jest.mocked(useAlertsTableContext).mockReturnValue(
+  createPartialObjectMock<RenderContext<AdditionalContext>>({
+    bulkActionsStore: [{}, jest.fn()],
+  })
+);
 
 const mockCasesService = createCasesServiceMock();
 const http = httpServiceMock.createStartContract();

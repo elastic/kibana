@@ -28,6 +28,9 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { createPartialObjectMock } from '../utils/test';
 
 export type BaseAlertsDataGridProps = AlertsDataGridProps;
 export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'renderContext'>> & {
@@ -79,8 +82,10 @@ export const mockColumns = [
   },
 ];
 
-export const mockAlerts = [
+export const mockAlerts: Alert[] = [
   {
+    _id: 'test-1',
+    _index: 'alerts',
     [ALERT_RULE_NAME]: ['one'],
     [ALERT_REASON]: ['two'],
     [ALERT_STATUS]: ['active'],
@@ -88,6 +93,8 @@ export const mockAlerts = [
     [ALERT_CASE_IDS]: ['test-id'],
   },
   {
+    _id: 'test-2',
+    _index: 'alerts',
     [ALERT_RULE_NAME]: ['three'],
     [ALERT_REASON]: ['four'],
     [ALERT_STATUS]: ['active'],
@@ -95,18 +102,22 @@ export const mockAlerts = [
     [ALERT_CASE_IDS]: ['test-id-2'],
   },
   {
+    _id: 'test-3',
+    _index: 'alerts',
     [ALERT_RULE_NAME]: ['five'],
     [ALERT_REASON]: ['six'],
     [ALERT_STATUS]: ['recovered'],
     [ALERT_FLAPPING]: [true],
   },
   {
+    _id: 'test-4',
+    _index: 'alerts',
     [ALERT_RULE_NAME]: ['seven'],
     [ALERT_REASON]: ['eight'],
     [ALERT_STATUS]: ['recovered'],
     [ALERT_FLAPPING]: [false],
   },
-] as unknown as Alert[];
+];
 export const mockOldAlertsData = [
   [
     {
@@ -176,8 +187,9 @@ export const mockBulkActionsState = {
   updatedAt: Date.now(),
 };
 
-export const mockRenderContext = {
+export const mockRenderContext = createPartialObjectMock<RenderContext<AdditionalContext>>({
   tableId: 'test-table',
+  dataGridRef: { current: null },
   showAlertStatusWithFlapping: true,
   columns: mockColumns,
   refresh: jest.fn(),
@@ -221,13 +233,15 @@ export const mockRenderContext = {
   ),
   services: {
     http: httpServiceMock.createStartContract(),
+    data: dataPluginMock.createStartContract(),
     fieldFormats: mockFieldFormatsRegistry,
     notifications: notificationServiceMock.createStartContract(),
     application: applicationServiceMock.createStartContract(),
-    casesService: createCasesServiceMock(),
     settings: settingsServiceMock.createStartContract(),
+    licensing: licensingMock.createStart(),
+    cases: createCasesServiceMock(),
   },
-} as RenderContext<AdditionalContext>;
+});
 
 export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   pageSizeOptions: [1, 10, 20, 50, 100],

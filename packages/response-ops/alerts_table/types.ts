@@ -7,6 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  JSX,
+  ComponentClass,
+  ComponentProps,
+  ComponentType,
+  Dispatch,
+  FC,
+  Key,
+  MutableRefObject,
+  ReactNode,
+  RefAttributes,
+  SetStateAction,
+} from 'react';
 import {
   AlertConsumers,
   ALERT_CASE_IDS,
@@ -15,17 +28,6 @@ import {
   type ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type {
-  ComponentClass,
-  ComponentProps,
-  ComponentType,
-  Dispatch,
-  Key,
-  MutableRefObject,
-  ReactNode,
-  RefAttributes,
-  SetStateAction,
-} from 'react';
 import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
 import type {
   EuiDataGridColumn,
@@ -91,9 +93,14 @@ type UseCasesAddToExistingCaseModal = (
   close: () => void;
 };
 
+/**
+ * Minimal cases service interface required by the alerts table
+ *
+ * We don't use the full cases service interface to avoid circular dependencies
+ */
 export interface CasesService {
   ui: {
-    getCasesContext: () => React.FC<any>;
+    getCasesContext: () => FC<any>;
   };
   hooks: {
     useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
@@ -277,7 +284,9 @@ export type FlyoutSectionRenderer<AC extends AdditionalContext = AdditionalConte
   FlyoutSectionProps<AC>
 >;
 
-export type AdditionalContext = object;
+// Intentional empty interface since using `object` is too permissive
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AdditionalContext {}
 
 export type RenderContext<AC extends AdditionalContext> = {
   tableId?: string;
@@ -542,8 +551,10 @@ export enum AlertsField {
   case_ids = 'kibana.alert.case_ids',
 }
 
-// Duplicated just for legacy reasons. Timelines plugin will be removed but
-// as long as the integration still work with Timelines we have to keep it
+/*
+ * Duplicated just for legacy reasons. Timelines plugin will be removed but
+ * as long as the integration still work with Timelines we have to keep it
+ */
 export interface TimelineItem {
   _id: string;
   _index?: string | null;

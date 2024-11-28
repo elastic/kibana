@@ -11,14 +11,12 @@ import React, { useMemo, useReducer } from 'react';
 import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Alert } from '@kbn/alerting-types';
 import { AlertsDataGrid } from '../components/alerts_data_grid';
 import { AlertsField, BulkActionsConfig, BulkActionsState } from '../types';
 import { RenderContext, AdditionalContext } from '../types';
 import { bulkActionsReducer } from './bulk_actions_reducer';
-import { createCasesServiceMock } from '../mocks/cases.mock';
 import {
   TestAlertsDataGridProps,
   mockBulkActionsState,
@@ -27,7 +25,7 @@ import {
   BaseAlertsDataGridProps,
 } from '../components/alerts_data_grid.mock';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
-import { getJsDomPerformanceFix, testQueryClientConfig } from '../test_utils';
+import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
@@ -47,34 +45,13 @@ const columns = [
   },
 ];
 
-const mockCaseService = createCasesServiceMock();
-const mockApplication = applicationServiceMock.createStartContract();
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      services: {
-        application: mockApplication,
-        cases: mockCaseService,
-        notifications: {
-          toasts: {
-            addDanger: jest.fn(),
-            addSuccess: jest.fn(),
-          },
-        },
-      },
-    }),
-  };
-});
-
 type AlertsTableWithBulkActionsContextProps = TestAlertsDataGridProps & {
   initialBulkActionsState?: BulkActionsState;
   renderContext?: Partial<RenderContext<AdditionalContext>>;
 };
 
 const mockRefresh = jest.mocked(mockRenderContext.refresh);
+const mockCaseService = mockRenderContext.services.cases!;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -87,22 +64,22 @@ afterAll(() => {
 });
 
 describe('AlertsDataGrid bulk actions', () => {
-  const alerts = [
+  const alerts: Alert[] = [
     {
+      _id: 'alert0',
+      _index: 'idx0',
       [AlertsField.name]: ['one'],
       [AlertsField.reason]: ['two'],
       [AlertsField.uuid]: ['uuidone'],
-      _id: 'alert0',
-      _index: 'idx0',
     },
     {
+      _id: 'alert1',
+      _index: 'idx1',
       [AlertsField.name]: ['three'],
       [AlertsField.reason]: ['four'],
       [AlertsField.uuid]: ['uuidtwo'],
-      _id: 'alert1',
-      _index: 'idx1',
     },
-  ] as unknown as Alert[];
+  ];
 
   const dataGridProps: TestAlertsDataGridProps = {
     ...mockDataGridProps,
@@ -259,15 +236,15 @@ describe('AlertsDataGrid bulk actions', () => {
 
     it('should pass the case ids when selecting alerts', async () => {
       const mockOnClick = jest.fn();
-      const newAlerts = [
+      const newAlerts: Alert[] = [
         {
+          _id: 'alert0',
+          _index: 'idx0',
           [AlertsField.name]: ['one'],
           [AlertsField.reason]: ['two'],
           [AlertsField.uuid]: ['uuidone'],
           [AlertsField.case_ids]: ['test-case'],
-          _id: 'alert0',
-          _index: 'idx0',
-        } as Alert,
+        },
       ];
 
       const props: AlertsTableWithBulkActionsContextProps = {
@@ -411,13 +388,14 @@ describe('AlertsDataGrid bulk actions', () => {
 
       describe('and its a page with count of alerts different than page size', () => {
         it('should show the right amount of alerts selected', async () => {
-          const secondPageAlerts = [
+          const secondPageAlerts: Alert[] = [
             {
+              _id: 'alert2',
+              _index: 'alerts',
               [AlertsField.name]: ['five'],
               [AlertsField.reason]: ['six'],
-              _id: 'alert2',
             },
-          ] as unknown as Alert[];
+          ];
           const allAlerts = [...alerts, ...secondPageAlerts];
           const props: AlertsTableWithBulkActionsContextProps = {
             ...dataGridPropsWithBulkActions,

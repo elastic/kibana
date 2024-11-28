@@ -38,7 +38,7 @@ export const CasesCell: CellComponent = memo((props) => {
   } = props;
   const { navigateToCaseView } = useCaseViewNavigation(application, caseAppId);
 
-  const caseIds = (alert && alert[ALERT_CASE_IDS]) ?? [];
+  const caseIds = (alert && (alert[ALERT_CASE_IDS] as string[])) ?? [];
 
   const validCases = caseIds
     .map((id) => cases?.get(id))

@@ -69,14 +69,14 @@ export const MaintenanceWindowsCell: CellComponent = memo((props) => {
   const { alert, maintenanceWindows, isLoading } = props;
 
   const validMaintenanceWindows = useMemo(() => {
-    const maintenanceWindowIds = (alert && alert[ALERT_MAINTENANCE_WINDOW_IDS]) || [];
+    const maintenanceWindowIds = (alert && (alert[ALERT_MAINTENANCE_WINDOW_IDS] as string[])) || [];
     return maintenanceWindowIds
       .map((id) => maintenanceWindows?.get(id))
       .filter(isMaintenanceWindowValid);
   }, [alert, maintenanceWindows]);
 
   const idsWithoutMaintenanceWindow = useMemo(() => {
-    const maintenanceWindowIds = (alert && alert[ALERT_MAINTENANCE_WINDOW_IDS]) || [];
+    const maintenanceWindowIds = (alert && (alert[ALERT_MAINTENANCE_WINDOW_IDS] as string[])) || [];
     return maintenanceWindowIds.filter((id) => !maintenanceWindows?.get(id));
   }, [alert, maintenanceWindows]);
 
@@ -89,7 +89,7 @@ export const MaintenanceWindowsCell: CellComponent = memo((props) => {
       maintenanceWindows={validMaintenanceWindows}
       maintenanceWindowIds={idsWithoutMaintenanceWindow}
       isLoading={isLoading}
-      timestamp={alert && alert[TIMESTAMP]?.[0]}
+      timestamp={alert && (alert[TIMESTAMP]?.[0] as string)}
     />
   );
 });
