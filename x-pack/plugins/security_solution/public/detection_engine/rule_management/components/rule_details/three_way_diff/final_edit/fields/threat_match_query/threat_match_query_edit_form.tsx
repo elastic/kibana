@@ -14,10 +14,10 @@ import {
   RuleQuery,
 } from '../../../../../../../../../common/api/detection_engine';
 import type { FormData } from '../../../../../../../../shared_imports';
+import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar_field';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { ThreatMatchQueryEditAdapter } from './threat_match_query_edit_adapter';
 import { isFilters } from '../../../../helpers';
-import type { FieldValueQueryBar } from '../../../../../../../rule_creation_ui/components/query_bar';
 
 export function ThreatMatchQueryEditForm(): JSX.Element {
   return (

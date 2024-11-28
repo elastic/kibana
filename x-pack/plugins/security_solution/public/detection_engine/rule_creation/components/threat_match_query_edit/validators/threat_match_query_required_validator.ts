@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
 import type { FormData, ValidationFunc } from '../../../../../shared_imports';
 import * as i18n from './translations';
 
