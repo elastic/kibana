@@ -360,10 +360,11 @@ import type {
   GetRuleMigrationResourcesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
-  InstallAllMigrationRulesRequestBodyInput,
-  InstallAllMigrationRulesResponse,
+  InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
+  InstallTranslatedMigrationRulesRequestParamsInput,
+  InstallTranslatedMigrationRulesResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -1575,29 +1576,13 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Installs all translated migration rules
-   */
-  async installAllMigrationRules(props: InstallAllMigrationRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InstallAllMigrationRules`);
-    return this.kbnClient
-      .request<InstallAllMigrationRulesResponse>({
-        path: '/internal/siem_migrations/rules/install_all',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
    * Installs migration rules
    */
   async installMigrationRules(props: InstallMigrationRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API InstallMigrationRules`);
     return this.kbnClient
       .request<InstallMigrationRulesResponse>({
-        path: '/internal/siem_migrations/rules/install',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}/install', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1634,6 +1619,24 @@ finalize it.
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Installs all translated migration rules
+   */
+  async installTranslatedMigrationRules(props: InstallTranslatedMigrationRulesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InstallTranslatedMigrationRules`);
+    return this.kbnClient
+      .request<InstallTranslatedMigrationRulesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/install_translated',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2371,14 +2374,15 @@ export interface InitEntityEngineProps {
 export interface InitEntityStoreProps {
   body: InitEntityStoreRequestBodyInput;
 }
-export interface InstallAllMigrationRulesProps {
-  body: InstallAllMigrationRulesRequestBodyInput;
-}
 export interface InstallMigrationRulesProps {
+  params: InstallMigrationRulesRequestParamsInput;
   body: InstallMigrationRulesRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
+}
+export interface InstallTranslatedMigrationRulesProps {
+  params: InstallTranslatedMigrationRulesRequestParamsInput;
 }
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
