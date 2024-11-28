@@ -12,7 +12,7 @@ import apm from 'elastic-apm-node';
 import { compact } from 'lodash';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { MessageSigningError } from '../../common/errors';
@@ -340,6 +340,9 @@ export async function ensureFleetGlobalEsAssets(
     ensureDefaultComponentTemplates(esClient, logger), // returns an array
     ensureFleetFinalPipelineIsInstalled(esClient, logger),
     ensureFleetEventIngestedPipelineIsInstalled(esClient, logger),
+    appContextService.getExperimentalFeatures()?.enrichAgentPolicies
+      ? ensureFleetAgentsEnrichAgentPolicies(esClient, logger)
+      : { isCreated: false },
   ]);
   const assetResults = globalAssetsRes.flat();
   if (assetResults.some((asset) => asset.isCreated)) {
@@ -418,4 +421,56 @@ export async function ensureFleetDirectories() {
       `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`
     );
   }
+}
+async function ensureFleetAgentsEnrichAgentPolicies(esClient: ElasticsearchClient, logger: Logger) {
+  // ensure index is created
+  await esClient.indices
+    .create({
+      index: '.fleet-agent-policies-metadata',
+    })
+    .catch((err) => {
+      // Ignore already created
+    });
+
+  await esClient.enrich
+    .putPolicy({
+      name: 'fleet-agents-enrich-agent-policies',
+      match: {
+        indices: '.fleet-agent-policies-metadata',
+        match_field: 'policy_id',
+        enrich_fields: ['agent_policy'],
+      },
+    })
+    .catch((err) => {
+      // Ignore already created
+    });
+
+  await esClient.enrich.executePolicy({
+    name: 'fleet-agents-enrich-agent-policies',
+    wait_for_completion: true,
+  });
+
+  await esClient.ingest.putPipeline({
+    id: 'fleet-agents@enrich-agent-policies-pipeline',
+    processors: [
+      {
+        enrich: {
+          description: "Add 'user' data based on 'email'",
+          policy_name: 'fleet-agents-enrich-agent-policies',
+          field: 'policy_id',
+          target_field: 'agent_policy',
+          max_matches: 1,
+        },
+      },
+      {
+        set: {
+          field: 'agent_policy',
+          copy_from: 'agent_policy.agent_policy',
+        },
+      },
+    ],
+  });
+
+  // No need to reinstall package after that one
+  return { isCreated: false };
 }
