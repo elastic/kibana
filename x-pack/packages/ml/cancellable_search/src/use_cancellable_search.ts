@@ -12,7 +12,10 @@ import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export interface UseCancellableSearch {
-  runRequest: <RequestBody, ResponseType extends IKibanaSearchResponse>(
+  runRequest: <
+    RequestBody extends IKibanaSearchRequest,
+    ResponseType extends IKibanaSearchResponse
+  >(
     requestBody: RequestBody,
     options?: object
   ) => Promise<ResponseType | null>;
