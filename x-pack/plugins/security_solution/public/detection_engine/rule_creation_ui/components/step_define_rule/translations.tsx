@@ -9,34 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const CUSTOM_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldRequiredError',
-  {
-    defaultMessage: 'A custom query is required.',
-  }
-);
-
-export const EQL_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
-  {
-    defaultMessage: 'An EQL query is required.',
-  }
-);
-
-export const ESQL_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError',
-  {
-    defaultMessage: 'An ES|QL query is required.',
-  }
-);
-
-export const INVALID_CUSTOM_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
-  {
-    defaultMessage: 'The KQL is invalid',
-  }
-);
-
 export const INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription',
   {
@@ -63,13 +35,6 @@ export const QUERY_BAR_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
   {
     defaultMessage: 'Custom query',
-  }
-);
-
-export const EQL_QUERY_BAR_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
-  {
-    defaultMessage: 'EQL query',
   }
 );
 
@@ -171,13 +136,6 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionMissingFieldsDoNotSuppressLabel',
   {
     defaultMessage: 'Do not suppress alerts for events with missing fields',
-  }
-);
-
-export const ESQL_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel',
-  {
-    defaultMessage: 'ES|QL query',
   }
 );
 

@@ -313,7 +313,6 @@ export const useESQLOverallStatsData = (
           { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
         )) as ESQLResponse | undefined;
         setQueryHistoryStatus(false);
-
         const columnInfo = columnsResp?.rawResponse
           ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
           : [];

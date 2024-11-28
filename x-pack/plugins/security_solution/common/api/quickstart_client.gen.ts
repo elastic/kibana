@@ -231,6 +231,11 @@ import type {
   InternalUploadAssetCriticalityRecordsResponse,
   UploadAssetCriticalityRecordsResponse,
 } from './entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
+import type {
+  GetEntityStoreStatusResponse,
+  InitEntityStoreRequestBodyInput,
+  InitEntityStoreResponse,
+} from './entity_analytics/entity_store/enablement.gen';
 import type { ApplyEntityEngineDataviewIndicesResponse } from './entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
@@ -294,14 +299,8 @@ import type {
   CreateTimelinesRequestBodyInput,
   CreateTimelinesResponse,
 } from './timeline/create_timelines/create_timelines_route.gen';
-import type {
-  DeleteNoteRequestBodyInput,
-  DeleteNoteResponse,
-} from './timeline/delete_note/delete_note_route.gen';
-import type {
-  DeleteTimelinesRequestBodyInput,
-  DeleteTimelinesResponse,
-} from './timeline/delete_timelines/delete_timelines_route.gen';
+import type { DeleteNoteRequestBodyInput } from './timeline/delete_note/delete_note_route.gen';
+import type { DeleteTimelinesRequestBodyInput } from './timeline/delete_timelines/delete_timelines_route.gen';
 import type {
   ExportTimelinesRequestQueryInput,
   ExportTimelinesRequestBodyInput,
@@ -356,6 +355,9 @@ import type {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationResourcesRequestQueryInput,
+  GetRuleMigrationResourcesRequestParamsInput,
+  GetRuleMigrationResourcesResponse,
   GetRuleMigrationStatsRequestParamsInput,
   GetRuleMigrationStatsResponse,
   StartRuleMigrationRequestParamsInput,
@@ -363,7 +365,12 @@ import type {
   StartRuleMigrationResponse,
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
-} from '../siem_migrations/model/api/rules/rules_migration.gen';
+  UpdateRuleMigrationRequestBodyInput,
+  UpdateRuleMigrationResponse,
+  UpsertRuleMigrationResourcesRequestParamsInput,
+  UpsertRuleMigrationResourcesRequestBodyInput,
+  UpsertRuleMigrationResourcesResponse,
+} from '../siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface ClientOptions {
   kbnClient: KbnClient;
@@ -755,7 +762,7 @@ If a record already exists for the specified entity, that record is overwritten 
   async deleteNote(props: DeleteNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteNote`);
     return this.kbnClient
-      .request<DeleteNoteResponse>({
+      .request({
         path: '/api/note',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -788,7 +795,7 @@ If a record already exists for the specified entity, that record is overwritten 
   async deleteTimelines(props: DeleteTimelinesProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteTimelines`);
     return this.kbnClient
-      .request<DeleteTimelinesResponse>({
+      .request({
         path: '/api/timeline',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
@@ -1295,6 +1302,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getEntityStoreStatus() {
+    this.log.info(`${new Date().toISOString()} Calling API GetEntityStoreStatus`);
+    return this.kbnClient
+      .request<GetEntityStoreStatusResponse>({
+        path: '/api/entity_store/status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Get all notes for a given document.
    */
@@ -1406,6 +1425,26 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves resources for an existing SIEM rules migration
+   */
+  async getRuleMigrationResources(props: GetRuleMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationResources`);
+    return this.kbnClient
+      .request<GetRuleMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the stats of a SIEM rules migration using the migration id provided
    */
   async getRuleMigrationStats(props: GetRuleMigrationStatsProps) {
@@ -1495,6 +1534,19 @@ finalize it.
     return this.kbnClient
       .request<InitEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}/init', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async initEntityStore(props: InitEntityStoreProps) {
+    this.log.info(`${new Date().toISOString()} Calling API InitEntityStore`);
+    return this.kbnClient
+      .request<InitEntityStoreResponse>({
+        path: '/api/entity_store/enable',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -2043,6 +2095,22 @@ detection engine rules.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Updates rules migrations attributes
+   */
+  async updateRuleMigration(props: UpdateRuleMigrationProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationResponse>({
+        path: '/internal/siem_migrations/rules',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -2053,6 +2121,25 @@ detection engine rules.
         },
         method: 'POST',
         body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Creates or updates resources for an existing SIEM rules migration
+   */
+  async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertRuleMigrationResources`);
+    return this.kbnClient
+      .request<UpsertRuleMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2221,6 +2308,10 @@ export interface GetRuleExecutionResultsProps {
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
 }
+export interface GetRuleMigrationResourcesProps {
+  query: GetRuleMigrationResourcesRequestQueryInput;
+  params: GetRuleMigrationResourcesRequestParamsInput;
+}
 export interface GetRuleMigrationStatsProps {
   params: GetRuleMigrationStatsRequestParamsInput;
 }
@@ -2240,6 +2331,9 @@ export interface ImportTimelinesProps {
 export interface InitEntityEngineProps {
   params: InitEntityEngineRequestParamsInput;
   body: InitEntityEngineRequestBodyInput;
+}
+export interface InitEntityStoreProps {
+  body: InitEntityStoreRequestBodyInput;
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
@@ -2319,6 +2413,13 @@ export interface TriggerRiskScoreCalculationProps {
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
 }
+export interface UpdateRuleMigrationProps {
+  body: UpdateRuleMigrationRequestBodyInput;
+}
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface UpsertRuleMigrationResourcesProps {
+  params: UpsertRuleMigrationResourcesRequestParamsInput;
+  body: UpsertRuleMigrationResourcesRequestBodyInput;
 }

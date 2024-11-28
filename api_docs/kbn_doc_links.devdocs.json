@@ -543,7 +543,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly aiAssistant: string; readonly artifactControl: string; readonly avcResults: string; readonly trustedApps: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; }; readonly detectionEngineOverview: string; }"
+              "{ readonly aiAssistant: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly trustedApps: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; }; readonly detectionEngineOverview: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -739,7 +739,7 @@
             "label": "security",
             "description": [],
             "signature": [
-              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; }"
+              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; readonly deprecatedV1Endpoints: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -1020,6 +1020,34 @@
             "description": [],
             "signature": [
               "{ readonly chatPlayground: string; readonly retrievalOptimize: string; readonly retrieval: string; readonly context: string; readonly hiddenFields: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.inferenceManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "inferenceManagement",
+            "description": [],
+            "signature": [
+              "{ readonly inferenceAPIDocumentation: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "{ readonly legacyApiDeprecations: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

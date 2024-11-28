@@ -15,7 +15,7 @@ export const allowedExperimentalValues = Object.freeze({
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
-  kubernetesEnabled: true,
+  kubernetesEnabled: false,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -236,6 +236,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the siem migrations feature
    */
   siemMigrationsEnabled: false,
+
+  /**
+   * Enables the Defend Insights feature
+   */
+  defendInsights: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

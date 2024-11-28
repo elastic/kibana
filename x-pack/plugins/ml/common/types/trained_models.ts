@@ -201,6 +201,7 @@ export interface AllocatedModel {
    */
   model_id?: string;
   state: string;
+  reason?: string;
   model_size_bytes: number;
   required_native_memory_bytes: number;
   node: {

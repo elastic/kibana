@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { IndicesStatusResponse, UserStartPrivilegesResponse } from '../../../common';
+import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';
@@ -22,6 +22,7 @@ import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
 
 import { CreateIndexPanel } from '../shared/create_index_panel';
 import { useKibana } from '../../hooks/use_kibana';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 
 function initCreateIndexState(): CreateIndexFormState {
   const defaultIndexName = generateRandomIndexName();
@@ -34,17 +35,18 @@ function initCreateIndexState(): CreateIndexFormState {
 
 export interface ElasticsearchStartProps {
   indicesData?: IndicesStatusResponse;
-  userPrivileges?: UserStartPrivilegesResponse;
 }
 
-export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) => {
+export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
   const { application } = useKibana().services;
+  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
+  const { data: userPrivileges } = useUserPrivilegesQuery(formState.defaultIndexName);
+
   const [createIndexView, setCreateIndexViewMode] = useState<CreateIndexViewMode>(
-    userPrivileges?.privileges.canCreateIndex === false
+    userPrivileges?.privileges.canManageIndex === false
       ? CreateIndexViewMode.Code
       : CreateIndexViewMode.UI
   );
-  const [formState, setFormState] = useState<CreateIndexFormState>(initCreateIndexState);
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export const ElasticsearchStart = ({ userPrivileges }: ElasticsearchStartProps) 
   }, [usageTracker]);
   useEffect(() => {
     if (userPrivileges === undefined) return;
-    if (userPrivileges.privileges.canCreateIndex === false) {
+    if (userPrivileges.privileges.canManageIndex === false) {
       setCreateIndexViewMode(CreateIndexViewMode.Code);
     }
   }, [userPrivileges]);
