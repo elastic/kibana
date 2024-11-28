@@ -19,7 +19,9 @@ export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   recentlyUsedDateRanges: [],
 });
 
-export const parseToMoment = (date: string) => dateMath.parse(date);
+type MomentDate = Exclude<ReturnType<typeof dateMath.parse>, undefined>;
+
+export const parseToMoment = (date: string): undefined | MomentDate => dateMath.parse(date);
 export const transformToUTCtime = ({
   start,
   end,
