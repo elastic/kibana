@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AlertConsumers, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
@@ -25,13 +25,14 @@ import {
 import AlertsStatusFilter from '../../../../../../components/shared/alerts/alerts_status_filter';
 import { CreateAlertRuleButton } from '../../../../../../components/shared/alerts/links/create_alert_rule_button';
 import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
-import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
 import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
+import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
 export const AlertsTabContent = () => {
   const { services } = useKibanaContextForPlugin();
   const { featureFlags } = usePluginConfig();
+  const { hostNodes } = useHostsViewContext();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -42,6 +43,11 @@ export const AlertsTabContent = () => {
 
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
+
+  const hostsWithAlerts = hostNodes
+    .filter((host) => host.alertsCount)
+    .map((host) => `"${host.name}"`);
+  const hostsWithAlertsKuery = hostsWithAlerts.join(' OR ');
 
   return (
     <HeightRetainer>
@@ -63,7 +69,7 @@ export const AlertsTabContent = () => {
               <LinkToAlertsPage
                 dateRange={searchCriteria.dateRange}
                 data-test-subj="infraHostAlertsTabAlertsShowAllButton"
-                kuery={`${ALERT_RULE_PRODUCER}: ${INFRA_ALERT_FEATURE_ID}`}
+                kuery={`${hostsWithAlertsKuery}`}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
