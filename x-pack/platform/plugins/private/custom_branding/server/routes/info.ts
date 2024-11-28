@@ -16,7 +16,8 @@ export const registerInfoRoute = (router: CustomBrandingRouter) => {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization, because this route is rather a status check route than a data fetching route',
         },
       },
       validate: false,

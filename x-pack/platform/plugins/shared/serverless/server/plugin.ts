@@ -74,7 +74,8 @@ export class ServerlessPlugin
           security: {
             authz: {
               enabled: false,
-              reason: 'This route is opted out from authorization',
+              reason:
+                'This route is opted out from authorization, because it is only used in development',
             },
           },
           validate: {

@@ -29,7 +29,8 @@ export function createUninstallRoute(
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because the uninstaller route is a wrapper around the Saved Object client',
         },
       },
       validate: {

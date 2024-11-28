@@ -32,7 +32,8 @@ export const createListRoute = (
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because the data retrieved is derived and fetched from the saved objects client',
         },
       },
       validate: false,

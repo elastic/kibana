@@ -45,7 +45,8 @@ export function initRpcRoutes(
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            "This route is opted out from authorization, because it's a wrapper around Saved Object client",
         },
       },
       validate: {

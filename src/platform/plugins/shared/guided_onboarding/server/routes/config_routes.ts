@@ -21,7 +21,8 @@ export const registerGetConfigRoute = (router: IRouter, guidesConfig: GuidesConf
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization, as it returns config for guided onboarding, the guide onboarding is not security sensitive',
         },
       },
       validate: {

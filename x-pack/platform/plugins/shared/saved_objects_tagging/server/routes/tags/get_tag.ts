@@ -15,7 +15,8 @@ export const registerGetTagRoute = (router: TagsPluginRouter) => {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because the tags client internals leverages the SO client',
         },
       },
       validate: {

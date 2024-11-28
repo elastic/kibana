@@ -21,7 +21,8 @@ export const registerUpdateTagsAssignmentsRoute = (router: TagsPluginRouter) => 
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization as there is a separate authorization check within the assignment service.',
         },
       },
       validate: {

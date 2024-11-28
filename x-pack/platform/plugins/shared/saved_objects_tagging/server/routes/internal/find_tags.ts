@@ -19,7 +19,8 @@ export const registerInternalFindTagsRoute = (router: TagsPluginRouter) => {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because this route leverages the SO client',
         },
       },
       validate: {

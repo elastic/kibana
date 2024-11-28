@@ -29,7 +29,8 @@ export function createInstallRoute(
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because the sample data installer is a wrapper around the Saved Object client',
         },
       },
       validate: {

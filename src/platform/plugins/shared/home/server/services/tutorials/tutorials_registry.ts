@@ -86,7 +86,8 @@ export class TutorialsRegistry {
         security: {
           authz: {
             enabled: false,
-            reason: 'This route is opted out from authorization',
+            reason:
+              'This route is opted out from authorization, because tutorials are public and ideally should be available to all users.',
           },
         },
         validate: false,

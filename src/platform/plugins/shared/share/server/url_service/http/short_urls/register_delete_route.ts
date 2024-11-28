@@ -18,7 +18,8 @@ export const registerDeleteRoute = (router: IRouter, url: ServerUrlService) => {
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization, because the url service is a wrapper around the Saved Object client',
         },
       },
       options: {
