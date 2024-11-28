@@ -94,9 +94,9 @@ import {
 import { ThresholdAlertSuppressionEdit } from '../../../rule_creation/components/threshold_alert_suppression_edit';
 import { usePersistentAlertSuppressionState } from './use_persistent_alert_suppression_state';
 import { MachineLearningJobIdEdit } from '../../../rule_creation/components/machine_learning_job_id_edit';
-import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_threshold';
 import { ThresholdEdit } from '../../../rule_creation/components/threshold_edit';
 import { usePersistentThresholdState } from './use_persistent_threshold_state';
+import { AnomalyThresholdEdit } from '../../../rule_creation/components/anomaly_threshold_edit';
 
 const CommonUseField = getUseField({ component: Field });
 

@@ -9,5 +9,5 @@ import React from 'react';
 import { MachineLearningJobSelector } from '../../../../../../../rule_creation/components/machine_learning_job_id_edit/machine_learning_job_selector';
 
 export function MachineLearningJobIdAdapter(): JSX.Element {
-  return <MachineLearningJobSelector path="machineLearningJobId" />;
+  return <MachineLearningJobSelector path="machine_learning_job_id" />;
 }

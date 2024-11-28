@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { AnomalyThresholdEdit } from '../../../../../../../rule_creation/components/anomaly_threshold';
+import { AnomalyThresholdEdit } from '../../../../../../../rule_creation/components/anomaly_threshold_edit';
 
 export function AnomalyThresholdAdapter(): JSX.Element {
-  return <AnomalyThresholdEdit path="anomalyThreshold" />;
+  return <AnomalyThresholdEdit path="anomaly_threshold" />;
 }

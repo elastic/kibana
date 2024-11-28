@@ -14,7 +14,7 @@ import { normalizeMachineLearningJobId } from '../../../../../../../../common/ut
 import { MachineLearningJobIdAdapter } from './machine_learning_job_id_adapter';
 
 interface MachineLearningJobIdFormData {
-  machineLearningJobId: MachineLearningJobId;
+  machine_learning_job_id: MachineLearningJobId;
 }
 
 export function MachineLearningJobIdForm(): JSX.Element {
@@ -23,25 +23,16 @@ export function MachineLearningJobIdForm(): JSX.Element {
       component={MachineLearningJobIdAdapter}
       ruleFieldFormSchema={machineLearningJobIdSchema}
       deserializer={deserializer}
-      serializer={serializer}
     />
   );
 }
 
 function deserializer(defaultValue: FormData): MachineLearningJobIdFormData {
   return {
-    machineLearningJobId: normalizeMachineLearningJobId(defaultValue.machine_learning_job_id),
-  };
-}
-
-function serializer(formData: FormData): {
-  machine_learning_job_id: MachineLearningJobId;
-} {
-  return {
-    machine_learning_job_id: formData.machineLearningJobId,
+    machine_learning_job_id: normalizeMachineLearningJobId(defaultValue.machine_learning_job_id),
   };
 }
 
 const machineLearningJobIdSchema = {
-  machineLearningJobId: schema.machineLearningJobId,
+  machine_learning_job_id: schema.machineLearningJobId,
 } as FormSchema<MachineLearningJobIdFormData>;

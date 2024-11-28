@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { FormData, FormSchema } from '../../../../../../../../shared_imports';
+import type { FormSchema } from '../../../../../../../../shared_imports';
 import { schema } from '../../../../../../../rule_creation_ui/components/step_define_rule/schema';
 import { RuleFieldEditFormWrapper } from '../rule_field_edit_form_wrapper';
 import { AnomalyThresholdAdapter } from './anomaly_threshold_adapter';
@@ -21,24 +21,8 @@ export function AnomalyThresholdForm(): JSX.Element {
     <RuleFieldEditFormWrapper
       component={AnomalyThresholdAdapter}
       ruleFieldFormSchema={anomalyThresholdSchema}
-      deserializer={deserializer}
-      serializer={serializer}
     />
   );
-}
-
-function deserializer(defaultValue: FormData): AnomalyThresholdFormData {
-  return {
-    anomalyThreshold: defaultValue.anomaly_threshold,
-  };
-}
-
-function serializer(formData: FormData): {
-  anomaly_threshold: AnomalyThresholdFormData;
-} {
-  return {
-    anomaly_threshold: formData.anomalyThreshold,
-  };
 }
 
 const anomalyThresholdSchema = {
