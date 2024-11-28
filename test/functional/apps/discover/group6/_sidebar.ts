@@ -99,6 +99,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
       });
 
+      it('should show filters by type in ES|QL view', async function () {
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await unifiedFieldList.openSidebarFieldFilter();
+        let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
+        expect(options).to.have.length(6);
+        await unifiedFieldList.closeSidebarFieldFilter();
+
+        await discover.selectTextBaseLang();
+
+        const testQuery = `from logstash-* | limit 10000`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await unifiedFieldList.waitUntilSidebarHasLoaded();
+        await unifiedFieldList.openSidebarFieldFilter();
+        options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
+        expect(options).to.have.length(6);
+
+        await expectFieldListDescription('76 available fields. 6 empty fields.');
+        await testSubjects.click('typeFilter-number');
+        await expectFieldListDescription('4 available fields. 2 empty fields.');
+      });
+
       it('should show empty fields in ES|QL view', async function () {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
         await discover.selectTextBaseLang();
@@ -109,7 +132,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await unifiedFieldList.waitUntilSidebarHasLoaded();
         await unifiedFieldList.openSidebarFieldFilter();
-
         await expectFieldListDescription('2 selected fields. 1 available field. 1 empty field.');
       });
     });
