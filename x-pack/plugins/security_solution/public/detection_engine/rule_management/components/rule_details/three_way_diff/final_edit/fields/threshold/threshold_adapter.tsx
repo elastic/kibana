@@ -20,7 +20,7 @@ interface ThresholdAdapterProps {
 export function ThresholdAdapter({ finalDiffableRule }: ThresholdAdapterProps): JSX.Element {
   const { dataView } = useDiffableRuleDataView(finalDiffableRule);
 
-  const esFields = dataView?.fields || [];
+  const esFields = dataView?.fields ?? [];
 
   return (
     <EuiAutoSizer disableHeight>
