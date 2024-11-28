@@ -13,16 +13,15 @@ export const NESTED_PANEL_CLASS_NAME = 'onboardingCardContentPanelNested';
 
 export const useCardContentPanelStyles = () => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
-  const darkModeStyles = useDarkPanelStyles(isDarkMode);
+  const darkPanelStyles = useDarkPanelStyles(colorMode === COLOR_MODES_STANDARD.dark);
 
   return css`
     padding-top: 0;
-    ${darkModeStyles}
+    ${darkPanelStyles}
 
     .${NESTED_PANEL_CLASS_NAME} {
       padding-top: ${euiTheme.size.s};
-      ${darkModeStyles}
+      ${darkPanelStyles}
     }
   `;
 };

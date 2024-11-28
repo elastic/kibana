@@ -64,10 +64,9 @@ export const useCardPanelStyles = () => {
 
 export const useDarkPanelStyles = (isDarkMode: boolean) => {
   const { euiTheme } = useEuiTheme();
-  return isDarkMode
-    ? `
+  const darkPanelStyles = css`
     background-color: ${euiTheme.colors.lightestShade};
     border-color: ${euiTheme.colors.mediumShade};
-  `
-    : '';
+  `;
+  return isDarkMode ? darkPanelStyles : '';
 };
