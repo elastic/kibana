@@ -942,14 +942,16 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       ruleId,
       expectedStatus,
       roleAuthc,
+      spaceId,
     }: {
       ruleId: string;
       expectedStatus: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertestWithoutAuth
-          .get(`/api/alerting/rule/${ruleId}`)
+          .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .timeout(requestTimeout);
@@ -1034,13 +1036,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       name,
       indexName,
       roleAuthc,
+      spaceId,
     }: {
       name: string;
       indexName: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/actions/connector`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/actions/connector`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -1063,6 +1067,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule,
       consumer,
       roleAuthc,
+      spaceId,
     }: {
       ruleTypeId: string;
       name: string;
@@ -1080,9 +1085,10 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule?: { interval: string };
       consumer: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/alerting/rule`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({

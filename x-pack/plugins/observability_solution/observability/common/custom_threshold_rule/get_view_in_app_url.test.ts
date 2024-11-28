@@ -59,15 +59,18 @@ describe('getViewInAppUrl', () => {
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
-    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
-      dataset: args.dataViewId,
-      timeRange: returnedTimeRange,
-      filters: [],
-      query: {
-        query: 'mockedFilter and mockedCountFilter',
-        language: 'kuery',
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: args.dataViewId,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedFilter and mockedCountFilter',
+          language: 'kuery',
+        },
       },
-    });
+      {}
+    );
   });
 
   it('should call getRedirectUrl with only count filter', () => {
@@ -85,15 +88,18 @@ describe('getViewInAppUrl', () => {
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
-    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
-      dataset: undefined,
-      timeRange: returnedTimeRange,
-      filters: [],
-      query: {
-        query: 'mockedCountFilter',
-        language: 'kuery',
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedCountFilter',
+          language: 'kuery',
+        },
       },
-    });
+      {}
+    );
   });
 
   it('should call getRedirectUrl with only filter', () => {
@@ -111,15 +117,18 @@ describe('getViewInAppUrl', () => {
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
-    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
-      dataset: undefined,
-      timeRange: returnedTimeRange,
-      filters: [],
-      query: {
-        query: 'mockedFilter',
-        language: 'kuery',
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedFilter',
+          language: 'kuery',
+        },
       },
-    });
+      {}
+    );
   });
 
   it('should call getRedirectUrl with empty query if metrics and filter are not not provided', () => {
@@ -130,15 +139,18 @@ describe('getViewInAppUrl', () => {
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
-    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
-      dataset: undefined,
-      timeRange: returnedTimeRange,
-      filters: [],
-      query: {
-        query: '',
-        language: 'kuery',
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: '',
+          language: 'kuery',
+        },
       },
-    });
+      {}
+    );
   });
 
   it('should call getRedirectUrl with empty if there are multiple metrics', () => {
@@ -161,15 +173,18 @@ describe('getViewInAppUrl', () => {
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
-    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
-      dataset: undefined,
-      timeRange: returnedTimeRange,
-      filters: [],
-      query: {
-        query: '',
-        language: 'kuery',
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: '',
+          language: 'kuery',
+        },
       },
-    });
+      {}
+    );
   });
 
   it('should call getRedirectUrl with filters if group and searchConfiguration filter are provided', () => {
@@ -217,33 +232,67 @@ describe('getViewInAppUrl', () => {
     };
 
     expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
-    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({
-      dataset: undefined,
-      timeRange: returnedTimeRange,
-      filters: [
-        {
-          meta: {},
-          query: {
-            term: {
-              field: {
-                value: 'justTesting',
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        timeRange: returnedTimeRange,
+        filters: [
+          {
+            meta: {},
+            query: {
+              term: {
+                field: {
+                  value: 'justTesting',
+                },
               },
             },
           },
-        },
-        {
-          meta: {},
-          query: {
-            match_phrase: {
-              'host.name': 'host-1',
+          {
+            meta: {},
+            query: {
+              match_phrase: {
+                'host.name': 'host-1',
+              },
             },
           },
+        ],
+        query: {
+          query: 'mockedFilter',
+          language: 'kuery',
+        },
+      },
+      {}
+    );
+  });
+
+  it('should call getRedirectUrl with spaceId', () => {
+    const spaceId = 'mockedSpaceId';
+    const args: GetViewInAppUrlArgs = {
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+          filter: 'mockedCountFilter',
         },
       ],
-      query: {
-        query: 'mockedFilter',
-        language: 'kuery',
+      logsExplorerLocator,
+      startedAt,
+      endedAt,
+      spaceId,
+    };
+
+    expect(getViewInAppUrl(args)).toBe('mockedGetRedirectUrl');
+    expect(logsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataset: undefined,
+        timeRange: returnedTimeRange,
+        filters: [],
+        query: {
+          query: 'mockedCountFilter',
+          language: 'kuery',
+        },
       },
-    });
+      { spaceId }
+    );
   });
 });
