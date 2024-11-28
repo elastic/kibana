@@ -2394,10 +2394,10 @@
     "@elastic/react-search-ui-views" "1.20.2"
     "@elastic/search-ui" "1.20.2"
 
-"@elastic/request-converter@^8.16.1":
-  version "8.16.1"
-  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.16.1.tgz#fad73db1a2ed0448501c389cf543fb77c6ffff57"
-  integrity sha512-lg2qCJ4kyxsP/0NpZo0+NsJfaY4JwyxGIVqD2l2Vmx9tv7ZNaZMn/TjHKBo2+jN0laJBInpxpnkPUgVWo5kw1g==
+"@elastic/request-converter@^8.16.2":
+  version "8.16.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-converter/-/request-converter-8.16.2.tgz#e82c5c794adf8da37795cb8656e2f0334460cb08"
+  integrity sha512-bljPrXbXkImBglTz5N8Rrpmzc64ahpZxOkBIKFBX1mnU3kv/JDeMjsv1rvfHXrkuhtQQ4kRRZqfwmqzJIwzlag==
   dependencies:
     child-process-promise "^2.2.1"
     commander "^12.1.0"
