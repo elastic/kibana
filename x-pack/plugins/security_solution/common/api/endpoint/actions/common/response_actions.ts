@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
+import { ScanActionRequestSchema } from '../..';
 import { RunScriptActionRequestSchema } from '../response_actions/crowdstrike/run_script';
 import { ExecuteActionRequestSchema } from '../response_actions/execute';
 import { EndpointActionGetFileSchema } from '../response_actions/get_file';
@@ -27,6 +28,7 @@ export const ResponseActionBodySchema = schema.oneOf([
   EndpointActionGetFileSchema.body,
   ExecuteActionRequestSchema.body,
   UploadActionRequestSchema.body,
+  ScanActionRequestSchema.body,
   RunScriptActionRequestSchema.body,
 ]);
 
