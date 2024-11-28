@@ -6440,10 +6440,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-browser@link:x-pack/packages/observability/observability_ai/observability_ai_browser":
-  version "0.0.0"
-  uid ""
-
 "@kbn/observability-ai-common@link:x-pack/packages/observability/observability_ai/observability_ai_common":
   version "0.0.0"
   uid ""

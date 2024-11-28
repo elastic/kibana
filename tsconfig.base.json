@@ -1316,8 +1316,6 @@
       "@kbn/observability-ai-assistant-management-plugin/*": ["x-pack/plugins/observability_solution/observability_ai_assistant_management/*"],
       "@kbn/observability-ai-assistant-plugin": ["x-pack/plugins/observability_solution/observability_ai_assistant"],
       "@kbn/observability-ai-assistant-plugin/*": ["x-pack/plugins/observability_solution/observability_ai_assistant/*"],
-      "@kbn/observability-ai-browser": ["x-pack/packages/observability/observability_ai/observability_ai_browser"],
-      "@kbn/observability-ai-browser/*": ["x-pack/packages/observability/observability_ai/observability_ai_browser/*"],
       "@kbn/observability-ai-common": ["x-pack/packages/observability/observability_ai/observability_ai_common"],
       "@kbn/observability-ai-common/*": ["x-pack/packages/observability/observability_ai/observability_ai_common/*"],
       "@kbn/observability-ai-server": ["x-pack/packages/observability/observability_ai/observability_ai_server"],
