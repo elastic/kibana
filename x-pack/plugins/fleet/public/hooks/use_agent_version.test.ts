@@ -14,7 +14,8 @@ import { sendGetAgentsAvailableVersions } from './use_request';
 jest.mock('./use_kibana_version');
 jest.mock('./use_request');
 
-describe('useAgentVersion', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201392
+describe.skip('useAgentVersion', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
