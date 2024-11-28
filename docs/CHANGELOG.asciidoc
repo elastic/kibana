@@ -105,7 +105,7 @@ you make the necessary updates after you upgrade to 8.17.0.
 [%collapsible]
 ====
 *Details* +
-The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With ths change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
+The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
 ====
       
 [float]
@@ -184,7 +184,7 @@ Kibana platform::
 === Bug fixes
 Dashboards & Visualizations::
 * Prevents identical include and exclude values in *Lens* ({kibana-pull}197628[#197628]).
-* Fixes react Error When Rendering Recoverable Error in *Lens* ({kibana-pull}196285[#196285]).
+* Fixes React Warning when rendering a recoverable error in *Lens* ({kibana-pull}196285[#196285]).
 * Fixes an issue allowing to save a dashboard while there were no pending changes. The button is now disabled if there are no changes to save ({kibana-pull}196137[#196137]).
 * Fixes an issue in Lens where the table exported did not match what was visible in the UI. ({kibana-pull}193780[#193780]).
 Data ingestion and Fleet::

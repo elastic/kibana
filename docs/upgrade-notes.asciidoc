@@ -1720,7 +1720,7 @@ unchanged. For more information, refer to {kibana-pull}178159[#178159].
 [%collapsible]
 ====
 *Details* +
-The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With ths change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
+The `metrics:allowCheckingForFailedShards` advanced setting has been removed. With this change, it is no longer possible to suppress warnings about failed shards in TSVB. For more information, refer to ({kibana-pull}197227[#197227]).
 ====
 
 [discrete]
