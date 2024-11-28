@@ -278,7 +278,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               )}
               isLoading={isLoading}
               options={groupedOptions}
-              singleSelection={{ asPlainText: true }}
+              singleSelection={{ asPlainText: connector.is_native }}
               prepend={connector.is_native ? MANAGED_CONNECTOR_INDEX_PREFIX : undefined}
               onKeyDown={(event) => {
                 // Index name should not contain spaces
