@@ -10,7 +10,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiDescriptionList, EuiPanel, EuiTabbedContentTab, EuiTitle } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
 import { AdditionalContext, FlyoutSectionProps } from '../types';
@@ -22,7 +21,7 @@ export const DefaultAlertsFlyoutHeader = <AC extends AdditionalContext>({
 }: FlyoutSectionProps<AC>) => {
   return (
     <EuiTitle size="s">
-      <h3>{alert[ALERT_RULE_NAME] ?? 'Unknown'}</h3>
+      <h3>{(alert[ALERT_RULE_NAME]?.[0] as string) ?? 'Unknown'}</h3>
     </EuiTitle>
   );
 };
@@ -49,7 +48,7 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>({
         <EuiPanel hasShadow={false} data-test-subj="overviewTabPanel">
           <EuiDescriptionList
             listItems={(columns ?? defaultAlertsTableColumns).map((column) => {
-              const value = get(alert, column.id)?.[0];
+              const value = alert[column.id]?.[0];
 
               return {
                 title: column.displayAsText as string,

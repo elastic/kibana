@@ -16,23 +16,24 @@ import { CellComponentProps } from '../types';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 import { getCasesMapMock } from '../mocks/cases.mock';
 import { Alert } from '@kbn/alerting-types';
+import { createPartialObjectMock } from '../utils/test';
 
 const casesMap = getCasesMapMock();
 const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
-const alert = {
+const alert: Alert = {
   _id: 'alert-id',
   _index: 'alert-index',
   [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1', 'test-mw-id-2'],
-} as Alert;
+};
 
-const props = {
+const props = createPartialObjectMock<CellComponentProps>({
   isLoading: false,
   alert,
   cases: casesMap,
   maintenanceWindows: maintenanceWindowsMap,
   columnId: ALERT_MAINTENANCE_WINDOW_IDS,
   showAlertStatusWithFlapping: false,
-} as CellComponentProps;
+});
 
 describe('MaintenanceWindowCell', () => {
   it('renders the maintenance window cell', async () => {

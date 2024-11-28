@@ -10,6 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { HoverVisibilityContainer } from './hover_visibility_container';
+import { matchers } from '@emotion/jest';
+
+expect.extend(matchers);
 
 describe('HoverVisibilityContainer', () => {
   const targetClass1 = 'Component1';
@@ -25,13 +28,8 @@ describe('HoverVisibilityContainer', () => {
       </HoverVisibilityContainer>
     );
 
-    expect(await screen.findByTestId('hoverVisibilityContainer')).toHaveStyleRule('opacity', '0', {
-      modifier: `.${targetClass1}`,
-    });
-
-    expect(await screen.getByTestId(`hoverVisibilityContainer`)).toHaveStyleRule('opacity', '1', {
-      modifier: `:hover .${targetClass2}`,
-    });
+    expect(getComputedStyle(await screen.findByTestId('component1')).opacity).toBe('0');
+    expect(getComputedStyle(await screen.findByTestId('component2')).opacity).toBe('0');
   });
 
   test('it renders an opaque inspect button when it has mouse focus', async () => {
@@ -41,11 +39,14 @@ describe('HoverVisibilityContainer', () => {
         <Component2 />
       </HoverVisibilityContainer>
     );
-    expect(await screen.findByTestId('hoverVisibilityContainer')).toHaveStyleRule('opacity', '1', {
-      modifier: `:hover .${targetClass1}`,
+
+    const hoverVisibilityContainer = await screen.findByTestId('hoverVisibilityContainer');
+
+    expect(hoverVisibilityContainer).toHaveStyleRule('opacity', '1', {
+      target: `:hover .${targetClass1}`,
     });
-    expect(await screen.findByTestId('hoverVisibilityContainer')).toHaveStyleRule('opacity', '1', {
-      modifier: `:hover .${targetClass2}`,
+    expect(hoverVisibilityContainer).toHaveStyleRule('opacity', '1', {
+      target: `:hover .${targetClass2}`,
     });
   });
 });

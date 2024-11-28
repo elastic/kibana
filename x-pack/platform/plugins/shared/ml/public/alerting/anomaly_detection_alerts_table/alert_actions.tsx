@@ -30,8 +30,8 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const ruleId = alert[ALERT_RULE_UUID]?.[0] ?? null;
-  const alertId = alert[ALERT_UUID]?.[0] ?? '';
+  const ruleId = (alert[ALERT_RULE_UUID]?.[0] as string) ?? null;
+  const alertId = (alert[ALERT_UUID]?.[0] as string) ?? '';
 
   const ecsData = useMemo<Ecs>(
     () => ({
@@ -50,7 +50,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
             type: AttachmentType.alert,
             rule: {
               id: ruleId,
-              name: alert[ALERT_RULE_NAME]![0],
+              name: alert[ALERT_RULE_NAME]![0] as string,
             },
             owner: PLUGIN_ID,
           },
