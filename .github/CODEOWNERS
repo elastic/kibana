@@ -1826,8 +1826,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/plugins/telemetry/schema/ @elastic/kibana-core
-/x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core
+/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-core
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
@@ -1872,7 +1872,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /.github/workflows/codeql-stats.yml @elastic/kibana-security
 /src/dev/eslint/security_eslint_rule_tests.ts @elastic/kibana-security
 /src/core/server/integration_tests/config/check_dynamic_config.test.ts @elastic/kibana-security
-/src/plugins/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
+/src/platform/plugins/shared/telemetry/server/config/telemetry_labels.ts @elastic/kibana-security
 /packages/kbn-std/src/is_internal_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /packages/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /packages/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security

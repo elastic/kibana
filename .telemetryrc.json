@@ -12,7 +12,7 @@
     "exclude": []
   },
   {
-    "output": "src/plugins/telemetry/schema/oss_platform.json",
+    "output": "src/platform/plugins/shared/telemetry/schema/oss_platform.json",
     "root": "src/platform/",
     "exclude": []
   }

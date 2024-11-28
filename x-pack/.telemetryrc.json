@@ -12,22 +12,22 @@
     "exclude": []
   },
   {
-    "output": "plugins/telemetry_collection_xpack/schema/xpack_platform.json",
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_platform.json",
     "root": "platform/",
     "exclude": []
   },
   {
-    "output": "plugins/telemetry_collection_xpack/schema/xpack_observability.json",
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_observability.json",
     "root": "solutions/observability",
     "exclude": []
   },
   {
-    "output": "plugins/telemetry_collection_xpack/schema/xpack_search.json",
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_search.json",
     "root": "solutions/search",
     "exclude": []
   },
   {
-    "output": "plugins/telemetry_collection_xpack/schema/xpack_security.json",
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_security.json",
     "root": "solutions/security",
     "exclude": []
   }
