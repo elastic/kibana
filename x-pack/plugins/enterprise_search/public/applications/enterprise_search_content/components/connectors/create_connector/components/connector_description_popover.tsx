@@ -141,7 +141,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                           'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isRunningLocallyTitle',
                           {
                             defaultMessage:
-                              'Elastic-managed connectors are available in Elastic Cloud',
+                              'Elastic managed connectors are only available in Elastic Cloud',
                           }
                         )
                   }
@@ -195,7 +195,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                   <h3>
                     {i18n.translate(
                       'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.learnMore',
-                      { defaultMessage: 'Start a 30-day trial' }
+                      { defaultMessage: 'Explore Elastic Cloud with your 14-day free trial' }
                     )}
                   </h3>
                 </EuiText>
@@ -206,7 +206,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                     'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.learnMore',
                     {
                       defaultMessage:
-                        "Take advantage of Elastic's generative AI capabilities to address search, observability, and security challenges across your organization in real time, at scale",
+                        'Take advantage of Elastic managed connectors and generative AI capabilities to address search challenges across your organization in real time, at scale.',
                     }
                   )}
                 </EuiText>
