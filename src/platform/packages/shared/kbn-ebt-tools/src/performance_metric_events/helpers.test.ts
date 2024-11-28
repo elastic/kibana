@@ -75,8 +75,8 @@ describe('performance metric event helpers', () => {
         )
       ).toThrowErrorMatchingInlineSnapshot(`
         "Failed to validate payload coming from \\"Event Type 'performance_metric'\\":
-          - [eventName]: {\\"expected\\":\\"string\\",\\"actual\\":\\"undefined\\",\\"value\\":\\"undefined\\"}
-          - [duration]: {\\"expected\\":\\"number\\",\\"actual\\":\\"undefined\\",\\"value\\":\\"undefined\\"}"
+        	- [eventName]: {\\"expected\\":\\"string\\",\\"actual\\":\\"undefined\\",\\"value\\":\\"undefined\\"}
+        	- [duration]: {\\"expected\\":\\"number\\",\\"actual\\":\\"undefined\\",\\"value\\":\\"undefined\\"}"
       `);
     });
 
@@ -90,7 +90,7 @@ describe('performance metric event helpers', () => {
         })
       ).toThrowErrorMatchingInlineSnapshot(`
         "Failed to validate payload coming from \\"Event Type 'performance_metric'\\":
-          - []: excess key 'an_unknown_field' found"
+        	- []: excess key 'an_unknown_field' found"
       `);
     });
   });
