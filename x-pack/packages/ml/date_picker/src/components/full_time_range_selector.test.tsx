@@ -9,7 +9,8 @@ import moment from 'moment';
 import React from 'react';
 import { act, render, fireEvent } from '@testing-library/react';
 
-import type { Query } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -48,9 +49,10 @@ describe('FullTimeRangeSelector', () => {
     timeFieldName: '@timestamp',
   } as unknown as DataView;
 
-  const query: Query = {
-    language: 'kuery',
-    query: 'region:us-east-1',
+  const query: QueryDslQueryContainer = {
+    term: {
+      region: 'us-east-1',
+    },
   };
 
   const props = {
@@ -70,7 +72,6 @@ describe('FullTimeRangeSelector', () => {
     const { getByText } = render(
       <IntlProvider locale="en">
         <DatePickerContextProvider {...mockDependencies}>
-          {/* @ts-expect-error upgrade typescript v4.9.5*/}
           <FullTimeRangeSelector {...props} />
         </DatePickerContextProvider>
       </IntlProvider>
@@ -99,7 +100,6 @@ describe('FullTimeRangeSelector', () => {
     const { getByText } = render(
       <IntlProvider locale="en">
         <DatePickerContextProvider {...mockDependencies}>
-          {/* @ts-expect-error upgrade typescript v4.9.5*/}
           <FullTimeRangeSelector {...props} />
         </DatePickerContextProvider>
       </IntlProvider>
