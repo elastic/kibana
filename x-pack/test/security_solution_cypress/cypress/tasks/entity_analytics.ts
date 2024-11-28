@@ -28,6 +28,7 @@ import { visitWithTimeRange } from './navigation';
 import { GET_DATE_PICKER_APPLY_BUTTON, GLOBAL_FILTERS_CONTAINER } from '../screens/date_picker';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import {
+  ENABLEMENT_MODAL_CONFIRM_BUTTON,
   ENTITIES_LIST_PANEL,
   ENTITY_STORE_ENABLEMENT_BUTTON,
   ENTITY_STORE_ENABLEMENT_MODAL,
@@ -125,7 +126,7 @@ export const openEntityStoreEnablementModal = () => {
 };
 
 export const confirmEntityStoreEnablement = () => {
-  cy.get(ENTITY_STORE_ENABLEMENT_BUTTON).click();
+  cy.get(ENABLEMENT_MODAL_CONFIRM_BUTTON).click();
 };
 
 export const waitForEntitiesListToAppear = () => {
