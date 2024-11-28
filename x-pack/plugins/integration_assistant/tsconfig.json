@@ -42,6 +42,7 @@
     "@kbn/utils",
     "@kbn/zod",
     "@kbn/tooling-log",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/logging"
   ]
 }
