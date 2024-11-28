@@ -13,7 +13,7 @@ import { commonEcsMetadata } from '../common/ecs_metadata';
 export const builtInKubernetesCronJobEcsEntityDefinition: EntityDefinition =
   entityDefinitionSchema.parse({
     id: `${BUILT_IN_ID_PREFIX}kubernetes_cron_job_ecs`,
-    filter: 'kubernetes.cronjob.uid : *',
+    filter: 'kubernetes.cronjob.name : *',
     managed: true,
     version: '0.1.0',
     name: 'Kubernetes CronJob from ECS data',
@@ -21,7 +21,7 @@ export const builtInKubernetesCronJobEcsEntityDefinition: EntityDefinition =
       'This definition extracts Kubernetes cron job entities from the Kubernetes integration data streams',
     type: 'k8s.cronjob.ecs',
     indexPatterns: commonEcsIndexPatterns,
-    identityFields: ['kubernetes.cronjob.uid'],
+    identityFields: ['kubernetes.cronjob.name'],
     displayNameTemplate: '{{kubernetes.cronjob.name}}',
     latest: {
       timestampField: '@timestamp',
