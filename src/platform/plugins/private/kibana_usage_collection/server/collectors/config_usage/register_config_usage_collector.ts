@@ -25,7 +25,9 @@ export function registerConfigUsageCollector(
      *
      * We'll experiment with flattened type and runtime fields before comitting to a schema.
      */
-    schema: {},
+    schema: {
+      properties: {},
+    },
     fetch: async () => {
       const coreUsageDataService = getCoreUsageDataService();
       if (!coreUsageDataService) {
