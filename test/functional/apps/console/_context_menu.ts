@@ -46,10 +46,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('console');
         await PageObjects.console.skipTourIfExists();
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('GET _search\n');
+        await PageObjects.console.enterText('GET _search');
+      });
+
+      it('by default it should copy as curl and show toast when copy as button is clicked', async () => {
+        await PageObjects.console.clickContextMenu();
+        await PageObjects.console.clickCopyAsButton();
+
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
+
+        if (toastText.includes('Write permission denied')) {
+          log.debug('Write permission denied, skipping test');
+          return;
+        }
+
+        expect(toastText).to.be('Request copied to clipboard as curl');
+
+        const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+        if (canReadClipboard) {
+          const clipboardText = await browser.getClipboardValue();
+          expect(clipboardText).to.contain('curl -X GET');
+        }
       });
 
       it('doesnt allow to copy kbn requests as anything other than curl', async () => {
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('GET _search\n');
+
         // Add a kbn request
         // pressEnter
         await PageObjects.console.enterText('GET kbn:/api/spaces/space');
@@ -78,27 +102,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         toastText = await resultToast.getVisibleText();
 
         expect(toastText).to.be('Kibana requests can only be copied as curl');
-      });
-
-      it('by default it should copy as curl and show toast when copy as button is clicked', async () => {
-        await PageObjects.console.clickContextMenu();
-        await PageObjects.console.clickCopyAsButton();
-
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
-
-        if (toastText.includes('Write permission denied')) {
-          log.debug('Write permission denied, skipping test');
-          return;
-        }
-
-        expect(toastText).to.be('Request copied to clipboard as curl');
-
-        const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
-        if (canReadClipboard) {
-          const clipboardText = await browser.getClipboardValue();
-          expect(clipboardText).to.contain('curl -X GET');
-        }
       });
 
       it.skip('allows to change default language', async () => {
