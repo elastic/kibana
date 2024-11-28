@@ -9,7 +9,11 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../helpers';
-import { getMatchingIndices, getFieldsFromIndices } from '../helpers/fixtures';
+import {
+  getMatchingIndices,
+  getFieldsFromIndices,
+  getMatchingDataStreams,
+} from '../helpers/fixtures';
 import { CreateEnrichPoliciesTestBed, setup } from './create_enrich_policy.helpers';
 import { getESPolicyCreationApiCall } from '../../../common/lib';
 
@@ -57,6 +61,7 @@ describe('Create enrich policy', () => {
       hasAllPrivileges: true,
       missingPrivileges: { cluster: [] },
     });
+    httpRequestsMockHelpers.setGetMatchingDataStreams(getMatchingDataStreams());
 
     await act(async () => {
       testBed = await setup(httpSetup);
