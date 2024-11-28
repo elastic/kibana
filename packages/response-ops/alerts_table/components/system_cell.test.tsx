@@ -15,19 +15,21 @@ import { getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 import { Alert } from '@kbn/alerting-types';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { createPartialObjectMock } from '../utils/test';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_STATUS } from '@kbn/rule-data-utils';
 
 const casesMap = getCasesMapMock();
 const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
 
-const alert = {
+const alert: Alert = {
   _id: 'alert-id',
   _index: 'alert-index',
-  'kibana.alert.status': ['active'],
-  'kibana.alert.case_ids': ['test-id'],
-  'kibana.alert.maintenance_window_ids': ['test-mw-id-1'],
-} as Alert;
+  [ALERT_STATUS]: ['active'],
+  [ALERT_CASE_IDS]: ['test-id'],
+  [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
+};
 
-const props = {
+const props = createPartialObjectMock<CellComponentProps>({
   isLoading: false,
   alert,
   cases: casesMap,
@@ -37,7 +39,7 @@ const props = {
   services: {
     application: applicationServiceMock.createStartContract(),
   },
-} as CellComponentProps;
+});
 
 describe('SystemCellFactory', () => {
   it('shows the status cell', async () => {

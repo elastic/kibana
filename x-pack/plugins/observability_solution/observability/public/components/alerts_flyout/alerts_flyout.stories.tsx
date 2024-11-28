@@ -49,7 +49,7 @@ export default {
 };
 
 export function Example({ alerts }: Args) {
-  const selectedAlertId = apmAlertResponseExample[0]![ALERT_UUID]![0];
+  const selectedAlertId = apmAlertResponseExample[0]![ALERT_UUID]![0] as string;
   const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
   return (
     <AlertsFlyout

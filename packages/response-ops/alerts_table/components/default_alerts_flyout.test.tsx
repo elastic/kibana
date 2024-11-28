@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps } from 'react';
+import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { AlertsTableFlyoutBaseProps } from '../types';
+import { AlertsTableFlyoutBaseProps, FlyoutSectionProps } from '../types';
 import { DefaultAlertsFlyoutBody } from './default_alerts_flyout';
+import { createPartialObjectMock } from '../utils/test';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 const columns = [
   {
@@ -91,12 +93,15 @@ describe('DefaultAlertsFlyout', () => {
   beforeAll(async () => {
     wrapper = mount(
       <DefaultAlertsFlyoutBody
-        {...({
+        {...createPartialObjectMock<FlyoutSectionProps>({
           alert,
           isLoading: false,
           columns,
-          fieldFormats: fieldFormatsMock,
-        } as unknown as ComponentProps<typeof DefaultAlertsFlyoutBody>)}
+          services: {
+            http: httpServiceMock.createStartContract(),
+            fieldFormats: fieldFormatsMock,
+          },
+        })}
       />
     ) as ReactWrapper;
     await waitFor(() => wrapper.update());

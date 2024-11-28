@@ -8,8 +8,9 @@
  */
 
 import { TechnicalRuleDataFieldName } from '@kbn/rule-data-utils';
+import { JsonValue } from '@kbn/utility-types';
 
-export interface BasicFields {
+export interface MetaAlertFields {
   _id: string;
   _index: string;
 }
@@ -24,8 +25,16 @@ export interface EsQuerySnapshot {
   response: string[];
 }
 
-export type Alert = BasicFields & {
-  [Property in TechnicalRuleDataFieldName]?: string[];
-} & {
-  [x: string]: unknown[];
+export type KnownAlertFields = {
+  [Property in TechnicalRuleDataFieldName]?: JsonValue[];
 };
+
+export type UnknownAlertFields = Record<string, string | JsonValue[]>;
+
+/**
+ * Alert document type as returned by alerts search requests
+ *
+ * Use the AdditionalFields type parameter to add additional fields to the alert type
+ */
+export type Alert<AdditionalFields extends UnknownAlertFields = UnknownAlertFields> =
+  KnownAlertFields & AdditionalFields & MetaAlertFields;

@@ -18,11 +18,11 @@ import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock'
 describe('AlertLifecycleStatusCell', () => {
   const casesMap = getCasesMapMock();
   const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
-  const alert = {
+  const alert: Alert = {
     _id: 'alert-id',
     _index: 'alert-index',
     'kibana.alert.status': ['active'],
-  } as Alert;
+  };
 
   const props = {
     isLoading: false,
@@ -48,7 +48,7 @@ describe('AlertLifecycleStatusCell', () => {
     render(
       <AlertLifecycleStatusCell
         {...props}
-        alert={{ ...alert, 'kibana.alert.flapping': ['true'] } as Alert}
+        alert={{ ...alert, 'kibana.alert.flapping': ['true'] }}
       />
     );
     expect(screen.getByText('Flapping')).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe('AlertLifecycleStatusCell', () => {
     render(
       <AlertLifecycleStatusCell
         {...props}
-        alert={{ ...alert, 'kibana.alert.status': ['active', 'recovered'] } as Alert}
+        alert={{ ...alert, 'kibana.alert.status': ['active', 'recovered'] }}
       />
     );
 
@@ -66,12 +66,7 @@ describe('AlertLifecycleStatusCell', () => {
   });
 
   it('shows the default cell if the status is empty', async () => {
-    render(
-      <AlertLifecycleStatusCell
-        {...props}
-        alert={{ ...alert, 'kibana.alert.status': [] } as unknown as Alert}
-      />
-    );
+    render(<AlertLifecycleStatusCell {...props} alert={{ ...alert, 'kibana.alert.status': [] }} />);
 
     expect(screen.getByText('--')).toBeInTheDocument();
   });

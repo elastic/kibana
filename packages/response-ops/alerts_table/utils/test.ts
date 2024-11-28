@@ -7,6 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DeepPartial } from 'utility-types';
+import MaybeMockedDeep = jest.MaybeMockedDeep;
+
+/**
+ * Utility function to create a partial object mock without losing type information
+ *
+ * @example
+ * ```ts
+ * const mockedObject = createPartialObjectMock<MyType>({ prop1: 'value' });
+ * ```
+ */
+export const createPartialObjectMock = <T>(partialObject: DeepPartial<T>) =>
+  partialObject as MaybeMockedDeep<T>;
+
 /* eslint-disable no-console */
 export const testQueryClientConfig = {
   defaultOptions: {
