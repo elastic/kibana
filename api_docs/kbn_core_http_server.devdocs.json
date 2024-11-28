@@ -6757,6 +6757,10 @@
               },
               {
                 "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_create_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/indices/register_clear_cache_route.ts"
               },
               {
@@ -20759,7 +20763,7 @@
           "\nThe set of supported parseable Content-Types"
         ],
         "signature": [
-          "\"application/json\" | \"multipart/form-data\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"text/*\""
+          "\"application/json\" | \"application/*+json\" | \"application/octet-stream\" | \"application/x-www-form-urlencoded\" | \"multipart/form-data\" | \"text/*\""
         ],
         "path": "packages/core/http/core-http-server/src/router/route.ts",
         "deprecated": false,
