@@ -39,6 +39,18 @@ export const METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP = Object.freeze<Record<Met
   search_rate: 'Search Rate',
 });
 
+export const METRIC_TYPE_UI_OPTIONS_VALUES_TO_API_MAP = Object.freeze<Record<string, MetricTypes>>({
+  'Data Retained in Storage': 'storage_retained',
+  'Data Ingested': 'ingest_rate',
+  'Search VCU': 'search_vcu',
+  'Ingest VCU': 'ingest_vcu',
+  'ML VCU': 'ml_vcu',
+  'Index Latency': 'index_latency',
+  'Index Rate': 'index_rate',
+  'Search Latency': 'search_latency',
+  'Search Rate': 'search_rate',
+});
+
 // type guard for MetricTypes
 export const isMetricType = (type: string): type is MetricTypes =>
   METRIC_TYPE_VALUES.includes(type as MetricTypes);
@@ -82,56 +94,45 @@ export type UsageMetricsRequestBody = TypeOf<typeof UsageMetricsRequestSchema>;
 
 export const UsageMetricsResponseSchema = {
   body: () =>
-    schema.object({
-      metrics: schema.recordOf(
-        metricTypesSchema,
-        schema.arrayOf(
-          schema.object({
-            name: schema.string(),
-            error: schema.nullable(schema.string()),
-            data: schema.arrayOf(
-              schema.object({
-                x: schema.number(),
-                y: schema.number(),
-              })
-            ),
-          })
-        )
-      ),
-    }),
+    schema.recordOf(
+      metricTypesSchema,
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          error: schema.nullable(schema.string()),
+          data: schema.arrayOf(
+            schema.object({
+              x: schema.number(),
+              y: schema.number(),
+            })
+          ),
+        })
+      )
+    ),
 };
-export type UsageMetricsResponseSchemaBody = Omit<
-  TypeOf<typeof UsageMetricsResponseSchema.body>,
-  'metrics'
-> & {
-  metrics: Partial<Record<MetricTypes, MetricSeries[]>>;
-};
-export type MetricSeries = TypeOf<
-  typeof UsageMetricsResponseSchema.body
->['metrics'][MetricTypes][number];
+
+export type UsageMetricsResponseSchemaBody = Partial<Record<MetricTypes, MetricSeries[]>>;
+
+export type MetricSeries = TypeOf<typeof UsageMetricsResponseSchema.body>[MetricTypes][number];
 
 export const UsageMetricsAutoOpsResponseSchema = {
   body: () =>
-    schema.object({
-      metrics: schema.recordOf(
-        metricTypesSchema,
-        schema.arrayOf(
-          schema.object({
-            name: schema.string(),
-            error: schema.nullable(schema.string()),
-            data: schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 })),
-          })
-        )
-      ),
-    }),
+    schema.recordOf(
+      metricTypesSchema,
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          error: schema.nullable(schema.string()),
+          data: schema.arrayOf(schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 })),
+        })
+      )
+    ),
 };
+
 export type UsageMetricsAutoOpsResponseMetricSeries = TypeOf<
   typeof UsageMetricsAutoOpsResponseSchema.body
->['metrics'][MetricTypes][number];
+>[MetricTypes][number];
 
-export type UsageMetricsAutoOpsResponseSchemaBody = Omit<
-  TypeOf<typeof UsageMetricsAutoOpsResponseSchema.body>,
-  'metrics'
-> & {
-  metrics: Partial<Record<MetricTypes, UsageMetricsAutoOpsResponseMetricSeries[]>>;
-};
+export type UsageMetricsAutoOpsResponseSchemaBody = Partial<
+  Record<MetricTypes, UsageMetricsAutoOpsResponseMetricSeries[]>
+>;
