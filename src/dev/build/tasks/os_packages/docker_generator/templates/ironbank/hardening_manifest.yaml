@@ -14,7 +14,7 @@ tags:
 # Build args passed to Dockerfile ARGs
 args:
   BASE_IMAGE: 'redhat/ubi/ubi9'
-  BASE_TAG: '9.4'
+  BASE_TAG: '9.5'
 
 # Docker image labels
 labels:
@@ -48,39 +48,47 @@ resources:
 
 # List of project maintainers
 maintainers:
-  - email: 'jon@elastic.co'
-    name: 'Jonathan Budzenski'
-    username: 'jbudz'
-    cht_member: false
+  # AppEx Operations Members
   - email: 'brad.white@elastic.co'
     name: 'Brad White'
     username: 'brad.white'
     cht_member: false
+  - email: 'jon@elastic.co'
+    name: 'Jonathan Budzenski'
+    username: 'jbudz'
+    cht_member: false
+  # AppEx Platform Security Members
+  - email: 'aleh.zasypkin@elastic.co'
+    name: 'Aleh Zasypkin'
+    username: 'azasypkin'
+    cht_member: false
+  - email: 'larry.gregory@elastic.co'
+    name: 'Larry Gregory'
+    username: 'legrego'
+    cht_member: false
+  # InfoSec Members
+  - email: 'abby.zumstein@elastic.co'
+    name: 'Abby Zumstein'
+    username: 'azumstein'
+    cht_member: false
+  - email: 'arsalan.khan@elastic.co'
+    name: 'Arsalan Khan'
+    username: 'khanarsalan'
+    cht_member: false
+  - email: 'iaroslava.zhomir@elastic.co'
+    name: 'Slava Zhomir'
+    username: 'slava-elastic'
+    cht_member: false
+  - email: 'ryan.kam@elastic.co'
+    name: 'Ryan Kam'
+    username: 'ryankam'
+    cht_member: false
+  - email: 'saumya.shree@elastic.co'
+    name: 'Saumya Shree'
+    username: 'shreesaumya'
+    cht_member: false
+  # CHT Members
   - email: 'klepal_alexander@bah.com'
     name: 'Alexander Klepal'
     username: 'alexander.klepal'
     cht_member: true
-  - cht_member: false
-    email: larry.gregory@elastic.co
-    name: Larry Gregory
-    username: legrego
-  - cht_member: false
-    email: aleh.zasypkin@elastic.co
-    name: Aleh Zasypkin
-    username: azasypkin
-  - cht_member: false
-    email: kurt.greiner@elastic.co
-    name: Kurt Greiner
-    username: kc13greiner
-  - cht_member: false
-    email: jeramy.soucy@elastic.co
-    name: Jeramy Soucy
-    username: jeramysoucy
-  - cht_member: false
-    email: sid.mantri@elastic.co
-    name: Sid Mantri
-    username: sidmantri
-  - cht_member: false
-    email: elena.shostak@elastic.co
-    name: Elena Shostak
-    username: elena.shostak

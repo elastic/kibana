@@ -34,10 +34,10 @@ import { doesLogsEndpointActionsIndexExist } from '../utils';
 const actionsIndices = [AGENT_ACTIONS_INDEX, ENDPOINT_ACTIONS_INDEX];
 // search all responses indices irrelevant of namespace
 const responseIndices = [AGENT_ACTIONS_RESULTS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN];
-export const logsEndpointActionsRegex = new RegExp(`(^\.ds-\.logs-endpoint\.actions-default-).+`);
+export const logsEndpointActionsRegex = new RegExp(`(^.ds-.logs-endpoint.actions-default-).+`);
 // matches index names like .ds-.logs-endpoint.action.responses-name_space---suffix-2022.01.25-000001
 export const logsEndpointResponsesRegex = new RegExp(
-  `(^\.ds-\.logs-endpoint\.action\.responses-\\w+-).+`
+  `(^.ds-.logs-endpoint.action.responses-\\w+-).+`
 );
 const queryOptions = {
   headers: {
