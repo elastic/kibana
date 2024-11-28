@@ -258,6 +258,6 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   );
 };
 
-// disabled to be able lazy load
+// Lazy loading helpers
 // eslint-disable-next-line import/no-default-export
 export default React.memo(BulkActionsComponent);

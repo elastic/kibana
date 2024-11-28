@@ -18,7 +18,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DefaultAlertActions } from './default_alert_actions';
-import type { AlertsTableProps } from '../types';
+import type { GetAlertsTableProp } from '../types';
 
 const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreActionsTextLabel', {
   defaultMessage: 'More actions',
@@ -27,7 +27,7 @@ const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreA
 /**
  * The cell containing contextual actions for a single alert row in the table
  */
-export const AlertActionsCell: AlertsTableProps['renderActionsCell'] = (props) => {
+export const AlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const closeActionsPopover = () => {
