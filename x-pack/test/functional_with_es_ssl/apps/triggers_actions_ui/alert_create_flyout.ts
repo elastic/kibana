@@ -60,10 +60,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.setValue('webhookUserInput', 'fakeuser');
     await testSubjects.setValue('webhookPasswordInput', 'fakepassword');
 
-    await find.clickByCssSelector(
-      '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-    );
-    await testSubjects.click('create-connector-flyout-save-btn');
+    await retry.try(async () => {
+      await find.clickByCssSelector(
+        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
+      );
+      await testSubjects.click('create-connector-flyout-save-btn');
+    });
 
     const toastTitle = await toasts.getTitleAndDismiss();
     expect(toastTitle).to.eql(`Created '${connectorName}'`);
@@ -164,7 +166,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await apmSynthtraceEsClient.clean();
+      await apmSynthtraceEsClient?.clean();
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
