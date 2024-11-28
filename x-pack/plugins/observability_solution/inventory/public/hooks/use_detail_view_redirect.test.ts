@@ -117,7 +117,6 @@ describe('useDetailViewRedirect', () => {
       },
       service: {
         name: 'service-1',
-        environment: 'prod',
       },
     };
     mockGetIdentityFieldsValue.mockReturnValue({ [SERVICE_NAME]: 'service-1' });
