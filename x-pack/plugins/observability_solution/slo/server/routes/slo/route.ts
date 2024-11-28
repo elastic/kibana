@@ -612,8 +612,9 @@ const getSLOInstancesRoute = createSloServerRoute({
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const settings = await getSloSettings(soClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const getSLOInstances = new GetSLOInstances(repository, esClient);
+    const getSLOInstances = new GetSLOInstances(repository, esClient, settings);
 
     return await executeWithErrorHandler(() =>
       getSLOInstances.execute(params.path.id, params.query ?? {})

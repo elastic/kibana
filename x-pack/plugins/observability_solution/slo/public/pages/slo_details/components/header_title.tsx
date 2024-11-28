@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
-import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
-import { SLOGroupings } from '../../slos/components/common/slo_groupings';
 import { SloStatusBadge } from '../../../components/slo/slo_status_badge';
+import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
+import { SLOGroupings } from './groupings/slo_groupings';
 
 export interface Props {
   slo?: SLOWithSummaryResponse;
@@ -25,9 +25,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <SLOGroupings slo={slo} />
-
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexGroup
         direction="row"
         gutterSize="s"
@@ -61,7 +59,7 @@ export function HeaderTitle({ isLoading, slo }: Props) {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <SLOGroupings slo={slo} />
     </EuiFlexGroup>
   );
 }

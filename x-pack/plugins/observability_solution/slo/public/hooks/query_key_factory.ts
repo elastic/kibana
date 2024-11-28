@@ -67,6 +67,13 @@ export const sloKeys = {
     groupings?: Record<string, unknown>
   ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
+  instances: (params: {
+    sloId: string;
+    groupingKey?: string;
+    search?: string;
+    afterKey?: string;
+    excludeStale?: boolean;
+  }) => [...sloKeys.all, 'fetch_slo_instances', params] as const,
 };
 
 export type SloKeys = typeof sloKeys;

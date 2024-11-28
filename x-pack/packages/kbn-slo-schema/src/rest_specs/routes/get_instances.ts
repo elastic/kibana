@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 
 const getSLOInstancesParamsSchema = t.type({
   path: t.type({ id: t.string }),
@@ -15,6 +16,7 @@ const getSLOInstancesParamsSchema = t.type({
       search: t.string,
       afterKey: t.string,
       size: t.string,
+      excludeStale: toBooleanRt,
     }),
   ]),
 });

@@ -8,14 +8,18 @@
 import { AggregationsCompositeAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { ALL_VALUE, GetSLOInstancesParams, GetSLOInstancesResponse } from '@kbn/slo-schema';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
+import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../common/constants';
+import { SLODefinition, SLOSettings } from '../domain/models';
 import { SLORepository } from './slo_repository';
 
 const DEFAULT_SIZE = 100;
 
 export class GetSLOInstances {
-  constructor(private repository: SLORepository, private esClient: ElasticsearchClient) {}
+  constructor(
+    private repository: SLORepository,
+    private esClient: ElasticsearchClient,
+    private sloSettings: SLOSettings
+  ) {}
 
   public async execute(
     sloId: string,
@@ -36,8 +40,8 @@ export class GetSLOInstances {
       unknown,
       Record<string, AggregationsCompositeAggregate>
     >({
-      index: SLO_DESTINATION_INDEX_PATTERN,
-      ...generateQuery(slo, params, groupingKeys),
+      index: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+      ...generateQuery(slo, params, groupingKeys, this.sloSettings),
     });
 
     return {
@@ -54,7 +58,12 @@ export class GetSLOInstances {
   }
 }
 
-function generateQuery(slo: SLODefinition, params: GetSLOInstancesParams, groupingKeys: string[]) {
+function generateQuery(
+  slo: SLODefinition,
+  params: GetSLOInstancesParams,
+  groupingKeys: string[],
+  settings: SLOSettings
+) {
   const aggs = generateAggs(groupingKeys, params);
 
   const query = {
@@ -67,6 +76,18 @@ function generateQuery(slo: SLODefinition, params: GetSLOInstancesParams, groupi
               'slo.id': slo.id,
             },
           },
+          // exclude stale summary documents if specified
+          ...(!!params?.excludeStale
+            ? [
+                {
+                  range: {
+                    summaryUpdatedAt: {
+                      gte: `now-${settings.staleThresholdInHours}h`,
+                    },
+                  },
+                },
+              ]
+            : []),
           // search on the specified grouping key only
           ...(params?.search && params?.groupingKey
             ? [
