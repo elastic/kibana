@@ -11,6 +11,7 @@ import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils'
 import { RuleTypeWithDescription } from '../../common/types';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 import { FEATURE_NAME_MAP } from '../translations';
+import { getAuthorizedConsumers } from './get_authorized_consumers';
 
 export const getValidatedMultiConsumer = ({
   multiConsumerSelection,
@@ -33,10 +34,12 @@ export const getInitialMultiConsumer = ({
   multiConsumerSelection,
   validConsumers,
   ruleType,
+  ruleTypes,
 }: {
   multiConsumerSelection?: RuleCreationValidConsumer | null;
   validConsumers: RuleCreationValidConsumer[];
   ruleType: RuleTypeWithDescription;
+  ruleTypes: RuleTypeWithDescription[];
 }): RuleCreationValidConsumer | null => {
   // If rule type doesn't support multi-consumer or no valid consumers exists,
   // return nothing
@@ -52,6 +55,23 @@ export const getInitialMultiConsumer = ({
   // If o11y is in the valid consumers, just use that
   if (validConsumers.includes(AlertConsumers.OBSERVABILITY)) {
     return AlertConsumers.OBSERVABILITY;
+  }
+
+  const selectedAvailableRuleType = ruleTypes.find((availableRuleType) => {
+    return availableRuleType.id === ruleType.id;
+  });
+
+  if (!selectedAvailableRuleType?.authorizedConsumers) {
+    return null;
+  }
+
+  const authorizedConsumers = getAuthorizedConsumers({
+    ruleType: selectedAvailableRuleType,
+    validConsumers,
+  });
+
+  if (authorizedConsumers.length === 1) {
+    return authorizedConsumers[0];
   }
 
   // User passed in null explicitly, won't set initial consumer
