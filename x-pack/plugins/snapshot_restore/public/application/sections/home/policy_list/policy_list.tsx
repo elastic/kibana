@@ -87,7 +87,6 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     uiMetricService.trackUiMetric(UIM_POLICY_LIST_LOAD);
   }, [uiMetricService]);
 
-  // TODO: Remove this comment after testing
   useExecutionContext(core.executionContext, {
     type: 'application',
     page: 'snapshotRestorePolicyTab',

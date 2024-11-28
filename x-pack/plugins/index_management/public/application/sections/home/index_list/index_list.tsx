@@ -19,7 +19,6 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
     core: { executionContext },
   } = useAppContext();
 
-  // TODO: Remove this comment after testing
   useExecutionContext(executionContext, {
     type: 'application',
     page: 'indexManagementIndicesTab',
