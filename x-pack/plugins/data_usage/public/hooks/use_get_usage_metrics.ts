@@ -8,7 +8,7 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { momentDateParser } from '../../common/utils';
+import { parseToMoment } from '../../common/utils';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import type {
   UsageMetricsRequestBody,
@@ -29,8 +29,8 @@ export const useGetDataUsageMetrics = (
 
   // parse values anyway to ensure they are valid
   // and to avoid sending invalid values to the server
-  const from = momentDateParser(body.from)?.toISOString();
-  const to = momentDateParser(body.to)?.toISOString();
+  const from = parseToMoment(body.from)?.toISOString();
+  const to = parseToMoment(body.to)?.toISOString();
 
   return useQuery<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>>({
     queryKey: ['get-data-usage-metrics', body],

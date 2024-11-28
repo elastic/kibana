@@ -15,7 +15,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { momentDateParser, DEFAULT_DATE_RANGE_OPTIONS } from '../../../../common/utils';
+import { parseToMoment, DEFAULT_DATE_RANGE_OPTIONS } from '../../../../common/utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export interface DateRangePickerValues {
@@ -88,8 +88,8 @@ export const UsageMetricsDateRangePicker = memo<UsageMetricsDateRangePickerProps
         timeFormat={'HH:mm'}
         updateButtonProps={{ iconOnly: false, fill: false }}
         utcOffset={0}
-        maxDate={momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.maxDate)}
-        minDate={momentDateParser(DEFAULT_DATE_RANGE_OPTIONS.minDate)}
+        maxDate={parseToMoment(DEFAULT_DATE_RANGE_OPTIONS.maxDate)}
+        minDate={parseToMoment(DEFAULT_DATE_RANGE_OPTIONS.minDate)}
         width="auto"
       />
     );

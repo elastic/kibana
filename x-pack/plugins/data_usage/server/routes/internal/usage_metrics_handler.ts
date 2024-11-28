@@ -7,7 +7,7 @@
 
 import { chunk } from 'lodash/fp';
 import { RequestHandler } from '@kbn/core/server';
-import { momentDateParser } from '../../../common/utils';
+import { parseToMoment } from '../../../common/utils';
 import type {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchemaBody,
@@ -39,8 +39,8 @@ export const getUsageMetricsHandler = (
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
 
       // parse date strings to validate
-      const parsedFrom = momentDateParser(from)?.toISOString();
-      const parsedTo = momentDateParser(to)?.toISOString();
+      const parsedFrom = parseToMoment(from)?.toISOString();
+      const parsedTo = parseToMoment(to)?.toISOString();
 
       if (!parsedFrom || !parsedTo) {
         const customErrorMessage = `[request body.${

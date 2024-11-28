@@ -14,7 +14,7 @@ import { Logger } from '@kbn/logging';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { LogMeta } from '@kbn/core/server';
-import { momentDateParser } from '../../common/utils';
+import { parseToMoment } from '../../common/utils';
 import {
   UsageMetricsAutoOpsResponseSchema,
   type UsageMetricsAutoOpsResponseSchemaBody,
@@ -76,8 +76,8 @@ export class AutoOpsAPIService {
     const requestConfig: AxiosRequestConfig = {
       url: getAutoOpsAPIRequestUrl(autoopsConfig.api?.url, cloudSetup?.serverless.projectId),
       data: {
-        from: momentDateParser(requestBody.from)?.toISOString(),
-        to: momentDateParser(requestBody.to)?.toISOString(),
+        from: parseToMoment(requestBody.from)?.toISOString(),
+        to: parseToMoment(requestBody.to)?.toISOString(),
         size: requestBody.dataStreams.length,
         level: 'datastream',
         metric_types: requestBody.metricTypes,
