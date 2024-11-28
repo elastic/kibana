@@ -25,6 +25,11 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
+import { DataViewsServerPluginStart } from '@kbn/data-plugin/server';
+import { LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
+import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
+import { DEFAULT_LOG_SOURCES } from '@kbn/logs-data-access-plugin/common/constants';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -177,6 +182,65 @@ export class InfraServerPlugin
     this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
       ? new MetricsExplorerViewsService(this.logger.get('metricsExplorerViews'))
       : undefined;
+  }
+
+  private async createDefaultDataViewsForObsRules(
+    core: CoreStart,
+    dataViews: DataViewsServerPluginStart,
+    logsShared: LogsSharedPluginStart,
+    logsDataAccess: LogsDataAccessPluginStart
+  ) {
+    const dataViewsService = await dataViews.dataViewsServiceFactory(
+      core.savedObjects.createInternalRepository(),
+      core.elasticsearch.client.asInternalUser,
+      undefined,
+      true
+    );
+
+    const savedObjectsClient = core.savedObjects.createInternalRepository();
+
+    const LOG_RULES_DATA_VIEW = 'log_rules_data_view';
+    const METRIC_RULES_DATA_VIEW = 'infra_rules_data_view';
+
+    // get log indices
+    const logSourcesService =
+      logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
+
+    const { indices: logIndices, timestampField } = await logsShared.logViews
+      .getClient(savedObjectsClient, core.elasticsearch.client.asInternalUser, logSourcesService)
+      .getResolvedLogView(DEFAULT_LOG_VIEW);
+
+    // create default data view for Log threshold rules
+    const logDataViewExists = await dataViewsService.get(LOG_RULES_DATA_VIEW).catch(() => false);
+
+    if (!logDataViewExists) {
+      await dataViewsService.createAndSave({
+        allowNoIndex: false,
+        name: LOG_RULES_DATA_VIEW,
+        title: logIndices === '' ? DEFAULT_LOG_SOURCES.join(',') : logIndices,
+        id: LOG_RULES_DATA_VIEW,
+        timeFieldName: timestampField,
+      });
+    }
+
+    // get metric indices
+    const metricsClient = this.libs.plugins.metricsDataAccess.setup.client;
+    const metricIndices = await metricsClient.getMetricIndices({ savedObjectsClient });
+
+    // create default data view for Metric and Inventory threshold rules
+    const metricDataViewExists = await dataViewsService
+      .get(METRIC_RULES_DATA_VIEW)
+      .catch(() => false);
+
+    if (!metricDataViewExists) {
+      await dataViewsService.createAndSave({
+        allowNoIndex: false,
+        name: METRIC_RULES_DATA_VIEW,
+        title: metricIndices,
+        id: METRIC_RULES_DATA_VIEW,
+        timeFieldName: '@timestamp',
+      });
+    }
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
@@ -336,7 +400,7 @@ export class InfraServerPlugin
     } as InfraPluginSetup;
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, { dataViews, logsShared, logsDataAccess }: InfraServerPluginStartDeps) {
     const inventoryViews = this.inventoryViews.start({
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
@@ -346,6 +410,10 @@ export class InfraServerPlugin
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
     });
+
+    this.createDefaultDataViewsForObsRules(core, dataViews, logsShared, logsDataAccess).catch(
+      () => {}
+    );
 
     registerRoutes(this.libs);
 
