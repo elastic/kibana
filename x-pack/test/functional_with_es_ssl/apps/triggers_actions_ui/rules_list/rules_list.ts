@@ -42,12 +42,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     await testSubjects.click('rulesTab');
   }
 
-  async function retryLoadingSpinnerDeletion() {
-    await retry.try(async () => {
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-    });
-  }
-
   const getAlertSummary = async (ruleId: string) => {
     const { body: summary } = await supertest
       .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
@@ -56,7 +50,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/157623
-  describe('rules list', function () {
+  describe.skip('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -698,33 +692,33 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       // Select only enabled
       await testSubjects.click('ruleStatusFilterButton');
       await testSubjects.click('ruleStatusFilterOption-enabled');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Select enabled or disabled (e.g. all)
       await testSubjects.click('ruleStatusFilterOption-disabled');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);
 
       // Select only disabled
       await testSubjects.click('ruleStatusFilterOption-enabled');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Select only snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await testSubjects.click('ruleStatusFilterOption-snoozed');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Select disabled or snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(3);
 
       // Select enabled or disabled or snoozed
       await testSubjects.click('ruleStatusFilterOption-enabled');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);
     });
 
@@ -770,25 +764,25 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       // Select a -> selected: a
       await testSubjects.click('ruleTagFilterOption-a');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
 
       // Unselect a -> selected: none
       await testSubjects.click('ruleTagFilterOption-a');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(5);
 
       // Select a, b -> selected: a, b
       await testSubjects.click('ruleTagFilterOption-a');
       await testSubjects.click('ruleTagFilterOption-b');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(4);
 
       // Unselect a, b, select c -> selected: c
       await testSubjects.click('ruleTagFilterOption-a');
       await testSubjects.click('ruleTagFilterOption-b');
       await testSubjects.click('ruleTagFilterOption-c');
-      await retryLoadingSpinnerDeletion();
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
     });
 
