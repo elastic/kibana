@@ -29,11 +29,14 @@ describe('addSpaceIdToPath', () => {
       '/my/base/path/s/new-space'
     );
 
-    expect(addSpaceIdToPath('/my/base/path/s/old-space', 'new-space')).toEqual(
+    expect(addSpaceIdToPath('/my/base/path/s/old-space-no-trailing', 'new-space')).toEqual(
       '/my/base/path/s/new-space'
     );
+  });
 
+  test('it removes existing space identifier when spaceId is default', () => {
     expect(addSpaceIdToPath('/my/base/path/s/old-space', 'default')).toEqual('/my/base/path');
+    expect(addSpaceIdToPath('/my/base/path/s/old-space')).toEqual('/my/base/path');
   });
 
   test('it throws an error when the requested path does not start with a slash', () => {
