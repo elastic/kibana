@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import type { FieldConfig } from '../../../../shared_imports';
 import { UseField } from '../../../../shared_imports';
-import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
-import { QueryBarDefineRule } from '../../../rule_creation_ui/components/query_bar';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
+import { QueryBarField } from '../../../rule_creation_ui/components/query_bar_field';
 import { threatMatchQueryRequiredValidator } from './validators/threat_match_query_required_validator';
 import { kueryValidatorFactory } from '../../../rule_creation_ui/validators/kuery_validator_factory';
 import * as i18n from './translations';
@@ -30,7 +30,7 @@ export const ThreatMatchQueryEdit = memo(function ThreatMatchQueryEdit({
     <UseField
       path={path}
       config={THREAT_MATCH_QUERY_FIELD_CONFIG}
-      component={QueryBarDefineRule}
+      component={QueryBarField}
       componentProps={{
         indexPattern: threatIndexPatterns,
         isLoading: loading,

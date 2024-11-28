@@ -81,7 +81,6 @@ import { THREAT_MATCH_MAPPING_FIELD_LABEL } from '../../../rule_creation/compone
 import { THREAT_MATCH_QUERY_FIELD_LABEL } from '../../../rule_creation/components/threat_match_query_edit/translations';
 import { THREAT_MATCH_INDEX_FIELD_LABEL } from '../../../rule_creation/components/threat_match_index_edit/translations';
 import { THREAT_MATCH_INDICATOR_PATH_FIELD_LABEL } from '../../../rule_creation/components/threat_match_indicator_path_edit/translations';
-import type { FieldValueQueryBar } from '../query_bar';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   max-width: 600px;
