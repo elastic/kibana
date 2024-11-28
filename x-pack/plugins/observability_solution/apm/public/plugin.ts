@@ -198,7 +198,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
-      pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
