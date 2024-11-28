@@ -35,9 +35,9 @@ export async function getESUpgradeStatus(
         }
         /**
          * This disables showing the Data streams deprecations in the UA if
-         * `featureSet.reindexDataStreams` is set to `false`.
+         * `featureSet.migrateDataStreams` is set to `false`.
          */
-        if (!featureSet.reindexDataStreams) {
+        if (!featureSet.migrateDataStreams) {
           if (type === 'data_streams') {
             return false;
           }

@@ -296,5 +296,5 @@ export interface FeatureSet {
   migrateSystemIndices: boolean;
   mlSnapshots: boolean;
   reindexCorrectiveActions: boolean;
-  reindexDataStreams: boolean;
+  migrateDataStreams: boolean;
 }
