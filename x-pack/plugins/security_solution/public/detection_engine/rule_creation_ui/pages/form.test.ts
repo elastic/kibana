@@ -7,7 +7,6 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import type { FormData, FormHook, ValidationError } from '../../../shared_imports';
-import { ERROR_CODES as ESQL_ERROR_CODES } from '../../rule_creation/logic/esql_validator';
 import { EQL_ERROR_CODES } from '../../../common/hooks/eql/api';
 import type {
   AboutStepRule,
@@ -15,9 +14,9 @@ import type {
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../detections/pages/detection_engine/rules/types';
-
-import { useRuleFormsErrors } from './form';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../rule_creation/components/alert_suppression_edit';
+import { ESQL_ERROR_CODES } from '../../rule_creation/components/esql_query_edit';
+import { useRuleFormsErrors } from './form';
 
 const getFormWithErrorsMock = <T extends FormData = FormData>(fields: {
   [key: string]: { errors: Array<ValidationError<EQL_ERROR_CODES | ESQL_ERROR_CODES>> };
