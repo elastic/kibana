@@ -13,7 +13,8 @@ import { createFleetTestRendererMock } from '../../mock';
 
 import { RootPrivilegesCallout } from './root_privileges_callout';
 
-describe('RootPrivilegesCallout', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/201210
+describe.skip('RootPrivilegesCallout', () => {
   function render(rootIntegrations?: Array<{ name: string; title: string }>) {
     const renderer = createFleetTestRendererMock();
     const results = renderer.render(<RootPrivilegesCallout rootIntegrations={rootIntegrations} />);

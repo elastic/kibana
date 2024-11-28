@@ -9,17 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
-  CoreKibanaRequest,
-  FakeRawRequest,
-  Headers,
-  IBasePath,
-  ISavedObjectsRepository,
-  Logger,
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import {
   createTaskRunError,
   RunContext,
   TaskErrorSource,
@@ -28,6 +17,15 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { type IBasePath, type Headers, type FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { Logger } from '@kbn/logging';
+import type {
+  ISavedObjectsRepository,
+  SavedObject,
+  SavedObjectReference,
+} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ActionExecutorContract } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -243,7 +241,7 @@ function getFakeRequest(apiKey?: string) {
 
   // Since we're using API keys and accessing elasticsearch can only be done
   // via a request, we're faking one with the proper authorization headers.
-  return CoreKibanaRequest.from(fakeRawRequest);
+  return kibanaRequestFactory(fakeRawRequest);
 }
 
 async function getActionTaskParams(

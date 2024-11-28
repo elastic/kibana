@@ -7,7 +7,7 @@
 
 import type { AppContextTestRender, ReactQueryHookRenderer } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { useGetEndpointsList } from './use_get_endpoints_list';
+import { useGetEndpointsList, PAGING_PARAMS } from './use_get_endpoints_list';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../common/endpoint/constants';
 import { useQuery as _useQuery } from '@tanstack/react-query';
 import { endpointMetadataHttpMocks } from '../../pages/endpoint_hosts/mocks';
@@ -117,13 +117,15 @@ describe('useGetEndpointsList hook', () => {
   it('should also list inactive agents', async () => {
     const getApiResponse = apiMocks.responseProvider.metadataList.getMockImplementation();
 
+    const inActiveIndex = [0, 1, 3];
+
     // set a few of the agents as inactive/unenrolled
     apiMocks.responseProvider.metadataList.mockImplementation(() => {
       if (getApiResponse) {
         return {
           ...getApiResponse(),
           data: getApiResponse().data.map((item, i) => {
-            const isInactiveIndex = [0, 1, 3].includes(i);
+            const isInactiveIndex = inActiveIndex.includes(i);
             return {
               ...item,
               host_status: isInactiveIndex ? HostStatus.INACTIVE : item.host_status,
@@ -154,7 +156,7 @@ describe('useGetEndpointsList hook', () => {
     const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: 'inactive' }));
     expect(
       res.data?.map((host) => host.name.split('-')[2]).filter((name) => name === 'inactive').length
-    ).toEqual(3);
+    ).toEqual(inActiveIndex.length);
   });
 
   it('should only list 50 agents when more than 50 in the metadata list API', async () => {
@@ -192,7 +194,7 @@ describe('useGetEndpointsList hook', () => {
 
     // verify useGetEndpointsList hook returns all 50 agents in the list
     const res = await renderReactQueryHook(() => useGetEndpointsList({ searchString: '' }));
-    expect(res.data?.length).toEqual(50);
+    expect(res.data?.length).toEqual(PAGING_PARAMS.default);
   });
 
   it('should only list 10 more agents when 50 or more agents are already selected', async () => {
@@ -232,7 +234,7 @@ describe('useGetEndpointsList hook', () => {
     const agentIdsToSelect = apiMocks.responseProvider
       .metadataList()
       .data.map((d) => d.metadata.agent.id)
-      .slice(0, 50);
+      .slice(0, PAGING_PARAMS.default);
 
     // call useGetEndpointsList with all 50 agents selected
     const res = await renderReactQueryHook(() =>
