@@ -331,6 +331,8 @@ export const getHeatmapVisualization = ({
       }
     );
 
+    console.log(state);
+
     const gridConfigFn = buildExpressionFunction<HeatmapGridExpressionFunctionDefinition>(
       'heatmap_grid',
       {
@@ -345,6 +347,7 @@ export const getHeatmapVisualization = ({
         yTitle: state.gridConfig.yTitle,
         // X-axis
         isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible,
+        xAxisLabelRotation: state.gridConfig.xAxisLabelRotation,
         isXAxisTitleVisible: state.gridConfig.isXAxisTitleVisible ?? false,
         xTitle: state.gridConfig.xTitle,
       }

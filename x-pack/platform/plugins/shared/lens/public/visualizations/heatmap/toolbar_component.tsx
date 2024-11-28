@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, IconType } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow, IconType } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
@@ -45,6 +45,34 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
   },
 ];
 
+const axisOrientationOptions: Array<{
+  id: string;
+  value: 0 | -90 | -45;
+  label: string;
+}> = [
+  {
+    id: 'xy_axis_orientation_horizontal',
+    value: 0,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.horizontal', {
+      defaultMessage: 'Horizontal',
+    }),
+  },
+  {
+    id: 'xy_axis_orientation_vertical',
+    value: -90,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.vertical', {
+      defaultMessage: 'Vertical',
+    }),
+  },
+  {
+    id: 'xy_axis_orientation_angled',
+    value: -45,
+    label: i18n.translate('xpack.lens.xyChart.axisOrientation.angled', {
+      defaultMessage: 'Angled',
+    }),
+  },
+];
+
 export const HeatmapToolbar = memo(
   (props: VisualizationToolbarProps<HeatmapVisualizationState>) => {
     const { state, setState, frame } = props;
@@ -58,6 +86,13 @@ export const HeatmapToolbar = memo(
     const legendSize = state?.legend.legendSize;
 
     const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
+
+    const setOrientation = (orientation: 0 | -90 | -45) => {
+      setState({
+        ...state,
+        gridConfig: { ...state.gridConfig, xAxisLabelRotation: orientation },
+      });
+    }
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -175,6 +210,31 @@ export const HeatmapToolbar = memo(
                   }}
                   isAxisLabelVisible={state?.gridConfig.isXAxisLabelVisible}
                 />
+                {/* TODO: Extract component */}
+                <EuiFormRow
+                  display="columnCompressed"
+                  fullWidth
+                  label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+                    defaultMessage: 'Orientation',
+                  })}
+                >
+                  <EuiButtonGroup
+                    isFullWidth
+                    legend={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+                      defaultMessage: 'Orientation',
+                    })}
+                    data-test-subj="lnsXY_axisOrientation_groups"
+                    buttonSize="compressed"
+                    options={axisOrientationOptions}
+                    idSelected={axisOrientationOptions.find(({ value }) => value === state.gridConfig.xAxisLabelRotation)?.id ?? axisOrientationOptions[0].id}
+                    onChange={(optionId) => {
+                      const newOrientation = axisOrientationOptions.find(
+                        ({ id }) => id === optionId
+                      )!.value;
+                      setOrientation(newOrientation);
+                    }}
+                  />
+                </EuiFormRow>
               </ToolbarPopover>
             </TooltipWrapper>
           </EuiFlexGroup>
