@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector, generateConnectorName } from '@kbn/search-connectors';
+import { Connector } from '@kbn/search-connectors';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useConnector } from '../../hooks/api/use_connector';
