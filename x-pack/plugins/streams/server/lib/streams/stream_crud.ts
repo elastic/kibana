@@ -103,7 +103,7 @@ export async function listStreams({
   });
 
   const dataStreams = await listDataStreamsAsStreams({ scopedClusterClient });
-  const definitions = response.hits.hits.map((hit) => hit._source!);
+  const definitions = response.hits.hits.map((hit) => ({ ...hit._source!, managed: true }));
   const total = response.hits.total!;
 
   return {
@@ -154,7 +154,10 @@ export async function readStream({
       }
     }
     return {
-      definition,
+      definition: {
+        ...definition,
+        managed: true,
+      },
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {
@@ -171,7 +174,7 @@ export async function readDataStreamAsStream({
 }: ReadStreamParams) {
   const response = await scopedClusterClient.asInternalUser.indices.getDataStream({ name: id });
   if (response.data_streams.length === 1) {
-    const definition = {
+    const definition: StreamDefinition = {
       id,
       managed: false,
       children: [],
@@ -184,6 +187,42 @@ export async function readDataStreamAsStream({
         throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
       }
     }
+    // retrieve linked index template, component template and ingest pipeline
+    const templateName = response.data_streams[0].template;
+    const componentTemplates: string[] = [];
+    const template = await scopedClusterClient.asInternalUser.indices.getIndexTemplate({
+      name: templateName,
+    });
+    if (template.index_templates.length) {
+      template.index_templates[0].index_template.composed_of.forEach((componentTemplateName) => {
+        componentTemplates.push(componentTemplateName);
+      });
+    }
+    const writeIndexName = response.data_streams[0].indices.at(-1)?.index_name!;
+    const currentIndex = await scopedClusterClient.asInternalUser.indices.get({
+      index: writeIndexName,
+    });
+    const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
+
+    definition.unmanaged_elasticsearch_assets = [
+      {
+        type: 'ingest_pipeline',
+        id: ingestPipelineId,
+      },
+      ...componentTemplates.map((componentTemplateName) => ({
+        type: 'component_template' as const,
+        id: componentTemplateName,
+      })),
+      {
+        type: 'index_template',
+        id: templateName,
+      },
+      {
+        type: 'data_stream',
+        id,
+      },
+    ];
+
     return { definition };
   }
   throw new DefinitionNotFound(`Stream definition for ${id} not found.`);
@@ -327,6 +366,9 @@ export async function syncStream({
   rootDefinition,
   logger,
 }: SyncStreamParams) {
+  if (definition.managed) {
+    throw new Error('Cannot sync a managed stream');
+  }
   const componentTemplate = generateLayer(definition.id, definition);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
