@@ -73,6 +73,11 @@ components:
         prebuilt_rule_id:
           description: The Elastic prebuilt rule id matched.
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
+        integration_ids:
+          type: array
+          items:
+            type: string
+          description: The Elastic integration IDs related to the rule.
         id:
           description: The Elastic rule id installed as a result.
           $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
@@ -140,9 +145,15 @@ components:
       type: object
       description: The rule migration task stats object.
       required:
+        - id
         - status
         - rules
+        - created_at
+        - last_updated_at
       properties:
+        id:
+          description: The migration id
+          $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
         status:
           type: string
           description: Indicates if the migration task status.
@@ -176,22 +187,12 @@ components:
             failed:
               type: integer
               description: The number of rules that have failed migration.
+        created_at:
+          type: string
+          description: The moment the migration was created.
         last_updated_at:
           type: string
           description: The moment of the last update.
-
-    RuleMigrationAllTaskStats:
-      type: array
-      items:
-        allOf:
-          - $ref: '#/components/schemas/RuleMigrationTaskStats'
-          - type: object
-            required:
-              - migration_id
-            properties:
-              migration_id:
-                description: The migration id
-                $ref: './common.schema.yaml#/components/schemas/NonEmptyString'
 
     RuleMigrationTranslationResult:
       type: string
