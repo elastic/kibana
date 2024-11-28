@@ -282,7 +282,7 @@ describe('DataUsageMetrics', () => {
     );
   });
 
-  it('should not call usage metrics API if no data streams', async () => {
+  it('should not call usage metrics API if no data streams in request', async () => {
     mockUseGetDataUsageDataStreams.mockReturnValue({
       ...getBaseMockedDataStreams,
       data: [],
