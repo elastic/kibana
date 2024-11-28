@@ -17,12 +17,13 @@ interface MachineLearningJobIdEditProps {
 export function MachineLearningJobSelector({ path }: MachineLearningJobIdEditProps): JSX.Element {
   const { loading, jobs } = useSecurityJobs();
 
-  const componentProps = useMemo(() => {
-    return {
+  const componentProps = useMemo(
+    () => ({
       jobs,
       loading,
-    };
-  }, [jobs, loading]);
+    }),
+    [jobs, loading]
+  );
 
   return <UseField path={path} component={MlJobComboBox} componentProps={componentProps} />;
 }
