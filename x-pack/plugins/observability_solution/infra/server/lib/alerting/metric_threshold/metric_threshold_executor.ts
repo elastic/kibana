@@ -125,9 +125,11 @@ export const createMetricThresholdExecutor =
       startedAt,
       executionId,
       spaceId,
+      getTimeRange,
       rule: { id: ruleId },
     } = options;
 
+    const { dateStart, dateEnd } = getTimeRange();
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
@@ -256,8 +258,8 @@ export const createMetricThresholdExecutor =
       compositeSize,
       alertOnGroupDisappear,
       logger,
+      { end: dateEnd, start: dateStart },
       state.lastRunTimestamp,
-      { end: startedAt.valueOf() },
       convertStringsToMissingGroupsRecord(previousMissingGroups)
     );
 

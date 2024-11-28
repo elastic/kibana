@@ -43,8 +43,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   compositeSize: number,
   alertOnGroupDisappear: boolean,
   logger: Logger,
+  timeframe: { start: string; end: string },
   lastPeriodEnd?: number,
-  timeframe?: { start?: number; end: number },
   missingGroups: MissingGroupsRecord[] = []
 ): Promise<Array<Record<string, Evaluation>>> => {
   const { criteria, groupBy, filterQuery } = params;
