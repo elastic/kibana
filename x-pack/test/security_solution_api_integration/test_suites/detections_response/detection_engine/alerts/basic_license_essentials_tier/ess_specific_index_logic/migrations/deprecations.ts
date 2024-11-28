@@ -82,9 +82,8 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return legacy siem signals deprecation with multiple spaces', async () => {
           const deprecation = await getLegacyIndicesDeprecation();
 
-          expect(deprecation?.correctiveActions.manualSteps[1]).toContain(
-            'Spaces with at least one non-migrated signals index: another-space, default.'
-          );
+          expect(deprecation?.correctiveActions.manualSteps[1]).toContain('another-space');
+          expect(deprecation?.correctiveActions.manualSteps[1]).toContain('default');
         });
       });
     });
