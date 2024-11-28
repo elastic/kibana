@@ -72,7 +72,11 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
   };
 
   return (
-    <EuiFormRow label={INDEX_LABEL} isInvalid={getFieldState(INDEX_FIELD).invalid} fullWidth>
+    <EuiFormRow
+      label={INDEX_LABEL}
+      isInvalid={getFieldState(INDEX_FIELD).invalid || getFieldState(DATA_VIEW_FIELD).invalid}
+      fullWidth
+    >
       <Controller
         defaultValue=""
         name={DATA_VIEW_FIELD}
