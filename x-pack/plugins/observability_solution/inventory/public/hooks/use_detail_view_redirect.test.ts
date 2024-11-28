@@ -117,6 +117,7 @@ describe('useDetailViewRedirect', () => {
       },
       service: {
         name: 'service-1',
+        environment: 'prod',
       },
     };
     mockGetIdentityFieldsValue.mockReturnValue({ [SERVICE_NAME]: 'service-1' });
@@ -128,7 +129,6 @@ describe('useDetailViewRedirect', () => {
     expect(url).toBe('service-overview-url');
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       serviceName: 'service-1',
-      environment: 'prod',
     });
   });
 
