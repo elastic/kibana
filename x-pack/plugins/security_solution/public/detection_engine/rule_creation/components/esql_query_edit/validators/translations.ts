@@ -7,28 +7,35 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ESQL_QUERY_VALIDATION_REQUIRED = i18n.translate(
+  'xpack.securitySolution.ruleManagement.esqlValidation.requiredError',
+  {
+    defaultMessage: 'An ES|QL query is required.',
+  }
+);
+
 export const ESQL_VALIDATION_UNKNOWN_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.esqlValidation.unknownError',
+  'xpack.securitySolution.ruleManagement.esqlValidation.unknownError',
   {
     defaultMessage: 'Unknown error while validating ES|QL',
   }
 );
 
 export const esqlValidationErrorMessage = (message: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.esqlValidation.errorMessage', {
+  i18n.translate('xpack.securitySolution.ruleManagement.esqlValidation.errorMessage', {
     values: { message },
     defaultMessage: 'Error validating ES|QL: "{message}"',
   });
 
 export const ESQL_VALIDATION_MISSING_METADATA_OPERATOR_IN_QUERY_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.esqlValidation.missingMetadataOperatorInQueryError',
+  'xpack.securitySolution.ruleManagement.esqlValidation.missingMetadataOperatorInQueryError',
   {
     defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`,
   }
 );
 
 export const ESQL_VALIDATION_MISSING_ID_FIELD_IN_QUERY_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.esqlValidation.missingIdFieldInQueryError',
+  'xpack.securitySolution.ruleManagement.esqlValidation.missingIdFieldInQueryError',
   {
     defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.  In addition, the metadata properties (_id, _version, and _index)  must be returned in the query response.`,
   }
