@@ -32,5 +32,6 @@ const initialState: MockSerializedDashboardState = {
     { title: 'Request Sizes', collapsed: false },
     { title: 'Visitors', collapsed: false },
     { title: 'Response Codes', collapsed: false },
+    { title: 'Entire Flights Dashboard', collapsed: true },
   ],
 };

@@ -13,18 +13,34 @@ import { resolveGridRow } from './utils/resolve_grid_row';
 import { GridPanelData, GridLayoutStateManager } from './types';
 import { isGridDataEqual } from './utils/equality_checks';
 
+const MAX_SPEED = 150 as const;
+
 const scrollOnInterval = (direction: 'up' | 'down') => {
   let count = 0;
+  // let scrollInProgress = false;
+  // const element = document.getElementsByClassName('react-draggable-dragging')[0] as HTMLElement;
   const interval = setInterval(() => {
     // calculate the speed based on how long the interval has been going to create an ease effect
     // via the parabola formula `y = a(x - h)^2 + k`
     // - the starting speed is k = 50
-    // - the maximum speed is 250
-    // - the rate at which the speed increases is controlled by a = 0.75
-    const speed = Math.min(0.75 * count ** 2 + 50, 250);
-    window.scrollBy({ top: direction === 'down' ? speed : -speed, behavior: 'smooth' });
-    count++;
-  }, 100);
+    // - the rate at which the speed increases is controlled by a = 0.1
+    const speed = Math.min(0.1 * count ** 2 + 50, MAX_SPEED);
+    window.scrollBy({
+      top: direction === 'down' ? speed : -speed,
+    });
+
+    // if near the top or bottom of the screen, start slowing down by decrementing count; otherwise,
+    // if we're not at max speed yet, increment count
+    const nearTop = direction === 'up' && scrollY < window.innerHeight;
+    const nearBottom =
+      direction === 'down' &&
+      window.innerHeight + window.scrollY > document.body.scrollHeight - window.innerHeight;
+    if (nearBottom || nearTop) {
+      count = Math.max(0, count - 2);
+    } else if (speed < MAX_SPEED) {
+      count++;
+    }
+  }, 60);
   return interval;
 };
 
@@ -152,8 +168,11 @@ export const useGridLayoutEvents = ({
       // auto scroll when an event is happening close to the top or bottom of the screen
       const heightPercentage =
         100 - ((window.innerHeight - mouseTargetPixel.y) / window.innerHeight) * 100;
-      const startScrollingUp = !isResize && heightPercentage < 5; // don't scroll up when resizing
-      const startScrollingDown = heightPercentage > 95;
+      const atTheTop = window.scrollY <= 0;
+      const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
+
+      const startScrollingUp = !isResize && heightPercentage < 5 && !atTheTop; // don't scroll up when resizing
+      const startScrollingDown = heightPercentage > 95 && !atTheBottom;
       if (startScrollingUp || startScrollingDown) {
         if (!scrollInterval.current) {
           // only start scrolling if it's not already happening
@@ -202,6 +221,7 @@ export const useGridLayoutEvents = ({
 
     document.addEventListener('mousemove', onMouseMove, { passive: true });
     document.addEventListener('scroll', calculateUserEvent, { passive: true });
+
     return () => {
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('scroll', calculateUserEvent);

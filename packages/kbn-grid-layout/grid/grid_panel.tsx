@@ -178,6 +178,8 @@ export const GridPanel = forwardRef<
 
                 // undo any "lock to grid" styles
                 ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
+
+                ref.classList.add('react-draggable-dragging');
               }
             } else {
               ref.style.zIndex = `auto`;
@@ -194,6 +196,8 @@ export const GridPanel = forwardRef<
               ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
               ref.style.gridRowStart = `${panel.row + 1}`;
               ref.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+
+              ref.classList.remove('react-draggable-dragging');
             }
           });
 

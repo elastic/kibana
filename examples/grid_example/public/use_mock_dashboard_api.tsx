@@ -11,12 +11,13 @@ import { cloneDeep } from 'lodash';
 import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
+import { TimeRange } from '@kbn/es-query';
+
 import {
   MockSerializedDashboardState,
   MockedDashboardPanelMap,
   MockedDashboardRowMap,
 } from './types';
-import { TimeRange } from '@kbn/es-query';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 const DEFAULT_PANEL_HEIGHT = 15;
