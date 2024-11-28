@@ -43,10 +43,10 @@ export const Aiops: FC<AiopsProps> = ({ field }) => {
 
     return els.join('\n| ');
   }, [field, filters, esql]);
-  // console.log('esqlWithFilters', esqlWithFilters);
+  console.log('esqlWithFilters', esqlWithFilters);
 
   const data = useFetchESQL(esqlWithFilters);
-  // console.log('data', data);
+  console.log('data', data);
 
   return null;
 };
