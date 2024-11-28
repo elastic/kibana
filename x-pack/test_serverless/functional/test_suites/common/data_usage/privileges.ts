@@ -57,8 +57,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
     describe('with custom role', function () {
-      // custom roles aren't available in observability yet
-      this.tags(['skipSvlOblt']);
+      // skipSvlOblt: custom roles aren't available in observability yet
+      // skipMKI: custom roles aren't available in MKI testing yet
+      this.tags(['skipSvlOblt', 'skipMKI']);
       afterEach(async () => {
         await samlAuth.deleteCustomRole();
       });
