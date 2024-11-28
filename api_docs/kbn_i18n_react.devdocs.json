@@ -31,7 +31,7 @@
         "signature": [
           "({ children, }: React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>) => React.JSX.Element"
         ],
-        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+        "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "React.PropsWithChildren<{ locale?: string | undefined; messages?: unknown; }>"
             ],
-            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+            "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -218,7 +218,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+        "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -238,7 +238,7 @@
                 "text": "FormattedRelativeProps"
               }
             ],
-            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+            "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -355,7 +355,7 @@
         "signature": [
           "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
         ],
-        "path": "packages/kbn-i18n-react/src/provider.tsx",
+        "path": "src/platform/packages/shared/kbn-i18n-react/src/provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -369,7 +369,7 @@
             "signature": [
               "{ children?: React.ReactNode; }"
             ],
-            "path": "packages/kbn-i18n-react/src/provider.tsx",
+            "path": "src/platform/packages/shared/kbn-i18n-react/src/provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -511,7 +511,7 @@
         "tags": [],
         "label": "FormattedRelativeProps",
         "description": [],
-        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+        "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -525,7 +525,7 @@
             "signature": [
               "string | number | Date"
             ],
-            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+            "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,7 +539,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+            "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -595,7 +595,7 @@
         "signature": [
           "IntlShape"
         ],
-        "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+        "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

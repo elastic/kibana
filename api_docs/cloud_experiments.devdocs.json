@@ -39,7 +39,7 @@
           },
           "<Data>"
         ],
-        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +55,7 @@
             "signature": [
               "never"
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +71,7 @@
             "signature": [
               "Data | undefined"
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,7 +87,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -105,7 +105,7 @@
         "description": [
           "\nThe contract of the start lifecycle method\n"
         ],
-        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -119,11 +119,11 @@
           },
           {
             "plugin": "cloudChat",
-            "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+            "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_chat/server/plugin.ts"
           },
           {
             "plugin": "cloudChat",
-            "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+            "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_chat/server/plugin.ts"
           },
           {
             "plugin": "observabilityOnboarding",
@@ -149,17 +149,17 @@
             "signature": [
               "<Data>(featureFlagName: \"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\", defaultValue: Data) => Promise<Data>"
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "cloudChat",
-                "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+                "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_chat/server/plugin.ts"
               },
               {
                 "plugin": "cloudChat",
-                "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/plugin.ts"
+                "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_chat/server/plugin.ts"
               }
             ],
             "children": [
@@ -175,7 +175,7 @@
                 "signature": [
                   "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\""
                 ],
-                "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -192,7 +192,7 @@
                 "signature": [
                   "Data"
                 ],
-                "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -222,7 +222,7 @@
               },
               "<Data>) => void"
             ],
-            "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [],
@@ -246,7 +246,7 @@
                   },
                   "<Data>"
                 ],
-                "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -272,7 +272,7 @@
         "signature": [
           "\"security-solutions.add-integrations-url\" | \"cloud-chat.enabled\" | \"cloud-chat.chat-variant\" | \"observability_onboarding.experimental_onboarding_flow_enabled\""
         ],
-        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -289,7 +289,7 @@
         "signature": [
           "never"
         ],
-        "path": "x-pack/plugins/cloud_integrations/cloud_experiments/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

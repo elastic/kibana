@@ -3706,7 +3706,7 @@
         "tags": [],
         "label": "METRIC_TYPE",
         "description": [],
-        "path": "packages/kbn-analytics/src/metrics/index.ts",
+        "path": "src/platform/packages/shared/kbn-analytics/src/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

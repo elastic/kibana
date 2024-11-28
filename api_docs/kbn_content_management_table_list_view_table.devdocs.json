@@ -320,7 +320,7 @@
                     "text": "FormattedRelativeProps"
                   }
                 ],
-                "path": "packages/kbn-i18n-react/src/compatiblity_layer.tsx",
+                "path": "src/platform/packages/shared/kbn-i18n-react/src/compatiblity_layer.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -909,7 +909,7 @@
               },
               {
                 "plugin": "cloudLinks",
-                "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
+                "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
               },
               {
                 "plugin": "cases",

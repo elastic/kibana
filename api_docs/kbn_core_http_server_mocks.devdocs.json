@@ -1322,7 +1322,7 @@
                   },
                   "<(name: string) => boolean> | undefined; }"
                 ],
-                "path": "packages/kbn-hapi-mocks/src/request.ts",
+                "path": "src/platform/packages/private/kbn-hapi-mocks/src/request.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

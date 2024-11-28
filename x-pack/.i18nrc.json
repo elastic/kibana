@@ -19,9 +19,9 @@
     "xpack.banners": "plugins/banners",
     "xpack.canvas": "plugins/canvas",
     "xpack.cases": "plugins/cases",
-    "xpack.cloud": "plugins/cloud",
+    "xpack.cloud": "platform/plugins/shared/cloud",
     "xpack.cloudDefend": "plugins/cloud_defend",
-    "xpack.cloudLinks": "plugins/cloud_integrations/cloud_links",
+    "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "plugins/cloud_integrations/cloud_data_migration",
     "xpack.csp": [
       "plugins/cloud_security_posture",
@@ -42,7 +42,7 @@
     "xpack.embeddableEnhanced": "plugins/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "plugins/enterprise_search",
-    "xpack.features": "plugins/features",
+    "xpack.features": "platform/plugins/shared/features",
     "xpack.dataVisualizer": "plugins/data_visualizer",
     "xpack.exploratoryView": "plugins/observability_solution/exploratory_view",
     "xpack.fileUpload": "plugins/file_upload",
@@ -74,7 +74,7 @@
     "xpack.lens": "plugins/lens",
     "xpack.licenseApiGuard": "plugins/license_api_guard",
     "xpack.licenseMgmt": "plugins/license_management",
-    "xpack.licensing": "plugins/licensing",
+    "xpack.licensing": "platform/plugins/shared/licensing",
     "xpack.lists": "plugins/lists",
     "xpack.logstash": [
       "plugins/logstash"

@@ -11,7 +11,7 @@
         "tags": [],
         "label": "ILicense",
         "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -44,7 +44,7 @@
               "LicenseStatus",
               " | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -57,7 +57,7 @@
             "description": [
               "\nDetermine if the status of the license is active."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -73,7 +73,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -89,7 +89,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,7 +107,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -122,7 +122,7 @@
             "description": [
               "\nSignature of the license content."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -135,7 +135,7 @@
             "description": [
               "\nDetermine if the license container has information."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,7 +152,7 @@
               "() => ",
               "PublicLicenseJSON"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -170,7 +170,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,7 +186,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -204,7 +204,7 @@
             "signature": [
               "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -220,7 +220,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -241,7 +241,7 @@
               "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
               "LicenseCheck"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -257,7 +257,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -274,7 +274,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -295,7 +295,7 @@
               "(name: string) => ",
               "LicenseFeature"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -311,7 +311,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -329,7 +329,7 @@
         "tags": [],
         "label": "LicenseCheck",
         "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -345,7 +345,7 @@
             "signature": [
               "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -361,7 +361,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -375,7 +375,7 @@
         "tags": [],
         "label": "LicenseFeature",
         "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -386,7 +386,7 @@
             "tags": [],
             "label": "isAvailable",
             "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -397,7 +397,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -413,7 +413,7 @@
         "description": [
           "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -426,7 +426,7 @@
             "description": [
               "\nUID for license."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -442,7 +442,7 @@
             "signature": [
               "\"active\" | \"invalid\" | \"expired\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -455,7 +455,7 @@
             "description": [
               "\nUnix epoch of the expiration date of the license."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -471,7 +471,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -489,7 +489,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -652,7 +652,7 @@
         "description": [
           "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -667,7 +667,7 @@
               "PublicLicense",
               " | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -682,7 +682,7 @@
               "PublicFeatures",
               " | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -693,7 +693,7 @@
             "tags": [],
             "label": "signature",
             "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -713,7 +713,7 @@
         "signature": [
           "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -728,7 +728,7 @@
         "signature": [
           "\"active\" | \"invalid\" | \"expired\""
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -743,7 +743,7 @@
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -762,7 +762,7 @@
           "LicenseFeature",
           "; }"
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -776,7 +776,7 @@
       "tags": [],
       "label": "LicensingPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/licensing/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -797,7 +797,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -872,7 +872,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -892,7 +892,7 @@
           "signature": [
             "FeatureUsageServiceSetup"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -907,7 +907,7 @@
       "tags": [],
       "label": "LicensingPluginStart",
       "description": [],
-      "path": "x-pack/plugins/licensing/public/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -926,7 +926,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -944,7 +944,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -964,7 +964,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -982,7 +982,7 @@
           "signature": [
             "FeatureUsageServiceStart"
           ],
-          "path": "x-pack/plugins/licensing/public/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1032,7 +1032,7 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1052,7 +1052,7 @@
                 "text": "CheckLicense"
               }
             ],
-            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1076,7 +1076,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1104,7 +1104,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/plugins/licensing/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1118,7 +1118,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/licensing/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1132,7 +1132,7 @@
         "tags": [],
         "label": "FeatureUsageServiceSetup",
         "description": [],
-        "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1148,7 +1148,7 @@
             "signature": [
               "(featureName: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
             ],
-            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1162,7 +1162,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1177,7 +1177,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1195,7 +1195,7 @@
         "tags": [],
         "label": "FeatureUsageServiceStart",
         "description": [],
-        "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1211,7 +1211,7 @@
             "signature": [
               "(featureName: string, usedAt?: number | Date | undefined) => void"
             ],
-            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1227,7 +1227,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1244,7 +1244,7 @@
                 "signature": [
                   "number | Date | undefined"
                 ],
-                "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1266,7 +1266,7 @@
               "LastFeatureUsage",
               "[]"
             ],
-            "path": "x-pack/plugins/licensing/server/services/feature_usage_service.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1282,7 +1282,7 @@
         "tags": [],
         "label": "ILicense",
         "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1298,7 +1298,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1315,7 +1315,7 @@
               "LicenseStatus",
               " | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1328,7 +1328,7 @@
             "description": [
               "\nDetermine if the status of the license is active."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1344,7 +1344,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1360,7 +1360,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1378,7 +1378,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -1393,7 +1393,7 @@
             "description": [
               "\nSignature of the license content."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1406,7 +1406,7 @@
             "description": [
               "\nDetermine if the license container has information."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1423,7 +1423,7 @@
               "() => ",
               "PublicLicenseJSON"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1441,7 +1441,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1457,7 +1457,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1475,7 +1475,7 @@
             "signature": [
               "(minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => boolean"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1491,7 +1491,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1512,7 +1512,7 @@
               "(pluginName: string, minimumLicenseRequired: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => ",
               "LicenseCheck"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1528,7 +1528,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1545,7 +1545,7 @@
                 "signature": [
                   "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1566,7 +1566,7 @@
               "(name: string) => ",
               "LicenseFeature"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1582,7 +1582,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/licensing/common/types.ts",
+                "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1600,7 +1600,7 @@
         "tags": [],
         "label": "LicenseCheck",
         "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1616,7 +1616,7 @@
             "signature": [
               "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1632,7 +1632,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1646,7 +1646,7 @@
         "tags": [],
         "label": "LicenseFeature",
         "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1657,7 +1657,7 @@
             "tags": [],
             "label": "isAvailable",
             "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1668,7 +1668,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1684,7 +1684,7 @@
         "description": [
           "\nThe APIs exposed on the `licensing` key of {@link RequestHandlerContext} for plugins that depend on licensing."
         ],
-        "path": "x-pack/plugins/licensing/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1704,7 +1704,7 @@
                 "text": "FeatureUsageServiceStart"
               }
             ],
-            "path": "x-pack/plugins/licensing/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1718,7 +1718,7 @@
             "signature": [
               "ILicense"
             ],
-            "path": "x-pack/plugins/licensing/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1734,7 +1734,7 @@
         "description": [
           "\nSubset of license data considered as non-sensitive information.\nCan be passed to the client."
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1747,7 +1747,7 @@
             "description": [
               "\nUID for license."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1763,7 +1763,7 @@
             "signature": [
               "\"active\" | \"invalid\" | \"expired\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1776,7 +1776,7 @@
             "description": [
               "\nUnix epoch of the expiration date of the license."
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1792,7 +1792,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1810,7 +1810,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": true,
             "removeBy": "8.8.0",
             "trackAdoption": false,
@@ -1973,7 +1973,7 @@
         "description": [
           "\nSubset of license & features data considered as non-sensitive information.\nStructured as json to be passed to the client."
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1988,7 +1988,7 @@
               "PublicLicense",
               " | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2003,7 +2003,7 @@
               "PublicFeatures",
               " | undefined"
             ],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2014,7 +2014,7 @@
             "tags": [],
             "label": "signature",
             "description": [],
-            "path": "x-pack/plugins/licensing/common/types.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2030,7 +2030,7 @@
         "tags": [],
         "label": "LICENSE_TYPE",
         "description": [],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2049,7 +2049,7 @@
           "ILicense",
           ") => { valid: false; message: string; } | { valid: true; message: null; }"
         ],
-        "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2064,7 +2064,7 @@
             "signature": [
               "ILicense"
             ],
-            "path": "x-pack/plugins/licensing/server/wrap_route_with_license_check.ts",
+            "path": "x-pack/platform/plugins/shared/licensing/server/wrap_route_with_license_check.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2081,7 +2081,7 @@
         "signature": [
           "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2096,7 +2096,7 @@
         "signature": [
           "\"active\" | \"invalid\" | \"expired\""
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2111,7 +2111,7 @@
         "signature": [
           "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2130,7 +2130,7 @@
           "LicenseFeature",
           "; }"
         ],
-        "path": "x-pack/plugins/licensing/common/types.ts",
+        "path": "x-pack/platform/plugins/shared/licensing/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2144,7 +2144,7 @@
       "tags": [],
       "label": "LicensingPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/licensing/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2165,7 +2165,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -2316,7 +2316,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
@@ -2342,7 +2342,7 @@
               "text": "FeatureUsageServiceSetup"
             }
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -2357,7 +2357,7 @@
       "tags": [],
       "label": "LicensingPluginStart",
       "description": [],
-      "path": "x-pack/plugins/licensing/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -2376,7 +2376,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
@@ -2394,7 +2394,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2414,7 +2414,7 @@
             "ILicense",
             ">"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -2446,7 +2446,7 @@
             "ILicense",
             ">; }"
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -2466,7 +2466,7 @@
                   "text": "IClusterClient"
                 }
               ],
-              "path": "x-pack/plugins/licensing/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2481,7 +2481,7 @@
               "signature": [
                 "number"
               ],
-              "path": "x-pack/plugins/licensing/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -2507,7 +2507,7 @@
               "text": "FeatureUsageServiceStart"
             }
           ],
-          "path": "x-pack/plugins/licensing/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/licensing/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }

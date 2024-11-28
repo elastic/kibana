@@ -802,7 +802,7 @@
               },
               {
                 "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/lib/resolve_import_errors.ts"
+                "path": "src/platform/plugins/shared/saved_objects_management/public/lib/resolve_import_errors.ts"
               }
             ]
           },
@@ -1367,19 +1367,19 @@
           },
           {
             "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
+            "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
+            "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
+            "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/server/lib/find_relationships.test.ts"
+            "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
@@ -1788,11 +1788,11 @@
           },
           {
             "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/services/types/record.ts"
+            "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts"
           },
           {
             "plugin": "savedObjectsManagement",
-            "path": "src/plugins/saved_objects_management/public/services/types/record.ts"
+            "path": "src/platform/plugins/shared/saved_objects_management/public/services/types/record.ts"
           },
           {
             "plugin": "savedObjects",

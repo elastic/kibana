@@ -612,7 +612,7 @@
               },
               {
                 "plugin": "@kbn/ebt-tools",
-                "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
+                "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metric_events/helpers.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
@@ -712,39 +712,39 @@
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "@kbn/cloud",
-                "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
+                "path": "src/platform/packages/shared/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
               {
                 "plugin": "dashboard",
@@ -1606,11 +1606,11 @@
               },
               {
                 "plugin": "licensing",
-                "path": "x-pack/plugins/licensing/common/register_analytics_context_provider.ts"
+                "path": "x-pack/platform/plugins/shared/licensing/common/register_analytics_context_provider.ts"
               },
               {
                 "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
+                "path": "x-pack/platform/plugins/shared/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
                 "plugin": "security",
@@ -1618,11 +1618,11 @@
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/server/plugin.ts"
+                "path": "src/platform/plugins/shared/telemetry/server/plugin.ts"
               },
               {
                 "plugin": "telemetry",
-                "path": "src/plugins/telemetry/public/plugin.ts"
+                "path": "src/platform/plugins/shared/telemetry/public/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
