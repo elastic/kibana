@@ -64,11 +64,13 @@ export const processRouter = (
         parameters.push(...pathObjects, ...queryObjects);
       }
 
-      let description = '';
+      let description = `${route.options.description ?? ''}`;
       if (route.security) {
         const authzDescription = extractAuthzDescription(route.security);
 
-        description = `${route.options.description ?? ''}${authzDescription ?? ''}`;
+        description += `${route.options.description && authzDescription ? `<br/><br/>` : ''}${
+          authzDescription ?? ''
+        }`;
       }
 
       const hasDeprecations = !!route.options.deprecated;
@@ -77,7 +79,6 @@ export const processRouter = (
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
         ...(description ? { description } : {}),
-        ...(route.options.description ? { description: route.options.description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
         requestBody: !!validationSchemas?.body

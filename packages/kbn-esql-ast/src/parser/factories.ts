@@ -31,6 +31,7 @@ import {
   IdentifierContext,
   InputParamContext,
   InputNamedOrPositionalParamContext,
+  IdentifierOrParameterContext,
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
@@ -227,26 +228,35 @@ export const createFunctionCall = (ctx: FunctionContext): ESQLFunctionCallExpres
   };
 
   const identifierOrParameter = functionName.identifierOrParameter();
-  if (identifierOrParameter) {
-    const identifier = identifierOrParameter.identifier();
-    if (identifier) {
-      node.operator = createIdentifier(identifier);
-    } else {
-      const parameter = identifierOrParameter.parameter();
-      if (parameter) {
-        node.operator = createParam(parameter);
-      }
+
+  if (identifierOrParameter instanceof IdentifierOrParameterContext) {
+    const operator = createIdentifierOrParam(identifierOrParameter);
+
+    if (operator) {
+      node.operator = operator;
     }
   }
 
   return node;
 };
 
-const createIdentifier = (identifier: IdentifierContext): ESQLIdentifier => {
-  return Builder.identifier(
-    { name: identifier.getText().toLowerCase() },
-    createParserFields(identifier)
-  );
+export const createIdentifierOrParam = (ctx: IdentifierOrParameterContext) => {
+  const identifier = ctx.identifier();
+  if (identifier) {
+    return createIdentifier(identifier);
+  } else {
+    const parameter = ctx.parameter();
+    if (parameter) {
+      return createParam(parameter);
+    }
+  }
+};
+
+export const createIdentifier = (identifier: IdentifierContext): ESQLIdentifier => {
+  const text = identifier.getText();
+  const name = parseIdentifier(text);
+
+  return Builder.identifier({ name }, createParserFields(identifier));
 };
 
 export const createParam = (ctx: ParseTree) => {
@@ -473,42 +483,68 @@ export function createSource(
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {
   const text = ctx.getText();
-
-  return {
-    type: 'column',
-    name: text,
-    parts: [text],
+  const parserFields = {
     text,
     location: getPosition(ctx.symbol),
     incomplete: ctx.getText() === '',
     quoted: false,
   };
+  const node = Builder.expression.column(
+    { args: [Builder.identifier({ name: '*' }, parserFields)] },
+    parserFields
+  );
+
+  node.name = text;
+
+  return node;
 }
 
 export function createColumn(ctx: ParserRuleContext): ESQLColumn {
-  const parts: string[] = [];
+  const args: ESQLColumn['args'] = [];
+
   if (ctx instanceof QualifiedNamePatternContext) {
-    parts.push(
-      ...ctx.identifierPattern_list().map((identifier) => parseIdentifier(identifier.getText()))
-    );
+    const list = ctx.identifierPattern_list();
+
+    for (const identifier of list) {
+      const name = parseIdentifier(identifier.getText());
+      const node = Builder.identifier({ name }, createParserFields(identifier));
+
+      args.push(node);
+    }
   } else if (ctx instanceof QualifiedNameContext) {
-    parts.push(
-      ...ctx.identifierOrParameter_list().map((identifier) => parseIdentifier(identifier.getText()))
-    );
+    const list = ctx.identifierOrParameter_list();
+
+    for (const item of list) {
+      if (item instanceof IdentifierOrParameterContext) {
+        const node = createIdentifierOrParam(item);
+
+        if (node) {
+          args.push(node);
+        }
+      }
+    }
   } else {
-    parts.push(sanitizeIdentifierString(ctx));
+    const name = sanitizeIdentifierString(ctx);
+    const node = Builder.identifier({ name }, createParserFields(ctx));
+
+    args.push(node);
   }
+
   const text = sanitizeIdentifierString(ctx);
   const hasQuotes = Boolean(getQuotedText(ctx) || isQuoted(ctx.getText()));
-  return {
-    type: 'column' as const,
-    name: text,
-    parts,
-    text: ctx.getText(),
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception || text === ''),
-    quoted: hasQuotes,
-  };
+  const column = Builder.expression.column(
+    { args },
+    {
+      text: ctx.getText(),
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+    }
+  );
+
+  column.name = text;
+  column.quoted = hasQuotes;
+
+  return column;
 }
 
 export function createOption(name: string, ctx: ParserRuleContext): ESQLCommandOption {

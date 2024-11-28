@@ -338,20 +338,6 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.BaseVisType.suppressWarnings",
-            "type": "Function",
-            "tags": [],
-            "label": "suppressWarnings",
-            "description": [],
-            "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "src/plugins/visualizations/public/vis_types/base_vis_type.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "visualizations",
             "id": "def-public.BaseVisType.hasPartialRows",
             "type": "CompoundType",
             "tags": [],
@@ -6984,7 +6970,15 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; lockHoverActions: (lock: boolean) => void; disableTriggers: boolean; timeRange$: ",
+          "<boolean>; lockHoverActions: (lock: boolean) => void; disableTriggers: boolean; savedObjectId: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; timeRange$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -7096,15 +7090,15 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; savedObjectId: ",
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
           },
-          "<string | undefined>; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; reload: () => Promise<void>; updateInput: (changes: Partial<",
+          " | undefined; reload: () => Promise<void>; updateInput: (changes: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7138,15 +7132,7 @@
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
-          ">; getInspectorAdapters: () => ",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          " | undefined; openInspector: () => ",
+          ">; openInspector: () => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "public",
@@ -7162,7 +7148,7 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
+          ") => void; getExpressionVariables$: () => ",
           "Observable",
           "<Record<string, unknown> | undefined>; getExpressionVariables: () => Record<string, unknown> | undefined; inputIsRefType: (input: ",
           {

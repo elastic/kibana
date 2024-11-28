@@ -39,7 +39,10 @@ import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
-import type { CustomPackageDatasetConfiguration, EnsurePackageResult } from './packages/install';
+import {
+  type CustomPackageDatasetConfiguration,
+  type EnsurePackageResult,
+} from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
@@ -56,6 +59,7 @@ import {
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
+import { createArchiveIteratorFromMap } from './archive/archive_iterator';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -381,12 +385,14 @@ class PackageClientImpl implements PackageClient {
     }
 
     const { assetsMap } = esPackage;
+    const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
     const { installedTransforms } = await installTransforms({
       packageInstallContext: {
         assetsMap,
         packageInfo,
         paths,
+        archiveIterator,
       },
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,

@@ -8,8 +8,13 @@
 import { takeLeading } from 'redux-saga/effects';
 import { i18n } from '@kbn/i18n';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { addGlobalParam, editGlobalParam, getGlobalParams } from './api';
-import { addNewGlobalParamAction, editGlobalParamAction, getGlobalParamAction } from './actions';
+import { addGlobalParam, deleteGlobalParams, editGlobalParam, getGlobalParams } from './api';
+import {
+  addNewGlobalParamAction,
+  deleteGlobalParamsAction,
+  editGlobalParamAction,
+  getGlobalParamAction,
+} from './actions';
 
 export function* getGlobalParamEffect() {
   yield takeLeading(
@@ -68,4 +73,27 @@ const editSuccessMessage = i18n.translate('xpack.synthetics.settings.editParams.
 
 const editFailureMessage = i18n.translate('xpack.synthetics.settings.editParams.fail', {
   defaultMessage: 'Failed to edit global parameter.',
+});
+
+// deleteGlobalParams
+
+export function* deleteGlobalParamsEffect() {
+  yield takeLeading(
+    deleteGlobalParamsAction.get,
+    fetchEffectFactory(
+      deleteGlobalParams,
+      deleteGlobalParamsAction.success,
+      deleteGlobalParamsAction.fail,
+      deleteSuccessMessage,
+      deleteFailureMessage
+    )
+  );
+}
+
+const deleteSuccessMessage = i18n.translate('xpack.synthetics.settings.deleteParams.success', {
+  defaultMessage: 'Successfully deleted global parameters.',
+});
+
+const deleteFailureMessage = i18n.translate('xpack.synthetics.settings.deleteParams.fail', {
+  defaultMessage: 'Failed to delete global parameters.',
 });

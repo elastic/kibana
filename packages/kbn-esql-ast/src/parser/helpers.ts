@@ -41,17 +41,16 @@ export const formatIdentifierParts = (parts: string[]): string =>
   parts.map(formatIdentifier).join('.');
 
 export const getPosition = (
-  token: Pick<Token, 'start' | 'stop'> | null,
-  lastToken?: Pick<Token, 'stop'> | undefined
+  start: Pick<Token, 'start' | 'stop'> | null,
+  stop?: Pick<Token, 'stop'> | undefined
 ) => {
-  if (!token || token.start < 0) {
+  if (!start || start.start < 0) {
     return { min: 0, max: 0 };
   }
-  const endFirstToken = token.stop > -1 ? Math.max(token.stop + 1, token.start) : undefined;
-  const endLastToken = lastToken?.stop;
+  const endFirstToken = start.stop > -1 ? Math.max(start.stop + 1, start.start) : undefined;
   return {
-    min: token.start,
-    max: endLastToken ?? endFirstToken ?? Infinity,
+    min: start.start,
+    max: stop?.stop ?? endFirstToken ?? Infinity,
   };
 };
 

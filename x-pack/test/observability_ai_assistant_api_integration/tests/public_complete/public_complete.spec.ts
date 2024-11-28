@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         (body) => !isFunctionTitleRequest(body)
       );
 
-      const responsePromise = observabilityAIAssistantAPIClient.adminUser({
+      const responsePromise = observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
           query: { format },

@@ -11,6 +11,7 @@ import {
   limitedArraySchema,
   limitedNumberSchema,
   limitedStringSchema,
+  mimeTypeString,
   NonEmptyString,
   paginationSchema,
   limitedNumberAsIntegerSchema,
@@ -321,14 +322,32 @@ describe('schema', () => {
     });
   });
 
+  describe('mimeTypeString', () => {
+    it('works correctly when the value is an allowed mime type', () => {
+      expect(PathReporter.report(mimeTypeString.decode('image/jpx'))).toMatchInlineSnapshot(`
+        Array [
+          "No errors!",
+        ]
+      `);
+    });
+
+    it('fails when the value is not an allowed mime type', () => {
+      expect(PathReporter.report(mimeTypeString.decode('foo/bar'))).toMatchInlineSnapshot(`
+        Array [
+          "The mime type field value foo/bar is not allowed.",
+        ]
+      `);
+    });
+  });
+
   describe('limitedNumberAsIntegerSchema', () => {
     it('works correctly the number is safe integer', () => {
       expect(PathReporter.report(limitedNumberAsIntegerSchema({ fieldName: 'foo' }).decode(1)))
         .toMatchInlineSnapshot(`
-          Array [
-            "No errors!",
-          ]
-        `);
+        Array [
+          "No errors!",
+        ]
+      `);
     });
 
     it('fails when given a number that is lower than the minimum', () => {

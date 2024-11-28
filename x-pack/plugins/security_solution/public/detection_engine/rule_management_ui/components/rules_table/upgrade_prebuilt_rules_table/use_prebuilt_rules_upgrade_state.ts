@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
 import type {
   RulesUpgradeState,
   FieldsUpgradeState,
@@ -19,11 +19,12 @@ import {
   type DiffableRule,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
+  type RuleSignatureId,
 } from '../../../../../../common/api/detection_engine';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 
 type RuleResolvedConflicts = Partial<DiffableAllFields>;
-type RulesResolvedConflicts = Record<string, RuleResolvedConflicts>;
+type RulesResolvedConflicts = Record<RuleSignatureId, RuleResolvedConflicts>;
 
 interface UseRulesUpgradeStateResult {
   rulesUpgradeState: RulesUpgradeState;
@@ -33,9 +34,7 @@ interface UseRulesUpgradeStateResult {
 export function usePrebuiltRulesUpgradeState(
   ruleUpgradeInfos: RuleUpgradeInfoForReview[]
 ): UseRulesUpgradeStateResult {
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
+  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
   const [rulesResolvedConflicts, setRulesResolvedConflicts] = useState<RulesResolvedConflicts>({});
 
   const setRuleFieldResolvedValue = useCallback(

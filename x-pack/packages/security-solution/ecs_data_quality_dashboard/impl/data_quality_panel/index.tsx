@@ -46,6 +46,8 @@ interface Props {
   setLastChecked: (lastChecked: string) => void;
   startDate?: string | null;
   theme?: PartialTheme;
+  defaultStartTime: string;
+  defaultEndTime: string;
 }
 
 const defaultSelectedIlmPhaseOptions: EuiComboBoxOptionOption[] = ilmPhaseOptionsStatic.filter(
@@ -71,6 +73,8 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   setLastChecked,
   startDate,
   theme,
+  defaultStartTime,
+  defaultEndTime,
 }) => {
   const [selectedIlmPhaseOptions, setSelectedIlmPhaseOptions] = useState<EuiComboBoxOptionOption[]>(
     defaultSelectedIlmPhaseOptions
@@ -109,6 +113,8 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     toasts,
     isILMAvailable,
     telemetryEvents,
+    startTime: defaultStartTime,
+    endTime: defaultEndTime,
   });
 
   const indicesCheckHookReturnValue = useIndicesCheck({
@@ -137,6 +143,8 @@ const DataQualityPanelComponent: React.FC<Props> = ({
       ilmPhases={ilmPhases}
       selectedIlmPhaseOptions={selectedIlmPhaseOptions}
       setSelectedIlmPhaseOptions={setSelectedIlmPhaseOptions}
+      defaultStartTime={defaultStartTime}
+      defaultEndTime={defaultEndTime}
     >
       <ResultsRollupContext.Provider value={resultsRollupHookReturnValue}>
         <IndicesCheckContext.Provider value={indicesCheckHookReturnValue}>

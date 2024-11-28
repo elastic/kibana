@@ -15,7 +15,11 @@ import { KibanaLogic } from '../../../shared/kibana';
 
 import { SearchPlaygroundPageTemplate } from './page_template';
 
-export const Playground: React.FC = () => {
+interface PlaygroundProps {
+  pageMode?: 'chat' | 'search';
+}
+
+export const Playground: React.FC<PlaygroundProps> = ({ pageMode = 'chat' }) => {
   const { searchPlayground } = useValues(KibanaLogic);
 
   if (!searchPlayground) {
@@ -35,7 +39,7 @@ export const Playground: React.FC = () => {
         customPageSections
         bottomBorder="extended"
       >
-        <searchPlayground.Playground />
+        <searchPlayground.Playground pageMode={pageMode} />
       </SearchPlaygroundPageTemplate>
     </searchPlayground.PlaygroundProvider>
   );

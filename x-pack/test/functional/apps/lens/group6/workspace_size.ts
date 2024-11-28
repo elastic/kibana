@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       // Detect here if the Chrome bug is present, and adjust the aspect ratio accordingly if not
       if (!within(width, DEFAULT_WINDOW_SIZE[0]) || !within(height, DEFAULT_WINDOW_SIZE[1])) {
         const { width: containerWidth, height: containerHeight } =

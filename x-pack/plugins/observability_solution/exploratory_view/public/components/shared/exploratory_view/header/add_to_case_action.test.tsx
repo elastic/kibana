@@ -120,6 +120,8 @@ describe('AddToCaseAction', function () {
           push: false,
           connectors: false,
           settings: false,
+          createComment: false,
+          reopenCase: false,
         },
       })
     );

@@ -22,7 +22,7 @@ import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 import { AuthStep, CreateStep, GetStep, UpdateStep } from './steps';
 
-export const HTTP_VERBS = ['post', 'put', 'patch'];
+export const HTTP_VERBS = ['post', 'put', 'patch', 'get'];
 const fields = {
   step1: [
     'config.hasAuth',
@@ -38,7 +38,9 @@ const fields = {
     'config.createIncidentResponseKey',
   ],
   step3: [
+    'config.getIncidentMethod',
     'config.getIncidentUrl',
+    'config.getIncidentJson',
     'config.getIncidentResponseExternalTitleKey',
     'config.viewIncidentUrl',
   ],

@@ -159,9 +159,9 @@ export const getData = async (
     customMetric,
     fieldsExisted
   );
-  logger.trace(`Request: ${JSON.stringify(request)}`);
+  logger.trace(() => `Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);
-  logger.trace(`Response: ${JSON.stringify(body)}`);
+  logger.trace(() => `Response: ${JSON.stringify(body)}`);
   if (body.aggregations) {
     return handleResponse(body.aggregations, previousNodes);
   }

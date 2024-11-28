@@ -157,7 +157,7 @@ describe('processVersionedRouter', () => {
     expect(results.paths['/foo']!.get).toBeDefined();
 
     expect(results.paths['/foo']!.get!.description).toBe(
-      '[Authz] Route required privileges: ALL of [manage_spaces].'
+      'This is a test route description.<br/><br/>[Required authorization] Route required privileges: ALL of [manage_spaces].'
     );
   });
 });
@@ -176,6 +176,7 @@ const createTestRoute: () => VersionedRouterRoute = () => ({
         requiredPrivileges: ['manage_spaces'],
       },
     },
+    description: 'This is a test route description.',
   },
   handlers: [
     {

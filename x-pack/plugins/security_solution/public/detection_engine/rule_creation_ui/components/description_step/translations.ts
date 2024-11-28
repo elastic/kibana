@@ -126,6 +126,24 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
   }
 );
 
+export const THRESHOLD_CARDINALITY = (
+  thresholdFieldsGroupedBy: string,
+  cardinalityField: string,
+  cardinalityValue: string | number
+) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsCardinalityDescription',
+    {
+      defaultMessage:
+        '{thresholdFieldsGroupedBy} when unique values count of {cardinalityField} >= {cardinalityValue}',
+      values: {
+        thresholdFieldsGroupedBy,
+        cardinalityField,
+        cardinalityValue,
+      },
+    }
+  );
+
 export const EQL_EVENT_CATEGORY_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.eqlEventCategoryFieldLabel',
   {
@@ -182,8 +200,8 @@ export const BUILDING_BLOCK_DESCRIPTION = i18n.translate(
   }
 );
 
-export const GROUP_BY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.groupByFieldsLabel',
+export const ALERT_SUPPRESSION_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionFieldsLabel',
   {
     defaultMessage: 'Suppress alerts by',
   }

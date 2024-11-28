@@ -35,6 +35,8 @@ describe('useResultsRollup', () => {
 
   const patterns = ['auditbeat-*', 'packetbeat-*'];
   const isILMAvailable = true;
+  const startTime = 'now-7d';
+  const endTime = 'now';
 
   const useStoredPatternResultsMock = useStoredPatternResults as jest.Mock;
 
@@ -52,6 +54,8 @@ describe('useResultsRollup', () => {
           patterns,
           isILMAvailable,
           telemetryEvents: mockTelemetryEvents,
+          startTime,
+          endTime,
         })
       );
 
@@ -94,10 +98,19 @@ describe('useResultsRollup', () => {
           patterns: ['auditbeat-*'],
           isILMAvailable,
           telemetryEvents: mockTelemetryEvents,
+          startTime,
+          endTime,
         })
       );
 
-      expect(useStoredPatternResultsMock).toHaveBeenCalledWith(['auditbeat-*'], toasts, httpFetch);
+      expect(useStoredPatternResultsMock).toHaveBeenCalledWith({
+        patterns: ['auditbeat-*'],
+        toasts,
+        httpFetch,
+        isILMAvailable,
+        startTime,
+        endTime,
+      });
 
       expect(result.current.patternRollups).toEqual({
         'auditbeat-*': {
@@ -119,6 +132,8 @@ describe('useResultsRollup', () => {
           patterns,
           isILMAvailable,
           telemetryEvents: mockTelemetryEvents,
+          startTime,
+          endTime,
         })
       );
 
@@ -144,6 +159,8 @@ describe('useResultsRollup', () => {
           patterns,
           isILMAvailable,
           telemetryEvents: mockTelemetryEvents,
+          startTime,
+          endTime,
         })
       );
 
@@ -180,6 +197,8 @@ describe('useResultsRollup', () => {
             patterns,
             isILMAvailable,
             telemetryEvents: mockTelemetryEvents,
+            startTime,
+            endTime,
           })
         );
 
@@ -369,6 +388,8 @@ describe('useResultsRollup', () => {
               patterns,
               isILMAvailable: false,
               telemetryEvents: mockTelemetryEvents,
+              startTime,
+              endTime,
             })
           );
 
@@ -532,6 +553,8 @@ describe('useResultsRollup', () => {
             patterns,
             isILMAvailable,
             telemetryEvents: mockTelemetryEvents,
+            startTime,
+            endTime,
           })
         );
 
@@ -592,6 +615,8 @@ describe('useResultsRollup', () => {
               patterns,
               isILMAvailable,
               telemetryEvents: mockTelemetryEvents,
+              startTime,
+              endTime,
             })
           );
 
@@ -654,6 +679,8 @@ describe('useResultsRollup', () => {
             patterns: ['packetbeat-*', 'auditbeat-*'],
             isILMAvailable,
             telemetryEvents: mockTelemetryEvents,
+            startTime,
+            endTime,
           })
         );
 

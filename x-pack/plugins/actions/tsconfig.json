@@ -24,7 +24,6 @@
     "@kbn/i18n",
     "@kbn/utility-types",
     "@kbn/config-schema",
-    "@kbn/config",
     "@kbn/core-saved-objects-server",
     "@kbn/es-query",
     "@kbn/apm-utils",
@@ -48,7 +47,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/security-plugin-types-server",
     "@kbn/core-application-common",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/core-http-server-utils"
   ],
   "exclude": [
     "target/**/*",

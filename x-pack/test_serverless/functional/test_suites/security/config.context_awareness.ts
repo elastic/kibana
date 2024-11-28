@@ -14,7 +14,12 @@ export default createTestConfig({
     reportName: 'Serverless Security Discover Context Awareness Functional Tests',
   },
   kbnServerArgs: [
-    '--discover.experimental.enabledProfiles=["example-root-profile","example-data-source-profile","example-document-profile"]',
+    `--discover.experimental.enabledProfiles=${JSON.stringify([
+      'example-root-profile',
+      'example-solution-view-root-profile',
+      'example-data-source-profile',
+      'example-document-profile',
+    ])}`,
   ],
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml

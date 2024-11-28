@@ -15,7 +15,7 @@ import type {
 } from './types';
 import { InferencePlugin } from './plugin';
 
-export type { InferenceClient } from './types';
+export type { InferenceClient, BoundInferenceClient } from './inference_client';
 export type { InferenceServerSetup, InferenceServerStart };
 
 export { naturalLanguageToEsql } from './tasks/nl_to_esql';
