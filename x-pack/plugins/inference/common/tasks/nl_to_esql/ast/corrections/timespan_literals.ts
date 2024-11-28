@@ -12,14 +12,14 @@ import { stringToTimespanLiteral, isTimespanString } from '../ast_tools/timespan
 import { QueryCorrection } from './types';
 
 /**
- * Returns the list of corrections regarding wrong usages of strings instead of timespan literals.
+ * Correct timespan literal grammar mistakes, and returns the list of corrections that got applied.
  *
  * E.g.
  * `DATE_TRUNC("YEAR", @timestamp)` => `DATE_TRUNC(1 year, @timestamp)`
  * `BUCKET(@timestamp, "1 week")` => `BUCKET(@timestamp, 1 week)`
  *
  */
-export const getTimespanLiteralsCorrections = (
+export const applyTimespanLiteralsCorrections = (
   query: ESQLAstQueryExpression
 ): QueryCorrection[] => {
   const corrections: QueryCorrection[] = [];
@@ -46,14 +46,13 @@ function checkDateTrunc(node: ESQLDateTruncFunction): QueryCorrection[] {
   const firstArg = node.args[0];
 
   if (isStringLiteralNode(firstArg) && isTimespanString(firstArg.value)) {
+    const replacement = stringToTimespanLiteral(firstArg.value);
+    node.args[0] = replacement;
+
     const correction: QueryCorrection = {
       type: 'string_as_timespan_literal',
       node,
-      description: '',
-      apply: () => {
-        const replacement = stringToTimespanLiteral(firstArg.value);
-        node.args[0] = replacement;
-      },
+      description: `Replaced string literal with timespan literal in DATE_TRUNC function at position ${node.location.min}`,
     };
     return [correction];
   }
@@ -70,14 +69,13 @@ function checkBucket(node: ESQLBucketFunction): QueryCorrection[] {
   const secondArg = node.args[1];
 
   if (isStringLiteralNode(secondArg) && isTimespanString(secondArg.value)) {
+    const replacement = stringToTimespanLiteral(secondArg.value);
+    node.args[1] = replacement;
+
     const correction: QueryCorrection = {
       type: 'string_as_timespan_literal',
       node,
-      description: '',
-      apply: () => {
-        const replacement = stringToTimespanLiteral(secondArg.value);
-        node.args[1] = replacement;
-      },
+      description: `Replaced string literal with timespan literal in BUCKET function at position ${node.location.min}`,
     };
     return [correction];
   }

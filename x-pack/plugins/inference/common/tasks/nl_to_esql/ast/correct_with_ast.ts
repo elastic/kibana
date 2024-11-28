@@ -6,19 +6,30 @@
  */
 
 import { BasicPrettyPrinter, parse } from '@kbn/esql-ast';
-import { getCorrections } from './corrections';
+import { getCorrections, type QueryCorrection } from './corrections';
 
-export const correctQueryWithAst = (query: string): string => {
+interface CorrectWithAstResult {
+  output: string;
+  corrections: QueryCorrection[];
+}
+
+export const correctQueryWithAst = (query: string): CorrectWithAstResult => {
   const { root, errors } = parse(query);
   // don't try modifying anything if the query is not syntactically correct
   if (errors) {
-    return query;
+    return {
+      output: query,
+      corrections: [],
+    };
   }
 
   const corrections = getCorrections(root);
 
-  corrections.forEach((correction) => correction.apply());
-
   const multiline = /\r?\n/.test(query);
-  return BasicPrettyPrinter.print(root, { multiline, pipeTab: '' });
+  const formattedQuery = BasicPrettyPrinter.print(root, { multiline, pipeTab: '' });
+
+  return {
+    output: formattedQuery,
+    corrections,
+  };
 };
