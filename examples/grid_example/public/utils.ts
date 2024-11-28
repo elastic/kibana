@@ -11,6 +11,7 @@ import { GridLayoutData } from '@kbn/grid-layout';
 import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
 
 export const gridLayoutToDashboardPanelMap = (
+  panelState: MockedDashboardPanelMap,
   layout: GridLayoutData
 ): { panels: MockedDashboardPanelMap; rows: MockedDashboardRowMap } => {
   const panels: MockedDashboardPanelMap = {};
@@ -19,7 +20,7 @@ export const gridLayoutToDashboardPanelMap = (
     rows.push({ title: row.title, collapsed: row.isCollapsed });
     Object.values(row.panels).forEach((panelGridData) => {
       panels[panelGridData.id] = {
-        id: panelGridData.id,
+        ...panelState[panelGridData.id],
         gridData: {
           i: panelGridData.id,
           y: panelGridData.row,

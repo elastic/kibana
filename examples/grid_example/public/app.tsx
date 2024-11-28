@@ -194,7 +194,10 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             }}
             renderPanelContents={renderPanelContents}
             onLayoutChange={(newLayout) => {
-              const { panels, rows } = gridLayoutToDashboardPanelMap(newLayout);
+              const { panels, rows } = gridLayoutToDashboardPanelMap(
+                mockDashboardApi.panels$.getValue(),
+                newLayout
+              );
               mockDashboardApi.panels$.next(panels);
               mockDashboardApi.rows$.next(rows);
             }}
