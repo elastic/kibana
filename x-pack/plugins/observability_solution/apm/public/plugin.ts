@@ -34,7 +34,7 @@ import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
@@ -96,7 +96,6 @@ export interface ApmPluginSetupDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
-  licensing: LicensingPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
@@ -122,7 +121,7 @@ export interface ApmPluginStartDeps {
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
-  licensing: void;
+  licensing: LicensingPluginStart;
   maps?: MapsStartApi;
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
