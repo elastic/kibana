@@ -7716,7 +7716,7 @@ paths:
       parameters:
         - description: If true returns a detailed status of the engine including all it's components
           in: query
-          name: withComponents
+          name: include_components
           schema:
             type: boolean
       responses:
