@@ -121,9 +121,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     // Do not show "Choose your search engine" dialog (> Chrome v127)
     'disable-search-engine-choice-screen',
     // Disable component updater used for Chrome Certificate Verifier
-    'disable-component-update',
-
-    'auto-open-devtools-for-tabs'
+    'disable-component-update'
   );
 
   if (process.platform === 'linux') {

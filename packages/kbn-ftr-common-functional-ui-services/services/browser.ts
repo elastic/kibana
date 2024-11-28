@@ -96,7 +96,7 @@ class BrowserService extends FtrService {
    * @return {Promise<void>}
    */
   public async setWindowSize(width: number, height: number) {
-    await this.driver.manage().window().setRect({ width: width + 500, height });
+    await this.driver.manage().window().setRect({ width, height });
   }
 
   /**
