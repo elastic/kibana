@@ -9,9 +9,8 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useState } from 'react';
 import { useKibana } from './use_kibana';
-import { ENTITIES_LATEST_ALIAS } from '../../common/entities';
 
-export function useAdHocInventoryDataView() {
+export function useAdHocDataView(title: string) {
   const {
     services: { dataViews, notifications },
   } = useKibana();
@@ -21,7 +20,7 @@ export function useAdHocInventoryDataView() {
     async function fetchDataView() {
       try {
         const displayError = false;
-        return await dataViews.create({ title: ENTITIES_LATEST_ALIAS }, undefined, displayError);
+        return await dataViews.create({ title }, undefined, displayError);
       } catch (e) {
         const noDataScreen = e.message.includes('No matching indices found');
         if (noDataScreen) {
@@ -40,7 +39,7 @@ export function useAdHocInventoryDataView() {
     }
 
     fetchDataView().then(setDataView);
-  }, [dataViews, notifications.toasts]);
+  }, [dataViews, title, notifications.toasts]);
 
   return { dataView };
 }
