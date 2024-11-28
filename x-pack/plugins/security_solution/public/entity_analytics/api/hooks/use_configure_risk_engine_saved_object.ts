@@ -34,6 +34,6 @@ export const useConfigureSORiskEngineMutation = (
       exclude_alert_statuses: params.includeClosedAlerts ? [] : ['closed'],
       range: params.range,
     });
-    return { configuration_successful: true };
-  });
+    return { risk_engine_saved_object_configured: true };
+  }, options);
 };

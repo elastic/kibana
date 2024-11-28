@@ -324,9 +324,26 @@ export class RiskEngineDataClient {
   }
 
   public async update_risk_engine_saved_object(attributes: {}) {
-    return updateSavedObjectAttribute({
-      savedObjectsClient: this.options.soClient,
-      attributes,
-    });
+    try {
+      return await updateSavedObjectAttribute({
+        savedObjectsClient: this.options.soClient,
+        attributes,
+      });
+    } catch (e) {
+      this.options.logger.error(`Error updating saved object attribute: ${e.message}`);
+      try {
+        await initSavedObjects({
+          savedObjectsClient: this.options.soClient,
+          namespace: this.options.namespace,
+        });
+        return await updateSavedObjectAttribute({
+          savedObjectsClient: this.options.soClient,
+          attributes,
+        });
+      } catch (initError) {
+        this.options.logger.error(`Error initializing saved object: ${initError.message}`);
+        throw initError;
+      }
+    }
   }
 }
