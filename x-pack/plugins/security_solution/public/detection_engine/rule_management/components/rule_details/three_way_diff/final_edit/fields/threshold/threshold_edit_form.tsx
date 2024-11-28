@@ -34,7 +34,7 @@ function deserializer(defaultValue: FormData): ThresholdFormData {
   return {
     threshold: {
       field: normalizeThresholdField(threshold.field),
-      value: `${threshold?.value || 100}`,
+      value: `${threshold?.value ?? 100}`,
       ...(threshold.cardinality?.length
         ? {
             cardinality: {
