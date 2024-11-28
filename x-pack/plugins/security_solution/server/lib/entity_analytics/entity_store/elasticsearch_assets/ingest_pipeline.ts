@@ -100,6 +100,7 @@ const buildIngestPipeline = ({
     // },
     {
       script: {
+        tag: 'entity_metadata_extractor',
         on_failure: [
           {
             set: {
