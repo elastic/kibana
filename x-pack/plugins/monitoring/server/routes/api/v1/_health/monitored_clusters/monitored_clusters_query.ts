@@ -12,7 +12,7 @@ import {
   getKibanaDataset,
   getLogstashDataset,
   getEntsearchDataset,
-} from '../../../../../lib/cluster/get_index_patterns';
+} from '../../../../../../common/get_index_patterns';
 
 const MAX_BUCKET_SIZE = 100;
 

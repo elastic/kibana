@@ -70,7 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Verify that index mode callout is displayed
         const indexModeCalloutText = await testSubjects.getVisibleText('indexModeCallout');
         expect(indexModeCalloutText).to.be(
-          'The index.mode setting has been set to Standard within template Logistics. Any changes to index.mode set on this page will be overwritten by the Logistics selection.'
+          'The index.mode setting has been set to Standard within the Logistics step. Any changes to index.mode set on this page will be overwritten by the Logistics selection.'
         );
 
         // Click Next button
