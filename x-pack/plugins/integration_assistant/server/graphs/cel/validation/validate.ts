@@ -7,31 +7,34 @@
 
 import path from 'path';
 import fs from 'fs';
+import { Logger } from '@kbn/logging';
 import './wasm/wasm_exec';
+
+declare global {
+  let formatCelProgram: (input: string) => { Format: string; Err?: string };
+  let stopFormatCelProgram: () => void;
+}
 
 const wasmPath = path.join(__dirname, 'wasm');
 const file = fs.readFileSync(path.join(wasmPath, 'celformat.wasm'));
 let wasm: WebAssembly.Instance;
 
-declare global {
-  var formatCelProgram: (input: string) => { Format: string; Err?: string };
-  var stopFormatCelProgram: () => void;
-}
-
-export async function validate(input: string): Promise<string> {
+export async function validate(logger: Logger, input: string): Promise<string> {
   // @ts-expect-error
   const goWasm = new Go();
   let value;
   try {
-    console.log('Before loading WASM', process.memoryUsage());
+    const usage = process.memoryUsage();
+    logger.info(`Before loading WASM ${JSON.stringify(process.memoryUsage())}`);
     const result = await WebAssembly.instantiate(file, goWasm.importObject);
     wasm = result.instance;
     goWasm.run(wasm);
-    console.log('WASM loaded', process.memoryUsage());
+    logger.info(`WASM loaded ${JSON.stringify(process.memoryUsage())}`);
 
+    // @ts-expect-error
     value = global.formatCelProgram(input);
 
-    console.log('Run function', process.memoryUsage());
+    logger.info(`Run function  ${JSON.stringify(process.memoryUsage())}`);
 
     if (value === undefined) {
       throw new Error('Failed to format CEL program');
@@ -41,8 +44,9 @@ export async function validate(input: string): Promise<string> {
       throw new Error(value.Err);
     }
   } finally {
+    // @ts-expect-error
     global.stopFormatCelProgram();
-    console.log('Stop Main in WASM', process.memoryUsage());
+    logger.info(`Stop Main in WASM ${JSON.stringify(process.memoryUsage())}`);
   }
   return value.Format;
 }

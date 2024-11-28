@@ -16,9 +16,24 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { ESProcessorItem, SamplesFormat } from '../common';
 import { ValidateCelTask } from './graphs/cel/validation/validate_task';
 
+export interface IntegrationAssistantPluginSetupDependencies {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  licensing: LicensingPluginSetup;
+  taskManager: TaskManagerSetupContract;
+}
+
+export interface IntegrationAssistantPluginStartDependencies {
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
+}
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
 }

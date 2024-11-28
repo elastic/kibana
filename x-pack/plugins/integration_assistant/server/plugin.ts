@@ -24,7 +24,7 @@ import type {
 } from './types';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { IntegrationAssistantConfigType } from './config';
-import { IntegrationAssistantPluginSetupDependencies } from '../public/types';
+import { IntegrationAssistantPluginSetupDependencies } from './types';
 import { ValidateCelTask } from './graphs/cel/validation/validate_task';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
@@ -74,7 +74,10 @@ export class IntegrationAssistantPlugin
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
     const experimentalFeatures = parseExperimentalConfigValue(this.config.enableExperimental ?? []);
-    this.validateCelTask = new ValidateCelTask({ taskManager: dependencies.taskManager });
+    this.validateCelTask = new ValidateCelTask({
+      logger: this.logger,
+      taskManager: dependencies.taskManager,
+    });
 
     this.logger.info('integrationAssistant api: Setup');
 
@@ -98,7 +101,7 @@ export class IntegrationAssistantPlugin
     licensing.license$.subscribe((license) => {
       this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
     });
-    
+
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     // Load the TaskManagerStartContract to the ValidateCelTask
     this.validateCelTask?.startTaskManager(dependencies.taskManager, esClient);

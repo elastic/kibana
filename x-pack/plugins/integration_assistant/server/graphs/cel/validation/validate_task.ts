@@ -10,7 +10,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { validate } from './validate';
 
 interface CelProgram {
@@ -22,8 +22,10 @@ export class ValidateCelTask {
   private VALIDATE_CEL_TASK_INDEX = '.kibana-wasm-cel-validation-program-index';
   private taskManagerStart: TaskManagerStartContract | undefined;
   private esClient: ElasticsearchClient | undefined;
+  private logger: Logger;
 
-  constructor({ taskManager }: { taskManager: TaskManagerSetupContract }) {
+  constructor({ logger, taskManager }: { logger: Logger; taskManager: TaskManagerSetupContract }) {
+    this.logger = logger;
     taskManager.registerTaskDefinitions({
       [this.VALIDATE_CEL_TASK_TYPE]: {
         title: 'Validate CEL through WASM task',
@@ -39,10 +41,10 @@ export class ValidateCelTask {
   }
 
   private runTask = async (taskInstance: ConcreteTaskInstance) => {
-    console.log("Start time in BG task: " + Date.now());
+    this.logger.info(`Start time in BG task: ${Date.now()}`);
     const { params, state } = taskInstance;
     if (params.celProgram) {
-      const formattedProgram = await validate(params.celProgram);
+      const formattedProgram = await validate(this.logger, params.celProgram);
       const stateUpdated = {
         ...state,
         formattedProgram,
@@ -51,7 +53,7 @@ export class ValidateCelTask {
         throw new Error('Elasticsearch client is not initialized');
       }
 
-      this.esClient.index(
+      await this.esClient.index(
         {
           index: this.VALIDATE_CEL_TASK_INDEX,
           document: { formattedProgram },
@@ -59,14 +61,14 @@ export class ValidateCelTask {
         },
         { meta: true }
       );
-      console.log("End time in BG task: " + Date.now());
+      this.logger.info(`End time in BG task: ${Date.now()}`);
       return {
         state: stateUpdated,
       };
     }
   };
 
-  public startTaskManager = async (
+  public startTaskManager = (
     taskManager?: TaskManagerStartContract,
     esClient?: ElasticsearchClient
   ) => {
@@ -86,7 +88,9 @@ export class ValidateCelTask {
         params: { celProgram },
       });
     } catch (e) {
-      console.log(`Error scheduling task ${this.VALIDATE_CEL_TASK_TYPE}, received ${e.message}`);
+      this.logger.error(
+        `Error scheduling task ${this.VALIDATE_CEL_TASK_TYPE}, received ${e.message}`
+      );
       throw new Error(`Error scheduling task: ${e.message}`);
     }
   };
@@ -116,7 +120,9 @@ export class ValidateCelTask {
             }
           }
         } catch (e) {
-          console.log(`Error polling task ${this.VALIDATE_CEL_TASK_TYPE}, received ${e.message}`);
+          this.logger.error(
+            `Error polling task ${this.VALIDATE_CEL_TASK_TYPE}, received ${e.message}`
+          );
         }
       }, 1000);
     });
