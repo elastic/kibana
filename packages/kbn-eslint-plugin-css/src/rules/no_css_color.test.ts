@@ -54,7 +54,21 @@ const invalid: RuleTester.InvalidTestCase[] = [
     errors: [{ messageId: 'noCssColorSpecific' }],
   },
   {
-    name: 'Raises an error when a CSS color is used in a variable that is passed to style prop of a JSX element',
+    name: 'Raises an error when a CSS color references a string variable that is passed to style prop of a JSX element',
+    filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
+    code: `
+    import React from 'react';
+
+    function TestComponent() {
+      const codeColor = '#dd4040';
+      return (
+        <EuiCode style={{ color: codeColor }}>This is a test</EuiCode>
+      )
+    }`,
+    errors: [{ messageId: 'noCSSColorSpecificDeclaredVariable' }],
+  },
+  {
+    name: 'Raises an error when a CSS color is used in an object variable that is passed to style prop of a JSX element',
     filename: '/x-pack/plugins/observability_solution/observability/public/test_component.tsx',
     code: `
     import React from 'react';

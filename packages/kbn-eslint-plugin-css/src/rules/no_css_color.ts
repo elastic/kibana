@@ -29,23 +29,49 @@ const htmlElementColorDeclarationRegex = RegExp(
   String.raw`(${propertiesSupportingCssColor.join('|')})\:\s?(\'|\")?${cssColorRegex.source}`
 );
 
-// in trying to keep this rule simple, if a string is used to define a color, we mark it as invalid for this particular use case
 const raiseReportIfPropertyHasInvalidCssColor = (
   context: Rule.RuleContext,
-  propertyNode: TSESTree.ObjectLiteralElement,
+  propertyNode: TSESTree.Property,
   messageToReport: Rule.ReportDescriptor
 ) => {
   let didReport: boolean;
 
   if (
-    (didReport = Boolean(
-      propertyNode.type === 'Property' &&
-        propertyNode.key.type === 'Identifier' &&
-        propertyNode.value.type === 'Literal' &&
-        propertiesSupportingCssColor.indexOf(propertyNode.key.name) > -1
-    ))
+    propertyNode.key.type === 'Identifier' &&
+    propertiesSupportingCssColor.indexOf(propertyNode.key.name) < 0
   ) {
+    return;
+  }
+
+  if ((didReport = Boolean(propertyNode.value.type === 'Literal'))) {
+    // in trying to keep this rule simple, if a string is used to define a color we simply mark it as invalid
     context.report(messageToReport);
+  } else if (propertyNode.value.type === 'Identifier') {
+    const identifierDeclaration = context.sourceCode
+      // @ts-expect-error
+      .getScope(propertyNode)
+      .variables.find(
+        (variable) => variable.name === (propertyNode.value as TSESTree.Identifier).name!
+      );
+
+    if (identifierDeclaration?.defs[0].node.init.type === 'Literal') {
+      context.report({
+        loc: propertyNode.value.loc,
+        messageId: 'noCSSColorSpecificDeclaredVariable',
+        data: {
+          // @ts-expect-error the key name is always present else this code will not execute
+          property: String(propertyNode.key.name),
+          line: String(propertyNode.value.loc.start.line),
+          variableName: propertyNode.value.name,
+        },
+      });
+
+      didReport = true;
+    }
+
+    return;
+  } else if ((didReport = Boolean(propertyNode.value.type === 'MemberExpression'))) {
+    // TODO: handle member expression ie. style.color.red
   }
 
   return didReport;
