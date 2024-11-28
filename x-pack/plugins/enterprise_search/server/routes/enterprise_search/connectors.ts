@@ -56,7 +56,6 @@ import {
   isExpensiveQueriesNotAllowedException,
   isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
-import { isManagedJob } from '@kbn/ml-plugin/public/application/jobs/jobs_utils';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
