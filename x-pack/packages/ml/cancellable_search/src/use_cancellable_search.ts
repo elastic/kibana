@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useRef, useState } from 'react';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { tap } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -26,13 +26,12 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
   const [isLoading, setIsFetching] = useState<boolean>(false);
 
   const runRequest = useCallback(
-    <RequestBody, ResponseType extends IKibanaSearchResponse>(
+    <RequestBody extends IKibanaSearchRequest, ResponseType extends IKibanaSearchResponse>(
       requestBody: RequestBody,
       options = {}
     ): Promise<ResponseType | null> => {
       return new Promise((resolve, reject) => {
         data.search
-          // @ts-expect-error upgrade typescript v4.9.5
           .search<RequestBody, ResponseType>(requestBody, {
             abortSignal: abortController.current.signal,
             ...options,
