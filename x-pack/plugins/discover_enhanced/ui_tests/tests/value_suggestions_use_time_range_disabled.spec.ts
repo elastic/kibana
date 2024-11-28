@@ -17,7 +17,7 @@ import {
 } from '../fixtures/constants';
 
 test.describe(
-  'Discover app - value suggestions',
+  'Discover app - value suggestions: useTimeRange disabled',
   { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
   () => {
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
