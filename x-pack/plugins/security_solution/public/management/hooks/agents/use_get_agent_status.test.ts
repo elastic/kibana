@@ -10,14 +10,15 @@ import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useGetAgentStatus } from './use_get_agent_status';
 import { agentStatusGetHttpMock } from '../../mocks';
 import { AGENT_STATUS_ROUTE } from '../../../../common/endpoint/constants';
-import type { RenderHookResult } from '@testing-library/react-hooks/src/types';
+import type { RenderHookResult } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 describe('useGetAgentStatus hook', () => {
   let httpMock: AppContextTestRender['coreStart']['http'];
   let agentIdsProp: Parameters<typeof useGetAgentStatus>[0];
   let optionsProp: Parameters<typeof useGetAgentStatus>[2];
   let apiMock: ReturnType<typeof agentStatusGetHttpMock>;
-  let renderHook: () => RenderHookResult<unknown, ReturnType<typeof useGetAgentStatus>>;
+  let renderHook: () => RenderHookResult<ReturnType<typeof useGetAgentStatus>, unknown>;
 
   beforeEach(() => {
     const appTestContext = createAppRootMockRenderer();
@@ -25,7 +26,7 @@ describe('useGetAgentStatus hook', () => {
     httpMock = appTestContext.coreStart.http;
     apiMock = agentStatusGetHttpMock(httpMock);
     renderHook = () => {
-      return appTestContext.renderHook<unknown, ReturnType<typeof useGetAgentStatus>>(() =>
+      return appTestContext.renderHook(() =>
         useGetAgentStatus(agentIdsProp, 'endpoint', optionsProp)
       );
     };
@@ -63,28 +64,28 @@ describe('useGetAgentStatus hook', () => {
   });
 
   it('should return expected data', async () => {
-    const { result, waitForValueToChange } = renderHook();
-    await waitForValueToChange(() => result.current);
-
-    expect(result.current.data).toEqual({
-      '1-2-3': {
-        agentId: '1-2-3',
-        agentType: 'endpoint',
-        found: true,
-        isolated: false,
-        lastSeen: expect.any(String),
-        pendingActions: {},
-        status: 'healthy',
-      },
-    });
+    const { result } = renderHook();
+    await waitFor(() =>
+      expect(result.current.data).toEqual({
+        '1-2-3': {
+          agentId: '1-2-3',
+          agentType: 'endpoint',
+          found: true,
+          isolated: false,
+          lastSeen: expect.any(String),
+          pendingActions: {},
+          status: 'healthy',
+        },
+      })
+    );
   });
 
   it('should NOT call agent status api if list of agent ids is empty', async () => {
     agentIdsProp = ['', '     '];
-    const { result, waitForValueToChange } = renderHook();
-    await waitForValueToChange(() => result.current);
-
-    expect(result.current.data).toEqual({});
-    expect(apiMock.responseProvider.getAgentStatus).not.toHaveBeenCalled();
+    const { result } = renderHook();
+    await waitFor(() => {
+      expect(result.current.data).toEqual({});
+      expect(apiMock.responseProvider.getAgentStatus).not.toHaveBeenCalled();
+    });
   });
 });
