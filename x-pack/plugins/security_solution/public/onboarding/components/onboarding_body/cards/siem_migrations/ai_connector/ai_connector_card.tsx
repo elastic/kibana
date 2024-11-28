@@ -28,7 +28,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   setComplete,
 }) => {
   const { siemMigrations } = useKibana().services;
-  const { euiTheme, colorMode } = useEuiTheme();
+  const { colorMode } = useEuiTheme();
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
 
   const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | null>(
@@ -48,12 +48,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   const canCreateConnectors = checkCompleteMetadata?.canCreateConnectors;
 
   return (
-    <OnboardingCardContentPanel
-      style={{
-        paddingTop: 0,
-        ...(isDarkMode && { backgroundColor: euiTheme.colors.lightestShade }),
-      }}
-    >
+    <OnboardingCardContentPanel>
       {canExecuteConnectors ? (
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>

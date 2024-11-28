@@ -30,8 +30,8 @@ import type {
 export const getRuleMigrationsStatsAll = async ({
   signal,
 }: {
-  signal: AbortSignal | undefined;
-}): Promise<GetAllStatsRuleMigrationResponse> => {
+  signal?: AbortSignal;
+} = {}): Promise<GetAllStatsRuleMigrationResponse> => {
   return KibanaServices.get().http.fetch<GetAllStatsRuleMigrationResponse>(
     SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
     { method: 'GET', version: '1', signal }
@@ -54,7 +54,7 @@ export const startRuleMigration = async ({
 }: {
   migrationId: string;
   body: StartRuleMigrationRequestBody;
-  signal: AbortSignal | undefined;
+  signal?: AbortSignal;
 }): Promise<GetAllStatsRuleMigrationResponse> => {
   return KibanaServices.get().http.put<GetAllStatsRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_START_PATH, { migration_id: migrationId }),
@@ -75,7 +75,7 @@ export const getRuleMigrations = async ({
   signal,
 }: {
   migrationId: string;
-  signal: AbortSignal | undefined;
+  signal?: AbortSignal;
 }): Promise<GetRuleMigrationResponse> => {
   return KibanaServices.get().http.fetch<GetRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),

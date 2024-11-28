@@ -19,7 +19,6 @@ import { RuleMigrationsStorage } from './storage';
 export class SiemRulesMigrationsService {
   private readonly pollingInterval = 5000;
   private readonly latestStats$: BehaviorSubject<RuleMigrationStats[]>;
-  private readonly signal = new AbortController().signal;
   private isPolling = false;
   public connectorIdStorage = new RuleMigrationsStorage('connectorId');
 
@@ -93,7 +92,6 @@ export class SiemRulesMigrationsService {
             await startRuleMigration({
               migrationId: result.id,
               body: { connector_id: connectorId },
-              signal: this.signal,
             });
             pendingMigrationIds.push(result.id);
           }
@@ -105,7 +103,7 @@ export class SiemRulesMigrationsService {
   }
 
   private async fetchRuleMigrationsStats(): Promise<RuleMigrationStats[]> {
-    const stats = await getRuleMigrationsStatsAll({ signal: this.signal });
+    const stats = await getRuleMigrationsStatsAll();
     return stats.map((stat, index) => ({ ...stat, number: index + 1 })); // the array order (by creation) is guaranteed by the API
   }
 }

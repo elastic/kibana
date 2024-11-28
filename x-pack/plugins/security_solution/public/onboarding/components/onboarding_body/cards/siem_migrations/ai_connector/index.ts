@@ -10,7 +10,7 @@ import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { AI_CONNECTOR_CARD_TITLE } from './translations';
-import { checkAssistantCardComplete } from './connectors_check_complete';
+import { checkAiConnectorsCardComplete } from './connectors_check_complete';
 import type { AIConnectorCardMetadata } from './types';
 
 export const aiConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadata> = {
@@ -24,6 +24,6 @@ export const aiConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadata
         './ai_connector_card'
       )
   ),
-  checkComplete: checkAssistantCardComplete,
+  checkComplete: checkAiConnectorsCardComplete,
   licenseTypeRequired: 'enterprise',
 };
