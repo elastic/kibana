@@ -21,13 +21,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { downloadBlob } from '../../../../../common/utils/download_blob';
-import { useEntityEngineStatusNew } from '../../hooks/use_entity_engine_status';
 import { EngineComponentsStatusTable } from './components/engine_components_status';
+import { useEntityStoreStatus } from '../../hooks/use_entity_store';
 
 const FILE_NAME = 'engines_status.json';
 
 export const EngineStatus: React.FC = () => {
-  const { data, isLoading, error } = useEntityEngineStatusNew({ withComponents: true });
+  const { data, isLoading, error } = useEntityStoreStatus({ withComponents: true });
 
   const downloadJson = useCallback(() => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);

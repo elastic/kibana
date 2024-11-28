@@ -30,8 +30,8 @@ jest.mock('../../helper_hooks', () => ({
 }));
 
 const mockUseEntityEngineStatus = jest.fn();
-jest.mock('../components/entity_store/hooks/use_entity_engine_status', () => ({
-  useEntityEngineStatus: () => mockUseEntityEngineStatus(),
+jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
+  useEntityStoreStatus: () => mockUseEntityEngineStatus(),
 }));
 
 const mockUseEntityEnginePrivileges = jest.fn();
