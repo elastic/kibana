@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiLoadingSpinner,
   EuiPanel,
@@ -29,9 +29,9 @@ const FILE_NAME = 'engines_status.json';
 export const EngineStatus: React.FC = () => {
   const { data, isLoading, error } = useEntityStoreStatus({ withComponents: true });
 
-  const downloadJson = useCallback(() => {
+  const downloadJson = () => {
     downloadBlob(new Blob([JSON.stringify(data)]), FILE_NAME);
-  }, [data]);
+  };
 
   const errorMessage = i18n.translate(
     'xpack.securitySolution.entityAnalytics.entityStore.enginesStatus.queryError',
