@@ -44,6 +44,7 @@ describe('ConnectorsForm ', () => {
         impact: '2',
         category: 'Denial of Service',
         subcategory: '12',
+        additionalFields: '{}',
       },
     },
     'resilient-2': {
@@ -90,17 +91,13 @@ describe('ConnectorsForm ', () => {
   it('sets the selected connector correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(screen.getByText('My SN connector')).toBeInTheDocument();
   });
 
   it('sets the fields for the selected connector correctly', async () => {
     appMockRender.render(<ConnectorsForm {...props} />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
 
     const severitySelect = screen.getByTestId('severitySelect');
     const urgencySelect = screen.getByTestId('urgencySelect');
@@ -163,6 +160,7 @@ describe('ConnectorsForm ', () => {
           impact: '2',
           category: 'Denial of Service',
           subcategory: '12',
+          additionalFields: '{}',
         },
       });
     });
@@ -367,17 +365,13 @@ describe('ConnectorsForm ', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
     await userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
 
-    await waitFor(() => {
-      expect(screen.getByText('My SN connector 2')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My SN connector 2')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('edit-connectors-submit'));
 
@@ -389,6 +383,7 @@ describe('ConnectorsForm ', () => {
           impact: null,
           severity: null,
           urgency: null,
+          additionalFields: null,
         },
         id: 'servicenow-2',
         name: 'My SN connector 2',

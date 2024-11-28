@@ -20,10 +20,15 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_choices');
 const useGetChoicesMock = useGetChoices as jest.Mock;
 
-let appMockRenderer: AppMockRenderer;
+useGetChoicesMock.mockReturnValue({
+  isLoading: false,
+  isFetching: false,
+  data: { data: choices },
+});
 
 describe('ServiceNowITSM Fields', () => {
   let user: UserEvent;
+  const appMockRenderer: AppMockRenderer = createAppMockRenderer();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -39,7 +44,7 @@ describe('ServiceNowITSM Fields', () => {
     impact: '3',
     category: 'software',
     subcategory: 'os',
-    additionalFields: '{}',
+    additionalFields: '',
   };
 
   beforeEach(() => {
@@ -47,12 +52,9 @@ describe('ServiceNowITSM Fields', () => {
     user = userEvent.setup({
       advanceTimers: jest.advanceTimersByTime,
     });
-    appMockRenderer = createAppMockRenderer();
-    useGetChoicesMock.mockReturnValue({
-      isLoading: false,
-      isFetching: false,
-      data: { data: choices },
-    });
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -63,12 +65,12 @@ describe('ServiceNowITSM Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(await screen.findByTestId('severitySelect')).toBeInTheDocument();
-    expect(await screen.findByTestId('urgencySelect')).toBeInTheDocument();
-    expect(await screen.findByTestId('impactSelect')).toBeInTheDocument();
-    expect(await screen.findByTestId('categorySelect')).toBeInTheDocument();
-    expect(await screen.findByTestId('subcategorySelect')).toBeInTheDocument();
-    expect(await screen.findByTestId('additionalFieldsEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('urgencySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('impactSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('categorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('subcategorySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('additionalFieldsEditor')).toBeInTheDocument();
   });
 
   it('transforms the categories to options correctly', async () => {
@@ -78,11 +80,13 @@ describe('ServiceNowITSM Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(await screen.findByRole('option', { name: 'Privilege Escalation' }));
-    expect(await screen.findByRole('option', { name: 'Criminal activity/investigation' }));
-    expect(await screen.findByRole('option', { name: 'Denial of Service' }));
-    expect(await screen.findByRole('option', { name: 'Software' }));
-    expect(await screen.findByRole('option', { name: 'Failed Login' }));
+    const categorySelect = screen.getByTestId('categorySelect');
+
+    expect(within(categorySelect).getByRole('option', { name: 'Privilege Escalation' }));
+    expect(within(categorySelect).getByRole('option', { name: 'Criminal activity/investigation' }));
+    expect(within(categorySelect).getByRole('option', { name: 'Denial of Service' }));
+    expect(within(categorySelect).getByRole('option', { name: 'Software' }));
+    expect(within(categorySelect).getByRole('option', { name: 'Failed Login' }));
   });
 
   it('transforms the subcategories to options correctly', async () => {
