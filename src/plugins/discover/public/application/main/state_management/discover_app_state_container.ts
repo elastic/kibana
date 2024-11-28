@@ -263,11 +263,12 @@ export const getDiscoverAppStateContainer = ({
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
 
     if (!currentSavedSearch.id) {
-      const { columns, rowHeight } = getCurrentUrlState(stateStorage, services);
+      const { breakdownField, columns, rowHeight } = getCurrentUrlState(stateStorage, services);
 
       internalStateContainer.transitions.setResetDefaultProfileState({
         columns: columns === undefined,
         rowHeight: rowHeight === undefined,
+        breakdownField: breakdownField === undefined,
       });
     }
 
