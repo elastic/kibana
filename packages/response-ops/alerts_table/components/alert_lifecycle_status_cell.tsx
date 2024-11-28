@@ -30,16 +30,16 @@ export const AlertLifecycleStatusCell: CellComponent = memo((props) => {
     return null;
   }
 
-  const alertStatus = (alert && alert[ALERT_STATUS]) ?? [];
+  const alertStatus = (alert?.[ALERT_STATUS] ?? []) as string[] | undefined;
 
   if (Array.isArray(alertStatus) && alertStatus.length) {
-    const flapping = (alert && alert[ALERT_FLAPPING]) ?? [];
+    const flapping = alert?.[ALERT_FLAPPING]?.[0] as boolean | undefined;
 
     return (
       <EuiFlexGroup gutterSize="s">
         <AlertLifecycleStatusBadge
           alertStatus={alertStatus.join() as AlertStatus}
-          flapping={flapping[0]}
+          flapping={flapping}
         />
         {isMuted && (
           <EuiToolTip

@@ -55,4 +55,5 @@ export const BulkActionsCell = memo(
       />
     );
   }
+  // See props comment above
 ) as unknown as RenderCellValue;

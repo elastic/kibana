@@ -34,8 +34,8 @@ export const useFetchUserProfilesFromAlerts = ({
     alerts.forEach((alert) => {
       profileUidColumns.forEach((columnId) => {
         if (columns.find((column) => column.id === columnId) != null) {
-          const userUids = alert[columnId];
-          userUids?.forEach((uid) => ids.add(uid as string));
+          const userUids = alert[columnId] as string[];
+          userUids?.forEach((uid) => ids.add(uid));
         }
       });
     });

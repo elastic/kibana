@@ -14,23 +14,24 @@ import { DefaultCell } from './default_cell';
 import { CellComponentProps } from '../types';
 import { getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
+import { createPartialObjectMock } from '../utils/test';
 
 const casesMap = getCasesMapMock();
 const maintenanceWindowsMap = getMaintenanceWindowsMapMock();
-const alert = {
+const alert: Alert = {
   _id: 'alert-id',
   _index: 'alert-index',
   'kibana.alert.status': ['active'],
-} as Alert;
+};
 
-const props = {
+const props = createPartialObjectMock<CellComponentProps>({
   isLoading: false,
   alert,
   cases: casesMap,
   maintenanceWindows: maintenanceWindowsMap,
   columnId: 'kibana.alert.status',
   showAlertStatusWithFlapping: false,
-} as CellComponentProps;
+});
 
 describe('DefaultCell', () => {
   it('shows the value', async () => {
@@ -39,9 +40,7 @@ describe('DefaultCell', () => {
   });
 
   it('shows empty tag if the value is empty', async () => {
-    render(
-      <DefaultCell {...props} alert={{ ...alert, 'kibana.alert.status': [] } as unknown as Alert} />
-    );
+    render(<DefaultCell {...props} alert={{ ...alert, 'kibana.alert.status': [] }} />);
     expect(screen.getByText('--')).toBeInTheDocument();
   });
 
@@ -49,7 +48,7 @@ describe('DefaultCell', () => {
     render(
       <DefaultCell
         {...props}
-        alert={{ ...alert, 'kibana.alert.status': ['active', 'recovered'] } as Alert}
+        alert={{ ...alert, 'kibana.alert.status': ['active', 'recovered'] }}
       />
     );
     expect(screen.getByText('active, recovered')).toBeInTheDocument();

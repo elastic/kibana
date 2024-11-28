@@ -13,7 +13,7 @@ import { useBulkGetCasesQuery } from './use_bulk_get_cases';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { testQueryClientConfig } from '../test_utils';
+import { testQueryClientConfig } from '../utils/test';
 import React, { PropsWithChildren } from 'react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 

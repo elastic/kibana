@@ -153,6 +153,7 @@ export function RuleComponent({
     ruleType.hasAlertsMappings,
     ruleType.hasFieldsForAAD,
     ruleType.id,
+    settings,
   ]);
 
   const tabs = [

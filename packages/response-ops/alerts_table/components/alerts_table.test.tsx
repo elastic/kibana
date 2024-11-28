@@ -23,7 +23,6 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { getMutedAlertsInstancesByRule } from '@kbn/response-ops-alerts-apis/apis/get_muted_alerts_instances_by_rule';
 import { applicationServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { afterAll } from '@elastic/synthetics';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
@@ -41,7 +40,8 @@ import { getMaintenanceWindowsMock } from '../mocks/maintenance_windows.mock';
 import { bulkGetCases } from '../hooks/bulk_get_cases';
 import { bulkGetMaintenanceWindows } from '../hooks/bulk_get_maintenance_windows';
 import { useLicense } from '../hooks/use_license';
-import { getJsDomPerformanceFix } from '../test_utils';
+import { getJsDomPerformanceFix } from '../utils/test';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 type BaseAlertsTableProps = AlertsTableProps;
 
@@ -66,8 +66,10 @@ const columns = [
     displayAsText: 'Maintenance Windows',
   },
 ];
-const alerts = [
+const alerts: Alert[] = [
   {
+    _id: 'test-1',
+    _index: 'alerts',
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
     [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
@@ -76,6 +78,8 @@ const alerts = [
     [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
   },
   {
+    _id: 'test-2',
+    _index: 'alerts',
     [AlertsField.name]: ['three'],
     [AlertsField.reason]: ['four'],
     [AlertsField.uuid]: ['bf5f6d63-5afd-48e0-baf6-f28c2b68db46'],
@@ -83,13 +87,15 @@ const alerts = [
     [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-2'],
   },
   {
+    _id: 'test-3',
+    _index: 'alerts',
     [AlertsField.name]: ['five'],
     [AlertsField.reason]: ['six'],
     [AlertsField.uuid]: ['1047d115-5afd-469e-baf6-f28c2b68db46'],
     [ALERT_CASE_IDS]: [],
     [ALERT_MAINTENANCE_WINDOW_IDS]: [],
   },
-] as unknown as Alert[];
+];
 const oldAlertsData = [
   [
     {
@@ -308,7 +314,7 @@ describe('AlertsTable', () => {
         },
         currentAppId$: mockCurrentAppId$,
       },
-      data: {} as unknown as DataPublicPluginStart,
+      data: dataPluginMock.createStartContract(),
       fieldFormats: fieldFormatsMock,
       licensing: licensingMock.createStart(),
       notifications: notificationServiceMock.createStartContract(),
@@ -403,7 +409,7 @@ describe('AlertsTable', () => {
           {
             ...mockSearchAlertsResponse.alerts[0],
             'kibana.alert.case_ids': [],
-          } as unknown as Alert,
+          },
           mockSearchAlertsResponse.alerts[1],
         ],
       });
@@ -608,7 +614,7 @@ describe('AlertsTable', () => {
           {
             ...mockSearchAlertsResponse.alerts[0],
             'kibana.alert.maintenance_window_ids': [],
-          } as unknown as Alert,
+          },
           mockSearchAlertsResponse.alerts[1],
         ],
       });
@@ -912,9 +918,11 @@ describe('AlertsTable', () => {
     it('resets the page index when any query parameter changes', () => {
       mockSearchAlerts.mockResolvedValue({
         ...mockSearchAlertsResponse,
-        alerts: Array.from({ length: 100 }).map(
-          (_, i) => ({ [AlertsField.uuid]: `alert-${i}` } as unknown as Alert)
-        ),
+        alerts: Array.from({ length: 100 }).map((_, i) => ({
+          _id: `${i}`,
+          _index: 'alerts',
+          [AlertsField.uuid]: [`alert-${i}`],
+        })),
       });
       const { rerender } = render(<TestComponent {...tableProps} />);
       act(() => {
@@ -932,9 +940,11 @@ describe('AlertsTable', () => {
     it('resets the page index when refetching alerts', () => {
       mockSearchAlerts.mockResolvedValue({
         ...mockSearchAlertsResponse,
-        alerts: Array.from({ length: 100 }).map(
-          (_, i) => ({ [AlertsField.uuid]: `alert-${i}` } as unknown as Alert)
-        ),
+        alerts: Array.from({ length: 100 }).map((_, i) => ({
+          _id: `${i}`,
+          _index: 'alerts',
+          [AlertsField.uuid]: [`alert-${i}`],
+        })),
       });
       render(<TestComponent {...tableProps} />);
       act(() => {

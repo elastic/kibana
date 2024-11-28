@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { useCaseViewNavigation } from './use_case_view_navigation';
-import { testQueryClientConfig } from '../test_utils';
+import { testQueryClientConfig } from '../utils/test';
 
 const application = applicationServiceMock.createStartContract();
 
