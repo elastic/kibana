@@ -8,6 +8,8 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
+import { waitUntilDocumentIndexed } from '../utils';
+
 import { getListItem } from '.';
 
 export interface DeleteListItemOptions {
@@ -27,7 +29,7 @@ export const deleteListItem = async ({
   if (listItem == null) {
     return null;
   } else {
-    await esClient.deleteByQuery({
+    const response = await esClient.deleteByQuery({
       index: listItemIndex,
       query: {
         ids: {
@@ -36,6 +38,19 @@ export const deleteListItem = async ({
       },
       refresh,
     });
+
+    if (response.deleted) {
+      const checkIfListItemDeleted = async (): Promise<void> => {
+        const deletedListItem = await getListItem({ esClient, id, listItemIndex });
+        if (deletedListItem !== null) {
+          throw Error('List item has not been re-indexed in time');
+        }
+      };
+
+      await waitUntilDocumentIndexed(checkIfListItemDeleted);
+    } else {
+      throw Error('No list item has been deleted');
+    }
   }
   return listItem;
 };

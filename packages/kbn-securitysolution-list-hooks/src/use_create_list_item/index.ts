@@ -28,7 +28,7 @@ export const useCreateListItemMutation = (
   const invalidateListItemQuery = useInvalidateListItemQuery();
   return useMutation<ListItemSchema, IHttpFetchError<Error>, CreateListMutationParams>(
     ({ listId, value, http }) =>
-      createListItemWithOptionalSignal({ listId, value, http, refresh: 'true' }),
+      createListItemWithOptionalSignal({ listId, value, http, refresh: 'wait_for' }),
     {
       ...options,
       mutationKey: CREATE_LIST_ITEM_MUTATION_KEY,
