@@ -7,7 +7,7 @@
 
 import { chunk } from 'lodash/fp';
 import { RequestHandler } from '@kbn/core/server';
-import { parseToMoment } from '../../../common/utils';
+import { parseToMoment, isDateRangeValid } from '../../../common/utils';
 import type {
   MetricTypes,
   UsageMetricsAutoOpsResponseSchemaBody,
@@ -39,14 +39,16 @@ export const getUsageMetricsHandler = (
       const { from, to, metricTypes, dataStreams: requestDsNames } = request.body;
 
       // parse date strings to validate
+      const isValidDateRange = isDateRangeValid({ start: from, end: to });
       const parsedFrom = parseToMoment(from)?.toISOString();
       const parsedTo = parseToMoment(to)?.toISOString();
 
-      if (!parsedFrom || !parsedTo) {
-        const customErrorMessage = `[request body.${
-          !parsedTo ? 'to' : 'from'
-        }] Invalid date range ${!parsedTo ? to : from} is out of range`;
-        return errorHandler(logger, response, new CustomHttpRequestError(customErrorMessage, 400));
+      if (!isValidDateRange || !parsedFrom || !parsedTo) {
+        return errorHandler(
+          logger,
+          response,
+          new CustomHttpRequestError('Invalid date range', 400)
+        );
       }
 
       // redundant check as we don't allow making requests via UI without data streams,

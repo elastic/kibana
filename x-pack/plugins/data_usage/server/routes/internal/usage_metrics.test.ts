@@ -21,21 +21,20 @@ import { CustomHttpRequestError } from '../../utils';
 import { AutoOpsError } from '../../services/errors';
 import { transformToUTCtime } from '../../../common/utils';
 
-const timeRange = {
-  start: 'now-15m',
-  end: 'now',
-};
-const utcTimeRange = transformToUTCtime({
-  ...timeRange,
-  isISOString: true,
-});
-
 describe('registerUsageMetricsRoute', () => {
   let mockCore: MockedKeys<CoreSetup<{}, DataUsageServerStart>>;
   let router: DataUsageRouter;
   let dataUsageService: DataUsageService;
   let context: DataUsageRequestHandlerContext;
   let mockedDataUsageContext: ReturnType<typeof createMockedDataUsageContext>;
+  let utcTimeRange: { start: string; end: string };
+
+  const getUtcTimeRange = ({ start, end }: { start: string; end: string }) =>
+    transformToUTCtime({
+      start,
+      end,
+      isISOString: true,
+    });
 
   beforeEach(() => {
     mockCore = coreMock.createSetup();
@@ -48,6 +47,12 @@ describe('registerUsageMetricsRoute', () => {
       coreMock.createPluginInitializerContext()
     );
     dataUsageService = new DataUsageService(mockedDataUsageContext.logFactory.get());
+
+    const { start, end } = getUtcTimeRange({
+      start: 'now-15m',
+      end: 'now',
+    });
+    utcTimeRange = { start: start as string, end: end as string };
   });
 
   it('should request correct API', () => {
@@ -79,6 +84,33 @@ describe('registerUsageMetricsRoute', () => {
     expect(mockResponse.customError).toHaveBeenCalledTimes(1);
     expect(mockResponse.customError).toHaveBeenCalledWith({
       body: new CustomHttpRequestError('[request body.dataStreams]: no data streams selected'),
+      statusCode: 400,
+    });
+  });
+
+  it('should throw error if invalid date range in the request', async () => {
+    registerUsageMetricsRoute(router, mockedDataUsageContext);
+
+    const { start, end } = getUtcTimeRange({
+      start: 'now-10s',
+      end: 'now-20s',
+    });
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body: {
+        from: start,
+        to: end,
+        metricTypes: ['ingest_rate'],
+        dataStreams: ['.ds-1'],
+      },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+    const mockRouter = mockCore.http.createRouter.mock.results[0].value;
+    const [[, handler]] = mockRouter.versioned.post.mock.results[0].value.addVersion.mock.calls;
+    await handler(context, mockRequest, mockResponse);
+
+    expect(mockResponse.customError).toHaveBeenCalledTimes(1);
+    expect(mockResponse.customError).toHaveBeenCalledWith({
+      body: new CustomHttpRequestError('Invalid date range'),
       statusCode: 400,
     });
   });

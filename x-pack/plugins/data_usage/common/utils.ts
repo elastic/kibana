@@ -19,7 +19,8 @@ export const DEFAULT_DATE_RANGE_OPTIONS = Object.freeze({
   recentlyUsedDateRanges: [],
 });
 
-type MomentDate = Exclude<ReturnType<typeof dateMath.parse>, undefined>;
+export type MomentDate = Exclude<ReturnType<typeof dateMath.parse>, undefined>;
+const TIME_UNITS = 's' as const;
 
 export const parseToMoment = (date: string): undefined | MomentDate => dateMath.parse(date);
 export const transformToUTCtime = ({
@@ -30,13 +31,17 @@ export const transformToUTCtime = ({
   start: string;
   end: string;
   isISOString?: boolean;
-}) => {
+}): {
+  start: string | MomentDate | undefined;
+  end: string | MomentDate | undefined;
+} => {
   const utcOffset = parseToMoment(start)?.utcOffset() ?? 0;
   const utcStart = parseToMoment(start)?.utc().add(utcOffset, 'm');
   const utcEnd = parseToMoment(end)?.utc().add(utcOffset, 'm');
+
   return {
-    start: isISOString ? utcStart?.toISOString() : parseToMoment(start),
-    end: isISOString ? utcEnd?.toISOString() : parseToMoment(end),
+    start: isISOString ? utcStart?.toISOString() : utcStart,
+    end: isISOString ? utcEnd?.toISOString() : utcEnd,
   };
 };
 
@@ -47,11 +52,15 @@ export const isDateRangeValid = ({ start, end }: { start: string; end: string })
   if (!startDate || !endDate) {
     return false;
   }
-  const minDate = parseToMoment(DEFAULT_DATE_RANGE_OPTIONS.minDate);
-  const maxDate = parseToMoment(DEFAULT_DATE_RANGE_OPTIONS.maxDate);
+
+  const { start: minDate, end: maxDate } = transformToUTCtime({
+    start: DEFAULT_DATE_RANGE_OPTIONS.minDate,
+    end: DEFAULT_DATE_RANGE_OPTIONS.maxDate,
+  });
+
   return (
-    startDate.isSameOrAfter(minDate, 's') &&
-    endDate.isSameOrBefore(maxDate, 's') &&
-    startDate <= endDate
+    startDate.isSameOrAfter(minDate, TIME_UNITS) &&
+    endDate.isSameOrBefore(maxDate, TIME_UNITS) &&
+    startDate.isBefore(endDate, TIME_UNITS)
   );
 };

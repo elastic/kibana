@@ -69,6 +69,11 @@ describe('useGetDataUsageMetrics', () => {
   });
 
   it('should call the correct API', async () => {
+    const expectedTime = transformToUTCtime({
+      start: defaultUsageMetricsRequestBody.from,
+      end: defaultUsageMetricsRequestBody.to,
+      isISOString: true,
+    });
     await renderHook(
       () => useGetDataUsageMetrics(defaultUsageMetricsRequestBody, { enabled: true }),
       {
@@ -79,7 +84,11 @@ describe('useGetDataUsageMetrics', () => {
     expect(mockServices.http.post).toHaveBeenCalledWith(DATA_USAGE_METRICS_API_ROUTE, {
       signal: expect.any(AbortSignal),
       version: '1',
-      body: JSON.stringify(defaultUsageMetricsRequestBody),
+      body: JSON.stringify({
+        ...defaultUsageMetricsRequestBody,
+        from: expectedTime.start,
+        to: expectedTime.end,
+      }),
     });
   });
 

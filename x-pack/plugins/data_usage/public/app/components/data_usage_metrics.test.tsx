@@ -13,6 +13,16 @@ import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
 
+const mockIsDateRangeValid = jest.fn().mockReturnValue(true);
+
+jest.mock('../../../common/utils', () => {
+  const original = jest.requireActual('../../../common/utils');
+  return {
+    ...original,
+    isDateRangeValid: jest.fn(() => mockIsDateRangeValid()),
+  };
+});
+
 jest.mock('../../utils/use_breadcrumbs', () => {
   return {
     useBreadcrumbs: jest.fn(),
@@ -116,6 +126,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 const mockUseGetDataUsageMetrics = useGetDataUsageMetrics as jest.Mock;
 const mockUseGetDataUsageDataStreams = useGetDataUsageDataStreams as jest.Mock;
+
 const mockServices = mockCore.createStart();
 
 const getBaseMockedDataStreams = () => ({
@@ -375,6 +386,7 @@ describe('DataUsageMetrics', () => {
       expect.any(Object),
       expect.objectContaining({ enabled: true })
     );
+
     expect(refetch).toHaveBeenCalledTimes(5);
   });
 

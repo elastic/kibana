@@ -17,11 +17,7 @@ import { PLUGIN_NAME } from '../../translations';
 import { useGetDataUsageMetrics } from '../../hooks/use_get_usage_metrics';
 import { useGetDataUsageDataStreams } from '../../hooks/use_get_data_streams';
 import { useDataUsageMetricsUrlParams } from '../hooks/use_charts_url_params';
-import {
-  DEFAULT_DATE_RANGE_OPTIONS,
-  transformToUTCtime,
-  isDateRangeValid,
-} from '../../../common/utils';
+import { DEFAULT_DATE_RANGE_OPTIONS, isDateRangeValid } from '../../../common/utils';
 import { useDateRangePicker } from '../hooks/use_date_picker';
 import { ChartFilters, ChartFiltersProps } from './filters/charts_filters';
 import { ChartsLoading } from './charts_loading';
@@ -133,15 +129,6 @@ export const DataUsageMetrics = memo(
       [isValidDateRange, metricsFilters.dataStreams, metricsFilters.metricTypes]
     );
 
-    const utcTimeRange = useMemo(
-      () =>
-        transformToUTCtime({
-          start: dateRangePickerState.startDate,
-          end: dateRangePickerState.endDate,
-          isISOString: true,
-        }),
-      [dateRangePickerState]
-    );
     const {
       error: errorFetchingDataUsageMetrics,
       data: usageMetricsData,
@@ -151,8 +138,8 @@ export const DataUsageMetrics = memo(
     } = useGetDataUsageMetrics(
       {
         ...metricsFilters,
-        from: utcTimeRange.start as string,
-        to: utcTimeRange.end as string,
+        from: dateRangePickerState.startDate,
+        to: dateRangePickerState.endDate,
       },
       {
         retry: false,
