@@ -49,6 +49,7 @@ export const createAlertRoute = ({
   licenseState,
   usageCounter,
   isServerless,
+  docLinks,
 }: RouteOptions) => {
   router.post(
     {
@@ -65,8 +66,15 @@ export const createAlertRoute = ({
         access: isServerless ? 'internal' : 'public',
         summary: 'Create an alert',
         tags: ['oas-tag:alerting'],
-        // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: '/api/alerting/rule/{id?}',
+          },
+        },
       },
     },
     handleDisabledApiKeysError(

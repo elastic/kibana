@@ -474,6 +474,7 @@ export interface DocLinks {
     slackApiAction: string;
     teamsAction: string;
     connectors: string;
+    legacyRuleApiDeprecations: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
