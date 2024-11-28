@@ -1038,6 +1038,20 @@
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.cases",
+            "type": "Object",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "{ readonly legacyApiDeprecations: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
