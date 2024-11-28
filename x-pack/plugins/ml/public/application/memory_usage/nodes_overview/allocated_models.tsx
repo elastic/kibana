@@ -254,7 +254,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       }),
       'data-test-subj': 'mlAllocatedModelsTableStartedTime',
       render: (v: AllocatedModel) => {
-        return dateFormatter(v.node.start_time);
+        return v.node.start_time ? dateFormatter(v.node.start_time) : '-';
       },
     },
     {
