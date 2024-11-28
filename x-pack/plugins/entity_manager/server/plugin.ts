@@ -17,6 +17,7 @@ import {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { firstValueFrom } from 'rxjs';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { EntityManagerConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { builtInDefinitions } from './lib/entities/built_in';
 import { upgradeBuiltInEntityDefinitions } from './lib/entities/upgrade_entity_definition';
@@ -72,12 +73,13 @@ export class EntityManagerServerPlugin
     core: CoreSetup,
     plugins: EntityManagerPluginSetupDependencies
   ): EntityManagerServerPluginSetup {
-    const ENTITY_MANAGER_FEATURE_ID = 'ENTITY_MANAGER';
+    const ENTITY_MANAGER_FEATURE_ID = 'entityManager';
     plugins.features.registerKibanaFeature({
       id: ENTITY_MANAGER_FEATURE_ID,
       name: 'Entity Manager',
       description: 'All features related to the Elastic Entity model',
       category: DEFAULT_APP_CATEGORIES.management,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: [ENTITY_MANAGER_FEATURE_ID],
       privileges: {
         all: {
