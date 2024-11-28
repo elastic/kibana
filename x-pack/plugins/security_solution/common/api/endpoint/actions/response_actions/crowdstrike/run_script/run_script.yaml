@@ -26,7 +26,7 @@ paths:
 
 components:
   schemas:
-    ExecuteRouteRequestBody:
+    RunScriptRouteRequestBody:
       allOf:
         - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
         - type: object
