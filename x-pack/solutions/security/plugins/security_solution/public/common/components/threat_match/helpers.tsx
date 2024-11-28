@@ -17,20 +17,16 @@ import type { Entry, FormattedEntry, ThreatMapEntries, EmptyEntry } from './type
 
 /**
  * Formats the entry into one that is easily usable for the UI.
- *
- * @param patterns DataViewBase containing available fields on rule index
- * @param item item entry
- * @param itemIndex entry index
  */
 export const getFormattedEntry = (
-  indexPattern: DataViewBase,
-  threatIndexPatterns: DataViewBase,
+  dataView: DataViewBase,
+  threatDataView: DataViewBase,
   item: Entry,
   itemIndex: number,
   uuidGen: () => string = uuidv4
 ): FormattedEntry => {
-  const { fields } = indexPattern;
-  const { fields: threatFields } = threatIndexPatterns;
+  const { fields } = dataView;
+  const { fields: threatFields } = threatDataView;
   const field = item.field;
   const threatField = item.value;
   const [foundField] = fields.filter(({ name }) => field != null && field === name);
@@ -38,11 +34,20 @@ export const getFormattedEntry = (
     ({ name }) => threatField != null && threatField === name
   );
   const maybeId: typeof item & { id?: string } = item;
+
+  // Fallback to a string field when field isn't found in known fields.
+  // It's required for showing field's value when appropriate data is missing in ES.
   return {
     id: maybeId.id ?? uuidGen(),
-    field: foundField,
+    field: foundField ?? {
+      name: field,
+      type: 'string',
+    },
     type: 'mapping',
-    value: threatFoundField,
+    value: threatFoundField ?? {
+      name: threatField,
+      type: 'string',
+    },
     entryIndex: itemIndex,
   };
 };
