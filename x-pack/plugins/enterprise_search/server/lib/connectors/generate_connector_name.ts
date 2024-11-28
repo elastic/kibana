@@ -9,11 +9,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
+import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { toAlphanumeric } from '../../../common/utils/to_alphanumeric';
 import { indexOrAliasExists } from '../indices/exists_index';
-import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 const addIndexPrefix = (indexName: string, isManagedConnector: boolean): string => {
   const indexPrefix = isManagedConnector ? MANAGED_CONNECTOR_INDEX_PREFIX : 'connector-';
