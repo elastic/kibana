@@ -8,10 +8,9 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BehaviorSubject, Subject, combineLatest, debounceTime } from 'rxjs';
+import { combineLatest, debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -32,8 +31,7 @@ import {
   SearchSerializedState,
 } from '@kbn/embeddable-examples-plugin/public/react_embeddables/search/types';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
-import { GridLayout, GridLayoutData, isLayoutEqual } from '@kbn/grid-layout';
+import { GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 
 import { getPanelId } from './get_panel_id';
@@ -72,18 +70,17 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderBasicPanel = useCallback(
+  const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
-      // console.log('RENDER PANEL', id);
-      // return <div style={{ padding: 8 }}>{id}</div>;
-
       return (
         <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+          key={id}
+          maybeId={id}
           type={'searchEmbeddableDemo'}
           getParentApi={() => mockDashboardApi}
           panelProps={{
             showBadges: true,
-            showBorder: false,
+            showBorder: true,
             showNotifications: true,
             showShadow: false,
             setDragHandles,
@@ -192,7 +189,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
               rowHeight: DASHBOARD_GRID_HEIGHT,
               columnCount: DASHBOARD_GRID_COLUMN_COUNT,
             }}
-            renderPanelContents={renderBasicPanel}
+            renderPanelContents={renderPanelContents}
             onLayoutChange={(newLayout) => {
               const { panels, rows } = gridLayoutToDashboardPanelMap(newLayout);
               mockDashboardApi.panels$.next(panels);

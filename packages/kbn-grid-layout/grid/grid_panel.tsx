@@ -26,6 +26,7 @@ export const GridPanel = forwardRef<
       setDragHandles: (refs: Array<HTMLElement | null>) => void
     ) => React.ReactNode;
     interactionStart: (
+      panelId: string,
       type: PanelInteractionEvent['type'] | 'drop',
       e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
     ) => void;
@@ -43,7 +44,8 @@ export const GridPanel = forwardRef<
     const { euiTheme } = useEuiTheme();
 
     useEffect(() => {
-      const onDropEventHandler = (dropEvent: MouseEvent) => interactionStart('drop', dropEvent);
+      const onDropEventHandler = (dropEvent: MouseEvent) =>
+        interactionStart(panelId, 'drop', dropEvent);
       /**
        * Subscription to add a singular "drop" event handler whenever an interaction starts -
        * this is handled in a subscription so that it is not lost when the component gets remounted
@@ -78,9 +80,9 @@ export const GridPanel = forwardRef<
     const onMouseDown = useCallback(
       (e: MouseEvent) => {
         e.stopPropagation();
-        interactionStart('drag', e);
+        interactionStart(panelId, 'drag', e);
       },
-      [interactionStart]
+      [interactionStart, panelId]
     );
 
     const setDragHandles = useCallback(
@@ -248,8 +250,8 @@ export const GridPanel = forwardRef<
                     opacity: 1 !important;
                   }
                 `}
-                onMouseDown={(e) => interactionStart('drag', e)}
-                onMouseUp={(e) => interactionStart('drop', e)}
+                onMouseDown={(e) => interactionStart(panelId, 'drag', e)}
+                onMouseUp={(e) => interactionStart(panelId, 'drop', e)}
               >
                 <EuiIcon type="grabOmnidirectional" />
               </div>
@@ -257,9 +259,10 @@ export const GridPanel = forwardRef<
             {/* Resize handle */}
             <div
               className="resizeHandle"
-              onMouseDown={(e) => interactionStart('resize', e)}
-              onMouseUp={(e) => interactionStart('drop', e)}
+              onMouseDown={(e) => interactionStart(panelId, 'resize', e)}
+              onMouseUp={(e) => interactionStart(panelId, 'drop', e)}
               css={css`
+                z-index: 9000;
                 right: 0;
                 bottom: 0;
                 opacity: 0;

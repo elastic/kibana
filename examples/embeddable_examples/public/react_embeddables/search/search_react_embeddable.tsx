@@ -30,6 +30,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
     type: SEARCH_EMBEDDABLE_ID,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+      console.log('buildEmbeddable');
       const timeRange = initializeTimeRange(state);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(

@@ -28,14 +28,14 @@ export const useMockDashboardApi = ({
 }) => {
   const mockDashboardApi = useMemo(() => {
     return {
-      getSerializedStateForChild: () => ({
+      getSerializedStateForChild: (id: string) => ({
         rawState: {
-          title: 'test',
+          title: id,
           timeRange: undefined,
         },
         references: [],
       }),
-
+      children$: new BehaviorSubject({}),
       viewMode: new BehaviorSubject('edit'),
       panels$: new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels),
       rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),

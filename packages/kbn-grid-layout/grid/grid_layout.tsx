@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';

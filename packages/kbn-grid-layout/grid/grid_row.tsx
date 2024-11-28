@@ -23,7 +23,7 @@ export const GridRow = forwardRef<
   HTMLDivElement,
   {
     rowIndex: number;
-    toggleIsCollapsed: () => void;
+    toggleIsCollapsed: (rowIndex: number) => void;
     renderPanelContents: (
       panelId: string,
       setDragHandles: (refs: Array<HTMLElement | null>) => void
@@ -158,6 +158,37 @@ export const GridRow = forwardRef<
       [rowIndex]
     );
 
+    const interactionStart = useCallback(
+      (
+        panelId: string,
+        type: PanelInteractionEvent['type'] | 'drop',
+        e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>
+      ) => {
+        e.stopPropagation();
+        const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+        if (!panelRef) return;
+
+        const panelRect = panelRef.getBoundingClientRect();
+        if (type === 'drop') {
+          setInteractionEvent(undefined);
+        } else {
+          setInteractionEvent({
+            type,
+            id: panelId,
+            panelDiv: panelRef,
+            targetRowIndex: rowIndex,
+            mouseOffsets: {
+              top: e.clientY - panelRect.top,
+              left: e.clientX - panelRect.left,
+              right: e.clientX - panelRect.right,
+              bottom: e.clientY - panelRect.bottom,
+            },
+          });
+        }
+      },
+      [gridLayoutStateManager.panelRefs, rowIndex, setInteractionEvent]
+    );
+
     /**
      * Memoize panel children components to prevent unnecessary re-renders
      */
@@ -169,30 +200,7 @@ export const GridRow = forwardRef<
           rowIndex={rowIndex}
           gridLayoutStateManager={gridLayoutStateManager}
           renderPanelContents={renderPanelContents}
-          interactionStart={(type, e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            if (!panelRef) return;
-
-            const panelRect = panelRef.getBoundingClientRect();
-            if (type === 'drop') {
-              setInteractionEvent(undefined);
-            } else {
-              setInteractionEvent({
-                type,
-                id: panelId,
-                panelDiv: panelRef,
-                targetRowIndex: rowIndex,
-                mouseOffsets: {
-                  top: e.clientY - panelRect.top,
-                  left: e.clientX - panelRect.left,
-                  right: e.clientX - panelRect.right,
-                  bottom: e.clientY - panelRect.bottom,
-                },
-              });
-            }
-          }}
+          interactionStart={interactionStart}
           ref={(element) => {
             if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
               gridLayoutStateManager.panelRefs.current[rowIndex] = {};
@@ -201,7 +209,7 @@ export const GridRow = forwardRef<
           }}
         />
       ));
-    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, setInteractionEvent]);
+    }, [panelIds, rowIndex, gridLayoutStateManager, renderPanelContents, interactionStart]);
 
     return (
       <>
@@ -215,7 +223,7 @@ export const GridRow = forwardRef<
                   defaultMessage: 'Toggle collapse',
                 })}
                 iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-                onClick={toggleIsCollapsed}
+                onClick={() => toggleIsCollapsed(rowIndex)}
               />
               <EuiTitle size="xs">
                 <h2>{rowTitle}</h2>
