@@ -29,7 +29,7 @@ export const SavedSearchURLConflictCallout = ({
     if (otherObjectId) {
       return spaces.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('discover.savedSearchURLConflictCallout.objectNoun', {
-          defaultMessage: '{savedSearch} search',
+          defaultMessage: '"{savedSearch}" Discover Session',
           values: {
             savedSearch: savedSearch.title,
           },

@@ -20,10 +20,9 @@ import {
   EuiFlyoutBody,
   EuiTitle,
 } from '@elastic/eui';
+import { SavedSearchType, SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-
-const SEARCH_OBJECT_TYPE = 'search';
 
 interface OpenSearchPanelProps {
   onClose: () => void;
@@ -43,7 +42,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
           <h2>
             <FormattedMessage
               id="discover.topNav.openSearchPanel.openSearchTitle"
-              defaultMessage="Open search"
+              defaultMessage="Open Discover Session"
             />
           </h2>
         </EuiTitle>
@@ -59,15 +58,15 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
           noItemsMessage={
             <FormattedMessage
               id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-              defaultMessage="No matching searches found."
+              defaultMessage="No matching Discover Sessions found."
             />
           }
           savedObjectMetaData={[
             {
-              type: SEARCH_OBJECT_TYPE,
+              type: SavedSearchType,
               getIconForSavedObject: () => 'discoverApp',
               name: i18n.translate('discover.savedSearch.savedObjectName', {
-                defaultMessage: 'Saved search',
+                defaultMessage: 'Discover Session',
               }),
             },
           ]}
@@ -88,12 +87,12 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
                 onClick={props.onClose}
                 data-test-subj="manageSearchesBtn"
                 href={addBasePath(
-                  `/app/management/kibana/objects?initialQuery=type:(${SEARCH_OBJECT_TYPE})`
+                  `/app/management/kibana/objects?initialQuery=type:("${SavedSearchTypeDisplayName}")`
                 )}
               >
                 <FormattedMessage
                   id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
-                  defaultMessage="Manage searches"
+                  defaultMessage="Manage Discover Sessions"
                 />
               </EuiButton>
             </EuiFlexItem>

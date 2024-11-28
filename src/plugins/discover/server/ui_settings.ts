@@ -122,7 +122,7 @@ export const getUiSettings: (
     description: i18n.translate('discover.advancedSettings.searchOnPageLoadText', {
       defaultMessage:
         'Controls whether a search is executed when Discover first loads. This setting does not ' +
-        'have an effect when loading a saved search.',
+        'have an effect when loading a Discover Session.',
     }),
     category: ['discover'],
     schema: schema.boolean(),
@@ -133,7 +133,8 @@ export const getUiSettings: (
     }),
     value: false,
     description: i18n.translate('discover.advancedSettings.docTableHideTimeColumnText', {
-      defaultMessage: "Hide the 'Time' column in Discover and in all Saved Searches on Dashboards.",
+      defaultMessage:
+        "Hide the 'Time' column in Discover and in all Discover Session panels on Dashboards.",
     }),
     category: ['discover'],
     schema: schema.boolean(),

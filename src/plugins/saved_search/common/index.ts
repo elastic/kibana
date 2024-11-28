@@ -25,6 +25,7 @@ export enum VIEW_MODE {
 
 export {
   SavedSearchType,
+  SavedSearchTypeDisplayName,
   LATEST_VERSION,
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,

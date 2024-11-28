@@ -17,9 +17,9 @@ export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID =
 
 export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER: Trigger = {
   id: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
-  title: 'Discover saved searches embeddable cell actions',
+  title: 'Discover Session embeddable cell actions',
   description:
-    'This trigger is used to replace the cell actions for Discover saved search embeddable grid.',
+    'This trigger is used to replace the cell actions for Discover Session embeddable grid.',
 } as const;
 
 export const DEFAULT_HEADER_ROW_HEIGHT_LINES = 3;

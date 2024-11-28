@@ -8,6 +8,7 @@
  */
 
 export const SavedSearchType = 'search';
+export const SavedSearchTypeDisplayName = 'discover session / search'; // It's a new SO name for "search" SO
 
 export const LATEST_VERSION = 1;
 
