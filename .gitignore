@@ -22,6 +22,7 @@ target
 *.iml
 *.log
 types.eslint.config.js
+types.eslint.config.cjs
 __tmp__
 
 # Ignore example plugin builds
@@ -142,6 +143,8 @@ x-pack/test/security_api_integration/plugins/audit_log/audit.log
 .ftr
 role_users.json
 
+# ignore Scout temp directory
+.scout
 
 .devcontainer/.env
 
@@ -159,4 +162,4 @@ x-pack/test/security_solution_playwright/playwright/.cache/
 x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
 .codeql
-.zshrc
+.dependency-graph-log.json
