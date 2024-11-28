@@ -564,8 +564,8 @@ export class EntityStoreDataClient {
     return this.engineClient.updateStatus(entityType, ENGINE_STATUS.STOPPED);
   }
 
-  public async get(entityType: EntityType, includeState = false) {
-    return { engine: this.engineClient.get(entityType) };
+  public async get(entityType: EntityType) {
+    return this.engineClient.get(entityType);
   }
 
   public async list(): Promise<ListEntityEnginesResponse> {
