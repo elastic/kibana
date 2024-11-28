@@ -88,12 +88,8 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: [createdMigration.migration_id],
       });
-      // we need to delete migrated index, otherwise create migration call will fail
-      try {
-        await es.indices.delete({ index: createdMigration.migration_index });
-      } catch (e) {
-        log.error(`Index delete failed ${e.message}`);
-      }
+      // we need to delete migrated index, otherwise create migration call(in beforeEach hook) will fail
+      await es.indices.delete({ index: createdMigration.migration_index });
       await deleteAllAlerts(supertest, log, es);
     });
 
