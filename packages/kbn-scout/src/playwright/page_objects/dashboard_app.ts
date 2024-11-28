@@ -20,16 +20,28 @@ export class DashboardApp {
     await this.page.testSubj.click('newItemButton');
   }
 
+  async saveDashboard(name: string) {
+    await this.page.testSubj.click('dashboardInteractiveSaveMenuItem');
+    await this.page.testSubj.fill('savedObjectTitle', name);
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+    await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'hidden' });
+  }
+
   async addPanelFromLibrary(...names: string[]) {
     await this.page.testSubj.click('dashboardAddFromLibraryButton');
     for (let i = 0; i < names.length; i++) {
       if (i > 0) {
         await this.page.testSubj.locator('savedObjectFinderSearchInput').fill('');
       }
-      await this.page.testSubj.typeWithDelay('savedObjectFinderSearchInput', names[i]);
+      // there is an issue typing a string longer than 16 character
+      const partialName = names[i].substring(0, 16);
+      await this.page.testSubj.typeWithDelay(
+        'savedObjectFinderSearchInput',
+        partialName.replace('-', ' ')
+      );
       await this.page.testSubj.click(`savedObjectTitle${names[i].replace(/ /g, '-')}`);
       await this.page.testSubj.waitForSelector(
-        `embeddablePanelHeading-${names[i].replace(/ /g, '')}`,
+        `embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`,
         {
           state: 'visible',
         }
@@ -57,5 +69,17 @@ export class DashboardApp {
 
     await this.page.testSubj.click('saveCustomizePanelButton');
     await this.page.testSubj.waitForSelector('saveCustomizePanelButton', { state: 'hidden' });
+  }
+
+  async removePanel(name: string | 'embeddableError') {
+    const panelHeaderTestSubj =
+      name === 'embeddableError' ? name : `embeddablePanelHeading-${name.replace(/ /g, '')}`;
+    await this.page.testSubj.locator(panelHeaderTestSubj).scrollIntoViewIfNeeded();
+    await this.page.testSubj.locator(panelHeaderTestSubj).hover();
+    await this.page.testSubj.click('embeddablePanelToggleMenuIcon');
+    await this.page.testSubj.click('embeddablePanelAction-deletePanel');
+    await this.page.testSubj.waitForSelector(panelHeaderTestSubj, {
+      state: 'hidden',
+    });
   }
 }

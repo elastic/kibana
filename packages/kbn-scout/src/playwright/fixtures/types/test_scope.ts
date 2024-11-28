@@ -73,6 +73,6 @@ export type ScoutPage = Page & {
       options?: Parameters<Page['waitForSelector']>[1]
     ) => ReturnType<Page['waitForSelector']>;
     // custom methods
-    typeWithDelay: (selector: string, text: string) => Promise<void>;
+    typeWithDelay: (selector: string, text: string, options?: { delay: number }) => Promise<void>;
   };
 };

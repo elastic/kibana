@@ -44,11 +44,7 @@ export class FilterBar {
     await this.page.click(`.euiFilterSelectItem[title="${options.operator}"]`);
     // set value
     await this.page.testSubj.locator('filterParams').locator('input').fill(options.value);
-
-    // await expect(page.testSubj.locator('filter-preview')).toHaveText(
-    //   `${filterField}:${filterValue}`
-    // );
-
+    // save filter
     await this.page.testSubj.click('saveFilter');
 
     await expect(this.page.testSubj.locator('^filter-badge')).toBeVisible();
