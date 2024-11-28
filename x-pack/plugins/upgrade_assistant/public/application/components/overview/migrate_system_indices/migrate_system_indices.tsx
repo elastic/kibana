@@ -141,14 +141,15 @@ const ConfirmModal: React.FC<{
       }
     )}
     confirmButtonText={i18n.translate(
-      'xpack.upgradeAssistant.overview.systemIndices.confirmModa.confirmButton.label',
+      'xpack.upgradeAssistant.overview.systemIndices.confirmModal.confirmButton.label',
       {
         defaultMessage: 'Confirm',
       }
     )}
     defaultFocusedButton="confirm"
+    data-test-subj="migrationConfirmModal"
   >
-    {i18n.translate('xpack.upgradeAssistant.overview.systemIndices.confirmModa.description', {
+    {i18n.translate('xpack.upgradeAssistant.overview.systemIndices.confirmModal.description', {
       defaultMessage:
         'Migrating system indices may lead to downtime while the indices are reindexed. Are you sure you want to migrate system indices?',
     })}
@@ -161,14 +162,14 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const refreshButtonClick = () => {
+  const openMigrationModal = () => {
     setIsModalVisible(true);
   };
   const onCancel = () => {
     setIsModalVisible(false);
   };
 
-  const onConfirm = () => {
+  const confirmMigrationAction = () => {
     beginSystemIndicesMigration();
     setIsModalVisible(false);
   };
@@ -252,14 +253,14 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
         </>
       )}
 
-      {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
+      {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={confirmMigrationAction} />}
 
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton
             isLoading={isMigrating}
             isDisabled={isButtonDisabled}
-            onClick={refreshButtonClick}
+            onClick={openMigrationModal}
             data-test-subj="startSystemIndicesMigrationButton"
           >
             {isMigrating ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
