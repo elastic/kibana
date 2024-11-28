@@ -22,13 +22,7 @@ import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import type { RecognizeModuleResult } from '@kbn/ml-common-types/modules';
 import type { MlCalendar, MlCalendarId, UpdateCalendar } from '@kbn/ml-common-types/calendars';
 import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
-import type {
-  AnalysisConfig,
-  CombinedJob,
-  Datafeed,
-  Job,
-  JobStats,
-} from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { AnalysisConfig, Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs/job_stats';
 import type {
   Datafeed,
