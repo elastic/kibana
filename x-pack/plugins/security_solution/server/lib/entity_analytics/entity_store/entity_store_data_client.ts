@@ -215,7 +215,7 @@ export class EntityStoreDataClient {
   }
 
   public async status({
-    withComponents = false,
+    include_components: withComponents = false,
   }: GetEntityStoreStatusRequestQuery): Promise<GetEntityStoreStatusResponse> {
     const { namespace } = this.options;
     const { engines, count } = await this.engineClient.list();

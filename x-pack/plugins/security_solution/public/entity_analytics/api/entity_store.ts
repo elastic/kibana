@@ -38,7 +38,7 @@ export const useEntityStoreRoutes = () => {
       return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
         method: 'GET',
         version: API_VERSIONS.public.v1,
-        query: { withComponents },
+        query: { include_components: withComponents },
       });
     };
 

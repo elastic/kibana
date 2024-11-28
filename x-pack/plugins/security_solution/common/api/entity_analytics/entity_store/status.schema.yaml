@@ -12,7 +12,7 @@ paths:
       summary: Get the status of the Entity Store
             
       parameters:
-        - name: withComponents          
+        - name: include_components
           in: query  
           schema:
             type: boolean

@@ -24,7 +24,7 @@ export const GetEntityStoreStatusRequestQuery = z.object({
   /**
    * If true returns a detailed status of the engine including all it's components
    */
-  withComponents: BooleanFromString.optional(),
+  include_components: BooleanFromString.optional(),
 });
 export type GetEntityStoreStatusRequestQueryInput = z.input<
   typeof GetEntityStoreStatusRequestQuery
