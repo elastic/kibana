@@ -1126,13 +1126,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from a_index | eval 1 ${op} "1"`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
+            ? [`Argument of [${op}] must be [date], found value [1] type [integer]`]
             : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         testErrorsAndWarnings(
           `from a_index | eval "1" ${op} 1`,
           ['+', '-'].includes(op)
-            ? [`Argument of [${op}] must be [date_period], found value [1] type [integer]`]
+            ? [`Argument of [${op}] must be [date], found value [1] type [integer]`]
             : [`Argument of [${op}] must be [double], found value [\"1\"] type [keyword]`]
         );
         // TODO: enable when https://github.com/elastic/elasticsearch/issues/108432 is complete

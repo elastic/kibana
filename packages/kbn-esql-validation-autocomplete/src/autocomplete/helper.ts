@@ -112,6 +112,7 @@ export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinit
   }));
 }
 
+const leftHandSideParamName = new Set(['left', 'field', 'lhs']);
 export function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
   previousType: string
@@ -119,7 +120,10 @@ export function getSupportedTypesForBinaryOperators(
   // Retrieve list of all 'right' supported types that match the left hand side of the function
   return fnDef && Array.isArray(fnDef?.signatures)
     ? fnDef.signatures
-        .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
+        // @todo: add 'field'
+        .filter(({ params }) =>
+          params.find((p) => leftHandSideParamName.has(p.name) && p.type === previousType)
+        )
         .map(({ params }) => params[1].type)
     : [previousType];
 }
@@ -133,6 +137,8 @@ export function getValidFunctionSignaturesForPreviousArgs(
   >,
   argIndex: number
 ) {
+  //@TODO: remove
+  console.log(`--@@enrichedArgs`, enrichedArgs, 'argIndex', argIndex);
   // Filter down to signatures that match every params up to the current argIndex
   // e.g. BUCKET(longField, /) => all signatures with first param as long column type
   // or BUCKET(longField, 2, /) => all signatures with (longField, integer, ...)

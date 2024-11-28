@@ -86,6 +86,7 @@ import {
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../shared/constants';
 import { compareTypesWithLiterals } from '../shared/esql_types';
+import { getCompatibleTypesToSuggestNext, getValidFunctionSignaturesForPreviousArgs } from '../autocomplete/helper';
 
 const NO_MESSAGE: ESQLMessage[] = [];
 function validateFunctionLiteralArg(
@@ -613,7 +614,36 @@ function validateFunction({
   }
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
-  for (const signature of matchingSignatures) {
+  let relevantFuncSignatures = matchingSignatures;
+  const enrichedArgs = fn.args;
+
+  console.log("fn", fn)
+  //@TODO: remove
+  console.log(`--@@fn.args`,fn.args );
+  if (fn.name === 'in') {
+    for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
+
+      relevantFuncSignatures = fnDefinition.signatures.filter(
+        (s) =>
+          s.params?.length >= argIndex &&
+          s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
+            return (
+              dataType === enrichedArgs[idx].literalType ||
+              compareTypesWithLiterals(dataType, enrichedArgs[idx].literalType)
+            );
+          })
+      );
+      //@TODO: remove
+      console.log(`--@@relevantFuncSignatures`,relevantFuncSignatures );
+      }
+
+  }
+  // Retrieve unique of types that are compatiable for the current arg
+  // const typesToSuggestNext = getCompatibleTypesToSuggestNext(fnDefinition, enrichedArgs, argIndex);
+
+  for (const signature of relevantFuncSignatures) {
+    //@TODO: remove
+    // console.log(`--@@signature`,signature );
     const failingSignature: ESQLMessage[] = [];
     fn.args.forEach((outerArg, index) => {
       const argDef = getParamAtPosition(signature, index);
@@ -649,6 +679,7 @@ function validateFunction({
         });
       });
 
+
       const shouldCollapseMessages = isArrayType(argDef.type as string) && hasMultipleElements;
       failingSignature.push(
         ...(shouldCollapseMessages
@@ -667,14 +698,18 @@ function validateFunction({
       failingSignatures.push(failingSignature);
     }
   }
+  //@TODO: remove
+  console.log(`--@@failingSignatures`,failingSignatures );
 
-  if (failingSignatures.length && failingSignatures.length === matchingSignatures.length) {
+  if (failingSignatures.length && failingSignatures.length === relevantFuncSignatures.length) {
     const failingSignatureOrderedByErrorCount = failingSignatures
       .map((arr, index) => ({ index, count: arr.length }))
       .sort((a, b) => a.count - b.count);
     const indexForShortestFailingsignature = failingSignatureOrderedByErrorCount[0].index;
     messages.push(...failingSignatures[indexForShortestFailingsignature]);
   }
+  //@TODO: remove
+  console.log( uniqBy(messages, ({ location }) => `${location.min}-${location.max}`));
   // This is due to a special case in enrich where an implicit assignment is possible
   // so the AST needs to store an explicit "columnX = columnX" which duplicates the message
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
@@ -1366,6 +1401,9 @@ async function validateAst(
     const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
+  //@TODO: remove
+  console.log(`--@@parsingResult.errors`, parsingResult.errors);
+  console.log(`--@@messages`, messages);
 
   return {
     errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],

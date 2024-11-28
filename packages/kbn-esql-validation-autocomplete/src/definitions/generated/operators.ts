@@ -1628,12 +1628,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'boolean',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'boolean',
           optional: false,
         },
@@ -1644,12 +1644,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'cartesian_point',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'cartesian_point',
           optional: false,
         },
@@ -1660,12 +1660,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'cartesian_shape',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'cartesian_shape',
           optional: false,
         },
@@ -1676,12 +1676,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'double',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'double',
           optional: false,
         },
@@ -1692,12 +1692,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'geo_point',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'geo_point',
           optional: false,
         },
@@ -1708,12 +1708,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'geo_shape',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'geo_shape',
           optional: false,
         },
@@ -1724,12 +1724,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'integer',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'integer',
           optional: false,
         },
@@ -1740,12 +1740,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'ip',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'ip',
           optional: false,
         },
@@ -1756,12 +1756,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'keyword',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'keyword',
           optional: false,
         },
@@ -1772,12 +1772,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'keyword',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'text',
           optional: false,
         },
@@ -1788,12 +1788,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'long',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'long',
           optional: false,
         },
@@ -1804,12 +1804,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'text',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'keyword',
           optional: false,
         },
@@ -1820,12 +1820,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'text',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'text',
           optional: false,
         },
@@ -1836,12 +1836,12 @@ const inDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'version',
           optional: false,
         },
         {
-          name: 'inlist',
+          name: 'right',
           type: 'version',
           optional: false,
         },
@@ -2505,7 +2505,7 @@ const likeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: undefined,
   validate: undefined,
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
@@ -2885,7 +2885,7 @@ const negDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'date_period',
           optional: false,
         },
@@ -2895,7 +2895,7 @@ const negDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'double',
           optional: false,
         },
@@ -2905,7 +2905,7 @@ const negDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'integer',
           optional: false,
         },
@@ -2915,7 +2915,7 @@ const negDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'long',
           optional: false,
         },
@@ -2925,7 +2925,7 @@ const negDefinition: FunctionDefinition = {
     {
       params: [
         {
-          name: 'field',
+          name: 'left',
           type: 'time_duration',
           optional: false,
         },
@@ -3428,7 +3428,7 @@ const rlikeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics'],
+  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: undefined,
   validate: undefined,
   examples: [

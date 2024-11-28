@@ -529,6 +529,12 @@ const replaceParamName = (str: string) => {
       return 'left';
     case 'rhs':
       return 'right';
+
+    // @todo: For in function where Kibana doesn't interpret field and inlist
+    case 'field':
+      return 'left';
+    case 'inlist':
+      return 'right';
     default:
       return str;
   }
@@ -545,6 +551,7 @@ const enrichOperators = (
       Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
     const isInOperator = op.name === 'in';
+    const isLikeOperator = /like/i.test(op.name);
 
     const signatures = op.signatures.map((s) => ({
       ...s,
@@ -569,7 +576,7 @@ const enrichOperators = (
       ]);
       supportedOptions = ['by'];
     }
-    if (isInOperator) {
+    if (isInOperator || isLikeOperator) {
       supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
     }
     if (
