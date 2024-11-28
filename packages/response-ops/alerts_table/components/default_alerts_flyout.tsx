@@ -12,9 +12,9 @@ import { EuiDescriptionList, EuiPanel, EuiTabbedContentTab, EuiTitle } from '@el
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { ScrollableFlyoutTabbedContent, AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { AdditionalContext, FlyoutSectionProps } from '../types';
-import { getAlertFormatters } from './render_cell_value';
+import { AdditionalContext, CellComponentProps, FlyoutSectionProps } from '../types';
 import { defaultAlertsTableColumns } from '../configuration';
+import { DefaultCellValue } from './default_cell_value';
 
 export const DefaultAlertsFlyoutHeader = <AC extends AdditionalContext>({
   alert,
@@ -28,15 +28,10 @@ export const DefaultAlertsFlyoutHeader = <AC extends AdditionalContext>({
 
 type TabId = 'overview' | 'table';
 
-export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>({
-  alert,
-  columns,
-  services: { http, fieldFormats },
-}: FlyoutSectionProps<AC>) => {
-  const formatColumnValue = useMemo(
-    () => getAlertFormatters(fieldFormats, http),
-    [fieldFormats, http]
-  );
+export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
+  props: FlyoutSectionProps<AC>
+) => {
+  const { alert, columns } = props;
   const overviewTab = useMemo(
     () => ({
       id: 'overview',
@@ -52,7 +47,12 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>({
 
               return {
                 title: column.displayAsText as string,
-                description: value != null ? formatColumnValue(column.id, value) : '—',
+                description:
+                  value != null ? (
+                    <DefaultCellValue {...(props as unknown as CellComponentProps)} />
+                  ) : (
+                    '—'
+                  ),
               };
             })}
             type="column"
@@ -61,7 +61,7 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>({
         </EuiPanel>
       ),
     }),
-    [alert, columns, formatColumnValue]
+    [alert, columns, props]
   );
 
   const tableTab = useMemo(
