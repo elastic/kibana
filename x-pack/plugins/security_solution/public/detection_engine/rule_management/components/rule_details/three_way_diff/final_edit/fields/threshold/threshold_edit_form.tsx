@@ -29,40 +29,41 @@ interface ThresholdFormData {
 }
 
 function deserializer(defaultValue: FormData): ThresholdFormData {
-  const threshold = defaultValue.threshold as Threshold;
+  const threshold: Threshold = defaultValue.threshold;
 
-  return {
-    threshold: {
-      field: normalizeThresholdField(threshold.field),
-      value: `${threshold?.value ?? 100}`,
-      ...(threshold.cardinality?.length
-        ? {
-            cardinality: {
-              field: [`${threshold.cardinality[0].field}`],
-              value: `${threshold.cardinality[0].value}`,
-            },
-          }
-        : {}),
-    },
+  const deserializedThreshold: FieldValueThreshold = {
+    field: normalizeThresholdField(threshold.field),
+    value: `${threshold?.value ?? 100}`,
   };
+
+  if (threshold.cardinality?.length) {
+    deserializedThreshold.cardinality = {
+      field: [`${threshold.cardinality[0].field}`],
+      value: `${threshold.cardinality[0].value}`,
+    };
+  }
+
+  return { threshold: deserializedThreshold };
 }
 
 function serializer(formData: FormData): { threshold: Threshold } {
-  const threshold: Threshold = {
-    field: formData.threshold.field,
-    value: Number.parseInt(formData.threshold.value, 10),
+  const threshold: FieldValueThreshold = formData.threshold;
+
+  const serializedThreshold: Threshold = {
+    field: threshold.field,
+    value: Number.parseInt(threshold.value, 10),
   };
 
-  if (formData.threshold.cardinality && formData.threshold.cardinality.field.length > 0) {
-    threshold.cardinality = [
+  if (threshold.cardinality?.field?.length) {
+    serializedThreshold.cardinality = [
       {
-        field: formData.threshold.cardinality.field[0],
-        value: parseInt(formData.threshold.cardinality.value, 10),
+        field: threshold.cardinality.field[0],
+        value: Number.parseInt(threshold.cardinality.value, 10),
       },
     ];
   }
 
-  return { threshold };
+  return { threshold: serializedThreshold };
 }
 
 const schema = {};
