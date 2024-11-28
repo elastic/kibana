@@ -90,28 +90,62 @@ export class OverviewStatusService {
     };
   }
 
+  getEsDataFilters() {
+    const { spaceId, request } = this.routeContext;
+    const params = request.query || {};
+    const {
+      scopeStatusByLocation = true,
+      tags,
+      monitorTypes,
+      projects,
+      showFromAllSpaces,
+    } = params;
+    const { locationFilter } = this.filterData;
+    const getTermFilter = (field: string, value: string | string[] | undefined) => {
+      if (!value || isEmpty(value)) {
+        return [];
+      }
+      if (Array.isArray(value)) {
+        return [
+          {
+            terms: {
+              [field]: value,
+            },
+          },
+        ];
+      }
+      return [
+        {
+          term: {
+            [field]: value,
+          },
+        },
+      ];
+    };
+    const filters: QueryDslQueryContainer[] = [
+      ...(showFromAllSpaces ? [] : [{ term: { 'meta.space_id': spaceId } }]),
+      ...getTermFilter('monitor.type', monitorTypes),
+      ...getTermFilter('tags', tags),
+      ...getTermFilter('monitor.project.id', projects),
+    ];
+
+    if (scopeStatusByLocation && !isEmpty(locationFilter) && locationFilter) {
+      filters.push({
+        terms: {
+          'observer.name': locationFilter,
+        },
+      });
+    }
+    return filters;
+  }
+
   async getQueryResult() {
     return withApmSpan('monitor_status_data', async () => {
       const range = {
-        // max monitor schedule period is 4 hours, 20 minute subtraction is to be on safe sife
+        // max monitor schedule period is 4 hours, 20 minute subtraction is to be on safe side
         from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
         to: 'now',
       };
-
-      const params = this.routeContext.request.query || {};
-      const { scopeStatusByLocation = true } = params;
-      const { locationFilter } = this.filterData;
-
-      const observerFilters =
-        scopeStatusByLocation && !isEmpty(locationFilter)
-          ? [
-              {
-                terms: {
-                  'observer.name': locationFilter,
-                },
-              },
-            ]
-          : [];
 
       let hasMoreData = true;
       const monitorByIds = new Map<string, LocationStatus>();
@@ -128,8 +162,8 @@ export class OverviewStatusService {
                   filter: [
                     FINAL_SUMMARY_FILTER,
                     getRangeFilter({ from: range.from, to: range.to }),
-                    getTimespanFilter({ from: 'now-5m', to: 'now' }),
-                    ...observerFilters,
+                    getTimespanFilter({ from: 'now-15m', to: 'now' }),
+                    ...this.getEsDataFilters(),
                   ] as QueryDslQueryContainer[],
                 },
               },
@@ -294,7 +328,7 @@ export class OverviewStatusService {
     return await getAllMonitors({
       soClient: savedObjectsClient,
       showFromAllSpaces,
-      search: query,
+      search: query ? `${query}*` : '',
       filter: filtersStr,
       fields: [
         ConfigKey.ENABLED,
