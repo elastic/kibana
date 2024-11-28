@@ -173,6 +173,8 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
         });
       } else {
         if (values.generatedNameData && values.selectedConnector) {
+          console.log(values.generatedNameData);
+          console.log(!values.selectedConnector.isNative ? false : !isSelfManaged);
           actions.createConnectorApi({
             deleteExistingConnector: false,
             indexName: values.generatedNameData.indexName,
@@ -192,6 +194,7 @@ export const NewConnectorLogic = kea<MakeLogicType<NewConnectorValues, NewConnec
       if (connector) {
         actions.generateConnectorName({
           connectorType: connector.serviceType,
+          isManagedConnector: connector.isNative,
         });
       }
     },

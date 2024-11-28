@@ -56,6 +56,7 @@ import {
   isExpensiveQueriesNotAllowedException,
   isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
+import { isManagedJob } from '@kbn/ml-plugin/public/application/jobs/jobs_utils';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -842,17 +843,19 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         body: schema.object({
           connectorName: schema.maybe(schema.string()),
           connectorType: schema.string(),
+          isManagedConnector: schema.maybe(schema.boolean()),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connectorType, connectorName } = request.body;
+      const { connectorType, connectorName, isManagedConnector } = request.body;
       try {
         const generatedNames = await generateConnectorName(
           client,
           connectorType ?? 'custom',
-          connectorName
+          connectorName,
+          isManagedConnector
         );
         return response.ok({
           body: generatedNames,
