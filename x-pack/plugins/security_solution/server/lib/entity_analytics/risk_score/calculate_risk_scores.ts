@@ -243,7 +243,6 @@ export const calculateRiskScores = async ({
         bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
       });
     }
-    logger.info(`The filter for risk score calculation is: ${JSON.stringify(filter)}`);
     const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
     const request = {
       size: 0,

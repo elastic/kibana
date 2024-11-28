@@ -82,10 +82,13 @@ export class RiskEngineDataClient {
     }
 
     try {
-      await initSavedObjects({
+      const soResult = await initSavedObjects({
         savedObjectsClient: this.options.soClient,
         namespace,
       });
+      this.options.logger.info(
+        `Risk engine savedObject configuration: ${JSON.stringify(soResult, null, 2)}`
+      );
       result.riskEngineConfigurationCreated = true;
     } catch (e) {
       result.errors.push(e.message);

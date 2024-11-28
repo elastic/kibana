@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,6 +39,7 @@ export const EntityAnalyticsManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess } = useAppToasts();
+  const [nextRunTime, setNextRunTime] = useState('');
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
@@ -63,7 +64,7 @@ export const EntityAnalyticsManagementPage = () => {
     localStorage.setItem('dateEnd', end);
   };
 
-  const calculateNextRunTime = () => {
+  const calculateNextRunTime = useCallback((): string => {
     if (runEngineEnabled) {
       const currentTime = new Date();
       const runAtTime = riskEngineStatus?.risk_engine_task_status?.runAt
@@ -72,7 +73,27 @@ export const EntityAnalyticsManagementPage = () => {
       const minutesUntilNextRun = Math.round((runAtTime.getTime() - currentTime.getTime()) / 60000);
       return `Next engine run in ${minutesUntilNextRun} minutes`;
     }
-  };
+    return '';
+  }, [runEngineEnabled, riskEngineStatus]);
+
+  useEffect(() => {
+    let intervalId: string | number | NodeJS.Timeout;
+
+    // Poll only if the engine is in the 'running' state
+    if (riskEngineStatus?.risk_engine_task_status?.status === 'idle') {
+      setNextRunTime(calculateNextRunTime()); // Initial calculation
+
+      intervalId = setInterval(() => {
+        setNextRunTime(calculateNextRunTime());
+      }, 60000); // Poll every minute
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [calculateNextRunTime, riskEngineStatus?.risk_engine_task_status?.status]);
 
   return (
     <>
@@ -117,7 +138,7 @@ export const EntityAnalyticsManagementPage = () => {
                 {runEngineEnabled && (
                   <EuiFlexItem grow={false}>
                     <span style={{ fontSize: '14px', color: '#888888', fontWeight: 'normal' }}>
-                      {calculateNextRunTime()}
+                      {nextRunTime}
                     </span>
                   </EuiFlexItem>
                 )}

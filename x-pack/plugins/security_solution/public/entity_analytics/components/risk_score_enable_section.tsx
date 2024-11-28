@@ -175,7 +175,6 @@ const RiskEngineStatusRow: React.FC<{
           data-test-subj="risk-score-switch"
           checked={currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED}
           onChange={onSwitchClick}
-          compressed
           disabled={btnIsDisabled}
           aria-describedby={'switchRiskModule'}
         />
