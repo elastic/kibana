@@ -12,6 +12,7 @@ import {
   fetchConnectorById,
   fetchConnectors,
   fetchSyncJobs,
+  generateConnectorName,
   IngestPipelineParams,
   startConnectorSync,
   updateConnectorConfiguration,
@@ -351,6 +352,36 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
         request.body
       );
       return response.ok();
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/connectors/{connectorId}/generate_name',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          service_type: schema.string(),
+        }),
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const result = await generateConnectorName(
+        client.asCurrentUser,
+        request.body.service_type,
+        request.body.name
+      );
+
+      return response.ok({
+        body: {
+          result,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 };
