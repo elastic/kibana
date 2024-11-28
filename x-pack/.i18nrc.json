@@ -84,6 +84,7 @@
     "xpack.metricsData": "solutions/observability/plugins/metrics_data_access",
     "xpack.ml": [
       "platform/packages/shared/ml/anomaly_utils",
+      "platform/packages/shared/ml/common_constants",
       "platform/packages/private/ml/creation_wizard_utils",
       "platform/packages/private/ml/data_grid",
       "platform/packages/private/ml/data_view_utils",
