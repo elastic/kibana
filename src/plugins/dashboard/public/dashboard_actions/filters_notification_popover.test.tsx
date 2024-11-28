@@ -51,6 +51,7 @@ describe('filters notification popover', () => {
   let updateFilters: (filters: Filter[]) => void;
   let updateQuery: (query: Query | AggregateQuery | undefined) => void;
   let updateViewMode: (viewMode: ViewMode) => void;
+  let updateType: (type: string) => void;
 
   beforeEach(async () => {
     const filtersSubject = new BehaviorSubject<Filter[] | undefined>(undefined);
@@ -59,6 +60,7 @@ describe('filters notification popover', () => {
     updateQuery = (query) => querySubject.next(query);
     const viewModeSubject = new BehaviorSubject<ViewMode>('view');
     updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
+    updateType = (type) => ({ ...api, type });
 
     api = {
       uuid: 'testId',
@@ -67,6 +69,7 @@ describe('filters notification popover', () => {
       parentApi: {
         viewMode: viewModeSubject,
       },
+      type: undefined,
     };
   });
 
@@ -94,6 +97,14 @@ describe('filters notification popover', () => {
 
   it('does not render an edit button when not in edit mode', async () => {
     await renderAndOpenPopover();
+    expect(
+      await screen.queryByTestId('filtersNotificationModal__editButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not render an edit button when the type is search', async () => {
+    await renderAndOpenPopover();
+    updateType('search');
     expect(
       await screen.queryByTestId('filtersNotificationModal__editButton')
     ).not.toBeInTheDocument();
