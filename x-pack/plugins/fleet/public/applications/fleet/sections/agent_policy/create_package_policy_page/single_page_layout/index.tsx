@@ -380,6 +380,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     newAgentPolicy,
     setNewAgentPolicy,
     updateAgentPolicies,
+    updatePackagePolicy,
     setSelectedPolicyTab,
     packageInfo,
     packagePolicy,
