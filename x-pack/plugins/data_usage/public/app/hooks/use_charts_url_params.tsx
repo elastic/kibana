@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { type MetricTypes, isMetricType } from '../../../common/rest_types';
 import { useUrlParams } from '../../hooks/use_url_params';
-import { DEFAULT_DATE_RANGE_OPTIONS } from './use_date_picker';
+import { DEFAULT_DATE_RANGE_OPTIONS } from '../../../common/utils';
 
 interface UrlParamsDataUsageMetricsFilters {
   metricTypes: string;
