@@ -53,6 +53,9 @@ const isNodeWithChildren = (x: unknown): x is ESQLAstNodeWithChildren =>
   typeof x === 'object' &&
   (Array.isArray((x as any).args) || Array.isArray((x as any).values));
 
+const isNodeWithValues = (x: unknown): x is Pick<ESQLList, 'values'> =>
+  !!x && typeof x === 'object' && Array.isArray((x as any).values);
+
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData,
@@ -116,6 +119,16 @@ export class VisitorContext<
     }
 
     return args;
+  }
+
+  public children(): ESQLAstExpressionNode[] {
+    const node = this.node;
+
+    if (isNodeWithValues(node)) {
+      return node.values;
+    }
+
+    return this.arguments();
   }
 
   public visitArgument(
