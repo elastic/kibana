@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-// import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import {
   getAggregateQueryMode,
   isOfAggregateQueryType,
@@ -96,6 +95,7 @@ export function LensEditConfigurationFlyout({
     Array<{
       key: string;
       value: string;
+      type: string;
     }>
   >(esqlVariablesService.getVariables());
 
@@ -519,7 +519,6 @@ export function LensEditConfigurationFlyout({
                 query={query}
                 onTextLangQueryChange={(q) => {
                   setQuery(q);
-                  esqlVariablesService.setEsqlQueryWithVariables('');
                 }}
                 detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
                 hideTimeFilterInfo={hideTimeFilterInfo}
@@ -540,6 +539,7 @@ export function LensEditConfigurationFlyout({
                     setIsVisualizationLoading(true);
                     await runQuery(q, a);
                   }
+                  esqlVariablesService.setEsqlQueryWithVariables('');
                 }}
                 isDisabled={false}
                 allowQueryCancellation

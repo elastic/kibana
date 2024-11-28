@@ -35,7 +35,6 @@ import {
   mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-
 import { merge, Subscription, switchMap } from 'rxjs';
 import { toExpression } from '@kbn/interpreter';
 import {
@@ -603,7 +602,6 @@ export class Embeddable
     if (!this.activeDatasourceId || !this.activeDatasource) return;
 
     const docDatasourceState = this.savedVis?.state.datasourceStates[this.activeDatasourceId];
-
     return this.activeDatasource.initialize(
       docDatasourceState,
       [...(this.savedVis?.references || []), ...(this.savedVis?.state.internalReferences || [])],

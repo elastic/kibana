@@ -49,7 +49,7 @@ export const getGridAttrs = async (
   adHocDataViews: DataViewSpec[],
   deps: LensPluginStartDependencies,
   abortController?: AbortController,
-  esqlVariables: Array<{ key: string; value: string }> = []
+  esqlVariables: Array<{ key: string; value: string; type: string }> = []
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -90,7 +90,7 @@ export const getSuggestions = async (
   setErrors: (errors: Error[]) => void,
   abortController?: AbortController,
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
-  esqlVariables: Array<{ key: string; value: string }> = []
+  esqlVariables: Array<{ key: string; value: string; type: string }> = []
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
@@ -100,6 +100,12 @@ export const getSuggestions = async (
       abortController,
       esqlVariables
     );
+
+    columns.map((column) => {
+      if (esqlVariables.some((variable) => variable.value === column.id)) {
+        column.variable = esqlVariables.find((variable) => variable.value === column.id)?.key;
+      }
+    });
 
     setDataGridAttrs?.({
       rows,

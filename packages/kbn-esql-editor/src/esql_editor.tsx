@@ -263,6 +263,20 @@ export const ESQLEditor = memo(function ESQLEditor({
     });
   });
 
+  monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
+    if (!dashboardApi) {
+      return;
+    }
+    const position = editor1.current?.getPosition();
+    await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+      queryString: query.esql,
+      controlType: 'fields',
+      dashboardApi,
+      panelId,
+      cursorPosition: position,
+    });
+  });
+
   const styles = esqlEditorStyles(
     euiTheme,
     editorHeight,

@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 interface ESQLVariables {
   key: string;
   value: string;
+  type: string;
 }
 
 export class EsqlVariablesService {
@@ -29,11 +30,11 @@ export class EsqlVariablesService {
     this.esqlQueryWithVariables = esqlQueryWithVariables;
   }
 
-  getEsqlQueryWithVariables() {
+  getEsqlQueryWithVariables(): string {
     return this.esqlQueryWithVariables;
   }
 
-  addVariable(variable: ESQLVariables) {
+  addVariable(variable: ESQLVariables): void {
     const variables = [...this.esqlVariables];
     const variableExists = variables.find((v) => v.key === variable.key);
     if (variableExists) {
@@ -52,10 +53,10 @@ export class EsqlVariablesService {
     return this.esqlVariables.find((variable) => variable.key === key);
   }
 
-  updateVariable(key: string, value: string) {
+  updateVariable(key: string, value: string, type: string) {
     const variables = this.esqlVariables.map((variable) => {
       if (variable.key === key) {
-        return { ...variable, value };
+        return { ...variable, value, type };
       }
       return variable;
     });

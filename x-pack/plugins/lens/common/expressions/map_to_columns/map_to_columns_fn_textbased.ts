@@ -21,7 +21,19 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
       for (const id in row) {
         if (id in idMap) {
           for (const cachedEntry of idMap[id]) {
-            mappedRow[cachedEntry.id] = row[id]; // <= I wrote idMap rather than mappedRow
+            mappedRow[cachedEntry.id] = row[id];
+          }
+        } else {
+          const col = data.columns.find((c) => c.id === id);
+          if (col?.variable) {
+            const originalColumn = Object.values(idMap).find((idMapCol) => {
+              return idMapCol.some((c) => c.variable === col.variable);
+            });
+            if (originalColumn) {
+              for (const cachedEntry of originalColumn) {
+                mappedRow[cachedEntry.id] = row[id];
+              }
+            }
           }
         }
       }
@@ -29,10 +41,43 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
       return mappedRow;
     }),
     columns: data.columns.flatMap((column) => {
-      if (!(column.id in idMap)) {
+      if (!(column.id in idMap) && !column.variable) {
         return [];
+      }
+      if (column.variable) {
+        const originalColumn = Object.values(idMap).find((idMapCol) => {
+          return idMapCol.some((c) => c.variable === column.variable);
+        });
+        if (!originalColumn) {
+          return [];
+        }
+
+        return originalColumn.map((c) => ({ ...column, id: c.id }));
       }
       return idMap[column.id].map((originalColumn) => ({ ...column, id: originalColumn.id }));
     }),
   };
+
+  // return {
+  //   ...data,
+  //   rows: data.rows.map((row) => {
+  //     const mappedRow: Record<string, unknown> = {};
+
+  //     for (const id in row) {
+  //       if (id in idMap) {
+  //         for (const cachedEntry of idMap[id]) {
+  //           mappedRow[cachedEntry.id] = row[id];
+  //         }
+  //       }
+  //     }
+
+  //     return mappedRow;
+  //   }),
+  //   columns: data.columns.flatMap((column) => {
+  //     if (!(column.id in idMap)) {
+  //       return [];
+  //     }
+  //     return idMap[column.id].map((originalColumn) => ({ ...column, id: originalColumn.id }));
+  //   }),
+  // };
 };

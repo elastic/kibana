@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyoutBody,
@@ -25,24 +25,33 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { ISearchGeneric } from '@kbn/search-types';
+import { getESQLQueryColumnsRaw, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { EsqlControlType, EsqlControlFlyoutType } from './types';
 
 interface ESQLControlsFlyoutProps {
+  search: ISearchGeneric;
   controlType: EsqlControlType;
   queryString: string;
   dashboardApi: DashboardApi;
   panelId?: string;
   cursorPosition?: monaco.Position;
   closeFlyout: () => void;
-  addToESQLVariablesService: (variable: string, variableValue: string, query: string) => void;
+  addToESQLVariablesService: (
+    variable: string,
+    variableValue: string,
+    controlType: string,
+    query: string
+  ) => void;
   openEditFlyout: (embeddable: unknown) => Promise<void>;
 }
 
 const getControlFlyoutType = (controlType: EsqlControlType) => {
   switch (controlType) {
     case EsqlControlType.TIME_LITERAL:
+    case EsqlControlType.FIELDS:
       return EsqlControlFlyoutType.STATIC_VALUES;
     default:
       return EsqlControlFlyoutType.STATIC_VALUES;
@@ -53,6 +62,8 @@ const getVariableName = (controlType: EsqlControlType) => {
   switch (controlType) {
     case EsqlControlType.TIME_LITERAL:
       return '?interval';
+    case EsqlControlType.FIELDS:
+      return '?field';
     default:
       return '?variable';
   }
@@ -106,6 +117,7 @@ const minimumWidthButtonGroup = [
 ];
 
 export function ESQLControlsFlyout({
+  search,
   controlType,
   queryString,
   dashboardApi,
@@ -129,11 +141,18 @@ export function ESQLControlsFlyout({
   const [values, setValues] = useState<string | undefined>(suggestedStaticValues);
 
   const [label, setLabel] = useState('');
-
   const [minimumWidth, setMinimumWidth] = useState('medium');
+  const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
+    []
+  );
+  const [selectedFields, setSelectedFields] = useState<EuiComboBoxOptionOption[]>([]);
 
   const onFlyoutTypeChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setControlFlyoutType(selectedOptions);
+  }, []);
+
+  const onFieldsChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
+    setSelectedFields(selectedOptions);
   }, []);
 
   const onVariableNameChange = useCallback(
@@ -159,7 +178,10 @@ export function ESQLControlsFlyout({
   }, []);
 
   const createVariableControl = useCallback(async () => {
-    const availableOptions = values?.split(',').map((value) => value.trim()) ?? [];
+    const availableOptions =
+      controlType === EsqlControlType.TIME_LITERAL
+        ? values?.split(',').map((value) => value.trim()) ?? []
+        : selectedFields.map((field) => field.label);
     const varName = variableName.replace('?', '');
     const state = {
       availableOptions,
@@ -167,6 +189,7 @@ export function ESQLControlsFlyout({
       width: minimumWidth,
       title: label || varName,
       variableName: varName,
+      variableType: controlType,
       grow: false,
     };
     controlGroupApi?.addNewControl('esqlControlStaticValues', state);
@@ -179,7 +202,7 @@ export function ESQLControlsFlyout({
         queryString.slice(cursorColumn - 1),
       ].join('');
 
-      addToESQLVariablesService(varName, availableOptions[0], query);
+      addToESQLVariablesService(varName, availableOptions[0], controlType, query);
       await openEditFlyout(embeddable);
     }
     closeFlyout();
@@ -196,7 +219,29 @@ export function ESQLControlsFlyout({
     cursorPosition,
     openEditFlyout,
     addToESQLVariablesService,
+    controlType,
+    selectedFields,
   ]);
+
+  useEffect(() => {
+    if (controlType === EsqlControlType.FIELDS && !availableFieldsOptions.length) {
+      const indexPattern = getIndexPatternFromESQLQuery(queryString);
+      getESQLQueryColumnsRaw({
+        esqlQuery: `from ${indexPattern}`,
+        search,
+      }).then((columns) => {
+        setAvailableFieldsOptions(
+          columns.map((col) => {
+            return {
+              label: col.name,
+              'data-test-subj': col.name,
+              key: col.name,
+            };
+          })
+        );
+      });
+    }
+  }, [availableFieldsOptions.length, controlType, queryString, search]);
 
   return (
     <>
@@ -244,26 +289,50 @@ export function ESQLControlsFlyout({
             })}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('esqlControls.flyout.values.label', {
-            defaultMessage: 'Values',
-          })}
-          helpText={i18n.translate('esqlControls.flyout.values.helpText', {
-            defaultMessage:
-              'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
-          })}
-        >
-          <EuiFieldText
-            placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
-              defaultMessage: 'Set the static values',
+        {controlType === EsqlControlType.FIELDS && (
+          <EuiFormRow
+            label={i18n.translate('esqlControls.flyout.values.label', {
+              defaultMessage: 'Values',
             })}
-            value={values}
-            onChange={onValuesChange}
-            aria-label={i18n.translate('esqlControls.flyout.values.placeholder', {
-              defaultMessage: 'Set a variable name',
+            helpText={i18n.translate('esqlControls.flyout.values.multipleValuesDropdownLabel', {
+              defaultMessage: 'Select multiple values',
             })}
-          />
-        </EuiFormRow>
+          >
+            <EuiComboBox
+              aria-label={i18n.translate('esqlControls.flyout.fieldsOptions.placeholder', {
+                defaultMessage: 'Select the fields options',
+              })}
+              placeholder={i18n.translate('esqlControls.flyout.fieldsOptions.placeholder', {
+                defaultMessage: 'Select the fields options',
+              })}
+              options={availableFieldsOptions}
+              selectedOptions={selectedFields}
+              onChange={onFieldsChange}
+            />
+          </EuiFormRow>
+        )}
+        {controlType === EsqlControlType.TIME_LITERAL && (
+          <EuiFormRow
+            label={i18n.translate('esqlControls.flyout.values.label', {
+              defaultMessage: 'Values',
+            })}
+            helpText={i18n.translate('esqlControls.flyout.values.helpText', {
+              defaultMessage:
+                'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
+            })}
+          >
+            <EuiFieldText
+              placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
+                defaultMessage: 'Set the static values',
+              })}
+              value={values}
+              onChange={onValuesChange}
+              aria-label={i18n.translate('esqlControls.flyout.values.placeholder', {
+                defaultMessage: 'Set a variable name',
+              })}
+            />
+          </EuiFormRow>
+        )}
 
         <EuiFormRow
           label={i18n.translate('esqlControls.flyout.label.label', {

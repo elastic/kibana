@@ -137,18 +137,21 @@ export async function getESQLResults({
   variables?: Array<{
     key: string;
     value: string;
+    type: string;
   }>;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
-  const namedParams: Array<Record<string, string | undefined>> = getStartEndParams(
-    esqlQuery,
-    timeRange
-  );
+  const namedParams: ESQLSearchParams['params'] = getStartEndParams(esqlQuery, timeRange);
+  // move to a function
   if (variables?.length) {
-    variables?.forEach(({ key, value }) => {
-      namedParams.push({ [key]: value });
+    variables?.forEach(({ key, value, type }) => {
+      if (type === 'fields') {
+        namedParams.push({ [key]: { identifier: value } });
+      } else {
+        namedParams.push({ [key]: value });
+      }
     });
   }
   const result = await lastValueFrom(

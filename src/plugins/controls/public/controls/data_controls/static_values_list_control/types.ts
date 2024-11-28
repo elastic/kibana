@@ -13,6 +13,7 @@ export interface StaticValuesListControlState extends DefaultDataControlState {
   availableOptions: string[];
   selectedOptions: string[];
   variableName: string;
+  variableType: string;
 }
 
 export type StaticValuesListControlApi = DataControlApi;

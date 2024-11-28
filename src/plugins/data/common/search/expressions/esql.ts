@@ -172,15 +172,19 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
 
-            const namedParams: Array<Record<string, string | undefined>> = getStartEndParams(
+            const namedParams: ESQLSearchParams['params'] = getStartEndParams(
               query,
               input.timeRange
             );
             const variables = esqlVariablesService.getVariables();
 
             if (variables?.length) {
-              variables?.forEach(({ key, value }) => {
-                namedParams.push({ [key]: value });
+              variables?.forEach(({ key, value, type }) => {
+                if (type === 'fields') {
+                  namedParams.push({ [key]: { identifier: value } });
+                } else {
+                  namedParams.push({ [key]: value });
+                }
               });
             }
 
@@ -314,6 +318,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
         }),
         map(({ rawResponse: body, warning }) => {
+          const variables = esqlVariablesService.getVariables();
           // all_columns in the response means that there is a separation between
           // columns with data and empty columns
           // columns contain only columns with data while all_columns everything
@@ -328,6 +333,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               name,
               meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
+              variable: variables?.find((variable) => variable.value === name)?.key,
             })) ?? [];
 
           // sort only in case of empty columns to correctly align columns to items in values array

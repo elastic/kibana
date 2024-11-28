@@ -12,6 +12,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { EsqlControlType } from '@kbn/esql-controls';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { monaco } from '@kbn/monaco';
 const ACTION_CREATE_ESQL_CONTROL = 'ACTION_CREATE_ESQL_CONTROL';
@@ -31,7 +32,11 @@ export class CreateESQLControlAction implements Action<Context> {
   public id = ACTION_CREATE_ESQL_CONTROL;
   public order = 50;
 
-  constructor(protected readonly core: CoreStart, protected readonly uiActions: UiActionsStart) {}
+  constructor(
+    protected readonly core: CoreStart,
+    protected readonly uiActions: UiActionsStart,
+    protected readonly search: ISearchGeneric
+  ) {}
 
   public getDisplayName(): string {
     return i18n.translate('esql.createESQLControlLabel', {
@@ -60,6 +65,7 @@ export class CreateESQLControlAction implements Action<Context> {
       queryString,
       core: this.core,
       uiActions: this.uiActions,
+      search: this.search,
       controlType,
       dashboardApi,
       panelId,

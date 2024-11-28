@@ -32,6 +32,7 @@ import { builtinFunctions } from '../definitions/builtin';
 
 enum EsqlControlType {
   TIME_LITERAL = 'time_literal',
+  FIELDS = 'fields',
 }
 
 const techPreviewLabel = i18n.translate(
@@ -222,7 +223,7 @@ export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],
   options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
 ): SuggestionRawDefinition[] => {
-  return fields.map((field) => {
+  const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
     return {
       label: field.name,
@@ -236,7 +237,11 @@ export const buildFieldsDefinitionsWithMetadata = (
       sortText: field.isEcs ? '1D' : 'D',
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
-  });
+  }) as SuggestionRawDefinition[];
+
+  const controlSuggestions = fields.length ? getControlSuggestion(EsqlControlType.FIELDS) : [];
+
+  return [...controlSuggestions, ...fieldsSuggestions];
 };
 
 export const buildFieldsDefinitions = (fields: string[]): SuggestionRawDefinition[] => {

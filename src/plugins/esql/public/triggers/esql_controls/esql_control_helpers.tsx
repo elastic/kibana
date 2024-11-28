@@ -11,6 +11,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { type EsqlControlType, ESQLControlsFlyout } from '@kbn/esql-controls';
 import type { CoreStart } from '@kbn/core/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
@@ -21,6 +22,7 @@ interface Context {
   queryString: string;
   core: CoreStart;
   uiActions: UiActionsStart;
+  search: ISearchGeneric;
   controlType: EsqlControlType;
   dashboardApi: DashboardApi;
   panelId?: string;
@@ -36,6 +38,7 @@ export async function executeAction({
   queryString,
   core,
   uiActions,
+  search,
   controlType,
   dashboardApi,
   panelId,
@@ -52,8 +55,13 @@ export async function executeAction({
     });
   };
 
-  const addToESQLVariablesService = (variable: string, variableValue: string, query: string) => {
-    esqlVariablesService.addVariable({ key: variable, value: variableValue });
+  const addToESQLVariablesService = (
+    variable: string,
+    variableValue: string,
+    variableType: string,
+    query: string
+  ) => {
+    esqlVariablesService.addVariable({ key: variable, value: variableValue, type: variableType });
     esqlVariablesService.setEsqlQueryWithVariables(query);
   };
 
@@ -62,6 +70,7 @@ export async function executeAction({
       React.cloneElement(
         <ESQLControlsFlyout
           queryString={queryString}
+          search={search}
           controlType={controlType}
           closeFlyout={() => {
             handle.close();
