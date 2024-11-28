@@ -28,6 +28,12 @@ export const WORKFLOW_INSIGHTS = {
     button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
       defaultMessage: 'Scan',
     }),
+    loading: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.scan.loading',
+      {
+        defaultMessage: 'Loading...',
+      }
+    ),
   },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {

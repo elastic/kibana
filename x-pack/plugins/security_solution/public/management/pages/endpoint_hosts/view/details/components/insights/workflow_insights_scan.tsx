@@ -89,7 +89,7 @@ export const WorkflowInsightsScanSection = ({
             onScanButtonClick({ connectorId, actionTypeId: selectedConnectorActionTypeId });
           }}
         >
-          {!isScanButtonDisabled && WORKFLOW_INSIGHTS.scan.button}
+          {isScanButtonDisabled ? WORKFLOW_INSIGHTS.scan.loading : WORKFLOW_INSIGHTS.scan.button}
         </EuiButton>
       </EuiFlexItem>
     );
