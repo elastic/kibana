@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { GroupBySelector } from '.';
 import { InventoryComponentWrapperMock } from '../entity_group_accordion/mock/inventory_component_wrapper_mock';
 
@@ -21,23 +20,5 @@ describe('GroupBySelector', () => {
   });
   it('Should default to Type', async () => {
     expect(await screen.findByText('Group entities by: Type')).toBeInTheDocument();
-  });
-
-  it.skip('Should change to None', async () => {
-    const user = userEvent.setup();
-
-    const selector = screen.getByText('Group entities by: Type');
-
-    expect(selector).toBeInTheDocument();
-
-    await user.click(selector);
-
-    const noneOption = screen.getByTestId('panelUnified');
-
-    expect(noneOption).toBeInTheDocument();
-
-    await user.click(noneOption);
-
-    expect(await screen.findByText('Group entities by: None')).toBeInTheDocument();
   });
 });

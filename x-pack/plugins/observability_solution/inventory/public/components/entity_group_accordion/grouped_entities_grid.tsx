@@ -8,7 +8,11 @@ import { EuiDataGridSorting } from '@elastic/eui';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { type EntityColumnIds } from '../../../common/entities';
-import { entityPaginationRt } from '../../../common/rt_types';
+import {
+  type EntityTypeCheckOptions,
+  entityPaginationRt,
+  entityTypesRt,
+} from '../../../common/rt_types';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryDecodedQueryParams } from '../../hooks/use_inventory_decoded_query_params';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
@@ -24,7 +28,7 @@ interface Props {
 export function GroupedEntitiesGrid({ groupValue }: Props) {
   const { query } = useInventoryParams('/');
   const { sortField, sortDirection, kuery } = query;
-  const { pagination } = useInventoryDecodedQueryParams();
+  const { pagination, entityTypes } = useInventoryDecodedQueryParams();
   const inventoryRoute = useInventoryRouter();
   const pageIndex = pagination?.[groupValue] ?? 0;
 
@@ -84,6 +88,16 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
     });
   }
 
+  function handleEntityTypeFilter(entityType: string, checkOption: EntityTypeCheckOptions) {
+    inventoryRoute.push('/', {
+      path: {},
+      query: {
+        ...query,
+        entityTypes: entityTypesRt.encode({ ...entityTypes, [entityType]: checkOption }),
+      },
+    });
+  }
+
   return (
     <EntitiesGrid
       entities={value.entities}
@@ -93,6 +107,7 @@ export function GroupedEntitiesGrid({ groupValue }: Props) {
       onChangePage={handlePageChange}
       onChangeSort={handleSortChange}
       pageIndex={pageIndex}
+      onFilterByType={handleEntityTypeFilter}
     />
   );
 }

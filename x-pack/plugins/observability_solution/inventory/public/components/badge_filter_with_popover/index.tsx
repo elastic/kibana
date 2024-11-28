@@ -19,32 +19,17 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { useInventoryParams } from '../../hooks/use_inventory_params';
-import { type EntityTypeCheckOptions, entityTypesRt } from '../../../common/rt_types';
-import { useInventoryRouter } from '../../hooks/use_inventory_router';
-import { useInventoryDecodedQueryParams } from '../../hooks/use_inventory_decoded_query_params';
+import { type EntityTypeCheckOptions } from '../../../common/rt_types';
 
 interface Props {
   field: string;
   value: string;
+  onFilter: (value: string, checked: EntityTypeCheckOptions) => void;
 }
 
-export function BadgeFilterWithPopover({ field, value }: Props) {
+export function BadgeFilterWithPopover({ field, value, onFilter }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useEuiTheme();
-  const { query } = useInventoryParams('/');
-  const { entityTypes } = useInventoryDecodedQueryParams();
-  const inventoryRoute = useInventoryRouter();
-
-  function handleEntityTypeFilter(entityType: string, checkOption: EntityTypeCheckOptions) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        entityTypes: entityTypesRt.encode({ ...entityTypes, [entityType]: checkOption }),
-      },
-    });
-  }
 
   return (
     <EuiPopover
@@ -96,7 +81,7 @@ export function BadgeFilterWithPopover({ field, value }: Props) {
             data-test-subj="inventoryBadgeFilterWithPopoverFilterForButton"
             iconType="plusInCircle"
             onClick={() => {
-              handleEntityTypeFilter(value, 'on');
+              onFilter(value, 'on');
             }}
           >
             {i18n.translate('xpack.inventory.badgeFilterWithPopover.filterForButtonEmptyLabel', {
@@ -106,10 +91,10 @@ export function BadgeFilterWithPopover({ field, value }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="inventoryBadgeFilterWithPopoverFilterForButton"
+            data-test-subj="inventoryBadgeFilterWithPopoverFilterOutButton"
             iconType="minusInCircle"
             onClick={() => {
-              handleEntityTypeFilter(value, 'off');
+              onFilter(value, 'off');
             }}
           >
             {i18n.translate('xpack.inventory.badgeFilterWithPopover.filterForButtonEmptyLabel', {
