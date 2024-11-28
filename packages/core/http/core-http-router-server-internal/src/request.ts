@@ -363,8 +363,10 @@ export class CoreKibanaRequest<
   }
 
   private isExcludedFromRateLimiter(request: RawRequest): boolean {
-    return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
-      ?.excludeFromRateLimiter;
+    return (
+      ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+        ?.excludeFromRateLimiter ?? false
+    );
   }
 }
 
