@@ -17,7 +17,7 @@ import { GridLayoutData, GridSettings } from './types';
 import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import { compactGridRow } from './utils/resolve_grid_row';
+import { resolveGridRow } from './utils/resolve_grid_row';
 
 interface GridLayoutProps {
   layout: GridLayoutData;
@@ -53,7 +53,7 @@ export const GridLayout = ({
        * so, we need to loop through each row and ensure it is compacted
        */
       newLayout.forEach((row, rowIndex) => {
-        newLayout[rowIndex] = compactGridRow(row);
+        newLayout[rowIndex] = resolveGridRow(row);
       });
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
