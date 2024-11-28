@@ -60,8 +60,7 @@ const isSwitchDisabled = (status?: StoreStatus) => status === 'error' || status 
 const isEntityStoreEnabled = (status?: StoreStatus) => status === 'running';
 const canDeleteEntityEngine = (status?: StoreStatus) =>
   !['not_installed', 'installing'].includes(status || '');
-const isEntityStoreInstalled = (status?: StoreStatus) =>
-  ['stopped', 'enabled', 'error'].includes(status || '');
+const isEntityStoreInstalled = (status?: StoreStatus) => status && status !== 'not_installed';
 
 export const EntityStoreManagementPage = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');

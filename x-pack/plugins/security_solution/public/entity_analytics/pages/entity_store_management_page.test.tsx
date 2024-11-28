@@ -53,7 +53,7 @@ describe('EntityStoreManagementPage', () => {
     });
 
     mockUseEntityEngineStatus.mockReturnValue({
-      status: 'enabled',
+      status: 'running',
       errors: [],
     });
 
@@ -143,7 +143,7 @@ describe('EntityStoreManagementPage', () => {
 
   it('switches to the Status tab when clicked', () => {
     mockUseEntityEngineStatus.mockReturnValue({
-      status: 'enabled',
+      status: 'running',
       errors: [],
     });
 
@@ -179,7 +179,7 @@ describe('EntityStoreManagementPage', () => {
 
   it('does not render the Status tab when privileges are missing', () => {
     mockUseEntityEngineStatus.mockReturnValue({
-      status: 'enabled',
+      status: 'running',
       errors: [],
     });
 
