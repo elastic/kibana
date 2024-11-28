@@ -9,11 +9,11 @@ import moment from 'moment';
 import { Frequency } from '@kbn/rrule';
 import sinon from 'sinon';
 import { RRuleRecord } from '../../types';
-import { isSnoozeActive } from './is_snooze_active';
+import { getActiveSnoozeIfExist } from './get_active_snooze_if_exist';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
-describe('isSnoozeActive', () => {
+describe('getActiveSnoozeIfExist', () => {
   afterAll(() => fakeTimer.restore());
 
   test('snooze is NOT active byweekday', () => {
@@ -36,7 +36,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
 
@@ -60,7 +60,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`
       Object {
         "id": "9141dc1f-ed85-4656-91e4-119173105432",
         "lastOccurrence": 2023-02-24T23:00:00.000Z,
@@ -90,7 +90,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
 
@@ -114,7 +114,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`
       Object {
         "id": "9141dc1f-ed85-4656-91e4-119173105432",
         "lastOccurrence": 2023-03-03T23:00:00.000Z,
@@ -145,7 +145,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
 
@@ -170,7 +170,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`
       Object {
         "id": "9141dc1f-ed85-4656-91e4-119173105432",
         "lastOccurrence": 2023-01-01T00:00:00.000Z,
@@ -201,7 +201,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
 
@@ -227,7 +227,7 @@ describe('isSnoozeActive', () => {
       } as RRuleRecord,
       id: '9141dc1f-ed85-4656-91e4-119173105432',
     };
-    expect(isSnoozeActive(snoozeA)).toMatchInlineSnapshot(`null`);
+    expect(getActiveSnoozeIfExist(snoozeA)).toMatchInlineSnapshot(`null`);
     fakeTimer.restore();
   });
 });
