@@ -123,6 +123,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
   );
 };
 
-// To simplify dynamic imports
+// Lazy loading helpers
 // eslint-disable-next-line import/no-default-export
 export { AlertsFlyout as default };
+export type AlertsFlyout = typeof AlertsFlyout;

@@ -7,60 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  ComponentProps,
-  FC,
-  lazy,
-  memo,
-  PropsWithChildren,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { FC, lazy, Suspense, useCallback, useMemo } from 'react';
 import {
-  EuiCodeBlock,
   EuiDataGrid,
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridStyle,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiText,
   RenderCellValue,
   tint,
   useEuiTheme,
 } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { EuiDataGridCellPopoverElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import type { Alert } from '@kbn/alerting-types';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { AlertActionsCell } from './alert_actions_cell';
+import { ControlColumnHeaderCell } from './control_column_header_cell';
+import { CellValueHost } from './cell_value_host';
 import { BulkActionsCell } from './bulk_actions_cell';
 import { BulkActionsHeader } from './bulk_actions_header_cell';
-import { useAlertsTableContext } from '../contexts/alerts_table_context';
-import { BulkActionsVerbs } from '../types';
 import {
   AdditionalContext,
   AlertsDataGridProps,
-  AlertsTableProps,
+  BulkActionsVerbs,
   CellActionsOptions,
-  SystemCellId,
 } from '../types';
-import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from '../translations';
 import { useGetToolbarVisibility } from '../hooks/toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
-import { SystemCell, systemCells } from './system_cell';
 import { typedMemo } from '../utils/react';
 import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout';
-import { ErrorBoundary } from './error_boundary';
 import { useBulkActions } from '../hooks/use_bulk_actions';
 import { useSorting } from '../hooks/use_sorting';
+import { CellPopoverHost } from './cell_popover_host';
+import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout')) as typeof AlertsFlyoutType;
 
@@ -75,203 +53,9 @@ const defaultCellActionsOptions: CellActionsOptions = {
   disabledCellActions: [],
 };
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
-const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
+const DEFAULT_ACTIONS_COLUMN_WIDTH = 75;
 
 const stableMappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
-
-interface BasicCellValueProps {
-  columnId: string;
-  alert: Alert;
-}
-
-const BasicCellValue = memo(({ alert, columnId }: BasicCellValueProps) => {
-  const value = alert[columnId];
-  if (Array.isArray(value)) {
-    return <>{value.length ? value.join() : '--'}</>;
-  }
-  return <>{value}</>;
-});
-
-const ControlColumnHeaderRenderCell = memo(() => {
-  return (
-    <span data-test-subj="expandColumnHeaderLabel">
-      {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
-    </span>
-  );
-});
-
-const CustomCellWrapper = ({ children }: PropsWithChildren) => (
-  <EuiFlexGroup gutterSize="none" responsive={false}>
-    {children}
-  </EuiFlexGroup>
-);
-
-const isSystemCell = (columnId: string): columnId is SystemCellId => {
-  return systemCells.includes(columnId as SystemCellId);
-};
-
-// Here we force the error callout to be the same height as the cell content
-// so that the error detail gets hidden in the overflow area and only shown in
-// the cell popover
-const errorCalloutStyles = css`
-  height: 1lh;
-`;
-
-/**
- * An error callout that displays the error stack in a code block
- */
-const ViewError = ({ error }: { error: Error }) => (
-  <>
-    <EuiFlexGroup gutterSize="s" alignItems="center" css={errorCalloutStyles}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="error" color="danger" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText
-          color="subdued"
-          size="xs"
-          css={css`
-            line-height: unset;
-          `}
-        >
-          <strong>
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertTable.viewError"
-              defaultMessage="An error occurred"
-            />
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-    <EuiCodeBlock isCopyable>{error.stack}</EuiCodeBlock>
-  </>
-);
-
-const Row = styled.div`
-  display: flex;
-  min-width: fit-content;
-`;
-
-type CustomGridBodyProps = Pick<
-  Parameters<NonNullable<EuiDataGridProps['renderCustomGridBody']>>['0'],
-  'Cell' | 'visibleColumns'
-> & {
-  alerts: Alert[];
-  isLoading: boolean;
-  pageIndex: number;
-  pageSize: number;
-  actualGridStyle: EuiDataGridStyle;
-  stripes?: boolean;
-};
-
-const CustomGridBody = memo(
-  ({
-    alerts,
-    isLoading,
-    pageIndex,
-    pageSize,
-    actualGridStyle,
-    visibleColumns,
-    Cell,
-    stripes,
-  }: CustomGridBodyProps) => {
-    return (
-      <>
-        {alerts
-          .concat(isLoading ? Array.from({ length: pageSize - alerts.length }) : [])
-          .map((_row, rowIndex) => (
-            <Row
-              role="row"
-              key={`${rowIndex},${pageIndex}`}
-              // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
-              // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
-              // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
-              // shouldHighlightRow is correct
-              className={`euiDataGridRow ${
-                stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
-              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
-            >
-              {visibleColumns.map((_col, colIndex) => (
-                <Cell
-                  colIndex={colIndex}
-                  visibleRowIndex={rowIndex}
-                  key={`${rowIndex},${colIndex}`}
-                />
-              ))}
-            </Row>
-          ))}
-      </>
-    );
-  }
-);
-
-const CellValueHost: AlertsTableProps['renderCellValue'] = (props) => {
-  const {
-    columnId,
-    renderCellValue: CellValue,
-    isLoading,
-    alerts,
-    oldAlertsData,
-    ecsAlertsData,
-    cases,
-    maintenanceWindows,
-    showAlertStatusWithFlapping,
-    casesConfig,
-    rowIndex,
-    pageIndex,
-    pageSize,
-  } = props;
-  const idx = rowIndex - pageSize * pageIndex;
-  const alert = alerts[idx];
-  const legacyAlert = oldAlertsData[idx];
-  const ecsAlert = ecsAlertsData[idx];
-  if (isSystemCell(columnId)) {
-    return (
-      <SystemCell
-        {...props}
-        alert={alert}
-        columnId={columnId}
-        isLoading={isLoading}
-        cases={cases}
-        maintenanceWindows={maintenanceWindows}
-        showAlertStatusWithFlapping={showAlertStatusWithFlapping ?? false}
-        caseAppId={casesConfig?.appId}
-      />
-    );
-  } else if (alert) {
-    if (CellValue) {
-      return (
-        <ErrorBoundary fallback={ViewError}>
-          <CellValue {...props} alert={alert} legacyAlert={legacyAlert} ecsAlert={ecsAlert} />
-        </ErrorBoundary>
-      );
-    } else {
-      return <BasicCellValue alert={alert} columnId={columnId} />;
-    }
-  } else if (isLoading) {
-    return <EuiSkeletonText lines={1} />;
-  }
-  return null;
-};
-
-const CellPopoverHost = (props: EuiDataGridCellPopoverElementProps) => {
-  const { rowIndex, DefaultCellPopover } = props;
-  const renderContext = useAlertsTableContext();
-  const { pageSize, pageIndex, alerts, renderCellPopover: CellPopover } = renderContext;
-
-  const idx = rowIndex - pageSize * pageIndex;
-  const alert = alerts[idx];
-  if (alert && CellPopover) {
-    return (
-      <ErrorBoundary fallback={ViewError}>
-        <CellPopover {...renderContext} {...props} alert={alert} />
-      </ErrorBoundary>
-    );
-  }
-
-  return <DefaultCellPopover {...props} />;
-};
 
 export const AlertsDataGrid = typedMemo(
   <AC extends AdditionalContext>(props: AlertsDataGridProps<AC>) => {
@@ -302,7 +86,7 @@ export const AlertsDataGrid = typedMemo(
       onPaginateFlyout,
       onChangePageSize,
       onChangePageIndex,
-      actionsColumnWidth = DEFAULT_ACTIONS_COLUMNS_WIDTH,
+      actionsColumnWidth = DEFAULT_ACTIONS_COLUMN_WIDTH,
       getBulkActions,
       fieldsBrowserOptions,
       cellActionsOptions,
@@ -316,7 +100,7 @@ export const AlertsDataGrid = typedMemo(
       alertsCount,
       isLoadingAlerts,
       browserFields,
-      renderActionsCell: ActionsCell,
+      renderActionsCell: ActionsCell = AlertActionsCell,
       pageIndex,
       pageSize,
       refresh: refreshQueries,
@@ -326,42 +110,7 @@ export const AlertsDataGrid = typedMemo(
     } = renderContext;
 
     const { colorMode } = useEuiTheme();
-
-    const [activeRowClasses, setActiveRowClasses] = useState<
-      NonNullable<EuiDataGridStyle['rowClasses']>
-    >({});
-
     const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
-
-    const bulkActionArgs = useMemo(
-      () => ({
-        ruleTypeIds,
-        query,
-        alertsCount: alerts.length,
-        casesConfig: casesConfiguration,
-        getBulkActions,
-        refresh: refreshQueries,
-        hideBulkActions,
-        http,
-        notifications,
-        application,
-        casesService,
-      }),
-      [
-        ruleTypeIds,
-        query,
-        alerts.length,
-        casesConfiguration,
-        getBulkActions,
-        refreshQueries,
-        hideBulkActions,
-        http,
-        notifications,
-        application,
-        casesService,
-      ]
-    );
-
     const {
       isBulkActionsColumnActive,
       bulkActionsState,
@@ -369,41 +118,32 @@ export const AlertsDataGrid = typedMemo(
       setIsBulkActionsLoading,
       clearSelection,
       updateBulkActionsState,
-    } = useBulkActions(bulkActionArgs);
+    } = useBulkActions({
+      ruleTypeIds,
+      query,
+      alertsCount: alerts.length,
+      casesConfig: casesConfiguration,
+      getBulkActions,
+      refresh: refreshQueries,
+      hideBulkActions,
+      http,
+      notifications,
+      application,
+      casesService,
+    });
 
     const refresh = useCallback(() => {
       refreshQueries();
       clearSelection();
     }, [clearSelection, refreshQueries]);
 
-    const toolbarVisibilityArgs = useMemo(() => {
-      return {
-        bulkActions,
-        alertsCount,
-        rowSelection: bulkActionsState.rowSelection,
-        alerts,
-        isLoading,
-        columnIds: columns.map((column) => column.id),
-        onToggleColumn,
-        onResetColumns,
-        browserFields,
-        additionalToolbarControls,
-        setIsBulkActionsLoading,
-        clearSelection,
-        refresh,
-        fieldsBrowserOptions,
-        alertsQuerySnapshot,
-        showInspectButton,
-        toolbarVisibilityProp,
-        settings,
-      };
-    }, [
+    const toolbarVisibility = useGetToolbarVisibility({
       bulkActions,
       alertsCount,
-      bulkActionsState.rowSelection,
+      rowSelection: bulkActionsState.rowSelection,
       alerts,
       isLoading,
-      columns,
+      columnIds: columns.map((column) => column.id),
       onToggleColumn,
       onResetColumns,
       browserFields,
@@ -416,9 +156,7 @@ export const AlertsDataGrid = typedMemo(
       showInspectButton,
       toolbarVisibilityProp,
       settings,
-    ]);
-
-    const toolbarVisibility = useGetToolbarVisibility(toolbarVisibilityArgs);
+    });
 
     const customActionsColumn: EuiDataGridControlColumn | undefined = useMemo(() => {
       if (ActionsCell) {
@@ -443,24 +181,22 @@ export const AlertsDataGrid = typedMemo(
           }
 
           return (
-            <CustomCellWrapper>
+            <EuiFlexGroup gutterSize="none" responsive={false}>
               <ActionsCell
-                {...(_props as ComponentProps<
-                  // `_props` already contains the correct render context
-                  typeof ActionsCell
-                >)}
+                // Though untyped, `_props` contains the correct render context
+                {...(_props as any)}
                 alert={alert}
                 legacyAlert={legacyAlert}
                 ecsAlert={ecsAlert}
                 setIsActionLoading={setIsActionLoading}
               />
-            </CustomCellWrapper>
+            </EuiFlexGroup>
           );
         };
         return {
           id: 'expandColumn',
           width: actionsColumnWidth,
-          headerCellRender: ControlColumnHeaderRenderCell,
+          headerCellRender: ControlColumnHeaderCell,
           rowCellRender: RowCellRender,
         };
       }
@@ -487,12 +223,14 @@ export const AlertsDataGrid = typedMemo(
     }, [additionalLeadingControlColumns, isBulkActionsColumnActive, customActionsColumn]);
 
     const flyoutRowIndex = flyoutAlertIndex + pageIndex * pageSize;
-    useEffect(() => {
-      // Row classes do not deal with visible row indices, so we need to handle page offset
-      setActiveRowClasses({
+
+    // Row classes do not deal with visible row indices, so we need to handle page offset
+    const activeRowClasses = useMemo<NonNullable<EuiDataGridStyle['rowClasses']>>(
+      () => ({
         [flyoutRowIndex]: 'alertsTableActiveRow',
-      });
-    }, [flyoutRowIndex]);
+      }),
+      [flyoutRowIndex]
+    );
 
     const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
@@ -551,7 +289,7 @@ export const AlertsDataGrid = typedMemo(
         ...DefaultGridStyle,
         ...propGridStyle,
         rowClasses: {
-          // We're spreadind the highlighted row classes first, so that the active
+          // We're spreading the highlighted row classes first, so that the active
           // row classed can override the highlighted row classes.
           ...highlightedRowClasses,
           ...activeRowClasses,
@@ -590,7 +328,7 @@ export const AlertsDataGrid = typedMemo(
       ({ visibleColumns: _visibleColumns, Cell, headerRow, footerRow }) => (
         <>
           {headerRow}
-          <CustomGridBody
+          <NonVirtualizedGridBody
             alerts={alerts}
             visibleColumns={_visibleColumns}
             Cell={Cell}
@@ -663,7 +401,8 @@ export const AlertsDataGrid = typedMemo(
               rowCount={alertsCount}
               renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
               cellContext={renderContext}
-              renderCellValue={CellValueHost as RenderCellValue} // CellValue will receive the correct props through `cellContext`
+              // Cast necessary because the `cellContext` type is too wide in EuiDataGrid
+              renderCellValue={CellValueHost as RenderCellValue}
               renderCellPopover={CellPopoverHost}
               gridStyle={actualGridStyle}
               sorting={sortProps}

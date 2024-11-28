@@ -137,8 +137,8 @@ const initialBulkActionsState = {
  *   featureIds={featureIds}
  *   query={esQuery}
  *   initialSort={defaultAlertsTableSort}
- *   renderCellValue={renderCellValue}
- *   renderActionsCell={AlertActionsCell}
+ *   renderCellValue={CellValue}
+ *   renderActionsCell={ActionsCell}
  *   services={{ ... }}
  * />
  * ```
@@ -426,48 +426,36 @@ const AlertsTableContent = typedForwardRef(
           columns,
           tableId: id,
           dataGridRef,
-
           refresh,
-
           isLoading:
             isLoadingAlerts ||
             casesQuery.isFetching ||
             maintenanceWindowsQuery.isFetching ||
             mutedAlertsQuery.isFetching,
-
           isLoadingAlerts,
           alerts,
           alertsCount,
           // TODO deprecate
           ecsAlertsData,
           oldAlertsData,
-
           browserFields,
-
           isLoadingCases: casesQuery.isFetching,
           cases: casesQuery.data,
-
           isLoadingMaintenanceWindows: maintenanceWindowsQuery.isFetching,
           maintenanceWindows: maintenanceWindowsQuery.data,
-
           isLoadingMutedAlerts: mutedAlertsQuery.isFetching,
           mutedAlerts: mutedAlertsQuery.data,
-
           pageIndex: pagination.pageIndex,
           pageSize: pagination.pageSize,
-
           showAlertStatusWithFlapping,
           openAlertInFlyout,
-
           bulkActionsStore,
-
           renderCellValue,
           renderCellPopover,
           renderActionsCell,
           renderFlyoutHeader,
           renderFlyoutBody,
           renderFlyoutFooter,
-
           services,
         } as RenderContext<AC>),
       [
@@ -606,7 +594,7 @@ const AlertsTableContent = typedForwardRef(
   }
 );
 
-// Default export to simplify lazy loading
+// Lazy loading helpers
 // eslint-disable-next-line import/no-default-export
 export { AlertsTable as default };
 export type AlertsTable = typeof AlertsTable;
