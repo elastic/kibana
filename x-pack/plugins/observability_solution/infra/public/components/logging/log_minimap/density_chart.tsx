@@ -12,6 +12,7 @@ import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntriesSummaryBucket } from '@kbn/logs-shared-plugin/common';
+import { type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 
 interface DensityChartProps {
   buckets: LogEntriesSummaryBucket[];
@@ -28,6 +29,8 @@ export const DensityChart: React.FC<DensityChartProps> = ({
   width,
   height,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   if (start >= end || height <= 0 || width <= 0 || buckets.length <= 0) {
     return null;
   }
@@ -59,22 +62,18 @@ export const DensityChart: React.FC<DensityChartProps> = ({
 
   return (
     <g>
-      <DensityChartPositiveBackground width={width} height={height} />
-      <PositiveAreaPath d={pathData || ''} />
+      <DensityChartPositiveBackground euiTheme={euiTheme} width={width} height={height} />
+      <PositiveAreaPath euiTheme={euiTheme} d={pathData || ''} />
     </g>
   );
 };
 
-const DensityChartPositiveBackground = euiStyled.rect`
+const DensityChartPositiveBackground = euiStyled.rect<{ euiTheme: EuiThemeComputed }>`
   fill: ${(props) =>
-    props.theme.darkMode
-      ? props.theme.eui.euiColorLightShade
-      : props.theme.eui.euiColorLightestShade};
+    props.theme.darkMode ? props.euiTheme.colors.lightShade : props.euiTheme.colors.lightestShade};
 `;
 
-const PositiveAreaPath = euiStyled.path`
+const PositiveAreaPath = euiStyled.path<{ euiTheme: EuiThemeComputed }>`
   fill: ${(props) =>
-    props.theme.darkMode
-      ? props.theme.eui.euiColorMediumShade
-      : props.theme.eui.euiColorLightShade};
+    props.theme.darkMode ? props.euiTheme.colors.mediumShade : props.euiTheme.colors.lightShade};
 `;

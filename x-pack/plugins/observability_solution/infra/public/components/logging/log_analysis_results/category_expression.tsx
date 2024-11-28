@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useEuiTheme } from '@elastic/eui';
 
 export const RegularExpressionRepresentation: React.FunctionComponent<{
   maximumSegmentCount?: number;
@@ -49,12 +50,18 @@ export const RegularExpressionRepresentation: React.FunctionComponent<{
 });
 
 const CategoryPattern = euiStyled.span`
-  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  font-family: ${(props) => {
+    const { euiTheme } = useEuiTheme();
+    return euiTheme.font.familyCode;
+  }};
   word-break: break-all;
 `;
 
 const CategoryPatternWildcard = euiStyled.span`
-  color: ${(props) => props.theme.eui.euiColorMediumShade};
+  color: ${() => {
+    const { euiTheme } = useEuiTheme();
+    return euiTheme.colors.emptyShade;
+  }};
 `;
 
 const CategoryPatternSegment = euiStyled.span`

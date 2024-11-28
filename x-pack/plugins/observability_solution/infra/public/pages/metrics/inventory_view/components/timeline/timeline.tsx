@@ -10,7 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
-import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import {
+  EuiLoadingChart,
+  EuiText,
+  EuiEmptyPrompt,
+  EuiButton,
+  useEuiTheme,
+  type EuiThemeComputed,
+} from '@elastic/eui';
 import {
   Axis,
   Chart,
@@ -57,6 +64,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
 
+  const { euiTheme } = useEuiTheme();
   const chartTheme = useTimelineChartTheme();
 
   const { loading, error, startTime, endTime, timeseries, reload } = useTimeline(
@@ -161,7 +169,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   if (loading) {
     return (
-      <TimelineContainer>
+      <TimelineContainer euiTheme={euiTheme}>
         <TimelineLoadingContainer>
           <EuiLoadingChart size="xl" />
         </TimelineLoadingContainer>
@@ -171,7 +179,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   if (!loading && (error || !timeseries)) {
     return (
-      <TimelineContainer>
+      <TimelineContainer euiTheme={euiTheme}>
         <EuiEmptyPrompt
           iconType="visArea"
           title={<h4>{error ? errorTitle : noHistoryDataTitle}</h4>}
@@ -202,9 +210,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
 
   return (
     <TimelineContainer
+      euiTheme={euiTheme}
       data-test-subj={isVisible ? 'timelineContainerOpen' : 'timelineContainerClosed'}
     >
-      <TimelineHeader>
+      <TimelineHeader euiTheme={euiTheme}>
         <EuiFlexItem grow={true}>
           <EuiText>
             <strong>
@@ -253,7 +262,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
           </EuiFlexGroup>
         </EuiFlexItem>
       </TimelineHeader>
-      <TimelineChartContainer>
+      <TimelineChartContainer euiTheme={euiTheme}>
         <Chart>
           {anomalies && (
             <RectAnnotation
@@ -298,27 +307,33 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   );
 };
 
-const TimelineContainer = euiStyled.div`
+const TimelineContainer = euiStyled.div<{
+  euiTheme: EuiThemeComputed;
+}>`
   background-color: ${(props) => props.theme.eui.euiPageBackgroundColor};
-  border-top: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
+  border-top: 1px solid ${(props) => props.euiTheme.colors.lightShade};
   height: 220px;
   width: 100%;
-  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
+  padding: ${(props) => props.euiTheme.size.s} ${(props) => props.euiTheme.size.m};
   display: flex;
   flex-direction: column;
 `;
 
-const TimelineHeader = euiStyled.div`
+const TimelineHeader = euiStyled.div<{
+  euiTheme: EuiThemeComputed;
+}>`
   display: flex;
   width: 100%;
-  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
+  padding: ${(props) => props.euiTheme.size.s} ${(props) => props.euiTheme.size.m};
   @media only screen and (max-width: 767px) {
       margin-top: 30px;
   }
 `;
 
-const TimelineChartContainer = euiStyled.div`
-  padding-left: ${(props) => props.theme.eui.euiSizeXS};
+const TimelineChartContainer = euiStyled.div<{
+  euiTheme: EuiThemeComputed;
+}>`
+  padding-left: ${(props) => props.euiTheme.size.xs};
   width: 100%;
   height: 100%;
 `;

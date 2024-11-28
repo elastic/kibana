@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React, { FC, PropsWithChildren } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -34,7 +34,10 @@ const RelativeDiv = euiStyled.div`
 
 const OverlayDiv = euiStyled.div`
   align-items: center;
-  background-color: ${(props) => transparentize(0.3, props.theme.eui.euiColorEmptyShade)};
+  background-color: ${() => {
+    const { euiTheme } = useEuiTheme();
+    return transparentize(0.3, euiTheme.colors.emptyShade);
+  }};
   display: flex;
   height: 100%;
   justify-content: center;

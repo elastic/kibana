@@ -8,6 +8,7 @@
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { type EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 
 interface HighlightedIntervalProps {
   className?: string;
@@ -28,6 +29,7 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
   width,
   target,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const yStart = getPositionOfTime(start);
   const yEnd = getPositionOfTime(end);
   const yTarget = target && getPositionOfTime(target);
@@ -36,6 +38,7 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
     <>
       {yTarget && (
         <HighlightTargetMarker
+          euiTheme={euiTheme}
           className={className}
           x1={0}
           x2={targetWidth}
@@ -44,6 +47,7 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
         />
       )}
       <HighlightPolygon
+        euiTheme={euiTheme}
         className={className}
         points={` ${targetWidth},${yStart} ${width},${yStart} ${width},${yEnd}  ${targetWidth},${yEnd}`}
       />
@@ -53,14 +57,14 @@ export const HighlightedInterval: React.FC<HighlightedIntervalProps> = ({
 
 HighlightedInterval.displayName = 'HighlightedInterval';
 
-const HighlightTargetMarker = euiStyled.line`
-  stroke: ${(props) => props.theme.eui.euiColorPrimary};
+const HighlightTargetMarker = euiStyled.line<{ euiTheme: EuiThemeComputed }>`
+  stroke: ${(props) => props.euiTheme.colors.primary};
   stroke-width: 1;
 `;
 
-const HighlightPolygon = euiStyled.polygon`
-  fill: ${(props) => props.theme.eui.euiColorPrimary};
+const HighlightPolygon = euiStyled.polygon<{ euiTheme: EuiThemeComputed }>`
+  fill: ${(props) => props.euiTheme.colors.primary};
   fill-opacity: 0.3;
-  stroke: ${(props) => props.theme.eui.euiColorPrimary};
+  stroke: ${(props) => props.euiTheme.colors.primary};
   stroke-width: 1;
 `;

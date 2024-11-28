@@ -17,6 +17,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { useTheme } from '../../../hooks/use_theme';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { getCytoscapeOptions } from './cytoscape_options';
@@ -58,9 +59,10 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
 
 function CytoscapeComponent({ children, elements, height, serviceName, style }: CytoscapeProps) {
   const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
+    ...getCytoscapeOptions({ theme, euiTheme, isTraceExplorerEnabled }),
     elements,
   });
   useCytoscapeEventHandlers({ cy, serviceName, theme });

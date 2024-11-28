@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -98,7 +98,6 @@ export function Controls() {
   const { core } = useApmPluginContext();
   const { basePath } = core.http;
   const theme = useTheme();
-  const { euiTheme } = useEuiTheme();
   const cy = useContext(CytoscapeContext);
   const { urlParams } = useLegacyUrlParams();
 
@@ -143,7 +142,7 @@ export function Controls() {
       cy.animate({
         ...getAnimationOptions(theme),
         center: { eles },
-        fit: { eles, padding: getNodeHeight(euiTheme) },
+        fit: { eles, padding: getNodeHeight(theme) },
       });
     }
   }

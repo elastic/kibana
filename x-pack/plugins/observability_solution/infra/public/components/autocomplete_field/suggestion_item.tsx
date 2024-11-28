@@ -23,12 +23,19 @@ export const SuggestionItem: React.FC<Props> = (props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <SuggestionItemContainer isSelected={isSelected} onClick={onClick} onMouseEnter={onMouseEnter}>
+    <SuggestionItemContainer
+      isSelected={isSelected}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      euiTheme={euiTheme}
+    >
       <SuggestionItemIconField suggestionType={suggestion.type} euiTheme={euiTheme}>
         <EuiIcon type={getEuiIconType(suggestion.type)} />
       </SuggestionItemIconField>
-      <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-      <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
+      <SuggestionItemTextField euiTheme={euiTheme}>{suggestion.text}</SuggestionItemTextField>
+      <SuggestionItemDescriptionField euiTheme={euiTheme}>
+        {suggestion.description}
+      </SuggestionItemDescriptionField>
     </SuggestionItemContainer>
   );
 };
@@ -39,40 +46,42 @@ SuggestionItem.defaultProps = {
 
 const SuggestionItemContainer = euiStyled.div<{
   isSelected?: boolean;
+  euiTheme: EuiThemeComputed;
 }>`
   display: flex;
   flex-direction: row;
-  font-size: ${(props) => props.theme.eui.euiFontSizeS};
-  height: ${(props) => props.theme.eui.euiSizeXL};
+  font-size: ${(props) => props.euiTheme.size.s};
+  height: ${(props) => props.euiTheme.size.xl};
   white-space: nowrap;
   background-color: ${(props) =>
-    props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
+    props.isSelected ? props.euiTheme.colors.lightestShade : 'transparent'};
 `;
 
-const SuggestionItemField = euiStyled.div`
+const SuggestionItemField = euiStyled.div<{
+  euiTheme: EuiThemeComputed;
+}>`
   align-items: center;
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${(props) => props.theme.eui.euiSizeXL};
-  padding: ${(props) => props.theme.eui.euiSizeXS};
+  height: ${(props) => props.euiTheme.size.xl};
+  padding: ${(props) => props.euiTheme.size.xs};
 `;
 
 const SuggestionItemIconField = euiStyled(SuggestionItemField)<{
   suggestionType: QuerySuggestionTypes;
-  euiTheme: EuiThemeComputed;
 }>`
   background-color: ${(props) =>
     transparentize(0.9, getEuiIconColor(props.euiTheme, props.suggestionType))};
   color: ${(props) => getEuiIconColor(props.euiTheme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${(props) => props.theme.eui.euiSizeXL};
+  width: ${(props) => props.euiTheme.size.xl};
 `;
 
 const SuggestionItemTextField = euiStyled(SuggestionItemField)`
   flex: 2 0 0;
-  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  font-family: ${(props) => props.euiTheme.font.familyCode};
 `;
 
 const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
@@ -82,7 +91,7 @@ const SuggestionItemDescriptionField = euiStyled(SuggestionItemField)`
     display: inline;
 
     span {
-      font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+      font-family: ${(props) => props.euiTheme.font.familyCode};
     }
   }
 `;
