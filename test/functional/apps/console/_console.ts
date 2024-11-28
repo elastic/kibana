@@ -224,6 +224,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should show actions menu when the first line of the request is not in the viewport', async () => {
+      await PageObjects.console.clearEditorText();
+      await PageObjects.console.enterText(`PUT _ingest/pipeline/testme
+        {
+          "processors": [
+            {
+              "inference": {
+                "model_id": "azure_openai_embeddings",
+                "input_output": {
+                  "input_field": "body_content",
+                  "output_field": "body_content_vector"
+                },
+                "if": "ctx?.body_content!=null",
+                "ignore_failure": true,
+                 "on_failure": [
+                  {
+                    "append": {
+                      "field": "_source._ingest.inference_errors",
+                      "allow_duplicates": false,
+                      "value": [
+                        {
+                          "message": "...",
+                          "pipeline": "ml-inference-search-edf-azureopenai-embeddings",
+                          "timestamp": "{{{ _ingest.timestamp }}}"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+      }`);
+
+      // Reduce the height of the browser window so that the first line of the request is not in the viewport
+      await browser.setWindowSize(1300, 500);
+      expect(await PageObjects.console.isPlayButtonVisible()).to.be(true);
+
+      // Reset it back to the original height
+      await browser.setWindowSize(1300, 1100);
+    });
+
     it('Shows OK when status code is 200 but body is empty', async () => {
       await PageObjects.console.clearEditorText();
 

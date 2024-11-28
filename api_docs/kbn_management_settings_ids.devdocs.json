@@ -1871,6 +1871,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.THEME_NAME_ID",
+        "type": "string",
+        "tags": [],
+        "label": "THEME_NAME_ID",
+        "description": [],
+        "signature": [
+          "\"theme:name\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.TIMELION_ES_DEFAULT_INDEX_ID",
         "type": "string",
         "tags": [],

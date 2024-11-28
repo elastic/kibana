@@ -185,6 +185,18 @@ export interface FullAgentPolicy {
       uninstall_token_hash: string;
       signing_key: string;
     };
+    logging?: {
+      level?: string;
+      to_files?: boolean;
+      files?: {
+        rotateeverybytes?: number;
+        keepfiles?: number;
+        interval?: string;
+      };
+    };
+    limits?: {
+      go_max_procs?: number;
+    };
   };
   secret_references?: PolicySecretReference[];
   signed?: {
@@ -260,7 +272,6 @@ export interface FleetServerPolicy {
 
 export interface AgentlessApiResponse {
   id: string;
-  region_id: string;
 }
 
 // Definitions for agent policy outputs endpoints

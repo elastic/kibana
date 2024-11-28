@@ -14,6 +14,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import {
+  analyticsServiceMock,
   chromeServiceMock,
   coreMock,
   docLinksServiceMock,
@@ -143,12 +144,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
   };
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const theme = themeServiceMock.createSetupContract({ darkMode: false });
+  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'amsterdam' });
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
 
   return {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: corePluginMock.application,
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),

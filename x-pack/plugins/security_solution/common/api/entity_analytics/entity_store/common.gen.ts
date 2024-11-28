@@ -39,6 +39,11 @@ export const EngineDescriptor = z.object({
   error: z.object({}).optional(),
 });
 
+export type StoreStatus = z.infer<typeof StoreStatus>;
+export const StoreStatus = z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']);
+export type StoreStatusEnum = typeof StoreStatus.enum;
+export const StoreStatusEnum = StoreStatus.enum;
+
 export type InspectQuery = z.infer<typeof InspectQuery>;
 export const InspectQuery = z.object({
   response: z.array(z.string()),

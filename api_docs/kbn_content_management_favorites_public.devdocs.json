@@ -17,14 +17,15 @@
             "section": "def-public.FavoritesClient",
             "text": "FavoritesClient"
           },
-          " implements ",
+          "<Metadata> implements ",
           {
             "pluginId": "@kbn/content-management-favorites-public",
             "scope": "public",
             "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
             "section": "def-public.FavoritesClientPublic",
             "text": "FavoritesClientPublic"
-          }
+          },
+          "<Metadata>"
         ],
         "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
         "deprecated": false,
@@ -140,14 +141,8 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/content-management-favorites-server",
-                "scope": "server",
-                "docId": "kibKbnContentManagementFavoritesServerPluginApi",
-                "section": "def-server.GetFavoritesResponse",
-                "text": "GetFavoritesResponse"
-              },
-              ">"
+              "GetFavoritesResponse",
+              "<Metadata>>"
             ],
             "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
             "deprecated": false,
@@ -163,13 +158,13 @@
             "label": "addFavorite",
             "description": [],
             "signature": [
-              "({ id }: { id: string; }) => Promise<",
+              "(params: AddFavoriteRequest<Metadata>) => Promise<",
               {
                 "pluginId": "@kbn/content-management-favorites-server",
                 "scope": "server",
                 "docId": "kibKbnContentManagementFavoritesServerPluginApi",
-                "section": "def-server.GetFavoritesResponse",
-                "text": "GetFavoritesResponse"
+                "section": "def-server.AddFavoriteResponse",
+                "text": "AddFavoriteResponse"
               },
               ">"
             ],
@@ -180,26 +175,17 @@
               {
                 "parentPluginId": "@kbn/content-management-favorites-public",
                 "id": "def-public.FavoritesClient.addFavorite.$1",
-                "type": "Object",
+                "type": "Uncategorized",
                 "tags": [],
-                "label": "{ id }",
+                "label": "params",
                 "description": [],
+                "signature": [
+                  "AddFavoriteRequest<Metadata>"
+                ],
                 "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/content-management-favorites-public",
-                    "id": "def-public.FavoritesClient.addFavorite.$1.id",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -217,8 +203,8 @@
                 "pluginId": "@kbn/content-management-favorites-server",
                 "scope": "server",
                 "docId": "kibKbnContentManagementFavoritesServerPluginApi",
-                "section": "def-server.GetFavoritesResponse",
-                "text": "GetFavoritesResponse"
+                "section": "def-server.RemoveFavoriteResponse",
+                "text": "RemoveFavoriteResponse"
               },
               ">"
             ],
@@ -509,14 +495,8 @@
           "({ enabled }?: { enabled?: boolean | undefined; }) => ",
           "UseQueryResult",
           "<",
-          {
-            "pluginId": "@kbn/content-management-favorites-server",
-            "scope": "server",
-            "docId": "kibKbnContentManagementFavoritesServerPluginApi",
-            "section": "def-server.GetFavoritesResponse",
-            "text": "GetFavoritesResponse"
-          },
-          ", unknown>"
+          "GetFavoritesResponse",
+          "<void>, unknown>"
         ],
         "path": "packages/content-management/favorites/favorites_public/src/favorites_query.tsx",
         "deprecated": false,
@@ -601,6 +581,16 @@
         "tags": [],
         "label": "FavoritesClientPublic",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-management-favorites-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          "<Metadata>"
+        ],
         "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -614,14 +604,8 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/content-management-favorites-server",
-                "scope": "server",
-                "docId": "kibKbnContentManagementFavoritesServerPluginApi",
-                "section": "def-server.GetFavoritesResponse",
-                "text": "GetFavoritesResponse"
-              },
-              ">"
+              "GetFavoritesResponse",
+              "<Metadata>>"
             ],
             "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
             "deprecated": false,
@@ -637,13 +621,13 @@
             "label": "addFavorite",
             "description": [],
             "signature": [
-              "({ id }: { id: string; }) => Promise<",
+              "(params: AddFavoriteRequest<Metadata>) => Promise<",
               {
                 "pluginId": "@kbn/content-management-favorites-server",
                 "scope": "server",
                 "docId": "kibKbnContentManagementFavoritesServerPluginApi",
-                "section": "def-server.GetFavoritesResponse",
-                "text": "GetFavoritesResponse"
+                "section": "def-server.AddFavoriteResponse",
+                "text": "AddFavoriteResponse"
               },
               ">"
             ],
@@ -654,26 +638,17 @@
               {
                 "parentPluginId": "@kbn/content-management-favorites-public",
                 "id": "def-public.FavoritesClientPublic.addFavorite.$1",
-                "type": "Object",
+                "type": "Uncategorized",
                 "tags": [],
-                "label": "{ id }",
+                "label": "params",
                 "description": [],
+                "signature": [
+                  "AddFavoriteRequest<Metadata>"
+                ],
                 "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/content-management-favorites-public",
-                    "id": "def-public.FavoritesClientPublic.addFavorite.$1.id",
-                    "type": "string",
-                    "tags": [],
-                    "label": "id",
-                    "description": [],
-                    "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -686,13 +661,13 @@
             "label": "removeFavorite",
             "description": [],
             "signature": [
-              "({ id }: { id: string; }) => Promise<",
+              "(params: { id: string; }) => Promise<",
               {
                 "pluginId": "@kbn/content-management-favorites-server",
                 "scope": "server",
                 "docId": "kibKbnContentManagementFavoritesServerPluginApi",
-                "section": "def-server.GetFavoritesResponse",
-                "text": "GetFavoritesResponse"
+                "section": "def-server.RemoveFavoriteResponse",
+                "text": "RemoveFavoriteResponse"
               },
               ">"
             ],
@@ -705,7 +680,7 @@
                 "id": "def-public.FavoritesClientPublic.removeFavorite.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ id }",
+                "label": "params",
                 "description": [],
                 "path": "packages/content-management/favorites/favorites_public/src/favorites_client.ts",
                 "deprecated": false,

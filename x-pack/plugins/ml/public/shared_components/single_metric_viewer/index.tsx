@@ -8,7 +8,10 @@
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { SingleMetricViewerServices } from '../../embeddables/types';
+import type {
+  SingleMetricViewerServices,
+  SingleMetricViewerEmbeddableApi,
+} from '../../embeddables/types';
 import type { MlDependencies } from '../../application/app';
 import type { SingleMetricViewerSharedComponent } from './single_metric_viewer';
 
@@ -17,7 +20,8 @@ const SingleMetricViewerLazy = dynamic(async () => import('./single_metric_viewe
 export const getSingleMetricViewerComponent = (
   coreStart: CoreStart,
   pluginStart: MlDependencies,
-  mlServices: SingleMetricViewerServices
+  mlServices: SingleMetricViewerServices,
+  api?: SingleMetricViewerEmbeddableApi
 ): SingleMetricViewerSharedComponent => {
   return (props) => {
     return (
@@ -25,6 +29,7 @@ export const getSingleMetricViewerComponent = (
         coreStart={coreStart}
         pluginStart={pluginStart}
         mlServices={mlServices}
+        api={api}
         {...props}
       />
     );

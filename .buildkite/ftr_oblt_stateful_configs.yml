@@ -32,6 +32,7 @@ enabled:
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/uptime/config.ts
   - x-pack/test/api_integration/apis/entity_manager/config.ts
+  - x-pack/test/api_integration/apis/streams/config.ts
   - x-pack/test/apm_api_integration/basic/config.ts
   - x-pack/test/apm_api_integration/cloud/config.ts
   - x-pack/test/apm_api_integration/rules/config.ts
@@ -52,3 +53,4 @@ enabled:
   - x-pack/test/functional/apps/apm/config.ts
   # stateful configs that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/configs/stateful/oblt.apm.stateful.config.ts

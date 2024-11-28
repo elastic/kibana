@@ -23,16 +23,20 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
   defaultMessage: 'Security',
 });
 
-export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] => {
+export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] | null => {
   const { chrome } = useKibana().services;
   const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
-  const chromeStyle = useObservable(chromeStyle$, 'classic');
+  const chromeStyle = useObservable(chromeStyle$, undefined);
 
   useBreadcrumbsNav();
 
+  if (chromeStyle === undefined) {
+    return undefined; // wait for chromeStyle to be initialized
+  }
+
   if (chromeStyle === 'project') {
-    // new shared-ux 'project' navigation enabled, return undefined to disable the 'classic' navigation
-    return undefined;
+    // new shared-ux 'project' navigation enabled, return null to disable the 'classic' navigation
+    return null;
   }
 
   return {
