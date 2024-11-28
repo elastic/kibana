@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useWaffleFilters, WaffleFiltersState } from './use_waffle_filters';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';

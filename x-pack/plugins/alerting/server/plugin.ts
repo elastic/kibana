@@ -411,6 +411,7 @@ export class AlertingPlugin {
       encryptedSavedObjects: plugins.encryptedSavedObjects,
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
+      docLinks: core.docLinks,
     });
 
     return {
