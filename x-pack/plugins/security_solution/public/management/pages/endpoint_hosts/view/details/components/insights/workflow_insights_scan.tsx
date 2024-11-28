@@ -21,7 +21,21 @@ import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 
-export const WorkflowInsightsScanSection = () => {
+interface WorkflowInsightsScanSectionProps {
+  isScanButtonDisabled: boolean;
+  onScanButtonClick: ({
+    actionTypeId,
+    connectorId,
+  }: {
+    actionTypeId: string;
+    connectorId: string;
+  }) => void;
+}
+
+export const WorkflowInsightsScanSection = ({
+  isScanButtonDisabled,
+  onScanButtonClick,
+}: WorkflowInsightsScanSectionProps) => {
   const CONNECTOR_ID_LOCAL_STORAGE_KEY = 'connectorId';
 
   const spaceId = useSpaceId() ?? 'default';
@@ -54,17 +68,38 @@ export const WorkflowInsightsScanSection = () => {
     [aiConnectors, connectorId]
   );
 
+  const selectedConnectorActionTypeId = useMemo(() => {
+    const selectedConnector = aiConnectors?.find((connector) => connector.id === connectorId);
+    return selectedConnector?.actionTypeId;
+  }, [aiConnectors, connectorId]);
+
   // Render the scan button only if a connector is selected
   const renderScanButton = useMemo(() => {
     if (!connectorExists) {
       return null;
     }
+
     return (
       <EuiFlexItem grow={false}>
-        <EuiButton size="s">{WORKFLOW_INSIGHTS.scan.button}</EuiButton>
+        <EuiButton
+          size="s"
+          isLoading={isScanButtonDisabled}
+          onClick={() => {
+            if (!connectorId || !selectedConnectorActionTypeId) return;
+            onScanButtonClick({ connectorId, actionTypeId: selectedConnectorActionTypeId });
+          }}
+        >
+          {!isScanButtonDisabled && WORKFLOW_INSIGHTS.scan.button}
+        </EuiButton>
       </EuiFlexItem>
     );
-  }, [connectorExists]);
+  }, [
+    connectorExists,
+    connectorId,
+    isScanButtonDisabled,
+    onScanButtonClick,
+    selectedConnectorActionTypeId,
+  ]);
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder>
