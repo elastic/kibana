@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { prefixIndexPatternWithCcs } from '../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from './ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_ELASTICSEARCH_ECS,
@@ -16,8 +16,8 @@ import {
   DS_INDEX_PATTERN_METRICS,
   INDEX_PATTERN_TYPES,
   INDEX_PATTERN_ENTERPRISE_SEARCH,
-} from '../../../common/constants';
-import { MonitoringConfig } from '../../config';
+} from './constants';
+import type { MonitoringConfig } from '../server/config';
 
 interface CommonIndexPatternArgs {
   config: MonitoringConfig;
