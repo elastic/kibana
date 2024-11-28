@@ -25,7 +25,7 @@ Higher-level functionality is provided by the `mutate` and `synth` modules. They
 allow you to traverse and modify the AST, or to easily construct AST nodes:
 
 - [`mutate` &mdash; Contains code for traversing and mutating the AST](./src/mutate/README.md).
-- [`synth` &mdash; Ability to construct AST nodes from template strings](./src/mutate/README.md).
+- [`synth` &mdash; Ability to construct AST nodes from template strings](./src/synth/README.md).
 
 The *Pretty-printing API* lets you format the AST to text. There are two
 implementations &mdash; a basic pretty-printer and a wrapping pretty-printer:
