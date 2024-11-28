@@ -164,7 +164,10 @@ export const AlertsDetailsTable = memo(
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}>
+          <EuiLink
+            onClick={() => handleOnEventAlertDetailPanelOpened(id, alert.index, tableId)}
+            data-test-subj={'alertPreviewExpandButtonTestSubject'}
+          >
             <EuiIcon type={'expand'} />
           </EuiLink>
         ),
