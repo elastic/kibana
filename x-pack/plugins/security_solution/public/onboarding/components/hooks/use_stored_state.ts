@@ -6,25 +6,16 @@
  */
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { OnboardingCardId } from '../constants';
-import type { IntegrationTabId } from '../components/onboarding_body/cards/integrations/types';
-
-const LocalStorageKey = {
-  avcBannerDismissed: 'ONBOARDING_HUB.AVC_BANNER_DISMISSED',
-  videoVisited: 'ONBOARDING_HUB.VIDEO_VISITED',
-  completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
-  expandedCard: 'ONBOARDING_HUB.EXPANDED_CARD',
-  selectedIntegrationTabId: 'ONBOARDING_HUB.SELECTED_INTEGRATION_TAB_ID',
-  IntegrationSearchTerm: 'ONBOARDING_HUB.INTEGRATION_SEARCH_TERM',
-  IntegrationScrollTop: 'ONBOARDING_HUB.INTEGRATION_SCROLL_TOP',
-} as const;
+import { useMemo } from 'react';
+import { LocalStorageKey, type OnboardingCardId } from '../../constants';
+import type { IntegrationTabId } from '../onboarding_body/cards/integrations/types';
 
 /**
  * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.
  */
-const useDefinedLocalStorage = <T>(key: string, defaultValue: T) => {
+export const useDefinedLocalStorage = <T = undefined>(key: string, defaultValue: T) => {
   const [value, setValue] = useLocalStorage<T>(key, defaultValue);
-  return [value ?? defaultValue, setValue] as const;
+  return useMemo(() => [value ?? defaultValue, setValue] as const, [value, defaultValue, setValue]);
 };
 
 /**
@@ -40,13 +31,10 @@ export const useStoredCompletedCardIds = (spaceId: string) =>
   useDefinedLocalStorage<OnboardingCardId[]>(`${LocalStorageKey.completeCards}.${spaceId}`, []);
 
 /**
- * Stores the expanded card ID per space
+ * Stores the selected topic ID per space
  */
-export const useStoredExpandedCardId = (spaceId: string) =>
-  useDefinedLocalStorage<OnboardingCardId | null>(
-    `${LocalStorageKey.expandedCard}.${spaceId}`,
-    null
-  );
+export const useStoredUrlDetails = (spaceId: string) =>
+  useDefinedLocalStorage<string | null>(`${LocalStorageKey.urlDetails}.${spaceId}`, null);
 
 /**
  * Stores the selected integration tab ID per space
@@ -65,6 +53,15 @@ export const useStoredIntegrationTabId = (
  */
 export const useStoredIntegrationSearchTerm = (spaceId: string) =>
   useDefinedLocalStorage<string | null>(
-    `${LocalStorageKey.IntegrationSearchTerm}.${spaceId}`,
+    `${LocalStorageKey.integrationSearchTerm}.${spaceId}`,
     null
+  );
+
+/**
+ * Stores the siem migrations connector id
+ */
+export const useStoredSiemMigrationsConnectorId = (spaceId: string) =>
+  useDefinedLocalStorage<string | undefined>(
+    `${LocalStorageKey.siemMigrationsConnectorId}.${spaceId}`,
+    undefined
   );

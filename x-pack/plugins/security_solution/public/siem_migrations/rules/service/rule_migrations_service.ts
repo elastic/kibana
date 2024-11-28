@@ -8,25 +8,31 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
-import { getRuleMigrationsStatsAll } from '../api/api';
+import { getRuleMigrationsStatsAll, startRuleMigration } from '../api/api';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
-
-const POLLING_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rulesService.polling.errorTitle',
-  { defaultMessage: 'Error fetching rule migrations' }
-);
+import { RuleMigrationsStorage } from './storage';
 
 export class SiemRulesMigrationsService {
   private readonly pollingInterval = 5000;
   private readonly latestStats$: BehaviorSubject<RuleMigrationStats[]>;
+  private readonly signal = new AbortController().signal;
   private isPolling = false;
+  public connectorIdStorage = new RuleMigrationsStorage('connectorId');
 
-  constructor(private readonly core: CoreStart) {
+  constructor(
+    private readonly core: CoreStart,
+    private readonly plugins: StartPluginsDependencies
+  ) {
     this.latestStats$ = new BehaviorSubject<RuleMigrationStats[]>([]);
-    this.startPolling();
+
+    this.plugins.spaces.getActiveSpace().then((space) => {
+      this.connectorIdStorage.setSpaceId(space.id);
+      this.startPolling();
+    });
   }
 
   public getLatestStats$(): Observable<RuleMigrationStats[]> {
@@ -45,7 +51,12 @@ export class SiemRulesMigrationsService {
     this.isPolling = true;
     this.startStatsPolling()
       .catch((e) => {
-        this.core.notifications.toasts.addError(e, { title: POLLING_ERROR_TITLE });
+        this.core.notifications.toasts.addError(e, {
+          title: i18n.translate(
+            'xpack.securitySolution.siemMigrations.rulesService.polling.errorTitle',
+            { defaultMessage: 'Error fetching rule migrations' }
+          ),
+        });
       })
       .finally(() => {
         this.isPolling = false;
@@ -62,26 +73,39 @@ export class SiemRulesMigrationsService {
         // send notifications for finished migrations
         pendingMigrationIds.forEach((pendingMigrationId) => {
           const migration = results.find((item) => item.id === pendingMigrationId);
-          if (migration && migration.status === 'finished') {
+          if (migration?.status === 'finished') {
             this.core.notifications.toasts.addSuccess(getSuccessToast(migration, this.core));
           }
         });
       }
 
-      // reassign pending migrations
-      pendingMigrationIds = results.reduce<string[]>((acc, item) => {
-        if (item.status === 'running') {
-          acc.push(item.id);
+      // reprocess pending migrations
+      pendingMigrationIds = [];
+      for (const result of results) {
+        if (result.status === 'running') {
+          pendingMigrationIds.push(result.id);
         }
-        return acc;
-      }, []);
+
+        if (result.status === 'stopped') {
+          const connectorId = this.connectorIdStorage.get();
+          if (connectorId) {
+            // automatically resume stopped migrations
+            await startRuleMigration({
+              migrationId: result.id,
+              body: { connector_id: connectorId },
+              signal: this.signal,
+            });
+            pendingMigrationIds.push(result.id);
+          }
+        }
+      }
 
       await new Promise((resolve) => setTimeout(resolve, this.pollingInterval));
     } while (pendingMigrationIds.length > 0);
   }
 
   private async fetchRuleMigrationsStats(): Promise<RuleMigrationStats[]> {
-    const stats = await getRuleMigrationsStatsAll({ signal: new AbortController().signal });
+    const stats = await getRuleMigrationsStatsAll({ signal: this.signal });
     return stats.map((stat, index) => ({ ...stat, number: index + 1 })); // the array order (by creation) is guaranteed by the API
   }
 }

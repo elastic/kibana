@@ -251,15 +251,7 @@ paths:
             schema:
               type: array
               items:
-                allOf:
-                  - $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
-                  - type: object
-                    required:
-                      - id
-                    properties:
-                      id:
-                        description: The rule resource migration id
-                        $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
       responses:
         200:
           description: Indicates migration resources have been created or updated correctly.
