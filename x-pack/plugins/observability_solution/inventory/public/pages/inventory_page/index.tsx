@@ -17,6 +17,7 @@ import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { GroupBySelector } from '../../components/group_by_selector';
+import { groupEntityTypesByStatus } from '../../utils/group_entity_types_by_status';
 
 export function InventoryPage() {
   const {
@@ -34,21 +35,15 @@ export function InventoryPage() {
     loading,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
-      const entityTypesKeys = Object.keys(entityTypes);
-      const includeEntityTypes = entityTypesKeys.filter((key) => entityTypes[key] === 'on').sort();
-      const excludeEntityTypes = entityTypesKeys.filter((key) => entityTypes[key] === 'off').sort();
+      const { entityTypesOff, entityTypesOn } = groupEntityTypesByStatus(entityTypes);
       return inventoryAPIClient.fetch('GET /internal/inventory/entities/group_by/{field}', {
         params: {
           path: {
             field: ENTITY_TYPE,
           },
           query: {
-            includeEntityTypes: includeEntityTypes.length
-              ? JSON.stringify(includeEntityTypes)
-              : undefined,
-            excludeEntityTypes: excludeEntityTypes.length
-              ? JSON.stringify(excludeEntityTypes)
-              : undefined,
+            includeEntityTypes: entityTypesOn.length ? JSON.stringify(entityTypesOn) : undefined,
+            excludeEntityTypes: entityTypesOff.length ? JSON.stringify(entityTypesOff) : undefined,
             kuery,
           },
         },

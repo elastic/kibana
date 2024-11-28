@@ -13,13 +13,14 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { entityTypesRt, type EntityType } from '../../../common/rt_types';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
 import { useInventoryDecodedQueryParams } from '../../hooks/use_inventory_decoded_query_params';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
+import { groupEntityTypesByStatus } from '../../utils/group_entity_types_by_status';
 
 export function EntityTypesMultiSelect() {
   const inventoryRoute = useInventoryRouter();
@@ -27,7 +28,7 @@ export function EntityTypesMultiSelect() {
   const { entityTypes: selectedEntityTypes } = useInventoryDecodedQueryParams();
 
   const {
-    services: { inventoryAPIClient },
+    services: { inventoryAPIClient, telemetry },
   } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -49,17 +50,20 @@ export function EntityTypesMultiSelect() {
     [selectedEntityTypes, value?.entityTypes]
   );
 
-  // const registerEntityTypeFilteredEvent = useCallback(
-  //   ({ filterEntityTypes, filterKuery }: { filterEntityTypes: string[]; filterKuery?: string }) => {
-  //     telemetry.reportEntityInventoryEntityTypeFiltered({
-  //       entity_types: filterEntityTypes,
-  //       kuery_fields: filterKuery ? getKqlFieldsWithFallback(filterKuery) : [],
-  //     });
-  //   },
-  //   [telemetry]
-  // );
+  const registerEntityTypeFilteredEvent = useCallback(
+    ({ filterEntityTypes }: { filterEntityTypes: EntityType }) => {
+      const { entityTypesOff, entityTypesOn } = groupEntityTypesByStatus(filterEntityTypes);
+
+      telemetry.reportEntityInventoryEntityTypeFiltered({
+        include_entity_types: entityTypesOn,
+        exclude_entity_types: entityTypesOff,
+      });
+    },
+    [telemetry]
+  );
 
   function handleEntityTypeChecked(nextItems: EntityType) {
+    registerEntityTypeFilteredEvent({ filterEntityTypes: nextItems });
     inventoryRoute.push('/', {
       path: {},
       query: {
