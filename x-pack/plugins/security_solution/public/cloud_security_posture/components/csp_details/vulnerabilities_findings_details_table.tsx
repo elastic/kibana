@@ -127,6 +127,18 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     );
   };
 
+  const vulnerabilityStats = getVulnerabilityStats(
+    {
+      critical,
+      high,
+      medium,
+      low,
+      none,
+    },
+    setCurrentFilter,
+    currentFilter
+  );
+
   const columns: Array<EuiBasicTableColumn<VulnerabilitiesFindingDetailFields>> = [
     {
       field: 'vulnerability',
@@ -227,19 +239,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
           <EuiIcon type={'popout'} />
         </SecuritySolutionLinkAnchor>
         <EuiSpacer size="xl" />
-        <DistributionBar
-          stats={getVulnerabilityStats(
-            {
-              critical,
-              high,
-              medium,
-              low,
-              none,
-            },
-            setCurrentFilter,
-            currentFilter
-          )}
-        />
+        <DistributionBar stats={vulnerabilityStats} />
         <EuiSpacer size="l" />
         <EuiBasicTable
           items={pageOfItems || []}

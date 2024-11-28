@@ -152,6 +152,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
     const linkWidth = 40;
     const resultWidth = 74;
 
+    const misconfgurationStats = getFindingsStats(
+      passedFindings,
+      failedFindings,
+      setCurrentFilter,
+      currentFilter
+    );
+
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
         field: 'rule',
@@ -225,14 +232,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
             <EuiIcon type={'popout'} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
-          <DistributionBar
-            stats={getFindingsStats(
-              passedFindings,
-              failedFindings,
-              setCurrentFilter,
-              currentFilter
-            )}
-          />
+          <DistributionBar stats={misconfgurationStats} />
           <EuiSpacer size="l" />
           <EuiBasicTable
             items={pageOfItems || []}
