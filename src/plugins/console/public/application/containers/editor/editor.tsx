@@ -213,7 +213,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
               <EuiSplitPanel.Outer borderRadius="none" hasShadow={false} style={{ height: '100%' }}>
                 <EuiSplitPanel.Inner
                   paddingSize="none"
-                  css={{ alignContent: 'center', top: 0 }}
+                  style={{ alignContent: 'center', top: 0, height: 'calc(100% - 40px)' }}
                   className="consoleEditorPanel"
                 >
                   {data ? (
