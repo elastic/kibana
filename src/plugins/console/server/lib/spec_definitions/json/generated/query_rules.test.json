@@ -1,5 +1,5 @@
 {
-  "security.create_cross_cluster_api_key": {
+  "query_rules.test": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -10,12 +10,12 @@
       "POST"
     ],
     "patterns": [
-      "_security/cross_cluster/api_key"
+      "_query_rules/{ruleset_id}/_test"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-create-cross-cluster-api-key.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/test-query-ruleset.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }
