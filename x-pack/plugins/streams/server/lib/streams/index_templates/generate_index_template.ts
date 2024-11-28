@@ -27,6 +27,7 @@ export function generateIndexTemplate(id: string) {
     },
     data_stream: {
       hidden: false,
+      failure_store: true,
     },
     template: {
       settings: {

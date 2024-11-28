@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { IVectorSource } from '.';
 
@@ -25,4 +26,9 @@ export interface IMvtVectorSource extends IVectorSource {
    * Use getTileSourceLayer to specify the displayed source layer.
    */
   getTileSourceLayer(): string;
+
+  /**
+   * Syncs source specific styling with mbMap this allows custom sources to further style the map layers/filters
+   */
+  syncSourceStyle?(mbMap: MbMap, getLayerIds: () => string[]): void;
 }

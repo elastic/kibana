@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { affectedJobIds } from '../../../../../../common/machine_learning/affected_job_ids';
@@ -19,10 +20,17 @@ export const useMlJobUpgradeModal = () => {
     onFinish: hideModal,
   });
 
+  const handleLegacyMLJobsConfirm = useCallback(async () => {
+    if (legacyJobsInstalled.length > 0) {
+      return confirmLegacyMLJobs();
+    }
+    return true;
+  }, [confirmLegacyMLJobs, legacyJobsInstalled]);
+
   return {
     isVisible,
     legacyJobsInstalled,
-    confirmLegacyMLJobs,
+    confirmLegacyMLJobs: handleLegacyMLJobsConfirm,
     handleConfirm,
     handleCancel,
     loadingJobs,

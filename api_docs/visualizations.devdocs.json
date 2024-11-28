@@ -7090,7 +7090,15 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; reload: () => Promise<void>; updateInput: (changes: Partial<",
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getEditHref: () => Promise<string | undefined>; supportedTriggers: () => string[]; getInspectorAdapters: () => ",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          " | undefined; reload: () => Promise<void>; updateInput: (changes: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -7124,15 +7132,7 @@
             "section": "def-common.VisParams",
             "text": "VisParams"
           },
-          ">; getInspectorAdapters: () => ",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          " | undefined; openInspector: () => ",
+          ">; openInspector: () => ",
           {
             "pluginId": "@kbn/core-mount-utils-browser",
             "scope": "public",
@@ -7148,7 +7148,7 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; supportedTriggers: () => string[]; getExpressionVariables$: () => ",
+          ") => void; getExpressionVariables$: () => ",
           "Observable",
           "<Record<string, unknown> | undefined>; getExpressionVariables: () => Record<string, unknown> | undefined; inputIsRefType: (input: ",
           {

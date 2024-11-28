@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-
 export const createExpandableFlyoutApiMock = () => ({
   closeFlyout: jest.fn(),
   closeLeftPanel: jest.fn(),
@@ -18,17 +16,3 @@ export const createExpandableFlyoutApiMock = () => ({
   openPreviewPanel: jest.fn(),
   openRightPanel: jest.fn(),
 });
-
-export const createExpandableFlyoutMock = () => {
-  return {
-    useExpandableFlyoutApi: jest.fn().mockReturnValue(createExpandableFlyoutApiMock()),
-    useExpandableFlyoutState: jest.fn(),
-    ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-    withExpandableFlyoutProvider: <T extends object>(Component: React.ComponentType<T>) => {
-      return (props: T) => {
-        return <Component {...props} />;
-      };
-    },
-    ExpandableFlyout: jest.fn(),
-  };
-};

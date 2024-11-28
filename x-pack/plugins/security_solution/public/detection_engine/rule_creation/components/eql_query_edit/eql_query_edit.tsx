@@ -11,11 +11,11 @@ import { debounceAsync } from '@kbn/securitysolution-utils';
 import type { FormData, FieldConfig, ValidationFuncArg } from '../../../../shared_imports';
 import { UseMultiFields } from '../../../../shared_imports';
 import type { EqlFieldsComboBoxOptions, EqlOptions } from '../../../../../common/search_strategy';
+import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar_field';
 import { queryRequiredValidatorFactory } from '../../../rule_creation_ui/validators/query_required_validator_factory';
 import { eqlQueryValidatorFactory } from './eql_query_validator_factory';
 import { EqlQueryBar } from './eql_query_bar';
 import * as i18n from './translations';
-import type { FieldValueQueryBar } from '../../../rule_creation_ui/components/query_bar';
 
 interface EqlQueryEditProps {
   path: string;

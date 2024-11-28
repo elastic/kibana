@@ -10,5 +10,10 @@
     "output": "src/plugins/telemetry/schema/kbn_packages.json",
     "root": "packages/",
     "exclude": []
+  },
+  {
+    "output": "src/plugins/telemetry/schema/oss_platform.json",
+    "root": "src/platform/",
+    "exclude": []
   }
 ]

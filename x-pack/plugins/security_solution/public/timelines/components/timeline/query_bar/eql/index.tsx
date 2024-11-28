@@ -16,7 +16,7 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { EqlQueryEdit } from '../../../../../detection_engine/rule_creation/components/eql_query_edit';
-import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar';
+import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
 
 import type { FormSchema, FormSubmitHandler } from '../../../../../shared_imports';
 import { Form, UseField, useForm } from '../../../../../shared_imports';

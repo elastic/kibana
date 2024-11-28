@@ -13,6 +13,7 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -28,11 +29,13 @@ beforeEach(() => {
 });
 
 describe('unmuteAlertInstanceRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('unmutes an alert instance', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    unmuteAlertInstanceRoute(router, licenseState);
+    unmuteAlertInstanceRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -73,7 +76,7 @@ describe('unmuteAlertInstanceRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    unmuteAlertInstanceRoute(router, licenseState, undefined, true);
+    unmuteAlertInstanceRoute(router, licenseState, docLinks, undefined, true);
 
     const [config] = router.post.mock.calls[0];
 
@@ -87,7 +90,7 @@ describe('unmuteAlertInstanceRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    unmuteAlertInstanceRoute(router, licenseState);
+    unmuteAlertInstanceRoute(router, licenseState, docLinks);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -111,12 +114,38 @@ describe('unmuteAlertInstanceRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    unmuteAlertInstanceRoute(router, licenseState, mockUsageCounter);
+    unmuteAlertInstanceRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('unmuteInstance', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    unmuteAlertInstanceRoute(router, licenseState, docLinks);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "POST",
+          "newApiPath": "/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

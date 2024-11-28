@@ -20,6 +20,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in one line. 1`] = `
         }
       }
     />
+     
      
     <span
       className="ml-explorer-chart-info-icon"
@@ -97,6 +98,7 @@ exports[`ExplorerChartLabelBadge Render the chart label in two lines. 1`] = `
         }
       }
     />
+     
   </span>
 </Fragment>
 `;

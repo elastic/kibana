@@ -5203,6 +5203,20 @@
             "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.UseLoadConnectorTypesProps.featureId",
+            "type": "string",
+            "tags": [],
+            "label": "featureId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-alerts-ui-shared/src/common/hooks/use_load_connector_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

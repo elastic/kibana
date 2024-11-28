@@ -672,6 +672,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       slackApiAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-web-api`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
+      legacyRuleApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201550`,
     },
     taskManager: {
       healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
@@ -1003,6 +1004,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     inferenceManagement: {
       inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
+    },
+    cases: {
+      legacyApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
     },
   });
 };

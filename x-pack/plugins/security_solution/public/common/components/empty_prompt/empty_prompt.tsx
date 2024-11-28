@@ -14,6 +14,7 @@ import {
   EuiPageHeader,
   useEuiTheme,
   type EuiThemeComputed,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { OnboardingCardId } from '../../../onboarding/constants';
@@ -67,7 +68,7 @@ const footerStyles = css`
   margin: 20px auto 0;
 `;
 
-export const EmptyPromptComponent = memo(() => {
+export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) => {
   const { euiTheme } = useEuiTheme();
 
   const { navigateTo } = useNavigateTo();
@@ -164,9 +165,20 @@ export const EmptyPromptComponent = memo(() => {
           textAlign="center"
           title={i18n.UNIFY_TITLE}
           footer={
-            <EuiButton data-test-subj="add-integrations-footer" onClick={onClick}>
-              {i18n.SIEM_CTA}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiButton data-test-subj="add-integrations-footer" onClick={onClick}>
+                  {i18n.SIEM_CTA}
+                </EuiButton>
+              </EuiFlexItem>
+              {onSkip && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty data-test-subj="skip-integrations-footer" onClick={onSkip}>
+                    {i18n.SIEM_CONTINUE}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           }
           css={footerStyles}
         />

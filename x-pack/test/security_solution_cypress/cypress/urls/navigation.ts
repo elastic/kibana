@@ -79,3 +79,6 @@ export const exceptionsListDetailsUrl = (listId: string) =>
 export const DISCOVER_URL = '/app/discover';
 export const OSQUERY_URL = '/app/osquery';
 export const FLEET_URL = '/app/fleet';
+
+// Entity Analytics
+export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';

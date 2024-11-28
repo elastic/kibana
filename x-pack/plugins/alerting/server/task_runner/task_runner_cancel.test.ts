@@ -158,6 +158,7 @@ describe('Task Runner Cancel', () => {
     supportsEphemeralTasks: false,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   beforeEach(() => {

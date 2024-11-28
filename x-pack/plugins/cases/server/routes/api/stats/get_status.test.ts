@@ -6,16 +6,33 @@
  */
 
 import { getStatusRoute } from './get_status';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 describe('getStatusRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('marks the endpoint internal in serverless', async () => {
-    const router = getStatusRoute({ isServerless: true });
+    const router = getStatusRoute({ isServerless: true, docLinks });
 
     expect(router.routerOptions?.access).toBe('internal');
+    expect(router.routerOptions?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201004$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201004\\$/,
+        "reason": Object {
+          "type": "remove",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 
   it('marks the endpoint public in non-serverless', async () => {
-    const router = getStatusRoute({ isServerless: false });
+    const router = getStatusRoute({ isServerless: false, docLinks });
 
     expect(router.routerOptions?.access).toBe('public');
   });

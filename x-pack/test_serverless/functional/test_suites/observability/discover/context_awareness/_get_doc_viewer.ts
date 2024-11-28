@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getDocViewer', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginAsAdmin();
+      await PageObjects.svlCommonPage.loginAsViewer();
     });
 
     describe('ES|QL mode', () => {

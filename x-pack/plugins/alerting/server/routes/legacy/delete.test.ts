@@ -13,6 +13,7 @@ import { verifyApiAccess } from '../../lib/license_api_access';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { rulesClientMock } from '../../rules_client.mock';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 const rulesClient = rulesClientMock.create();
 
@@ -29,11 +30,13 @@ beforeEach(() => {
 });
 
 describe('deleteAlertRoute', () => {
+  const docLinks = docLinksServiceMock.createSetupContract();
+
   it('deletes an alert with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteAlertRoute(router, licenseState);
+    deleteAlertRoute(router, licenseState, docLinks);
 
     const [config, handler] = router.delete.mock.calls[0];
 
@@ -70,7 +73,7 @@ describe('deleteAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteAlertRoute(router, licenseState, undefined, true);
+    deleteAlertRoute(router, licenseState, docLinks, undefined, true);
 
     const [config] = router.delete.mock.calls[0];
 
@@ -82,7 +85,7 @@ describe('deleteAlertRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    deleteAlertRoute(router, licenseState);
+    deleteAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.delete.mock.calls[0];
 
@@ -108,7 +111,7 @@ describe('deleteAlertRoute', () => {
       throw new Error('OMG');
     });
 
-    deleteAlertRoute(router, licenseState);
+    deleteAlertRoute(router, licenseState, docLinks);
 
     const [, handler] = router.delete.mock.calls[0];
 
@@ -132,12 +135,38 @@ describe('deleteAlertRoute', () => {
     const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
     const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
-    deleteAlertRoute(router, licenseState, mockUsageCounter);
+    deleteAlertRoute(router, licenseState, docLinks, mockUsageCounter);
     const [, handler] = router.delete.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
       'ok',
     ]);
     await handler(context, req, res);
     expect(trackLegacyRouteUsage).toHaveBeenCalledWith('delete', mockUsageCounter);
+  });
+
+  it('should be deprecated', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteAlertRoute(router, licenseState, docLinks);
+
+    const [config] = router.delete.mock.calls[0];
+
+    expect(config.options?.deprecated).toMatchInlineSnapshot(
+      {
+        documentationUrl: expect.stringMatching(/#breaking-201550$/),
+      },
+      `
+      Object {
+        "documentationUrl": StringMatching /#breaking-201550\\$/,
+        "reason": Object {
+          "newApiMethod": "DELETE",
+          "newApiPath": "/api/alerting/rule/{id}",
+          "type": "migrate",
+        },
+        "severity": "warning",
+      }
+    `
+    );
   });
 });

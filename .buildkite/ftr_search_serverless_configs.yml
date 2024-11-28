@@ -18,5 +18,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group6.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group7.ts
+  - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group8.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/search.serverless.config.ts

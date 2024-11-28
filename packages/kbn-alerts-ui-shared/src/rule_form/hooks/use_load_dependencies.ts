@@ -35,6 +35,7 @@ export interface UseLoadDependencies {
   ruleTypeId?: string;
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
+  connectorFeatureId?: string;
 }
 
 export const useLoadDependencies = (props: UseLoadDependencies) => {
@@ -46,6 +47,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     ruleTypeId,
     capabilities,
     filteredRuleTypes = [],
+    connectorFeatureId,
   } = props;
 
   const canReadConnectors = !!capabilities.actions?.show;
@@ -113,6 +115,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     http,
     includeSystemActions: true,
     enabled: canReadConnectors,
+    featureId: connectorFeatureId,
   });
 
   const {

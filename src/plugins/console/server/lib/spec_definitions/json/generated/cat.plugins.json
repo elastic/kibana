@@ -6,7 +6,6 @@
       ],
       "h": [],
       "help": "__flag__",
-      "local": "__flag__",
       "master_timeout": [
         "30s",
         "-1",
@@ -17,7 +16,8 @@
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "local": "__flag__"
     },
     "methods": [
       "GET"

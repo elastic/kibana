@@ -10,9 +10,11 @@ import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
 
+import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import { FieldConfig, ValidationFunc, fieldValidators } from '../../../../../../shared_imports';
+import { collapseEscapedStrings } from '../../../utils';
 
-const { emptyField } = fieldValidators;
+const { emptyField, isJsonField } = fieldValidators;
 
 export const arrayOfStrings = rt.array(rt.string);
 
@@ -20,6 +22,35 @@ export function isArrayOfStrings(v: unknown): v is string[] {
   const res = arrayOfStrings.decode(v);
   return isRight(res);
 }
+
+/**
+ * Format a XJson string input as parsed JSON. Replaces the invalid characters
+ *  with a placeholder, parses the new string in a JSON format with the expected
+ * indentantion and then replaces the placeholders with the original values.
+ */
+const formatXJsonString = (input: string) => {
+  let placeholder = 'PLACEHOLDER';
+  const INVALID_STRING_REGEX = /"""(.*?)"""/gs;
+  while (input.includes(placeholder)) {
+    placeholder += '_';
+  }
+  const modifiedInput = input.replace(INVALID_STRING_REGEX, () => `"${placeholder}"`);
+
+  let jsonObject;
+  try {
+    jsonObject = JSON.parse(modifiedInput);
+  } catch (error) {
+    return input;
+  }
+  let formattedJsonString = JSON.stringify(jsonObject, null, 2);
+  const invalidStrings = input.match(INVALID_STRING_REGEX);
+  if (invalidStrings) {
+    invalidStrings.forEach((invalidString) => {
+      formattedJsonString = formattedJsonString.replace(`"${placeholder}"`, invalidString);
+    });
+  }
+  return formattedJsonString;
+};
 
 /**
  * Shared deserializer functions.
@@ -49,6 +80,15 @@ export const to = {
       return s.slice(1, s.length - 1);
     }
     return v;
+  },
+  xJsonString: (v: unknown) => {
+    if (!v) {
+      return '{}';
+    }
+    if (typeof v === 'string') {
+      return formatXJsonString(v);
+    }
+    return JSON.stringify(v, null, 2);
   },
 };
 
@@ -98,6 +138,12 @@ export const from = {
       }
     }
   },
+  optionalXJson: (v: string) => {
+    if (v && v !== '{}') {
+      return v;
+    }
+    return undefined;
+  },
 };
 
 const isJSONString = (v: string) => {
@@ -119,6 +165,16 @@ export const isJSONStringValidator: ValidationFunc = ({ value }) => {
     };
   }
 };
+
+export const isXJsonField =
+  (message: string, { allowEmptyString = false }: { allowEmptyString?: boolean } = {}) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value, ...rest }] = args;
+    return isJsonField(message, { allowEmptyString })({
+      ...rest,
+      value: collapseEscapedStrings(value as string),
+    });
+  };
 
 /**
  * Similar to the emptyField validator but we accept whitespace characters.

@@ -24,7 +24,7 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 [float]
 === Prerequisites
 
-- If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial]. Download the deployment credentials.
+- If you don’t already have {kib}, sign up for https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[a free Elastic Cloud trial] and create a hosted deployment. When creating it, download the deployment credentials.
 - Obtain an API key for https://developer.trimet.org/[TriMet web services] at https://developer.trimet.org/appid/registration/.
 - {fleet-guide}/fleet-overview.html[Fleet] is enabled on your cluster, and one or more {fleet-guide}/elastic-agent-installation.html[{agent}s] is enrolled.
 

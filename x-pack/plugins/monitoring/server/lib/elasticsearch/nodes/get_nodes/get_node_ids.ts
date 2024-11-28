@@ -10,7 +10,10 @@ import { get } from 'lodash';
 import { ElasticsearchMetric } from '../../../metrics';
 import { createQuery } from '../../../create_query';
 import { LegacyRequest, Bucket } from '../../../../types';
-import { getIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
+import {
+  getIndexPatterns,
+  getElasticsearchDataset,
+} from '../../../../../common/get_index_patterns';
 import { Globals } from '../../../../static_globals';
 
 export async function getNodeIds(

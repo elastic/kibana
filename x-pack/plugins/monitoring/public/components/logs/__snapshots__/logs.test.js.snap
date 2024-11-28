@@ -12,10 +12,8 @@ exports[`Logs should render a link to filter by cluster uuid 1`] = `
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            href=""
-          >
-            Logs
+          "link": <EuiLink>
+            Discover
           </EuiLink>,
         }
       }
@@ -36,10 +34,8 @@ exports[`Logs should render a link to filter by cluster uuid and index uuid 1`] 
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            href=""
-          >
-            Logs
+          "link": <EuiLink>
+            Discover
           </EuiLink>,
         }
       }
@@ -60,10 +56,8 @@ exports[`Logs should render a link to filter by cluster uuid and node uuid 1`] =
       id="xpack.monitoring.logs.listing.linkText"
       values={
         Object {
-          "link": <EuiLink
-            href=""
-          >
-            Logs
+          "link": <EuiLink>
+            Discover
           </EuiLink>,
         }
       }
@@ -290,10 +284,8 @@ exports[`Logs should render normally 1`] = `
         id="xpack.monitoring.logs.listing.linkText"
         values={
           Object {
-            "link": <EuiLink
-              href=""
-            >
-              Logs
+            "link": <EuiLink>
+              Discover
             </EuiLink>,
           }
         }

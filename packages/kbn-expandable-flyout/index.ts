@@ -15,7 +15,6 @@ export { useExpandableFlyoutState } from './src/hooks/use_expandable_flyout_stat
 export { type FlyoutPanels as ExpandableFlyoutState } from './src/store/state';
 
 export { ExpandableFlyoutProvider } from './src/provider';
-export { withExpandableFlyoutProvider } from './src/with_provider';
 
 export type { ExpandableFlyoutProps } from './src';
 export type { FlyoutPanelProps, PanelPath, ExpandableFlyoutApi } from './src/types';

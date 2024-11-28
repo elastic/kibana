@@ -26,7 +26,6 @@
     ],
     "optionalPlugins": [
       "infra",
-      "logsShared",
       "usageCollection",
       "home",
       "cloud",
@@ -41,7 +40,6 @@
       "kibanaUtils",
       "alerting",
       "kibanaReact",
-      "logsShared"
     ]
   }
 }

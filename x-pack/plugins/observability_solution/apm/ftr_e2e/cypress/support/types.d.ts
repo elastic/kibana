@@ -19,11 +19,12 @@ declare namespace Cypress {
       password: string;
     }): Cypress.Chainable<Cypress.Response<any>>;
     changeTimeRange(value: string): void;
-    visitKibana(url: string): void;
+    visitKibana(url: string, options?: { localStorageOptions?: Array<[string, string]> }): void;
     selectAbsoluteTimeRange(start: string, end: string): void;
     expectAPIsToHaveBeenCalledWith(params: { apisIntercepted: string[]; value: string }): void;
     updateAdvancedSettings(settings: Record<string, unknown>): void;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
     withHidden(selector: string, callback: () => void): void;
+    waitUntilPageContentIsLoaded(): void;
   }
 }

@@ -157,7 +157,7 @@ describe('PrivilegesRolesForm', () => {
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     ['all', 'read', 'custom'].forEach((privilege) => {
       expect(screen.queryByTestId(`${privilege}-privilege-button`)).not.toBeInTheDocument();
@@ -174,9 +174,9 @@ describe('PrivilegesRolesForm', () => {
 
     renderPrivilegeRolesForm();
 
-    await waitFor(() => null);
-
-    expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled();
+    await waitFor(() =>
+      expect(screen.getByTestId('space-assign-role-create-roles-privilege-button')).toBeDisabled()
+    );
   });
 
   it('makes a request to refetch available roles if page transitions back from a user interaction page visibility change', () => {
@@ -208,7 +208,7 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
@@ -234,11 +234,11 @@ describe('PrivilegesRolesForm', () => {
       ],
     });
 
-    await waitFor(() => null);
-
-    expect(screen.getByTestId(`${FEATURE_PRIVILEGES_ALL}-privilege-button`)).toHaveAttribute(
-      'aria-pressed',
-      String(true)
+    await waitFor(() =>
+      expect(screen.getByTestId(`${FEATURE_PRIVILEGES_ALL}-privilege-button`)).toHaveAttribute(
+        'aria-pressed',
+        String(true)
+      )
     );
   });
 
@@ -256,7 +256,7 @@ describe('PrivilegesRolesForm', () => {
       preSelectedRoles: roles,
     });
 
-    await waitFor(() => null);
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(screen.getByTestId(`${FEATURE_PRIVILEGES_READ}-privilege-button`)).toHaveAttribute(
       'aria-pressed',
@@ -290,9 +290,9 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
-
-      expect(screen.getByTestId('privilege-conflict-callout')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.getByTestId('privilege-conflict-callout')).toBeInTheDocument()
+      );
     });
 
     it('does not display the permission conflict message when roles with the same privilege levels are selected', async () => {
@@ -312,9 +312,9 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
-
-      expect(screen.queryByTestId('privilege-conflict-callout')).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.queryByTestId('privilege-conflict-callout')).not.toBeInTheDocument()
+      );
     });
   });
 
@@ -348,7 +348,7 @@ describe('PrivilegesRolesForm', () => {
         preSelectedRoles: roles,
       });
 
-      await waitFor(() => null);
+      await waitFor(() => new Promise((resolve) => resolve(null)));
 
       await userEvent.click(screen.getByTestId('custom-privilege-button'));
 

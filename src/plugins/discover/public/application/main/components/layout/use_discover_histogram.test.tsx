@@ -97,7 +97,6 @@ describe('useDiscoverHistogram', () => {
     stateContainer.appState.update({
       interval: 'auto',
       hideChart: false,
-      breakdownField: 'extension',
     });
     const appState = stateContainer.appState;
     const wrappedStateContainer = Object.create(appState);
@@ -166,7 +165,6 @@ describe('useDiscoverHistogram', () => {
       expect(Object.keys(params?.initialState ?? {})).toEqual([
         'chartHidden',
         'timeInterval',
-        'breakdownField',
         'totalHitsStatus',
         'totalHitsResult',
       ]);
@@ -204,7 +202,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: '1m',
         chartHidden: true,
-        breakdownField: 'test',
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -217,7 +214,6 @@ describe('useDiscoverHistogram', () => {
       expect(stateContainer.appState.update).toHaveBeenCalledWith({
         interval: state.timeInterval,
         hideChart: state.chartHidden,
-        breakdownField: state.breakdownField,
       });
     });
 
@@ -228,7 +224,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -254,18 +249,14 @@ describe('useDiscoverHistogram', () => {
       api.setTimeInterval = jest.fn((timeInterval) => {
         params = { ...params, timeInterval };
       });
-      api.setBreakdownField = jest.fn((breakdownField) => {
-        params = { ...params, breakdownField };
-      });
       act(() => {
         hook.result.current.ref(api);
       });
-      stateContainer.appState.update({ hideChart: true, interval: '1m', breakdownField: 'test' });
+      stateContainer.appState.update({ hideChart: true, interval: '1m' });
       expect(api.setTotalHits).not.toHaveBeenCalled();
       expect(api.setChartHidden).toHaveBeenCalled();
       expect(api.setTimeInterval).toHaveBeenCalled();
-      expect(api.setBreakdownField).toHaveBeenCalled();
-      expect(Object.keys(params ?? {})).toEqual(['breakdownField', 'timeInterval', 'chartHidden']);
+      expect(Object.keys(params ?? {})).toEqual(['timeInterval', 'chartHidden']);
     });
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
@@ -275,7 +266,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -310,7 +300,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -355,7 +344,6 @@ describe('useDiscoverHistogram', () => {
       const state = {
         timeInterval: containerState.interval,
         chartHidden: containerState.hideChart,
-        breakdownField: containerState.breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
       } as unknown as UnifiedHistogramState;
@@ -381,22 +369,13 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should set isChartLoading to true for fetch start', async () => {
-      const fetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
+      const fetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
       stateContainer.appState.update({ query: { esql: 'from *' } });
-      stateContainer.dataState.fetch$ = fetch$;
+      stateContainer.dataState.fetchChart$ = fetch$;
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {
-        fetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
+        fetch$.next();
       });
       expect(hook.result.current.isChartLoading).toBe(true);
     });
@@ -404,15 +383,9 @@ describe('useDiscoverHistogram', () => {
 
   describe('refetching', () => {
     it('should call refetch when savedSearchFetch$ is triggered', async () => {
-      const savedSearchFetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
+      const savedSearchFetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
-      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      stateContainer.dataState.fetchChart$ = savedSearchFetch$;
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });
       const api = createMockUnifiedHistogramApi();
       act(() => {
@@ -420,24 +393,15 @@ describe('useDiscoverHistogram', () => {
       });
       expect(api.refetch).toHaveBeenCalled();
       act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
+        savedSearchFetch$.next();
       });
       expect(api.refetch).toHaveBeenCalledTimes(2);
     });
 
     it('should skip the next refetch when hideChart changes from true to false', async () => {
-      const savedSearchFetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
+      const savedSearchFetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
-      stateContainer.dataState.fetch$ = savedSearchFetch$;
+      stateContainer.dataState.fetchChart$ = savedSearchFetch$;
       const { hook, initialProps } = await renderUseDiscoverHistogram({ stateContainer });
       const api = createMockUnifiedHistogramApi();
       act(() => {
@@ -451,45 +415,9 @@ describe('useDiscoverHistogram', () => {
         hook.rerender({ ...initialProps, hideChart: false });
       });
       act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
+        savedSearchFetch$.next();
       });
       expect(api.refetch).toHaveBeenCalledTimes(1);
-    });
-
-    it('should skip the next refetch when fetching more', async () => {
-      const savedSearchFetch$ = new Subject<{
-        options: {
-          reset: boolean;
-          fetchMore: boolean;
-        };
-        searchSessionId: string;
-      }>();
-      const stateContainer = getStateContainer();
-      stateContainer.dataState.fetch$ = savedSearchFetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
-      const api = createMockUnifiedHistogramApi();
-      act(() => {
-        hook.result.current.ref(api);
-      });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
-      act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: true },
-          searchSessionId: '1234',
-        });
-      });
-      expect(api.refetch).toHaveBeenCalledTimes(1);
-
-      act(() => {
-        savedSearchFetch$.next({
-          options: { reset: false, fetchMore: false },
-          searchSessionId: '1234',
-        });
-      });
-      expect(api.refetch).toHaveBeenCalledTimes(2);
     });
   });
 

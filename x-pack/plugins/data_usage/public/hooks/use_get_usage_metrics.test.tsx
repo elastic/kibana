@@ -11,7 +11,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useGetDataUsageMetrics } from './use_get_usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import { coreMock as mockCore } from '@kbn/core/public/mocks';
-import { dataUsageTestQueryClientOptions, timeXMinutesAgo } from '../../common/test_utils';
+import { dataUsageTestQueryClientOptions } from '../../common/test_utils';
+import { transformToUTCtime } from '../../common/utils';
 
 const useQueryMock = _useQuery as jest.Mock;
 
@@ -40,16 +41,31 @@ jest.mock('../utils/use_kibana', () => {
   };
 });
 
-const defaultUsageMetricsRequestBody = {
-  from: timeXMinutesAgo(15),
-  to: timeXMinutesAgo(0),
-  metricTypes: ['ingest_rate'],
-  dataStreams: ['ds-1'],
-};
-
 describe('useGetDataUsageMetrics', () => {
+  const timeRange = {
+    start: 'now-15m',
+    end: 'now',
+  };
+  const getUtcTimeRange = (range: { start: string; end: string }) =>
+    transformToUTCtime({
+      ...range,
+      isISOString: true,
+    });
+  let defaultUsageMetricsRequestBody = {
+    from: 'now-15m',
+    to: 'now',
+    metricTypes: ['ingest_rate'],
+    dataStreams: ['ds-1'],
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    defaultUsageMetricsRequestBody = {
+      ...defaultUsageMetricsRequestBody,
+      from: getUtcTimeRange(timeRange).start as string,
+      to: getUtcTimeRange(timeRange).end as string,
+    };
   });
 
   it('should call the correct API', async () => {
@@ -65,6 +81,19 @@ describe('useGetDataUsageMetrics', () => {
       version: '1',
       body: JSON.stringify(defaultUsageMetricsRequestBody),
     });
+  });
+
+  it('should not call the API if invalid date range', async () => {
+    const requestBody = {
+      ...defaultUsageMetricsRequestBody,
+      from: 'invalid-date',
+      to: 'invalid-date',
+    };
+    await renderHook(() => useGetDataUsageMetrics(requestBody, { enabled: true }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(mockServices.http.post).not.toHaveBeenCalled();
   });
 
   it('should not call the API if disabled', async () => {

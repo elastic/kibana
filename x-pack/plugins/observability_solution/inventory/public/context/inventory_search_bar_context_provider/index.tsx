@@ -7,7 +7,8 @@
 import React, { createContext, useContext, type ReactChild } from 'react';
 import { Subject } from 'rxjs';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useAdHocInventoryDataView } from '../../hooks/use_adhoc_inventory_data_view';
+import { ENTITIES_LATEST_ALIAS } from '../../../common/entities';
+import { useAdHocDataView } from '../../hooks/use_adhoc_data_view';
 
 interface InventorySearchBarContextType {
   searchBarContentSubject$: Subject<{
@@ -24,7 +25,7 @@ const InventorySearchBarContext = createContext<InventorySearchBarContextType>({
 });
 
 export function InventorySearchBarContextProvider({ children }: { children: ReactChild }) {
-  const { dataView } = useAdHocInventoryDataView();
+  const { dataView } = useAdHocDataView(ENTITIES_LATEST_ALIAS);
   return (
     <InventorySearchBarContext.Provider
       value={{

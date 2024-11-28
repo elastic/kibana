@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { Feedback, FeedbackButtons } from '../buttons/feedback_buttons';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
@@ -34,8 +34,6 @@ export function ChatItemControls({
   onRegenerateClick: () => void;
   onStopGeneratingClick: () => void;
 }) {
-  const { euiTheme } = useEuiTheme();
-
   const displayFeedback = !error && canGiveFeedback;
   const displayRegenerate = !loading && canRegenerate;
 
@@ -64,7 +62,7 @@ export function ChatItemControls({
 
   return controls ? (
     <>
-      <EuiHorizontalRule margin="none" color={euiTheme.colors.lightestShade} />
+      <EuiHorizontalRule margin="none" />
       <EuiPanel hasShadow={false} paddingSize="s" className={containerClassName}>
         {controls}
       </EuiPanel>

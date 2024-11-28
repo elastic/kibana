@@ -15,9 +15,8 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { momentDateParser } from '../../../../common/utils';
+import { momentDateParser, DEFAULT_DATE_RANGE_OPTIONS } from '../../../../common/utils';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { DEFAULT_DATE_RANGE_OPTIONS } from '../../hooks/use_date_picker';
 
 export interface DateRangePickerValues {
   autoRefreshOptions: {

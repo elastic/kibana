@@ -35,6 +35,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
           stale_status_threshold_seconds: true,
         },
       },
+      logs: true,
     },
     kibana: true,
   },

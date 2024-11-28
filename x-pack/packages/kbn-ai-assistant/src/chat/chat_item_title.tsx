@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { ReactNode } from 'react';
 import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
 interface ChatItemTitleProps {
   actionsTrigger?: ReactNode;
@@ -15,11 +15,14 @@ interface ChatItemTitleProps {
 }
 
 export function ChatItemTitle({ actionsTrigger, title }: ChatItemTitleProps) {
+  const { euiTheme } = useEuiTheme();
+
   const containerCSS = css`
     position: absolute;
     top: 2;
-    right: ${euiThemeVars.euiSizeS};
+    right: ${euiTheme.size.s};
   `;
+
   return (
     <>
       {title}

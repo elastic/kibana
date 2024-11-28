@@ -22,48 +22,79 @@ import type { DataDocumentsMsg } from '../discover_data_state_container';
 export const getDefaultProfileState = ({
   profilesManager,
   resetDefaultProfileState,
-  defaultColumns,
   dataView,
-  esqlQueryColumns,
 }: {
   profilesManager: ProfilesManager;
   resetDefaultProfileState: InternalState['resetDefaultProfileState'];
-  defaultColumns: string[];
   dataView: DataView;
-  esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
 }) => {
-  const stateUpdate: DiscoverAppState = {};
   const defaultState = getDefaultState(profilesManager, dataView);
 
-  if (resetDefaultProfileState.columns) {
-    const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
-    const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
-    const validColumns = uniqBy(
-      defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
-      'name'
-    );
+  return {
+    /**
+     * Returns state that should be updated before data fetching occurs,
+     * for example state used as part of the data fetching process
+     * @returns The state to reset to before fetching data
+     */
+    getPreFetchState: () => {
+      const stateUpdate: DiscoverAppState = {};
 
-    if (validColumns?.length) {
-      const hasAutoWidthColumn = validColumns.some(({ width }) => !width);
-      const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
-        (acc, { name, width }, index) => {
-          // Ensure there's at least one auto width column so the columns fill the grid
-          const skipColumnWidth = !hasAutoWidthColumn && index === validColumns.length - 1;
-          return width && !skipColumnWidth ? { ...acc, [name]: { width } } : acc;
-        },
-        undefined
-      );
+      if (
+        resetDefaultProfileState.breakdownField &&
+        defaultState.breakdownField !== undefined &&
+        dataView.fields.getByName(defaultState.breakdownField)
+      ) {
+        stateUpdate.breakdownField = defaultState.breakdownField;
+      }
 
-      stateUpdate.grid = columns ? { columns } : undefined;
-      stateUpdate.columns = validColumns.map(({ name }) => name);
-    }
-  }
+      return Object.keys(stateUpdate).length ? stateUpdate : undefined;
+    },
 
-  if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
-    stateUpdate.rowHeight = defaultState.rowHeight;
-  }
+    /**
+     * Returns state that should be updated after data fetching occurs,
+     * for example state used to modify the UI after receiving data
+     * @returns The state to reset to after fetching data
+     */
+    getPostFetchState: ({
+      defaultColumns,
+      esqlQueryColumns,
+    }: {
+      defaultColumns: string[];
+      esqlQueryColumns: DataDocumentsMsg['esqlQueryColumns'];
+    }) => {
+      const stateUpdate: DiscoverAppState = {};
 
-  return Object.keys(stateUpdate).length ? stateUpdate : undefined;
+      if (resetDefaultProfileState.columns) {
+        const mappedDefaultColumns = defaultColumns.map((name) => ({ name }));
+        const isValidColumn = getIsValidColumn(dataView, esqlQueryColumns);
+        const validColumns = uniqBy(
+          defaultState.columns?.concat(mappedDefaultColumns).filter(isValidColumn),
+          'name'
+        );
+
+        if (validColumns?.length) {
+          const hasAutoWidthColumn = validColumns.some(({ width }) => !width);
+          const columns = validColumns.reduce<DiscoverGridSettings['columns']>(
+            (acc, { name, width }, index) => {
+              // Ensure there's at least one auto width column so the columns fill the grid
+              const skipColumnWidth = !hasAutoWidthColumn && index === validColumns.length - 1;
+              return width && !skipColumnWidth ? { ...acc, [name]: { width } } : acc;
+            },
+            undefined
+          );
+
+          stateUpdate.grid = columns ? { columns } : undefined;
+          stateUpdate.columns = validColumns.map(({ name }) => name);
+        }
+      }
+
+      if (resetDefaultProfileState.rowHeight && defaultState.rowHeight !== undefined) {
+        stateUpdate.rowHeight = defaultState.rowHeight;
+      }
+
+      return Object.keys(stateUpdate).length ? stateUpdate : undefined;
+    },
+  };
 };
 
 const getDefaultState = (profilesManager: ProfilesManager, dataView: DataView) => {

@@ -24,22 +24,23 @@ import { healthRoute } from './health';
 import { RouteOptions } from '..';
 
 export function defineLegacyRoutes(opts: RouteOptions) {
-  const { router, licenseState, encryptedSavedObjects, usageCounter, isServerless } = opts;
+  const { router, licenseState, encryptedSavedObjects, usageCounter, isServerless, docLinks } =
+    opts;
 
   createAlertRoute(opts);
-  deleteAlertRoute(router, licenseState, usageCounter, isServerless);
-  findAlertRoute(router, licenseState, usageCounter, isServerless);
-  getAlertRoute(router, licenseState, usageCounter, isServerless);
-  getAlertStateRoute(router, licenseState, usageCounter, isServerless);
-  getAlertInstanceSummaryRoute(router, licenseState, usageCounter, isServerless);
-  listAlertTypesRoute(router, licenseState, usageCounter, isServerless);
-  updateAlertRoute(router, licenseState, usageCounter, isServerless);
-  enableAlertRoute(router, licenseState, usageCounter, isServerless);
-  disableAlertRoute(router, licenseState, usageCounter, isServerless);
-  updateApiKeyRoute(router, licenseState, usageCounter, isServerless);
-  muteAllAlertRoute(router, licenseState, usageCounter, isServerless);
-  unmuteAllAlertRoute(router, licenseState, usageCounter, isServerless);
-  muteAlertInstanceRoute(router, licenseState, usageCounter, isServerless);
-  unmuteAlertInstanceRoute(router, licenseState, usageCounter, isServerless);
-  healthRoute(router, licenseState, encryptedSavedObjects, usageCounter, isServerless);
+  deleteAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  findAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  getAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  getAlertStateRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  getAlertInstanceSummaryRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  listAlertTypesRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  updateAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  enableAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  disableAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  updateApiKeyRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  muteAllAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  unmuteAllAlertRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  muteAlertInstanceRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  unmuteAlertInstanceRoute(router, licenseState, docLinks, usageCounter, isServerless);
+  healthRoute(router, licenseState, encryptedSavedObjects, docLinks, usageCounter, isServerless);
 }

@@ -80,7 +80,7 @@ export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: st
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('esqlRuleType').click();
-    cy.getByTestSubj('detectionEngineStepDefineRuleEsqlQueryBar').within(() => {
+    cy.getByTestSubj('ruleEsqlQueryBar').within(() => {
       cy.getByTestSubj('globalQueryBar').click();
       cy.getByTestSubj('kibanaCodeEditor').type(query);
     });

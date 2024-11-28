@@ -5,25 +5,27 @@
  * 2.0.
  */
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useIsMutating } from '@tanstack/react-query';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import { invariant } from '../../../../../../common/utils/invariant';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
-import { invariant } from '../../../../../../common/utils/invariant';
+import { PERFORM_ALL_RULES_INSTALLATION_KEY } from '../../../../rule_management/api/hooks/prebuilt_rules/use_perform_all_rules_install_mutation';
 import {
   usePerformInstallAllRules,
   usePerformInstallSpecificRules,
 } from '../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
+import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
+import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
+import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
+import * as i18n from './translations';
 import type { AddPrebuiltRulesTableFilterOptions } from './use_filter_prebuilt_rules_to_install';
 import { useFilterPrebuiltRulesToInstall } from './use_filter_prebuilt_rules_to_install';
-import { useRulePreviewFlyout } from '../use_rule_preview_flyout';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import * as i18n from './translations';
-import { isUpgradeReviewRequestEnabled } from './add_prebuilt_rules_utils';
 
 export interface AddPrebuiltRulesTableState {
   /**
@@ -59,6 +61,11 @@ export interface AddPrebuiltRulesTableState {
    * package in background
    */
   isUpgradingSecurityPackages: boolean;
+
+  /**
+   * Is true when performing Install All Rules mutation
+   */
+  isInstallingAllRules: boolean;
   /**
    * List of rule IDs that are currently being upgraded
    */
@@ -112,6 +119,10 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const { data: prebuiltRulesStatus } = useFetchPrebuiltRulesStatusQuery();
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const isInstallingAllRules =
+    useIsMutating({
+      mutationKey: PERFORM_ALL_RULES_INSTALLATION_KEY,
+    }) > 0;
 
   const {
     data: { rules, stats: { tags } } = {
@@ -269,6 +280,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
         loadingRules,
         isRefetching,
         isUpgradingSecurityPackages,
+        isInstallingAllRules,
         selectedRules,
         lastUpdated: dataUpdatedAt,
       },
@@ -284,6 +296,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     loadingRules,
     isRefetching,
     isUpgradingSecurityPackages,
+    isInstallingAllRules,
     selectedRules,
     dataUpdatedAt,
     actions,

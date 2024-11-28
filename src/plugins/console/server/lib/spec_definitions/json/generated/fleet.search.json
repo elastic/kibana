@@ -28,7 +28,6 @@
       "ignore_unavailable": "__flag__",
       "lenient": "__flag__",
       "max_concurrent_shard_requests": "",
-      "min_compatible_shard_node": "",
       "preference": "",
       "pre_filter_shard_size": "",
       "request_cache": "__flag__",

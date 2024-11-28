@@ -403,8 +403,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             beforeSave: async () => {
               await testSubjects.click('colorEditorAddColor');
               await testSubjects.setValue('~colorEditorKeyPattern', 'red');
-              await testSubjects.setValue('~colorEditorColorPicker', '#ffffff');
-              await testSubjects.setValue('~colorEditorBackgroundPicker', '#ff0000');
+              await testSubjects.click('~colorEditorColorPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ffffff');
+              await testSubjects.click('~colorEditorBackgroundPicker');
+              await testSubjects.setValue('~euiColorPickerInput_bottom', '#ff0000');
             },
             expect: async (renderedValueContainer) => {
               const span = await renderedValueContainer.findByTagName('span');

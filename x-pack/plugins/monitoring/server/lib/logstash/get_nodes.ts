@@ -11,7 +11,7 @@ import { calculateAvailability } from '../calculate_availability';
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
-import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getLogstashDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 
 interface Logstash {

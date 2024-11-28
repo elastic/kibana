@@ -191,6 +191,7 @@ describe('legacyRules_notification_rule_type', () => {
         const date = new Date('2019-12-14T16:40:33.400Z').toISOString();
         return { dateStart: date, dateEnd: date };
       },
+      isServerless: false,
     };
 
     rule = legacyRulesNotificationRuleType({

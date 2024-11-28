@@ -32,14 +32,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('privileges', function () {
-    // plugin needs to be enabled in serverless
-    this.tags(['skipMKI']);
-
     it('renders for the admin role', async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
       await navigateAndVerify(true);
     });
-
     it('does not render for viewer', async () => {
       await pageObjects.svlCommonPage.loginAsViewer();
       await navigateAndVerify(false);
@@ -61,8 +57,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
     describe('with custom role', function () {
-      // custom roles aren't available in observability yet
-      this.tags(['skipSvlOblt']);
+      // skipSvlOblt: custom roles aren't available in observability yet
+      // skipMKI: custom roles aren't available in MKI testing yet
+      this.tags(['skipSvlOblt', 'skipMKI']);
       afterEach(async () => {
         await samlAuth.deleteCustomRole();
       });

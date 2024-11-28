@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { badRequest, internal } from '@hapi/boom';
 import { SecurityException } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { syncStream } from '../../lib/streams/stream_crud';
+import { streamsEnabled, syncStream } from '../../lib/streams/stream_crud';
 import { rootStreamDefinition } from '../../lib/streams/root_stream_definition';
 import { createStreamsIndex } from '../../lib/streams/internal_stream_mapping';
 
@@ -34,6 +34,10 @@ export const enableStreamsRoute = createServerRoute({
   }): Promise<{ acknowledged: true }> => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
+      const alreadyEnabled = await streamsEnabled({ scopedClusterClient });
+      if (alreadyEnabled) {
+        return { acknowledged: true };
+      }
       await createStreamsIndex(scopedClusterClient);
       await syncStream({
         scopedClusterClient,

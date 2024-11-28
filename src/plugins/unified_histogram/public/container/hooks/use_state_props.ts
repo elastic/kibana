@@ -17,11 +17,11 @@ import { useCallback, useEffect, useMemo } from 'react';
 import {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramFetchStatus,
+  UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
 } from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
-  breakdownFieldSelector,
   chartHiddenSelector,
   timeIntervalSelector,
   totalHitsResultSelector,
@@ -30,23 +30,31 @@ import {
   lensDataLoadingSelector$,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
+import { setBreakdownField } from '../utils/local_storage_utils';
 
 export const useStateProps = ({
+  services,
+  localStorageKeyPrefix,
   stateService,
   dataView,
   query,
   searchSessionId,
   requestAdapter,
   columns,
+  breakdownField,
+  onBreakdownFieldChange: originalOnBreakdownFieldChange,
 }: {
+  services: UnifiedHistogramServices;
+  localStorageKeyPrefix: string | undefined;
   stateService: UnifiedHistogramStateService | undefined;
   dataView: DataView;
   query: Query | AggregateQuery | undefined;
   searchSessionId: string | undefined;
   requestAdapter: RequestAdapter | undefined;
   columns: DatatableColumn[] | undefined;
+  breakdownField: string | undefined;
+  onBreakdownFieldChange: ((breakdownField: string | undefined) => void) | undefined;
 }) => {
-  const breakdownField = useStateSelector(stateService?.state$, breakdownFieldSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
   const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
@@ -166,9 +174,9 @@ export const useStateProps = ({
 
   const onBreakdownFieldChange = useCallback(
     (newBreakdownField: DataViewField | undefined) => {
-      stateService?.setBreakdownField(newBreakdownField?.name);
+      originalOnBreakdownFieldChange?.(newBreakdownField?.name);
     },
-    [stateService]
+    [originalOnBreakdownFieldChange]
   );
 
   const onSuggestionContextChange = useCallback(
@@ -181,6 +189,13 @@ export const useStateProps = ({
   /**
    * Effects
    */
+
+  // Sync the breakdown field with local storage
+  useEffect(() => {
+    if (localStorageKeyPrefix) {
+      setBreakdownField(services.storage, localStorageKeyPrefix, breakdownField);
+    }
+  }, [breakdownField, localStorageKeyPrefix, services.storage]);
 
   // Clear the Lens request adapter when the chart is hidden
   useEffect(() => {

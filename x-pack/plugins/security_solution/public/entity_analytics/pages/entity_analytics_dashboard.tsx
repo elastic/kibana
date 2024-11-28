@@ -24,19 +24,23 @@ import { useHasSecurityCapability } from '../../helper_hooks';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
 
-import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_panels';
+import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const EntityAnalyticsComponent = () => {
+  const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
+  const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isRiskScoreModuleLicenseAvailable = useHasSecurityCapability('entity-analytics');
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
-
+  const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
   return (
     <>
-      {indicesExist ? (
+      {showEmptyPrompt ? (
+        <EmptyPrompt onSkip={onSkip} />
+      ) : (
         <>
           <FiltersGlobal>
             <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
@@ -82,8 +86,6 @@ const EntityAnalyticsComponent = () => {
             )}
           </SecuritySolutionPageWrapper>
         </>
-      ) : (
-        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalytics} />

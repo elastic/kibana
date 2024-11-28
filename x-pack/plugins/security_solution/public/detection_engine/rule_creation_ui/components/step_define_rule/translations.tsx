@@ -139,13 +139,6 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
   }
 );
 
-export const ESQL_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel',
-  {
-    defaultMessage: 'ES|QL query',
-  }
-);
-
 export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perRuleExecutionLabel',
   {

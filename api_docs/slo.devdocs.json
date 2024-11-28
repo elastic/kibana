@@ -384,6 +384,27 @@
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-public.SLOPublicPluginsSetup.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.SecurityPluginSetup",
+                "text": "SecurityPluginSetup"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1072,6 +1093,27 @@
                 "section": "def-public.UsageCollectionStart",
                 "text": "UsageCollectionStart"
               }
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-public.SLOPublicPluginsStart.security",
+            "type": "Object",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-plugin-types-public",
+                "scope": "public",
+                "docId": "kibKbnSecurityPluginTypesPublicPluginApi",
+                "section": "def-public.SecurityPluginStart",
+                "text": "SecurityPluginStart"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,

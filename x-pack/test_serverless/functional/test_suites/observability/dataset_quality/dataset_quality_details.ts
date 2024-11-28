@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
       ]);
 
-      await PageObjects.svlCommonPage.loginAsAdmin();
+      await PageObjects.svlCommonPage.loginAsViewer();
     });
 
     after(async () => {

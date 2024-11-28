@@ -344,18 +344,27 @@ describe('DataUsageMetrics', () => {
   });
 
   it('should refetch usage metrics with `Refresh` button click', async () => {
+    mockUseGetDataUsageDataStreams.mockReturnValue({
+      error: undefined,
+      data: generateDataStreams(3),
+      isFetching: false,
+    });
     const refetch = jest.fn();
     mockUseGetDataUsageMetrics.mockReturnValue({
       ...getBaseMockedDataUsageMetrics,
-      data: ['.ds-1', '.ds-2'],
-      isFetched: true,
-    });
-    mockUseGetDataUsageMetrics.mockReturnValue({
-      ...getBaseMockedDataUsageMetrics,
-      isFetched: true,
+      data: {},
+      isFetched: false,
       refetch,
     });
-    const { getByTestId } = renderComponent();
+    const { getByTestId, getAllByTestId } = renderComponent();
+
+    const toggleFilterButton = getByTestId(`${testIdFilter}-dataStreams-popoverButton`);
+
+    expect(toggleFilterButton).toHaveTextContent('Data streams3');
+    await user.click(toggleFilterButton);
+    const allFilterOptions = getAllByTestId('dataStreams-filter-option');
+    await user.click(allFilterOptions[2]);
+
     const refreshButton = getByTestId(`${testIdFilter}-super-refresh-button`);
     // click refresh 5 times
     for (let i = 0; i < 5; i++) {
@@ -364,7 +373,7 @@ describe('DataUsageMetrics', () => {
 
     expect(mockUseGetDataUsageMetrics).toHaveBeenLastCalledWith(
       expect.any(Object),
-      expect.objectContaining({ enabled: false })
+      expect.objectContaining({ enabled: true })
     );
     expect(refetch).toHaveBeenCalledTimes(5);
   });

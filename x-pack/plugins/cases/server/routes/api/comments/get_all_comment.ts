@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import { CASE_COMMENTS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -15,7 +16,13 @@ import type { attachmentDomainV1 } from '../../../../common/types/domain';
 /**
  * @deprecated since version 8.1.0
  */
-export const getAllCommentsRoute = ({ isServerless }: { isServerless?: boolean }) =>
+export const getAllCommentsRoute = ({
+  isServerless,
+  docLinks,
+}: {
+  isServerless?: boolean;
+  docLinks: DocLinksServiceSetup;
+}) =>
   createCasesRoute({
     method: 'get',
     path: CASE_COMMENTS_URL,
@@ -32,8 +39,15 @@ export const getAllCommentsRoute = ({ isServerless }: { isServerless?: boolean }
       summary: `Gets all case comments`,
       tags: ['oas-tag:cases'],
       // description: 'You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you\'re seeking.',
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
+      deprecated: {
+        documentationUrl: docLinks.links.cases.legacyApiDeprecations,
+        severity: 'warning',
+        reason: {
+          type: 'migrate',
+          newApiMethod: 'GET',
+          newApiPath: '/api/cases/{case_id}/comments/_find',
+        },
+      },
     },
     handler: async ({ context, request, response }) => {
       try {

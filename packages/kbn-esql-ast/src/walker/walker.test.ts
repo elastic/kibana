@@ -709,6 +709,25 @@ describe('structurally can walk all nodes', () => {
           ]);
         });
 
+        test('can visit a column inside a deeply nested inline cast', () => {
+          const query =
+            'FROM index | WHERE 123 == add(1 + fn(NOT -(a.b.c)::INTEGER /* comment */))';
+          const { root } = parse(query);
+
+          const columns: ESQLColumn[] = [];
+
+          walk(root, {
+            visitColumn: (node) => columns.push(node),
+          });
+
+          expect(columns).toMatchObject([
+            {
+              type: 'column',
+              name: 'a.b.c',
+            },
+          ]);
+        });
+
         test('"visitAny" can capture cast expression', () => {
           const query = 'FROM index | STATS a = 123::integer';
           const { ast } = parse(query);
@@ -1014,6 +1033,21 @@ describe('Walker.match()', () => {
           value: 1,
         },
       ],
+    });
+  });
+
+  test('can find a deeply nested column', () => {
+    const query =
+      'FROM index | WHERE 123 == add(1 + fn(NOT 10 + -(a.b.c::ip)::INTEGER /* comment */))';
+    const { root } = parse(query);
+    const res = Walker.match(root, {
+      type: 'column',
+      name: 'a.b.c',
+    });
+
+    expect(res).toMatchObject({
+      type: 'column',
+      name: 'a.b.c',
     });
   });
 });

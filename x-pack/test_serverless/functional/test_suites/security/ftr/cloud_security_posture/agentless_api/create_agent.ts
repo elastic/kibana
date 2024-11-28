@@ -8,9 +8,12 @@
 import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import expect from '@kbn/expect';
+import equals from 'fast-deep-equal';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
+  const retry = getService('retry');
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'svlCommonPage',
@@ -81,7 +84,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessIntegration()).to.be(
         integrationPolicyName
       );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Pending');
+
+      // wait for eventually Pending or Healthy status
+      // purpose of this retry is to wait for the agent to be created and the status to be updated
+      // not to wait for the agent to be healthy
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        const resStatus = await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus();
+        expect(equals(resStatus, 'Healthy') || equals(resStatus, 'Pending')).to.be(true);
+      });
     });
 
     it(`should create default agent-based agent`, async () => {

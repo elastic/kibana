@@ -34,7 +34,7 @@ export const getTranslateRuleNode = ({
     );
     const integrationIds = state.integrations.map((integration) => integration.id);
 
-    const prompt = getEsqlTranslationPrompt(state, indexPatterns.join(' '));
+    const prompt = getEsqlTranslationPrompt(state, indexPatterns.join(','));
     const response = await esqlKnowledgeBaseCaller(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';

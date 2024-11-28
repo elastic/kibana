@@ -34,6 +34,13 @@ export const SIEM_CTA = i18n.translate(
   }
 );
 
+export const SIEM_CONTINUE = i18n.translate(
+  'xpack.securitySolution.getStarted.landingCards.box.siem.continue',
+  {
+    defaultMessage: 'Continue without adding integrations',
+  }
+);
+
 export const ENDPOINT_TITLE = i18n.translate(
   'xpack.securitySolution.getStarted.landingCards.box.endpoint.title',
   {

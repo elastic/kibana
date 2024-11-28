@@ -27,7 +27,7 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async cancelRuleCreation() {
-      await testSubjects.click('cancelSaveRuleButton');
+      await testSubjects.click('rulePageFooterCancelButton');
       await testSubjects.existOrFail('confirmRuleCloseModal');
       await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmRuleCloseModal');
@@ -43,8 +43,6 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await browser.refresh();
       await this.clickCreateAlertButton();
       await testSubjects.click(`.index-threshold-SelectOption`);
-      await testSubjects.scrollIntoView('ruleNameInput');
-      await testSubjects.setValue('ruleNameInput', alertName);
       await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
       await comboBox.set('thresholdIndexesComboBox', 'k');
@@ -55,9 +53,6 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
         await fieldOptions[1].click();
       });
       await testSubjects.click('closePopover');
-      // need this two out of popup clicks to close them
-      const nameInput = await testSubjects.find('ruleNameInput');
-      await nameInput.click();
 
       await testSubjects.click('whenExpression');
       await testSubjects.click('whenExpressionSelect');
@@ -74,6 +69,9 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       const ofOptions = ofOptionsString.trim().split('\n');
       expect(ofOptions.length > 0).to.be(true);
       await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
+
+      await testSubjects.scrollIntoView('ruleDetailsNameInput');
+      await testSubjects.setValue('ruleDetailsNameInput', alertName);
     },
   };
 }

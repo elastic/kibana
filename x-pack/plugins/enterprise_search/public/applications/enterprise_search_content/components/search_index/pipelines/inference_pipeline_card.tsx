@@ -51,17 +51,11 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
   const { pipelineName } = pipeline;
 
   const actionButton = (
-    <EuiButtonEmpty
-      iconSide="right"
-      flush="both"
-      iconType="boxesHorizontal"
-      onClick={() => setIsPopOverOpen(!isPopOverOpen)}
-    >
-      <TrainedModelHealth
-        modelState={pipeline.modelState}
-        modelStateReason={pipeline.modelStateReason}
-      />
-    </EuiButtonEmpty>
+    <TrainedModelHealth
+      modelState={pipeline.modelState}
+      modelStateReason={pipeline.modelStateReason}
+      onClickAction={() => setIsPopOverOpen(!isPopOverOpen)}
+    />
   );
 
   const showConfirmDeleteModal = () => {
@@ -81,6 +75,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
             <EuiFlexItem>
               <span>
                 <EuiButtonEmpty
+                  data-test-subj="enterpriseSearchTrainedModelHealthPopoverFixIssueInTrainedModelsButton"
                   data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                   size="s"
                   flush="both"
@@ -101,6 +96,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
           <EuiFlexItem>
             <span>
               <EuiButtonEmpty
+                data-test-subj="enterpriseSearchTrainedModelHealthPopoverViewInStackManagementButton"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
                 size="s"
                 flush="both"
@@ -119,6 +115,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
           <EuiFlexItem>
             <span>
               <EuiButtonEmpty
+                data-test-subj="enterpriseSearchTrainedModelHealthPopoverDetachPipelineButton"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                 size="s"
                 flush="both"

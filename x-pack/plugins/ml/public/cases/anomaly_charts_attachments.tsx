@@ -80,6 +80,7 @@ const AnomalyChartsCaseAttachment = ({
             onRenderComplete={api.onRenderComplete}
             onError={api.onError}
             timeRange$={api.parentApi.timeRange$}
+            showFilterIcons={false}
           />
         </KibanaContextProvider>
       </KibanaRenderContextProvider>

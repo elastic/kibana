@@ -6,6 +6,11 @@
  */
 import { useMemo } from 'react';
 import type {
+  GetEntityStoreStatusResponse,
+  InitEntityStoreRequestBody,
+  InitEntityStoreResponse,
+} from '../../../common/api/entity_analytics/entity_store/enablement.gen';
+import type {
   DeleteEntityEngineResponse,
   EntityType,
   GetEntityEngineResponse,
@@ -20,7 +25,24 @@ export const useEntityStoreRoutes = () => {
   const http = useKibana().services.http;
 
   return useMemo(() => {
-    const initEntityStore = async (entityType: EntityType) => {
+    const enableEntityStore = async (
+      options: InitEntityStoreRequestBody = { fieldHistoryLength: 10 }
+    ) => {
+      return http.fetch<InitEntityStoreResponse>('/api/entity_store/enable', {
+        method: 'POST',
+        version: API_VERSIONS.public.v1,
+        body: JSON.stringify(options),
+      });
+    };
+
+    const getEntityStoreStatus = async () => {
+      return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+      });
+    };
+
+    const initEntityEngine = async (entityType: EntityType) => {
       return http.fetch<InitEntityEngineResponse>(`/api/entity_store/engines/${entityType}/init`, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
@@ -28,7 +50,7 @@ export const useEntityStoreRoutes = () => {
       });
     };
 
-    const stopEntityStore = async (entityType: EntityType) => {
+    const stopEntityEngine = async (entityType: EntityType) => {
       return http.fetch<StopEntityEngineResponse>(`/api/entity_store/engines/${entityType}/stop`, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
@@ -59,8 +81,10 @@ export const useEntityStoreRoutes = () => {
     };
 
     return {
-      initEntityStore,
-      stopEntityStore,
+      enableEntityStore,
+      getEntityStoreStatus,
+      initEntityEngine,
+      stopEntityEngine,
       getEntityEngine,
       deleteEntityEngine,
       listEntityEngines,

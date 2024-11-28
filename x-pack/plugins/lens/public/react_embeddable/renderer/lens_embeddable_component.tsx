@@ -29,18 +29,18 @@ export function LensEmbeddableComponent({
     expressionParams,
     // used for functional tests
     renderCount,
-    // has the render completed?
-    hasRendered,
     // these are blocking errors that can be shown in a badge
     // without replacing the entire panel
     blockingErrors,
+    // has the render completed?
+    hasRendered,
     // has view mode changed?
     latestViewMode,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
-    internalApi.hasRenderCompleted$,
     internalApi.validationMessages$,
+    api.rendered$,
     api.viewMode
   );
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');

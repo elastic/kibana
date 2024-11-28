@@ -18,13 +18,12 @@ import {
   useKibana,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor } from '../field_components';
-
 import { TargetField } from './common_fields/target_field';
 
-import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
+import { FieldsConfig, to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
+import { XJsonEditor } from '../field_components';
 
-const { emptyField, isJsonField } = fieldValidators;
+const { emptyField } = fieldValidators;
 
 const INFERENCE_CONFIG_DOCS = {
   documentation: {
@@ -83,8 +82,8 @@ const fieldsConfig: FieldsConfig = {
   /* Optional fields config */
   field_map: {
     type: FIELD_TYPES.TEXT,
-    deserializer: to.jsonString,
-    serializer: from.optionalJson,
+    deserializer: to.xJsonString,
+    serializer: from.optionalXJson,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.inferenceForm.fieldMapLabel', {
       defaultMessage: 'Field map (optional)',
     }),
@@ -97,7 +96,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: isJsonField(
+        validator: isXJsonField(
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.inferenceForm.fieldMapInvalidJSONError',
             { defaultMessage: 'Invalid JSON' }
@@ -112,8 +111,8 @@ const fieldsConfig: FieldsConfig = {
 
   inference_config: {
     type: FIELD_TYPES.TEXT,
-    deserializer: to.jsonString,
-    serializer: from.optionalJson,
+    deserializer: to.xJsonString,
+    serializer: from.optionalXJson,
     label: i18n.translate(
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.inferenceConfigLabel',
       {
@@ -122,7 +121,7 @@ const fieldsConfig: FieldsConfig = {
     ),
     validations: [
       {
-        validator: isJsonField(
+        validator: isXJsonField(
           i18n.translate(
             'xpack.ingestPipelines.pipelineEditor.grokForm.patternsDefinitionsInvalidJSONError',
             { defaultMessage: 'Invalid JSON' }
@@ -141,7 +140,12 @@ export const Inference: FunctionComponent = () => {
   const documentationDocsLink = services.documentation.getDocumentationUrl();
   return (
     <>
-      <UseField config={fieldsConfig.model_id} component={Field} path="fields.model_id" />
+      <UseField
+        config={fieldsConfig.model_id}
+        component={Field}
+        path="fields.model_id"
+        data-test-subj="inferenceModelId"
+      />
 
       <TargetField
         helpText={
@@ -158,6 +162,7 @@ export const Inference: FunctionComponent = () => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
+            'data-test-subj': 'fieldMap',
             height: EDITOR_PX_HEIGHT.medium,
             options: { minimap: { enabled: false } },
           },
@@ -173,6 +178,7 @@ export const Inference: FunctionComponent = () => {
         component={XJsonEditor}
         componentProps={{
           editorProps: {
+            'data-test-subj': 'inferenceConfig',
             height: EDITOR_PX_HEIGHT.medium,
             options: { minimap: { enabled: false } },
           },

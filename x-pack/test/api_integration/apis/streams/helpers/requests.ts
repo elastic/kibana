@@ -36,6 +36,12 @@ export async function forkStream(supertest: Agent, root: string, body: JsonObjec
   return response.body;
 }
 
+export async function putStream(supertest: Agent, name: string, body: JsonObject) {
+  const req = supertest.put(`/api/streams/${name}`).set('kbn-xsrf', 'xxx');
+  const response = await req.send(body).expect(200);
+  return response.body;
+}
+
 export async function deleteStream(supertest: Agent, id: string) {
   const req = supertest.delete(`/api/streams/${id}`).set('kbn-xsrf', 'xxx');
   const response = await req.send().expect(200);

@@ -114,54 +114,58 @@ export function StreamDetailOverview({ definition }: { definition?: StreamDefini
   return (
     <>
       <EuiFlexGroup direction="column">
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow>
-            <StreamsAppSearchBar
-              onQuerySubmit={({ dateRange }, isUpdate) => {
-                if (!isUpdate) {
-                  histogramQueryFetch.refresh();
-                  return;
-                }
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem grow>
+              <StreamsAppSearchBar
+                onQuerySubmit={({ dateRange }, isUpdate) => {
+                  if (!isUpdate) {
+                    histogramQueryFetch.refresh();
+                    return;
+                  }
 
-                if (dateRange) {
-                  setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
-                }
-              }}
-              onRefresh={() => {
-                histogramQueryFetch.refresh();
-              }}
-              placeholder={i18n.translate(
-                'xpack.streams.entityDetailOverview.searchBarPlaceholder',
-                {
-                  defaultMessage: 'Filter data by using KQL',
-                }
-              )}
-              dateRangeFrom={timeRange.from}
-              dateRangeTo={timeRange.to}
-            />
-          </EuiFlexItem>
-          <EuiButton
-            data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
-            iconType="discoverApp"
-            href={discoverLink}
-            color="text"
-          >
-            {i18n.translate('xpack.streams.streamDetailOverview.openInDiscoverButtonLabel', {
-              defaultMessage: 'Open in Discover',
-            })}
-          </EuiButton>
-        </EuiFlexGroup>
-        <EuiPanel hasShadow={false} hasBorder>
-          <EuiFlexGroup direction="column">
-            <ControlledEsqlChart
-              result={histogramQueryFetch}
-              id="entity_log_rate"
-              metricNames={['metric']}
-              height={200}
-              chartType={'bar'}
-            />
+                  if (dateRange) {
+                    setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
+                  }
+                }}
+                onRefresh={() => {
+                  histogramQueryFetch.refresh();
+                }}
+                placeholder={i18n.translate(
+                  'xpack.streams.entityDetailOverview.searchBarPlaceholder',
+                  {
+                    defaultMessage: 'Filter data by using KQL',
+                  }
+                )}
+                dateRangeFrom={timeRange.from}
+                dateRangeTo={timeRange.to}
+              />
+            </EuiFlexItem>
+            <EuiButton
+              data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
+              iconType="discoverApp"
+              href={discoverLink}
+              color="text"
+            >
+              {i18n.translate('xpack.streams.streamDetailOverview.openInDiscoverButtonLabel', {
+                defaultMessage: 'Open in Discover',
+              })}
+            </EuiButton>
           </EuiFlexGroup>
-        </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel hasShadow={false} hasBorder>
+            <EuiFlexGroup direction="column">
+              <ControlledEsqlChart
+                result={histogramQueryFetch}
+                id="entity_log_rate"
+                metricNames={['metric']}
+                height={200}
+                chartType={'bar'}
+              />
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

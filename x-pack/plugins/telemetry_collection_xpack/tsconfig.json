@@ -8,9 +8,7 @@
     "common/**/*",
     "server/**/*",
     "../../../typings/*",
-    "schema/xpack_monitoring.json",
-    "schema/xpack_plugins.json",
-    "schema/xpack_root.json",
+    "schema/*.json",
   ],
   "kbn_references": [
     "@kbn/core",

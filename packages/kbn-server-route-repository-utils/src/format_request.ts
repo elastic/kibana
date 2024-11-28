@@ -11,11 +11,23 @@ import { parseEndpoint } from './parse_endpoint';
 
 export function formatRequest(endpoint: string, pathParams: Record<string, any> = {}) {
   const { method, pathname: rawPathname, version } = parseEndpoint(endpoint);
+  const optionalReg = /(\/\{\w+\?\})/g; // /{param?}
 
-  // replace template variables with path params
+  const optionalOrRequiredParamsReg = /(\/{)((.+?))(\})/g;
+  if (Object.keys(pathParams)?.length === 0) {
+    const pathname = rawPathname.replace(optionalOrRequiredParamsReg, '');
+    return { method, pathname, version };
+  }
+
   const pathname = Object.keys(pathParams).reduce((acc, paramName) => {
-    return acc.replace(`{${paramName}}`, pathParams[paramName]);
+    return acc
+      .replace(`{${paramName}}`, pathParams[paramName])
+      .replace(`{${paramName}?}`, pathParams[paramName]);
   }, rawPathname);
+
+  if ((pathname.match(optionalReg) ?? [])?.length > 0) {
+    throw new Error(`Missing parameters: ${pathname.match(optionalReg)}`);
+  }
 
   return { method, pathname, version };
 }
