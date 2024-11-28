@@ -13,9 +13,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
+import { TypedLensSerializedState } from '../../../react_embeddable/types';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -93,7 +93,7 @@ const lensAttributes = {
     esql: 'from index1 | limit 10',
   },
   references: [],
-} as unknown as TypedLensByValueInput['attributes'];
+} as unknown as TypedLensSerializedState['attributes'];
 const mockStartDependencies =
   createMockStartDependencies() as unknown as LensPluginStartDependencies;
 
@@ -139,6 +139,8 @@ describe('LensEditConfigurationFlyout', () => {
         visualizationMap={visualizationMap}
         closeFlyout={jest.fn()}
         datasourceId={'testDatasource' as EditConfigPanelProps['datasourceId']}
+        onApply={jest.fn()}
+        onCancel={jest.fn()}
         {...propsOverrides}
       />,
       {},
@@ -234,7 +236,7 @@ describe('LensEditConfigurationFlyout', () => {
     await renderConfigFlyout(
       {
         closeFlyout: jest.fn(),
-        onApplyCb: onApplyCbSpy,
+        onApply: onApplyCbSpy,
       },
       { esql: 'from index1 | limit 10' }
     );
