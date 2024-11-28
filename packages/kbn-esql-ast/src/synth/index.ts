@@ -7,13 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder } from '../builder';
-import { Walker, WalkerAstNode } from '../walker/walker';
-
-export const clearParserFields = (ast: WalkerAstNode) => {
-  Walker.walk(ast, {
-    visitAny: (node) => {
-      Object.assign(node, Builder.parserFields({}));
-    },
-  });
-};
+export { expr } from './expr';
+export { cmd } from './cmd';

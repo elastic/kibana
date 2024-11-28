@@ -7,14 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ParseOptions } from '../parser';
-import { ESQLAstExpression } from '../types';
+import type { ParseOptions } from '../parser';
+import type { ESQLAstExpression, ESQLProperNode } from '../types';
 
-export type SynthGenerator = (src: string, opts?: ParseOptions) => ESQLAstExpression;
+export type SynthGenerator<N extends ESQLProperNode> = (src: string, opts?: ParseOptions) => N;
 
-export type SynthTaggedTemplate = (
+export type SynthTaggedTemplate<N extends ESQLProperNode> = (
   template: TemplateStringsArray,
   ...params: Array<ESQLAstExpression | string>
-) => ESQLAstExpression;
+) => N;
 
-export type SynthTaggedTemplateWithOpts = (opts?: ParseOptions) => SynthTaggedTemplate;
+export type SynthTaggedTemplateWithOpts<N extends ESQLProperNode> = (
+  opts?: ParseOptions
+) => SynthTaggedTemplate<N>;
+
+export type SynthMethod<N extends ESQLProperNode> = SynthGenerator<N> &
+  SynthTaggedTemplate<N> &
+  SynthTaggedTemplateWithOpts<N>;

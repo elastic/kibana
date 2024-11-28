@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '../pretty_print';
-import { ESQLProperNode } from '../types';
-import { Walker } from '../walker/walker';
-import { expr } from './expr';
+import { BasicPrettyPrinter } from '../../pretty_print';
+import { ESQLProperNode } from '../../types';
+import { Walker } from '../../walker/walker';
+import { expr } from '../expr';
 
 test('can generate integer literal', () => {
   const node = expr('42');

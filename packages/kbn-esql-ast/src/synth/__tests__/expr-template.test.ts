@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '../pretty_print';
-import { expr } from './expr';
+import { BasicPrettyPrinter } from '../../pretty_print';
+import { expr } from '../expr';
 
 test('can be used as templated string tag', () => {
   const node = expr`42`;
