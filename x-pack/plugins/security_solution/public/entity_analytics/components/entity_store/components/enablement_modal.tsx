@@ -26,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useContractComponents } from '../../../../common/hooks/use_contract_component';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 import {
   ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY,
@@ -72,6 +73,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
     useEntityEnginePrivileges();
   const riskEnginePrivileges = useMissingRiskEnginePrivileges();
   const enablementOptions = enablements.riskScore || enablements.entityStore;
+  const { EnablementModalCallout } = useContractComponents();
 
   if (!visible) {
     return null;
@@ -100,6 +102,7 @@ export const EntityStoreEnablementModal: React.FC<EntityStoreEnablementModalProp
 
       <EuiModalBody>
         <EuiFlexGroup direction="column">
+          <EuiFlexItem>{EnablementModalCallout && <EnablementModalCallout />}</EuiFlexItem>
           <EuiFlexItem>
             <EuiSwitch
               label={
