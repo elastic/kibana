@@ -6,6 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { initializeTitles } from '@kbn/presentation-publishing';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
@@ -23,6 +24,7 @@ export function initializeInternalApi(
   parentApi: unknown,
   { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
+  const { titlesApi } = initializeTitles(initialState);
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
@@ -102,6 +104,13 @@ export function initializeInternalApi(
         displayOptions = {
           ...displayOptions,
           noPadding: parentApi.noPadding,
+        };
+      }
+
+      if (displayOptions.noPanelTitle == null && titlesApi.hidePanelTitle?.getValue()) {
+        displayOptions = {
+          ...displayOptions,
+          noPanelTitle: true,
         };
       }
 

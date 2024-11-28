@@ -62,7 +62,6 @@ interface GetExpressionRendererPropsParams {
   api: LensApi;
   addUserMessages: (messages: UserMessage[]) => void;
   updateBlockingErrors: (error: Error) => void;
-  renderCount: number;
   getDisplayOptions: () => VisualizationDisplayOptions;
 }
 
