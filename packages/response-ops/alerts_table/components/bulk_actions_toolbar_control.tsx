@@ -47,11 +47,14 @@ const selectedIdsToTimelineItemMapper = (
       _id: alert._id,
       _index: alert._index,
       data: [
-        { field: ALERT_RULE_NAME, value: alert[ALERT_RULE_NAME] },
-        { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] },
-        { field: ALERT_CASE_IDS, value: alert[ALERT_CASE_IDS] ?? [] },
-        { field: ALERT_WORKFLOW_TAGS, value: alert[ALERT_WORKFLOW_TAGS] ?? [] },
-        { field: ALERT_WORKFLOW_ASSIGNEE_IDS, value: alert[ALERT_WORKFLOW_ASSIGNEE_IDS] ?? [] },
+        { field: ALERT_RULE_NAME, value: alert[ALERT_RULE_NAME] as string[] },
+        { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] as string[] },
+        { field: ALERT_CASE_IDS, value: (alert[ALERT_CASE_IDS] ?? []) as string[] },
+        { field: ALERT_WORKFLOW_TAGS, value: (alert[ALERT_WORKFLOW_TAGS] ?? []) as string[] },
+        {
+          field: ALERT_WORKFLOW_ASSIGNEE_IDS,
+          value: (alert[ALERT_WORKFLOW_ASSIGNEE_IDS] ?? []) as string[],
+        },
       ],
       ecs: {
         _id: alert._id,

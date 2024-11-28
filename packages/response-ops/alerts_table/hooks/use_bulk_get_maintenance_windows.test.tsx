@@ -16,7 +16,7 @@ import { useLicense } from './use_license';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import React, { PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { testQueryClientConfig } from '../test_utils';
+import { testQueryClientConfig } from '../utils/test';
 
 jest.mock('./use_license');
 jest.mock('./bulk_get_maintenance_windows');

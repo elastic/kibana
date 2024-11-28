@@ -14,8 +14,8 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 export const useAlertMutedState = (alert?: Alert) => {
   const { mutedAlerts } = useAlertsTableContext();
-  const alertInstanceId = alert && alert[ALERT_INSTANCE_ID]?.[0];
-  const ruleId = alert && alert[ALERT_RULE_UUID]?.[0];
+  const alertInstanceId = alert && (alert[ALERT_INSTANCE_ID]?.[0] as string);
+  const ruleId = alert && (alert[ALERT_RULE_UUID]?.[0] as string);
   return useMemo(() => {
     const rule = ruleId ? mutedAlerts?.[ruleId] ?? [] : [];
     return {
