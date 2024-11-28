@@ -43,6 +43,7 @@ import {
 import { MockSerializedDashboardState } from './types';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -72,11 +73,13 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
+      const currentPanels = mockDashboardApi.panels$.getValue();
+
       return (
         <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
           key={id}
           maybeId={id}
-          type={'searchEmbeddableDemo'}
+          type={currentPanels[id].type}
           getParentApi={() => mockDashboardApi}
           panelProps={{
             showBadges: true,
@@ -92,7 +95,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   );
 
   return (
-    <EuiProvider>
+    <KibanaRenderContextProvider {...coreStart}>
       <EuiPageTemplate grow={false} offset={0} restrictWidth={false}>
         <EuiPageTemplate.Header
           iconType={'dashboardApp'}
@@ -198,7 +201,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
-    </EuiProvider>
+    </KibanaRenderContextProvider>
   );
 };
 

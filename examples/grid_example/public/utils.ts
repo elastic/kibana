@@ -49,7 +49,7 @@ export const dashboardInputToGridLayout = ({
 
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
-    layout[gridData.row].panels[panelId] = {
+    layout[gridData.row ?? 0].panels[panelId] = {
       id: panelId,
       row: gridData.y,
       column: gridData.x,

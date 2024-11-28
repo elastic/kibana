@@ -16,6 +16,7 @@ import {
   MockedDashboardPanelMap,
   MockedDashboardRowMap,
 } from './types';
+import { TimeRange } from '@kbn/es-query';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 const DEFAULT_PANEL_HEIGHT = 15;
@@ -29,11 +30,12 @@ export const useMockDashboardApi = ({
   const mockDashboardApi = useMemo(() => {
     return {
       getSerializedStateForChild: (id: string) => ({
-        rawState: {
-          title: id,
-          timeRange: undefined,
-        },
+        rawState: savedState.panels[id].explicitInput,
         references: [],
+      }),
+      timeRange$: new BehaviorSubject<TimeRange>({
+        from: 'now-24h',
+        to: 'now',
       }),
       children$: new BehaviorSubject({}),
       viewMode: new BehaviorSubject('edit'),
