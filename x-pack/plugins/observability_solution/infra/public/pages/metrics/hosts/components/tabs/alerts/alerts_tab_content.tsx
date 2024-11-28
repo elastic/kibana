@@ -44,10 +44,10 @@ export const AlertsTabContent = () => {
   const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
     triggersActionsUi;
 
-  const hostsWithAlerts = hostNodes
+  const hostsWithAlertsKuery = hostNodes
     .filter((host) => host.alertsCount)
-    .map((host) => `"${host.name}"`);
-  const hostsWithAlertsKuery = hostsWithAlerts.join(' OR ');
+    .map((host) => `"${host.name}"`)
+    .join(' OR ');
 
   return (
     <HeightRetainer>
