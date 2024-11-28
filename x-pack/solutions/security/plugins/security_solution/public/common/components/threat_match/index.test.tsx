@@ -8,6 +8,7 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 
 import { fields } from '@kbn/data-plugin/common/mocks';
 
@@ -26,10 +27,6 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../lib/kibana');
-
-const getPayLoad = (): ThreatMapEntries[] => [
-  { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
-];
 
 const getDoublePayLoad = (): ThreatMapEntries[] => [
   { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
@@ -88,35 +85,39 @@ describe('ThreatMatchComponent', () => {
     );
   });
 
-  test('it displays "Search" for "listItems" that are passed in', async () => {
-    const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <ThreatMatchComponent
-          mappingEntries={getPayLoad()}
-          indexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          threatIndexPatterns={
-            {
-              id: '1234',
-              title: 'logstash-*',
-              fields,
-            } as DataViewBase
-          }
-          onMappingEntriesChange={jest.fn()}
-        />
-      </ThemeProvider>
-    );
-    expect(wrapper.find('EuiFlexGroup[data-test-subj="itemEntryContainer"]')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="entryField"] input').at(0).props().placeholder).toEqual(
-      'Search'
+  test('it displays field values for "listItems" that are passed in', async () => {
+    const mapping: ThreatMapEntries[] = [
+      { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },
+    ];
+
+    render(
+      <ThreatMatchComponent
+        mappingEntries={mapping}
+        indexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        onMappingEntriesChange={jest.fn()}
+      />
     );
 
-    wrapper.unmount();
+    expect(screen.getAllByTestId('itemEntryContainer')).toHaveLength(1);
+
+    const comboboxes = screen.getAllByRole('combobox');
+
+    expect(comboboxes).toHaveLength(2);
+    expect(comboboxes[0]).toHaveValue('host.name');
+    expect(comboboxes[1]).toHaveValue('host.name');
   });
 
   test('it displays "or", "and" enabled', () => {
