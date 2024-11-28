@@ -615,7 +615,9 @@ const getSLOInstancesRoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const getSLOInstances = new GetSLOInstances(repository, esClient);
 
-    return await executeWithErrorHandler(() => getSLOInstances.execute(params.path.id));
+    return await executeWithErrorHandler(() =>
+      getSLOInstances.execute(params.path.id, params.query ?? {})
+    );
   },
 });
 
