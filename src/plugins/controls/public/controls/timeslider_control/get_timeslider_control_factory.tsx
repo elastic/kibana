@@ -60,6 +60,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       const isAnchored$ = new BehaviorSubject<boolean | undefined>(initialState.isAnchored);
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
+      const changeRangeByDragging$ = new BehaviorSubject<boolean>(false);
 
       const timeRangePercentage = initTimeRangePercentage(
         initialState,
@@ -118,6 +119,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }, 300);
 
       function onPrevious() {
+        changeRangeByDragging$.next(false);
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
         const value = timeslice$.value;
         const tickRange = ticks[1].value - ticks[0].value;
@@ -154,6 +156,7 @@ export const getTimesliderControlFactory = (): ControlFactory<
       }
 
       function onNext() {
+        changeRangeByDragging$.next(false);
         const { ticks, timeRangeMax, timeRangeMin } = timeRangeMeta$.value;
         const value = timeslice$.value;
         const tickRange = ticks[1].value - ticks[0].value;
@@ -314,8 +317,9 @@ export const getTimesliderControlFactory = (): ControlFactory<
               <TimeSliderPopoverContent
                 isAnchored={typeof isAnchored === 'boolean' ? isAnchored : false}
                 setIsAnchored={setIsAnchored}
-                value={localTimeslice}
+                value={changeRangeByDragging$.getValue() ? localTimeslice : [from, to]}
                 onChange={(value) => {
+                  changeRangeByDragging$.next(true);
                   setLocalTimeslice(value as Timeslice);
                   debouncedOnChange(value);
                 }}
