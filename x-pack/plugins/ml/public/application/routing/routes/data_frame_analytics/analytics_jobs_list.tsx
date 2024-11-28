@@ -14,7 +14,7 @@ import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { basicResolvers } from '../../resolvers';
+import { basicResolvers, initSavedObjects } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 const Page = dynamic(async () => ({
@@ -45,7 +45,10 @@ export const analyticsJobsListRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], basicResolvers());
+  const { context } = useRouteResolver('full', ['canGetDataFrameAnalytics'], {
+    ...basicResolvers(),
+    initSavedObjects,
+  });
   return (
     <PageLoader context={context}>
       <Page />

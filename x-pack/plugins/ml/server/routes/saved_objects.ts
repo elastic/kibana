@@ -94,7 +94,7 @@ export function savedObjectsRoutes(
           try {
             const { simulate } = request.query;
             const { syncSavedObjects } = syncSavedObjectsFactory(client, mlSavedObjectService);
-            const savedObjects = await syncSavedObjects(simulate);
+            const savedObjects = await syncSavedObjects(simulate, true);
 
             return response.ok({
               body: savedObjects,
