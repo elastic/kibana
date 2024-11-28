@@ -246,20 +246,18 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
               { defaultMessage: 'Associated index' }
             )}
             helpText={
-              connector.is_native ? (
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedManagedConnectorIndexHelpTextLabel"
-                  defaultMessage="Managed connector indices must be prefixed. Use an existing index or create a new one."
-                  values={{
-                    prefix: MANAGED_CONNECTOR_INDEX_PREFIX,
-                  }}
-                />
-              ) : (
-                i18n.translate(
-                  'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
-                  { defaultMessage: 'You can use an existing index or create a new one.' }
-                )
-              )
+              connector.is_native
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedManagedConnectorIndexHelpTextLabel',
+                    {
+                      defaultMessage:
+                        'Managed connector indices must be prefixed. Use an existing index or create a new one.',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.enterpriseSearch.attachIndexBox.euiFormRow.associatedIndexHelpTextLabel',
+                    { defaultMessage: 'You can use an existing index or create a new one.' }
+                  )
             }
             error={error}
             isInvalid={!!error}
