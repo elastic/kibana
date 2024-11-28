@@ -33,7 +33,7 @@ describe('View agentless policy details', () => {
     });
   });
 
-  it('should disable the add integration button if the policy support agentless', () => {
+  it('should not show the add integration button if the policy support agentless', () => {
     cy.visit('/app/fleet/policies/policy-1');
     cy.getBySel(ADD_PACKAGE_POLICY_BTN).should('not.exist');
   });
