@@ -53,7 +53,7 @@ export const getAllMonitors = async ({
       hits.push(...result.saved_objects);
     }
 
-    void finder.close();
+    finder.close().catch(() => {});
 
     return hits;
   });

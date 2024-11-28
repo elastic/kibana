@@ -38,14 +38,13 @@ type LocationStatus = Array<{
 export const SUMMARIES_PAGE_SIZE = 5000;
 
 export class OverviewStatusService {
-  routeContext: RouteContext<Record<string, any>, OverviewStatusQuery>;
   filterData: {
     locationFilter?: string[] | string;
     filtersStr?: string;
   } = {};
-  constructor(routeContext: RouteContext) {
-    this.routeContext = routeContext;
-  }
+  constructor(
+    private readonly routeContext: RouteContext<Record<string, any>, OverviewStatusQuery>
+  ) {}
 
   async getOverviewStatus() {
     const { request } = this.routeContext;
@@ -94,7 +93,7 @@ export class OverviewStatusService {
   async getQueryResult() {
     return withApmSpan('monitor_status_data', async () => {
       const range = {
-        // max monitor schedule period is 4 hours
+        // max monitor schedule period is 4 hours, 20 minute subtraction is to be on safe sife
         from: moment().subtract(4, 'hours').subtract(20, 'minutes').toISOString(),
         to: 'now',
       };
@@ -232,7 +231,6 @@ export class OverviewStatusService {
       // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
       // in monitorLocationsMap but not in listOfLocations
       const monLocations = monitor.attributes[ConfigKey.LOCATIONS];
-      // const monQueriedLocations = intersection(monLocations, monitorLocationIds);
       monLocations?.forEach((monLocation) => {
         if (!isEmpty(queryLocIds) && !queryLocIds?.includes(monLocation.id)) {
           // filter out location provided via query
@@ -296,7 +294,7 @@ export class OverviewStatusService {
     return await getAllMonitors({
       soClient: savedObjectsClient,
       showFromAllSpaces,
-      search: query ? `${query}*` : undefined,
+      search: query,
       filter: filtersStr,
       fields: [
         ConfigKey.ENABLED,
