@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { WorkflowInsights } from './components/insights/workflow_insights';
 import { isPolicyOutOfDate } from '../../utils';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
@@ -42,6 +43,7 @@ interface EndpointDetailsContentProps {
 
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
+    const isWorkflowInsightsEnabled = useIsExperimentalFeatureEnabled('defendInsights');
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
       () => hostInfo.metadata.Endpoint.policy.applied.status,
@@ -184,7 +186,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
 
     return (
       <div>
-        <WorkflowInsights />
+        {isWorkflowInsightsEnabled && <WorkflowInsights endpointId={hostInfo.metadata.agent.id} />}
         <EuiDescriptionList
           columnWidths={[1, 3]}
           compressed
