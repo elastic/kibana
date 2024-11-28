@@ -190,8 +190,11 @@ export class InfraServerPlugin
     logsShared: LogsSharedPluginStart,
     logsDataAccess: LogsDataAccessPluginStart
   ) {
-    const LOG_RULES_DATA_VIEW = 'log_rules_data_view';
-    const METRIC_RULES_DATA_VIEW = 'infra_rules_data_view';
+    const LOG_RULES_DATA_VIEW_ID = 'log_rules_data_view';
+    const METRIC_RULES_DATA_VIEW_ID = 'infra_rules_data_view';
+
+    const LOG_RULES_DATA_VIEW_NAME = 'Log Threshold Alerting Rule Source';
+    const METRIC_RULES_DATA_VIEW_NAME = 'Metric AND Inventory Threshold Alerting Rule Source';
 
     const savedObjectsClient = core.savedObjects.createInternalRepository();
     const esClient = core.elasticsearch.client.asInternalUser;
@@ -212,14 +215,14 @@ export class InfraServerPlugin
       .getResolvedLogView(DEFAULT_LOG_VIEW);
 
     // create default data view for Log threshold rules
-    const logDataViewExists = await dataViewsService.get(LOG_RULES_DATA_VIEW).catch(() => false);
+    const logDataViewExists = await dataViewsService.get(LOG_RULES_DATA_VIEW_ID).catch(() => false);
 
     if (!logDataViewExists) {
       await dataViewsService.createAndSave({
         allowNoIndex: false,
-        name: LOG_RULES_DATA_VIEW,
+        name: LOG_RULES_DATA_VIEW_NAME,
         title: logIndices === '' ? DEFAULT_LOG_SOURCES.join(',') : logIndices,
-        id: LOG_RULES_DATA_VIEW,
+        id: LOG_RULES_DATA_VIEW_ID,
         timeFieldName: timestampField,
       });
     }
@@ -230,15 +233,15 @@ export class InfraServerPlugin
 
     // create default data view for Metric and Inventory threshold rules
     const metricDataViewExists = await dataViewsService
-      .get(METRIC_RULES_DATA_VIEW)
+      .get(METRIC_RULES_DATA_VIEW_ID)
       .catch(() => false);
 
     if (!metricDataViewExists) {
       await dataViewsService.createAndSave({
         allowNoIndex: false,
-        name: METRIC_RULES_DATA_VIEW,
+        name: METRIC_RULES_DATA_VIEW_NAME,
         title: metricIndices,
-        id: METRIC_RULES_DATA_VIEW,
+        id: METRIC_RULES_DATA_VIEW_ID,
         timeFieldName: '@timestamp',
       });
     }
