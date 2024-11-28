@@ -81,7 +81,7 @@ export const useGridLayoutState = ({
       runtimeSettings$,
       interactionEvent$,
       expandedPanelId$,
-      isMobileView$: new BehaviorSubject<boolean>(accessMode === 'VIEW' && shouldShowMobileView()),
+      isMobileView$: new BehaviorSubject<boolean>(shouldShowMobileView(accessMode)),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -99,9 +99,7 @@ export const useGridLayoutState = ({
           gridSettings.columnCount;
 
         gridLayoutStateManager.runtimeSettings$.next({ ...gridSettings, columnPixelWidth });
-        gridLayoutStateManager.isMobileView$.next(
-          currentAccessMode === 'VIEW' && shouldShowMobileView()
-        );
+        gridLayoutStateManager.isMobileView$.next(shouldShowMobileView(currentAccessMode));
       });
 
     return () => {
