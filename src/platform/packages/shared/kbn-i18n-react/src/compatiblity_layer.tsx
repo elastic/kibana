@@ -10,7 +10,7 @@
 import React, { PropsWithChildren, FC } from 'react';
 import { selectUnit } from '@formatjs/intl-utils';
 import moment from 'moment';
-import { FormattedRelativeTime, IntlShape } from '..';
+import { FormattedRelativeTime, IntlShape } from 'react-intl';
 import { I18nProvider } from './provider';
 
 export interface FormattedRelativeProps {

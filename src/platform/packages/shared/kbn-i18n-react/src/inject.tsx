@@ -13,4 +13,4 @@
  * More docs and examples can be found here https://github.com/yahoo/react-intl/wiki/API#injection-api
  */
 
-export { injectIntl as injectI18n, useIntl as useI18n } from '..';
+export { injectIntl as injectI18n, useIntl as useI18n } from 'react-intl';
