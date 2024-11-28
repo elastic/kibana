@@ -28,11 +28,6 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
     let resourcesSlice: CreateRuleMigrationResourceInput[];
 
     const createdAt = new Date().toISOString();
-    const dateFields = {
-      '@timestamp': createdAt,
-      updated_by: this.username,
-      updated_at: createdAt,
-    };
     while ((resourcesSlice = resources.splice(0, BULK_MAX_SIZE)).length > 0) {
       await this.esClient
         .bulk({
@@ -40,7 +35,12 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
           operations: resourcesSlice.flatMap((resource) => [
             { update: { _id: this.createId(resource), _index: index } },
             {
-              doc: { ...resource, ...dateFields },
+              doc: {
+                ...resource,
+                '@timestamp': createdAt,
+                updated_by: this.username,
+                updated_at: createdAt,
+              },
               doc_as_upsert: true,
             },
           ]),

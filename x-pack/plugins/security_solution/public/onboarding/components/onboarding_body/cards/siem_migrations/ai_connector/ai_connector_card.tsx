@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,24 +13,35 @@ import {
   useEuiTheme,
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
-import { useStoredSiemMigrationsConnectorId } from '../../../../hooks/use_stored_state';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
+import { useDefinedLocalStorage } from '../../../../hooks/use_stored_state';
 import type { OnboardingCardComponent } from '../../../../../types';
 import * as i18n from './translations';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
 import { ConnectorCards } from '../../common/connectors/connector_cards';
 import type { AIConnectorCardMetadata } from './types';
 import { MissingPrivilegesCallOut } from '../../common/connectors/missing_privileges';
-import { useOnboardingContext } from '../../../../onboarding_context';
 
 export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> = ({
   checkCompleteMetadata,
   checkComplete,
+  setComplete,
 }) => {
+  const { siemMigrations } = useKibana().services;
   const { euiTheme, colorMode } = useEuiTheme();
   const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
-  const { spaceId } = useOnboardingContext();
 
-  const [selectedConnectorId, setSelectedConnectorId] = useStoredSiemMigrationsConnectorId(spaceId);
+  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | null>(
+    siemMigrations.rules.connectorIdStorage.key,
+    null
+  );
+  const setSelectedConnectorId = useCallback(
+    (connectorId: string) => {
+      setStoredConnectorId(connectorId);
+      setComplete(true);
+    },
+    [setComplete, setStoredConnectorId]
+  );
 
   const connectors = checkCompleteMetadata?.connectors;
   const canExecuteConnectors = checkCompleteMetadata?.canExecuteConnectors;
@@ -55,7 +66,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
               canCreateConnectors={canCreateConnectors}
               connectors={connectors}
               onConnectorSaved={checkComplete}
-              selectedConnectorId={selectedConnectorId}
+              selectedConnectorId={storedConnectorId}
               setSelectedConnectorId={setSelectedConnectorId}
             />
           </EuiFlexItem>

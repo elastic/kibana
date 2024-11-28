@@ -13,7 +13,7 @@ import type { IntegrationTabId } from '../onboarding_body/cards/integrations/typ
 /**
  * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.
  */
-const useDefinedLocalStorage = <T = undefined>(key: string, defaultValue: T) => {
+export const useDefinedLocalStorage = <T = undefined>(key: string, defaultValue: T) => {
   const [value, setValue] = useLocalStorage<T>(key, defaultValue);
   return useMemo(() => [value ?? defaultValue, setValue] as const, [value, defaultValue, setValue]);
 };

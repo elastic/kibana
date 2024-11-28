@@ -7,17 +7,13 @@
 
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { LocalStorageKey } from '../../../../../constants';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { AIActionTypeIds } from '../../common/connectors/constants';
 import type { AIConnectorCardMetadata } from './types';
 
-const storage = new Storage(localStorage);
-
 export const checkAssistantCardComplete: OnboardingCardCheckComplete<
   AIConnectorCardMetadata
-> = async ({ http, application }) => {
+> = async ({ http, application, siemMigrations }) => {
   let isComplete = false;
   const allConnectors = await loadConnectors({ http });
   const { capabilities } = application;
@@ -29,10 +25,10 @@ export const checkAssistantCardComplete: OnboardingCardCheckComplete<
     return acc;
   }, []);
 
-  const storedConnectorId = storage.get(LocalStorageKey.siemMigrationsConnectorId);
+  const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
   if (storedConnectorId) {
     if (aiConnectors.length === 0) {
-      storage.remove(LocalStorageKey.siemMigrationsConnectorId);
+      siemMigrations.rules.connectorIdStorage.remove();
     } else {
       isComplete = aiConnectors.some((connector) => connector.id === storedConnectorId);
     }

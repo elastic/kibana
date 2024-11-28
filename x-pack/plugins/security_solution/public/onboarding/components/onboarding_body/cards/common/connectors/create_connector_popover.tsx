@@ -11,7 +11,7 @@ import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
 import { MissingPrivilegesTooltip } from './missing_privileges';
 
-interface CreateConnectorPopoverProps {
+export interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
   canCreateConnectors?: boolean;
 }

@@ -18,6 +18,6 @@ export const AI_CONNECTOR_CARD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.onboarding.aiConnector.description',
   {
     defaultMessage:
-      'Choose and configure any AI provider available to use start a SIEM rules migration.',
+      'Choose and configure any AI provider available to start a SIEM rules migration.',
   }
 );

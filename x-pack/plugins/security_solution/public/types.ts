@@ -138,7 +138,7 @@ export interface StartPlugins {
   uiActions: UiActionsStart;
   maps: MapsStartApi;
   ml?: MlPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   osquery: OsqueryPluginStart;
   security: SecurityPluginStart;
