@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { UseField } from '../../../../shared_imports';
-import { AnomalyThresholdSlider } from '../../../rule_creation_ui/components/anomaly_threshold_slider';
+import { UseField } from '../../../shared_imports';
+import { AnomalyThresholdSlider } from '../../rule_creation_ui/components/anomaly_threshold_slider';
 
 const componentProps = {
   describedByIds: ['anomalyThreshold'],
