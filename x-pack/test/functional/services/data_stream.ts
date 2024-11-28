@@ -23,11 +23,6 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
     deleteOriginal: false,
   };
 
-  async function existsDataStream(stream: string) {
-    log.info(`Check ${stream} data stream index existence...`);
-    return await es.indices.getDataStream({ name: stream });
-  }
-
   /**
    * Downsample a data-stream or a specific backing index
    * @param indexOrStream An index or a data stream
@@ -293,7 +288,6 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
 
   return {
     createDataStream,
-    existsDataStream,
     deleteDataStream,
     downsampleTSDBIndex,
     upgradeStream,
