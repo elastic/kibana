@@ -22,9 +22,9 @@ function getExpressionForLayer(
 
   let idMapper: Record<string, OriginalColumn[]> = {};
   layer.columns.forEach((col) => {
-    const columnId = col?.variable ?? col.columnId;
+    const columnId = col.fieldName;
     if (idMapper[columnId]) {
-      idMapper[col.columnId].push({
+      idMapper[columnId].push({
         id: col.columnId,
         label: col.fieldName,
         variable: col?.variable,
