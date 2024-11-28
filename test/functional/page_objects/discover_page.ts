@@ -208,6 +208,12 @@ export class DiscoverPageObject extends FtrService {
     );
   }
 
+  public async getBreakdownFieldValue() {
+    const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+
+    return breakdownButton.getVisibleText();
+  }
+
   public async chooseBreakdownField(field: string, value?: string) {
     await this.retry.try(async () => {
       await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
