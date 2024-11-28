@@ -235,21 +235,6 @@ export const RuleMigrationTaskStats = z.object({
 });
 
 /**
- * The rule migration to install.
- */
-export type RuleMigrationToInstall = z.infer<typeof RuleMigrationToInstall>;
-export const RuleMigrationToInstall = z.object({
-  /**
-   * The rule migration id
-   */
-  id: NonEmptyString,
-  /**
-   * The migrated elastic rule attributes to install.
-   */
-  elastic_rule: ElasticRule,
-});
-
-/**
  * The type of the rule migration resource.
  */
 export type RuleMigrationResourceType = z.infer<typeof RuleMigrationResourceType>;

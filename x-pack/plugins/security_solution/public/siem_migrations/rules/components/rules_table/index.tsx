@@ -71,17 +71,9 @@ const RulesTableComponent: React.FC<RulesTableComponentProps> = ({ migrationId }
   const [isTableLoading, setTableLoading] = useState(false);
   const installSingleRule = useCallback(
     async (migrationRule: RuleMigration, enable?: boolean) => {
-      if (!migrationRule.elastic_rule) {
-        return;
-      }
       setTableLoading(true);
       try {
-        await installMigrationRules([
-          {
-            id: migrationRule.id,
-            elastic_rule: migrationRule.elastic_rule,
-          },
-        ]);
+        await installMigrationRules([migrationRule.id]);
       } finally {
         setTableLoading(false);
       }

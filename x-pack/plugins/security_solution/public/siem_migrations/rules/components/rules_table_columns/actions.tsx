@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { canInstallMigrationRule } from '../../../../../common/siem_migrations/utils';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common';
@@ -55,7 +54,7 @@ const ActionName = ({
     );
   }
 
-  if (canInstallMigrationRule(migrationRule)) {
+  if (migrationRule.translation_result === 'full') {
     return (
       <EuiLink
         disabled={disableActions}

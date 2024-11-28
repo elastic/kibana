@@ -8,7 +8,6 @@
 import type {
   ElasticRule,
   RuleMigrationTaskStats,
-  RuleMigrationToInstall,
 } from '../../../common/siem_migrations/model/rule_migration.gen';
 
 export interface RuleMigrationStats extends RuleMigrationTaskStats {
@@ -22,7 +21,8 @@ export interface InstallRule {
 }
 
 export interface InstallRulesProps {
-  rules: RuleMigrationToInstall[];
+  migrationId: string;
+  ids: string[];
   signal?: AbortSignal;
 }
 

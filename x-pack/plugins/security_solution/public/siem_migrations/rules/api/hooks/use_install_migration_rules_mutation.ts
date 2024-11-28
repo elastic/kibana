@@ -6,7 +6,6 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import type { RuleMigrationToInstall } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { InstallMigrationRulesResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../../common/siem_migrations/constants';
 import { installMigrationRules } from '../api';
@@ -16,12 +15,12 @@ export const INSTALL_MIGRATION_RULES_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION
 
 export const useInstallMigrationRulesMutation = (
   migrationId: string,
-  options?: UseMutationOptions<InstallMigrationRulesResponse, Error, RuleMigrationToInstall[]>
+  options?: UseMutationOptions<InstallMigrationRulesResponse, Error, string[]>
 ) => {
   const invalidateGetRuleMigrationsQuery = useInvalidateGetMigrationRulesQuery(migrationId);
 
-  return useMutation<InstallMigrationRulesResponse, Error, RuleMigrationToInstall[]>(
-    (rules: RuleMigrationToInstall[]) => installMigrationRules({ rules }),
+  return useMutation<InstallMigrationRulesResponse, Error, string[]>(
+    (ids: string[]) => installMigrationRules({ migrationId, ids }),
     {
       ...options,
       mutationKey: INSTALL_MIGRATION_RULES_MUTATION_KEY,

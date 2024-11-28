@@ -11,7 +11,6 @@ import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
 } from '../../../../../../common/siem_migrations/constants';
-import type { RuleMigrationToInstall } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 import { createPrebuiltRuleObjectsClient } from '../../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { performTimelinesInstallation } from '../../../../detection_engine/prebuilt_rules/logic/perform_timelines_installation';
@@ -23,9 +22,10 @@ import { createPrebuiltRuleAssetsClient } from '../../../../detection_engine/pre
 import type { IDetectionRulesClient } from '../../../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { RuleCreateProps } from '../../../../../../common/api/detection_engine';
 import type { UpdateRuleMigrationInput } from '../../data/rule_migrations_data_rules_client';
+import type { StoredRuleMigration } from '../../types';
 
 const installPrebuiltRules = async (
-  rulesToInstall: RuleMigrationToInstall[],
+  rulesToInstall: StoredRuleMigration[],
   securitySolutionContext: SecuritySolutionApiRequestHandlerContext,
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
@@ -44,13 +44,12 @@ const installPrebuiltRules = async (
   rulesToInstall.forEach((ruleToInstall) => {
     // If prebuilt rule has already been install, then just update migration rule with the installed rule id
     const installedRule = currentRules.find(
-      (rule) => rule.rule_id === ruleToInstall.elastic_rule.prebuilt_rule_id
+      (rule) => rule.rule_id === ruleToInstall.elastic_rule?.prebuilt_rule_id
     );
     if (installedRule) {
       rulesToUpdate.push({
-        ...ruleToInstall,
+        id: ruleToInstall.id,
         elastic_rule: {
-          ...ruleToInstall.elastic_rule,
           id: installedRule.id,
         },
       });
@@ -59,7 +58,7 @@ const installPrebuiltRules = async (
 
     // If prebuilt rule is not installed, then keep reference to install it
     const installableRule = installableRules.find(
-      (rule) => rule.rule_id === ruleToInstall.elastic_rule.prebuilt_rule_id
+      (rule) => rule.rule_id === ruleToInstall.elastic_rule?.prebuilt_rule_id
     );
     if (installableRule) {
       assetsToInstall.push(installableRule);
@@ -80,13 +79,12 @@ const installPrebuiltRules = async (
 
   installedRules.forEach((installedRule) => {
     const rules = rulesToInstall.filter(
-      (rule) => rule.elastic_rule.prebuilt_rule_id === installedRule.result.rule_id
+      (rule) => rule.elastic_rule?.prebuilt_rule_id === installedRule.result.rule_id
     );
     rules.forEach((prebuiltRule) => {
       rulesToUpdate.push({
-        ...prebuiltRule,
+        id: prebuiltRule.id,
         elastic_rule: {
-          ...prebuiltRule.elastic_rule,
           id: installedRule.result.id,
         },
       });
@@ -97,14 +95,14 @@ const installPrebuiltRules = async (
 };
 
 const installCustomRules = async (
-  rulesToInstall: RuleMigrationToInstall[],
+  rulesToInstall: StoredRuleMigration[],
   detectionRulesClient: IDetectionRulesClient,
   logger: Logger
 ): Promise<UpdateRuleMigrationInput[]> => {
   const rulesToUpdate: UpdateRuleMigrationInput[] = [];
   await Promise.all(
     rulesToInstall.map(async (rule) => {
-      if (!rule.elastic_rule.query || !rule.elastic_rule.description) {
+      if (!rule.elastic_rule?.query || !rule.elastic_rule?.description) {
         return;
       }
       try {
@@ -121,9 +119,8 @@ const installCustomRules = async (
           params: payloadRule,
         });
         rulesToUpdate.push({
-          ...rule,
+          id: rule.id,
           elastic_rule: {
-            ...rule.elastic_rule,
             id: createdRule.id,
           },
         });
@@ -136,19 +133,59 @@ const installCustomRules = async (
   return rulesToUpdate;
 };
 
-export const installRules = async (
-  rulesToInstall: RuleMigrationToInstall[],
-  securitySolutionContext: SecuritySolutionApiRequestHandlerContext,
-  rulesClient: RulesClient,
-  savedObjectsClient: SavedObjectsClientContract,
-  logger: Logger
-) => {
+interface InstallTranslatedProps {
+  /**
+   * The migration id
+   */
+  migrationId: string;
+
+  /**
+   * If specified, then installable translated rules in theThe list will be installed,
+   * otherwise all installable translated rules will be installed.
+   */
+  ids?: string[];
+
+  /**
+   * The security solution context
+   */
+  securitySolutionContext: SecuritySolutionApiRequestHandlerContext;
+
+  /**
+   * The rules client to create rules
+   */
+  rulesClient: RulesClient;
+
+  /**
+   * The saved objects client
+   */
+  savedObjectsClient: SavedObjectsClientContract;
+
+  /**
+   * The logger
+   */
+  logger: Logger;
+}
+
+export const installTranslated = async ({
+  migrationId,
+  ids,
+  securitySolutionContext,
+  rulesClient,
+  savedObjectsClient,
+  logger,
+}: InstallTranslatedProps) => {
   const detectionRulesClient = securitySolutionContext.getDetectionRulesClient();
   const ruleMigrationsClient = securitySolutionContext.getSiemRuleMigrationsClient();
 
+  const rulesToInstall = await ruleMigrationsClient.data.rules.get({
+    migrationId,
+    ids,
+    installable: true,
+  });
+
   const { customRulesToInstall, prebuiltRulesToInstall } = rulesToInstall.reduce(
     (acc, item) => {
-      if (item.elastic_rule.prebuilt_rule_id) {
+      if (item.elastic_rule?.prebuilt_rule_id) {
         acc.prebuiltRulesToInstall.push(item);
       } else {
         acc.customRulesToInstall.push(item);
@@ -156,8 +193,8 @@ export const installRules = async (
       return acc;
     },
     { customRulesToInstall: [], prebuiltRulesToInstall: [] } as {
-      customRulesToInstall: RuleMigrationToInstall[];
-      prebuiltRulesToInstall: RuleMigrationToInstall[];
+      customRulesToInstall: StoredRuleMigration[];
+      prebuiltRulesToInstall: StoredRuleMigration[];
     }
   );
 

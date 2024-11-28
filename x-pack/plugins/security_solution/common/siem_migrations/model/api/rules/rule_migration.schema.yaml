@@ -79,7 +79,7 @@ paths:
                     type: boolean
                     description: Indicates rules migrations have been updated.
 
-  /internal/siem_migrations/rules/install:
+  /internal/siem_migrations/rules/{migration_id}/install:
     post:
       summary: Installs translated migration rules
       operationId: InstallMigrationRules
@@ -87,6 +87,13 @@ paths:
       description: Installs migration rules
       tags:
         - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to isnstall rules for
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -94,7 +101,8 @@ paths:
             schema:
               type: array
               items:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationToInstall'
+                description: The rule migration id
+                $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates rules migrations have been installed correctly.
@@ -109,26 +117,21 @@ paths:
                     type: boolean
                     description: Indicates rules migrations have been installed.
 
-  /internal/siem_migrations/rules/install_all:
+  /internal/siem_migrations/rules/{migration_id}/install_translated:
     post:
       summary: Installs all translated migration rules
-      operationId: InstallAllMigrationRules
+      operationId: InstallTranslatedMigrationRules
       x-codegen-enabled: true
       description: Installs all translated migration rules
       tags:
         - SIEM Rule Migrations
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - migrationId
-              properties:
-                migrationId:
-                  description: The migration id
-                  $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to install translated rules for
+            $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates rules migrations have been installed correctly.

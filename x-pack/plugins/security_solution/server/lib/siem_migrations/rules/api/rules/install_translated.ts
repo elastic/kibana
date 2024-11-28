@@ -7,23 +7,20 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../../../common/siem_migrations/constants';
-import type { InstallMigrationRulesResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import {
-  InstallMigrationRulesRequestBody,
-  InstallMigrationRulesRequestParams,
-} from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH } from '../../../../../../common/siem_migrations/constants';
+import type { InstallTranslatedMigrationRulesResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { InstallTranslatedMigrationRulesRequestParams } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { withLicense } from '../util/with_license';
 import { installTranslated } from '../util/installation';
 
-export const registerSiemRuleMigrationsInstallRoute = (
+export const registerSiemRuleMigrationsInstallTranslatedRoute = (
   router: SecuritySolutionPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .post({
-      path: SIEM_RULE_MIGRATION_INSTALL_PATH,
+      path: SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
     })
@@ -32,15 +29,17 @@ export const registerSiemRuleMigrationsInstallRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(InstallMigrationRulesRequestParams),
-            body: buildRouteValidationWithZod(InstallMigrationRulesRequestBody),
+            params: buildRouteValidationWithZod(InstallTranslatedMigrationRulesRequestParams),
           },
         },
       },
       withLicense(
-        async (context, req, res): Promise<IKibanaResponse<InstallMigrationRulesResponse>> => {
+        async (
+          context,
+          req,
+          res
+        ): Promise<IKibanaResponse<InstallTranslatedMigrationRulesResponse>> => {
           const { migration_id: migrationId } = req.params;
-          const ids = req.body;
 
           try {
             const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
@@ -51,7 +50,6 @@ export const registerSiemRuleMigrationsInstallRoute = (
 
             await installTranslated({
               migrationId,
-              ids,
               securitySolutionContext,
               savedObjectsClient,
               rulesClient,
