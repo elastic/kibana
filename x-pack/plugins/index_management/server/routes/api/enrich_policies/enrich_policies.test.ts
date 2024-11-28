@@ -366,4 +366,33 @@ describe('Enrich policies API', () => {
       expect(searchMock).toHaveBeenCalled();
     });
   });
+
+  describe('Get matching indices - POST /api/index_management/enrich_policies/get_matching_data_streams', () => {
+    const getDataStreamsMock = router.getMockESApiFn('indices.getDataStream');
+
+    it('Return matching data streams', async () => {
+      const mockRequest: RequestMock = {
+        method: 'post',
+        path: addInternalBasePath('/enrich_policies/get_matching_data_streams'),
+        body: {
+          pattern: 'test',
+        },
+      };
+
+      getDataStreamsMock.mockResolvedValue({
+        body: {},
+        statusCode: 200,
+      });
+
+      const res = await router.runRequest(mockRequest);
+
+      expect(res).toEqual({
+        body: {
+          dataStreams: [],
+        },
+      });
+
+      expect(getDataStreamsMock).toHaveBeenCalledWith({ name: '*test*', expand_wildcards: 'open' });
+    });
+  });
 });
