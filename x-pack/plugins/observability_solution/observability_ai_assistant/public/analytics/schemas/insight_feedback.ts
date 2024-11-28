@@ -11,6 +11,7 @@ import { ObservabilityAIAssistantTelemetryEventType } from '../telemetry_event_t
 
 export interface InsightFeedback {
   feedback: Feedback;
+  '@timestamp': string;
 }
 
 export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
@@ -20,6 +21,12 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
       type: 'text',
       _meta: {
         description: 'Whether the user has deemed this response useful or not',
+      },
+    },
+    '@timestamp': {
+      type: 'text',
+      _meta: {
+        description: 'The timestamp of the conversation.',
       },
     },
   },

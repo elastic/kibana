@@ -119,6 +119,7 @@ function ChatContent({
                       type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
                       payload: {
                         feedback,
+                        '@timestamp': lastAssistantResponse['@timestamp'],
                       },
                     });
                   }
