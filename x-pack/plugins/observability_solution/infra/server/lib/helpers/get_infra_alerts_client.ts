@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { KibanaRequest } from '@kbn/core/server';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import { INFRA_ALERT_FEATUREIDS } from '../../../common/constants';
 import type { InfraBackendLibs } from '../infra_types';
 
 type RequiredParams = ESSearchRequest & {
@@ -27,13 +27,7 @@ export async function getInfraAlertsClient({
 }) {
   const [, { ruleRegistry }] = await libs.getStartServices();
   const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-  const infraAlertsIndices = await alertsClient.getAuthorizedAlertsIndices([
-    AlertConsumers.INFRASTRUCTURE,
-    AlertConsumers.OBSERVABILITY,
-    AlertConsumers.LOGS,
-    AlertConsumers.SLO,
-    AlertConsumers.APM,
-  ]);
+  const infraAlertsIndices = await alertsClient.getAuthorizedAlertsIndices(INFRA_ALERT_FEATUREIDS);
 
   if (!infraAlertsIndices || isEmpty(infraAlertsIndices)) {
     throw Error('No alert indices exist for "infrastructure"');
