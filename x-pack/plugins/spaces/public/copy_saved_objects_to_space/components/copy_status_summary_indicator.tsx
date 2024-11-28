@@ -138,7 +138,7 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
   return (
     <Fragment>
       {renderIcon(props)}
-      <EuiBadge color="#DDD" className="spcCopyToSpace__summaryCountBadge">
+      <EuiBadge className="spcCopyToSpace__summaryCountBadge">
         {summarizedCopyResult.objects.length}
       </EuiBadge>
     </Fragment>

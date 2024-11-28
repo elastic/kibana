@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
@@ -47,6 +48,7 @@ export const SpaceListInternal = ({
   cursorStyle,
 }: SpaceListProps) => {
   const { spacesDataPromise } = useSpaces();
+  const { euiTheme } = useEuiTheme();
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [shareToSpacesData, setShareToSpacesData] = useState<SpacesData>();
@@ -76,7 +78,7 @@ export const SpaceListInternal = ({
           defaultMessage: `* All spaces`,
         }),
         initials: '*',
-        color: '#D3DAE6',
+        color: euiTheme.colors.vis.euiColorVis3,
       },
     ];
   } else {
@@ -145,7 +147,7 @@ export const SpaceListInternal = ({
             />
           }
         >
-          <EuiBadge color="#DDD">+{unauthorizedSpacesCount}</EuiBadge>
+          <EuiBadge>+{unauthorizedSpacesCount}</EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
