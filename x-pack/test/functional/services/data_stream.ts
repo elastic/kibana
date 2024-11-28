@@ -259,7 +259,9 @@ export function DataStreamProvider({ getService, getPageObject }: FtrProviderCon
         log.info(`Found resource_already_exists_exception: delete and rety again...`);
         await deleteDataStream(streamIndex);
         await createDataStream(streamIndex, mappings, mode);
+        return;
       }
+      throw err;
     }
   }
 
