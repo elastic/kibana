@@ -9,6 +9,10 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type {
+  CrowdStrikeActionDataParameterTypes,
+  CrowdStrikeActionResponseDataOutput,
+} from './crowdstrike';
+import type {
   UploadActionApiRequestBody,
   ActionStatusRequestSchema,
   KillProcessRequestBody,
@@ -24,9 +28,7 @@ import type {
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
-export interface ActionResponseOutput<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
-> {
+export interface ActionResponseOutput<TOutputContent = AgentTypeMapping['endpoint']['output']> {
   type: 'json' | 'text';
   content: TOutputContent;
 }
@@ -94,6 +96,10 @@ export interface ResponseActionExecuteOutputContent {
 
 export interface ResponseActionScanOutputContent {
   code: string;
+}
+
+export interface ResponseActionRunScriptOutputContent {
+  output: string;
 }
 
 export const ActivityLogItemTypes = {
@@ -233,7 +239,8 @@ export type EndpointActionResponseDataOutput =
   | GetProcessesActionOutputContent
   | SuspendProcessActionOutputContent
   | KillProcessActionOutputContent
-  | ResponseActionScanOutputContent;
+  | ResponseActionScanOutputContent
+  | ResponseActionRunScriptOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -393,9 +400,36 @@ export interface ActionDetailsAgentState {
   completedAt: string | undefined;
 }
 
+export interface AgentTypeMapping {
+  endpoint: {
+    output: EndpointActionResponseDataOutput;
+    parameters: EndpointActionDataParameterTypes;
+  };
+  crowdstrike: {
+    output: CrowdStrikeActionResponseDataOutput;
+    parameters: CrowdStrikeActionDataParameterTypes;
+  };
+  default: {
+    output: EndpointActionResponseDataOutput;
+    parameters: EndpointActionDataParameterTypes;
+  };
+}
+
+// type OutputContentByAgent<TAgentType> = TAgentType extends 'endpoint'
+//   ? EndpointActionResponseDataOutput
+//   : TAgentType extends 'crowdstrike'
+//   ? CrowdStrikeActionResponseDataOutput
+//   : EndpointActionResponseDataOutput;
+//
+// type ParametersByAgent<TAgentType> = TAgentType extends 'endpoint'
+//   ? EndpointActionDataParameterTypes
+//   : TAgentType extends 'crowdstrike'
+//   ? CrowdStrikeActionDataParameterTypes
+//   : EndpointActionDataParameterTypes;
+
 export interface ActionDetails<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TOutputContent = AgentTypeMapping['endpoint']['output'],
+  TParameters = AgentTypeMapping['endpoint']['parameters']
 > {
   /**
    * The action ID. This is a legacy property action and should no longer be used. Only here for

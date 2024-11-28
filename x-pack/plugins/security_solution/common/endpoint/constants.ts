@@ -80,6 +80,11 @@ export const PROTECTION_UPDATES_NOTE_ROUTE = `${BASE_ENDPOINT_ROUTE}/protection_
 /** Suggestions routes */
 export const SUGGESTIONS_INTERNAL_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/suggestions/{suggestion_type}`;
 
+/** External EDR routes */
+
+export const BASE_CROWDSTRIKE_ROUTE = `${BASE_ENDPOINT_ROUTE}/crowdstrike`;
+export const BASE_SENTINEL_ONE_ROUTE = `${BASE_ENDPOINT_ROUTE}/sentinel_one`;
+
 /**
  * Action Response Routes
  */
@@ -104,6 +109,14 @@ export const ACTION_DETAILS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}`;
 export const ACTION_AGENT_FILE_INFO_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}`;
 export const ACTION_AGENT_FILE_DOWNLOAD_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/{action_id}/file/{file_id}/download`;
 export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
+
+/** Crowdstrike Actions Routes */
+export const BASE_CROWDSTRIKE_ACTION_ROUTE = `${BASE_CROWDSTRIKE_ROUTE}/action`;
+
+export const CROWDSTRIKE_RUN_SCRIPT_ROUTE = `${BASE_CROWDSTRIKE_ACTION_ROUTE}/run_script`;
+
+/** SentinelOne Actions Routes */
+export const BASE_SENTINEL_ONE_ACTION_ROUTE = `${BASE_SENTINEL_ONE_ROUTE}/action`;
 
 /** Endpoint Agent Routes */
 export const AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;

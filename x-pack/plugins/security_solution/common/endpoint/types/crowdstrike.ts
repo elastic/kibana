@@ -9,3 +9,21 @@ export interface CrowdstrikeActionRequestCommonMeta {
   /** The host name */
   hostName: string;
 }
+
+export interface CrowdStrikeActionsRunScriptParameters {
+  Raw?: string;
+  HostPath?: string;
+  CloudFile?: string;
+  CommandLine?: string;
+  Timeout?: number;
+}
+
+export interface CrowdStrikeActionRunScriptOutputContent {
+  output: string;
+}
+
+export type CrowdStrikeActionDataParameterTypes = undefined | CrowdStrikeActionsRunScriptParameters;
+
+export type CrowdStrikeActionResponseDataOutput =
+  | Record<string, never> // Empty object
+  | CrowdStrikeActionRunScriptOutputContent;

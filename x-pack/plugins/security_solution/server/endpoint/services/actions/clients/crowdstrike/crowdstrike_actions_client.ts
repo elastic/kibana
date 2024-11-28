@@ -13,7 +13,12 @@ import {
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CrowdstrikeBaseApiResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
-import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
+import type { RunScriptActionRequestBody } from '../../../../../../common/api/endpoint/actions/response_actions/crowdstrike/run_script';
+import type {
+  CrowdstrikeActionRequestCommonMeta,
+  CrowdStrikeActionRunScriptOutputContent,
+  CrowdStrikeActionsRunScriptParameters,
+} from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
@@ -23,6 +28,7 @@ import { stringify } from '../../../../utils/stringify';
 import { ResponseActionsClientError } from '../errors';
 import type {
   ActionDetails,
+  AgentTypeMapping,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   LogsEndpointAction,
@@ -294,6 +300,19 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  public async runscript<
+    TRequest = RunScriptActionRequestBody,
+    TOutput = CrowdStrikeActionRunScriptOutputContent,
+    TParameters = CrowdStrikeActionsRunScriptParameters,
+    TAgentType extends keyof AgentTypeMapping = 'crowdstrike'
+  >(
+    actionRequest: TRequest,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<TOutput, TParameters>> {
+    // TODO: just a placeholder for now
+    return Promise.resolve({ output: 'runscript' }) as any as ActionDetails<TOutput, TParameters>;
   }
 
   private async completeCrowdstrikeAction(

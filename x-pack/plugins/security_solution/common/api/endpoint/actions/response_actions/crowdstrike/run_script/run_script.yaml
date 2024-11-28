@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: CrowdStrike RunScript Action Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/crowdstrike/action/runscript:
+    post:
+      summary: Run a script
+      operationId: CrowdStrikeRunScriptAction
+      description: Run a shell command on an endpoint.
+      x-codegen-enabled: true
+      x-labels: [ ess, serverless ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunScriptRouteRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    ExecuteRouteRequestBody:
+      allOf:
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+          properties:
+            parameters:
+              oneOf:
+                - type: object
+                  properties:
+                    Raw:
+                      type: string
+                      minLength: 1
+                      description: The script to run directly as a string.
+                    required:
+                      - Raw
+                - type: object
+                  properties:
+                    HostPath:
+                      type: string
+                      minLength: 1
+                      description: The path to the script on the host to run.
+                    required:
+                      - HostPath
+                - type: object
+                  properties:
+                    CloudFile:
+                      type: string
+                      minLength: 1
+                      description: The path to the script in the cloud to run.
+                    required:
+                      - CloudFile
+                - type: object
+                  properties:
+                    CommandLine:
+                      type: string
+                      minLength: 1
+                      description: The command line to run.
+                    required:
+                      - CommandLine
+              properties:
+                Timeout:
+                  type: integer
+                  minimum: 1
+                  description: The max timeout value before the command is killed. Number represents milliseconds.

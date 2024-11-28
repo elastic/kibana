@@ -841,6 +841,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     throw new ResponseActionsNotSupportedError('scan');
   }
 
+  public async runscript<TRequest = never, TOutput = never, TParameters = never>(
+    actionRequest: TRequest,
+    options?: CommonResponseActionMethodOptions
+  ): Promise<ActionDetails<TOutput, TParameters>> {
+    throw new ResponseActionsNotSupportedError('runscript');
+  }
+
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
     this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
   }
