@@ -535,13 +535,13 @@ export const getEndpointConsoleCommands = ({
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
-      exampleUsage: `C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true" \\n
-Run a script saved to the CrowdStrike cloud with the specified command line arguments \\n
-C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true" -Timeout=180 \\n
-Run a script saved to the CrowdStrike cloud with the specified command line arguments and 180 seconds timeout \\n
-C:\\> runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine="" \\n
-Run a raw script whose entire contents are provided in the "-Raw=" flag \\n
-C:\\> runscript -HostPath="C:\\temp\\LocalScript.ps1" -CommandLine="-Verbose true" \\n
+      exampleUsage: `C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true"
+Run a script saved to the CrowdStrike cloud with the specified command line arguments
+C:\\> runscript -CloudFile="CloudScript1.ps1" -CommandLine="-Verbose true" -Timeout=180
+Run a script saved to the CrowdStrike cloud with the specified command line arguments and 180 seconds timeout
+C:\\> runscript -Raw=\`\`\`Get-ChildItem .\`\`\` -CommandLine=""
+Run a raw script whose entire contents are provided in the "-Raw=" flag
+C:\\> runscript -HostPath="C:\\temp\\LocalScript.ps1" -CommandLine="-Verbose true"
 Run a script from a path on the remote host with the specified command line arguments`,
       exampleInstruction: CROWDSTRIKE_CONSOLE_COMMANDS.execute.about,
       validate: capabilitiesAndPrivilegesValidator(agentType),
