@@ -46,7 +46,7 @@ export async function createInferenceEndpoint({
       }
     );
   } catch (e) {
-    logger.error(
+    logger.debug(
       `Failed to create inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}": ${e.message}`
     );
     throw e;
@@ -55,24 +55,17 @@ export async function createInferenceEndpoint({
 
 export async function deleteInferenceEndpoint({
   esClient,
-  logger,
 }: {
   esClient: {
     asCurrentUser: ElasticsearchClient;
   };
-  logger: Logger;
 }) {
-  try {
-    const response = await esClient.asCurrentUser.inference.delete({
-      inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
-      force: true,
-    });
+  const response = await esClient.asCurrentUser.inference.delete({
+    inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
+    force: true,
+  });
 
-    return response;
-  } catch (e) {
-    logger.error(`Failed to delete inference endpoint: ${e.message}`);
-    throw e;
-  }
+  return response;
 }
 
 export async function getInferenceEndpoint({
@@ -113,7 +106,6 @@ export async function getElserModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    logger.debug(`Failed to get inference endpoint: ${error.message}`);
     errorMessage = error.message;
   });
 

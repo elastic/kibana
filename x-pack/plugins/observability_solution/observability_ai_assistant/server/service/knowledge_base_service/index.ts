@@ -60,13 +60,13 @@ export class KnowledgeBaseService {
     },
     modelId: string | undefined
   ) {
-    await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger }).catch((e) => {}); // ensure existing inference endpoint is deleted
+    await deleteInferenceEndpoint({ esClient }).catch((e) => {}); // ensure existing inference endpoint is deleted
     return createInferenceEndpoint({ esClient, logger: this.dependencies.logger, modelId });
   }
 
   async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
     try {
-      await deleteInferenceEndpoint({ esClient, logger: this.dependencies.logger });
+      await deleteInferenceEndpoint({ esClient });
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         return;
