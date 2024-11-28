@@ -57,7 +57,6 @@ export const GridHeightSmoother = ({
           smoothHeightRef.current.style.height = `calc(100vh - ${smoothHeightRefY + gutterSize}px)`;
           smoothHeightRef.current.style.transition = 'none';
         } else {
-          smoothHeightRef.current.style.display = '';
           smoothHeightRef.current.style.transition = '';
         }
       }
