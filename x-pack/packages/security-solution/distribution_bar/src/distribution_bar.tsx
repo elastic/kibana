@@ -18,8 +18,8 @@ export interface DistributionBarProps {
     color: string;
     label?: React.ReactNode;
     isCurrentFilter?: boolean;
-    onClick?: () => void;
-    onClickReset?: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
+    filter?: () => void;
+    reset?: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
   }>;
   /** hide the label above the bar at first render */
   hideLastTooltip?: boolean;
@@ -163,12 +163,18 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
     const prettyNumber = numeral(stat.count).format('0,0a');
 
     return (
-      // eslint-disable-next-line jsx-a11y/click-events-have-key-events
       <div
         key={stat.key}
         css={partStyle}
         data-test-subj={`${dataTestSubj}__part`}
-        onClick={stat.onClick}
+        onClick={stat.filter}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            stat.filter?.();
+          }
+        }}
+        tabIndex={0}
+        role="button"
       >
         <div css={styles.tooltip}>
           <EuiFlexGroup
@@ -191,7 +197,7 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
                   <EuiFlexItem grow={false}>{stat.label ? stat.label : stat.key}</EuiFlexItem>
                   {stat.isCurrentFilter ? (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="cross" size="m" onClick={stat.onClickReset} />
+                      <EuiIcon type="cross" size="m" onClick={stat.reset} />
                     </EuiFlexItem>
                   ) : undefined}
                 </EuiFlexGroup>

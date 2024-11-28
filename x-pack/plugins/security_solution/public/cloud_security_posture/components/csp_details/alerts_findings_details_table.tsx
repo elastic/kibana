@@ -122,12 +122,12 @@ export const AlertsDetailsTable = memo(
       key: capitalize(key),
       count,
       color: getSeverityColor(key),
-      onClick: () => {
+      filter: () => {
         setCurrentFilter(key);
         setQuery(buildEntityAlertsQuery(field, to, from, value, 500, key));
       },
       isCurrentFilter: currentFilter === key,
-      onClickReset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         setCurrentFilter('');
         setQuery(buildEntityAlertsQuery(field, to, from, value, 500, ''));
         event?.stopPropagation();

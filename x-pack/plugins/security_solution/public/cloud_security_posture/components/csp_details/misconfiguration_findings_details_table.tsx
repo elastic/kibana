@@ -47,11 +47,11 @@ const getFindingsStats = (
       ),
       count: passedFindingsStats,
       color: euiThemeVars.euiColorSuccess,
-      onClick: () => {
+      filter: () => {
         filterFunction('passed');
       },
       isCurrentFilter: currentFilter === 'passed',
-      onClickReset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         filterFunction('');
         event?.stopPropagation();
       },
@@ -65,11 +65,11 @@ const getFindingsStats = (
       ),
       count: failedFindingsStats,
       color: euiThemeVars.euiColorVis9,
-      onClick: () => {
+      filter: () => {
         filterFunction('failed');
       },
       isCurrentFilter: currentFilter === 'failed',
-      onClickReset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
+      reset: (event: React.MouseEvent<SVGElement, MouseEvent>) => {
         filterFunction('');
         event?.stopPropagation();
       },
