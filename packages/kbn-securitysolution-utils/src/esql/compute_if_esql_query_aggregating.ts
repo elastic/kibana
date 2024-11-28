@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAst, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { type ESQLAstQueryExpression, parse } from '@kbn/esql-ast';
 
-export const isAggregatingQuery = (ast: ESQLAst): boolean => {
-  return ast.some((astItem) => astItem.type === 'command' && astItem.name === 'stats');
-};
+export const isAggregatingQuery = (astExpression: ESQLAstQueryExpression): boolean =>
+  astExpression.commands.some((command) => command.name === 'stats');
 
 /**
  * compute if esqlQuery is aggregating/grouping, i.e. using STATS...BY command
@@ -19,6 +18,6 @@ export const isAggregatingQuery = (ast: ESQLAst): boolean => {
  * @returns boolean
  */
 export const computeIsESQLQueryAggregating = (esqlQuery: string): boolean => {
-  const { ast } = getAstAndSyntaxErrors(esqlQuery);
-  return isAggregatingQuery(ast);
+  const { root } = parse(esqlQuery);
+  return isAggregatingQuery(root);
 };
