@@ -17,7 +17,7 @@ import {
   takeUntil,
 } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-server-internal';
-import type { KibanaRequest, OnPreRoutingHandler } from '@kbn/core-http-server';
+import type { KibanaRequest, OnPreAuthHandler } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { EluMetrics } from '@kbn/core-metrics-server';
 import type { InternalMetricsServiceSetup } from '@kbn/core-metrics-server-internal';
@@ -42,7 +42,7 @@ export class HttpRateLimiterService
   private ready$ = new Subject<boolean>();
   private stopped$ = new Subject<boolean>();
 
-  private handler: OnPreRoutingHandler = (request, response, toolkit) => {
+  private handler: OnPreAuthHandler = (request, response, toolkit) => {
     if (!this.shouldBeThrottled(request)) {
       return toolkit.next();
     }
@@ -77,7 +77,7 @@ export class HttpRateLimiterService
     }
 
     this.watch(metrics.getEluMetrics$(), http.rateLimiter.elu);
-    http.registerOnPreRouting(this.handler);
+    http.registerOnPreAuth(this.handler);
   }
 
   public start(): InternalRateLimiterStart {
