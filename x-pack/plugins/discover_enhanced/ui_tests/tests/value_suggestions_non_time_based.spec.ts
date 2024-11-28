@@ -9,32 +9,38 @@ import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import { ES_ARCHIVES, KBN_ARCHIVES } from '../fixtures/constants';
 
-test.describe('Discover app - value suggestions non-time based', () => {
-  test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-    await esArchiver.loadIfNeeded(ES_ARCHIVES.NO_TIME_FIELD);
-    await kbnClient.importExport.load(KBN_ARCHIVES.NO_TIME_FIELD);
-    await uiSettings.set({
-      defaultIndex: 'without-timefield',
-      'doc_table:legacy': false,
+test.describe(
+  'Discover app - value suggestions non-time based',
+  { tag: ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'] },
+  () => {
+    test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
+      await esArchiver.loadIfNeeded(ES_ARCHIVES.NO_TIME_FIELD);
+      await kbnClient.importExport.load(KBN_ARCHIVES.NO_TIME_FIELD);
+      await uiSettings.set({
+        defaultIndex: 'without-timefield',
+        'doc_table:legacy': false,
+      });
     });
-  });
 
-  test.afterAll(async ({ kbnClient, uiSettings }) => {
-    await uiSettings.unset('doc_table:legacy', 'defaultIndex');
-    await kbnClient.savedObjects.cleanStandardList();
-  });
+    test.afterAll(async ({ kbnClient, uiSettings }) => {
+      await uiSettings.unset('doc_table:legacy', 'defaultIndex');
+      await kbnClient.savedObjects.cleanStandardList();
+    });
 
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
-    await pageObjects.discover.goto();
-  });
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.discover.goto();
+    });
 
-  test('shows all auto-suggest options for a filter in discover context app', async ({ page }) => {
-    await page.testSubj.fill('queryInput', 'type.keyword : ');
-    await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(1);
-    const actualSuggestions = await page.testSubj
-      .locator('autoCompleteSuggestionText')
-      .allTextContents();
-    expect(actualSuggestions.join(',')).toContain('"apache"');
-  });
-});
+    test('shows all auto-suggest options for a filter in discover context app', async ({
+      page,
+    }) => {
+      await page.testSubj.fill('queryInput', 'type.keyword : ');
+      await expect(page.testSubj.locator('autoCompleteSuggestionText')).toHaveCount(1);
+      const actualSuggestions = await page.testSubj
+        .locator('autoCompleteSuggestionText')
+        .allTextContents();
+      expect(actualSuggestions.join(',')).toContain('"apache"');
+    });
+  }
+);
