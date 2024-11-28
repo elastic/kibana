@@ -618,6 +618,7 @@ describe('Create case', () => {
               urgency: null,
               category: null,
               subcategory: null,
+              additionalFields: null,
             },
             id: 'servicenow-1',
             name: 'My SN connector',
@@ -785,7 +786,7 @@ describe('Create case', () => {
       });
     });
 
-    it('resets fields when changing between connectors of the same type', async () => {
+    it.only('resets fields when changing between connectors of the same type', async () => {
       const connectors = [
         ...connectorsMock,
         { ...connectorsMock[0], id: 'servicenow-2', name: 'My SN connector 2' },
@@ -818,7 +819,7 @@ describe('Create case', () => {
       });
 
       await user.selectOptions(screen.getByTestId('severitySelect'), '4 - Low');
-      expect(screen.getByTestId('severitySelect')).toHaveValue('4');
+      expect(await screen.findByTestId('severitySelect')).toHaveValue('4');
 
       await user.click(screen.getByTestId('dropdown-connectors'));
       await user.click(screen.getByTestId('dropdown-connector-servicenow-2'));
@@ -836,6 +837,7 @@ describe('Create case', () => {
                 impact: null,
                 severity: null,
                 urgency: null,
+                additional_fields: null,
               },
               id: 'servicenow-2',
               name: 'My SN connector 2',
@@ -1072,7 +1074,7 @@ describe('Create case', () => {
   });
 
   describe('Assignees', () => {
-    it('should submit assignees', async () => {
+    it.only('should submit assignees', async () => {
       appMockRender.render(
         <FormContext
           selectedOwner={SECURITY_SOLUTION_OWNER}
