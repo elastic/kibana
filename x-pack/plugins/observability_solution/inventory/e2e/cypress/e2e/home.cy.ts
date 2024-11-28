@@ -217,16 +217,16 @@ describe('Home page', () => {
         cy.intercept('GET', '/internal/entities/managed/enablement', {
           fixture: 'eem_enabled.json',
         }).as('getEEMStatus');
+        cy.intercept('GET', '/internal/inventory/entities?**').as('getEntities');
         cy.visitKibana('/app/inventory');
         cy.wait('@getEEMStatus');
         cy.contains('container');
         cy.getByTestSubj('inventoryGroupTitle_entity.type_container').click();
+        cy.wait('@getEntities');
+        // cy.getByTestSubj('inventoryEntityActionsButton').click();
         cy.getByTestSubj('inventoryEntityActionsButton-foo').click();
-        cy.getByTestSubj('inventoryEntityActionOpenInDiscover').click();
-        cy.url().should(
-          'include',
-          "query:'container.id:%20%22foo%22%20AND%20entity.definition_id%20:%20builtin*"
-        );
+        cy.getByTestSubj('inventoryEntityActionExploreInDiscover').click();
+        cy.url().should('include', "query:'container.id:%20%22foo%22");
       });
     });
   });
