@@ -679,6 +679,9 @@ export interface DocLinks {
   readonly inferenceManagement: {
     readonly inferenceAPIDocumentation: string;
   };
+  readonly cases: {
+    readonly legacyApiDeprecations: string;
+  };
 }
 
 export type BuildFlavor = 'serverless' | 'traditional';
