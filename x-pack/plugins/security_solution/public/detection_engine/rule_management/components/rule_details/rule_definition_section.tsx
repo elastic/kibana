@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { isEmpty } from 'lodash/fp';
 import {
   EuiDescriptionList,
@@ -23,7 +23,6 @@ import type {
 import type { Filter } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type {
   AlertSuppressionMissingFieldsStrategy,
@@ -62,6 +61,8 @@ import {
   EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIMESTAMP_FIELD_LABEL,
 } from '../../../rule_creation/components/eql_query_edit/translations';
+import type { UseDataViewParams } from './three_way_diff/final_edit/fields/hooks/use_data_view';
+import { useDataView } from './three_way_diff/final_edit/fields/hooks/use_data_view';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -72,47 +73,6 @@ export const SavedQueryName = ({ savedQueryName }: SavedQueryNameProps) => (
     {savedQueryName}
   </EuiText>
 );
-
-interface UseFetchDataViewParams {
-  index?: string[];
-  dataViewId?: string;
-}
-
-interface UseFetchDataViewReturn {
-  dataView: DataView | null;
-  error: Error | null;
-  isLoading: boolean;
-}
-
-/*
-  Fetches a DataView by its ID if `dataViewId` is provided, or creates a new DataView out of index patterns if `index` is provided.
-*/
-function useFetchDataView({ dataViewId, index }: UseFetchDataViewParams): UseFetchDataViewReturn {
-  const { data } = useKibana().services;
-
-  const [dataView, setDataView] = useState<DataView | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (dataViewId) {
-      data.dataViews
-        .get(dataViewId)
-        .then((dv) => {
-          setDataView(dv);
-        })
-        .catch(setError);
-    } else if (index) {
-      data.dataViews
-        .create({ title: index.join(','), id: index.join(','), allowNoIndex: true })
-        .then((dv) => {
-          setDataView(dv);
-        })
-        .catch(setError);
-    }
-  }, [data, dataViewId, index]);
-
-  return { dataView, error, isLoading: !dataView && !error };
-}
 
 interface FiltersProps {
   filters: Filter[];
@@ -127,7 +87,17 @@ export const Filters = ({
   index,
   'data-test-subj': dataTestSubj,
 }: FiltersProps) => {
-  const { dataView } = useFetchDataView({ dataViewId, index });
+  let dataViewArg: UseDataViewParams;
+  if (index) {
+    dataViewArg = { indexPatterns: index };
+  } else {
+    if (dataViewId) {
+      dataViewArg = { dataViewId };
+    } else {
+      dataViewArg = { indexPatterns: [] };
+    }
+  }
+  const { dataView } = useDataView(dataViewArg);
 
   const flattenedFilters = mapAndFlattenFilters(filters);
   const styles = filtersStyles;
