@@ -18,7 +18,7 @@ import { HELP_GROUPS } from '../console_commands_definition';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 import type { CommandDefinition } from '../../../console';
 import type { HostMetadataInterface } from '../../../../../../common/endpoint/types';
-import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -72,7 +72,7 @@ describe('When displaying Endpoint Response Actions', () => {
         HELP_GROUPS.responseActions.label
       );
 
-      const expectedCommands: string[] = [...CONSOLE_RESPONSE_ACTION_COMMANDS];
+      const expectedCommands: string[] = [...TESTING_RESPONSE_ACTION_API_COMMANDS_NAMES];
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');
 

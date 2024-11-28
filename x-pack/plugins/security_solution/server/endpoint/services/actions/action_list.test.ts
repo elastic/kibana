@@ -316,14 +316,7 @@ describe('When using `getActionList()', () => {
               errors: undefined,
             },
           },
-          outputs: {
-            'agent-a': {
-              content: {
-                code: 'ra_scan_success_done',
-              },
-              type: 'json',
-            },
-          },
+          outputs: {},
         },
       ],
       total: 1,
