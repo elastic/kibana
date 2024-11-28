@@ -24,7 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const visTitle = 'My TSVB to Lens viz 2';
 
-  describe('Dashboard to TSVB to Lens', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/190737
+  describe.skip('Dashboard to TSVB to Lens', function describeIndexTests() {
     const fixture =
       'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/dashboard.json';
 

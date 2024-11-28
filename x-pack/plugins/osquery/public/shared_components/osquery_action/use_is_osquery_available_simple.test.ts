@@ -6,7 +6,7 @@
  */
 import { useKibana } from '../../common/lib/kibana';
 import { useIsOsqueryAvailableSimple } from './use_is_osquery_available_simple';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -41,15 +41,13 @@ describe('UseIsOsqueryAvailableSimple', () => {
     });
   });
   it('should expect response from API and return enabled flag', async () => {
-    const { result, waitForValueToChange } = renderHook(() =>
+    const { result } = renderHook(() =>
       useIsOsqueryAvailableSimple({
         agentId: '3242332',
       })
     );
 
     expect(result.current).toBe(false);
-    await waitForValueToChange(() => result.current);
-
-    expect(result.current).toBe(true);
+    await waitFor(() => expect(result.current).toBe(true));
   });
 });

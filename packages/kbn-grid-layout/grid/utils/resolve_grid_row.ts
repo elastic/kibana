@@ -57,7 +57,7 @@ const getKeysInOrder = (rowData: GridRowData, draggedId?: string): string[] => {
   });
 };
 
-export const compactGridRow = (originalLayout: GridRowData) => {
+const compactGridRow = (originalLayout: GridRowData) => {
   const nextRowData = { ...originalLayout, panels: { ...originalLayout.panels } };
   // compact all vertical space.
   const sortedKeysAfterMove = getKeysInOrder(nextRowData);
