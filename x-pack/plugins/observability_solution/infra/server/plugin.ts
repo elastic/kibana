@@ -190,17 +190,18 @@ export class InfraServerPlugin
     logsShared: LogsSharedPluginStart,
     logsDataAccess: LogsDataAccessPluginStart
   ) {
+    const LOG_RULES_DATA_VIEW = 'log_rules_data_view';
+    const METRIC_RULES_DATA_VIEW = 'infra_rules_data_view';
+
+    const savedObjectsClient = core.savedObjects.createInternalRepository();
+    const esClient = core.elasticsearch.client.asInternalUser;
+
     const dataViewsService = await dataViews.dataViewsServiceFactory(
-      core.savedObjects.createInternalRepository(),
-      core.elasticsearch.client.asInternalUser,
+      savedObjectsClient,
+      esClient,
       undefined,
       true
     );
-
-    const savedObjectsClient = core.savedObjects.createInternalRepository();
-
-    const LOG_RULES_DATA_VIEW = 'log_rules_data_view';
-    const METRIC_RULES_DATA_VIEW = 'infra_rules_data_view';
 
     // get log indices
     const logSourcesService =
