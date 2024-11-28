@@ -40,7 +40,11 @@ export function EntityTypesMultiSelect() {
     () =>
       value?.entityTypes.map((type): EuiSelectableOption => {
         const checked = selectedEntityTypes?.[type];
-        return { label: type, checked };
+        return {
+          label: type,
+          checked,
+          'data-test-subj': `entityTypes_multiSelect_filter_selection_${type}`,
+        };
       }) || [],
     [selectedEntityTypes, value?.entityTypes]
   );
@@ -71,6 +75,7 @@ export function EntityTypesMultiSelect() {
         id="entityTypeMultiSelector"
         button={
           <EuiFilterButton
+            data-test-subj="entityTypes_multiSelect_filter"
             iconType="arrowDown"
             badgeColor="success"
             onClick={() => setIsPopoverOpen((state) => !state)}
