@@ -44,6 +44,11 @@ function termToCssSelector(term: string) {
  *     - css equivalent: `[data-test-subj*="foo"]`
  *     - DOM match example: <div> data-test-subj="bar-foo" </div>
  *
+ *   - prefixing a value with `^` will allow matching a `data-test-subj` attribute beginning with the specified value.
+ *     - example: `^foo`
+ *     - css equivalent: `[data-test-subj^="foo"]`
+ *     - DOM match example: <div> data-test-subj="foo_bar" </div>
+ *
  *   - prefixing a value with `~` will allow matching a `data-test-subj` attribute represented as a whitespace-separated list of words, one of which is exactly value
  *     - example: `~foo`
  *     - css equivalent: `[data-test-subj~="foo"]`
