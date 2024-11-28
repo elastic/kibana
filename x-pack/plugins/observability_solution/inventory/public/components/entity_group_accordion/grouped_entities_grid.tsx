@@ -5,49 +5,33 @@
  * 2.0.
  */
 import { EuiDataGridSorting } from '@elastic/eui';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
 import React from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
-import {
-  entityPaginationRt,
-  type EntityColumnIds,
-  type EntityPagination,
-} from '../../../common/entities';
+import { type EntityColumnIds } from '../../../common/entities';
+import { entityPaginationRt } from '../../../common/rt_types';
 import { useInventoryAbortableAsync } from '../../hooks/use_inventory_abortable_async';
+import { useInventoryDecodedQueryParams } from '../../hooks/use_inventory_decoded_query_params';
 import { useInventoryParams } from '../../hooks/use_inventory_params';
 import { useInventoryRouter } from '../../hooks/use_inventory_router';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search_context';
 import { EntitiesGrid } from '../entities_grid';
-import { InventorySummary } from '../grouped_inventory/inventory_summary';
 
-const paginationDecoder = decodeOrThrow(entityPaginationRt);
+interface Props {
+  groupValue: string;
+}
 
-export function UnifiedInventory() {
+export function GroupedEntitiesGrid({ groupValue }: Props) {
+  const { query } = useInventoryParams('/');
+  const { sortField, sortDirection, kuery } = query;
+  const { pagination } = useInventoryDecodedQueryParams();
+  const inventoryRoute = useInventoryRouter();
+  const pageIndex = pagination?.[groupValue] ?? 0;
+
+  const { refreshSubject$ } = useUnifiedSearchContext();
   const {
     services: { inventoryAPIClient },
   } = useKibana();
-  const { refreshSubject$, isControlPanelsInitiated, stringifiedEsQuery } =
-    useUnifiedSearchContext();
-  const { query } = useInventoryParams('/');
-  const { sortDirection, sortField, pagination: paginationQuery } = query;
-
-  let pagination: EntityPagination | undefined = {};
-  const inventoryRoute = useInventoryRouter();
-  try {
-    pagination = paginationDecoder(paginationQuery);
-  } catch (error) {
-    inventoryRoute.push('/', {
-      path: {},
-      query: {
-        ...query,
-        pagination: undefined,
-      },
-    });
-    window.location.reload();
-  }
-
-  const pageIndex = pagination?.unified ?? 0;
 
   const {
     value = { entities: [] },
@@ -55,24 +39,24 @@ export function UnifiedInventory() {
     refresh,
   } = useInventoryAbortableAsync(
     ({ signal }) => {
-      if (isControlPanelsInitiated) {
-        return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
-          params: {
-            query: {
-              sortDirection,
-              sortField,
-              esQuery: stringifiedEsQuery,
-            },
+      return inventoryAPIClient.fetch('GET /internal/inventory/entities', {
+        params: {
+          query: {
+            sortDirection,
+            sortField,
+            kuery,
+            entityTypes: groupValue?.length ? JSON.stringify([groupValue]) : undefined,
           },
-          signal,
-        });
-      }
+        },
+        signal,
+      });
     },
-    [inventoryAPIClient, sortDirection, sortField, isControlPanelsInitiated, stringifiedEsQuery]
+    [groupValue, inventoryAPIClient, sortDirection, sortField, kuery]
   );
 
   useEffectOnce(() => {
     const refreshSubscription = refreshSubject$.subscribe(refresh);
+
     return () => refreshSubscription.unsubscribe();
   });
 
@@ -83,7 +67,7 @@ export function UnifiedInventory() {
         ...query,
         pagination: entityPaginationRt.encode({
           ...pagination,
-          unified: nextPage,
+          [groupValue]: nextPage,
         }),
       },
     });
@@ -101,17 +85,14 @@ export function UnifiedInventory() {
   }
 
   return (
-    <>
-      <InventorySummary />
-      <EntitiesGrid
-        entities={value.entities}
-        loading={loading}
-        sortDirection={sortDirection}
-        sortField={sortField}
-        onChangePage={handlePageChange}
-        onChangeSort={handleSortChange}
-        pageIndex={pageIndex}
-      />
-    </>
+    <EntitiesGrid
+      entities={value.entities}
+      loading={loading}
+      sortDirection={sortDirection}
+      sortField={sortField}
+      onChangePage={handlePageChange}
+      onChangeSort={handleSortChange}
+      pageIndex={pageIndex}
+    />
   );
 }

@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
+import { EntityGroupAccordion } from '.';
 
-import { InventoryGroupAccordion } from './inventory_group_accordion';
-
-describe('Grouped Inventory Accordion', () => {
+describe('EntityGroupAccordion', () => {
   it('renders with correct values', () => {
     const props = {
       groupBy: 'entity.type',
@@ -26,14 +25,14 @@ describe('Grouped Inventory Accordion', () => {
       ],
     };
     render(
-      <InventoryGroupAccordion
+      <EntityGroupAccordion
         groupValue={props.groups[0]['entity.type']}
         groupCount={props.groups[0].count}
         groupBy={props.groupBy}
       />
     );
     expect(screen.getByText(props.groups[0]['entity.type'])).toBeInTheDocument();
-    const container = screen.getByTestId('inventoryPanelBadgeEntitiesCount_entity.type_host');
+    const container = screen.getByTestId('entityCountBadge_entity.type_host');
     expect(within(container).getByText('Entities:')).toBeInTheDocument();
     expect(within(container).getByText(props.groups[0].count)).toBeInTheDocument();
   });

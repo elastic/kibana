@@ -8,16 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { GroupBySelector } from '.';
+import { InventoryComponentWrapperMock } from '../entity_group_accordion/mock/inventory_component_wrapper_mock';
 
-import { GroupSelector } from './group_selector';
-
-import { InventoryComponentWrapperMock } from './mock/inventory_component_wrapper_mock';
-
-describe('GroupSelector', () => {
+describe('GroupBySelector', () => {
   beforeEach(() => {
     render(
       <InventoryComponentWrapperMock>
-        <GroupSelector />
+        <GroupBySelector />
       </InventoryComponentWrapperMock>
     );
   });

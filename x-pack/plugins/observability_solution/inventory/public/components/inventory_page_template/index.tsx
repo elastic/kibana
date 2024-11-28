@@ -106,27 +106,27 @@ export function InventoryPageTemplate({ children }: { children: React.ReactNode 
           />,
         ],
       }}
-      noDataConfig={getEntityManagerEnablement({
-        enabled: isEntityManagerEnabled,
-        loading: isEnablementLoading,
-        onSuccess: handleSuccess,
-      })}
+      // noDataConfig={getEntityManagerEnablement({
+      //   enabled: isEntityManagerEnabled,
+      //   loading: isEnablementLoading,
+      //   onSuccess: handleSuccess,
+      // })}
     >
-      {value.hasData ? (
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <SearchBar />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {children}
-            {showWelcomedModal ? (
-              <Welcome onClose={toggleWelcomedModal} onConfirm={toggleWelcomedModal} />
-            ) : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : (
+      {/* {value.hasData ? ( */}
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <SearchBar />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {children}
+          {showWelcomedModal ? (
+            <Welcome onClose={toggleWelcomedModal} onConfirm={toggleWelcomedModal} />
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {/* ) : (
         <EmptyState />
-      )}
+      )} */}
     </ObservabilityPageTemplate>
   );
 }
