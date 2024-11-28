@@ -81,8 +81,8 @@ import {
   withLangtraceChatCompleteSpan,
 } from './operators/with_langtrace_chat_complete_span';
 import {
-  KB_SEMANTIC_TEXT_MIGRATION_TASK_ID,
   runSemanticTextKnowledgeBaseMigration,
+  scheduleSemanticTextMigration,
 } from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
@@ -738,12 +738,12 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await this.dependencies.knowledgeBaseService.setup(esClient, modelId);
 
-    // run the semantic text migration task
     this.dependencies.core
       .getStartServices()
-      .then(([_, pluginsStart]) =>
-        pluginsStart.taskManager.runSoon(KB_SEMANTIC_TEXT_MIGRATION_TASK_ID)
-      )
+      .then(([_, pluginsStart]) => {
+        this.dependencies.logger.debug('Schedule semantic text migration task');
+        return scheduleSemanticTextMigration(pluginsStart);
+      })
       .catch((error) => {
         this.dependencies.logger.error(`Failed to run semantic text migration task: ${error}`);
       });

@@ -16,8 +16,7 @@ import { getElserModelStatus } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 
-export const KB_SEMANTIC_TEXT_MIGRATION_TASK_ID =
-  'obs-ai-assistant:knowledge-base-migration-task-id';
+const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';
 const TASK_TYPE = 'obs-ai-assistant:knowledge-base-migration';
 
 // This task will re-index all knowledge base entries without `semantic_text` field
@@ -34,11 +33,10 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   config: ObservabilityAIAssistantConfig;
 }) {
+  const [coreStart, pluginsStart] = await core.getStartServices();
+
   try {
     logger.debug(`Register task "${TASK_TYPE}"`);
-
-    const [coreStart, pluginsStart] = await core.getStartServices();
-
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
         title: 'Migrate AI Assistant Knowledge Base',
@@ -57,18 +55,28 @@ export async function registerMigrateKnowledgeBaseEntriesTask({
         },
       },
     });
-
-    logger.debug(`Scheduled task: "${TASK_TYPE}"`);
-    await pluginsStart.taskManager.ensureScheduled({
-      id: KB_SEMANTIC_TEXT_MIGRATION_TASK_ID,
-      taskType: TASK_TYPE,
-      scope: ['aiAssistant'],
-      params: {},
-      state: {},
-    });
   } catch (error) {
     logger.error(`Failed to register task "${TASK_TYPE}". Error: ${error}`);
   }
+
+  try {
+    logger.debug(`Scheduled task: "${TASK_TYPE}"`);
+    await scheduleSemanticTextMigration(pluginsStart);
+  } catch (error) {
+    logger.error(`Failed to schedule task "${TASK_TYPE}". Error: ${error}`);
+  }
+}
+
+export function scheduleSemanticTextMigration(
+  pluginsStart: ObservabilityAIAssistantPluginStartDependencies
+) {
+  return pluginsStart.taskManager.ensureScheduled({
+    id: TASK_ID,
+    taskType: TASK_TYPE,
+    scope: ['aiAssistant'],
+    params: {},
+    state: {},
+  });
 }
 
 export async function runSemanticTextKnowledgeBaseMigration({
@@ -137,7 +145,6 @@ export async function runSemanticTextKnowledgeBaseMigration({
     await runSemanticTextKnowledgeBaseMigration({ esClient, logger, config });
   } catch (e) {
     logger.error(`Knowledge base migration failed: ${e.message}`);
-    logger.error(e);
   }
 }
 
@@ -158,6 +165,6 @@ async function waitForModel({
         throw new Error('Elser model is not yet ready');
       }
     },
-    { retries: 40, factor: 2, maxTimeout: 30_000 }
+    { retries: 30, factor: 2, maxTimeout: 30_000 }
   );
 }
