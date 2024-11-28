@@ -18,14 +18,10 @@ export const THRESHOLD_FIELD_CONFIG = {
   helpText: i18n.THRESHOLD_FIELD_HELP_TEXT,
   validations: [
     {
-      validator: (
-        ...args: Parameters<ValidationFunc>
-      ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-        return fieldValidators.maxLengthField({
-          length: 3,
-          message: i18n.THRESHOLD_FIELD_COUNT_VALIDATION_ERROR,
-        })(...args);
-      },
+      validator: fieldValidators.maxLengthField({
+        length: 3,
+        message: i18n.THRESHOLD_FIELD_COUNT_VALIDATION_ERROR,
+      }),
     },
   ],
 };
@@ -35,15 +31,11 @@ export const THRESHOLD_VALUE_CONFIG = {
   label: i18n.THRESHOLD_VALUE_LABEL,
   validations: [
     {
-      validator: (
-        ...args: Parameters<ValidationFunc>
-      ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-        return fieldValidators.numberGreaterThanField({
-          than: 1,
-          message: i18n.THRESHOLD_VALUE_VALIDATION_ERROR,
-          allowEquality: true,
-        })(...args);
-      },
+      validator: fieldValidators.numberGreaterThanField({
+        than: 1,
+        message: i18n.THRESHOLD_VALUE_VALIDATION_ERROR,
+        allowEquality: true,
+      }),
     },
   ],
 };
@@ -61,10 +53,7 @@ export function getCardinalityFieldConfig(path: string) {
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData }] = args;
 
-          if (
-            isEmpty(formData[`${path}.cardinality.field`]) &&
-            !isEmpty(formData[`${path}.cardinality.value`])
-          ) {
+          if (!isEmpty(formData[`${path}.cardinality.value`])) {
             return fieldValidators.emptyField(i18n.CARDINALITY_FIELD_MISSING_VALIDATION_ERROR)(
               ...args
             );
