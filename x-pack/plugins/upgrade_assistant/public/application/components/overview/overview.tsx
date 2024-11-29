@@ -9,13 +9,13 @@ import React, { useEffect, useState } from 'react';
 
 import {
   EuiSteps,
-  EuiText,
   EuiPageHeader,
   EuiButtonEmpty,
   EuiSpacer,
   EuiLink,
   EuiPageBody,
   EuiPageContentBody,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -96,6 +96,11 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
                 defaultMessage="What's new in 8.x?"
               />
             </EuiLink>
+            &nbsp;
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.upgradeToLatestMinorBeforeMajorMessage"
+              defaultMessage="Before upgrading to a new major version, you must first upgrade to the latest minor of this major version."
+            />
           </EuiText>
         </EuiPageHeader>
 
