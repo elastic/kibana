@@ -689,7 +689,15 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; dataViews: ",
+          " | undefined>; rendered$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; dataViews: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18305,7 +18313,15 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; dataViews: ",
+          " | undefined>; rendered$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; dataViews: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20851,7 +20867,15 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined>; dataViews: ",
+          " | undefined>; rendered$: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<boolean>; dataViews: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
