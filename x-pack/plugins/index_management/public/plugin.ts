@@ -102,8 +102,9 @@ export class IndexMgmtUIPlugin
     const { fleet, usageCollection, management, cloud } = plugins;
 
     this.capabilities$.subscribe((capabilities) => {
-      const { monitor, manageEnrich, monitorEnrich } = capabilities.index_management;
-      if (monitor || manageEnrich || monitorEnrich) {
+      const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+        capabilities.index_management;
+      if (monitor || manageEnrich || monitorEnrich || manageIndexTemplates) {
         management.sections.section.data.registerApp({
           id: PLUGIN.id,
           title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
