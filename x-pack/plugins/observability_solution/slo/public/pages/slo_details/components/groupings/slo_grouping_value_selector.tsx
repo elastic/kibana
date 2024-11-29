@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiComboBoxOptionOption, EuiCopy } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { get } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useFetchSloInstances } from '../../hooks/use_fetch_slo_instances';
 
@@ -23,6 +26,9 @@ interface Field {
 }
 
 export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
+  const { search: searchParams, pathname } = useLocation();
+  const history = useHistory();
+
   const [currSelected, setSelected] = useState<string | undefined>(value);
   const [options, setOptions] = useState<Field[]>([]);
   const [search, setSearch] = useState<string | undefined>(undefined);
@@ -47,7 +53,21 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
   }, [groupingKey, instances]);
 
   const onChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    setSelected(selected[0].value!);
+    const newValue = selected[0].value;
+    if (!newValue) return;
+    setSelected(newValue);
+
+    const groups = [slo.groupBy].flat();
+    const newInstanceValues = groups.map((group) => {
+      return group === groupingKey ? newValue : get(slo.groupings, group);
+    });
+
+    const urlSearchParams = new URLSearchParams(searchParams);
+    urlSearchParams.set('instanceId', newInstanceValues.join(','));
+    history.replace({
+      pathname,
+      search: urlSearchParams.toString(),
+    });
   };
 
   return (
@@ -56,11 +76,41 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
       isClearable={false}
       compressed
       prepend={groupingKey}
+      append={
+        currSelected ? (
+          <EuiCopy textToCopy={currSelected}>
+            {(copy) => (
+              <EuiButtonIcon
+                data-test-subj="sloSLOGroupingValueSelectorButton"
+                color="text"
+                iconType="copyClipboard"
+                onClick={copy}
+                aria-label={i18n.translate('xpack.slo.sLOGroupingValueSelector.copyButton.label', {
+                  defaultMessage: 'Copy value to clipboard',
+                })}
+              />
+            )}
+          </EuiCopy>
+        ) : (
+          <EuiButtonIcon
+            data-test-subj="sloSLOGroupingValueSelectorButton"
+            color="text"
+            disabled={true}
+            iconType="copyClipboard"
+            aria-label={i18n.translate(
+              'xpack.slo.sLOGroupingValueSelector.copyButton.noValueLabel',
+              { defaultMessage: 'Select a value before' }
+            )}
+          />
+        )
+      }
       singleSelection={{ asPlainText: true }}
       options={options}
       isLoading={isLoading}
       isDisabled={isError}
-      placeholder="Select an instance value"
+      placeholder={i18n.translate('xpack.slo.sLOGroupingValueSelector.placeholder', {
+        defaultMessage: 'Select a group value',
+      })}
       selectedOptions={currSelected ? [toField(currSelected)] : []}
       onChange={onChange}
       truncationProps={{

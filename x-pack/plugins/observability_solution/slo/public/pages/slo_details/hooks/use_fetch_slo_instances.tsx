@@ -46,7 +46,7 @@ export function useFetchSloInstances({
         throw new Error(`Something went wrong. Error: ${error}`);
       }
     },
-    staleTime: 120 * 1000,
+    staleTime: 60 * 1000,
     retry: false,
     refetchOnWindowFocus: false,
   });

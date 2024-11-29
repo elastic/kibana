@@ -6,29 +6,26 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { get } from 'lodash';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { SLOGroupingValueSelector } from './slo_grouping_value_selector';
 
 export function SLOGroupings({ slo }: { slo: SLOWithSummaryResponse }) {
-  const groups = [slo.groupBy].flat();
-  const hasGroups = groups.length > 0 && !groups.includes(ALL_VALUE);
+  const groupings = Object.entries(slo.groupings ?? {});
 
-  if (!hasGroups) {
+  if (!groupings.length) {
     return null;
   }
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s">
-      {groups.map((groupingKey) => {
-        const groupingValue = get(slo.groupings, groupingKey);
+      {groupings.map(([groupingKey, groupingValue]) => {
         return (
           <SLOGroupingValueSelector
             key={groupingKey}
             slo={slo}
             groupingKey={groupingKey}
-            value={groupingValue ? String(groupingValue) : undefined}
+            value={String(groupingValue)}
           />
         );
       })}
