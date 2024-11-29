@@ -38,17 +38,19 @@ export async function getInfraMetricsClient({
   const excludedDataTiers = await uiSettings.client.get<DataTier[]>(searchExcludedDataTiers);
   const metricsIndices = await infraContext.getMetricsIndices();
 
+  const excludedQuery = excludedDataTiers.length
+    ? excludeTiersQuery(excludedDataTiers)[0].bool!.must_not!
+    : [];
+
   return {
     search<TDocument, TParams extends RequiredParams>(
       searchParams: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
-      const searchFilter = searchParams.body.query?.bool?.filter ?? [];
-
-      const excludedQuery = excludedDataTiers.length ? excludeTiersQuery(excludedDataTiers) : [];
+      const searchFilter = searchParams.body.query?.bool?.must_not ?? [];
 
       // This flattens arrays by one level, and non-array values can be added as well, so it all
       // results in a nice [QueryDsl, QueryDsl, ...] array.
-      const filter = ([] as QueryDslQueryContainer[]).concat(searchFilter, excludedQuery);
+      const mustNot = ([] as QueryDslQueryContainer[]).concat(searchFilter, excludedQuery);
 
       return framework.callWithRequest(
         context,
@@ -63,7 +65,7 @@ export async function getInfraMetricsClient({
               ...searchParams.body.query,
               bool: {
                 ...searchParams.body.query?.bool,
-                filter,
+                must_not: mustNot,
               },
             },
           },
