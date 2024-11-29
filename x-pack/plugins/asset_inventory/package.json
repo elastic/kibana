@@ -1,12 +1,12 @@
 {
-  "name": "assetInventory",
-  "version": "0.0.0",
+  "author": "Elastic",
+  "name": "@kbn/asset-inventory-plugin",
+  "version": "1.0.0",
   "private": true,
+  "license": "Elastic License 2.0",
   "scripts": {
-    "bootstrap": "yarn kbn bootstrap && yarn install",
     "build": "yarn plugin-helpers build",
-    "dev": "yarn plugin-helpers dev",
-    "plugin-helpers": "node ../../scripts/plugin_helpers",
-    "kbn": "node ../../scripts/kbn"
+    "kbn": "node ../../../scripts/kbn",
+    "plugin-helpers": "node ../../../scripts/plugin_helpers"
   }
 }
