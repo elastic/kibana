@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { isEmpty } from 'lodash/fp';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
@@ -15,11 +16,13 @@ import { REPLACE_QUERY_RESOURCE_PROMPT, getResourcesContext } from './prompts';
 interface GetProcessQueryNodeParams {
   model: ChatModel;
   resourceRetriever: RuleResourceRetriever;
+  logger: Logger;
 }
 
 export const getProcessQueryNode = ({
   model,
   resourceRetriever,
+  logger,
 }: GetProcessQueryNodeParams): GraphNode => {
   return async (state) => {
     let query = state.original_rule.query;
