@@ -8,7 +8,7 @@
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { dateParser } from '../../common/utils';
+import { momentDateParser } from '../../common/utils';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../common';
 import type {
   UsageMetricsRequestBody,
@@ -27,9 +27,15 @@ export const useGetDataUsageMetrics = (
 ): UseQueryResult<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>> => {
   const { http } = useKibanaContextForPlugin().services;
 
+  // parse values anyway to ensure they are valid
+  // and to avoid sending invalid values to the server
+  const from = momentDateParser(body.from)?.toISOString();
+  const to = momentDateParser(body.to)?.toISOString();
+
   return useQuery<UsageMetricsResponseSchemaBody, IHttpFetchError<ErrorType>>({
     queryKey: ['get-data-usage-metrics', body],
     ...options,
+    enabled: !!(from && to) && options.enabled,
     keepPreviousData: true,
     queryFn: async ({ signal }) => {
       return http
@@ -37,8 +43,8 @@ export const useGetDataUsageMetrics = (
           signal,
           version: '1',
           body: JSON.stringify({
-            from: dateParser(body.from),
-            to: dateParser(body.to),
+            from,
+            to,
             metricTypes: body.metricTypes,
             dataStreams: body.dataStreams,
           }),

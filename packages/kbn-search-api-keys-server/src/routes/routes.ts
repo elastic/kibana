@@ -71,14 +71,6 @@ export function registerSearchApiKeysRoutes(router: IRouter, logger: Logger) {
       try {
         const core = await context.core;
         const client = core.elasticsearch.client.asCurrentUser;
-        const clusterHasApiKeys = await fetchClusterHasApiKeys(client, logger);
-
-        if (clusterHasApiKeys) {
-          return response.customError({
-            body: { message: 'Project already has API keys' },
-            statusCode: 400,
-          });
-        }
 
         const canCreateApiKeys = await fetchUserStartPrivileges(client, logger);
 
@@ -86,6 +78,15 @@ export function registerSearchApiKeysRoutes(router: IRouter, logger: Logger) {
           return response.customError({
             body: { message: 'User does not have required privileges' },
             statusCode: 403,
+          });
+        }
+
+        const clusterHasApiKeys = await fetchClusterHasApiKeys(client, logger);
+
+        if (clusterHasApiKeys) {
+          return response.customError({
+            body: { message: 'Project already has API keys' },
+            statusCode: 400,
           });
         }
 

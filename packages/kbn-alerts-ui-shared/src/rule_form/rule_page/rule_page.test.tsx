@@ -152,7 +152,7 @@ describe('rulePage', () => {
     render(<RulePage onCancel={onCancel} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('rulePageFooterCancelButton'));
-    expect(screen.getByTestId('ruleFormCancelModal')).toBeInTheDocument();
+    expect(screen.getByTestId('confirmRuleCloseModal')).toBeInTheDocument();
   });
 
   test('should not display discard changes modal id no changes are made in the form', () => {
@@ -181,6 +181,6 @@ describe('rulePage', () => {
     render(<RulePage onCancel={onCancel} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('rulePageFooterCancelButton'));
-    expect(screen.queryByTestId('ruleFormCancelModal')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('confirmRuleCloseModal')).not.toBeInTheDocument();
   });
 });
