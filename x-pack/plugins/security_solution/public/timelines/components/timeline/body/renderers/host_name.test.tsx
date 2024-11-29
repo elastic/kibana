@@ -12,29 +12,13 @@ import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenRightPanel = jest.fn();
 
 jest.mock('@kbn/expandable-flyout');
-
-jest.mock('../../../../../common/lib/kibana/kibana_react', () => {
-  return {
-    useKibana: () => ({
-      services: {
-        application: {
-          getUrlForApp: jest.fn(),
-          navigateToApp: jest.fn(),
-        },
-        telemetry: mockedTelemetry,
-      },
-    }),
-  };
-});
 
 jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
