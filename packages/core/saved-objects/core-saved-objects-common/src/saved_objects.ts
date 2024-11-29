@@ -43,6 +43,11 @@ export interface SavedObjectsMigrationVersion {
  */
 export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'multiple-isolated' | 'agnostic';
 
+/**
+ * Information about an error occurred when calling one of the Saved Object APIs.
+ * It contains details and status code, along with some relevant metadata.
+ * @public
+ */
 export interface SavedObjectError {
   error: string;
   message: string;

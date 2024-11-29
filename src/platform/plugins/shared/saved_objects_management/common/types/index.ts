@@ -8,9 +8,11 @@
  */
 
 export type {
+  RelationshipsResponseHTTP,
   SavedObjectInvalidRelation,
   SavedObjectManagementTypeInfo,
   SavedObjectMetadata,
+  SavedObjectReference,
   SavedObjectRelation,
   SavedObjectRelationKind,
   SavedObjectWithMetadata,

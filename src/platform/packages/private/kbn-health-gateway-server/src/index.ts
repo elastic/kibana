@@ -17,6 +17,10 @@ import { getConfigService } from './config';
 import { config as kibanaConfig, KibanaService } from './kibana';
 import { config as serverConfig, Server, ServerStart } from './server';
 
+/**
+ * This is the function that allows to spin-up the Heath Gateway Server
+ * @public
+ */
 export async function bootstrap() {
   const loggingSystem = new LoggingSystem();
   const logger = loggingSystem.asLoggerFactory();
