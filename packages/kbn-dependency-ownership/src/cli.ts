@@ -8,7 +8,7 @@
  */
 
 import nodePath from 'path';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import yargs from 'yargs';
 import chalk from 'chalk';
 import fs from 'fs';
