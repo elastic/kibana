@@ -8,6 +8,7 @@
 import { BehaviorSubject, type Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
 import type { StartPluginsDependencies } from '../../../types';
 import { ExperimentalFeaturesService } from '../../../common/experimental_features_service';
 import { licenseService } from '../../../common/hooks/use_license';
@@ -65,14 +66,14 @@ export class SiemRulesMigrationsService {
   private async startStatsPolling(): Promise<void> {
     let pendingMigrationIds: string[] = [];
     do {
-      const results = await this.fetchRuleMigrationsStats();
+      const results = await this.fetchRuleMigrationTasksStats();
       this.latestStats$.next(results);
 
       if (pendingMigrationIds.length > 0) {
         // send notifications for finished migrations
         pendingMigrationIds.forEach((pendingMigrationId) => {
           const migration = results.find((item) => item.id === pendingMigrationId);
-          if (migration?.status === 'finished') {
+          if (migration?.status === SiemMigrationTaskStatus.FINISHED) {
             this.core.notifications.toasts.addSuccess(getSuccessToast(migration, this.core));
           }
         });
@@ -81,14 +82,14 @@ export class SiemRulesMigrationsService {
       // reprocess pending migrations
       pendingMigrationIds = [];
       for (const result of results) {
-        if (result.status === 'running') {
+        if (result.status === SiemMigrationTaskStatus.RUNNING) {
           pendingMigrationIds.push(result.id);
         }
 
-        if (result.status === 'stopped') {
+        if (result.status === SiemMigrationTaskStatus.STOPPED) {
           const connectorId = this.connectorIdStorage.get();
           if (connectorId) {
-            // automatically resume stopped migrations
+            // automatically resume stopped migrations when connector is available
             await startRuleMigration({
               migrationId: result.id,
               body: { connector_id: connectorId },
@@ -102,7 +103,7 @@ export class SiemRulesMigrationsService {
     } while (pendingMigrationIds.length > 0);
   }
 
-  private async fetchRuleMigrationsStats(): Promise<RuleMigrationStats[]> {
+  private async fetchRuleMigrationTasksStats(): Promise<RuleMigrationStats[]> {
     const stats = await getRuleMigrationsStatsAll();
     return stats.map((stat, index) => ({ ...stat, number: index + 1 })); // the array order (by creation) is guaranteed by the API
   }

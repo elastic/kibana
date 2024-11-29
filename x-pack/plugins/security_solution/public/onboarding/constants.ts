@@ -23,14 +23,3 @@ export enum OnboardingCardId {
   siemMigrationsAiConnectors = 'ai_connectors',
   siemMigrationsStart = 'start',
 }
-
-export const LocalStorageKey = {
-  avcBannerDismissed: 'ONBOARDING_HUB.AVC_BANNER_DISMISSED',
-  videoVisited: 'ONBOARDING_HUB.VIDEO_VISITED',
-  completeCards: 'ONBOARDING_HUB.COMPLETE_CARDS',
-  expandedCard: 'ONBOARDING_HUB.EXPANDED_CARD',
-  urlDetails: 'ONBOARDING_HUB.URL_DETAILS',
-  selectedIntegrationTabId: 'ONBOARDING_HUB.SELECTED_INTEGRATION_TAB_ID',
-  integrationSearchTerm: 'ONBOARDING_HUB.INTEGRATION_SEARCH_TERM',
-  siemMigrationsConnectorId: 'ONBOARDING_HUB.SIEM_MIGRATIONS_CONNECTOR_ID',
-} as const;
