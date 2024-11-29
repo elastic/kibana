@@ -187,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           'securitySolutionCasesV2',
           'fleet',
           'fleetv2',
+          'entityManager',
         ];
 
         const features = body.filter(
