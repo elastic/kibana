@@ -22,6 +22,7 @@ export interface GetViewInAppUrlArgs {
   logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
   metrics?: CustomThresholdExpressionMetric[];
   startedAt?: string;
+  spaceId?: string;
 }
 
 export const getViewInAppUrl = ({
@@ -32,6 +33,7 @@ export const getViewInAppUrl = ({
   metrics = [],
   searchConfiguration,
   startedAt = new Date().toISOString(),
+  spaceId,
 }: GetViewInAppUrlArgs) => {
   if (!logsExplorerLocator) return '';
 
@@ -56,10 +58,13 @@ export const getViewInAppUrl = ({
     query.query = searchConfigurationQuery;
   }
 
-  return logsExplorerLocator?.getRedirectUrl({
-    dataset,
-    timeRange,
-    query,
-    filters: [...searchConfigurationFilters, ...groupFilters],
-  });
+  return logsExplorerLocator?.getRedirectUrl(
+    {
+      dataset,
+      timeRange,
+      query,
+      filters: [...searchConfigurationFilters, ...groupFilters],
+    },
+    { spaceId }
+  );
 };
