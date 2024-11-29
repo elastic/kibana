@@ -67,11 +67,33 @@ export async function deleteUnmanagedStreamObjects({
     name: id,
     logger,
   });
-  await scopedClusterClient.asInternalUser.delete({
-    id,
-    index: STREAMS_INDEX,
-    refresh: 'wait_for',
-  });
+  try {
+    await deleteIngestPipeline({
+      esClient: scopedClusterClient.asCurrentUser,
+      id: getClassicPipelineName(id),
+      logger,
+    });
+  } catch (e) {
+    // if the pipeline doesn't exist, we don't need to delete it
+    if (!(e.meta?.statusCode === 404)) {
+      throw e;
+    }
+  }
+  try {
+    await scopedClusterClient.asInternalUser.get({
+      id,
+      index: STREAMS_INDEX,
+    });
+    await scopedClusterClient.asInternalUser.delete({
+      id,
+      index: STREAMS_INDEX,
+      refresh: 'wait_for',
+    });
+  } catch (e) {
+    if (e.meta?.statusCode !== 404) {
+      throw e;
+    }
+  }
 }
 
 export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
@@ -190,10 +212,7 @@ export async function readStream({
       }
     }
     return {
-      definition: {
-        ...definition,
-        managed: true,
-      },
+      definition,
     };
   } catch (e) {
     if (e.meta?.statusCode === 404) {

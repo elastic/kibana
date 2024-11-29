@@ -52,14 +52,6 @@ export const deleteStreamRoute = createServerRoute({
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
 
-      const parentId = getParentId(params.path.id);
-      if (!parentId) {
-        throw new MalformedStreamId('Cannot delete root stream');
-      }
-
-      // need to update parent first to cut off documents streaming down
-      await updateParentStream(scopedClusterClient, params.path.id, parentId, logger);
-
       await deleteStream(scopedClusterClient, params.path.id, logger);
 
       return { acknowledged: true };
@@ -92,6 +84,14 @@ export async function deleteStream(
       await deleteUnmanagedStreamObjects({ scopedClusterClient, id, logger });
       return;
     }
+
+    const parentId = getParentId(id);
+    if (!parentId) {
+      throw new MalformedStreamId('Cannot delete root stream');
+    }
+
+    // need to update parent first to cut off documents streaming down
+    await updateParentStream(scopedClusterClient, id, parentId, logger);
     for (const child of definition.children) {
       await deleteStream(scopedClusterClient, child.id, logger);
     }
