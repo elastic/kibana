@@ -163,7 +163,7 @@ export const getNavigationTreeDefinition = ({
 
                         return (
                           pathNameSerialized ===
-                          prepend(`/app/enterprise_search/applications${SEARCH_APPLICATIONS_PATH}`)
+                          prepend(`/app/elasticsearch/applications${SEARCH_APPLICATIONS_PATH}`)
                         );
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
@@ -190,7 +190,7 @@ export const getNavigationTreeDefinition = ({
 
                         if (someSubItemSelected) return false;
 
-                        return pathNameSerialized === prepend(`/app/enterprise_search/analytics`);
+                        return pathNameSerialized === prepend(`/app/elasticsearch/analytics`);
                       },
                       link: 'enterpriseSearchAnalytics',
                       renderAs: 'item',

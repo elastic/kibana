@@ -20,7 +20,7 @@ export const fetchAnalyticsCollections = async ({
   query = '',
 }: FetchAnalyticsCollectionsApiLogicArgs) => {
   const { http } = HttpLogic.values;
-  const route = '/internal/enterprise_search/analytics/collections';
+  const route = '/internal/elasticsearch/analytics/collections';
   const response = await http.get<FetchAnalyticsCollectionsApiLogicResponse>(route, {
     query: {
       query,
