@@ -3440,7 +3440,7 @@ describe('The custom threshold alert type', () => {
       const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
         executor({
           ...mockOptions,
-          spaceId: undefined,
+          spaceId: '',
           services,
           params: {
             ...mockOptions.params,
