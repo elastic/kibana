@@ -183,7 +183,7 @@ export class ServerlessSearchPlugin
                 defaultMessage: 'AI Assistant Settings',
               }),
               description: i18n.translate(
-                'xpack.serverlessObservability.aiAssistantManagementDescription',
+                'xpack.serverlessSearch.aiAssistantManagementDescription',
                 {
                   defaultMessage:
                     'Manage knowledge base and control assistant behavior, including response language.',
