@@ -14,7 +14,7 @@ import { useFetchSloInstances } from '../../hooks/use_fetch_slo_instances';
 interface Props {
   slo: SLOWithSummaryResponse;
   groupingKey: string;
-  value: string;
+  value?: string;
 }
 
 interface Field {
@@ -23,7 +23,7 @@ interface Field {
 }
 
 export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
-  const [currSelected, setSelected] = useState(value);
+  const [currSelected, setSelected] = useState<string | undefined>(value);
   const [options, setOptions] = useState<Field[]>([]);
   const [search, setSearch] = useState<string | undefined>(undefined);
   const [debouncedSearch, setDebouncedSearch] = useState<string | undefined>(undefined);
@@ -41,12 +41,7 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
         (grouping) => grouping.groupingKey === groupingKey
       )?.values;
       if (groupingValues) {
-        setOptions(
-          groupingValues.map((groupingValue) => ({
-            label: groupingValue,
-            value: groupingValue,
-          }))
-        );
+        setOptions(groupingValues.map(toField));
       }
     }
   }, [groupingKey, instances]);
@@ -65,7 +60,8 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
       options={options}
       isLoading={isLoading}
       isDisabled={isError}
-      selectedOptions={[{ label: currSelected, value: currSelected }]}
+      placeholder="Select an instance value"
+      selectedOptions={currSelected ? [toField(currSelected)] : []}
       onChange={onChange}
       truncationProps={{
         truncation: 'end',
@@ -75,4 +71,8 @@ export function SLOGroupingValueSelector({ slo, groupingKey, value }: Props) {
       }}
     />
   );
+}
+
+function toField(value: string): Field {
+  return { label: value, value };
 }
