@@ -378,5 +378,41 @@ GET _search
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);
       });
     });
+
+    describe('Autocomplete shouldnt trigger within', () => {
+      beforeEach(async () => {
+        await PageObjects.console.skipTourIfExists();
+        await PageObjects.console.clearEditorText();
+      });
+
+      it('a hash comment', async () => {
+        await PageObjects.console.enterText(`# GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a simple double slash comment', async () => {
+        await PageObjects.console.enterText(`// GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a single line block comment', async () => {
+        await PageObjects.console.enterText(`/* GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('a multiline block comment', async () => {
+        await PageObjects.console.enterText(`/*
+          GET /`);
+        await PageObjects.console.sleepForDebouncePeriod();
+
+        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+    });
   });
 }
