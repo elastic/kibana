@@ -25,12 +25,12 @@ import { CodeSample } from '../shared/code_sample';
 import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
-const basicExampleTexts = [
+export const basicExampleTexts = [
   'Yellowstone National Park',
   'Yosemite National Park',
   'Rocky Mountain National Park',
 ];
-const exampleTextsWithCustomMapping = ['Example text 1', 'Example text 2', 'Example text 3'];
+export const exampleTextsWithCustomMapping = [1, 2, 3].map((num) => `Example text ${num}`);
 
 export interface AddDocumentsCodeExampleProps {
   indexName: string;
