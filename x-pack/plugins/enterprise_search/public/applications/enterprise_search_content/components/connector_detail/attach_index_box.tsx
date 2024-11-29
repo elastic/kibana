@@ -71,25 +71,25 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
   const isLoading = [Status.IDLE, Status.LOADING].includes(status);
 
   // Helper function to remove the managed connector index prefix from the index name
-  const removePrefixConnectorIndex = (indexName: string) => {
+  const removePrefixConnectorIndex = (connectorIndexName: string) => {
     if (!connector.is_native) {
-      return indexName;
+      return connectorIndexName;
     }
-    if (indexName.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX)) {
-      return indexName.substring(MANAGED_CONNECTOR_INDEX_PREFIX.length);
+    if (connectorIndexName.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX)) {
+      return connectorIndexName.substring(MANAGED_CONNECTOR_INDEX_PREFIX.length);
     }
-    return indexName;
+    return connectorIndexName;
   };
 
   // Helper function to add the managed connector index prefix to the index name
-  const prefixConnectorIndex = (indexName: string) => {
+  const prefixConnectorIndex = (connectorIndexName: string) => {
     if (!connector.is_native) {
-      return indexName;
+      return connectorIndexName;
     }
-    if (indexName.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX)) {
-      return indexName;
+    if (connectorIndexName.startsWith(MANAGED_CONNECTOR_INDEX_PREFIX)) {
+      return connectorIndexName;
     }
-    return `${MANAGED_CONNECTOR_INDEX_PREFIX}${indexName}`;
+    return `${MANAGED_CONNECTOR_INDEX_PREFIX}${connectorIndexName}`;
   };
 
   const [query, setQuery] = useState<{
