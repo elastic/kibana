@@ -62,7 +62,11 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
       const results: Record<string, GeneratedConnectorNameResult> = await http.post(
         `/internal/serverless_search/connectors/${connector.id}/generate_name`,
         {
-          body: JSON.stringify({ name: connector.name, service_type: inputServiceType }),
+          body: JSON.stringify({
+            name: connector.name,
+            is_native: connector.is_native,
+            service_type: inputServiceType,
+          }),
         }
       );
 

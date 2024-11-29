@@ -13,12 +13,14 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { toAlphanumeric } from '../utils/to_alphanumeric';
 import { indexOrAliasExists } from './exists_index';
+import { MANAGED_CONNECTOR_INDEX_PREFIX } from '../constants';
 
 const GENERATE_INDEX_NAME_ERROR = 'generate_index_name_error';
 
 export const generateConnectorName = async (
   client: ElasticsearchClient,
   connectorType: string,
+  isNative: boolean,
   userConnectorName?: string
 ): Promise<{ connectorName: string; indexName: string }> => {
   const prefix = toAlphanumeric(connectorType);
@@ -26,8 +28,10 @@ export const generateConnectorName = async (
     throw new Error('Connector type or connectorName is required');
   }
 
+  const nativePrefix = isNative ? MANAGED_CONNECTOR_INDEX_PREFIX : '';
+
   if (userConnectorName) {
-    let indexName = `connector-${userConnectorName}`;
+    let indexName = `${nativePrefix}connector-${userConnectorName}`;
     const resultSameName = await indexOrAliasExists(client, indexName);
     // index with same name doesn't exist
     if (!resultSameName) {
@@ -38,7 +42,9 @@ export const generateConnectorName = async (
     }
     // if the index name already exists, we will generate until it doesn't for 20 times
     for (let i = 0; i < 20; i++) {
-      indexName = `connector-${userConnectorName}-${uuidv4().split('-')[1].slice(0, 4)}`;
+      indexName = `${nativePrefix}connector-${userConnectorName}-${uuidv4()
+        .split('-')[1]
+        .slice(0, 4)}`;
 
       const result = await indexOrAliasExists(client, indexName);
       if (!result) {
@@ -51,7 +57,7 @@ export const generateConnectorName = async (
   } else {
     for (let i = 0; i < 20; i++) {
       const connectorName = `${prefix}-${uuidv4().split('-')[1].slice(0, 4)}`;
-      const indexName = `connector-${connectorName}`;
+      const indexName = `${nativePrefix}connector-${connectorName}`;
 
       const result = await indexOrAliasExists(client, indexName);
       if (!result) {

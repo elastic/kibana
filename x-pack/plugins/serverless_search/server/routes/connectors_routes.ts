@@ -361,6 +361,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       validate: {
         body: schema.object({
           name: schema.string(),
+          is_native: schema.boolean(),
           service_type: schema.string(),
         }),
         params: schema.object({
@@ -373,6 +374,7 @@ export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependen
       const result = await generateConnectorName(
         client.asCurrentUser,
         request.body.service_type,
+        request.body.is_native,
         request.body.name
       );
 
