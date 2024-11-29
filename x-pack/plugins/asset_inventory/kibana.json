@@ -1,0 +1,14 @@
+{
+  "id": "assetInventory",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Cloud Risk Apps team",
+    "githubTeam": ""
+  },
+  "description": "Centralized place to view and manage all assets in Kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
