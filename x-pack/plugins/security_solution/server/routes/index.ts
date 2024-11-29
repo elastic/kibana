@@ -80,6 +80,7 @@ export const initRoutes = (
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   previewTelemetryReceiver: ITelemetryReceiver,
+  isServerless: boolean,
   endpointContext: EndpointAppContext
 ) => {
   registerFleetIntegrationsRoutes(router);
@@ -98,7 +99,8 @@ export const initRoutes = (
     securityRuleTypeOptions,
     previewRuleDataClient,
     getStartServices,
-    logger
+    logger,
+    isServerless
   );
 
   registerResolverRoutes(router, getStartServices, config);
