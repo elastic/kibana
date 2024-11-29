@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'security',
-  testFiles: [require.resolve('./mki_only.ts')],
+  testFiles: [require.resolve('./index.mki_only.ts')],
   junit: {
     reportName: 'Serverless Security MKI Functional Tests',
   },
