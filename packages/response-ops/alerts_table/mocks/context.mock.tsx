@@ -12,7 +12,7 @@ import { AlertsField, RowSelectionState } from '../types';
 import { AdditionalContext, RenderContext } from '../types';
 import { createCasesServiceMock, getCasesMapMock } from './cases.mock';
 import { getMaintenanceWindowsMock } from './maintenance_windows.mock';
-import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { identity } from 'lodash';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
@@ -24,7 +24,6 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
-import { FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID } from '../constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
@@ -239,38 +238,3 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
     cases: createCasesServiceMock(),
   },
 });
-
-export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
-  pageSizeOptions: [1, 10, 20, 50, 100],
-  leadingControlColumns: [],
-  trailingControlColumns: [],
-  visibleColumns: mockColumns.map((c) => c.id),
-  'data-test-subj': 'testTable',
-  onToggleColumn: jest.fn(),
-  onResetColumns: jest.fn(),
-  onChangeVisibleColumns: jest.fn(),
-  query: {},
-  sort: [],
-  alertsQuerySnapshot: { request: [], response: [] },
-  onSortChange: jest.fn(),
-  onChangePageIndex: jest.fn(),
-  onChangePageSize: jest.fn(),
-  getBulkActions: () => [
-    {
-      id: 0,
-      items: [
-        {
-          label: 'Fake Bulk Action',
-          key: 'fakeBulkAction',
-          'data-test-subj': 'fake-bulk-action',
-          disableOnQuery: false,
-          onClick: () => {},
-        },
-      ],
-    },
-  ],
-  fieldsBrowserOptions: {
-    createFieldButton: () => <EuiButton data-test-subj={FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID} />,
-  },
-  casesConfiguration: { featureId: 'test-feature-id', owner: ['cases'] },
-};
