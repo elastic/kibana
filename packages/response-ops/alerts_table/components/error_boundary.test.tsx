@@ -17,7 +17,7 @@ const ComponentThatThrows = () => {
   throw new Error();
 };
 
-describe('ErrorBoundary', () => {
+describe(ErrorBoundary, () => {
   it('should render its children when no error is thrown in its subtree', () => {
     const { getByText } = render(
       <ErrorBoundary fallback={FallbackComponent}>

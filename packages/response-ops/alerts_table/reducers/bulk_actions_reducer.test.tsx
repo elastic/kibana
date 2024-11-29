@@ -12,27 +12,20 @@ import { render, screen, within, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { AlertsDataGrid } from '../components/alerts_data_grid';
 import { AlertsField, BulkActionsConfig, BulkActionsState } from '../types';
 import { RenderContext, AdditionalContext } from '../types';
 import { bulkActionsReducer } from './bulk_actions_reducer';
+import { mockBulkActionsState, mockDataGridProps, mockRenderContext } from '../mocks/context.mock';
 import {
   TestAlertsDataGridProps,
-  mockBulkActionsState,
-  mockDataGridProps,
-  mockRenderContext,
   BaseAlertsDataGridProps,
-} from '../components/alerts_data_grid.mock';
+} from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-
-jest.mock('@kbn/data-plugin/public');
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting$: jest.fn((value: string) => ['0,0']),
-}));
 
 const columns = [
   {
@@ -601,12 +594,13 @@ describe('AlertsDataGrid bulk actions', () => {
 
             expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
             const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
+
             // First row, first column
             expect(within(selectedOptions[0]).queryByLabelText('Loading')).not.toBeInTheDocument();
             expect(within(selectedOptions[0]).getByRole('checkbox')).toBeInTheDocument();
 
             // Second row, first column
-            expect(within(selectedOptions[3]).getByLabelText('Loading')).toBeDefined();
+            expect(within(selectedOptions[3]).getByLabelText('Loading')).toBeInTheDocument();
             expect(within(selectedOptions[3]).queryByRole('checkbox')).not.toBeInTheDocument();
           });
 

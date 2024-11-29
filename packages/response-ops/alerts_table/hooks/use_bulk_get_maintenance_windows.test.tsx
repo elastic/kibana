@@ -9,7 +9,7 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 import { MaintenanceWindowStatus } from '@kbn/alerting-plugin/common';
-import * as api from './bulk_get_maintenance_windows';
+import * as api from '../apis/bulk_get_maintenance_windows';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useBulkGetMaintenanceWindowsQuery } from './use_bulk_get_maintenance_windows';
 import { useLicense } from './use_license';
@@ -19,7 +19,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClientConfig } from '../utils/test';
 
 jest.mock('./use_license');
-jest.mock('./bulk_get_maintenance_windows');
+jest.mock('../apis/bulk_get_maintenance_windows');
 
 const useLicenseMock = useLicense as jest.Mock;
 
@@ -68,7 +68,7 @@ const wrapper = ({ children }: PropsWithChildren) => {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
-describe('useBulkGetMaintenanceWindows', () => {
+describe(useBulkGetMaintenanceWindowsQuery, () => {
   let addErrorMock: jest.Mock;
 
   beforeEach(async () => {

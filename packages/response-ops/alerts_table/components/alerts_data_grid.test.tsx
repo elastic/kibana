@@ -12,24 +12,21 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsDataGrid } from './alerts_data_grid';
-import { BulkActionsState } from '../types';
+import { AlertsDataGridProps, BulkActionsState } from '../types';
 import { AdditionalContext, RenderContext } from '../types';
 import { EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
-import { createCasesServiceMock } from '../mocks/cases.mock';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import {
-  TestAlertsDataGridProps,
-  BaseAlertsDataGridProps,
   mockDataGridProps,
   mockRenderContext,
   mockColumns,
   mockAlerts,
   mockBulkActionsState,
-} from './alerts_data_grid.mock';
+} from '../mocks/context.mock';
 import {
   CELL_ACTIONS_EXPAND_TEST_ID,
   CELL_ACTIONS_POPOVER_TEST_ID,
@@ -41,31 +38,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-
-jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
-  useUiSetting$: jest.fn((value: string) => ['0,0']),
-}));
-
-// useKibana mock
-const mockCaseService = createCasesServiceMock();
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      services: {
-        cases: mockCaseService,
-        notifications: {
-          toasts: {
-            addDanger: jest.fn(),
-            addSuccess: jest.fn(),
-          },
-        },
-      },
-    }),
-  };
-});
 
 jest.mock('../hooks/use_case_view_navigation');
 
@@ -80,6 +52,11 @@ beforeAll(() => {
 afterAll(() => {
   cleanup();
 });
+
+export type BaseAlertsDataGridProps = AlertsDataGridProps;
+export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'renderContext'>> & {
+  renderContext?: Partial<RenderContext<AdditionalContext>>;
+};
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -244,7 +221,7 @@ describe('AlertsDataGrid', () => {
         expect(screen.queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBeInTheDocument();
       });
 
-      it('should render no action column if there is neither the action nor the expand action config is set', () => {
+      it('should render no action column if neither the action nor the expand action config is set', () => {
         render(
           <TestComponent
             {...mockDataGridProps}

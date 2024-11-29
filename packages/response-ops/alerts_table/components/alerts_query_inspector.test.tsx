@@ -18,7 +18,7 @@ jest
   .mocked(AlertsQueryInspectorModal.type)
   .mockImplementation(() => <div data-test-subj="mocked-modal" />);
 
-describe('Inspect Button', () => {
+describe('AlertsQueryInspector', () => {
   const alertsQuerySnapshot = {
     request: [''],
     response: [''],

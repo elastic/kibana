@@ -29,7 +29,7 @@ import {
   ALERTS_ALREADY_ATTACHED_TO_CASE,
   MARK_AS_UNTRACKED,
   NO_ALERTS_ADDED_TO_CASE,
-} from './translations';
+} from '../translations';
 import { useBulkUntrackAlerts } from './use_bulk_untrack_alerts';
 import { useBulkUntrackAlertsByQuery } from './use_bulk_untrack_alerts_by_query';
 
@@ -282,12 +282,14 @@ export const useBulkUntrackActions = ({
   ]);
 };
 
+const EMPTY_BULK_ACTIONS_CONFIG = () => [];
+
 export function useBulkActions({
   alertsCount,
   casesConfig,
   query,
   refresh,
-  getBulkActions = () => [],
+  getBulkActions = EMPTY_BULK_ACTIONS_CONFIG,
   ruleTypeIds,
   hideBulkActions,
   http,

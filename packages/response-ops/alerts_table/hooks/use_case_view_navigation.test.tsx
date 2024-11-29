@@ -28,7 +28,7 @@ const wrapper = ({ children }: PropsWithChildren) => {
   );
 };
 
-describe('useCaseViewNavigation', () => {
+describe(useCaseViewNavigation, () => {
   const navigateToApp = jest.fn();
 
   beforeEach(() => {
