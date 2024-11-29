@@ -382,7 +382,7 @@
         "faker"
       ],
       "reviewers": [
-        "team:kibana-visualizations"
+        "team:visualizations"
       ],
       "matchBaseBranches": [
         "main"
