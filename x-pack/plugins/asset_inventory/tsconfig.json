@@ -4,12 +4,15 @@
     "outDir": "./target/types"
   },
   "include": [
-    "index.ts",
     "common/**/*.ts",
+    "common/**/*.json",
     "public/**/*.ts",
     "public/**/*.tsx",
+    "public/**/*.json",
     "server/**/*.ts",
-    "../../typings/**/*"
+    "server/**/*.json",
+    // "../../typings/**/*",
+    "../../../typings/**/*",
   ],
   "exclude": []
 }
