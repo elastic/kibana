@@ -14,7 +14,7 @@ import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useMuteAlertInstanceMutation } from '@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance_mutation';
 import { useUnmuteAlertInstanceMutation } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance_mutation';
 import type { AlertActionsProps } from '../types';
-import { MUTE, UNMUTE } from '../hooks/translations';
+import { MUTE, UNMUTE } from '../translations';
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 
 /**
