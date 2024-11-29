@@ -9,13 +9,25 @@ import { z } from '@kbn/zod';
 
 const stringOrNumberOrBoolean = z.union([z.string(), z.number(), z.boolean()]);
 
-export const filterConditionSchema = z.object({
+export const binaryConditionSchema = z.object({
   field: z.string(),
   operator: z.enum(['eq', 'neq', 'lt', 'lte', 'gt', 'gte', 'contains', 'startsWith', 'endsWith']),
   value: stringOrNumberOrBoolean,
 });
 
+export const unaryFilterConditionSchema = z.object({
+  field: z.string(),
+  operator: z.enum(['exists', 'notExists']),
+});
+
+export const filterConditionSchema = z.discriminatedUnion('operator', [
+  unaryFilterConditionSchema,
+  binaryConditionSchema,
+]);
+
 export type FilterCondition = z.infer<typeof filterConditionSchema>;
+export type BinaryFilterCondition = z.infer<typeof binaryConditionSchema>;
+export type UnaryFilterCondition = z.infer<typeof unaryFilterConditionSchema>;
 
 export interface AndCondition {
   and: Condition[];
@@ -72,7 +84,7 @@ export const streamWithoutIdDefinitonSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        condition: conditionSchema,
+        condition: z.optional(conditionSchema),
       })
     )
     .default([]),
