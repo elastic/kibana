@@ -83,9 +83,9 @@ export const config: PluginConfigDescriptor<AlertingConfig> = {
     rules: { run: { alerts: { max: true } } },
   },
   deprecations: ({ renameFromRoot, deprecate }) => [
-    deprecate('maxEphemeralActionsPerAlert', 'a future version', {
+    deprecate('maxEphemeralActionsPerAlert', '9.0.0', {
       level: 'warning',
-      message: `Configuring "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and will be removed in a future version. Remove this setting to increase action execution resiliency.`,
+      message: `The setting "xpack.alerting.maxEphemeralActionsPerAlert" is deprecated and currently ignored by the system. Please remove this setting.`,
     }),
   ],
 };
