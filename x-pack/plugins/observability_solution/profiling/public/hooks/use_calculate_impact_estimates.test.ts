@@ -40,9 +40,9 @@ describe('useCalculateImpactEstimate', () => {
   it('calculates impact when countExclusive is lower than countInclusive', () => {
     const calculateImpactEstimates = useCalculateImpactEstimate();
     const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
-      countExclusive: 500,
-      countInclusive: 1000,
-      totalSamples: 10000,
+      countExclusive: 475,
+      countInclusive: 950,
+      totalSamples: 9500,
       totalSeconds: 15 * 60, // 15m
     });
 
@@ -68,9 +68,9 @@ describe('useCalculateImpactEstimate', () => {
   it('calculates impact', () => {
     const calculateImpactEstimates = useCalculateImpactEstimate();
     const { selfCPU, totalCPU, totalSamples } = calculateImpactEstimates({
-      countExclusive: 1000,
-      countInclusive: 1000,
-      totalSamples: 10000,
+      countExclusive: 950,
+      countInclusive: 950,
+      totalSamples: 9500,
       totalSeconds: 15 * 60, // 15m
     });
 
