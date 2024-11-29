@@ -76,7 +76,6 @@ export default function ({ getService }: FtrProviderContext) {
           } as JsonObject,
         ],
         children: [],
-        managed: true,
       };
       const response = await putStream(supertest, 'logs', body);
       expect(response).to.have.property('acknowledged', true);
