@@ -87,13 +87,13 @@ const connectorClientPopoverPanels = [
 
 export interface ConnectorDescriptionPopoverProps {
   isNative: boolean;
-  isOnlySelfManagedAvailable: boolean;
+  showIsOnlySelfManaged: boolean;
   isRunningLocally?: boolean;
 }
 
 export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
-  isOnlySelfManagedAvailable,
+  showIsOnlySelfManaged,
   isRunningLocally,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -123,13 +123,13 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
         hasBorder={false}
         hasShadow={false}
       >
-        {(isOnlySelfManagedAvailable || isRunningLocally) && (
+        {(showIsOnlySelfManaged || isRunningLocally) && (
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiCallOut
                   title={
-                    isOnlySelfManagedAvailable
+                    showIsOnlySelfManaged
                       ? i18n.translate(
                           'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
                           {

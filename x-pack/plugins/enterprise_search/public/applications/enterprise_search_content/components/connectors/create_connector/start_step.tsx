@@ -217,7 +217,7 @@ export const StartStep: React.FC<StartStepProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ConnectorDescriptionPopover
-                  isOnlySelfManagedAvailable={selectedConnector?.isNative === false}
+                  showIsOnlySelfManaged={selectedConnector?.isNative === false}
                   isRunningLocally={isRunningLocally}
                   isNative
                 />
@@ -236,7 +236,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover isOnlySelfManagedAvailable={false} isNative={false} />
+                <ConnectorDescriptionPopover showIsOnlySelfManaged={false} isNative={false} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
