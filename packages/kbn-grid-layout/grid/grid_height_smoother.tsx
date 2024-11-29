@@ -63,7 +63,7 @@ export const GridHeightSmoother = ({
         if (expandedPanelId) {
           const smoothHeightRefY =
             smoothHeightRef.current.getBoundingClientRect().y + document.documentElement.scrollTop;
-          const gutterSize = parseFloat(euiThemeVars.euiSizeL);
+          const { gutterSize } = gridLayoutStateManager.runtimeSettings$.getValue();
 
           // When panel is expanded, ensure the page occupies the full viewport height
           // If the parent element is a flex container (preferred approach):
