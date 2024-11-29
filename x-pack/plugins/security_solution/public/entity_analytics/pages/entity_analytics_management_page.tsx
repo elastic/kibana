@@ -13,8 +13,11 @@ import {
   EuiHorizontalRule,
   EuiButton,
   useEuiTheme,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
-
+import styled from '@emotion/styled';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { RiskScorePreviewSection } from '../components/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -40,6 +43,13 @@ export const EntityAnalyticsManagementPage = () => {
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess } = useAppToasts();
   const [nextRunTime, setNextRunTime] = useState('');
+  const VerticalSeparator = styled.div`
+    :before {
+      content: '';
+      height: ${euiThemeVars.euiSizeM};
+      border-left: ${euiThemeVars.euiBorderWidthThin} solid ${euiThemeVars.euiColorLightShade};
+    }
+  `;
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
@@ -71,7 +81,7 @@ export const EntityAnalyticsManagementPage = () => {
         ? new Date(riskEngineStatus.risk_engine_task_status.runAt)
         : new Date();
       const minutesUntilNextRun = Math.round((runAtTime.getTime() - currentTime.getTime()) / 60000);
-      return `Next engine run in ${minutesUntilNextRun} minutes`;
+      return i18n.RISK_ENGINE_NEXT_RUN_TIME(minutesUntilNextRun);
     }
     return '';
   }, [runEngineEnabled, riskEngineStatus]);
@@ -79,13 +89,12 @@ export const EntityAnalyticsManagementPage = () => {
   useEffect(() => {
     let intervalId: string | number | NodeJS.Timeout;
 
-    // Poll only if the engine is in the 'running' state
     if (riskEngineStatus?.risk_engine_task_status?.status === 'idle') {
-      setNextRunTime(calculateNextRunTime()); // Initial calculation
+      setNextRunTime(calculateNextRunTime());
 
       intervalId = setInterval(() => {
         setNextRunTime(calculateNextRunTime());
-      }, 60000); // Poll every minute
+      }, 60000);
     }
 
     return () => {
@@ -121,25 +130,24 @@ export const EntityAnalyticsManagementPage = () => {
                         }
                       }}
                     >
-                      {'Run Engine'}
+                      {i18n.RUN_RISK_SCORE_ENGINE}
                     </EuiButton>
                   </EuiFlexItem>
                 )}
-
+                <EuiSpacer size="s" />
                 {/* Vertical Line */}
                 {runEngineEnabled && (
-                  <div
-                    className="vertical-line"
-                    style={{ height: '24px', borderLeft: '1px solid #ccc', margin: '0 8px' }}
-                  />
+                  <EuiFlexItem grow={false}>
+                    <VerticalSeparator />
+                  </EuiFlexItem>
                 )}
-
+                <EuiSpacer size="s" />
                 {/* Text: "Next engine run in {} minutes" */}
                 {runEngineEnabled && (
                   <EuiFlexItem grow={false}>
-                    <span style={{ fontSize: '14px', color: '#888888', fontWeight: 'normal' }}>
+                    <EuiText size="s" color="subdued">
                       {nextRunTime}
-                    </span>
+                    </EuiText>
                   </EuiFlexItem>
                 )}
 
@@ -171,7 +179,6 @@ export const EntityAnalyticsManagementPage = () => {
             includeClosedAlerts={includeClosedAlerts}
             from={from}
             to={to}
-            key={`${from}-${to}-${includeClosedAlerts}`}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

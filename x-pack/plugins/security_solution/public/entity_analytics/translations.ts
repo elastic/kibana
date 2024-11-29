@@ -304,15 +304,50 @@ export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
 );
 
 export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
-  'xpack.securitySolution.riskScore.moduleTurnedOff',
+  'xpack.securitySolution.riskScore.engineRunSuccess',
   {
-    defaultMessage: 'Entity risk score engine ran successfully',
+    defaultMessage: 'Entity risk score engine started successfully',
   }
 );
 
 export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
-  'xpack.securitySolution.riskScore.configurationSuccess',
+  'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
     defaultMessage: 'Risk engine Saved Object configuration updated successfully',
+  }
+);
+
+export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.riskScore.includeClosedAlertsDescription',
+  {
+    defaultMessage: `Enable this option to factor both open and closed alerts into the risk engine
+            calculations. Including closed alerts helps provide a more comprehensive risk assessment
+            based on past incidents, leading to more accurate scoring and insights.`,
+  }
+);
+
+export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: number) =>
+  i18n.translate('xpack.securitySolution.riskScore.engineNextRunTime', {
+    defaultMessage: `Next engine run in ${timeInMinutes} ${
+      timeInMinutes === 1 ? 'minute' : 'minutes'
+    }`,
+    values: { timeInMinutes },
+  });
+
+export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
+  defaultMessage: 'Run Engine',
+});
+
+export const SAVE_CHANGES = i18n.translate(
+  'xpack.securitySolution.riskScore.engineSavedObjectsaveChanges',
+  {
+    defaultMessage: 'Save',
+  }
+);
+
+export const DISCARD_CHANGES = i18n.translate(
+  'xpack.securitySolution.riskScore.engineSavedObject.discardChanges',
+  {
+    defaultMessage: 'Discard',
   }
 );

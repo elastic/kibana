@@ -16,7 +16,10 @@ import {
   EuiFlexItem,
   EuiBottomBar,
   EuiButtonEmpty,
+  EuiSpacer,
 } from '@elastic/eui';
+import styled from '@emotion/styled';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
@@ -39,6 +42,13 @@ export const IncludeClosedAlertsSection = ({
   const [isLoading, setIsLoading] = useState(false);
   const [showBar, setShowBar] = useState(false);
   const { addSuccess } = useAppToasts();
+  const VerticalSeparator = styled.div`
+    :before {
+      content: '';
+      height: ${euiThemeVars.euiSizeM};
+      border-left: ${euiThemeVars.euiBorderWidthThin} solid ${euiThemeVars.euiColorLightShade};
+    }
+  `;
 
   // Retrieve state from localStorage on initial render
   useEffect(() => {
@@ -112,10 +122,9 @@ export const IncludeClosedAlertsSection = ({
             onChange={handleToggle}
           />
         </EuiFlexItem>
-        <div
-          className="vertical-line"
-          style={{ height: '24px', borderLeft: '1px solid #ccc', margin: '0 8px' }}
-        />
+        <EuiFlexItem grow={false}>
+          <VerticalSeparator />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSuperDatePicker
             start={start}
@@ -129,19 +138,16 @@ export const IncludeClosedAlertsSection = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiText size="s" style={{ marginTop: '10px' }}>
-        <p>
-          {`Enable this option to factor both open and closed alerts into the risk engine
-            calculations. Including closed alerts helps provide a more comprehensive risk assessment
-            based on past incidents, leading to more accurate scoring and insights.`}
-        </p>
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <p>{i18n.RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION}</p>
       </EuiText>
       {showBar && (
         <EuiBottomBar
           paddingSize="s"
           position="fixed"
           css={css`
-            margin-left: 250px;
+            margin-left: calc(${euiThemeVars.euiSizeXXL} * 6 + ${euiThemeVars.euiSizeM});
           `}
         >
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -153,7 +159,7 @@ export const IncludeClosedAlertsSection = ({
                   iconType="cross"
                   onClick={() => setShowBar(false)}
                 >
-                  {'Discard'}
+                  {i18n.DISCARD_CHANGES}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -165,7 +171,7 @@ export const IncludeClosedAlertsSection = ({
                   onClick={handleSave}
                   isLoading={isLoading}
                 >
-                  {'Save'}
+                  {i18n.SAVE_CHANGES}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

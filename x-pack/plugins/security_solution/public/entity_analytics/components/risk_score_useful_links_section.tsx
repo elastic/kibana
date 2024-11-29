@@ -9,6 +9,8 @@ import React, { useState } from 'react';
 import { EuiLink, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import styled from '@emotion/styled';
+import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../translations';
 import { RiskInformationFlyout } from './risk_information';
 
@@ -17,6 +19,10 @@ export const RiskScoreUsefulLinksSection = () => {
 
   const handleOnOpen = () => setIsFlyoutVisible(true);
   const handleOnClose = () => setIsFlyoutVisible(false);
+  const StyledList = styled.ul`
+    list-style-type: disc;
+    padding-left: ${euiThemeVars.euiSizeM};
+  `;
 
   return (
     <>
@@ -24,7 +30,7 @@ export const RiskScoreUsefulLinksSection = () => {
         <h2>{i18n.USEFUL_LINKS}</h2>
       </EuiTitle>
       <EuiSpacer />
-      <ul style={{ listStyleType: 'disc', paddingLeft: '20px' }}>
+      <StyledList>
         <li>
           <LinkAnchor id={SecurityPageName.entityAnalytics}>{i18n.EA_DASHBOARD_LINK}</LinkAnchor>
           <EuiSpacer size="s" />
@@ -36,7 +42,7 @@ export const RiskScoreUsefulLinksSection = () => {
           {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
           <EuiSpacer size="s" />
         </li>
-      </ul>
+      </StyledList>
     </>
   );
 };
