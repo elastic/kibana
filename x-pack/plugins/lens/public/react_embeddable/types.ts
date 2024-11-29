@@ -23,7 +23,6 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDisabledActionIds,
-  PublishesPanelTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
@@ -379,12 +378,7 @@ export type LensApi = Simplify<
     // Let the container know the view mode
     PublishesViewMode &
     // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface
-    Partial<
-      HasParentApi<
-        PresentationContainer &
-          Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
-      >
-    > &
+    Partial<HasParentApi<PresentationContainer>> &
     // Let the container know the saved object id
     PublishesSavedObjectId &
     // Lens specific API methods:
