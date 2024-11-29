@@ -64,10 +64,7 @@ export const createScriptedFieldsDeprecationsConfig: (
               i18n.translate('dataViews.deprecations.scriptedFields.manualStepTwoMessage', {
                 defaultMessage:
                   'Update data views that have scripted fields to use runtime fields instead. In most cases, to migrate existing scripts, you will need to change "return <value>;" to "emit(<value>);". Data views with at least one scripted field: {allTitles}.',
-                values: {
-                  allTitles: indexPatternTitles.join('; '),
-                  numberOfIndexPatternsWithScriptedFields: indexPatternsWithScriptedFields.length,
-                },
+                values: { allTitles: indexPatternTitles.join('; ') },
                 ignoreTag: true,
               }),
               i18n.translate('dataViews.deprecations.scriptedFields.manualStepThreeMessage', {
