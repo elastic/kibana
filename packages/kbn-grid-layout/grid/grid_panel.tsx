@@ -195,11 +195,11 @@ export const GridPanel = forwardRef<
               ref.style.zIndex = `auto`;
 
               // if the panel is not being dragged and/or resized, undo any fixed position styles
-              ref.style.position = 'static';
-              ref.style.left = `auto`;
-              ref.style.top = `auto`;
-              ref.style.width = `auto`;
-              ref.style.height = `auto`;
+              ref.style.position = '';
+              ref.style.left = ``;
+              ref.style.top = ``;
+              ref.style.width = ``;
+              ref.style.height = ``;
 
               // and render the panel locked to the grid
               ref.style.gridColumnStart = `${panel.column + 1}`;

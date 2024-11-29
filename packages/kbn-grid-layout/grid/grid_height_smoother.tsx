@@ -46,14 +46,14 @@ export const GridHeightSmoother = ({
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    const marginSubscription = gridLayoutStateManager.runtimeSettings$
+    const paddingSubscription = gridLayoutStateManager.runtimeSettings$
       .pipe(
         map(({ gutterSize }) => gutterSize),
         distinctUntilChanged()
       )
       .subscribe((gutterSize) => {
         if (!smoothHeightRef.current) return;
-        smoothHeightRef.current.style.margin = `${gutterSize}px`;
+        smoothHeightRef.current.style.padding = `${gutterSize}px`;
       });
 
     const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
@@ -81,7 +81,7 @@ export const GridHeightSmoother = ({
     );
     return () => {
       interactionStyleSubscription.unsubscribe();
-      marginSubscription.unsubscribe();
+      paddingSubscription.unsubscribe();
       expandedPanelSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -29,6 +29,8 @@ export const useMockDashboardApi = ({
   savedState: MockSerializedDashboardState;
 }) => {
   const mockDashboardApi = useMemo(() => {
+    const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+
     return {
       getSerializedStateForChild: (id: string) => ({
         rawState: savedState.panels[id].explicitInput,
@@ -42,6 +44,16 @@ export const useMockDashboardApi = ({
       viewMode: new BehaviorSubject('edit'),
       panels$: new BehaviorSubject<MockedDashboardPanelMap>(savedState.panels),
       rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
+
+      expandedPanelId: expandedPanelId$,
+      expandPanel: (id: string) => {
+        if (expandedPanelId$.getValue()) {
+          expandedPanelId$.next(undefined);
+        } else {
+          expandedPanelId$.next(id);
+        }
+      },
+
       removePanel: (id: string) => {
         const panels = { ...mockDashboardApi.panels$.getValue() };
         delete panels[id]; // the grid layout component will handle compacting, if necessary

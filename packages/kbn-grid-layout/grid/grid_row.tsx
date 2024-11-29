@@ -253,7 +253,7 @@ export const GridRow = forwardRef<
         {rowIndex !== 0 && (
           <GridRowHeader
             isCollapsed={isCollapsed}
-            toggleIsCollapsed={toggleIsCollapsed}
+            toggleIsCollapsed={() => toggleIsCollapsed(rowIndex)}
             rowTitle={rowTitle}
           />
         )}

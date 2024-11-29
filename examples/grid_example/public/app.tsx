@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { combineLatest, debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { css } from '@emotion/react';
 
 import {
   EuiBadge,
@@ -34,6 +35,7 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { GridAccessMode, GridLayout, GridLayoutData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { getPanelId } from './get_panel_id';
 import {
@@ -52,13 +54,13 @@ const DASHBOARD_GRID_COLUMN_COUNT = 48;
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
-  const [expandedPanelId, setExpandedPanelId] = useState<string | undefined>();
   const [accessMode, setAccessMode] = useState<GridAccessMode>('EDIT');
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
     dashboardInputToGridLayout(savedState.current)
   );
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
+  const expandedPanelId = useStateFromPublishingSubject(mockDashboardApi.expandedPanelId);
 
   useEffect(() => {
     combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
@@ -114,7 +116,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
         <EuiPageTemplate.Section
           color="subdued"
           contentProps={{
-            css: { display: 'flex', flexFlow: 'column nowrap', flexGrow: 1 },
+            css: { height: '100%' },
           }}
         >
           <EuiCallOut
@@ -141,7 +143,7 @@ export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 onClick={async () => {
-                  setExpandedPanelId(undefined);
+                  mockDashboardApi.expandedPanelId.next(undefined);
                   const panelId = await getPanelId({
                     coreStart,
                     suggestion: uuidv4(),
