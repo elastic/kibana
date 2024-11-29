@@ -78,9 +78,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
       if (!actionType) {
         return false;
       }
-      if (actionTypeModel.hideInUi) {
-        return false;
-      }
+
       if (!actionTypeModel.actionParamsFields) {
         return false;
       }
@@ -93,6 +91,7 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
       if (!actionType.enabledInConfig && !checkEnabledResult.isEnabled) {
         return false;
       }
+
       return true;
     });
   }, [connectors, connectorTypes, preconfiguredConnectors, actionTypeRegistry]);
@@ -120,29 +119,43 @@ export const RuleActionsConnectorsModal = (props: RuleActionsConnectorsModalProp
 
   const connectorsMap: ConnectorsMap | null = useMemo(() => {
     return availableConnectors.reduce<ConnectorsMap>((result, { actionTypeId }) => {
-      if (result[actionTypeId]) {
-        result[actionTypeId].total += 1;
+      const actionTypeModel = actionTypeRegistry.get(actionTypeId);
+      const subtype = actionTypeModel.subtype;
+
+      const otherActionTypeId = actionTypeModel.hideInUi
+        ? subtype?.filter((type) => type.id !== actionTypeId)[0].id
+        : undefined;
+
+      const actionTypeKey = otherActionTypeId ? otherActionTypeId : actionTypeId;
+
+      if (result[actionTypeKey]) {
+        result[actionTypeKey].total += 1;
       } else {
-        result[actionTypeId] = {
-          actionTypeId,
+        result[actionTypeKey] = {
+          actionTypeId: actionTypeKey,
           total: 1,
-          name: connectorTypes.find(({ id }) => actionTypeId === id)?.name || '',
+          name: connectorTypes.find(({ id }) => id === actionTypeKey)?.name || '',
         };
       }
+
       return result;
     }, {});
-  }, [availableConnectors, connectorTypes]);
+  }, [availableConnectors, connectorTypes, actionTypeRegistry]);
 
   const filteredConnectors = useMemo(() => {
     return availableConnectors
       .filter(({ actionTypeId }) => {
+        const subtype = actionTypeRegistry.get(actionTypeId).subtype?.map((type) => type.id);
+
         if (selectedConnectorType === 'all' || selectedConnectorType === '') {
           return true;
         }
-        if (selectedConnectorType === actionTypeId) {
-          return true;
+
+        if (subtype?.includes(selectedConnectorType)) {
+          return subtype.includes(actionTypeId);
         }
-        return false;
+
+        return selectedConnectorType === actionTypeId;
       })
       .filter(({ actionTypeId, name }) => {
         const trimmedSearchValue = searchValue.trim().toLocaleLowerCase();
