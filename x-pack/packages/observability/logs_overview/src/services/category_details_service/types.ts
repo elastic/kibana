@@ -8,11 +8,6 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchGeneric } from '@kbn/search-types';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils';
-
-export interface LogCategoryDocument {
-  row: Pick<DataTableRecord, 'flattened' | 'raw'>;
-}
 
 export interface LogCategoryDetailsParams {
   additionalFilters: QueryDslQueryContainer[];
@@ -27,5 +22,3 @@ export interface LogCategoryDetailsParams {
 export interface CategoryDetailsServiceDependencies {
   search: ISearchGeneric;
 }
-
-export type LogCategoryDocumentsParams = LogCategoryDetailsParams & { categoryTerms: string };
