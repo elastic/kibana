@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 import { EuiContextMenuItem } from '@elastic/eui';
 
@@ -134,8 +134,7 @@ function createMockAgentPolicies(
   }
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/199204
-describe.skip('PackagePolicyDeleteProvider', () => {
+describe('PackagePolicyDeleteProvider', () => {
   it('Should show delete integrations action and cancel modal', async () => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
     sendGetAgentsMock.mockResolvedValue({
@@ -155,15 +154,15 @@ describe.skip('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    await act(async () => {
-      const button = utils.getByRole('button');
-      fireEvent.click(button);
+    const button = utils.getByRole('button');
+    fireEvent.click(button);
+    await waitFor(() => {
+      expect(utils.getByText('This action will affect 5 agents.')).toBeInTheDocument();
+      expect(
+        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
+      ).toBeInTheDocument();
+      expect(utils.getAllByText(/is already in use by some of your agents./).length).toBe(1);
     });
-    expect(utils.getByText('This action will affect 5 agents.')).toBeInTheDocument();
-    expect(
-      utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-    ).toBeInTheDocument();
-    expect(utils.getAllByText(/is already in use by some of your agents./).length).toBe(1);
   });
 
   it('When multiple agent policies are present and agents are enrolled show additional warnings', async () => {
@@ -185,18 +184,19 @@ describe.skip('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    await act(async () => {
-      const button = utils.getByRole('button');
-      fireEvent.click(button);
+    const button = utils.getByRole('button');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(utils.getByText('This action will affect 5 agents.')).toBeInTheDocument();
+      expect(
+        utils.getByText('This integration is shared by multiple agent policies.')
+      ).toBeInTheDocument();
+      expect(
+        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
+      ).toBeInTheDocument();
+      expect(utils.queryAllByText(/is already in use by some of your agents./).length).toBe(0);
     });
-    expect(utils.getByText('This action will affect 5 agents.')).toBeInTheDocument();
-    expect(
-      utils.getByText('This integration is shared by multiple agent policies.')
-    ).toBeInTheDocument();
-    expect(
-      utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-    ).toBeInTheDocument();
-    expect(utils.queryAllByText(/is already in use by some of your agents./).length).toBe(0);
   });
 
   it('When multiple agent policies are present and no agents are enrolled show additional warnings', async () => {
@@ -213,18 +213,19 @@ describe.skip('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    await act(async () => {
-      const button = utils.getByRole('button');
-      fireEvent.click(button);
+    const button = utils.getByRole('button');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(utils.queryByText('This action will affect 5 agents.')).not.toBeInTheDocument();
+      expect(utils.queryAllByText(/is already in use by some of your agents./).length).toBe(0);
+      expect(
+        utils.getByText('This integration is shared by multiple agent policies.')
+      ).toBeInTheDocument();
+      expect(
+        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
+      ).toBeInTheDocument();
     });
-    expect(utils.queryByText('This action will affect 5 agents.')).not.toBeInTheDocument();
-    expect(utils.queryAllByText(/is already in use by some of your agents./).length).toBe(0);
-    expect(
-      utils.getByText('This integration is shared by multiple agent policies.')
-    ).toBeInTheDocument();
-    expect(
-      utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-    ).toBeInTheDocument();
   });
 
   it('When agentless should show a different set of warnings', async () => {
@@ -246,16 +247,17 @@ describe.skip('PackagePolicyDeleteProvider', () => {
       agentPolicies,
       packagePolicyIds: ['integration-0001'],
     });
-    await act(async () => {
-      const button = utils.getByRole('button');
-      fireEvent.click(button);
-    });
+    const button = utils.getByRole('button');
+    fireEvent.click(button);
     // utils.debug();
-    expect(utils.queryByText('This action will affect 5 agents.')).not.toBeInTheDocument();
-    expect(utils.getByText(/about to delete an integration/)).toBeInTheDocument();
-    expect(
-      utils.getByText('This action can not be undone. Are you sure you wish to continue?')
-    ).toBeInTheDocument();
-    expect(utils.getAllByText(/integration will stop data ingestion./).length).toBe(1);
+
+    await waitFor(() => {
+      expect(utils.queryByText('This action will affect 5 agents.')).not.toBeInTheDocument();
+      expect(utils.getByText(/about to delete an integration/)).toBeInTheDocument();
+      expect(
+        utils.getByText('This action can not be undone. Are you sure you wish to continue?')
+      ).toBeInTheDocument();
+      expect(utils.getAllByText(/integration will stop data ingestion./).length).toBe(1);
+    });
   });
 });
