@@ -23,7 +23,7 @@ describe('getEntityInstancesQuery', () => {
         limit: 5,
         start: '2024-11-20T19:00:00.000Z',
         end: '2024-11-20T20:00:00.000Z',
-        sortBy: { field: 'entity.id', direction: 'ASC' },
+        sortBy: { field: 'entity.id', direction: 'DESC' },
       });
 
       expect(query).toEqual(
@@ -32,7 +32,7 @@ describe('getEntityInstancesQuery', () => {
           'WHERE custom_timestamp_field >= "2024-11-20T19:00:00.000Z" AND custom_timestamp_field <= "2024-11-20T20:00:00.000Z" | ' +
           'STATS host.name = VALUES(host.name), entity.last_seen_timestamp = MAX(custom_timestamp_field), service.id = MAX(service.id) BY service.name | ' +
           'EVAL entity.type = "service", entity.id = service.name, entity.display_name = COALESCE(service.id, entity.id) | ' +
-          'SORT entity.id ASC | ' +
+          'SORT entity.id DESC | ' +
           'LIMIT 5'
       );
     });
