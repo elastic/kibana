@@ -44,6 +44,9 @@ import {
 import { MockSerializedDashboardState } from './types';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
+
+const DASHBOARD_MARGIN_SIZE = 8;
+const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 
 export const GridExample = ({ coreStart }: { coreStart: CoreStart }) => {
