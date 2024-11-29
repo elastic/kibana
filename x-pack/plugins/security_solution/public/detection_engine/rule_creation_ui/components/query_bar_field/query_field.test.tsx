@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { QueryBarDefineRule } from '.';
+import { QueryBarField } from '.';
 import {
   TestProviders,
   useFormFieldMock,
@@ -72,7 +72,7 @@ describe('QueryBarDefineRule', () => {
     const { getByTestId } = render(
       <TestProviders>
         <Router history={mockHistory}>
-          <QueryBarDefineRule
+          <QueryBarField
             isLoading={false}
             indexPattern={{ fields: [], title: 'title' }}
             onCloseTimelineSearch={jest.fn()}
@@ -94,7 +94,7 @@ describe('QueryBarDefineRule', () => {
       const { queryByTestId } = render(
         <TestProviders>
           <Router history={mockHistory}>
-            <QueryBarDefineRule
+            <QueryBarField
               isLoading={false}
               indexPattern={{ fields: [], title: 'title' }}
               onCloseTimelineSearch={jest.fn()}
@@ -119,7 +119,7 @@ describe('QueryBarDefineRule', () => {
     const { getByTestId } = render(
       <TestProviders>
         <Router history={mockHistory}>
-          <QueryBarDefineRule
+          <QueryBarField
             isLoading={false}
             indexPattern={{ fields: [], title: 'title' }}
             onCloseTimelineSearch={jest.fn()}
