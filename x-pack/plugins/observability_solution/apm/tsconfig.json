@@ -127,6 +127,8 @@
     "@kbn/router-utils",
     "@kbn/react-hooks",
     "@kbn/alerting-comparators",
+    "@kbn/saved-search-component",
+    "@kbn/saved-search-plugin",
   ],
   "exclude": ["target/**/*"]
 }
