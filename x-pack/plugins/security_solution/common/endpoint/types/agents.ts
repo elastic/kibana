@@ -8,7 +8,7 @@
 import type { HostStatus } from '.';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../service/response_actions/constants';
 
 export interface AgentStatusInfo {
@@ -17,7 +17,7 @@ export interface AgentStatusInfo {
   found: boolean;
   isolated: boolean;
   lastSeen: string; // ISO date
-  pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
+  pendingActions: Record<EDRActionsApiCommandNames<'endpoint'> | string, number>;
   status: HostStatus;
 }
 

@@ -7,12 +7,12 @@
 
 import {
   type ResponseActionAgentType,
-  type ResponseActionsApiCommandNames,
+  type EDRActionsApiCommandNames,
   type ResponseActionType,
 } from './constants';
 
 type SupportMap = Record<
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames<'endpoint'>,
   Record<ResponseActionType, Record<ResponseActionAgentType, boolean>>
 >;
 
@@ -136,7 +136,7 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
  */
 export const isActionSupportedByAgentType = (
   agentType: ResponseActionAgentType,
-  actionName: ResponseActionsApiCommandNames,
+  actionName: EDRActionsApiCommandNames<'endpoint'>,
   actionType: ResponseActionType
 ): boolean => {
   return RESPONSE_ACTIONS_SUPPORT_MAP[actionName][actionType][agentType];

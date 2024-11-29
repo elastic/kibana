@@ -21,7 +21,7 @@ import type {
 
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionStatus,
 } from '../service/response_actions/constants';
 
@@ -251,7 +251,7 @@ export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
-  command: ResponseActionsApiCommandNames;
+  command: EDRActionsApiCommandNames<'endpoint'>;
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
@@ -383,7 +383,7 @@ export interface ResponseActionApiResponse<
 export interface EndpointPendingActions {
   agent_id: string;
   /** Number of actions pending for each type */
-  pending_actions: Partial<Record<ResponseActionsApiCommandNames, number>> & {
+  pending_actions: Partial<Record<EDRActionsApiCommandNames<'endpoint'>, number>> & {
     // Defined any other key just in case we get back some other actions
     [key: string]: number;
   };
@@ -445,7 +445,7 @@ export interface ActionDetails<
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: ResponseActionsApiCommandNames;
+  command: EDRActionsApiCommandNames<'endpoint'>;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date

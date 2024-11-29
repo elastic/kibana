@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { AppContextTestRender } from '../../mock/endpoint';
-import { createAppRootMockRenderer, endpointAlertDataMock } from '../../mock/endpoint';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import type {TimelineEventsDetailsItem} from '@kbn/timelines-plugin/common';
+import type {AppContextTestRender} from '../../mock/endpoint';
+import {createAppRootMockRenderer, endpointAlertDataMock} from '../../mock/endpoint';
+import type {ResponseActionAgentType} from '../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  EDR_COMMANDS_MAPPING,
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { AlertResponseActionsSupport } from './use_alert_response_actions_support';
+import type {AlertResponseActionsSupport} from './use_alert_response_actions_support';
 import {
   ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD,
   RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS,
   useAlertResponseActionsSupport,
 } from './use_alert_response_actions_support';
-import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
-import type { DeepPartial } from 'utility-types';
-import { merge } from 'lodash';
+import {isAgentTypeAndActionSupported} from '../../lib/endpoint';
+import type {DeepPartial} from 'utility-types';
+import {merge} from 'lodash';
 
 describe('When using `useAlertResponseActionsSupport()` hook', () => {
   let appContextMock: AppContextTestRender;
@@ -46,7 +46,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         details: {
           agentId: 'abfe4a35-d5b4-42a0-a539-bd054c791769',
           agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0],
-          agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce((acc, commandName) => {
+          agentSupport: EDR_COMMANDS_MAPPING<'endpoint'>.reduce((acc, commandName) => {
             acc[commandName] = options.noAgentSupport
               ? false
               : isAgentTypeAndActionSupported(agentType, commandName);
@@ -81,9 +81,9 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
     (agentType) => {
       alertDetailItemData =
         endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType);
-      const { result } = renderHook();
+      const {result} = renderHook();
 
-      expect(result.current).toEqual(getExpectedResult({ details: { agentType } }));
+      expect(result.current).toEqual(getExpectedResult({details: {agentType}}));
     }
   );
 
@@ -103,7 +103,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
             platform: '',
           },
         },
-        { noAgentSupport: true }
+        {noAgentSupport: true}
       )
     );
   });
@@ -111,7 +111,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
   it('should set `isSupported` to `false` for if not an Alert', () => {
     alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(
       'sentinel_one',
-      { 'kibana.alert.rule.uuid': undefined }
+      {'kibana.alert.rule.uuid': undefined}
     );
 
     expect(renderHook().result.current).toEqual(
@@ -136,7 +136,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       getExpectedResult({
         isSupported: false,
         unsupportedReason: ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD('Elastic Defend', 'agent.id'),
-        details: { agentId: '' },
+        details: {agentId: ''},
       })
     );
   });
@@ -155,7 +155,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
             agentIdField: '',
           },
         },
-        { noAgentSupport: true }
+        {noAgentSupport: true}
       )
     );
   });
@@ -172,7 +172,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
             agentIdField: '',
           },
         },
-        { noAgentSupport: true }
+        {noAgentSupport: true}
       )
     );
   });
@@ -184,7 +184,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
   )('should set `isSupported` to `false` for [%s] if feature flag is disabled', (agentType) => {
     switch (agentType) {
       case 'sentinel_one':
-        appContextMock.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: false });
+        appContextMock.setExperimentalFlag({responseActionsSentinelOneV1Enabled: false});
         break;
       case 'crowdstrike':
         appContextMock.setExperimentalFlag({
@@ -200,7 +200,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
     expect(renderHook().result.current).toEqual(
       getExpectedResult({
         isSupported: false,
-        details: { agentType },
+        details: {agentType},
       })
     );
   });

@@ -21,7 +21,7 @@ import { catchAndWrapError } from '../../../utils';
 import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 
@@ -33,7 +33,7 @@ export interface FetchActionRequestsOptions {
   startDate?: string;
   endDate?: string;
   agentTypes?: ResponseActionAgentType[];
-  commands?: ResponseActionsApiCommandNames[];
+  commands?: Array<EDRActionsApiCommandNames<'endpoint'>>;
   elasticAgentIds?: string[];
   userIds?: string[];
   unExpiredOnly?: boolean;

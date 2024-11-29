@@ -18,20 +18,6 @@ export type ResponseActionAgentType = (typeof RESPONSE_ACTION_AGENT_TYPE)[number
 /**
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
  */
-export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
-  'isolate',
-  'unisolate',
-  'kill-process',
-  'suspend-process',
-  'running-processes',
-  'get-file',
-  'execute',
-  'upload',
-  'scan',
-  'runscript',
-] as const;
-
-export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
 export const EDR_COMMANDS_MAPPING = {
   endpoint: [
@@ -52,7 +38,9 @@ export const EDR_COMMANDS_MAPPING = {
 export type EDRActionsApiCommandNames<TAgentType extends keyof typeof EDR_COMMANDS_MAPPING> =
   (typeof EDR_COMMANDS_MAPPING)[TAgentType][number];
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: Array<
+  EDRActionsApiCommandNames<'endpoint'>
+> = [
   'isolate',
   // TODO: TC- Uncomment these when we go GA with automated process actions
   // 'kill-process',
@@ -126,7 +114,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
 });
 
 export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
-  Record<ResponseActionsApiCommandNames, ConsoleResponseActionCommands>
+  Record<EDRActionsApiCommandNames<'endpoint' | 'crowdstrike'>, ConsoleResponseActionCommands>
 >({
   isolate: 'isolate',
   unisolate: 'release',
@@ -141,7 +129,7 @@ export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
 });
 
 export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
-  Record<ConsoleResponseActionCommands, ResponseActionsApiCommandNames>
+  Record<ConsoleResponseActionCommands, EDRActionsApiCommandNames<'endpoint' | 'crowdstrike'>>
 >({
   isolate: 'isolate',
   release: 'unisolate',

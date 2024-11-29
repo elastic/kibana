@@ -16,7 +16,7 @@ import { ExperimentalFeaturesService } from '../../../../common/experimental_fea
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  EDR_COMMANDS_MAPPING,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
@@ -326,7 +326,7 @@ export const useActionsLogFilter = ({
         }))
       : isHostsFilter
       ? []
-      : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+      : EDR_COMMANDS_MAPPING.filter((commandName) => {
           const featureFlags = ExperimentalFeaturesService.get();
 
           // upload - v8.9

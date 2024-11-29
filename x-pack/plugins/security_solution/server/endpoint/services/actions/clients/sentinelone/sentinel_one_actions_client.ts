@@ -52,7 +52,7 @@ import type {
 } from '../lib/types';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../../utils/stringify';
@@ -925,7 +925,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           return;
         }
 
-        switch (actionType as ResponseActionsApiCommandNames) {
+        switch (actionType as EDRActionsApiCommandNames<'endpoint'>) {
           case 'isolate':
           case 'unisolate':
             addResponsesToQueueIfAny(
@@ -993,7 +993,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async fetchScriptInfo<
     TScriptOptions extends SentinelOneScriptArgs = SentinelOneScriptArgs
   >(
-    scriptType: Extract<ResponseActionsApiCommandNames, 'kill-process' | 'running-processes'>,
+    scriptType: Extract<
+      EDRActionsApiCommandNames<'endpoint'>,
+      'kill-process' | 'running-processes'
+    >,
     osType: string | 'linux' | 'macos' | 'windows'
   ): Promise<FetchScriptInfoResponse<TScriptOptions>> {
     const searchQueryParams: Mutable<Partial<SentinelOneGetRemoteScriptsParams>> = {
@@ -1121,7 +1124,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequests: Array<
       ResponseActionsClientPendingAction<undefined, {}, SentinelOneIsolationRequestMeta>
     >,
-    command: ResponseActionsApiCommandNames & ('isolate' | 'unisolate')
+    command: EDRActionsApiCommandNames<'endpoint'> & ('isolate' | 'unisolate')
   ): Promise<LogsEndpointActionResponse[]> {
     const completedResponses: LogsEndpointActionResponse[] = [];
     const actionsByAgentId: {

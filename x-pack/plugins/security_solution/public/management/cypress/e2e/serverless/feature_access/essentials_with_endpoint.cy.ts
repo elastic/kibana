@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
 import { login, ROLE } from '../../../tasks/login';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { EDR_COMMANDS_MAPPING } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   getEndpointManagementPageMap,
   getFleetAgentListTable,
@@ -69,9 +71,7 @@ describe(
         });
       }
 
-      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
-      )) {
+      for (const actionName of EDR_COMMANDS_MAPPING.filter((apiName) => apiName !== 'unisolate')) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });
@@ -98,9 +98,7 @@ describe(
         });
       });
 
-      for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
-      )) {
+      for (const actionName of EDR_COMMANDS_MAPPING.filter((apiName) => apiName !== 'unisolate')) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });

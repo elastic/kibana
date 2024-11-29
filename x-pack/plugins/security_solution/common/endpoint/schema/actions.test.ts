@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   RESPONSE_ACTION_AGENT_TYPE,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  EDR_COMMANDS_MAPPING,
   RESPONSE_ACTION_TYPE,
 } from '../service/response_actions/constants';
 import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
@@ -252,7 +252,7 @@ describe('actions schemas', () => {
     });
 
     describe('commands', () => {
-      it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+      it.each(EDR_COMMANDS_MAPPING.endpoint)(
         'should work with commands query params with %s action',
         (command) => {
           expect(() => {

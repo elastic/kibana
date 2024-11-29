@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ResponseActionsApiCommandNames } from '../service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../service/response_actions/constants';
 import { EndpointError } from '../errors';
 import { usageTracker } from './usage_tracker';
 import type {
@@ -119,7 +119,7 @@ interface BuildIEndpointAndFleetActionsBulkOperationsResponse
 }
 
 const getAutomatedActionsSample = (): Array<{
-  command: ResponseActionsApiCommandNames;
+  command: EDRActionsApiCommandNames<'endpoint'>;
   config?: { overwrite: boolean };
 }> => [
   { command: 'isolate' },

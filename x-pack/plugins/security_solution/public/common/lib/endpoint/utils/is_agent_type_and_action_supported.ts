@@ -7,7 +7,7 @@
 
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -19,7 +19,7 @@ import { ExperimentalFeaturesService } from '../../../experimental_features_serv
  */
 export const isAgentTypeAndActionSupported = (
   agentType: ResponseActionAgentType,
-  actionName?: ResponseActionsApiCommandNames,
+  actionName?: EDRActionsApiCommandNames<'endpoint'>,
   actionType: ResponseActionType = 'manual'
 ): boolean => {
   const features = ExperimentalFeaturesService.get();

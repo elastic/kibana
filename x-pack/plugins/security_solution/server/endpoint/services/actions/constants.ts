@@ -6,11 +6,12 @@
  */
 
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
 } from '../../../../common/endpoint/constants';
+
 /**
  * The Page Size to be used when searching against the Actions indexes (both requests and responses)
  */
@@ -24,7 +25,6 @@ export const ACTION_RESPONSE_INDICES = [
 ];
 
 /** Legacy API"s that should still return `action` (the action id) in the response */
-export const responseActionsWithLegacyActionProperty: readonly ResponseActionsApiCommandNames[] = [
-  'isolate',
-  'unisolate',
-];
+export const responseActionsWithLegacyActionProperty: ReadonlyArray<
+  EDRActionsApiCommandNames<'endpoint'>
+> = ['isolate', 'unisolate'];

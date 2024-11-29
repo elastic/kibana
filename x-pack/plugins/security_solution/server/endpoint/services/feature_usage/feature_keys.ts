@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const FEATURE_KEYS = {
   HOST_ISOLATION: 'Host isolation',
@@ -30,21 +30,22 @@ export const FEATURE_KEYS = {
 
 export type FeatureKeys = keyof typeof FEATURE_KEYS;
 
-const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<Record<ResponseActionsApiCommandNames, FeatureKeys>> =
-  {
-    isolate: 'HOST_ISOLATION',
-    unisolate: 'HOST_ISOLATION',
-    'kill-process': 'KILL_PROCESS',
-    'suspend-process': 'SUSPEND_PROCESS',
-    'running-processes': 'RUNNING_PROCESSES',
-    'get-file': 'GET_FILE',
-    execute: 'EXECUTE',
-    upload: 'UPLOAD',
-    scan: 'SCAN',
-  };
+const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<
+  Record<EDRActionsApiCommandNames<'endpoint'>, FeatureKeys>
+> = {
+  isolate: 'HOST_ISOLATION',
+  unisolate: 'HOST_ISOLATION',
+  'kill-process': 'KILL_PROCESS',
+  'suspend-process': 'SUSPEND_PROCESS',
+  'running-processes': 'RUNNING_PROCESSES',
+  'get-file': 'GET_FILE',
+  execute: 'EXECUTE',
+  upload: 'UPLOAD',
+  scan: 'SCAN',
+};
 
 export const getResponseActionFeatureKey = (
-  responseAction: ResponseActionsApiCommandNames
+  responseAction: EDRActionsApiCommandNames
 ): FeatureKeys | undefined => {
   return RESPONSE_ACTIONS_FEATURE_KEY[responseAction];
 };

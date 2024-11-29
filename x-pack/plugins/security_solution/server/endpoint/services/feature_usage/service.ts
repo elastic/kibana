@@ -7,7 +7,7 @@
 
 import type { Values } from '@kbn/utility-types';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type { FeatureKeys } from './feature_keys';
 import { getResponseActionFeatureKey, FEATURE_KEYS } from './feature_keys';
 
@@ -33,7 +33,7 @@ export class FeatureUsageService {
   }
 
   public getResponseActionFeatureKey(
-    responseAction: ResponseActionsApiCommandNames
+    responseAction: EDRActionsApiCommandNames<'endpoint'>
   ): FeatureKeys | undefined {
     return getResponseActionFeatureKey(responseAction);
   }

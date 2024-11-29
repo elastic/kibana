@@ -7,7 +7,7 @@
 
 import type { AlertResponseActionsSupport } from '../use_alert_response_actions_support';
 import {
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  EDR_COMMANDS_MAPPING,
   RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 
@@ -22,7 +22,7 @@ const useAlertResponseActionsSupportMock = (): AlertResponseActionsSupport => {
       agentIdField: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.endpoint[0],
       hostName: 'host-a',
       platform: 'linux',
-      agentSupport: RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<
+      agentSupport: EDR_COMMANDS_MAPPING.endpoint.reduce<
         AlertResponseActionsSupport['details']['agentSupport']
       >((acc, responseActionName) => {
         acc[responseActionName] = true;

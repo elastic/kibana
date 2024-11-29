@@ -13,7 +13,7 @@ import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../../mo
 import { agentStatusGetHttpMock } from '../../../../../management/mocks';
 import { useUserPrivileges as _useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
-import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { agentStatusMocks } from '../../../../../../common/endpoint/service/response_actions/mocks/agent_status.mocks';
 import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import {
@@ -74,7 +74,7 @@ describe('useHostIsolationAction', () => {
     authMockSetter.reset();
   });
 
-  it.each<ResponseActionsApiCommandNames>(['isolate', 'unisolate'])(
+  it.each<EDRActionsApiCommandNames<'endpoint'>>(['isolate', 'unisolate'])(
     'should return menu item for displaying %s',
     async (command) => {
       if (command === 'unisolate') {

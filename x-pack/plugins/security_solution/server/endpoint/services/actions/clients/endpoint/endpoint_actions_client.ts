@@ -13,7 +13,7 @@ import { ResponseActionsClientError } from '../errors';
 import { stringify } from '../../../../utils/stringify';
 import type { HapiReadableStream } from '../../../../../types';
 import type {
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
   ResponseActionAgentType,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -94,7 +94,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     TResponse extends ActionDetails = ActionDetails,
     TMethodOptions extends CommonResponseActionMethodOptions = CommonResponseActionMethodOptions
   >(
-    command: ResponseActionsApiCommandNames,
+    command: EDRActionsApiCommandNames<'endpoint'>,
     actionReq: TOptions,
     options?: TMethodOptions
   ): Promise<TResponse> {
@@ -349,7 +349,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const createFileActionOptions = {
       ...actionPayload,
       parameters: uploadParameters,
-      command: 'upload' as ResponseActionsApiCommandNames,
+      command: 'upload' as EDRActionsApiCommandNames<'endpoint'>,
     };
 
     try {

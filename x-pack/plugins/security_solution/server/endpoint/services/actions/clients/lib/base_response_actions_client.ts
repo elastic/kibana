@@ -37,7 +37,7 @@ import type { EndpointAppContextService } from '../../../../endpoint_app_context
 import { APP_ID } from '../../../../../../common';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
@@ -90,7 +90,7 @@ import { EMPTY_COMMENT } from '../../../../utils/translations';
 
 const ELASTIC_RESPONSE_ACTION_MESSAGE = (
   username: string = 'system',
-  command: ResponseActionsApiCommandNames,
+  command: EDRActionsApiCommandNames<'endpoint'>,
   responseActionId: string
 ): string => {
   return i18n.translate('xpack.securitySolution.responseActions.comment.message', {
@@ -129,7 +129,7 @@ export interface ResponseActionsClientOptions {
 
 export interface ResponseActionsClientUpdateCasesOptions {
   /** The Response Action that was taken */
-  command: ResponseActionsApiCommandNames;
+  command: EDRActionsApiCommandNames<'endpoint'>;
   /** the list of hosts that received the response action `command` */
   hosts: Array<{
     hostname: string;
@@ -151,7 +151,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
 > = ResponseActionsRequestBody &
   Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
   Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
-    command: ResponseActionsApiCommandNames;
+    command: EDRActionsApiCommandNames<'endpoint'>;
     actionId?: string;
   };
 
@@ -606,7 +606,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     return doc;
   }
 
-  protected notifyUsage(responseAction: ResponseActionsApiCommandNames): void {
+  protected notifyUsage(responseAction: EDRActionsApiCommandNames<'endpoint'>): void {
     const usageService = this.options.endpointService.getFeatureUsageService();
     const featureKey = usageService.getResponseActionFeatureKey(responseAction);
 
@@ -739,7 +739,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   protected sendActionCreationErrorTelemetry(
-    command: ResponseActionsApiCommandNames,
+    command: EDRActionsApiCommandNames<'endpoint'>,
     error: Error
   ): void {
     if (!this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled) {

@@ -20,9 +20,8 @@ import { createBaseActionRequestHandler } from '../base_response_actions_handler
 import type { ResponseActionsRequestBody } from '../../../../../common/api/endpoint';
 import type { ResponseActionsClient } from '../../../services';
 import type {
-  EDRActionsApiCommandNames,
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ActionDetails,
@@ -57,7 +56,7 @@ export function crowdStrikeActionRequestHandler<T extends CrowdStrikeActionDataP
 }
 
 const handleCrowdstrikeActionCreation = async (
-  command: ResponseActionsApiCommandNames,
+  command: EDRActionsApiCommandNames<'crowdstrike'>,
   body: ResponseActionsRequestBody,
   responseActionsClient: ResponseActionsClient
 ): Promise<

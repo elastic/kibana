@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inputConsoleCommand, submitCommand } from './response_console';
@@ -22,7 +24,7 @@ import {
   UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type { ActionDetails, ActionDetailsApiResponse } from '../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type { EDRActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
@@ -212,7 +214,7 @@ export const waitForActionToSucceed = (
  */
 export const ensureResponseActionAuthzAccess = (
   accessLevel: Exclude<UserAuthzAccessLevel, 'read'>,
-  responseAction: ResponseActionsApiCommandNames,
+  responseAction: EDRActionsApiCommandNames<'endpoint'>,
   username: string,
   password: string
 ): Cypress.Chainable => {

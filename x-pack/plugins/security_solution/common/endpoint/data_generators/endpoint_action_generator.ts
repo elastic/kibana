@@ -36,7 +36,7 @@ import {
 } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
-  RESPONSE_ACTION_API_COMMANDS_NAMES,
+  EDR_COMMANDS_MAPPING,
 } from '../service/response_actions/constants';
 import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
 
@@ -564,6 +564,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   protected randomResponseActionCommand() {
-    return this.randomChoice(RESPONSE_ACTION_API_COMMANDS_NAMES);
+    return this.randomChoice(EDR_COMMANDS_MAPPING.endpoint);
   }
 }

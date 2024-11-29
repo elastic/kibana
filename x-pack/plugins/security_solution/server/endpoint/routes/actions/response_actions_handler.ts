@@ -13,9 +13,8 @@ import type {
 } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import type {
-  EDRActionsApiCommandNames,
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   ExecuteActionRequestBody,
@@ -59,7 +58,7 @@ function isThirdPartyFeatureDisabled(
 }
 
 async function handleActionCreation(
-  command: ResponseActionsApiCommandNames,
+  command: EDRActionsApiCommandNames<'endpoint'>,
   body: ResponseActionsRequestBody,
   responseActionsClient: ResponseActionsClient
 ): Promise<ActionDetails> {

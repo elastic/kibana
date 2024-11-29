@@ -21,13 +21,13 @@ import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames<'endpoint'>,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 
 const formatRequestParams = <
-  T extends string | ResponseActionsApiCommandNames | ResponseActionAgentType
+  T extends string | EDRActionsApiCommandNames<'endpoint'> | ResponseActionAgentType
 >(
   value: T | T[] | undefined
 ): T[] | undefined => (typeof value === 'string' ? [value] : value);

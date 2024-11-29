@@ -15,9 +15,9 @@ import { getAlertDetailsFieldValue } from '../../lib/endpoint/utils/get_event_de
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type {
   ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
+import { EDR_COMMANDS_MAPPING } from '../../../../common/endpoint/service/response_actions/constants';
 import { getAgentTypeName } from '../../translations';
 
 export const ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD = (
@@ -78,7 +78,7 @@ export interface AlertResponseActionsSupport {
   };
 }
 
-type AlertAgentActionsSupported = Record<ResponseActionsApiCommandNames, boolean>;
+type AlertAgentActionsSupported = Record<EDRActionsApiCommandNames<'endpoint'>, boolean>;
 
 /**
  * Determines the level of support that an alert's host has for Response Actions.
@@ -131,22 +131,19 @@ export const useAlertResponseActionsSupport = (
   }, [agentId, agentType, isAlert, isFeatureEnabled]);
 
   const supportedActions = useMemo(() => {
-    return RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<AlertAgentActionsSupported>(
-      (acc, responseActionName) => {
-        acc[responseActionName] = false;
+    return EDR_COMMANDS_MAPPING.reduce<AlertAgentActionsSupported>((acc, responseActionName) => {
+      acc[responseActionName] = false;
 
-        if (agentType && isFeatureEnabled) {
-          acc[responseActionName] = isAgentTypeAndActionSupported(
-            agentType,
-            responseActionName,
-            'manual'
-          );
-        }
+      if (agentType && isFeatureEnabled) {
+        acc[responseActionName] = isAgentTypeAndActionSupported(
+          agentType,
+          responseActionName,
+          'manual'
+        );
+      }
 
-        return acc;
-      },
-      {} as AlertAgentActionsSupported
-    );
+      return acc;
+    }, {} as AlertAgentActionsSupported);
   }, [agentType, isFeatureEnabled]);
 
   const hostName = useMemo(() => {

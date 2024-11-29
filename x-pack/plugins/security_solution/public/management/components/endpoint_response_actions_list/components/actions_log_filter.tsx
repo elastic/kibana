@@ -15,7 +15,7 @@ import {
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
-  type ResponseActionsApiCommandNames,
+  type EDRActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
 import {
@@ -151,7 +151,7 @@ export const ActionsLogFilter = memo(
                 .map(
                   (item) =>
                     RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
-                      item as ResponseActionsApiCommandNames
+                      item as EDRActionsApiCommandNames<'endpoint'>
                     ]
                 )
                 .join()

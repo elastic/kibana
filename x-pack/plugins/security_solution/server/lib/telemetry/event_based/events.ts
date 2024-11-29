@@ -8,7 +8,7 @@ import type { EventTypeOpts } from '@kbn/core/server';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
-  ResponseActionsApiCommandNames,
+  EDRActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 
@@ -276,6 +276,7 @@ interface CreateAssetCriticalityProcessedFileEvent {
   startTime: Date;
   endTime: Date;
 }
+
 export const createAssetCriticalityProcessedFileEvent = ({
   result,
   startTime,
@@ -321,7 +322,7 @@ const getUploadStatus = (stats?: BulkUpsertAssetCriticalityRecordsResponse['stat
 export const ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT: EventTypeOpts<{
   responseActions: {
     agentType: ResponseActionAgentType;
-    command: ResponseActionsApiCommandNames;
+    command: EDRActionsApiCommandNames<'endpoint'>;
     error: string;
   };
 }> = {
@@ -358,7 +359,7 @@ export const ENDPOINT_RESPONSE_ACTION_SENT_EVENT: EventTypeOpts<{
   responseActions: {
     actionId: string;
     agentType: ResponseActionAgentType;
-    command: ResponseActionsApiCommandNames;
+    command: EDRActionsApiCommandNames<'endpoint'>;
     isAutomated: boolean;
   };
 }> = {
@@ -404,7 +405,7 @@ export const ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT: EventTypeOpts<{
     actionId: string;
     agentType: ResponseActionAgentType;
     actionStatus: ResponseActionStatus;
-    command: ResponseActionsApiCommandNames;
+    command: EDRActionsApiCommandNames<'endpoint'>;
   };
 }> = {
   eventType: 'endpoint_response_action_status_change_event',
