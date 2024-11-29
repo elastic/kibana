@@ -96,7 +96,7 @@ describe('AddDocumentsCodeExample', () => {
     it('pass basic examples when mapping is default with extra vector fields', () => {
       const indexName = 'test-index';
       const mappingProperties: Record<string, MappingProperty> = {
-        vector: { type: 'dense_vector', dims: 3, extraField: 'extra' },
+        vector: { type: 'dense_vector', dims: 3, similarity: 'extra' },
         text: { type: 'text' },
       };
 
