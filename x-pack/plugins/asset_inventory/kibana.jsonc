@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/asset-inventory-plugin",
+  "owner": [
+    "@elastic/kibana-cloud-security-posture"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "Centralized place to view and manage all assets in Kibana",
+  "plugin": {
+    "id": "assetInventory",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "assetInventory"
+    ],
+    "requiredPlugins": ["navigation"],
+    "requiredBundles": [],
+    "optionalPlugins": []
+  },
+}
