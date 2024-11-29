@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import { StringOutputParser } from '@langchain/core/output_parsers';
+import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ChatModel } from '../../../util/actions_client_chat';
-import type { GraphNode } from '../../types';
 import { filterPrebuiltRules, type PrebuiltRulesMapByName } from '../../../util/prebuilt_rules';
+import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
   prebuiltRulesMap: PrebuiltRulesMapByName;
-  logger: Logger;
+}
+
+interface GetMatchedRuleResponse {
+  match: string;
 }
 
 export const getMatchPrebuiltRuleNode =
@@ -25,34 +27,32 @@ export const getMatchPrebuiltRuleNode =
     if (!mitreAttackIds?.length) {
       return {};
     }
+
     const filteredPrebuiltRulesMap = filterPrebuiltRules(prebuiltRulesMap, mitreAttackIds);
     if (filteredPrebuiltRulesMap.size === 0) {
       return {};
     }
 
-    const outputParser = new StringOutputParser();
+    const outputParser = new JsonOutputParser();
     const matchPrebuiltRule = MATCH_PREBUILT_RULE_PROMPT.pipe(model).pipe(outputParser);
 
-    const elasticSecurityRules = Array(filteredPrebuiltRulesMap.keys()).join('\n');
-    const response = await matchPrebuiltRule.invoke({
+    const elasticSecurityRules = [...filteredPrebuiltRulesMap.keys()].join('\n');
+    const response = (await matchPrebuiltRule.invoke({
       elasticSecurityRules,
       ruleTitle: state.original_rule.title,
-    });
-    const cleanResponse = response.trim();
-    if (cleanResponse === 'no_match') {
-      return {};
-    }
-
-    const result = filteredPrebuiltRulesMap.get(cleanResponse);
-    if (result != null) {
-      return {
-        elastic_rule: {
-          title: result.rule.name,
-          description: result.rule.description,
-          prebuilt_rule_id: result.rule.rule_id,
-          id: result.installedRuleId,
-        },
-      };
+    })) as GetMatchedRuleResponse;
+    if (response.match) {
+      const result = filteredPrebuiltRulesMap.get(response.match);
+      if (result != null) {
+        return {
+          elastic_rule: {
+            title: result.rule.name,
+            description: result.rule.description,
+            prebuilt_rule_id: result.rule.rule_id,
+            id: result.installedRuleId,
+          },
+        };
+      }
     }
 
     return {};
