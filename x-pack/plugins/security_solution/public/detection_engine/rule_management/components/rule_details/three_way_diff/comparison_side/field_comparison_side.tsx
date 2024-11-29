@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiTitle } from '@elastic/eui';
-import { VersionsPicker } from '../versions_picker/versions_picker';
-import type { Version } from '../versions_picker/constants';
-import { SelectedVersions } from '../versions_picker/constants';
+import { VersionsPicker } from './versions_picker/versions_picker';
+import type { Version } from './versions_picker/constants';
+import { SelectedVersions } from './versions_picker/constants';
 import { FieldUpgradeSideHeader } from '../field_upgrade_side_header';
 import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { pickFieldValueForVersion } from './utils';

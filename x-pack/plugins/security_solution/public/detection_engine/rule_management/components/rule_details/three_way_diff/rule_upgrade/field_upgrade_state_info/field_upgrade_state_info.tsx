@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { FieldUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
-import { ReadyForUpgradeBadge } from '../badges/ready_for_upgrade_badge';
-import { ReviewRequiredBadge } from '../badges/review_required_badge';
-import { ActionRequiredBadge } from '../badges/action_required';
+import { assertUnreachable } from '../../../../../../../../common/utility_types';
+import { FieldUpgradeState } from '../../../../../model/prebuilt_rule_upgrade';
+import { ReadyForUpgradeBadge } from '../../badges/ready_for_upgrade_badge';
+import { ReviewRequiredBadge } from '../../badges/review_required_badge';
+import { ActionRequiredBadge } from '../../badges/action_required';
 import * as i18n from './translations';
 
 interface FieldUpgradeStateInfoProps {
@@ -60,7 +60,7 @@ export function FieldUpgradeStateInfo({ state }: FieldUpgradeStateInfoProps): JS
   return (
     <>
       <EuiText color={color} size="xs">
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>{badge}</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <strong>{title}</strong>
