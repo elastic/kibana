@@ -33,12 +33,33 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     value: Path.resolve(REPO_ROOT, 'src/plugins'),
   },
   {
+    name: 'Kibana Platform OSS',
+    value: Path.resolve(REPO_ROOT, 'src/platform/plugins'),
+  },
+
+  {
     name: 'Kibana OSS Functional Testing',
     value: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
   },
   {
     name: 'X-Pack',
     value: Path.resolve(REPO_ROOT, 'x-pack/plugins'),
+  },
+  {
+    name: 'X-Pack Platform',
+    value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins'),
+  },
+  {
+    name: 'X-Pack Observability',
+    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/observability/plugins'),
+  },
+  {
+    name: 'X-Pack Security',
+    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/security/plugins'),
+  },
+  {
+    name: 'X-Pack Search',
+    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/search/plugins'),
   },
   {
     name: 'X-Pack Functional Testing',
