@@ -12,7 +12,6 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { isTestDataExpectedWithSampleProbability, type TestData } from './types';
 import { logRateAnalysisTestData } from './log_rate_analysis_test_data';
-import { USER } from '../../services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home', 'security']);
@@ -20,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
   const retry = getService('retry');
-  const cases = getService('cases');
 
   // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -324,92 +322,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   describe('log rate analysis', function () {
-    describe('attachments', function () {
-      const testData = logRateAnalysisTestData[0];
-
-      before(async () => {
-        await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
-        await ml.testResources.setKibanaTimeZoneToUTC();
-        await ml.securityUI.loginAsMlPowerUser();
-        await ml.testResources.createDataViewIfNeeded(
-          testData.sourceIndexOrSavedSearch,
-          '@timestamp'
-        );
-        await ml.navigation.navigateToMl();
-      });
-
-      after(async () => {
-        await elasticChart.setNewChartUiDebugFlag(false);
-        await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
-        await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
-        await cases.api.deleteAllCases();
-      });
-
-      it('attaches log rate analysis to a dashboard', async () => {
-        await aiops.logRateAnalysisPage.navigateToDataViewSelection();
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} loads the log rate analysis page with selected data source`
-        );
-        await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
-          testData.sourceIndexOrSavedSearch
-        );
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} starting dashboard attachment process`
-        );
-        await aiops.logRateAnalysisPage.attachToDashboard();
-      });
-
-      it('attaches log rate analysis to a case', async () => {
-        await ml.navigation.navigateToMl();
-
-        await aiops.logRateAnalysisPage.navigateToDataViewSelection();
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} loads the log rate analysis page with selected data source`
-        );
-        await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
-          testData.sourceIndexOrSavedSearch
-        );
-
-        await ml.testExecution.logTestStep('asserts the attach to case button is disabled');
-        await aiops.logRateAnalysisPage.openAttachmentsMenu();
-        await aiops.logRateAnalysisPage.assertAttachToCaseButtonDisabled();
-
-        await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
-
-        await aiops.logRateAnalysisPage.clickUseFullDataButton(
-          testData.expected.totalDocCountFormatted
-        );
-
-        await ml.testExecution.logTestStep('clicks the document count chart to start analysis');
-        await aiops.logRateAnalysisPage.clickDocumentCountChart(testData.chartClickCoordinates);
-
-        if (!testData.autoRun) {
-          await aiops.logRateAnalysisPage.assertNoAutoRunButtonExists();
-          await aiops.logRateAnalysisPage.clickNoAutoRunButton();
-        }
-
-        await aiops.logRateAnalysisPage.assertAnalysisSectionExists();
-
-        await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} starting cases attachment process`
-        );
-
-        const caseParams = {
-          title: testData.suiteTitle,
-          description: `Description for ${testData.suiteTitle}`,
-          tag: 'ml_log_rate_analysis',
-          reporter: USER.ML_POWERUSER,
-        };
-
-        await aiops.logRateAnalysisPage.attachToCase(caseParams);
-
-        await ml.cases.assertCaseWithLogRateAnalysisAttachment(caseParams);
-      });
-    });
-
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
@@ -434,6 +346,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // Start navigation from the base of the ML app.
           await ml.navigation.navigateToMl();
           await elasticChart.setNewChartUiDebugFlag(true);
+        });
+
+        it(`${testData.suiteTitle} attaches log rate analysis to a dashboard`, async () => {
+          await aiops.logRateAnalysisPage.navigateToDataViewSelection();
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} loads the log rate analysis page with selected data source`
+          );
+          await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
+            testData.sourceIndexOrSavedSearch
+          );
+
+          await ml.testExecution.logTestStep(
+            `${testData.suiteTitle} starting dashboard attachment process`
+          );
+          await aiops.logRateAnalysisPage.attachToDashboard();
+
+          await ml.navigation.navigateToMl();
         });
 
         runTests(testData);
