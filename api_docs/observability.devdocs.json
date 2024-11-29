@@ -8640,7 +8640,7 @@
             "label": "tags",
             "description": [],
             "signature": [
-              "string[]"
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/observability_solution/observability/server/routes/types.ts",
             "deprecated": false,

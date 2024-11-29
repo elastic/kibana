@@ -11,7 +11,7 @@
         "label": "GridLayout",
         "description": [],
         "signature": [
-          "({ layout, gridSettings, renderPanelContents, onLayoutChange, }: GridLayoutProps) => React.JSX.Element"
+          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, }: GridLayoutProps) => React.JSX.Element"
         ],
         "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
         "deprecated": false,
@@ -22,7 +22,7 @@
             "id": "def-public.GridLayout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n}",
+            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n}",
             "description": [],
             "signature": [
               "GridLayoutProps"
@@ -258,6 +258,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridAccessMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GridAccessMode",
+        "description": [],
+        "signature": [
+          "\"VIEW\" | \"EDIT\""
+        ],
+        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/grid-layout",
         "id": "def-public.GridLayoutData",
