@@ -45,17 +45,17 @@ function extendPageWithTestSubject(page: Page) {
     };
   }
 
-  // custom method to type text slowly
+  // custom method to type text slowly using keyboard.insertText
   extendedMethods.typeWithDelay = async (
     selector: string,
     text: string,
     options?: { delay: number }
   ) => {
     const { delay = 50 } = options || {};
+    const testSubjSelector = subj(selector);
+    await page.locator(testSubjSelector).click();
     for (const char of text) {
-      const testSubjSelector = subj(selector);
-      await page.locator(testSubjSelector).click();
-      await page.keyboard.press(char);
+      await page.keyboard.insertText(char);
       await page.waitForTimeout(delay); // Delay in milliseconds
     }
   };

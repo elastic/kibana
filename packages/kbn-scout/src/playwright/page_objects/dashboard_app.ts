@@ -30,16 +30,13 @@ export class DashboardApp {
   async addPanelFromLibrary(...names: string[]) {
     await this.page.testSubj.click('dashboardAddFromLibraryButton');
     for (let i = 0; i < names.length; i++) {
+      // clear search input after the first panel is added
       if (i > 0) {
         await this.page.testSubj.locator('savedObjectFinderSearchInput').fill('');
       }
-      // there is an issue typing a string longer than 16 character
-      const partialName = names[i].substring(0, 16);
-      await this.page.testSubj.typeWithDelay(
-        'savedObjectFinderSearchInput',
-        partialName.replace('-', ' ')
-      );
+      await this.page.testSubj.typeWithDelay('savedObjectFinderSearchInput', names[i]);
       await this.page.testSubj.click(`savedObjectTitle${names[i].replace(/ /g, '-')}`);
+      // wait for the panel to be added
       await this.page.testSubj.waitForSelector(
         `embeddablePanelHeading-${names[i].replace(/[- ]/g, '')}`,
         {
@@ -47,6 +44,7 @@ export class DashboardApp {
         }
       );
     }
+    // close the flyout
     await this.page.testSubj.click('euiFlyoutCloseButton');
     await this.page.testSubj.waitForSelector('euiFlyoutCloseButton', { state: 'hidden' });
   }
