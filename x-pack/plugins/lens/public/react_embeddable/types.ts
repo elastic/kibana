@@ -26,6 +26,7 @@ import type {
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
+  PublishesRendered,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
   PublishingSubject,
@@ -364,6 +365,8 @@ export type LensApi = Simplify<
     PublishesUnifiedSearch &
     // Let the container know the loading state
     PublishesDataLoading &
+    // Let the container know when the rendering has completed rendering
+    PublishesRendered &
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
