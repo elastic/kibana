@@ -161,34 +161,6 @@ interface EntityEngineInstallationDescriptor {
     | ((defaultProcessors: IngestProcessorContainer) => IngestProcessorContainer[]);
 }
 
-const uni: EntityEngineInstallationDescriptor = {
-  version: '1.0.0',
-  entityType: 'universal',
-  indexPatterns: ['logs-store'],
-  identityFields: ['related.entity'],
-  fields: [
-    {
-      source: 'entities.keyword',
-      destination: 'related.entity',
-      aggregation: {
-        type: 'terms',
-        limit: 10,
-      },
-      retention_operator: { operation: 'collect_values', field: 'related.entity', maxLength: 10 },
-      mapping: { type: 'keyword' },
-    },
-  ],
-  settings: {
-    syncDelay: '1m',
-    frequency: '1m',
-    lookbackPeriod: '1d',
-    timestampField: '@timestamp',
-  },
-  pipeline: [entityMetadataExtractorProcessor],
-
-  indexMappings: {},
-};
-
 const entityMetadataExtractorProcessor = {
   script: {
     tag: 'entity_metadata_extractor',
@@ -218,4 +190,31 @@ merged.entity.id = id;
 ctx = merged;
 `,
   },
+};
+const uni: EntityEngineInstallationDescriptor = {
+  version: '1.0.0',
+  entityType: 'universal',
+  indexPatterns: ['logs-store'],
+  identityFields: ['related.entity'],
+  fields: [
+    {
+      source: 'entities.keyword',
+      destination: 'related.entity',
+      aggregation: {
+        type: 'terms',
+        limit: 10,
+      },
+      retention_operator: { operation: 'collect_values', maxLength: 10 },
+      mapping: { type: 'keyword' },
+    },
+  ],
+  settings: {
+    syncDelay: '1m',
+    frequency: '1m',
+    lookbackPeriod: '1d',
+    timestampField: '@timestamp',
+  },
+  pipeline: [entityMetadataExtractorProcessor],
+
+  indexMappings: {},
 };
