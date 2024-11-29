@@ -26,9 +26,6 @@ import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callou
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
-
-import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 import { ConvertConnector } from '../search_index/connector/native_connector_configuration/convert_connector';
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
 import { ResearchConfiguration } from '../search_index/connector/native_connector_configuration/research_configuration';
@@ -41,7 +38,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
   const { connector } = useValues(ConnectorViewLogic);
   const { config, connectorTypes: connectors } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
-  const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
 
   const NATIVE_CONNECTORS = useMemo(
     () => connectors.filter(({ isNative }) => isNative),
@@ -68,7 +64,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
   };
 
   const iconPath = nativeConnector.iconPath;
-  const hasApiKey = !!(connector.api_key_id ?? apiKeyData);
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
   const isBeta =
@@ -168,23 +163,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   status={connector.status}
                 />
                 <EuiSpacer />
-              </EuiPanel>
-              <EuiSpacer />
-              <EuiPanel hasBorder>
-                <EuiTitle size="s">
-                  <h4>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.apiKey.title',
-                      { defaultMessage: 'API Key' }
-                    )}
-                  </h4>
-                </EuiTitle>
-                <EuiSpacer size="m" />
-                <ApiKeyConfig
-                  indexName={connector.index_name || ''}
-                  hasApiKey={hasApiKey}
-                  isNative
-                />
               </EuiPanel>
               <EuiSpacer />
               <EuiPanel hasBorder>

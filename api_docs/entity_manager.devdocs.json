@@ -55,15 +55,7 @@
                 "section": "def-common.EntityV2",
                 "text": "EntityV2"
               },
-              "[]; }>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"POST /internal/entities/v2/_search\": ",
+              "[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -81,15 +73,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"PATCH /internal/entities/definition/{id}\": ",
+              "<any>, undefined>; \"PATCH /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -179,15 +163,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"POST /internal/entities/definition/{id}/_reset\": ",
+              "<any>, undefined>; \"POST /internal/entities/definition/{id}/_reset\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -205,15 +181,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"GET /internal/entities/definition/{id?}\": ",
+              "<any>, undefined>; \"GET /internal/entities/definition/{id?}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -231,15 +199,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"DELETE /internal/entities/definition/{id}\": ",
+              "<any>, undefined>; \"DELETE /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -257,15 +217,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"POST /internal/entities/definition\": ",
+              "<any>, undefined>; \"POST /internal/entities/definition\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -355,15 +307,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"DELETE /internal/entities/managed/enablement\": ",
+              "<any>, undefined>; \"DELETE /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -381,15 +325,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"PUT /internal/entities/managed/enablement\": ",
+              "<any>, undefined>; \"PUT /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -407,25 +343,9 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"GET /internal/entities/managed/enablement\": ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.ServerRoute",
-                "text": "ServerRoute"
-              },
-              "<\"GET /internal/entities/managed/enablement\", undefined, ",
+              "<any>, undefined>; \"GET /internal/entities/managed/enablement\": { endpoint: \"GET /internal/entities/managed/enablement\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
-              ", ",
+              ", undefined, ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -433,15 +353,23 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
+              "<any>>; security?: ",
               {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
               },
-              ">; }, TEndpoint> & {}>) => Promise<",
+              " | undefined; }; }, TEndpoint> & ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpFetchOptions",
+                "text": "HttpFetchOptions"
+              },
+              ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -475,15 +403,7 @@
                 "section": "def-common.EntityV2",
                 "text": "EntityV2"
               },
-              "[]; }>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"POST /internal/entities/v2/_search\": ",
+              "[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -501,15 +421,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"PATCH /internal/entities/definition/{id}\": ",
+              "<any>, undefined>; \"PATCH /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -599,15 +511,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"POST /internal/entities/definition/{id}/_reset\": ",
+              "<any>, undefined>; \"POST /internal/entities/definition/{id}/_reset\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -625,15 +529,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"GET /internal/entities/definition/{id?}\": ",
+              "<any>, undefined>; \"GET /internal/entities/definition/{id?}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -651,15 +547,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"DELETE /internal/entities/definition/{id}\": ",
+              "<any>, undefined>; \"DELETE /internal/entities/definition/{id}\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -677,15 +565,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"POST /internal/entities/definition\": ",
+              "<any>, undefined>; \"POST /internal/entities/definition\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -775,15 +655,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"DELETE /internal/entities/managed/enablement\": ",
+              "<any>, undefined>; \"DELETE /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -801,15 +673,7 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"PUT /internal/entities/managed/enablement\": ",
+              "<any>, undefined>; \"PUT /internal/entities/managed/enablement\": ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
                 "scope": "common",
@@ -827,25 +691,9 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
-              },
-              ">; \"GET /internal/entities/managed/enablement\": ",
-              {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.ServerRoute",
-                "text": "ServerRoute"
-              },
-              "<\"GET /internal/entities/managed/enablement\", undefined, ",
+              "<any>, undefined>; \"GET /internal/entities/managed/enablement\": { endpoint: \"GET /internal/entities/managed/enablement\"; handler: ServerRouteHandler<",
               "EntityManagerRouteHandlerResources",
-              ", ",
+              ", undefined, ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "server",
@@ -853,15 +701,15 @@
                 "section": "def-server.IKibanaResponse",
                 "text": "IKibanaResponse"
               },
-              "<any>, ",
+              "<any>>; security?: ",
               {
-                "pluginId": "@kbn/server-route-repository-utils",
-                "scope": "common",
-                "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                "section": "def-common.DefaultRouteCreateOptions",
-                "text": "DefaultRouteCreateOptions"
+                "pluginId": "@kbn/core-http-server",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-server.RouteSecurity",
+                "text": "RouteSecurity"
               },
-              ">; }, TEndpoint>>"
+              " | undefined; }; }, TEndpoint>>"
             ],
             "path": "x-pack/plugins/entity_manager/public/lib/entity_client.ts",
             "deprecated": false,
@@ -899,7 +747,15 @@
                     "section": "def-common.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
-                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions> extends never ? [] | [",
+                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-public.HttpFetchOptions",
+                    "text": "HttpFetchOptions"
+                  },
+                  "> extends never ? [] | [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
                     "scope": "common",
@@ -907,7 +763,15 @@
                     "section": "def-common.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
-                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions] : [",
+                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-public.HttpFetchOptions",
+                    "text": "HttpFetchOptions"
+                  },
+                  "] : [",
                   {
                     "pluginId": "@kbn/server-route-repository-utils",
                     "scope": "common",
@@ -915,7 +779,15 @@
                     "section": "def-common.ClientRequestParamsOf",
                     "text": "ClientRequestParamsOf"
                   },
-                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions]"
+                  "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
+                  {
+                    "pluginId": "@kbn/core-http-browser",
+                    "scope": "public",
+                    "docId": "kibKbnCoreHttpBrowserPluginApi",
+                    "section": "def-public.HttpFetchOptions",
+                    "text": "HttpFetchOptions"
+                  },
+                  "]"
                 ],
                 "path": "packages/kbn-server-route-repository-utils/src/typings.ts",
                 "deprecated": false,
@@ -1046,6 +918,48 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityManager",
+            "id": "def-public.EntityClient.getEntityDefinition",
+            "type": "Function",
+            "tags": [],
+            "label": "getEntityDefinition",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<{ definitions: { id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+              {
+                "pluginId": "@kbn/entities-schema",
+                "scope": "common",
+                "docId": "kibKbnEntitiesSchemaPluginApi",
+                "section": "def-common.BasicAggregations",
+                "text": "BasicAggregations"
+              },
+              "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }[] | ",
+              "EntityDefinitionWithState",
+              "[]; }>"
+            ],
+            "path": "x-pack/plugins/entity_manager/public/lib/entity_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityManager",
+                "id": "def-public.EntityClient.getEntityDefinition.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/entity_manager/public/lib/entity_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1396,15 +1310,7 @@
             "section": "def-common.EntityV2",
             "text": "EntityV2"
           },
-          "[]; }>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"POST /internal/entities/v2/_search\": ",
+          "[]; }>, undefined>; \"POST /internal/entities/v2/_search\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1422,15 +1328,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"PATCH /internal/entities/definition/{id}\": ",
+          "<any>, undefined>; \"PATCH /internal/entities/definition/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1520,15 +1418,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"POST /internal/entities/definition/{id}/_reset\": ",
+          "<any>, undefined>; \"POST /internal/entities/definition/{id}/_reset\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1546,15 +1436,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"GET /internal/entities/definition/{id?}\": ",
+          "<any>, undefined>; \"GET /internal/entities/definition/{id?}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1572,15 +1454,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"DELETE /internal/entities/definition/{id}\": ",
+          "<any>, undefined>; \"DELETE /internal/entities/definition/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1598,15 +1472,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"POST /internal/entities/definition\": ",
+          "<any>, undefined>; \"POST /internal/entities/definition\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1696,15 +1562,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"DELETE /internal/entities/managed/enablement\": ",
+          "<any>, undefined>; \"DELETE /internal/entities/managed/enablement\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1722,15 +1580,7 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"PUT /internal/entities/managed/enablement\": ",
+          "<any>, undefined>; \"PUT /internal/entities/managed/enablement\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1748,25 +1598,9 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
-          },
-          ">; \"GET /internal/entities/managed/enablement\": ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ServerRoute",
-            "text": "ServerRoute"
-          },
-          "<\"GET /internal/entities/managed/enablement\", undefined, ",
+          "<any>, undefined>; \"GET /internal/entities/managed/enablement\": { endpoint: \"GET /internal/entities/managed/enablement\"; handler: ServerRouteHandler<",
           "EntityManagerRouteHandlerResources",
-          ", ",
+          ", undefined, ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "server",
@@ -1774,15 +1608,15 @@
             "section": "def-server.IKibanaResponse",
             "text": "IKibanaResponse"
           },
-          "<any>, ",
+          "<any>>; security?: ",
           {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.DefaultRouteCreateOptions",
-            "text": "DefaultRouteCreateOptions"
+            "pluginId": "@kbn/core-http-server",
+            "scope": "server",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-server.RouteSecurity",
+            "text": "RouteSecurity"
           },
-          ">; }"
+          " | undefined; }; }"
         ],
         "path": "x-pack/plugins/entity_manager/server/routes/index.ts",
         "deprecated": false,

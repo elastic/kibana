@@ -10,6 +10,7 @@ paths:
       summary: Creates a new rule migration
       operationId: CreateRuleMigration
       x-codegen-enabled: true
+      x-internal: true
       description: Creates a new SIEM rules migration using the original vendor rules provided
       tags:
         - SIEM Rule Migrations
@@ -39,6 +40,7 @@ paths:
       summary: Updates rules migrations
       operationId: UpdateRuleMigration
       x-codegen-enabled: true
+      x-internal: true
       description: Updates rules migrations attributes
       tags:
         - SIEM Rule Migrations
@@ -84,6 +86,7 @@ paths:
       summary: Retrieves the stats for all rule migrations
       operationId: GetAllStatsRuleMigration
       x-codegen-enabled: true
+      x-internal: true
       description: Retrieves the rule migrations stats for all migrations stored in the system
       tags:
         - SIEM Rule Migrations
@@ -93,7 +96,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationAllTaskStats'
+                type: array
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskStats'
 
   ## Specific rule migration APIs
 
@@ -102,6 +107,7 @@ paths:
       summary: Retrieves all the rules of a migration
       operationId: GetRuleMigration
       x-codegen-enabled: true
+      x-internal: true
       description: Retrieves the rule documents stored in the system given the rule migration id
       tags:
         - SIEM Rule Migrations
@@ -129,6 +135,7 @@ paths:
       summary: Starts a rule migration
       operationId: StartRuleMigration
       x-codegen-enabled: true
+      x-internal: true
       description: Starts a SIEM rules migration using the migration id provided
       tags:
         - SIEM Rule Migrations
@@ -173,6 +180,7 @@ paths:
       summary: Gets a rule migration task stats
       operationId: GetRuleMigrationStats
       x-codegen-enabled: true
+      x-internal: true
       description: Retrieves the stats of a SIEM rules migration using the migration id provided
       tags:
         - SIEM Rule Migrations
@@ -198,6 +206,7 @@ paths:
       summary: Stops an existing rule migration
       operationId: StopRuleMigration
       x-codegen-enabled: true
+      x-internal: true
       description: Stops a running SIEM rules migration using the migration id provided
       tags:
         - SIEM Rule Migrations
@@ -231,6 +240,7 @@ paths:
       summary: Creates or updates rule migration resources for a migration
       operationId: UpsertRuleMigrationResources
       x-codegen-enabled: true
+      x-internal: true
       description: Creates or updates resources for an existing SIEM rules migration
       tags:
         - SIEM Rule Migrations
@@ -249,15 +259,7 @@ paths:
             schema:
               type: array
               items:
-                allOf:
-                  - $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
-                  - type: object
-                    required:
-                      - id
-                    properties:
-                      id:
-                        description: The rule resource migration id
-                        $ref: '../../common.schema.yaml#/components/schemas/NonEmptyString'
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
       responses:
         200:
           description: Indicates migration resources have been created or updated correctly.
@@ -276,6 +278,7 @@ paths:
       summary: Gets rule migration resources for a migration
       operationId: GetRuleMigrationResources
       x-codegen-enabled: true
+      x-internal: true
       description: Retrieves resources for an existing SIEM rules migration
       tags:
         - SIEM Rule Migrations

@@ -6,6 +6,11 @@
  */
 export const PAGE_CONTENT_WIDTH = '1150px';
 
+export enum OnboardingTopicId {
+  default = 'default',
+  siemMigrations = 'siem_migrations',
+}
+
 export enum OnboardingCardId {
   integrations = 'integrations',
   dashboards = 'dashboards',
@@ -13,4 +18,7 @@ export enum OnboardingCardId {
   alerts = 'alerts',
   assistant = 'assistant',
   attackDiscovery = 'attack_discovery',
+
+  // siem_migrations topic cards
+  siemMigrationsAiConnectors = 'ai_connectors',
 }
