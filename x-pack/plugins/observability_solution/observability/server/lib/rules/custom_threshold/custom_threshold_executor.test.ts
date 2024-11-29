@@ -38,6 +38,7 @@ const initialRuleState: TestRuleState = {
 };
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
+const MOCKED_SPACE_ID = 'mockedSpaceId';
 
 const logger = {
   trace: fakeLogger,
@@ -90,7 +91,7 @@ const mockOptions = {
     },
     trackedAlertsRecovered: {},
   },
-  spaceId: '',
+  spaceId: MOCKED_SPACE_ID,
   rule: {
     id: '',
     name: '',
@@ -1562,7 +1563,7 @@ describe('The custom threshold alert type', () => {
         expect(services.alertsClient.setAlertData).toBeCalledTimes(1);
         expect(services.alertsClient.setAlertData).toBeCalledWith({
           context: {
-            alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/uuid-a',
+            alertDetailsUrl: `http://localhost:5601/s/${MOCKED_SPACE_ID}/app/observability/alerts/uuid-a`,
             viewInAppUrl: 'mockedViewInApp',
             group: [
               {
@@ -1583,6 +1584,7 @@ describe('The custom threshold alert type', () => {
         });
         expect(getViewInAppUrl).lastCalledWith({
           dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+          spaceId: MOCKED_SPACE_ID,
           groups: [
             {
               field: 'host.name',
@@ -1799,7 +1801,7 @@ describe('The custom threshold alert type', () => {
         await execute(true);
         const recentAlert = getLastReportedAlert(instanceID);
         expect(recentAlert?.context).toEqual({
-          alertDetailsUrl: 'http://localhost:5601/app/observability/alerts/uuid-*',
+          alertDetailsUrl: `http://localhost:5601/s/${MOCKED_SPACE_ID}/app/observability/alerts/uuid-*`,
           reason: 'Average test.metric.3 reported no data in the last 1m',
           timestamp: STARTED_AT_MOCK_DATE.toISOString(),
           value: ['[NO DATA]', null],
@@ -3437,6 +3439,7 @@ describe('The custom threshold alert type', () => {
       const execute = (alertOnNoData: boolean, sourceId: string = 'default') =>
         executor({
           ...mockOptions,
+          spaceId: undefined,
           services,
           params: {
             ...mockOptions.params,
