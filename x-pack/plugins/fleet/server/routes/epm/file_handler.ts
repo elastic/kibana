@@ -13,7 +13,6 @@ import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/co
 
 import type { GetFileRequestSchema, FleetRequestHandler } from '../../types';
 import { getFile, getInstallation } from '../../services/epm/packages';
-import { defaultFleetErrorHandler } from '../../errors';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getBundledPackageByPkgKey } from '../../services/epm/packages/bundled_packages';
 import { pkgToPkgKey } from '../../services/epm/registry';
@@ -25,104 +24,100 @@ const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
 export const getFileHandler: FleetRequestHandler<
   TypeOf<typeof GetFileRequestSchema.params>
 > = async (context, request, response) => {
-  try {
-    const { pkgName, pkgVersion, filePath } = request.params;
-    const savedObjectsClient = (await context.fleet).internalSoClient;
+  const { pkgName, pkgVersion, filePath } = request.params;
+  const savedObjectsClient = (await context.fleet).internalSoClient;
 
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
-    const isPackageInstalled = pkgVersion === installation?.version;
-    const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
+  const installation = await getInstallation({ savedObjectsClient, pkgName });
+  const isPackageInstalled = pkgVersion === installation?.version;
+  const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
 
-    if (isPackageInstalled) {
-      const storedAsset = await getAsset({ savedObjectsClient, path: assetPath });
+  if (isPackageInstalled) {
+    const storedAsset = await getAsset({ savedObjectsClient, path: assetPath });
 
-      if (!storedAsset) {
-        return response.custom({
-          body: `installed package file not found: ${filePath}`,
-          statusCode: 404,
-        });
-      }
-
-      const contentType = storedAsset.media_type;
-      const buffer = storedAsset.data_utf8
-        ? Buffer.from(storedAsset.data_utf8, 'utf8')
-        : Buffer.from(storedAsset.data_base64, 'base64');
-
-      if (!contentType) {
-        return response.custom({
-          body: `unknown content type for file: ${filePath}`,
-          statusCode: 400,
-        });
-      }
-
+    if (!storedAsset) {
       return response.custom({
-        body: buffer,
-        statusCode: 200,
-        headers: {
-          ...CACHE_CONTROL_10_MINUTES_HEADER,
-          'content-type': contentType,
-        },
+        body: `installed package file not found: ${filePath}`,
+        statusCode: 404,
       });
     }
 
-    const bundledPackage = await getBundledPackageByPkgKey(
-      pkgToPkgKey({ name: pkgName, version: pkgVersion })
+    const contentType = storedAsset.media_type;
+    const buffer = storedAsset.data_utf8
+      ? Buffer.from(storedAsset.data_utf8, 'utf8')
+      : Buffer.from(storedAsset.data_base64, 'base64');
+
+    if (!contentType) {
+      return response.custom({
+        body: `unknown content type for file: ${filePath}`,
+        statusCode: 400,
+      });
+    }
+
+    return response.custom({
+      body: buffer,
+      statusCode: 200,
+      headers: {
+        ...CACHE_CONTROL_10_MINUTES_HEADER,
+        'content-type': contentType,
+      },
+    });
+  }
+
+  const bundledPackage = await getBundledPackageByPkgKey(
+    pkgToPkgKey({ name: pkgName, version: pkgVersion })
+  );
+  if (bundledPackage) {
+    const bufferEntries = await unpackArchiveEntriesIntoMemory(
+      await bundledPackage.getBuffer(),
+      'application/zip'
     );
-    if (bundledPackage) {
-      const bufferEntries = await unpackArchiveEntriesIntoMemory(
-        await bundledPackage.getBuffer(),
-        'application/zip'
-      );
 
-      const fileBuffer = bufferEntries.find((entry) => entry.path === assetPath)?.buffer;
+    const fileBuffer = bufferEntries.find((entry) => entry.path === assetPath)?.buffer;
 
-      if (!fileBuffer) {
-        return response.custom({
-          body: `bundled package file not found: ${filePath}`,
-          statusCode: 404,
-        });
-      }
-
-      // if storedAsset is not available, fileBuffer *must* be
-      // b/c we error if we don't have at least one, and storedAsset is the least likely
-      const { buffer, contentType } = {
-        contentType: mime.contentType(path.extname(assetPath)),
-        buffer: fileBuffer,
-      };
-
-      if (!contentType) {
-        return response.custom({
-          body: `unknown content type for file: ${filePath}`,
-          statusCode: 400,
-        });
-      }
-
+    if (!fileBuffer) {
       return response.custom({
-        body: buffer,
-        statusCode: 200,
-        headers: {
-          ...CACHE_CONTROL_10_MINUTES_HEADER,
-          'content-type': contentType,
-        },
-      });
-    } else {
-      const registryResponse = await getFile(pkgName, pkgVersion, filePath);
-      const headersToProxy: KnownHeaders[] = ['content-type'];
-      const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-        const value = registryResponse.headers.get(knownHeader);
-        if (value !== null) {
-          headers[knownHeader] = value;
-        }
-        return headers;
-      }, {} as ResponseHeaders);
-
-      return response.custom({
-        body: registryResponse.body,
-        statusCode: registryResponse.status,
-        headers: { ...CACHE_CONTROL_10_MINUTES_HEADER, ...proxiedHeaders },
+        body: `bundled package file not found: ${filePath}`,
+        statusCode: 404,
       });
     }
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
+
+    // if storedAsset is not available, fileBuffer *must* be
+    // b/c we error if we don't have at least one, and storedAsset is the least likely
+    const { buffer, contentType } = {
+      contentType: mime.contentType(path.extname(assetPath)),
+      buffer: fileBuffer,
+    };
+
+    if (!contentType) {
+      return response.custom({
+        body: `unknown content type for file: ${filePath}`,
+        statusCode: 400,
+      });
+    }
+
+    return response.custom({
+      body: buffer,
+      statusCode: 200,
+      headers: {
+        ...CACHE_CONTROL_10_MINUTES_HEADER,
+        'content-type': contentType,
+      },
+    });
+  } else {
+    const registryResponse = await getFile(pkgName, pkgVersion, filePath);
+    const headersToProxy: KnownHeaders[] = ['content-type'];
+    const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
+      const value = registryResponse.headers.get(knownHeader);
+      if (value !== null) {
+        headers[knownHeader] = value;
+      }
+      return headers;
+    }, {} as ResponseHeaders);
+
+    return response.custom({
+      body: registryResponse.body,
+      statusCode: registryResponse.status,
+      headers: { ...CACHE_CONTROL_10_MINUTES_HEADER, ...proxiedHeaders },
+    });
   }
 };

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DataUsagePage } from './components/page';
-import { DATA_USAGE_PAGE } from './translations';
+import { DATA_USAGE_PAGE } from '../translations';
 import { DataUsageMetrics } from './components/data_usage_metrics';
 
 export const DataUsageMetricsPage = () => {

@@ -30,6 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const ml = getService('ml');
   const log = getService('log');
+  const retry = getService('retry');
   const getScopedApiClientForUsername = getService('getScopedApiClientForUsername');
 
   describe('Knowledge base user instructions', () => {
@@ -94,62 +95,69 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('"editor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        await retry.try(async () => {
+          const res = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const instructions = res.body.userInstructions;
+          expect(instructions).to.have.length(3);
+
+          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+
+          expect(sortById(instructions)).to.eql(
+            sortById([
+              {
+                id: 'private-doc-from-editor',
+                public: false,
+                text: 'Private user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-secondary_editor',
+                public: true,
+                text: 'Public user instruction from "secondary_editor"',
+              },
+            ])
+          );
         });
-
-        const instructions = res.body.userInstructions;
-
-        const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
-
-        expect(sortById(instructions)).to.eql(
-          sortById([
-            {
-              id: 'private-doc-from-editor',
-              public: false,
-              text: 'Private user instruction from "editor"',
-            },
-            {
-              id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              id: 'public-doc-from-secondary_editor',
-              public: true,
-              text: 'Public user instruction from "secondary_editor"',
-            },
-          ])
-        );
       });
 
       it('"secondaryEditor" can retrieve their own private instructions and the public instruction', async () => {
-        const res = await observabilityAIAssistantAPIClient.secondaryEditor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+        await retry.try(async () => {
+          const res = await observabilityAIAssistantAPIClient.secondaryEditor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+          });
+
+          const instructions = res.body.userInstructions;
+          expect(instructions).to.have.length(3);
+
+          const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
+
+          expect(sortById(instructions)).to.eql(
+            sortById([
+              {
+                id: 'public-doc-from-editor',
+                public: true,
+                text: 'Public user instruction from "editor"',
+              },
+              {
+                id: 'public-doc-from-secondary_editor',
+                public: true,
+                text: 'Public user instruction from "secondary_editor"',
+              },
+              {
+                id: 'private-doc-from-secondary_editor',
+                public: false,
+                text: 'Private user instruction from "secondary_editor"',
+              },
+            ])
+          );
         });
-        const instructions = res.body.userInstructions;
-
-        const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
-
-        expect(sortById(instructions)).to.eql(
-          sortById([
-            {
-              id: 'public-doc-from-editor',
-              public: true,
-              text: 'Public user instruction from "editor"',
-            },
-            {
-              id: 'public-doc-from-secondary_editor',
-              public: true,
-              text: 'Public user instruction from "secondary_editor"',
-            },
-            {
-              id: 'private-doc-from-secondary_editor',
-              public: false,
-              text: 'Private user instruction from "secondary_editor"',
-            },
-          ])
-        );
       });
     });
 

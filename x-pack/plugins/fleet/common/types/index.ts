@@ -66,6 +66,7 @@ export interface FleetConfigType {
     disableBundledPackagesCache?: boolean;
   };
   internal?: {
+    useMeteringApi?: boolean;
     disableILMPolicies: boolean;
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;

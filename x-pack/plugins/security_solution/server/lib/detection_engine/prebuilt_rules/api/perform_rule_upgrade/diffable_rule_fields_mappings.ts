@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import type {
   RuleSchedule,
   DataSourceIndexPatterns,
@@ -48,9 +48,13 @@ export const mapDiffableRuleFieldValueToRuleSchemaFormat = (
     return transformedValue.value;
   }
 
+  if (!SUBFIELD_MAPPING[fieldName] && !has(diffableField, diffableRuleSubfieldName)) {
+    return diffableField;
+  }
+
   // From the ThreeWayDiff, get the specific field that maps to the diffable rule field
   // Otherwise, the diffableField itself already matches the rule field, so retrieve that value.
-  const mappedField = get(diffableField, diffableRuleSubfieldName, diffableField);
+  const mappedField = get(diffableField, diffableRuleSubfieldName);
 
   return mappedField;
 };
@@ -81,24 +85,6 @@ export function mapRuleFieldToDiffableRuleField({
   ruleType,
   fieldName,
 }: MapRuleFieldToDiffableRuleFieldParams): keyof AllFieldsDiff {
-  const diffableRuleFieldMap: Record<string, keyof AllFieldsDiff> = {
-    building_block_type: 'building_block',
-    saved_id: 'kql_query',
-    threat_query: 'threat_query',
-    threat_language: 'threat_query',
-    threat_filters: 'threat_query',
-    index: 'data_source',
-    data_view_id: 'data_source',
-    rule_name_override: 'rule_name_override',
-    interval: 'rule_schedule',
-    from: 'rule_schedule',
-    to: 'rule_schedule',
-    timeline_id: 'timeline_template',
-    timeline_title: 'timeline_template',
-    timestamp_override: 'timestamp_override',
-    timestamp_override_fallback_disabled: 'timestamp_override',
-  };
-
   // Handle query, filters and language fields based on rule type
   if (fieldName === 'query' || fieldName === 'language' || fieldName === 'filters') {
     switch (ruleType) {
@@ -114,8 +100,47 @@ export function mapRuleFieldToDiffableRuleField({
     }
   }
 
+  const diffableRuleFieldMap: Record<string, keyof AllFieldsDiff> = {
+    building_block_type: 'building_block',
+    saved_id: 'kql_query',
+    event_category_override: 'eql_query',
+    tiebreaker_field: 'eql_query',
+    timestamp_field: 'eql_query',
+    threat_query: 'threat_query',
+    threat_language: 'threat_query',
+    threat_filters: 'threat_query',
+    index: 'data_source',
+    data_view_id: 'data_source',
+    rule_name_override: 'rule_name_override',
+    interval: 'rule_schedule',
+    from: 'rule_schedule',
+    to: 'rule_schedule',
+    timeline_id: 'timeline_template',
+    timeline_title: 'timeline_template',
+    timestamp_override: 'timestamp_override',
+    timestamp_override_fallback_disabled: 'timestamp_override',
+  };
+
   return diffableRuleFieldMap[fieldName] || fieldName;
 }
+
+const SUBFIELD_MAPPING: Record<string, string> = {
+  index: 'index_patterns',
+  data_view_id: 'data_view_id',
+  saved_id: 'saved_query_id',
+  event_category_override: 'event_category_override',
+  tiebreaker_field: 'tiebreaker_field',
+  timestamp_field: 'timestamp_field',
+  building_block_type: 'type',
+  rule_name_override: 'field_name',
+  timestamp_override: 'field_name',
+  timestamp_override_fallback_disabled: 'fallback_disabled',
+  timeline_id: 'timeline_id',
+  timeline_title: 'timeline_title',
+  interval: 'interval',
+  from: 'lookback',
+  to: 'lookback',
+};
 
 /**
  * Maps a PrebuiltRuleAsset schema field name to its corresponding property
@@ -134,22 +159,7 @@ export function mapRuleFieldToDiffableRuleField({
  *
  */
 export function mapRuleFieldToDiffableRuleSubfield(fieldName: string): string {
-  const fieldMapping: Record<string, string> = {
-    index: 'index_patterns',
-    data_view_id: 'data_view_id',
-    saved_id: 'saved_query_id',
-    building_block_type: 'type',
-    rule_name_override: 'field_name',
-    timestamp_override: 'field_name',
-    timestamp_override_fallback_disabled: 'fallback_disabled',
-    timeline_id: 'timeline_id',
-    timeline_title: 'timeline_title',
-    interval: 'interval',
-    from: 'lookback',
-    to: 'lookback',
-  };
-
-  return fieldMapping[fieldName] || fieldName;
+  return SUBFIELD_MAPPING[fieldName] || fieldName;
 }
 
 type TransformValuesReturnType =

@@ -12,8 +12,19 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerFavoritesRoutes } from './favorites_routes';
 import { favoritesSavedObjectType } from './favorites_saved_object';
 import { registerFavoritesUsageCollection } from './favorites_usage_collection';
+import { FavoritesRegistry, FavoritesRegistrySetup } from './favorites_registry';
 
-export type { GetFavoritesResponse } from './favorites_routes';
+export type {
+  GetFavoritesResponse,
+  AddFavoriteResponse,
+  RemoveFavoriteResponse,
+} from './favorites_routes';
+
+/**
+ * @public
+ * Setup contract for the favorites feature.
+ */
+export type FavoritesSetup = FavoritesRegistrySetup;
 
 /**
  * @public
@@ -31,11 +42,14 @@ export function registerFavorites({
   core: CoreSetup;
   logger: Logger;
   usageCollection?: UsageCollectionSetup;
-}) {
+}): FavoritesSetup {
+  const favoritesRegistry = new FavoritesRegistry();
   core.savedObjects.registerType(favoritesSavedObjectType);
-  registerFavoritesRoutes({ core, logger });
+  registerFavoritesRoutes({ core, logger, favoritesRegistry });
 
   if (usageCollection) {
     registerFavoritesUsageCollection({ core, usageCollection });
   }
+
+  return favoritesRegistry;
 }

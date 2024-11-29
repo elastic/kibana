@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { capitalize } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
-import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
-import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import type {
   AlertsByStatus,
   ParsedAlertsData,
 } from '../../../overview/components/detection_response/alerts_by_status/types';
+import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
+import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
+import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useNavigateEntityInsight } from '../../hooks/use_entity_insight';
 
 const AlertsCount = ({
   alertsTotal,
@@ -56,9 +58,13 @@ const AlertsCount = ({
 
 export const AlertsPreview = ({
   alertsData,
+  field,
+  value,
   isPreviewMode,
 }: {
   alertsData: ParsedAlertsData;
+  field: 'host.name' | 'user.name';
+  value: string;
   isPreviewMode?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -82,14 +88,38 @@ export const AlertsPreview = ({
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
 
+  const hasNonClosedAlerts = totalAlertsCount > 0;
+
+  const { goToEntityInsightTab } = useNavigateEntityInsight({
+    field,
+    value,
+    queryIdExtension: 'ALERTS_PREVIEW',
+    subTab: CspInsightLeftPanelSubTab.ALERTS,
+  });
+  const link = useMemo(
+    () =>
+      !isPreviewMode
+        ? {
+            callback: goToEntityInsightTab,
+            tooltip: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.alerts.alertsTooltip"
+                defaultMessage="Show all alerts"
+              />
+            ),
+          }
+        : undefined,
+    [isPreviewMode, goToEntityInsightTab]
+  );
   return (
     <ExpandablePanel
       header={{
+        iconType: !isPreviewMode && hasNonClosedAlerts ? 'arrowStart' : '',
         title: (
           <EuiText
             size="xs"
             css={{
-              fontWeight: euiTheme.font.weight.semiBold,
+              fontWeight: euiTheme.font.weight.bold,
             }}
           >
             <FormattedMessage
@@ -98,6 +128,7 @@ export const AlertsPreview = ({
             />
           </EuiText>
         ),
+        link: totalAlertsCount > 0 ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsAlerts'}
     >

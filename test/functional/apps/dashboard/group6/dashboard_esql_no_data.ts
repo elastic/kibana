@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.expectOnDashboard('New Dashboard');
       expect(await testSubjects.exists('lnsVisualizationContainer')).to.be(true);
 
-      await panelActions.clickInlineEdit();
+      await panelActions.clickEdit();
       const editorValue = await monacoEditor.getCodeEditorValue();
       expect(editorValue).to.eql(`FROM logs* | LIMIT 10`);
     });

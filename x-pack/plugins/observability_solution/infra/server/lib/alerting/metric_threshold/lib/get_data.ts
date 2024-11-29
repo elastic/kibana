@@ -280,10 +280,10 @@ export const getData = async (
       fieldsExisted
     ),
   };
-  logger.trace(`Request: ${JSON.stringify(request)}`);
+  logger.trace(() => `Request: ${JSON.stringify(request)}`);
   const body = await esClient.search<undefined, ResponseAggregations>(request);
   const { aggregations, _shards } = body;
-  logger.trace(`Response: ${JSON.stringify(body)}`);
+  logger.trace(() => `Response: ${JSON.stringify(body)}`);
   if (aggregations) {
     return handleResponse(aggregations, previousResults, _shards.successful);
   } else if (_shards.successful) {

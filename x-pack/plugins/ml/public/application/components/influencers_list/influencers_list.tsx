@@ -19,6 +19,7 @@ import { getSeverity, getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
 import { abbreviateWholeNumber } from '../../formatters/abbreviate_whole_number';
 import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
+import { useInfluencersListStyles } from './influencers_list_styles';
 
 export interface InfluencerValueData {
   influencerFieldValue: string;
@@ -65,6 +66,7 @@ function getTooltipContent(maxScoreLabel: string, totalScoreLabel: string) {
 }
 
 const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter, valueData }) => {
+  const styles = useInfluencersListStyles();
   const maxScore = Math.floor(valueData.maxAnomalyScore);
   const maxScoreLabel = getFormattedSeverityScore(valueData.maxAnomalyScore);
   const severity = getSeverity(maxScore);
@@ -73,29 +75,25 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
 
   // Ensure the bar has some width for 0 scores.
   const barScore = maxScore !== 0 ? maxScore : 1;
-  const barStyle = {
-    width: `${barScore}%`,
-  };
 
   const tooltipContent = getTooltipContent(maxScoreLabel, totalScoreLabel);
 
   return (
     <div data-test-subj={`mlInfluencerEntry field-${influencerFieldName}`}>
-      <div className="field-label" data-test-subj="mlInfluencerEntryFieldLabel">
+      <div css={styles.fieldLabel} data-test-subj="mlInfluencerEntryFieldLabel">
         <EntityCell
           entityName={influencerFieldName}
           entityValue={valueData.influencerFieldValue}
           filter={influencerFilter}
         />
       </div>
-      <div className={`progress ${severity.id}`}>
-        <div className="progress-bar-holder">
-          <div className="progress-bar" style={barStyle} />
+      <div css={styles.progress}>
+        <div css={styles.progressBarHolder}>
+          <div css={styles.progressBar(severity.id, barScore)} />
         </div>
-        <div className="score-label">
+        <div css={styles.scoreLabel(severity.id)}>
           <EuiToolTip
             position="right"
-            className="ml-influencers-list-tooltip"
             title={`${influencerFieldName}: ${valueData.influencerFieldValue}`}
             content={tooltipContent}
           >
@@ -103,10 +101,9 @@ const Influencer: FC<InfluencerProps> = ({ influencerFieldName, influencerFilter
           </EuiToolTip>
         </div>
       </div>
-      <div className="total-score-label">
+      <div css={styles.totalScoreLabel}>
         <EuiToolTip
           position="right"
-          className="ml-influencers-list-tooltip"
           title={`${influencerFieldName}: ${valueData.influencerFieldValue}`}
           content={tooltipContent}
         >
@@ -145,12 +142,14 @@ const InfluencersByName: FC<InfluencersByNameProps> = ({
 };
 
 export const InfluencersList: FC<InfluencersListProps> = ({ influencers, influencerFilter }) => {
+  const styles = useInfluencersListStyles();
+
   if (influencers === undefined || Object.keys(influencers).length === 0) {
     return (
-      <EuiFlexGroup justifyContent="spaceAround" className="ml-influencers-list">
+      <EuiFlexGroup justifyContent="spaceAround" css={styles.influencersList}>
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xxl" />
-          <EuiTitle size="xxs" className="influencer-title">
+          <EuiTitle size="xxs">
             <h3>
               <FormattedMessage
                 id="xpack.ml.influencersList.noInfluencersFoundTitle"
@@ -172,5 +171,5 @@ export const InfluencersList: FC<InfluencersListProps> = ({ influencers, influen
     />
   ));
 
-  return <div className="ml-influencers-list">{influencersByName}</div>;
+  return <div css={styles.influencersList}>{influencersByName}</div>;
 };
