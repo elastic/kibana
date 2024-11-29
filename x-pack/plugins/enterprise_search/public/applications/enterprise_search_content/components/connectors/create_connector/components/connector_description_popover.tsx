@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
@@ -22,7 +23,6 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import connectorLogo from '../../../../../../assets/images/connector.svg';
-import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 const nativePopoverPanels = [
   {
@@ -87,14 +87,14 @@ const connectorClientPopoverPanels = [
 
 export interface ConnectorDescriptionPopoverProps {
   isNative: boolean;
-  showIsOnlySelfManaged: boolean;
   isRunningLocally?: boolean;
+  showIsOnlySelfManaged: boolean;
 }
 
 export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
-  showIsOnlySelfManaged,
   isRunningLocally,
+  showIsOnlySelfManaged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;
@@ -212,11 +212,15 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonTo to="/app/management/stack/license_management" shouldNotCreateHref>
+                <EuiButton
+                  data-test-subj="enterpriseSearchConnectorStartFreeTrialButton"
+                  href="https://cloud.elastic.co/registration?onboarding_token=search&cta=cloudregistration&tech=trial&plcmt=cross%20module&pg=search-labs"
+                  target="_blank"
+                >
                   {i18n.translate('xpack.enterpriseSearch.createConnector.startTrialButtonLabel', {
                     defaultMessage: 'Start free trial',
                   })}
-                </EuiButtonTo>
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
