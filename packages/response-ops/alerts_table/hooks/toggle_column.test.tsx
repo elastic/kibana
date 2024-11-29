@@ -10,7 +10,7 @@
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import { toggleColumn } from './toggle_column';
 
-describe('toggleColumn', () => {
+describe(toggleColumn, () => {
   const columns = [{ id: 'test-column' }];
   const casesColumn = {
     id: ALERT_CASE_IDS,

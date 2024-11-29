@@ -7,30 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { bulkGetCases } from './bulk_get_cases';
 import { coreMock } from '@kbn/core/public/mocks';
+import { bulkGetMaintenanceWindows } from './bulk_get_maintenance_windows';
 
-describe('Bulk Get Cases API', () => {
-  const abortCtrl = new AbortController();
+describe(bulkGetMaintenanceWindows, () => {
   const mockCoreSetup = coreMock.createSetup();
   const http = mockCoreSetup.http;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    http.post.mockResolvedValue({ cases: [], errors: [] });
+    http.post.mockResolvedValue({ maintenance_windows: [], errors: [] });
   });
 
-  it('fetch cases correctly', async () => {
-    const res = await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
-    expect(res).toEqual({ cases: [], errors: [] });
+  it('fetch maintenance windows correctly', async () => {
+    const res = await bulkGetMaintenanceWindows({
+      http,
+      ids: ['test-id-1', 'test-id-2'],
+    });
+    expect(res).toEqual({ maintenanceWindows: [], errors: [] });
   });
 
   it('should call http with correct arguments', async () => {
-    await bulkGetCases(http, { ids: ['test-id'] }, abortCtrl.signal);
-
-    expect(http.post).toHaveBeenCalledWith('/internal/cases/_bulk_get', {
-      body: '{"ids":["test-id"]}',
-      signal: abortCtrl.signal,
+    await bulkGetMaintenanceWindows({
+      http,
+      ids: ['test-id-1', 'test-id-2'],
     });
+
+    expect(http.post).toHaveBeenCalledWith(
+      '/internal/alerting/rules/maintenance_window/_bulk_get',
+      {
+        body: '{"ids":["test-id-1","test-id-2"]}',
+      }
+    );
   });
 });

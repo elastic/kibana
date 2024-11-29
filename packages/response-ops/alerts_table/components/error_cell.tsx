@@ -23,7 +23,12 @@ const errorCalloutStyles = css`
  */
 export const ErrorCell = ({ error }: { error: Error }) => (
   <>
-    <EuiFlexGroup gutterSize="s" alignItems="center" css={errorCalloutStyles}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      css={errorCalloutStyles}
+      data-test-subj="errorCell"
+    >
       <EuiFlexItem grow={false}>
         <EuiIcon type="error" color="danger" />
       </EuiFlexItem>
