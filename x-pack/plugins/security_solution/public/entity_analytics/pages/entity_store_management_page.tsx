@@ -421,10 +421,8 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
   );
 };
 
-const AssetCriticalityIssueCallout: React.FC = ({
+const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode }> = ({
   errorMessage,
-}: {
-  errorMessage?: string | ReactNode;
 }) => {
   const msg = errorMessage ?? (
     <FormattedMessage
@@ -522,7 +520,9 @@ const FileUploadSection: React.FC<{
   hasAssetCriticalityWritePermissions,
 }) => {
   if (!hasEntityAnalyticsCapability || assetCriticalityPrivilegesError?.body.status_code === 403) {
-    return <AssetCriticalityIssueCallout />;
+    return (
+      <AssetCriticalityIssueCallout errorMessage={assetCriticalityPrivilegesError?.body.message} />
+    );
   }
   if (!hasAssetCriticalityWritePermissions) {
     return <InsufficientAssetCriticalityPrivilegesCallout />;

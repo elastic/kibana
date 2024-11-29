@@ -29,9 +29,10 @@ jest.mock('../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
 }));
 
-const mockUseEntityEngineStatus = jest.fn();
+const mockUseEntityStoreStatus = jest.fn();
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
-  useEntityStoreStatus: () => mockUseEntityEngineStatus(),
+  ...jest.requireActual('../components/entity_store/hooks/use_entity_store'),
+  useEntityStoreStatus: () => mockUseEntityStoreStatus(),
 }));
 
 const mockUseEntityEnginePrivileges = jest.fn();
@@ -52,8 +53,10 @@ describe('EntityStoreManagementPage', () => {
       data: { has_all_required: true },
     });
 
-    mockUseEntityEngineStatus.mockReturnValue({
-      status: 'running',
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: {
+        status: 'running',
+      },
       errors: [],
     });
 
@@ -79,9 +82,11 @@ describe('EntityStoreManagementPage', () => {
     expect(screen.getByText('Entity Store')).toBeInTheDocument();
   });
 
-  it('disables the switch when status is loading', () => {
-    mockUseEntityEngineStatus.mockReturnValue({
-      status: 'loading',
+  it('disables the switch when status is installing', () => {
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: {
+        status: 'installing',
+      },
       errors: [],
     });
 
@@ -142,8 +147,10 @@ describe('EntityStoreManagementPage', () => {
   });
 
   it('switches to the Status tab when clicked', () => {
-    mockUseEntityEngineStatus.mockReturnValue({
-      status: 'running',
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: {
+        status: 'running',
+      },
       errors: [],
     });
 
@@ -161,8 +168,10 @@ describe('EntityStoreManagementPage', () => {
   });
 
   it('does not render the Status tab when entity store is not installed', () => {
-    mockUseEntityEngineStatus.mockReturnValue({
-      status: 'not_installed',
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: {
+        status: 'not_installed',
+      },
       errors: [],
     });
 
@@ -178,8 +187,10 @@ describe('EntityStoreManagementPage', () => {
   });
 
   it('does not render the Status tab when privileges are missing', () => {
-    mockUseEntityEngineStatus.mockReturnValue({
-      status: 'running',
+    mockUseEntityStoreStatus.mockReturnValue({
+      data: {
+        status: 'running',
+      },
       errors: [],
     });
 
