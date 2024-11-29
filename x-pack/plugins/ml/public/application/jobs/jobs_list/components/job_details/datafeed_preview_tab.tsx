@@ -8,13 +8,15 @@
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+
 import { useEnabledFeatures } from '../../../../contexts/ml';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { useMlApi } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { MLJobEditor } from '../ml_job_editor';
-import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 
 interface Props {
   job: CombinedJob;

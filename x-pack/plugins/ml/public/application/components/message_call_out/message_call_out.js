@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { MESSAGE_LEVEL } from '../../../../common/constants/message_levels';
+import { MESSAGE_LEVEL } from '@kbn/ml-common-constants/message_levels';
 
 function getCallOutAttributes(message, status) {
   switch (status) {

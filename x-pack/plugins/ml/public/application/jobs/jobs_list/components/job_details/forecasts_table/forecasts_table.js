@@ -24,14 +24,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
-import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
+import { FORECAST_REQUEST_STATE } from '@kbn/ml-common-constants/states';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { forecastServiceFactory } from '../../../../../services/forecast_service';
 import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 const MAX_FORECASTS = 500;

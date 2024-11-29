@@ -48,15 +48,15 @@ import { cloneDeep, groupBy, isEmpty, memoize } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { ML_PAGES } from '../../../common/constants/locator';
-import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { ML_ELSER_CALLOUT_DISMISSED } from '@kbn/ml-common-types/storage';
 import type {
   ModelDownloadState,
   ModelPipelines,
   TrainedModelConfigResponse,
   TrainedModelDeploymentStatsResponse,
   TrainedModelStat,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';

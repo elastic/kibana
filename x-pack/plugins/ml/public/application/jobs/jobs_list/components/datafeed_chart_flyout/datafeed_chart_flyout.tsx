@@ -51,14 +51,12 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
-import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import type {
-  CombinedJobWithStats,
-  MlSummaryJob,
-  ModelSnapshot,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import type { JobMessage } from '../../../../../../common/types/audit_message';
-import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
+import { DATAFEED_STATE } from '@kbn/ml-common-constants/states';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import type { LineAnnotationDatumWithModelSnapshot } from '@kbn/ml-common-types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useCurrentThemeVars, useMlApi } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { type MlUrlConfig, isMlKibanaUrlConfigWithTimeRange } from '@kbn/ml-anomaly-utils';
+import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import { isMlKibanaUrlConfigWithTimeRange } from '@kbn/ml-anomaly-utils/custom_urls';
 import { isValidLabel, isValidTimeRange } from '../../util/custom_url_utils';
 
 export function isValidCustomUrls(customUrls: MlUrlConfig[]) {

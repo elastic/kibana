@@ -16,15 +16,16 @@ import type {
   DashboardLocatorParams,
   DashboardStart,
 } from '@kbn/dashboard-plugin/public';
-import { getPanelTitle } from '@kbn/presentation-publishing';
+import { getPanelTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_panel_title';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
 import type { MlApi } from '../../../services/ml_api_service';
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
 import { getFiltersForDSLQuery } from '../../../../../common/util/job_utils';
-import type { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 import { createQueries } from '../utils/new_job_utils';
 import { createDatafeedId } from '../../../../../common/util/job_utils';
 

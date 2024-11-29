@@ -9,7 +9,7 @@ import { EuiHealth } from '@elastic/eui';
 import { type FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import React from 'react';
-import { ALERT_ANOMALY_SCORE } from '../../../common/constants/alerts';
+import { ALERT_ANOMALY_SCORE } from '@kbn/ml-common-constants/alerts';
 import { getAlertFormatters } from './render_cell_value';
 
 describe('getAlertFormatters', () => {

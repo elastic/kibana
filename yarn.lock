@@ -6272,6 +6272,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-common-constants@link:x-pack/packages/ml/common_constants":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-common-types@link:x-pack/packages/ml/common_types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-creation-wizard-utils@link:x-pack/packages/ml/creation_wizard_utils":
   version "0.0.0"
   uid ""

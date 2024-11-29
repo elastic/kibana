@@ -20,7 +20,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import type { ModelService } from '../model_management/models_provider';
 import { modelsProvider } from '../model_management';
 import {

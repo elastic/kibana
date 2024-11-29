@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Aggregation, Datafeed } from '../types/anomaly_detection_jobs';
+import type { Aggregation, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 
 export function getAggregations<T>(obj: any): T | undefined {
   if (obj?.aggregations !== undefined) return obj.aggregations;

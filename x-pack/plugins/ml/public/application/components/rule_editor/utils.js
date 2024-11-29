@@ -13,7 +13,7 @@ import {
   ML_DETECTOR_RULE_APPLIES_TO,
   ML_DETECTOR_RULE_FILTER_TYPE,
   ML_DETECTOR_RULE_OPERATOR,
-} from '@kbn/ml-anomaly-utils';
+} from '@kbn/ml-anomaly-utils/detector_rule';
 
 import { processCreatedBy } from '../../../../common/util/job_utils';
 

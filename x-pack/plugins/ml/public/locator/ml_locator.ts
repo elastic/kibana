@@ -6,15 +6,16 @@
  */
 
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
-import { formatChangePointDetectionUrl } from './formatters/aiops';
-import { formatNotificationsUrl } from './formatters/notifications';
 import type {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
   MlLocator,
   ChangePointDetectionQueryState,
-} from '../../common/types/locator';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
+} from '@kbn/ml-common-types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { formatChangePointDetectionUrl } from './formatters/aiops';
+import { formatNotificationsUrl } from './formatters/notifications';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
   formatAnomalyDetectionCreateJobSelectType,

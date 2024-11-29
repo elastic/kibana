@@ -29,7 +29,7 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
-import type { ModelDownloadState, PipelineDefinition } from '../../../common/types/trained_models';
+import type { ModelDownloadState, PipelineDefinition } from '@kbn/ml-common-types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 

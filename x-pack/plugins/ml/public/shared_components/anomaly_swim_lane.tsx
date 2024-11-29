@@ -16,8 +16,8 @@ import type {
   AnomalySwimLaneEmbeddableApi,
   AnomalySwimlaneEmbeddableCustomInput,
   AnomalySwimLaneEmbeddableState,
-} from '../embeddables';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
+} from '../embeddables/types';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables/constants';
 
 export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
   id?: string;

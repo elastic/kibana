@@ -7,16 +7,16 @@
 
 import { omitBy } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import type {
   NotificationsQueryParams,
   NotificationsSearchResponse,
-} from '../../../../common/types/notifications';
-import type { HttpService } from '../http_service';
+} from '@kbn/ml-common-types/notifications';
 import type {
   NotificationsCountQueryParams,
   NotificationsCountResponse,
-} from '../../../../common/types/notifications';
+} from '@kbn/ml-common-types/notifications';
+import type { HttpService } from '../http_service';
 
 export function notificationsProvider(httpService: HttpService) {
   return {

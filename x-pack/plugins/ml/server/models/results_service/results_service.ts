@@ -19,15 +19,15 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   DatafeedResultsChartDataParams,
-} from '../../../common/types/results';
-import { defaultSearchQuery } from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import { defaultSearchQuery } from '@kbn/ml-common-types/results';
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
 import { annotationServiceProvider } from '../annotation_service';
