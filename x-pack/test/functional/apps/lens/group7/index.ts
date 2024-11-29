@@ -71,16 +71,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~16m 30s
-    loadTestFile(require.resolve('./colors')); // 1m 2s
-    loadTestFile(require.resolve('./color_mapping'));
-    loadTestFile(require.resolve('./chart_data')); // 1m 10s
-    loadTestFile(require.resolve('./time_shift')); // 1m
-    loadTestFile(require.resolve('./dashboard')); // 6m 45s
-    loadTestFile(require.resolve('./show_underlying_data')); // 2m
-    loadTestFile(require.resolve('./show_underlying_data_dashboard')); // 2m 10s
-    loadTestFile(require.resolve('./share')); // 1m 20s
-    // keep it last in the group
-    loadTestFile(require.resolve('./tsdb')); // 3m 56s
+    // total run time ~30m
+    loadTestFile(require.resolve('./logsdb')); // 30m
   });
 };
