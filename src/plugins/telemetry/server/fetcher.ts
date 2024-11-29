@@ -29,9 +29,8 @@ import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-colle
 import {
   type PluginInitializerContext,
   type Logger,
-  type SavedObjectsClientContract,
-  SavedObjectsClient,
   type CoreStart,
+  type ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
 import {
@@ -77,7 +76,7 @@ export class FetcherTask {
   private readonly subscriptions = new Subscription();
   private readonly isOnline$ = new BehaviorSubject<boolean>(false); // Let's initially assume we are not online
   private readonly lastReported$ = new BehaviorSubject<number>(0);
-  private internalRepository?: SavedObjectsClientContract;
+  private internalRepository?: ISavedObjectsRepository;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
@@ -87,9 +86,7 @@ export class FetcherTask {
   }
 
   public start({ savedObjects }: CoreStart, { telemetryCollectionManager }: FetcherTaskDepsStart) {
-    this.internalRepository = new SavedObjectsClient(
-      savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE])
-    );
+    this.internalRepository = savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE]);
     this.telemetryCollectionManager = telemetryCollectionManager;
 
     this.subscriptions.add(this.validateConnectivity());
