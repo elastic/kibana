@@ -35,7 +35,7 @@
       "kibanaUtils",
       "kibanaReact",
       "inspector",
-      "esqlVariables"
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

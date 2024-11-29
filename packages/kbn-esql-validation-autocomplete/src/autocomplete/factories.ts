@@ -580,6 +580,7 @@ export function getDateLiterals(options?: {
 }
 
 export function getControlSuggestion(type: EsqlControlType): SuggestionRawDefinition[] {
+  // need to get the variables from the service
   return [
     {
       label: i18n.translate(
@@ -607,5 +608,12 @@ export function getControlSuggestion(type: EsqlControlType): SuggestionRawDefini
         ),
       },
     } as SuggestionRawDefinition,
+    // ...buildConstantsDefinitions(
+    //   TIME_SYSTEM_PARAMS,
+    //   i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition', {
+    //     defaultMessage: 'Named parameter',
+    //   }),
+    //   '1A'
+    // ),
   ];
 }

@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EuiComboBox } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQL_CONTROL_STATIC_VALUES } from '../../../../common';
 import type { StaticValuesListControlState, StaticValuesListControlApi } from './types';
 import { initializeDataControl } from '../initialize_data_control';

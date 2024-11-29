@@ -45,7 +45,6 @@ pageLoadAssetSize:
   entityManagerApp: 20378
   esql: 37000
   esqlDataGrid: 24582
-  esqlVariables: 12000
   esUiShared: 326654
   eventAnnotation: 30000
   eventAnnotationListing: 25841

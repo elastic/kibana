@@ -28,7 +28,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { esqlVariablesService } from '@kbn/esql/common';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';

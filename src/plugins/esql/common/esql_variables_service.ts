@@ -53,6 +53,10 @@ export class EsqlVariablesService {
     return this.esqlVariables.find((variable) => variable.key === key);
   }
 
+  getVariablesByType(type: string) {
+    return this.esqlVariables.filter((variable) => variable.type === type);
+  }
+
   updateVariable(key: string, value: string, type: string) {
     const variables = this.esqlVariables.map((variable) => {
       if (variable.key === key) {

@@ -49,7 +49,7 @@
       "presentationUtil",
       "presentationPanel",
       "savedObjects",
-      "esqlVariables"
+      "esql"
     ]
   }
 }

@@ -8,7 +8,7 @@
  */
 
 import { COMPARE_ALL_OPTIONS, compareFilters, type Filter } from '@kbn/es-query';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { esqlVariablesService } from '@kbn/esql/common';
 import {
   BehaviorSubject,
   combineLatest,

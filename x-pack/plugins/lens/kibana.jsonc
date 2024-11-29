@@ -61,7 +61,6 @@
       "fieldFormats",
       "charts",
       "esqlDataGrid",
-      "esqlVariables",
       "esql"
     ],
     "extraPublicDirs": [

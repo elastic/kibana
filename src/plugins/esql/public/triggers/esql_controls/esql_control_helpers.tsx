@@ -18,7 +18,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
-import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { esqlVariablesService } from '../../../common';
 import { untilPluginStartServicesReady } from '../../kibana_services';
 
 import './flyout.scss';
