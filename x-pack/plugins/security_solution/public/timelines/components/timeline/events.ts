@@ -13,7 +13,7 @@ export type {
   OnColumnsSorted,
   OnColumnRemoved,
   OnColumnResized,
-  OnChangePage,
+  OnFetchMoreRecords as OnChangePage,
   OnPinEvent,
   OnRowSelected,
   OnSelectAll,
