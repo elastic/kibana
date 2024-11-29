@@ -14,7 +14,7 @@ import type { CaseTooltipContentProps } from '@kbn/cases-components';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import type { CellComponent } from '../types';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
-import type { Case } from '../hooks/bulk_get_cases';
+import type { Case } from '../apis/bulk_get_cases';
 
 const formatCase = (theCase: Case): CaseTooltipContentProps => ({
   title: theCase.title,

@@ -21,7 +21,7 @@ import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { createPartialObjectMock, testQueryClientConfig } from '../utils/test';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 
-jest.mock('./bulk_get_cases');
+jest.mock('../apis/bulk_get_cases');
 jest.mock('../contexts/alerts_table_context');
 jest.mocked(useAlertsTableContext).mockReturnValue(
   createPartialObjectMock<RenderContext<AdditionalContext>>({

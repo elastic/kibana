@@ -14,7 +14,7 @@ import { useLicense } from './use_license';
 
 const mockLicensing = licensingMock.createStart();
 
-describe('useLicense', () => {
+describe(useLicense, () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

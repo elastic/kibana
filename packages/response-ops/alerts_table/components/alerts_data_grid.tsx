@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { AlertActionsCell } from './alert_actions_cell';
 import { ControlColumnHeaderCell } from './control_column_header_cell';
 import { CellValueHost } from './cell_value_host';
 import { BulkActionsCell } from './bulk_actions_cell';
@@ -31,7 +30,7 @@ import {
   BulkActionsVerbs,
   CellActionsOptions,
 } from '../types';
-import { useGetToolbarVisibility } from '../hooks/toolbar_visibility';
+import { useGetToolbarVisibility } from '../hooks/use_toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
 import { typedMemo } from '../utils/react';
 import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout';
@@ -100,7 +99,7 @@ export const AlertsDataGrid = typedMemo(
       alertsCount,
       isLoadingAlerts,
       browserFields,
-      renderActionsCell: ActionsCell = AlertActionsCell,
+      renderActionsCell: ActionsCell,
       pageIndex,
       pageSize,
       refresh: refreshQueries,

@@ -35,7 +35,7 @@ const props = createPartialObjectMock<CellComponentProps>({
   showAlertStatusWithFlapping: false,
 });
 
-describe('MaintenanceWindowCell', () => {
+describe('MaintenanceWindowsCell', () => {
   it('renders the maintenance window cell', async () => {
     render(<MaintenanceWindowsCell {...props} />);
     expect(screen.getByText('test-title,')).toBeInTheDocument();

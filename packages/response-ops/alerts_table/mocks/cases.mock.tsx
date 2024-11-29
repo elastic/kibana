@@ -9,7 +9,7 @@
 
 import React, { PropsWithChildren } from 'react';
 import { CaseStatuses } from '@kbn/cases-components';
-import type { Case } from '../hooks/bulk_get_cases';
+import type { Case } from '../apis/bulk_get_cases';
 import type { CasesService } from '../types';
 
 export const theCase: Case = {

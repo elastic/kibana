@@ -18,8 +18,8 @@ import { ErrorCell } from './error_cell';
 /**
  * Entry point for rendering cell values
  *
- * Renders a SystemCell for cases, maintenance windows, and alert status, otherwise the
- * `renderCellValue` provided in the `AlertsTableProps` or the default cell value renderer otherwise.
+ * Renders a SystemCell for cases, maintenance windows, and alert status, the `renderCellValue`
+ * provided in the `AlertsTableProps` for other fields or the default cell value renderer otherwise.
  * When the alerts or the related cases or maintenance windows are loading, a skeleton text is rendered.
  */
 export const CellValueHost: GetAlertsTableProp<'renderCellValue'> = (props) => {
@@ -55,13 +55,15 @@ export const CellValueHost: GetAlertsTableProp<'renderCellValue'> = (props) => {
         caseAppId={casesConfig?.appId}
       />
     );
-  } else if (alert) {
+  }
+  if (alert) {
     return (
       <ErrorBoundary fallback={ErrorCell}>
         <CellValue {...props} alert={alert} legacyAlert={legacyAlert} ecsAlert={ecsAlert} />
       </ErrorBoundary>
     );
-  } else if (isLoading) {
+  }
+  if (isLoading) {
     return <EuiSkeletonText lines={1} />;
   }
   return null;

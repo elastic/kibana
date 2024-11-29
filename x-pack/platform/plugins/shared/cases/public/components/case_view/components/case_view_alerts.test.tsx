@@ -20,8 +20,11 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 
 jest.mock('../../../containers/api');
 
-jest.mock('@kbn/response-ops-alerts-table');
-jest.mocked(AlertsTable).mockReturnValue(<div data-test-subj="alerts-table" />);
+// Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
+// correct type inference, but it's actually a `memo(forwardRef()` component, which is hard to mock
+jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
+  AlertsTable: () => <div data-test-subj="alertsTable">{'Alerts table'}</div>,
+}));
 
 const caseData: CaseUI = {
   ...basicCase,

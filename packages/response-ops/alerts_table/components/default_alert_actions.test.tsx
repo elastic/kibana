@@ -58,7 +58,7 @@ const props = createPartialObjectMock<AlertActionsProps>({
   },
 });
 
-describe('DefaultAlertActions component', () => {
+describe(DefaultAlertActions, () => {
   it('should show "Mute" and "Marked as untracked" option', async () => {
     useLoadRuleTypesQuery.mockReturnValue({ authorizedToCreateAnyRules: true });
 
@@ -68,7 +68,7 @@ describe('DefaultAlertActions component', () => {
     expect(await screen.findByText('MarkAsUntrackedAlertAction')).toBeInTheDocument();
   });
 
-  it('should hide "Mute" and "Marked as untracted" option', async () => {
+  it('should hide "Mute" and "Marked as untracked" option', async () => {
     useLoadRuleTypesQuery.mockReturnValue({ authorizedToCreateAnyRules: false });
 
     render(<DefaultAlertActions {...props} />);

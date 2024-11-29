@@ -41,7 +41,7 @@ const props = createPartialObjectMock<CellComponentProps>({
   },
 });
 
-describe('SystemCellFactory', () => {
+describe('SystemCell', () => {
   it('shows the status cell', async () => {
     render(<SystemCell {...props} />);
     expect(screen.getByText('Active')).toBeInTheDocument();

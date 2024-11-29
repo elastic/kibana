@@ -11,7 +11,7 @@ import { useSorting } from './use_sorting';
 
 import { renderHook, act } from '@testing-library/react';
 
-describe('useSorting', () => {
+describe(useSorting, () => {
   const onSortChange = jest.fn();
 
   beforeEach(() => {
