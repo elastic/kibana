@@ -205,6 +205,10 @@ export const createStartServicesMock = (
           crud: true,
           read: true,
         },
+        securitySolutionTimeline: {
+          crud: true,
+          read: true,
+        },
       },
     },
     security,

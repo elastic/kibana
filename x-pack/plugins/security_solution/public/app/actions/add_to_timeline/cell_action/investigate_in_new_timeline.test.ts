@@ -107,6 +107,54 @@ describe('createAddToNewTimelineCellAction', () => {
         })
       ).toEqual(false);
     });
+
+    it('should return true if the the user has read access to timeline', async () => {
+      const factory = createInvestigateInNewTimelineCellActionFactory({
+        store,
+        services: {
+          ...services,
+          application: {
+            ...services.application,
+            capabilities: {
+              ...services.application.capabilities,
+              securitySolutionTimeline: {
+                crud: false,
+                read: true,
+              },
+            },
+          },
+        },
+      });
+      const addToTimelineActionIsCompatible = factory({
+        id: 'testAddToTimeline',
+        order: 1,
+      });
+      expect(await addToTimelineActionIsCompatible.isCompatible(context)).toEqual(true);
+    });
+
+    it('should return flase if the user does not have access to timeline', async () => {
+      const factory = createInvestigateInNewTimelineCellActionFactory({
+        store,
+        services: {
+          ...services,
+          application: {
+            ...services.application,
+            capabilities: {
+              ...services.application.capabilities,
+              securitySolutionTimeline: {
+                crud: false,
+                read: false,
+              },
+            },
+          },
+        },
+      });
+      const addToTimelineActionIsCompatible = factory({
+        id: 'testAddToTimeline',
+        order: 1,
+      });
+      expect(await addToTimelineActionIsCompatible.isCompatible(context)).toEqual(false);
+    });
   });
 
   describe('execute', () => {
