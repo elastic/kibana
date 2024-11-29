@@ -60,6 +60,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
+    it('should not show duplicate suggestions', async () => {
+      await PageObjects.console.enterText(`POST _ingest/pipeline/_simulate
+{
+  "pipeline": {
+    "processors": [
+      {
+        "script": {`);
+      await PageObjects.console.pressEnter();
+      await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.enterText(`"`);
+      expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+
+      // Iterate on the first 10 suggestions (the ones that are only visible without scrolling)
+      const suggestions = [];
+      for (let i = 0; i < 10; i++) {
+        suggestions.push(await PageObjects.console.getAutocompleteSuggestion(i));
+      }
+
+      // and expect the array to not have duplicates
+      expect(suggestions).to.eql(_.uniq(suggestions));
+    });
+
     describe('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.clearEditorText();
