@@ -9,9 +9,9 @@
 
 import { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
 import { AlertsField, RowSelectionState } from '../types';
-import { AdditionalContext, AlertsDataGridProps, RenderContext } from '../types';
-import { createCasesServiceMock, getCasesMapMock } from '../mocks/cases.mock';
-import { getMaintenanceWindowsMock } from '../mocks/maintenance_windows.mock';
+import { AdditionalContext, RenderContext } from '../types';
+import { createCasesServiceMock, getCasesMapMock } from './cases.mock';
+import { getMaintenanceWindowsMock } from './maintenance_windows.mock';
 import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { identity } from 'lodash';
@@ -21,6 +21,7 @@ import {
   ALERT_FLAPPING,
   ALERT_REASON,
   ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID } from '../constants';
@@ -31,11 +32,6 @@ import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { createPartialObjectMock } from '../utils/test';
-
-export type BaseAlertsDataGridProps = AlertsDataGridProps;
-export type TestAlertsDataGridProps = Partial<Omit<BaseAlertsDataGridProps, 'renderContext'>> & {
-  renderContext?: Partial<RenderContext<AdditionalContext>>;
-};
 
 export const mockFieldFormatsRegistry = {
   deserialize: jest.fn(() => ({
@@ -87,6 +83,7 @@ export const mockAlerts: Alert[] = [
     _id: 'test-1',
     _index: 'alerts',
     [ALERT_RULE_NAME]: ['one'],
+    [ALERT_RULE_UUID]: ['rule-uuid'],
     [ALERT_REASON]: ['two'],
     [ALERT_STATUS]: ['active'],
     [ALERT_FLAPPING]: [true],

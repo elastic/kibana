@@ -44,7 +44,6 @@ export const BulkActionsCell = memo(
 
     // NOTE: id is prefixed here to avoid conflicts with labels in other sections in the app.
     // see https://github.com/elastic/kibana/issues/162837
-
     return (
       <EuiCheckbox
         id={`bulk-actions-row-cell-${rowIndex}`}
