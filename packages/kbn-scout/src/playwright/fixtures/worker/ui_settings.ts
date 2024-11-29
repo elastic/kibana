@@ -10,7 +10,7 @@
 import { test as base } from '@playwright/test';
 import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
 import { ScoutWorkerFixtures } from '../types';
-import { isValidUTCDate } from '../../utils';
+import { isValidUTCDate, formatTime } from '../../utils';
 
 export const uiSettingsFixture = base.extend<{}, ScoutWorkerFixtures>({
   uiSettings: [
@@ -22,13 +22,10 @@ export const uiSettingsFixture = base.extend<{}, ScoutWorkerFixtures>({
           Promise.all(keys.map((key) => kbnClient.uiSettings.unset(key))),
 
         setDefaultTime: async ({ from, to }: { from: string; to: string }) => {
-          if (!isValidUTCDate(from) || !isValidUTCDate(to)) {
-            throw new Error(
-              `Invalid UTC date format. Ensure 'from' and 'to' are in ISO 8601 format (e.g., '2024-11-25T10:00:00.000Z').`
-            );
-          }
+          const utcFrom = isValidUTCDate(from) ? from : formatTime(from);
+          const untcTo = isValidUTCDate(to) ? to : formatTime(to);
           await kbnClient.uiSettings.update({
-            'timepicker:timeDefaults': `{ "from": "${from}", "to": "${to}"}`,
+            'timepicker:timeDefaults': `{ "from": "${utcFrom}", "to": "${untcTo}"}`,
           });
         },
       };

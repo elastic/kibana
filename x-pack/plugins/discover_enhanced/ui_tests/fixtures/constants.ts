@@ -8,6 +8,16 @@
 export const LOGSTASH_DEFAULT_START_TIME = '2015-09-19T06:31:44.000Z';
 export const LOGSTASH_DEFAULT_END_TIME = '2015-09-23T18:31:44.000Z';
 
+export const DATA_VIEW_ID = {
+  ECOMMERCE: '5193f870-d861-11e9-a311-0fa548c5f953',
+  LOGSTASH: 'logstash-*',
+};
+
+export const DATA_VIEW = {
+  ECOMMERCE: 'ecommerce',
+  LOGSTASH: 'logstash-*',
+};
+
 export const LOGSTASH_OUT_OF_RANGE_DATES = {
   from: 'Mar 1, 2020 @ 00:00:00.000',
   to: 'Nov 1, 2020 @ 00:00:00.000',

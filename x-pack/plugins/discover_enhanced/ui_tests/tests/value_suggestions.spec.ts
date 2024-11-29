@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 import {
+  DATA_VIEW_ID,
   ES_ARCHIVES,
   KBN_ARCHIVES,
   LOGSTASH_DEFAULT_END_TIME,
@@ -24,7 +25,7 @@ test.describe(
       await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
       await kbnClient.importExport.load(KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
       await uiSettings.set({
-        defaultIndex: 'logstash-*', // TODO: investigate why it is required for `node scripts/playwright_test.js` run
+        defaultIndex: DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
         'doc_table:legacy': false,
         'timepicker:timeDefaults': `{ "from": "${LOGSTASH_DEFAULT_START_TIME}", "to": "${LOGSTASH_DEFAULT_END_TIME}"}`,
       });

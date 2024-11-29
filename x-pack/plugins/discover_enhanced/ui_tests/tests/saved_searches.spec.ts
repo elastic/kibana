@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout';
 import { ExtendedScoutTestFixtures, test } from '../fixtures';
-import { ES_ARCHIVES, KBN_ARCHIVES } from '../fixtures/constants';
+import { DATA_VIEW, DATA_VIEW_ID, ES_ARCHIVES, KBN_ARCHIVES } from '../fixtures/constants';
 
 const assertNoFilterAndEmptyQuery = async (
   pageObjects: ExtendedScoutTestFixtures['pageObjects'],
@@ -29,8 +29,6 @@ test.describe(
     const START_TIME = '2019-04-27T23:56:51.374Z';
     const END_TIME = '2019-08-23T16:18:51.821Z';
     const PANEL_NAME = 'Ecommerce Data';
-    const DATA_VIEW_ECOMMERCE = 'ecommerce';
-    const DATA_VIEW_LOGSTASH = 'logstash-*';
     const SEARCH_QUERY = 'customer_gender:MALE';
     const SAVED_SEARCH_NAME = 'test-unselect-saved-search';
 
@@ -39,7 +37,7 @@ test.describe(
       await kbnClient.importExport.load(KBN_ARCHIVES.DISCOVER);
       await kbnClient.importExport.load(KBN_ARCHIVES.ECOMMERCE);
       await uiSettings.set({
-        defaultIndex: 'ecommerce',
+        defaultIndex: DATA_VIEW_ID.ECOMMERCE,
         'doc_table:legacy': false,
         'timepicker:timeDefaults': `{ "from": "${START_TIME}", "to": "${END_TIME}"}`,
       });
@@ -58,10 +56,9 @@ test.describe(
       await pageObjects.dashboard.goto();
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addPanelFromLibrary(PANEL_NAME);
-      await expect(page.locator('[data-document-number]')).toHaveAttribute(
-        'data-document-number',
-        '500'
-      );
+      await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
+        state: 'visible',
+      });
 
       await pageObjects.dashboard.customizePanel({
         name: PANEL_NAME,
@@ -77,8 +74,7 @@ test.describe(
       page,
     }) => {
       await pageObjects.discover.goto();
-      await pageObjects.discover.selectDataView(DATA_VIEW_ECOMMERCE);
-      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW_ECOMMERCE);
+      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW.ECOMMERCE);
 
       await pageObjects.filterBar.addFilter({
         field: 'category',
@@ -103,20 +99,20 @@ test.describe(
 
       // create new search
       await pageObjects.discover.clickNewSearch();
-      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW_ECOMMERCE);
+      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW.ECOMMERCE);
       await assertNoFilterAndEmptyQuery(pageObjects, page);
 
       // change data view
-      await pageObjects.discover.selectDataView(DATA_VIEW_LOGSTASH);
+      await pageObjects.discover.selectDataView(DATA_VIEW.LOGSTASH);
       await assertNoFilterAndEmptyQuery(pageObjects, page);
 
       // change data view again
-      await pageObjects.discover.selectDataView(DATA_VIEW_ECOMMERCE);
+      await pageObjects.discover.selectDataView(DATA_VIEW.ECOMMERCE);
       await assertNoFilterAndEmptyQuery(pageObjects, page);
 
       // create new search again
       await pageObjects.discover.clickNewSearch();
-      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW_ECOMMERCE);
+      await expect(page.testSubj.locator('*dataView-switch-link')).toHaveText(DATA_VIEW.ECOMMERCE);
     });
   }
 );

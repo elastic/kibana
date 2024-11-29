@@ -12,6 +12,7 @@ import {
   LOGSTASH_DEFAULT_START_TIME,
   ES_ARCHIVES,
   KBN_ARCHIVES,
+  DATA_VIEW_ID,
 } from '../fixtures/constants';
 
 const createSavedSearch = async (
@@ -49,12 +50,11 @@ test.describe(
   () => {
     const SAVED_SEARCH_TITLE = 'TempSearch';
     const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
-    const DATA_VIEW_ID = 'logstash-*';
     test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       await esArchiver.loadIfNeeded(ES_ARCHIVES.LOGSTASH);
       await kbnClient.importExport.load(KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
       await uiSettings.set({
-        defaultIndex: 'logstash-*', // TODO: investigate why it is required for `node scripts/playwright_test.js` run
+        defaultIndex: DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
         'timepicker:timeDefaults': `{ "from": "${LOGSTASH_DEFAULT_START_TIME}", "to": "${LOGSTASH_DEFAULT_END_TIME}"}`,
       });
     });
@@ -75,12 +75,13 @@ test.describe(
       pageObjects,
     }) => {
       await pageObjects.dashboard.openNewDashboard();
-      await createSavedSearch(kbnClient, SAVED_SEARCH_ID, SAVED_SEARCH_TITLE, DATA_VIEW_ID);
+      await createSavedSearch(
+        kbnClient,
+        SAVED_SEARCH_ID,
+        SAVED_SEARCH_TITLE,
+        DATA_VIEW_ID.LOGSTASH
+      );
       await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
-
-      await page.testSubj.locator('discoverDocTable').waitFor({
-        state: 'visible',
-      });
       await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
         state: 'visible',
       });
