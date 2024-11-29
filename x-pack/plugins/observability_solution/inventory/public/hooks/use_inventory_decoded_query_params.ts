@@ -47,7 +47,7 @@ export function useInventoryDecodedQueryParams() {
     }
   }, [entityTypes, resetUrlParam]);
 
-  const selectedPagination: EntityPagination | undefined = useMemo(() => {
+  const selectedPagination: EntityPagination = useMemo(() => {
     try {
       return paginationDecoder(pagination) || {};
     } catch (error) {
