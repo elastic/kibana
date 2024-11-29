@@ -33,6 +33,14 @@ import {
   AddIntegrationPageStep,
   ConfirmDataPageStep,
 } from './components';
+import { AgentEnrollmentStep } from './components/page_steps/agent_enrollment';
+
+const agentEnrollmentStep = {
+  title: i18n.translate('xpack.fleet.createFirstPackagePolicy.agentEnrollmentStepTitle', {
+    defaultMessage: 'Add agent',
+  }),
+  component: AgentEnrollmentStep,
+};
 
 const installAgentStep = {
   title: i18n.translate('xpack.fleet.createFirstPackagePolicy.installAgentStepTitle', {
@@ -66,7 +74,7 @@ const fleetManagedSteps = [installAgentStep, addIntegrationStep, confirmDataStep
 
 const standaloneSteps = [addIntegrationStep, installAgentStep, confirmDataStep];
 
-const onboardingSteps = [addIntegrationSingleLayoutStep, installAgentStep, confirmDataStep];
+const onboardingSteps = [addIntegrationSingleLayoutStep, agentEnrollmentStep, confirmDataStep];
 
 export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   queryParamsPolicyId,
@@ -176,7 +184,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       fleetServerHost={fleetServerHost}
       fleetProxy={fleetProxy}
       downloadSource={downloadSource}
-      agentPolicy={agentPolicy}
+      agentPolicy={selectedAgentPolicies?.[0] ?? agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}
       steps={steps}
@@ -190,6 +198,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
       setEnrolledAgentIds={setEnrolledAgentIds}
       enrolledAgentIds={enrolledAgentIds}
       onCanceled={onCanceled}
+      hasIncomingDataStep={false}
     />
   );
 };
