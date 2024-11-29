@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -23,10 +24,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiTextArea,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import ESQLEditor from '@kbn/esql-editor';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { getESQLQueryColumnsRaw, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getESQLQueryColumnsRaw,
+  getIndexPatternFromESQLQuery,
+  getESQLResults,
+} from '@kbn/esql-utils';
+import { type ESQLColumn, parse, walk } from '@kbn/esql-ast';
 import { monaco } from '@kbn/monaco';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { EsqlControlType, EsqlControlFlyoutType } from './types';
@@ -53,17 +61,41 @@ const getControlFlyoutType = (controlType: EsqlControlType) => {
     case EsqlControlType.TIME_LITERAL:
     case EsqlControlType.FIELDS:
       return EsqlControlFlyoutType.STATIC_VALUES;
+    case EsqlControlType.VALUES:
+      return EsqlControlFlyoutType.VALUES_FROM_QUERY;
     default:
       return EsqlControlFlyoutType.STATIC_VALUES;
   }
 };
 
-const getVariableName = (controlType: EsqlControlType) => {
+const getValuesFromQueryField = (queryString: string) => {
+  const validQuery = `${queryString} ""`;
+  const { root } = parse(validQuery);
+  const lastCommand = root.commands[root.commands.length - 1];
+  const columns: ESQLColumn[] = [];
+
+  walk(lastCommand, {
+    visitColumn: (node) => columns.push(node),
+  });
+
+  if (columns.length) {
+    return `${columns[columns.length - 1].name}`;
+  }
+};
+
+const getVariableName = (controlType: EsqlControlType, queryString: string) => {
   switch (controlType) {
     case EsqlControlType.TIME_LITERAL:
       return '?interval';
     case EsqlControlType.FIELDS:
       return '?field';
+    case EsqlControlType.VALUES:
+      const field = getValuesFromQueryField(queryString);
+      if (field) {
+        // variables names can't have special characters, only underscore
+        return `?${field.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      }
+      return '';
     default:
       return '?variable';
   }
@@ -134,18 +166,24 @@ export function ESQLControlsFlyout({
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const children = useStateFromPublishingSubject(dashboardApi.children$);
   const embeddable = children[panelId!];
-  const suggestedVariableName = getVariableName(controlType);
+  const suggestedVariableName = getVariableName(controlType, queryString);
   const [variableName, setVariableName] = useState(suggestedVariableName);
 
+  // time literal control option and values
   const suggestedStaticValues = getSuggestedValues(controlType);
   const [values, setValues] = useState<string | undefined>(suggestedStaticValues);
 
   const [label, setLabel] = useState('');
   const [minimumWidth, setMinimumWidth] = useState('medium');
+
+  // fields control option
   const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
     []
   );
   const [selectedFields, setSelectedFields] = useState<EuiComboBoxOptionOption[]>([]);
+
+  // values from query control option
+  const [valuesQuery, setValuesQuery] = useState<string>('');
 
   const onFlyoutTypeChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setControlFlyoutType(selectedOptions);
@@ -179,7 +217,7 @@ export function ESQLControlsFlyout({
 
   const createVariableControl = useCallback(async () => {
     const availableOptions =
-      controlType === EsqlControlType.TIME_LITERAL
+      controlType === EsqlControlType.TIME_LITERAL || controlType === EsqlControlType.VALUES
         ? values?.split(',').map((value) => value.trim()) ?? []
         : selectedFields.map((field) => field.label);
     const varName = variableName.replace('?', '');
@@ -194,7 +232,7 @@ export function ESQLControlsFlyout({
     };
     controlGroupApi?.addNewControl('esqlControlStaticValues', state);
 
-    if (panelId && cursorPosition) {
+    if (panelId && cursorPosition && availableOptions.length) {
       const cursorColumn = cursorPosition?.column ?? 0;
       const query = [
         queryString.slice(0, cursorColumn - 1),
@@ -243,6 +281,43 @@ export function ESQLControlsFlyout({
     }
   }, [availableFieldsOptions.length, controlType, queryString, search]);
 
+  const onValuesQuerySubmit = useCallback(
+    async (query: string) => {
+      if (valuesQuery !== query) {
+        getESQLResults({
+          esqlQuery: query,
+          search,
+          signal: undefined,
+          filter: undefined,
+          dropNullColumns: true,
+        }).then((results) => {
+          const valuesArray = results.response.values.map((value) => value[0]);
+          setValues(valuesArray.filter((v) => v).join(', '));
+        });
+        setValuesQuery(query);
+      }
+    },
+    [search, valuesQuery]
+  );
+
+  useEffect(() => {
+    if (controlType === EsqlControlType.VALUES && !values?.length) {
+      const column = getValuesFromQueryField(queryString);
+      const queryForValues =
+        suggestedVariableName !== ''
+          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${column}`
+          : '';
+      onValuesQuerySubmit(queryForValues);
+    }
+  }, [
+    controlType,
+    onValuesQuerySubmit,
+    queryString,
+    suggestedVariableName,
+    values?.length,
+    variableName,
+  ]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -254,11 +329,31 @@ export function ESQLControlsFlyout({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody
+        css={css`
+          // styles needed to display extra drop targets that are outside of the config panel main area
+          overflow-y: auto;
+          pointer-events: none;
+          .euiFlyoutBody__overflow {
+            -webkit-mask-image: none;
+            padding-left: inherit;
+            margin-left: inherit;
+            overflow-y: hidden;
+            transform: initial;
+            > * {
+              pointer-events: auto;
+            }
+          }
+          .euiFlyoutBody__overflowContent {
+            block-size: 100%;
+          }
+        `}
+      >
         <EuiFormRow
           label={i18n.translate('esqlControls.flyout.controlTypeOptions.label', {
             defaultMessage: 'Type',
           })}
+          fullWidth
         >
           <EuiComboBox
             aria-label={i18n.translate('esqlControls.flyout.controlTypeOptions.placeholder', {
@@ -271,12 +366,15 @@ export function ESQLControlsFlyout({
             options={controlTypeOptions}
             selectedOptions={controlFlyoutType}
             onChange={onFlyoutTypeChange}
+            fullWidth
           />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('esqlControls.flyout.variableName.label', {
             defaultMessage: 'Name',
           })}
+          fullWidth
+          autoFocus
         >
           <EuiFieldText
             placeholder={i18n.translate('esqlControls.flyout.variableName.placeholder', {
@@ -287,8 +385,36 @@ export function ESQLControlsFlyout({
             aria-label={i18n.translate('esqlControls.flyout.variableName.placeholder', {
               defaultMessage: 'Set a variable name',
             })}
+            fullWidth
           />
         </EuiFormRow>
+        {controlType === EsqlControlType.VALUES && (
+          <EuiFormRow
+            label={i18n.translate('esqlControls.flyout.valuesQueryEditor.label', {
+              defaultMessage: 'Values query',
+            })}
+            fullWidth
+          >
+            <ESQLEditor
+              query={{ esql: valuesQuery }}
+              onTextLangQueryChange={(q) => {
+                setValuesQuery(q.esql);
+              }}
+              hideTimeFilterInfo={true}
+              disableAutoFocus={true}
+              // errors={errors}
+              editorIsInline
+              hideRunQueryText
+              onTextLangQuerySubmit={async (q, a) => {
+                if (q) {
+                  await onValuesQuerySubmit(q.esql);
+                }
+              }}
+              isDisabled={false}
+              isLoading={false}
+            />
+          </EuiFormRow>
+        )}
         {controlType === EsqlControlType.FIELDS && (
           <EuiFormRow
             label={i18n.translate('esqlControls.flyout.values.label', {
@@ -297,6 +423,7 @@ export function ESQLControlsFlyout({
             helpText={i18n.translate('esqlControls.flyout.values.multipleValuesDropdownLabel', {
               defaultMessage: 'Select multiple values',
             })}
+            fullWidth
           >
             <EuiComboBox
               aria-label={i18n.translate('esqlControls.flyout.fieldsOptions.placeholder', {
@@ -308,6 +435,7 @@ export function ESQLControlsFlyout({
               options={availableFieldsOptions}
               selectedOptions={selectedFields}
               onChange={onFieldsChange}
+              fullWidth
             />
           </EuiFormRow>
         )}
@@ -320,6 +448,7 @@ export function ESQLControlsFlyout({
               defaultMessage:
                 'Comma separated values (e.g. 5 minutes, 1 hour, 1 day, 1 week, 1 year)',
             })}
+            fullWidth
           >
             <EuiFieldText
               placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
@@ -330,6 +459,30 @@ export function ESQLControlsFlyout({
               aria-label={i18n.translate('esqlControls.flyout.values.placeholder', {
                 defaultMessage: 'Set a variable name',
               })}
+              fullWidth
+            />
+          </EuiFormRow>
+        )}
+
+        {controlType === EsqlControlType.VALUES && (
+          <EuiFormRow
+            label={i18n.translate('esqlControls.flyout.previewValues.placeholder', {
+              defaultMessage: 'Values preview',
+            })}
+            fullWidth
+          >
+            <EuiTextArea
+              placeholder={i18n.translate('esqlControls.flyout.values.placeholder', {
+                defaultMessage: 'Set the static values',
+              })}
+              value={values}
+              disabled
+              compressed
+              onChange={() => {}}
+              aria-label={i18n.translate('esqlControls.flyout.previewValues.placeholder', {
+                defaultMessage: 'Values preview',
+              })}
+              fullWidth
             />
           </EuiFormRow>
         )}
@@ -341,6 +494,7 @@ export function ESQLControlsFlyout({
           labelAppend={i18n.translate('esqlControls.flyout.label.extraLabel', {
             defaultMessage: 'Optional',
           })}
+          fullWidth
         >
           <EuiFieldText
             placeholder={i18n.translate('esqlControls.flyout.label.placeholder', {
@@ -351,6 +505,7 @@ export function ESQLControlsFlyout({
             aria-label={i18n.translate('esqlControls.flyout.label.placeholder', {
               defaultMessage: 'Set a label',
             })}
+            fullWidth
           />
         </EuiFormRow>
 
@@ -358,6 +513,7 @@ export function ESQLControlsFlyout({
           label={i18n.translate('esqlControls.flyout.minimumWidth.label', {
             defaultMessage: 'Minimum Width',
           })}
+          fullWidth
         >
           <EuiButtonGroup
             legend={i18n.translate('esqlControls.flyout.minimumWidth.label', {

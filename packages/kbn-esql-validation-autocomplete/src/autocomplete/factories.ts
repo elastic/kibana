@@ -26,14 +26,10 @@ import { shouldBeQuotedSource, getCommandDefinition, shouldBeQuotedText } from '
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
+import { EsqlControlType } from './types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { builtinFunctions } from '../definitions/builtin';
-
-enum EsqlControlType {
-  TIME_LITERAL = 'time_literal',
-  FIELDS = 'fields',
-}
 
 const techPreviewLabel = i18n.translate(
   'kbn-esql-validation-autocomplete.esql.autocomplete.techPreviewLabel',
@@ -221,7 +217,12 @@ export function getSuggestionCommandDefinition(
 
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],
-  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
+  options?: {
+    advanceCursor?: boolean;
+    openSuggestions?: boolean;
+    addComma?: boolean;
+    controlType?: EsqlControlType;
+  }
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -239,7 +240,9 @@ export const buildFieldsDefinitionsWithMetadata = (
     };
   }) as SuggestionRawDefinition[];
 
-  const controlSuggestions = fields.length ? getControlSuggestion(EsqlControlType.FIELDS) : [];
+  const controlSuggestions = fields.length
+    ? getControlSuggestion(options?.controlType ?? EsqlControlType.FIELDS)
+    : [];
 
   return [...controlSuggestions, ...fieldsSuggestions];
 };

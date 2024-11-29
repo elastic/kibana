@@ -86,6 +86,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   displayDocumentationAsFlyout,
   dashboardApi,
   panelId,
+  disableAutoFocus,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -271,6 +272,20 @@ export const ESQLEditor = memo(function ESQLEditor({
     await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
       queryString: query.esql,
       controlType: 'fields',
+      dashboardApi,
+      panelId,
+      cursorPosition: position,
+    });
+  });
+
+  monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
+    if (!dashboardApi) {
+      return;
+    }
+    const position = editor1.current?.getPosition();
+    await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+      queryString: query.esql,
+      controlType: 'values',
       dashboardApi,
       panelId,
       cursorPosition: position,
@@ -756,8 +771,10 @@ export const ESQLEditor = memo(function ESQLEditor({
                     editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
 
                     // Auto-focus the editor and move the cursor to the end.
-                    editor.focus();
-                    editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    if (!disableAutoFocus) {
+                      editor.focus();
+                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    }
                   }}
                 />
               </div>

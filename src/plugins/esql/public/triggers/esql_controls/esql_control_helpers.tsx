@@ -9,6 +9,8 @@
 import React from 'react';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { type EsqlControlType, ESQLControlsFlyout } from '@kbn/esql-controls';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -17,6 +19,9 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { monaco } from '@kbn/monaco';
 import { esqlVariablesService } from '@kbn/esql-variables/common';
+import { untilPluginStartServicesReady } from '../../kibana_services';
+
+import './flyout.scss';
 
 interface Context {
   queryString: string;
@@ -64,23 +69,31 @@ export async function executeAction({
     esqlVariablesService.addVariable({ key: variable, value: variableValue, type: variableType });
     esqlVariablesService.setEsqlQueryWithVariables(query);
   };
-
+  const deps = await untilPluginStartServicesReady();
   const handle = core.overlays.openFlyout(
     toMountPoint(
       React.cloneElement(
-        <ESQLControlsFlyout
-          queryString={queryString}
-          search={search}
-          controlType={controlType}
-          closeFlyout={() => {
-            handle.close();
-          }}
-          dashboardApi={dashboardApi}
-          panelId={panelId}
-          cursorPosition={cursorPosition}
-          openEditFlyout={openEditFlyout}
-          addToESQLVariablesService={addToESQLVariablesService}
-        />,
+        <KibanaRenderContextProvider {...core}>
+          <KibanaContextProvider
+            services={{
+              ...deps,
+            }}
+          >
+            <ESQLControlsFlyout
+              queryString={queryString}
+              search={search}
+              controlType={controlType}
+              closeFlyout={() => {
+                handle.close();
+              }}
+              dashboardApi={dashboardApi}
+              panelId={panelId}
+              cursorPosition={cursorPosition}
+              openEditFlyout={openEditFlyout}
+              addToESQLVariablesService={addToESQLVariablesService}
+            />
+          </KibanaContextProvider>
+        </KibanaRenderContextProvider>,
         {
           closeFlyout: () => {
             handle.close();
@@ -92,6 +105,8 @@ export async function executeAction({
     {
       size: 's',
       'data-test-subj': 'create_esql_control_flyout',
+      className: 'esqlControls__overlay',
+      isResizable: true,
       type: 'push',
       paddingSize: 'm',
       hideCloseButton: true,

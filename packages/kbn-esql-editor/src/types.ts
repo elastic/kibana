@@ -73,6 +73,9 @@ export interface ESQLEditorProps {
   dashboardApi?: PresentationContainer;
 
   panelId?: string;
+
+  /** The component by default focuses on the editor when it is mounted, this flag disabled it**/
+  disableAutoFocus?: boolean;
 }
 
 export interface ESQLEditorDeps {

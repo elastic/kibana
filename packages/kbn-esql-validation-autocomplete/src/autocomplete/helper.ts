@@ -48,6 +48,7 @@ import { EDITOR_MARKER } from '../shared/constants';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import { removeMarkerArgFromArgsList } from '../shared/context';
+import { EsqlControlType } from './types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -367,12 +368,14 @@ export async function getFieldsOrFunctionsSuggestions(
     functions,
     fields,
     variables,
+    values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
     literals?: boolean;
+    values?: boolean;
   },
   {
     ignoreFn = [],
@@ -387,6 +390,7 @@ export async function getFieldsOrFunctionsSuggestions(
       ? getFieldsByType(types, ignoreColumns, {
           advanceCursor: commandName === 'sort',
           openSuggestions: commandName === 'sort',
+          controlType: values ? EsqlControlType.VALUES : EsqlControlType.FIELDS,
         })
       : [])) as SuggestionRawDefinition[],
     functions
@@ -617,6 +621,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
             {
               functions: true,
               fields: true,
+              values: Boolean(operator.subtype === 'binary-expression'),
             }
           ))
         );

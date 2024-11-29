@@ -10,6 +10,7 @@
 export enum EsqlControlType {
   TIME_LITERAL = 'time_literal',
   FIELDS = 'fields',
+  VALUES = 'values',
 }
 
 export enum EsqlControlFlyoutType {

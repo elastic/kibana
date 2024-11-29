@@ -69,6 +69,12 @@ export interface SuggestionRawDefinition {
   };
 }
 
+export enum EsqlControlType {
+  TIME_LITERAL = 'time_literal',
+  FIELDS = 'fields',
+  VALUES = 'values',
+}
+
 export interface EditorContext {
   /** The actual char that triggered the suggestion (1 single char) */
   triggerCharacter?: string;
@@ -84,5 +90,10 @@ export interface EditorContext {
 export type GetColumnsByTypeFn = (
   type: string | string[],
   ignored?: string[],
-  options?: { advanceCursor?: boolean; openSuggestions?: boolean; addComma?: boolean }
+  options?: {
+    advanceCursor?: boolean;
+    openSuggestions?: boolean;
+    addComma?: boolean;
+    controlType?: EsqlControlType;
+  }
 ) => Promise<SuggestionRawDefinition[]>;
