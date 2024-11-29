@@ -174,6 +174,10 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     license_level,
   ]);
 
+  const hideColumns = useMemo(() => {
+    return showNodeInfo ? ['model_id'] : ['model_id', 'node_name'];
+  }, [showNodeInfo]);
+
   const deploymentStatItems = useMemo<AllocatedModel[]>(() => {
     if (!isNLPModelItem(item)) return [];
 
@@ -235,8 +239,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
         };
       });
     });
-  }, [stats]);
-
+  }, [stats, item]);
 
   const tabs = useMemo<EuiTabbedContentTab[]>(() => {
     return [

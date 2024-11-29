@@ -11,7 +11,11 @@ import type {
   ModelState,
   TrainedModelType,
 } from '@kbn/ml-trained-models-utils';
-import { BUILT_IN_MODEL_TAG, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import {
+  BUILT_IN_MODEL_TAG,
+  ELASTIC_MODEL_TAG,
+  TRAINED_MODEL_TYPE,
+} from '@kbn/ml-trained-models-utils';
 import type {
   DataFrameAnalyticsConfig,
   FeatureImportanceBaseline,
@@ -103,25 +107,25 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   /**
    * Associated pipelines. Extends response from the ES endpoint.
    */
-  pipelines?: Record<string, PipelineDefinition> | null;
-  origin_job_exists?: boolean;
+  // ONLY IF INCLUDE PIPELINES
+  // pipelines?: Record<string, PipelineDefinition> | null;
+  // PART OF THE DFA
+  // origin_job_exists?: boolean;
 
-  metadata?: {
-    analytics_config: DataFrameAnalyticsConfig;
+  metadata?: estypes.MlTrainedModelConfig['metadata'] & {
+    analytics_config?: DataFrameAnalyticsConfig;
     input: unknown;
-    total_feature_importance?: TotalFeatureImportance[];
-    feature_importance_baseline?: FeatureImportanceBaseline;
-    model_aliases?: string[];
+    // total_feature_importance?: TotalFeatureImportance[];
+    // feature_importance_baseline?: FeatureImportanceBaseline;
   } & Record<string, unknown>;
-  model_id: string;
-  model_type: TrainedModelType;
-  tags: string[];
-  version: string;
-  inference_config?: Record<string, any>;
+
   /**
    * Indices with associated pipelines that have inference processors utilizing the model deployments.
+   * ONLY IF INCLUDE INDICES
    */
-  indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+  // indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+
+  // ONLY IF INCLUDE INFERENCE SERVICES
   /**
    * Whether the model has inference services
    */
@@ -360,14 +364,24 @@ export type DFAModelItem = TrainedModelItem & {
 };
 
 export function isBaseNLPModelItem(item: unknown): item is BaseNLPModelItem {
-  return typeof item === 'object' && item !== null && 'state' in item;
+  return (
+    typeof item === 'object' &&
+    item !== null &&
+    'type' in item &&
+    Array.isArray(item.type) &&
+    item.type.includes(TRAINED_MODEL_TYPE.PYTORCH)
+  );
 }
 
 export function isNLPModelItem(item: unknown): item is NLPModelItem {
   return isExistingModel(item) && item.model_type === TRAINED_MODEL_TYPE.PYTORCH;
 }
 
+export const isElasticModel = (item: TrainedModelConfigResponse) =>
+  item.tags.includes(ELASTIC_MODEL_TAG);
+
 export type ExistingModelBase = TrainedModelConfigResponse & BaseModelItem;
+
 /** Any model returned by the trained_models API, e.g. lang_ident, elser, dfa model */
 export type TrainedModelItem = ExistingModelBase & { stats: Stats };
 

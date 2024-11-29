@@ -6,20 +6,23 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { groupBy } from 'lodash';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type {
-  ElasticCuratedModelName,
-  ElserVersion,
-  InferenceAPIConfigResponse,
-} from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import type { RouteInitialization } from '../types';
+import {
+  TRAINED_MODEL_TYPE,
+  type ElasticCuratedModelName,
+  type ElserVersion,
+} from '@kbn/ml-trained-models-utils';
+import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
+import type { PipelineDefinition } from '../../common/types/trained_models';
+import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
 import { wrapError } from '../client/error_wrapper';
+import { mlLog } from '../lib/log';
+import { modelsProvider } from '../models/model_management';
+import type { RouteInitialization } from '../types';
+import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
 import {
   createIngestPipelineSchema,
   curatedModelsParamsSchema,
@@ -38,67 +41,26 @@ import {
   threadingParamsQuerySchema,
   updateDeploymentParamsSchema,
 } from './schemas/inference_schema';
-import type { PipelineDefinition } from '../../common/types/trained_models';
-import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
-import { mlLog } from '../lib/log';
-import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
-import { modelsProvider } from '../models/model_management';
 
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
+// TODO make a method for trained models provider
 export function filterForEnabledFeatureModels<
   T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
 >(models: T[], enabledFeatures: MlFeatures) {
   let filteredModels = models;
   if (enabledFeatures.nlp === false) {
-    filteredModels = filteredModels.filter((m) => m.model_type === 'tree_ensemble');
+    filteredModels = filteredModels.filter((m) => m.model_type !== TRAINED_MODEL_TYPE.PYTORCH);
   }
 
   if (enabledFeatures.dfa === false) {
-    filteredModels = filteredModels.filter((m) => m.model_type !== 'tree_ensemble');
+    filteredModels = filteredModels.filter(
+      (m) => m.model_type !== TRAINED_MODEL_TYPE.TREE_ENSEMBLE
+    );
   }
 
   return filteredModels;
 }
-
-export const populateInferenceServicesProvider = (client: IScopedClusterClient) => {
-  return async function populateInferenceServices(
-    trainedModels: TrainedModelConfigResponse[],
-    asInternal: boolean = false
-  ) {
-    const esClient = asInternal ? client.asInternalUser : client.asCurrentUser;
-
-    try {
-      // Check if model is used by an inference service
-      const { endpoints } = await esClient.transport.request<{
-        endpoints: InferenceAPIConfigResponse[];
-      }>({
-        method: 'GET',
-        path: `/_inference/_all`,
-      });
-
-      const inferenceAPIMap = groupBy(
-        endpoints,
-        (endpoint) => endpoint.service === 'elser' && endpoint.service_settings.model_id
-      );
-
-      for (const model of trainedModels) {
-        const inferenceApis = inferenceAPIMap[model.model_id];
-        model.hasInferenceServices = !!inferenceApis;
-        if (model.hasInferenceServices && !asInternal) {
-          model.inference_apis = inferenceApis;
-        }
-      }
-    } catch (e) {
-      if (!asInternal && e.statusCode === 403) {
-        // retry with internal user to get an indicator if models has associated inference services, without mentioning the names
-        await populateInferenceServices(trainedModels, true);
-      } else {
-        mlLog.error(e);
-      }
-    }
-  };
-};
 
 export function trainedModelsRoutes(
   { router, routeGuard, getEnabledFeatures }: RouteInitialization,
@@ -132,23 +94,26 @@ export function trainedModelsRoutes(
           const {
             with_pipelines: withPipelines,
             with_indices: withIndicesRaw,
-            ...getTrainedModelsRequestParams
+            with_stats: withStats,
+            size,
+            // ...getTrainedModelsRequestParams
           } = request.query;
 
           const withIndices =
             request.query.with_indices === 'true' || request.query.with_indices === true;
 
-          const resp = await mlClient.getTrainedModels({
-            ...getTrainedModelsRequestParams,
-            ...(modelId ? { model_id: modelId } : {}),
-            size: DEFAULT_TRAINED_MODELS_PAGE_SIZE,
-          } as estypes.MlGetTrainedModelsRequest);
-          // model_type is missing
-          // @ts-ignore
-          const result = resp.trained_model_configs as TrainedModelConfigResponse[];
+          const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
 
-          const populateInferenceServices = populateInferenceServicesProvider(client);
-          await populateInferenceServices(result, false);
+          const resp = await modelsClient.getTrainedModelList({
+            modelId,
+            withStats,
+            withPipelines,
+            withIndices,
+            size: size ?? DEFAULT_TRAINED_MODELS_PAGE_SIZE,
+          });
+
+          // @ts-ignore
+          const result = resp as TrainedModelConfigResponse[];
 
           try {
             if (withPipelines) {
@@ -180,7 +145,6 @@ export function trainedModelsRoutes(
                   ...Object.values(modelDeploymentsMap).flat(),
                 ])
               );
-              const modelsClient = modelsProvider(client, mlClient, cloud);
 
               const modelsPipelinesAndIndices = await Promise.all(
                 modelIdsAndAliases.map(async (modelIdOrAlias) => {

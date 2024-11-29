@@ -17,32 +17,25 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiProgress,
-  type EuiSearchBarProps,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  type EuiSearchBarProps,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import {
-  BUILT_IN_MODEL_TYPE,
-  ELASTIC_MODEL_TAG,
-  ELASTIC_MODEL_TYPE,
-  ELSER_ID_V1,
-  MODEL_STATE,
-} from '@kbn/ml-trained-models-utils';
+import { ELSER_ID_V1, MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { cloneDeep, groupBy, isEmpty, memoize } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -50,18 +43,16 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
   DFAModelItem,
-  ModelDownloadItem,
   NLPModelItem,
   TrainedModelItem,
   TrainedModelUIItem,
-  ExistingModelBase,
 } from '../../../common/types/trained_models';
 import {
+  isBaseNLPModelItem,
   isBuiltInModel,
   isDFAModelItem,
   isModelDownloadItem,
   isNLPModelItem,
-  isBaseNLPModelItem,
 } from '../../../common/types/trained_models';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
@@ -76,7 +67,7 @@ import { useTrainedModelsApiService } from '../services/ml_api_service/trained_m
 import { useToastNotificationService } from '../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from './config_mapping';
 import { DeleteModelsModal } from './delete_models_modal';
-import { getModelDeploymentState, getModelStateColor } from './get_model_state';
+import { getModelStateColor } from './get_model_state';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
@@ -172,20 +163,10 @@ export const ModelsList: FC<Props> = ({
   const [dfaModelToTest, setDfaModelToTest] = useState<DFAModelItem | null>(null);
   const [isAddModelFlyoutVisible, setIsAddModelFlyoutVisible] = useState(false);
 
-  const isElasticModel = useCallback(
-    (item: TrainedModelUIItem) => item.tags.includes(ELASTIC_MODEL_TAG),
-    []
-  );
-
   // List of downloaded/existing models
   const existingModels = useMemo<Array<NLPModelItem | DFAModelItem>>(() => {
     return items.filter((i): i is NLPModelItem | DFAModelItem => !isModelDownloadItem(i));
   }, [items]);
-
-  /**
-   * Fetch of model definitions available for download needs to happen only once
-   */
-  const getTrainedModelDownloads = memoize(trainedModelsApiService.getTrainedModelDownloads);
 
   /**
    * Fetches trained models.
@@ -193,83 +174,11 @@ export const ModelsList: FC<Props> = ({
   const fetchModelsData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await trainedModelsApiService.getTrainedModels(undefined, {
+      const resultItems = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
         with_indices: false,
+        with_stats: true,
       });
-
-      const newItems: TrainedModelUIItem[] = [];
-      const expandedItemsToRefresh = [];
-
-      for (const model of response) {
-        const tableItem: TrainedModelUIItem = {
-          ...model,
-          // Extract model types
-          ...(typeof model.inference_config === 'object'
-            ? {
-                type: [
-                  model.model_type,
-                  ...Object.keys(model.inference_config),
-                  ...(isBuiltInModel(model as TrainedModelUIItem) ? [BUILT_IN_MODEL_TYPE] : []),
-                  ...(isElasticModel(model as TrainedModelUIItem) ? [ELASTIC_MODEL_TYPE] : []),
-                ],
-              }
-            : {}),
-        } as TrainedModelUIItem;
-        newItems.push(tableItem);
-
-        if (itemIdToExpandedRowMap[model.model_id]) {
-          expandedItemsToRefresh.push(tableItem);
-        }
-      }
-
-      // Need to fetch stats for all models to enable/disable actions
-      // TODO combine fetching models definitions and stats into a single function
-      await fetchModelsStats(newItems as ExistingModelBase[]);
-
-      let resultItems = newItems;
-      // don't add any of the built-in models (e.g. elser) if NLP is disabled
-      if (isNLPEnabled) {
-        const idMap = new Map<string, TrainedModelUIItem>(
-          resultItems.map((model) => [model.model_id, model])
-        );
-        /**
-         * Fetches model definitions available for download
-         */
-        const forDownload = await getTrainedModelDownloads();
-
-        const notDownloaded: TrainedModelUIItem[] = forDownload
-          .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer }) => {
-            if (idMap.has(modelId)) {
-              const model = idMap.get(modelId)! as NLPModelItem;
-              if (recommended) {
-                model.recommended = true;
-              }
-              model.supported = supported;
-              model.disclaimer = disclaimer;
-            }
-            return !idMap.has(modelId) && !hidden;
-          })
-          .map<ModelDownloadItem>((modelDefinition) => {
-            return {
-              model_id: modelDefinition.model_id,
-              type: modelDefinition.type,
-              tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
-              putModelConfig: modelDefinition.config,
-              description: modelDefinition.description,
-              state: MODEL_STATE.NOT_DOWNLOADED,
-              recommended: !!modelDefinition.recommended,
-              modelName: modelDefinition.modelName,
-              os: modelDefinition.os,
-              arch: modelDefinition.arch,
-              softwareLicense: modelDefinition.license,
-              licenseUrl: modelDefinition.licenseUrl,
-              supported: modelDefinition.supported,
-              disclaimer: modelDefinition.disclaimer,
-            } as ModelDownloadItem;
-          });
-        resultItems = [...resultItems, ...notDownloaded];
-      }
 
       setItems((prevItems) => {
         // Need to merge existing items with new items
@@ -335,58 +244,6 @@ export const ModelsList: FC<Props> = ({
       },
     };
   }, [existingModels]);
-
-  /**
-   * Fetches models stats and update the original object
-   */
-  const fetchModelsStats = useCallback(async (models: ExistingModelBase[]) => {
-    try {
-      if (models) {
-        const { trained_model_stats: modelsStatsResponse } =
-          await trainedModelsApiService.getTrainedModelStats();
-
-        const groupByModelId = groupBy(modelsStatsResponse, 'model_id');
-
-        models.forEach((model) => {
-          const modelStats = groupByModelId[model.model_id];
-
-          const isNlpModel = isNLPModelItem(model);
-
-          (model as TrainedModelItem).stats = {
-            // ...(model.stats ?? {}),
-            ...modelStats[0],
-            ...(isNlpModel
-              ? { deployment_stats: modelStats.map((d) => d.deployment_stats).filter(isDefined) }
-              : {}),
-          };
-
-          if (isNlpModel) {
-            // Extract deployment ids from deployment stats
-            model.deployment_ids = modelStats
-              .map((v) => v.deployment_stats?.deployment_id)
-              .filter(isDefined);
-
-            model.state = getModelDeploymentState(model);
-            model.stateDescription = model.stats!.deployment_stats.reduce((acc, c) => {
-              if (acc) return acc;
-              return c.reason ?? '';
-            }, '');
-          }
-        });
-      }
-
-      return true;
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
-          defaultMessage: 'Error loading trained models statistics',
-        })
-      );
-      return false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const downLoadStatusFetchInProgress = useRef(false);
   const abortedDownload = useRef(new Set<string>());

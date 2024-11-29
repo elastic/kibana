@@ -20,15 +20,15 @@ import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 import type {
-  TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
   ModelDownloadState,
+  TrainedModelUIItem,
 } from '../../../../common/types/trained_models';
+
 export interface InferenceQueryParams {
-  decompress_definition?: boolean;
   from?: number;
   include_model_definition?: boolean;
   size?: number;
@@ -36,6 +36,7 @@ export interface InferenceQueryParams {
   // Custom kibana endpoint query params
   with_pipelines?: boolean;
   with_indices?: boolean;
+  with_stats?: boolean;
   include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
 }
 
@@ -114,7 +115,7 @@ export function trainedModelsApiProvider(httpService: HttpService) {
     getTrainedModels(modelId?: string | string[], params?: InferenceQueryParams) {
       const model = Array.isArray(modelId) ? modelId.join(',') : modelId;
 
-      return httpService.http<TrainedModelConfigResponse[]>({
+      return httpService.http<TrainedModelUIItem[]>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models${model ? `/${model}` : ''}`,
         method: 'GET',
         ...(params ? { query: params as HttpFetchQuery } : {}),
