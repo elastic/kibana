@@ -331,8 +331,6 @@ export const getHeatmapVisualization = ({
       }
     );
 
-    console.log(state);
-
     const gridConfigFn = buildExpressionFunction<HeatmapGridExpressionFunctionDefinition>(
       'heatmap_grid',
       {
