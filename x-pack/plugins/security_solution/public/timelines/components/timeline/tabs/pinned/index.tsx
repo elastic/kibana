@@ -173,7 +173,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
    * Triggers on Datagrid page change
    *
    */
-  const onChangePage = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
+  const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
@@ -292,7 +292,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         isTextBasedQuery={false}
         leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
         trailingControlColumns={rowDetailColumn}
-        onChangePage={onChangePage}
+        onUpdatePageIndex={onUpdatePageIndex}
       />
     </>
   );

@@ -79,7 +79,7 @@ type CommonDataTableProps = {
   | 'renderCustomGridBody'
   | 'trailingControlColumns'
   | 'isSortEnabled'
-  | 'onChangePage'
+  | 'onUpdatePageIndex'
 >;
 
 interface DataTableProps extends CommonDataTableProps {
@@ -110,7 +110,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSort,
     onFilter,
     leadingControlColumns,
-    onChangePage,
+    onUpdatePageIndex,
   }) {
     const dispatch = useDispatch();
 
@@ -426,7 +426,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
-            onChangePage={onChangePage}
+            onUpdatePageIndex={onUpdatePageIndex}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

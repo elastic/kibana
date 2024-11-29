@@ -111,7 +111,7 @@ const TestComponent = (
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
-    onChangePage: jest.fn(),
+    onUpdatePageIndex: jest.fn(),
   };
 
   const dispatch = useDispatch();

@@ -1408,7 +1408,7 @@ describe('UnifiedDataTable', () => {
     test('should effect pageIndex change', async () => {
       const component = await getComponent({
         ...getProps(),
-        onChangePage: onChangePageMock,
+        onUpdatePageIndex: onChangePageMock,
         rowsPerPageState: 1,
         rowsPerPageOptions: [1, 5],
       });
@@ -1429,7 +1429,7 @@ describe('UnifiedDataTable', () => {
        * */
       const component = await getComponent({
         ...getProps(),
-        onChangePage: onChangePageMock,
+        onUpdatePageIndex: onChangePageMock,
         rowsPerPageState: 1,
         rowsPerPageOptions: [1, 4],
       });

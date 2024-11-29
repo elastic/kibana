@@ -210,7 +210,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
    * Triggers on Datagrid page change
    *
    */
-  const onChangePage = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
+  const onUpdatePageIndex = useCallback((newPageIndex: number) => setPageIndex(newPageIndex), []);
 
   const { openFlyout } = useExpandableFlyoutApi();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
@@ -387,7 +387,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         activeTab={activeTab}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}
-        onChangePage={onChangePage}
+        onUpdatePageIndex={onUpdatePageIndex}
       />
     </>
   );

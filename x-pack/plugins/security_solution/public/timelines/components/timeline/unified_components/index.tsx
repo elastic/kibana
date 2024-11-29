@@ -114,7 +114,7 @@ interface Props {
   dataView: DataView;
   trailingControlColumns?: EuiDataGridProps['trailingControlColumns'];
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
-  onChangePage?: UnifiedDataTableProps['onChangePage'];
+  onUpdatePageIndex?: UnifiedDataTableProps['onUpdatePageIndex'];
 }
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -136,7 +136,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   dataView,
   trailingControlColumns,
   leadingControlColumns,
-  onChangePage,
+  onUpdatePageIndex,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -444,7 +444,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFilter={onAddFilter as DocViewFilterFn}
                       trailingControlColumns={trailingControlColumns}
                       leadingControlColumns={leadingControlColumns}
-                      onChangePage={onChangePage}
+                      onUpdatePageIndex={onUpdatePageIndex}
                     />
                   </EventDetailsWidthProvider>
                 </DropOverlayWrapper>

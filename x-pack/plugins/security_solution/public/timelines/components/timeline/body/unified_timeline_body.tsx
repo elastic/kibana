@@ -35,7 +35,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     updatedAt,
     trailingControlColumns,
     leadingControlColumns,
-    onChangePage,
+    onUpdatePageIndex,
   } = props;
 
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
@@ -66,7 +66,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
             isTextBasedQuery={false}
             trailingControlColumns={trailingControlColumns}
             leadingControlColumns={leadingControlColumns}
-            onChangePage={onChangePage}
+            onUpdatePageIndex={onUpdatePageIndex}
           />
         </RootDragDropProvider>
       </StyledUnifiedTableFlexItem>
