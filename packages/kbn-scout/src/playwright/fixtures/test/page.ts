@@ -15,7 +15,7 @@ import { ScoutPage, KibanaUrl } from '../types';
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
  * All methods must have 'selector: string' as the first argument
  */
-function extendPageWithTestSubject(page: Page) {
+function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   const methods: Array<keyof Page> = [
     'check',
     'click',
@@ -45,24 +45,22 @@ function extendPageWithTestSubject(page: Page) {
     };
   }
 
-  // custom method to type text slowly using keyboard.insertText
+  // custom method to types text into an input field character by character with a delay
   extendedMethods.typeWithDelay = async (
     selector: string,
     text: string,
     options?: { delay: number }
   ) => {
-    const { delay = 50 } = options || {};
+    const { delay = 25 } = options || {};
     const testSubjSelector = subj(selector);
     await page.locator(testSubjSelector).click();
     for (const char of text) {
       await page.keyboard.insertText(char);
-      await page.waitForTimeout(delay); // Delay in milliseconds
+      await page.waitForTimeout(delay);
     }
   };
 
-  return extendedMethods as Record<keyof Page, any> & {
-    typeWithDelay: ScoutPage['testSubj']['typeWithDelay'];
-  };
+  return extendedMethods as ScoutPage['testSubj'];
 }
 
 /**
