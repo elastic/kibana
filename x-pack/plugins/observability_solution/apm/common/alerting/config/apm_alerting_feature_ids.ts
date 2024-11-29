@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const apmAlertingFeatureIds: ValidFeatureId[] = [
-  'logs',
-  'apm',
-  'slo',
-  'observability',
-  'infrastructure',
+  AlertConsumers.LOGS,
+  AlertConsumers.APM,
+  AlertConsumers.SLO,
+  AlertConsumers.OBSERVABILITY,
+  AlertConsumers.INFRASTRUCTURE,
 ];
