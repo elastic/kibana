@@ -114,7 +114,7 @@ const buildIngestPipeline = ({
         source: `
 Map merged = ctx;
 def id = ctx.entity.id;
-for (meta in ctx.entities.keyword) {
+for (meta in ctx.collected.metadata) {
     Object json = Processors.json(meta);
     
     for (entry in ((Map)json)[id].entrySet()) {
