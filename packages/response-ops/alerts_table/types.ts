@@ -56,7 +56,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { Case } from './hooks/bulk_get_cases';
+import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
   id: AlertConsumers;

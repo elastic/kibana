@@ -8,7 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import * as api from './bulk_get_cases';
+import * as api from '../apis/bulk_get_cases';
 import { useBulkGetCasesQuery } from './use_bulk_get_cases';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -17,7 +17,7 @@ import { testQueryClientConfig } from '../utils/test';
 import React, { PropsWithChildren } from 'react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
-jest.mock('./bulk_get_cases');
+jest.mock('../apis/bulk_get_cases');
 
 const response = {
   cases: [],
@@ -36,7 +36,7 @@ const wrapper = ({ children }: PropsWithChildren) => {
   );
 };
 
-describe('useBulkGetCases', () => {
+describe(useBulkGetCasesQuery, () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
