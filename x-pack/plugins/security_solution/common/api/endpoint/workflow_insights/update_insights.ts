@@ -7,6 +7,17 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 
+const arrayWithNonEmptyString = schema.arrayOf(
+  schema.string({
+    minLength: 1,
+    validate: (id) => {
+      if (id.trim() === '') {
+        return 'insightId can not be an empty string';
+      }
+    },
+  })
+);
+
 export const UpdateWorkflowInsightRequestSchema = {
   params: schema.object({
     insightId: schema.string({
@@ -36,7 +47,7 @@ export const UpdateWorkflowInsightRequestSchema = {
     target: schema.maybe(
       schema.object({
         type: schema.maybe(schema.oneOf([schema.literal('endpoint')])),
-        ids: schema.maybe(schema.arrayOf(schema.string())),
+        ids: schema.maybe(arrayWithNonEmptyString),
       })
     ),
     action: schema.maybe(
@@ -62,8 +73,8 @@ export const UpdateWorkflowInsightRequestSchema = {
               name: schema.maybe(schema.string()),
               description: schema.maybe(schema.string()),
               entries: schema.maybe(schema.arrayOf(schema.any())),
-              tags: schema.maybe(schema.arrayOf(schema.string())),
-              os_types: schema.maybe(schema.arrayOf(schema.string())),
+              tags: schema.maybe(arrayWithNonEmptyString),
+              os_types: schema.maybe(arrayWithNonEmptyString),
             })
           )
         ),
@@ -72,7 +83,7 @@ export const UpdateWorkflowInsightRequestSchema = {
     metadata: schema.maybe(
       schema.object({
         notes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-        message_variables: schema.maybe(schema.arrayOf(schema.string())),
+        message_variables: schema.maybe(arrayWithNonEmptyString),
       })
     ),
   }),
