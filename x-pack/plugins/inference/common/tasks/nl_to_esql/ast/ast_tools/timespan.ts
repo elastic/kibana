@@ -72,5 +72,5 @@ export function stringToTimespanLiteral(str: string): ESQLTimeInterval {
   }
   const [_, quantity, unit] = match;
 
-  return createTimespanLiteral(unit, quantity ? parseInt(quantity, 10) : 1);
+  return createTimespanLiteral(unit.toLowerCase(), quantity ? parseInt(quantity, 10) : 1);
 }

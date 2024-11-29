@@ -36,6 +36,19 @@ describe('getTimespanLiteralsCorrections', () => {
       );
     });
 
+    it('replaces uppercase literals', () => {
+      const query = 'FROM logs | EVAL truncated = DATE_TRUNC("1 YEAR", date)';
+      const { root } = parse(query);
+
+      applyTimespanLiteralsCorrections(root);
+
+      const output = BasicPrettyPrinter.print(root);
+
+      expect(output).toMatchInlineSnapshot(
+        `"FROM logs | EVAL truncated = DATE_TRUNC(1 year, date)"`
+      );
+    });
+
     it('returns info about the correction', () => {
       const query = 'FROM logs | EVAL truncated = DATE_TRUNC("1 year", date)';
       const { root } = parse(query);
@@ -76,6 +89,19 @@ describe('getTimespanLiteralsCorrections', () => {
 
       expect(output).toMatchInlineSnapshot(
         `"FROM logs | STATS hires = COUNT(*) BY hour = BUCKET(hire_date, 1 hour)"`
+      );
+    });
+
+    it('replaces uppercase literals', () => {
+      const query = 'FROM logs | STATS hires = COUNT(*) BY week = BUCKET(hire_date, "1 WEEK")';
+      const { root } = parse(query);
+
+      applyTimespanLiteralsCorrections(root);
+
+      const output = BasicPrettyPrinter.print(root);
+
+      expect(output).toMatchInlineSnapshot(
+        `"FROM logs | STATS hires = COUNT(*) BY week = BUCKET(hire_date, 1 week)"`
       );
     });
 
