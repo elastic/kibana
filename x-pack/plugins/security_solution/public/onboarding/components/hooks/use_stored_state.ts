@@ -6,16 +6,25 @@
  */
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useMemo } from 'react';
-import { LocalStorageKey, type OnboardingCardId } from '../../constants';
+import type { OnboardingCardId } from '../../constants';
 import type { IntegrationTabId } from '../onboarding_body/cards/integrations/types';
+
+const LocalStorageKey = {
+  avcBannerDismissed: 'securitySolution.onboarding.avcBannerDismissed',
+  videoVisited: 'securitySolution.onboarding.videoVisited',
+  completeCards: 'securitySolution.onboarding.completeCards',
+  expandedCard: 'securitySolution.onboarding.expandedCard',
+  urlDetails: 'securitySolution.onboarding.urlDetails',
+  selectedIntegrationTabId: 'securitySolution.onboarding.selectedIntegrationTabId',
+  integrationSearchTerm: 'securitySolution.onboarding.integrationSearchTerm',
+} as const;
 
 /**
  * Wrapper hook for useLocalStorage, but always returns the default value when not defined instead of `undefined`.
  */
 export const useDefinedLocalStorage = <T = undefined>(key: string, defaultValue: T) => {
   const [value, setValue] = useLocalStorage<T>(key, defaultValue);
-  return useMemo(() => [value ?? defaultValue, setValue] as const, [value, defaultValue, setValue]);
+  return [value ?? defaultValue, setValue] as const;
 };
 
 /**
@@ -55,13 +64,4 @@ export const useStoredIntegrationSearchTerm = (spaceId: string) =>
   useDefinedLocalStorage<string | null>(
     `${LocalStorageKey.integrationSearchTerm}.${spaceId}`,
     null
-  );
-
-/**
- * Stores the siem migrations connector id
- */
-export const useStoredSiemMigrationsConnectorId = (spaceId: string) =>
-  useDefinedLocalStorage<string | undefined>(
-    `${LocalStorageKey.siemMigrationsConnectorId}.${spaceId}`,
-    undefined
   );
