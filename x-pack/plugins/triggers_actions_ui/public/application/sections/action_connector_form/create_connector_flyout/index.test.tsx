@@ -426,7 +426,7 @@ describe('CreateConnectorFlyout', () => {
 
   describe('Submitting', () => {
     it('creates a connector correctly', async () => {
-      const { getByTestId } = appMockRenderer.render(
+      const { getByTestId, queryByTestId } = appMockRenderer.render(
         <CreateConnectorFlyout
           actionTypeRegistry={actionTypeRegistry}
           onClose={onClose}
@@ -469,6 +469,35 @@ describe('CreateConnectorFlyout', () => {
         name: 'My test',
         secrets: {},
       });
+      expect(queryByTestId('requiredFieldErrorMsg')).not.toBeInTheDocument();
+    });
+
+    it('show Required all fields message', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      await act(() => Promise.resolve());
+
+      await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-text-field')).toBeInTheDocument();
+      });
+
+      await userEvent.type(getByTestId('test-connector-text-field'), 'My text field', {
+        delay: 100,
+      });
+
+      await userEvent.click(getByTestId('create-connector-flyout-save-btn'));
+
+      expect(onClose).not.toHaveBeenCalled();
+      expect(onConnectorCreated).not.toHaveBeenCalled();
+      expect(getByTestId('requiredFieldErrorMsg')).toBeInTheDocument();
     });
 
     it('runs pre submit validator correctly', async () => {
