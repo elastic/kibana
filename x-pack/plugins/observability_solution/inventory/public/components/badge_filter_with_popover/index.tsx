@@ -19,7 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { type EntityTypeCheckOptions } from '../../../common/rt_types';
+import type { EntityTypeCheckOptions } from '../../../common/rt_types';
 
 interface Props {
   field: string;
