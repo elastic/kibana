@@ -29,7 +29,6 @@ import { DataViewsServerPluginStart } from '@kbn/data-plugin/server';
 import { LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
-import { DEFAULT_LOG_SOURCES } from '@kbn/logs-data-access-plugin/common/constants';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -221,7 +220,7 @@ export class InfraServerPlugin
       await dataViewsService.createAndSave({
         allowNoIndex: false,
         name: LOG_RULES_DATA_VIEW_NAME,
-        title: logIndices === '' ? DEFAULT_LOG_SOURCES.join(',') : logIndices,
+        title: logIndices,
         id: LOG_RULES_DATA_VIEW_ID,
         timeFieldName: timestampField,
       });
