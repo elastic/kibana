@@ -102,6 +102,37 @@ router.get({
 }, handler);
 ```
 
+### Configuring operator and superuser privileges
+We have two special predefined privilege sets that can be used in security configuration:
+1. Operator
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [ReservedPrivilegesSet.operator],
+    },
+  },
+  ...
+}, handler);
+```
+Operator privileges check is enforced only if operator privileges are enabled in the Elasticsearch configuration.
+For more information on operator privileges, refer to the [Operator privileges documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/operator-privileges.html).
+If operator privileges are disabled, we fall back to the superuser privileges check.
+
+2. Superuser
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [ReservedPrivilegesSet.superuser],
+    },
+  },
+  ...
+}, handler);
+```
+
 ### Opting out of authorization for specific routes
 **Before migration:**
 ```ts
