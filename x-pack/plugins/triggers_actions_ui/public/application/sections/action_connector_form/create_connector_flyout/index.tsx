@@ -60,6 +60,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [actionType, setActionType] = useState<ActionType | null>(null);
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
+  const [isRequiredFieldError, setIsRequiredFieldError] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -106,6 +107,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
   const setResetForm = (reset: ResetForm) => {
     resetConnectorForm.current = reset;
+    setIsRequiredFieldError(false);
   };
 
   const onChangeGroupAction = (id: string) => {
@@ -159,6 +161,11 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
+    } else {
+      if (Object.keys(data).length === 0) {
+        setIsRequiredFieldError(true);
+      }
+      return;
     }
   }, [submit, preSubmitValidator, createConnector]);
 
@@ -226,6 +233,17 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   data-test-subj="slackTypeChangeButton"
                 />
                 <EuiSpacer size="xs" />
+              </>
+            )}
+            {isRequiredFieldError && (
+              <>
+                <p data-test-subj="requiredFieldErrorMsg">
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionConnectorAdd.requiredFieldError"
+                    defaultMessage="All fields are required"
+                  />
+                </p>
+                <EuiSpacer size="m" />
               </>
             )}
             <ConnectorForm
