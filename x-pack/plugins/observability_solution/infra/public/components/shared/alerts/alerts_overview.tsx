@@ -27,8 +27,6 @@ interface AlertsOverviewProps {
   assetType?: InventoryItemType;
 }
 
-const alertFeatureIds = [...infraAlertFeatureIds, AlertConsumers.OBSERVABILITY];
-
 export const AlertsOverview = ({
   assetId,
   dateRange,
@@ -127,7 +125,7 @@ export const AlertsOverview = ({
           alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
           id={'assetDetailsAlertsTable'}
           configurationId={AlertConsumers.OBSERVABILITY}
-          featureIds={alertFeatureIds}
+          featureIds={infraAlertFeatureIds}
           showAlertStatusWithFlapping
           query={alertsEsQueryByStatus}
           initialPageSize={5}
