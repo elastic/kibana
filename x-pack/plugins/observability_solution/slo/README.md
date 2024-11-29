@@ -22,7 +22,7 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/
 </dl>
 
 
-## Tests
+## API Integration Tests
 The SLO tests are located under `x-pack/test/api_integration/deployment_agnostic/apis/observability/slo` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SLO`) on stateful or serverless.
 
 ### Stateful
