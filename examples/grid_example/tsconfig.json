@@ -13,6 +13,10 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/embeddable-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/embeddable-examples-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/presentation-publishing",
+    "@kbn/es-query"
   ]
 }
