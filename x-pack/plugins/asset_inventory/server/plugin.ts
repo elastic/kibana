@@ -8,11 +8,14 @@ import type {
 
 import type { AssetInventoryPluginSetup, AssetInventoryPluginStart } from './types';
 import { defineRoutes } from './routes';
+import { initializeTransforms } from './create_transforms/create_transforms';
 
 export class AssetInventoryPlugin
   implements Plugin<AssetInventoryPluginSetup, AssetInventoryPluginStart>
 {
   private readonly logger: Logger;
+
+  #isInitialized: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -30,8 +33,22 @@ export class AssetInventoryPlugin
 
   public start(core: CoreStart) {
     this.logger.debug('assetInventory: Started');
+
+    // TODO Invoke initialize() when it's due
+    // this.initialize(core).catch(() => {});
+
     return {};
   }
 
   public stop() {}
+
+  /**
+   * Initialization is idempotent and required for (re)creating indices and transforms.
+   */
+  async initialize(core: CoreStart): Promise<void> {
+    this.logger.debug('initialize');
+    const esClient = core.elasticsearch.client.asInternalUser;
+    await initializeTransforms(esClient, this.logger);
+    this.#isInitialized = true;
+  }
 }
