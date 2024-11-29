@@ -11,11 +11,10 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
-  AlertConsumers,
 } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { INFRA_ALERT_FEATURE_IDS } from '../../../../common/constants';
 
 export const ALERT_STATUS_ALL = 'all';
 
@@ -88,5 +87,4 @@ export const ALERTS_PATH = '/app/observability/alerts';
 export const ALERTS_PER_PAGE = 10;
 export const ALERTS_TABLE_ID = 'xpack.infra.hosts.alerts.table';
 
-export const INFRA_ALERT_FEATURE_ID = 'infrastructure';
-export const infraAlertFeatureIds: ValidFeatureId[] = [AlertConsumers.INFRASTRUCTURE];
+export const infraAlertFeatureIds = INFRA_ALERT_FEATURE_IDS;
