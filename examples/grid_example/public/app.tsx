@@ -12,7 +12,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { combineLatest, debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { css } from '@emotion/react';
 
 import {
   EuiBadge,

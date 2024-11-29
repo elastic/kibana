@@ -53,7 +53,6 @@ import {
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
-import { useDragHandleContext } from '../presentation_panel_context_provider';
 
 const DASHED_OUTLINE = `1px dashed ${euiThemeVars.euiColorMediumShade}`;
 const SOLID_OUTLINE = `1px solid ${euiThemeVars.euiBorderColor}`;
