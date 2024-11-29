@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
+export { getCellRendererForGivenRecord } from './cell_renderers';
