@@ -41,9 +41,7 @@ export const GridRow = forwardRef<
     gridRef
   ) => {
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
-    const [panelIds, setPanelIds] = useState<string[]>(
-      Object.keys(getKeysInOrder(currentRow.panels))
-    );
+    const [panelIds, setPanelIds] = useState<string[]>(getKeysInOrder(currentRow.panels));
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
@@ -160,7 +158,7 @@ export const GridRow = forwardRef<
               return {
                 title: gridLayout[rowIndex].title,
                 isCollapsed: gridLayout[rowIndex].isCollapsed,
-                panelIds: Object.keys(getKeysInOrder(gridLayout[rowIndex].panels)),
+                panelIds: getKeysInOrder(gridLayout[rowIndex].panels),
               };
             }),
             pairwise()
