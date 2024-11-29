@@ -6,7 +6,7 @@
   ],
   "group": "security",
   "visibility": "private",
-  "description": "Centralized place to view and manage all assets in Kibana",
+  "description": "Centralized page to view and manage all cloud assets",
   "plugin": {
     "id": "assetInventory",
     "browser": true,
