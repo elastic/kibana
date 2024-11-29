@@ -259,20 +259,9 @@ export function loadEmbeddableData(
   }
 
   const mergedSubscriptions = merge(
-    // on data change from the parentApi, reload
-    fetch$(api).pipe(
-      // some integrations may send different objects
-      distinctUntilChanged(fastIsEqual),
-      tap((data) => {
-        const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
-        unifiedSearch$.next({
-          query: data.query,
-          filters: data.filters,
-          timeRange: data.timeRange,
-          timeslice: data.timeslice,
-          searchSessionId,
-        });
-      }),
+    // This is an indirect observable, populated by the fetch$
+    unifiedSearch$.pipe(
+      waitUntilChanged(),
       map(() => 'searchContext' as ReloadReason)
     ),
     // On state change, reload
@@ -304,6 +293,18 @@ export function loadEmbeddableData(
   );
 
   const subscriptions: Subscription[] = [
+    // make fetch$ populate the internal unifiedSearch$ and will filter that out
+    // before deciding to data load
+    fetch$(api).subscribe((data) => {
+      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
+      unifiedSearch$.next({
+        query: data.query,
+        filters: data.filters,
+        timeRange: data.timeRange,
+        timeslice: data.timeslice,
+        searchSessionId,
+      });
+    }),
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
     api.viewMode.subscribe(() => {
