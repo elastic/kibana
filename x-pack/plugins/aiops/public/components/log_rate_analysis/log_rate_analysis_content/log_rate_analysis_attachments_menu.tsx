@@ -98,12 +98,12 @@ export const LogRateAnalysisAttachmentsMenu = ({
   const caseAttachmentTooltipContent = useMemo(() => {
     if (!showLogRateAnalysisResults) {
       return i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseTooltipNoAnalysis', {
-        defaultMessage: 'Run the analysis first to add results to a case',
+        defaultMessage: 'Run the analysis first to add results to a case.',
       });
     }
     if (significantItems.length === 0) {
       return i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseTooltipNoResults', {
-        defaultMessage: 'Cannot add to case because the analysis did not produce any results',
+        defaultMessage: 'Cannot add to case because the analysis did not produce any results.',
       });
     }
   }, [showLogRateAnalysisResults, significantItems.length]);
