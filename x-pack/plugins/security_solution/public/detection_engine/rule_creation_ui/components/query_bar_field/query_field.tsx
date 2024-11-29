@@ -9,7 +9,7 @@ import { EuiFormRow, EuiMutationObserver } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import type { DataViewBase, Query } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 
@@ -21,15 +21,10 @@ import type { TimelineModel } from '../../../../timelines/store/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
+import type { FieldValueQueryBar } from './types';
 import * as i18n from './translations';
 
-export interface FieldValueQueryBar {
-  filters: Filter[];
-  query: Query;
-  saved_id: string | null;
-  title?: string;
-}
-export interface QueryBarDefineRuleProps {
+export interface QueryBarFieldProps {
   dataTestSubj: string;
   field: FieldHook;
   idAria: string;
@@ -70,7 +65,7 @@ const savedQueryToFieldValue = (savedQuery: SavedQuery): FieldValueQueryBar => (
   title: savedQuery.attributes.title,
 });
 
-export const QueryBarDefineRule = ({
+export const QueryBarField = ({
   defaultSavedQuery,
   dataTestSubj,
   field,
@@ -85,7 +80,7 @@ export const QueryBarDefineRule = ({
   resetToSavedQuery,
   onOpenTimeline,
   onSavedQueryError,
-}: QueryBarDefineRuleProps) => {
+}: QueryBarFieldProps) => {
   const { value: fieldValue, setValue: setFieldValue } = field as FieldHook<FieldValueQueryBar>;
   const [originalHeight, setOriginalHeight] = useState(-1);
   const [loadingTimeline, setLoadingTimeline] = useState(false);
