@@ -73,7 +73,7 @@ export function formatHit(
     // or if it's highlighted, but the parent is not.
     // If not we always include it into the result.
     if (displayKey) {
-      const multiParent = field.getSubtypeMulti()?.multi.parent;
+      const multiParent = field.getSubtypeMulti?.()?.multi.parent;
       const isHighlighted = Boolean(highlights[key]);
       const isParentHighlighted = Boolean(multiParent && highlights[multiParent]);
 
