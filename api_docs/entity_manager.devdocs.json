@@ -924,6 +924,48 @@
           },
           {
             "parentPluginId": "entityManager",
+            "id": "def-public.EntityClient.getEntityDefinition",
+            "type": "Function",
+            "tags": [],
+            "label": "getEntityDefinition",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<{ definitions: { id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; } | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+              {
+                "pluginId": "@kbn/entities-schema",
+                "scope": "common",
+                "docId": "kibKbnEntitiesSchemaPluginApi",
+                "section": "def-common.BasicAggregations",
+                "text": "BasicAggregations"
+              },
+              "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }[] | ",
+              "EntityDefinitionWithState",
+              "[]; }>"
+            ],
+            "path": "x-pack/plugins/entity_manager/public/lib/entity_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "entityManager",
+                "id": "def-public.EntityClient.getEntityDefinition.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/entity_manager/public/lib/entity_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "entityManager",
             "id": "def-public.EntityClient.asKqlFilter",
             "type": "Function",
             "tags": [],
