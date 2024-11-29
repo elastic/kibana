@@ -22,20 +22,34 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
         .optional(z.string())
         .default(() => moment().subtract(5, 'minutes').toISOString())
         .refine((val) => moment(val).isValid(), {
-          message: 'start should be a date in ISO format',
+          message: '[start] should be a date in ISO format',
         }),
       end: z
         .optional(z.string())
         .default(() => moment().toISOString())
         .refine((val) => moment(val).isValid(), {
-          message: 'start should be a date in ISO format',
+          message: '[end] should be a date in ISO format',
         }),
+      sort_by: z.optional(
+        z.object({
+          field: z.string(),
+          direction: z.enum(['ASC', 'DESC']),
+        })
+      ),
       limit: z.optional(z.number()).default(10),
     }),
   }),
   handler: async ({ request, response, params, logger, getScopedClient }) => {
     try {
-      const { type, start, end, limit, filters, metadata_fields: metadataFields } = params.body;
+      const {
+        type,
+        start,
+        end,
+        limit,
+        filters,
+        metadata_fields: metadataFields,
+        sort_by: sortBy,
+      } = params.body;
 
       const client = await getScopedClient({ request });
       const entities = await client.searchEntities({
@@ -44,6 +58,7 @@ export const searchEntitiesRoute = createEntityManagerServerRoute({
         metadataFields,
         start,
         end,
+        sortBy,
         limit,
       });
 
@@ -69,25 +84,32 @@ export const searchEntitiesPreviewRoute = createEntityManagerServerRoute({
         .optional(z.string())
         .default(() => moment().subtract(5, 'minutes').toISOString())
         .refine((val) => moment(val).isValid(), {
-          message: 'start should be a date in ISO format',
+          message: '[start] should be a date in ISO format',
         }),
       end: z
         .optional(z.string())
         .default(() => moment().toISOString())
         .refine((val) => moment(val).isValid(), {
-          message: 'start should be a date in ISO format',
+          message: '[end] should be a date in ISO format',
         }),
+      sort_by: z.optional(
+        z.object({
+          field: z.string(),
+          direction: z.enum(['ASC', 'DESC']),
+        })
+      ),
       limit: z.optional(z.number()).default(10),
     }),
   }),
-  handler: async ({ request, response, params, logger, getScopedClient }) => {
-    const { sources, start, end, limit } = params.body;
+  handler: async ({ request, response, params, getScopedClient }) => {
+    const { sources, start, end, limit, sort_by: sortBy } = params.body;
 
     const client = await getScopedClient({ request });
     const entities = await client.searchEntitiesBySources({
       sources,
       start,
       end,
+      sortBy,
       limit,
     });
 

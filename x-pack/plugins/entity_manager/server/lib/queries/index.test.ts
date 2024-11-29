@@ -18,19 +18,21 @@ describe('getEntityInstancesQuery', () => {
           metadata_fields: ['host.name'],
           filters: [],
           timestamp_field: 'custom_timestamp_field',
+          display_name: 'service.id',
         },
         limit: 5,
         start: '2024-11-20T19:00:00.000Z',
         end: '2024-11-20T20:00:00.000Z',
+        sortBy: { field: 'entity.id', direction: 'ASC' },
       });
 
       expect(query).toEqual(
-        'FROM logs-*,metrics-*|' +
-          'WHERE custom_timestamp_field >= "2024-11-20T19:00:00.000Z"|' +
-          'WHERE custom_timestamp_field <= "2024-11-20T20:00:00.000Z"|' +
-          'WHERE service.name IS NOT NULL|' +
-          'STATS entity.last_seen_timestamp=MAX(custom_timestamp_field),metadata.host.name=VALUES(host.name) BY service.name|' +
-          'SORT entity.last_seen_timestamp DESC|' +
+        'FROM logs-*, metrics-* | ' +
+          'WHERE service.name IS NOT NULL | ' +
+          'WHERE custom_timestamp_field >= "2024-11-20T19:00:00.000Z" AND custom_timestamp_field <= "2024-11-20T20:00:00.000Z" | ' +
+          'STATS host.name = VALUES(host.name), entity.last_seen_timestamp = MAX(custom_timestamp_field), service.id = MAX(service.id) BY service.name | ' +
+          'EVAL entity.type = "service", entity.id = service.name, entity.display_name = COALESCE(service.id, entity.id) | ' +
+          'SORT entity.id ASC | ' +
           'LIMIT 5'
       );
     });

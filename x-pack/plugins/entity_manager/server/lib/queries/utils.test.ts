@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EntitySource } from '.';
 import { mergeEntitiesList } from './utils';
 
 describe('mergeEntitiesList', () => {
@@ -23,7 +24,7 @@ describe('mergeEntitiesList', () => {
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(entities);
+      const mergedEntities = mergeEntitiesList([], entities);
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
@@ -38,33 +39,43 @@ describe('mergeEntitiesList', () => {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T18:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': 'host-1',
-          'metadata.agent.name': 'agent-1',
-          'metadata.service.environment': ['dev', 'staging'],
-          'metadata.only_in_record_1': 'foo',
+          'host.name': 'host-1',
+          'agent.name': 'agent-1',
+          'service.environment': ['dev', 'staging'],
+          only_in_record_1: 'foo',
         },
         {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T18:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': ['host-2', 'host-3'],
-          'metadata.agent.name': 'agent-2',
-          'metadata.service.environment': 'prod',
-          'metadata.only_in_record_2': 'bar',
+          'host.name': ['host-2', 'host-3'],
+          'agent.name': 'agent-2',
+          'service.environment': 'prod',
+          only_in_record_2: 'bar',
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(entities);
+      const mergedEntities = mergeEntitiesList(
+        [
+          {
+            metadata_fields: ['host.name', 'agent.name', 'service.environment', 'only_in_record_1'],
+          },
+          {
+            metadata_fields: ['host.name', 'agent.name', 'service.environment', 'only_in_record_2'],
+          },
+        ] as EntitySource[],
+        entities
+      );
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
         'entity.last_seen_timestamp': '2024-11-20T18:00:00.000Z',
         'entity.type': 'service',
-        'metadata.host.name': ['host-1', 'host-2', 'host-3'],
-        'metadata.agent.name': ['agent-1', 'agent-2'],
-        'metadata.service.environment': ['dev', 'staging', 'prod'],
-        'metadata.only_in_record_1': 'foo',
-        'metadata.only_in_record_2': 'bar',
+        'host.name': ['host-1', 'host-2', 'host-3'],
+        'agent.name': ['agent-1', 'agent-2'],
+        'service.environment': ['dev', 'staging', 'prod'],
+        only_in_record_1: 'foo',
+        only_in_record_2: 'bar',
       });
     });
 
@@ -74,29 +85,39 @@ describe('mergeEntitiesList', () => {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T18:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': 'host-1',
+          'host.name': 'host-1',
         },
         {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T20:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': 'host-2',
+          'host.name': 'host-2',
         },
         {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T16:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': 'host-3',
+          'host.name': 'host-3',
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(entities);
+      const mergedEntities = mergeEntitiesList(
+        [
+          {
+            metadata_fields: ['host.name'],
+          },
+          {
+            metadata_fields: ['host.name'],
+          },
+        ] as EntitySource[],
+        entities
+      );
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
         'entity.last_seen_timestamp': '2024-11-20T20:00:00.000Z',
         'entity.type': 'service',
-        'metadata.host.name': ['host-1', 'host-2', 'host-3'],
+        'host.name': ['host-1', 'host-2', 'host-3'],
       });
     });
 
@@ -106,29 +127,39 @@ describe('mergeEntitiesList', () => {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T18:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': 'host-1',
+          'host.name': 'host-1',
         },
         {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T20:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': 'host-2',
+          'host.name': 'host-2',
         },
         {
           'entity.id': 'foo',
           'entity.last_seen_timestamp': '2024-11-20T16:00:00.000Z',
           'entity.type': 'service',
-          'metadata.host.name': ['host-1', 'host-2'],
+          'host.name': ['host-1', 'host-2'],
         },
       ];
 
-      const mergedEntities = mergeEntitiesList(entities);
+      const mergedEntities = mergeEntitiesList(
+        [
+          {
+            metadata_fields: ['host.name'],
+          },
+          {
+            metadata_fields: ['host.name'],
+          },
+        ] as EntitySource[],
+        entities
+      );
       expect(mergedEntities.length).toEqual(1);
       expect(mergedEntities[0]).toEqual({
         'entity.id': 'foo',
         'entity.last_seen_timestamp': '2024-11-20T20:00:00.000Z',
         'entity.type': 'service',
-        'metadata.host.name': ['host-1', 'host-2'],
+        'host.name': ['host-1', 'host-2'],
       });
     });
   });

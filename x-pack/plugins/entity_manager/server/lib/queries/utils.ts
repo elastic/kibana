@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { compact, uniq } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { EntityV2 } from '@kbn/entities-schema';
 import { ESQLSearchResponse } from '@kbn/es-types';
-import { uniq } from 'lodash';
+import { EntitySource } from '.';
 
-function mergeEntities(entity1: EntityV2, entity2: EntityV2): EntityV2 {
+function mergeEntities(metadataFields: string[], entity1: EntityV2, entity2: EntityV2): EntityV2 {
   const merged: EntityV2 = {
     ...entity1,
     'entity.last_seen_timestamp': new Date(
@@ -22,7 +23,7 @@ function mergeEntities(entity1: EntityV2, entity2: EntityV2): EntityV2 {
   };
 
   for (const [key, value] of Object.entries(entity2).filter(([_key]) =>
-    _key.startsWith('metadata.')
+    metadataFields.includes(_key)
   )) {
     if (merged[key]) {
       merged[key] = uniq([
@@ -36,7 +37,10 @@ function mergeEntities(entity1: EntityV2, entity2: EntityV2): EntityV2 {
   return merged;
 }
 
-export function mergeEntitiesList(entities: EntityV2[]): EntityV2[] {
+export function mergeEntitiesList(sources: EntitySource[], entities: EntityV2[]): EntityV2[] {
+  const metadataFields = uniq(
+    sources.flatMap((source) => compact([source.timestamp_field, ...source.metadata_fields]))
+  );
   const instances: { [key: string]: EntityV2 } = {};
 
   for (let i = 0; i < entities.length; i++) {
@@ -44,7 +48,7 @@ export function mergeEntitiesList(entities: EntityV2[]): EntityV2[] {
     const id = entity['entity.id'];
 
     if (instances[id]) {
-      instances[id] = mergeEntities(instances[id], entity);
+      instances[id] = mergeEntities(metadataFields, instances[id], entity);
     } else {
       instances[id] = entity;
     }
