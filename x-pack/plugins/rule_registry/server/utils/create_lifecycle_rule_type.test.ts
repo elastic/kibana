@@ -154,6 +154,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           const date = new Date(Date.now()).toISOString();
           return { dateStart: date, dateEnd: date };
         },
+        isServerless: false,
       })) ?? {}) as Record<string, any>);
 
       previousStartedAt = startedAt;
