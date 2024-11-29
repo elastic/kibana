@@ -12,7 +12,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { HOST_NAME_FIELD, INFRA_ALERT_FEATUREIDS } from '../../../../../common/constants';
+import { HOST_NAME_FIELD, INFRA_ALERT_FEATURE_IDS } from '../../../../../common/constants';
 import { GetHostParameters } from '../types';
 
 export async function getHostsAlertsCount({
@@ -40,7 +40,7 @@ export async function getHostsAlertsCount({
     query: {
       bool: {
         filter: [
-          ...termsQuery(ALERT_RULE_PRODUCER, ...INFRA_ALERT_FEATUREIDS),
+          ...termsQuery(ALERT_RULE_PRODUCER, ...INFRA_ALERT_FEATURE_IDS),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...termsQuery(HOST_NAME_FIELD, ...hostNames),
           ...rangeQuery,

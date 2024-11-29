@@ -16,7 +16,7 @@ export const METRICS_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
 export const INFRA_ALERT_FEATURE_ID = AlertConsumers.INFRASTRUCTURE;
 export const LOGS_FEATURE_ID = AlertConsumers.LOGS;
 
-export const INFRA_ALERT_FEATUREIDS: ValidFeatureId[] = [
+export const INFRA_ALERT_FEATURE_IDS: ValidFeatureId[] = [
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.OBSERVABILITY,
   AlertConsumers.LOGS,

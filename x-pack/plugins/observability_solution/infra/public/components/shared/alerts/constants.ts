@@ -14,8 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
-
-import { INFRA_ALERT_FEATUREIDS } from '../../../../common/constants';
+import { INFRA_ALERT_FEATURE_IDS } from '../../../../common/constants';
 
 export const ALERT_STATUS_ALL = 'all';
 
@@ -88,4 +87,4 @@ export const ALERTS_PATH = '/app/observability/alerts';
 export const ALERTS_PER_PAGE = 10;
 export const ALERTS_TABLE_ID = 'xpack.infra.hosts.alerts.table';
 
-export const infraAlertFeatureIds = INFRA_ALERT_FEATUREIDS;
+export const infraAlertFeatureIds = INFRA_ALERT_FEATURE_IDS;
