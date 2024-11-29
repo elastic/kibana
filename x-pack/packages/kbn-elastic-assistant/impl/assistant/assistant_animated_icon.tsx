@@ -45,7 +45,7 @@ const Animation = styled.div`
     top: 0;
     left: 0;
     z-index: 0;
-    border: 1px solid ${euiThemeVars.euiColorPrimary};
+    border: 1px solid ${euiThemeVars.euiBorderColor};
     border-radius: inherit;
     animation: 4s cubic-bezier(0.42, 0, 0.37, 1) 0.5s infinite normal none running pulsing;
   }
