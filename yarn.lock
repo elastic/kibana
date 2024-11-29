@@ -5320,10 +5320,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dependency-ownership@link:packages/kbn-dependency-ownership":
-  version "0.0.0"
-  uid ""
-
 "@kbn/dependency-usage@link:packages/kbn-dependency-usage":
   version "0.0.0"
   uid ""
