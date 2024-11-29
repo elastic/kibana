@@ -759,7 +759,7 @@
       "post": {
         "summary": "Resolve import errors",
         "operationId": "resolveImportErrors",
-        "description": "To resolve errors from the Import objects API, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n\nThis functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+        "description": "To resolve errors from the Import objects API, you can:\n\n* Retry certain saved objects\n* Overwrite specific saved objects\n* Change references to different saved objects\n",
         "tags": [
           "saved objects"
         ],
