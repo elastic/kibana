@@ -22,9 +22,8 @@ import {
   ElasticRulePartial,
   RuleMigrationTranslationResult,
   RuleMigrationComments,
-  RuleMigrationAllTaskStats,
-  RuleMigration,
   RuleMigrationTaskStats,
+  RuleMigration,
   RuleMigrationResourceData,
   RuleMigrationResourceType,
   RuleMigrationResource,
@@ -44,7 +43,7 @@ export const CreateRuleMigrationResponse = z.object({
 });
 
 export type GetAllStatsRuleMigrationResponse = z.infer<typeof GetAllStatsRuleMigrationResponse>;
-export const GetAllStatsRuleMigrationResponse = RuleMigrationAllTaskStats;
+export const GetAllStatsRuleMigrationResponse = z.array(RuleMigrationTaskStats);
 
 export type GetRuleMigrationRequestParams = z.infer<typeof GetRuleMigrationRequestParams>;
 export const GetRuleMigrationRequestParams = z.object({
@@ -168,16 +167,7 @@ export type UpsertRuleMigrationResourcesRequestParamsInput = z.input<
 export type UpsertRuleMigrationResourcesRequestBody = z.infer<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;
-export const UpsertRuleMigrationResourcesRequestBody = z.array(
-  RuleMigrationResourceData.merge(
-    z.object({
-      /**
-       * The rule resource migration id
-       */
-      id: NonEmptyString,
-    })
-  )
-);
+export const UpsertRuleMigrationResourcesRequestBody = z.array(RuleMigrationResourceData);
 export type UpsertRuleMigrationResourcesRequestBodyInput = z.input<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;
