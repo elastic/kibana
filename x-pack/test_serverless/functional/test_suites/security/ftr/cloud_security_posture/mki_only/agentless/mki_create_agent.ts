@@ -23,7 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
   // This test suite is only running in the Serverless Quality Gates environment
-  describe('Agentless API Serverless', function () {
+  describe('Agentless API Serverless MKI only', function () {
     this.tags(['cloud_security_posture_agentless']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
