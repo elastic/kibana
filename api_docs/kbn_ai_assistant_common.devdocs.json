@@ -1,0 +1,92 @@
+{
+  "id": "@kbn/ai-assistant-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.filterScopes",
+        "type": "Function",
+        "tags": [],
+        "label": "filterScopes",
+        "description": [],
+        "signature": [
+          "(scopeFilters: ",
+          {
+            "pluginId": "@kbn/ai-assistant-common",
+            "scope": "common",
+            "docId": "kibKbnAiAssistantCommonPluginApi",
+            "section": "def-common.AssistantScope",
+            "text": "AssistantScope"
+          },
+          "[] | undefined) => (value: T) => boolean"
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant-common/src/utils/filter_scopes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-common",
+            "id": "def-common.filterScopes.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "scopeFilters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnAiAssistantCommonPluginApi",
+                "section": "def-common.AssistantScope",
+                "text": "AssistantScope"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/kbn-ai-assistant-common/src/utils/filter_scopes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ai-assistant-common",
+        "id": "def-common.AssistantScope",
+        "type": "Type",
+        "tags": [],
+        "label": "AssistantScope",
+        "description": [],
+        "signature": [
+          "\"search\" | \"observability\" | \"all\""
+        ],
+        "path": "x-pack/packages/kbn-ai-assistant-common/src/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

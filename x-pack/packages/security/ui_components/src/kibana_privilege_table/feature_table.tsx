@@ -33,9 +33,9 @@ import type { Role } from '@kbn/security-plugin-types-common';
 import type { KibanaPrivileges, SecuredFeature } from '@kbn/security-role-management-model';
 
 import { ChangeAllPrivilegesControl } from './change_all_privileges';
+import { FeatureTableCell } from './components/feature_table_cell';
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
 import { NO_PRIVILEGE_VALUE } from '../constants';
-import { FeatureTableCell } from './components/feature_table_cell';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
 
 interface Props {
@@ -45,13 +45,10 @@ interface Props {
   privilegeIndex: number;
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
+  showAdditionalPermissionsMessage: boolean;
   canCustomizeSubFeaturePrivileges: boolean;
   allSpacesSelected: boolean;
   disabled?: boolean;
-  /**
-   * default is true, to remain backwards compatible
-   */
-  showTitle?: boolean;
 }
 
 interface State {
@@ -62,7 +59,6 @@ export class FeatureTable extends Component<Props, State> {
   public static defaultProps = {
     privilegeIndex: -1,
     showLocks: true,
-    showTitle: true,
   };
 
   private featureCategories: Map<string, SecuredFeature[]> = new Map();
@@ -160,9 +156,7 @@ export class FeatureTable extends Component<Props, State> {
             <EuiSpacer size="s" />
             {helpText && (
               <>
-                <EuiCallOut iconType="iInCircle" size="s">
-                  {helpText}
-                </EuiCallOut>
+                <EuiCallOut size="s" title={helpText} />
                 <EuiSpacer size="s" />
               </>
             )}
@@ -191,20 +185,7 @@ export class FeatureTable extends Component<Props, State> {
     return (
       <div>
         <EuiFlexGroup alignItems={'flexEnd'}>
-          <EuiFlexItem>
-            {this.props.showTitle && (
-              <EuiText size="xs">
-                <b>
-                  {i18n.translate(
-                    'xpack.security.management.editRole.featureTable.featureVisibilityTitle',
-                    {
-                      defaultMessage: 'Customize feature privileges',
-                    }
-                  )}
-                </b>
-              </EuiText>
-            )}
-          </EuiFlexItem>
+          <EuiFlexItem />
           {!this.props.disabled && (
             <EuiFlexItem grow={false}>
               <ChangeAllPrivilegesControl
@@ -399,12 +380,12 @@ export class FeatureTable extends Component<Props, State> {
   };
 
   private getCategoryHelpText = (category: AppCategory) => {
-    if (category.id === 'management') {
+    if (category.id === 'management' && this.props.showAdditionalPermissionsMessage) {
       return i18n.translate(
         'xpack.security.management.editRole.featureTable.managementCategoryHelpText',
         {
           defaultMessage:
-            'Access to Stack Management is determined by both Elasticsearch and Kibana privileges, and cannot be explicitly disabled.',
+            'Additional Stack Management permissions can be found outside of this menu, in index and cluster privileges.',
         }
       );
     }

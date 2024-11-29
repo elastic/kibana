@@ -59,7 +59,7 @@ export const SETTINGS_PROMPT_HELP_TEXT_TITLE = i18n.translate(
 export const STREAMING_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.conversations.settings.streamingTitle',
   {
-    defaultMessage: 'STREAMING',
+    defaultMessage: 'Streaming',
   }
 );
 

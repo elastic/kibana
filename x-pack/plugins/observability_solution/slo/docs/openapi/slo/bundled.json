@@ -559,7 +559,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "Successful request"
           },
           "400": {
@@ -625,7 +625,7 @@
           }
         ],
         "responses": {
-          "204": {
+          "200": {
             "description": "Successful request",
             "content": {
               "application/json": {
@@ -1738,6 +1738,31 @@
           }
         }
       },
+      "group_by": {
+        "title": "Group by",
+        "description": "optional group by field or fields to use to generate an SLO per distinct value",
+        "example": [
+          [
+            "service.name"
+          ],
+          "service.name",
+          [
+            "service.name",
+            "service.environment"
+          ]
+        ],
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      },
       "slo_with_summary_response": {
         "title": "SLO response",
         "type": "object",
@@ -1835,9 +1860,7 @@
             "example": true
           },
           "groupBy": {
-            "description": "optional group by field to use to generate an SLO per distinct value",
-            "type": "string",
-            "example": "some.field"
+            "$ref": "#/components/schemas/group_by"
           },
           "instanceId": {
             "description": "the value derived from the groupBy field, if present, otherwise '*'",
@@ -2046,9 +2069,7 @@
             "$ref": "#/components/schemas/settings"
           },
           "groupBy": {
-            "description": "optional group by field to use to generate an SLO per distinct value",
-            "type": "string",
-            "example": "some.field"
+            "$ref": "#/components/schemas/group_by"
           },
           "tags": {
             "description": "List of tags",
@@ -2141,6 +2162,9 @@
           },
           "settings": {
             "$ref": "#/components/schemas/settings"
+          },
+          "groupBy": {
+            "$ref": "#/components/schemas/group_by"
           },
           "tags": {
             "description": "List of tags",
@@ -2243,9 +2267,7 @@
             "example": true
           },
           "groupBy": {
-            "description": "optional group by field to use to generate an SLO per distinct value",
-            "type": "string",
-            "example": "some.field"
+            "$ref": "#/components/schemas/group_by"
           },
           "tags": {
             "description": "List of tags",

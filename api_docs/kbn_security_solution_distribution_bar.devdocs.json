@@ -31,14 +31,14 @@
           {
             "parentPluginId": "@kbn/security-solution-distribution-bar",
             "id": "def-public.DistributionBar.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -52,7 +52,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -85,6 +85,22 @@
             ],
             "signature": [
               "{ key: string; count: number; color: string; label?: React.ReactNode; }[]"
+            ],
+            "path": "x-pack/packages/security-solution/distribution_bar/src/distribution_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-distribution-bar",
+            "id": "def-public.DistributionBarProps.hideLastTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideLastTooltip",
+            "description": [
+              "hide the label above the bar at first render"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/packages/security-solution/distribution_bar/src/distribution_bar.tsx",
             "deprecated": false,

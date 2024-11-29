@@ -38,7 +38,7 @@ exports[`renders correctly 1`] = `
     <EuiFormRow
       data-test-subj="optionalDescription"
       fullWidth={true}
-      helpText="The description appears on the space selection screen."
+      helpText="Appears on the space selection screen and spaces list."
       isInvalid={false}
       label="Description"
       labelAppend={
@@ -82,63 +82,13 @@ exports[`renders correctly 1`] = `
     >
       <EuiFieldText
         data-test-subj="spaceURLDisplay"
+        disabled={false}
         fullWidth={true}
         isInvalid={true}
         onChange={[Function]}
         value=""
       />
     </EuiFormRow>
-  </EuiDescribedFormGroup>
-  <EuiDescribedFormGroup
-    description={
-      <React.Fragment>
-        <p>
-          Choose how your space avatar appears across Kibana.
-        </p>
-        <React.Suspense
-          fallback={<EuiLoadingSpinner />}
-        >
-          <UNDEFINED
-            size="xl"
-            space={
-              Object {
-                "id": "",
-                "imageUrl": undefined,
-                "name": "",
-              }
-            }
-          />
-        </React.Suspense>
-      </React.Fragment>
-    }
-    fullWidth={true}
-    title={
-      <EuiTitle
-        size="xs"
-      >
-        <h3>
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Create an avatar"
-            id="xpack.spaces.management.manageSpacePage.avatarTitle"
-          />
-        </h3>
-      </EuiTitle>
-    }
-  >
-    <CustomizeSpaceAvatar
-      onChange={[Function]}
-      space={
-        Object {
-          "id": "",
-          "name": "",
-        }
-      }
-      validator={
-        SpaceValidator {
-          "shouldValidate": true,
-        }
-      }
-    />
   </EuiDescribedFormGroup>
 </SectionPanel>
 `;

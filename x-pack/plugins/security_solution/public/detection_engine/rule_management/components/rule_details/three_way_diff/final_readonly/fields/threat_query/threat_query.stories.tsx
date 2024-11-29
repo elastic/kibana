@@ -31,8 +31,11 @@ interface TemplateProps {
 
 const Template: Story<TemplateProps> = (args) => {
   return (
-    <ThreeWayDiffStorybookProviders kibanaServicesOverrides={args.kibanaServicesOverrides}>
-      <FieldReadOnly fieldName="threat_query" finalDiffableRule={args.finalDiffableRule} />
+    <ThreeWayDiffStorybookProviders
+      kibanaServicesOverrides={args.kibanaServicesOverrides}
+      finalDiffableRule={args.finalDiffableRule}
+    >
+      <FieldReadOnly fieldName="threat_query" />
     </ThreeWayDiffStorybookProviders>
   );
 };

@@ -19,6 +19,8 @@ import {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
+import { IndexManagementLocator } from '@kbn/index-management-shared-types';
+import { Subscription } from 'rxjs';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -29,6 +31,7 @@ import { PLUGIN } from '../common/constants/plugin';
 import { IndexMapping } from './application/sections/home/index_list/details_page/with_context_components/index_mappings_embeddable';
 import { PublicApiService } from './services/public_api_service';
 import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
+import { IndexManagementLocatorDefinition } from './locator';
 
 export class IndexMgmtUIPlugin
   implements
@@ -40,6 +43,7 @@ export class IndexMgmtUIPlugin
     >
 {
   private extensionsService = new ExtensionsService();
+  private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
     enableIndexActions: boolean;
@@ -51,8 +55,11 @@ export class IndexMgmtUIPlugin
     isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
+    enableProjectLevelRetentionChecks: boolean;
     enableSemanticText: boolean;
   };
+  private canUseSyntheticSource: boolean = false;
+  private licensingSubscription?: Subscription;
 
   constructor(ctx: PluginInitializerContext) {
     // Temporary hack to provide the service instances in module files in order to avoid a big refactor
@@ -69,6 +76,7 @@ export class IndexMgmtUIPlugin
       editableIndexSettings,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
+      enableProjectLevelRetentionChecks,
       dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
@@ -81,6 +89,7 @@ export class IndexMgmtUIPlugin
       editableIndexSettings: editableIndexSettings ?? 'all',
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
+      enableProjectLevelRetentionChecks: enableProjectLevelRetentionChecks ?? false,
       enableSemanticText: enableSemanticText ?? true,
     };
   }
@@ -107,19 +116,32 @@ export class IndexMgmtUIPlugin
             kibanaVersion: this.kibanaVersion,
             config: this.config,
             cloud,
+            canUseSyntheticSource: this.canUseSyntheticSource,
           });
         },
       });
     }
 
+    this.locator = plugins.share.url.locators.create(
+      new IndexManagementLocatorDefinition({
+        managementAppLocator: plugins.management.locator,
+      })
+    );
+
     return {
       apiService: new PublicApiService(coreSetup.http),
       extensionsService: this.extensionsService.setup(),
+      locator: this.locator,
     };
   }
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
     const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+
+    this.licensingSubscription = licensing?.license$.subscribe((next) => {
+      this.canUseSyntheticSource = next.hasAtLeast('enterprise');
+    });
+
     return {
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
@@ -200,5 +222,7 @@ export class IndexMgmtUIPlugin
       },
     };
   }
-  public stop() {}
+  public stop() {
+    this.licensingSubscription?.unsubscribe();
+  }
 }

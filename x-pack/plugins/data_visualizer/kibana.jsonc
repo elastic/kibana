@@ -1,12 +1,16 @@
 {
   "type": "plugin",
   "id": "@kbn/data-visualizer-plugin",
-  "owner": "@elastic/ml-ui",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "private",
   "description": "The Data Visualizer tools help you understand your data, by analyzing the metrics and fields in a log file or an existing Elasticsearch index.",
   "plugin": {
     "id": "dataVisualizer",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "data",
       "usageCollection",
@@ -33,12 +37,10 @@
       "kibanaReact",
       "kibanaUtils",
       "maps",
-      "esUiShared",
       "fieldFormats",
       "uiActions",
       "lens",
       "esql",
-      "visualizations"
     ]
   }
 }

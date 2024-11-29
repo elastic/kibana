@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { NEVER } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+
+import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
 
 import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
@@ -17,6 +19,23 @@ const getTestScheduler = () => {
     return expect(actual).toEqual(expected);
   });
 };
+
+const getSearchProviderContext = ({
+  enterpriseSearchEnabled,
+}: {
+  enterpriseSearchEnabled: boolean;
+}): GlobalSearchProviderContext => ({
+  core: {
+    capabilities: of({
+      catalogue: { enterpriseSearch: enterpriseSearchEnabled },
+      management: {},
+      navLinks: {},
+    }),
+    savedObjects: {} as any,
+    uiSettings: {} as any,
+  },
+});
+const mockSearchProviderContext = getSearchProviderContext({ enterpriseSearchEnabled: true });
 
 const connectors = [
   {
@@ -47,13 +66,13 @@ const connectors = [
   },
 ];
 
-describe('Enterprise Search search provider', () => {
+describe('Search search provider', () => {
   const crawlerResult = {
     icon: 'crawlerIcon.svg',
     id: 'elastic-crawler',
     score: 75,
     title: 'Elastic Web Crawler',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`,
       prependBasePath: true,
@@ -65,7 +84,7 @@ describe('Enterprise Search search provider', () => {
     id: 'mongodb',
     score: 75,
     title: 'MongoDB',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=mongodb`,
       prependBasePath: true,
@@ -77,7 +96,7 @@ describe('Enterprise Search search provider', () => {
     id: 'mongodb',
     score: 75,
     title: 'MongoDB',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=native&service_type=mongodb`,
       prependBasePath: true,
@@ -89,7 +108,7 @@ describe('Enterprise Search search provider', () => {
     id: '',
     score: 75,
     title: 'Customized connector',
-    type: 'Search',
+    type: 'Elasticsearch',
     url: {
       path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=`,
       prependBasePath: true,
@@ -119,7 +138,7 @@ describe('Enterprise Search search provider', () => {
           searchResultProvider.find(
             { term: 'crawler' },
             { aborted$: NEVER, maxResults: 100, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: [crawlerResult],
@@ -133,7 +152,7 @@ describe('Enterprise Search search provider', () => {
           searchResultProvider.find(
             { term: '' },
             { aborted$: NEVER, maxResults: 100, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: expect.arrayContaining([
@@ -150,7 +169,7 @@ describe('Enterprise Search search provider', () => {
           searchResultProvider.find(
             { term: '' },
             { aborted$: NEVER, maxResults: 1, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: [{ ...crawlerResult, score: 80 }],
@@ -173,7 +192,7 @@ describe('Enterprise Search search provider', () => {
           searchProvider.find(
             { term: '' },
             { aborted$: NEVER, maxResults: 100, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: expect.not.arrayContaining([{ ...crawlerResult, score: 80 }]),
@@ -196,7 +215,7 @@ describe('Enterprise Search search provider', () => {
           searchProvider.find(
             { term: '' },
             { aborted$: NEVER, maxResults: 100, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: expect.not.arrayContaining([{ mongoResult, score: 80 }]),
@@ -210,20 +229,34 @@ describe('Enterprise Search search provider', () => {
           searchResultProvider.find(
             { tags: ['tag'], term: '' },
             { aborted$: NEVER, maxResults: 1, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: [],
         });
       });
     });
+
     it('returns nothing if unknown type is specified', () => {
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
           searchResultProvider.find(
             { term: '', types: ['tag'] },
             { aborted$: NEVER, maxResults: 1, preference: '' },
-            {} as any
+            mockSearchProviderContext
+          )
+        ).toBe('(a|)', {
+          a: [],
+        });
+      });
+    });
+    it('returns nothing if capabilities.catalogue.enterpriseSearch is false', () => {
+      getTestScheduler().run(({ expectObservable }) => {
+        expectObservable(
+          searchResultProvider.find(
+            { term: '', types: ['tag'] },
+            { aborted$: NEVER, maxResults: 1, preference: '' },
+            getSearchProviderContext({ enterpriseSearchEnabled: false })
           )
         ).toBe('(a|)', {
           a: [],
@@ -236,7 +269,7 @@ describe('Enterprise Search search provider', () => {
           searchResultProvider.find(
             { term: 'crawler', types: ['integration'] },
             { aborted$: NEVER, maxResults: 1, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: [crawlerResult],
@@ -249,7 +282,7 @@ describe('Enterprise Search search provider', () => {
           searchResultProvider.find(
             { term: 'crawler', types: ['enterprise search'] },
             { aborted$: NEVER, maxResults: 1, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: [crawlerResult],
@@ -272,7 +305,7 @@ describe('Enterprise Search search provider', () => {
           searchProvider.find(
             { term: 'app search' },
             { aborted$: NEVER, maxResults: 1, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: [],
@@ -295,7 +328,7 @@ describe('Enterprise Search search provider', () => {
           searchProvider.find(
             { term: 'workplace search' },
             { aborted$: NEVER, maxResults: 1, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: [],
@@ -318,7 +351,7 @@ describe('Enterprise Search search provider', () => {
           searchProvider.find(
             { term: '' },
             { aborted$: NEVER, maxResults: 100, preference: '' },
-            {} as any
+            mockSearchProviderContext
           )
         ).toBe('(a|)', {
           a: expect.arrayContaining([

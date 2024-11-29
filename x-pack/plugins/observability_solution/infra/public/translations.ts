@@ -19,14 +19,14 @@ export const streamTitle = i18n.translate('xpack.infra.logs.index.streamTabTitle
   defaultMessage: 'Stream',
 });
 
-export const anomaliesTitle = i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
-  defaultMessage: 'Anomalies',
+export const logsAnomaliesTitle = i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
+  defaultMessage: 'Logs Anomalies',
 });
 
 export const logCategoriesTitle = i18n.translate(
   'xpack.infra.logs.index.logCategoriesBetaBadgeTitle',
   {
-    defaultMessage: 'Categories',
+    defaultMessage: 'Logs Categories',
   }
 );
 
@@ -39,7 +39,7 @@ export const metricsTitle = i18n.translate('xpack.infra.header.infrastructureTit
 });
 
 export const inventoryTitle = i18n.translate('xpack.infra.metrics.infrastructureInventoryTitle', {
-  defaultMessage: 'Infrastructure Inventory',
+  defaultMessage: 'Infrastructure inventory',
 });
 
 export const metricsExplorerTitle = i18n.translate('xpack.infra.metrics.metricsExplorerTitle', {

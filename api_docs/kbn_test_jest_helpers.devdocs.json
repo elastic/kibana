@@ -1006,7 +1006,7 @@
         "label": "renderReactTestingLibraryWithI18n",
         "description": [],
         "signature": [
-          "(ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: Omit<",
+          "(ui: React.ReactNode, options?: Omit<",
           "RenderOptions",
           "<typeof ",
           "node_modules/@testing-library/dom/types/queries",
@@ -1028,7 +1028,7 @@
             "label": "args",
             "description": [],
             "signature": [
-              "[ui: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options?: Omit<",
+              "[ui: React.ReactNode, options?: Omit<",
               "RenderOptions",
               "<typeof ",
               "node_modules/@testing-library/dom/types/queries",
@@ -1378,7 +1378,7 @@
           "ComponentType",
           "<any> | undefined; }) | undefined) => ",
           "ShallowWrapper",
-          "<Readonly<{}> & Readonly<{ children?: React.ReactNode; }>, Readonly<{}>, React.Component<{}, {}, any>>"
+          "<Readonly<{}>, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
         "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "deprecated": false,
@@ -1532,7 +1532,7 @@
         "signature": [
           "(initialEntries?: ",
           "LocationDescriptor",
-          "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => JSX.Element"
+          "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => React.JSX.Element"
         ],
         "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
@@ -1585,7 +1585,7 @@
           "LocationDescriptor",
           "<unknown> | ",
           "LocationDescriptor",
-          "<unknown>[], onRouter: (router: any) => void) => (WrappedComponent: React.ComponentType<T>) => (props: any) => JSX.Element"
+          "<unknown>[], onRouter: (router: any) => void) => (WrappedComponent: React.ComponentType<T>) => (props: any) => React.JSX.Element"
         ],
         "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
         "deprecated": false,
@@ -1636,7 +1636,7 @@
         "label": "WithStore",
         "description": [],
         "signature": [
-          "(store: any) => (WrappedComponent: React.ComponentType<T>) => (props: any) => JSX.Element"
+          "(store: any) => (WrappedComponent: React.ComponentType<T>) => (props: any) => React.JSX.Element"
         ],
         "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
         "deprecated": false,

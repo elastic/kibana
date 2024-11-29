@@ -9,9 +9,7 @@
     "server/**/**/*",
     "common/**/*",
     "../../../typings/**/*",
-    "schema/oss_plugins.json",
-    "schema/oss_root.json",
-    "schema/kbn_packages.json"
+    "schema/*.json",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -36,6 +34,7 @@
     "@kbn/analytics-collection-utils",
     "@kbn/react-kibana-mount",
     "@kbn/core-node-server",
+    "@kbn/security-plugin-types-server",
   ],
   "exclude": [
     "target/**/*",

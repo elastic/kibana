@@ -9,34 +9,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const CUSTOM_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldRequiredError',
-  {
-    defaultMessage: 'A custom query is required.',
-  }
-);
-
-export const EQL_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlQueryFieldRequiredError',
-  {
-    defaultMessage: 'An EQL query is required.',
-  }
-);
-
-export const ESQL_QUERY_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryFieldRequiredError',
-  {
-    defaultMessage: 'An ES|QL query is required.',
-  }
-);
-
-export const INVALID_CUSTOM_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldInvalidError',
-  {
-    defaultMessage: 'The KQL is invalid',
-  }
-);
-
 export const INDEX_HELPER_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.indicesHelperDescription',
   {
@@ -63,13 +35,6 @@ export const QUERY_BAR_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
   {
     defaultMessage: 'Custom query',
-  }
-);
-
-export const EQL_QUERY_BAR_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.EqlQueryBarLabel',
-  {
-    defaultMessage: 'EQL query',
   }
 );
 
@@ -174,13 +139,6 @@ export const ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS_OPTION = i18n.tran
   }
 );
 
-export const ESQL_QUERY = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.esqlQueryLabel',
-  {
-    defaultMessage: 'ES|QL query',
-  }
-);
-
 export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionOptions.perRuleExecutionLabel',
   {
@@ -205,15 +163,15 @@ export const THRESHOLD_SUPPRESSION_PER_RULE_EXECUTION_WARNING = i18n.translate(
 export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined) =>
   fields?.length ? (
     <FormattedMessage
-      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionForFieldsLabel"
-      defaultMessage="Suppress alerts by selected fields: {fieldsString} (Technical Preview)"
+      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionForFieldsLabel"
+      defaultMessage="Suppress alerts by selected fields: {fieldsString}"
       values={{ fieldsString: <strong>{fields.join(', ')}</strong> }}
     />
   ) : (
     i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionLabel',
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ga.enableThresholdSuppressionLabel',
       {
-        defaultMessage: 'Suppress alerts (Technical Preview)',
+        defaultMessage: 'Suppress alerts',
       }
     )
   );
@@ -249,23 +207,16 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   }
 );
 
-export const GROUP_BY_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsTechPreviewLabelAppend',
+export const ALERT_SUPPRESSION_FIELDS_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionTechPreviewLabelAppend',
   {
     defaultMessage: 'Optional (Technical Preview)',
   }
 );
 
-export const GROUP_BY_GA_LABEL_APPEND = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsGALabelAppend',
+export const ALERT_SUPPRESSION_FIELDS_GA_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.alertSuppressionGALabelAppend',
   {
     defaultMessage: 'Optional',
-  }
-);
-
-export const GROUP_BY_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
-  {
-    defaultMessage: 'Suppress alerts by',
   }
 );

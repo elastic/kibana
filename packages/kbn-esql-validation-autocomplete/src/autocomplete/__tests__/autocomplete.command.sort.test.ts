@@ -62,6 +62,36 @@ describe('autocomplete.suggest', () => {
             },
           ].map(attachTriggerCommand)
         );
+
+        await assertSuggestions(
+          'from a | sort `keywordField`/',
+          [
+            {
+              filterText: '`keywordField`',
+              text: '`keywordField`, ',
+            },
+            {
+              filterText: '`keywordField`',
+              text: '`keywordField` | ',
+            },
+            {
+              filterText: '`keywordField`',
+              text: '`keywordField` ASC',
+            },
+            {
+              filterText: '`keywordField`',
+              text: '`keywordField` DESC',
+            },
+            {
+              filterText: '`keywordField`',
+              text: '`keywordField` NULLS FIRST',
+            },
+            {
+              filterText: '`keywordField`',
+              text: '`keywordField` NULLS LAST',
+            },
+          ].map(attachTriggerCommand)
+        );
       });
       it('suggests subsequent column after comma', async () => {
         const { assertSuggestions } = await setup();

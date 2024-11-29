@@ -28,7 +28,7 @@ jest.mock('rxjs', () => {
     ...actual,
     lastValueFrom: async (source: Promise<any>) => {
       const value = await source;
-      return value.result;
+      return value;
     },
   };
 });
@@ -97,7 +97,7 @@ export const getMockServerDependencies = () => {
         search: {
           ...getMockDependencies().data.search,
           search: async ({ params }: { params: any }) => {
-            const response = await fetch(`${MOCK_SERVER_BASE_URL}/internal/bsearch`, {
+            const response = await fetch(`${MOCK_SERVER_BASE_URL}/internal/search`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

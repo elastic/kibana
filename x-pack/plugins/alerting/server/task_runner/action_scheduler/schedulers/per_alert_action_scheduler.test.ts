@@ -16,6 +16,12 @@ import { PerAlertActionScheduler } from './per_alert_action_scheduler';
 import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
 import { SanitizedRuleAction } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { Alert } from '../../../alert';
+import {
+  ActionsCompletion,
+  AlertInstanceContext,
+  AlertInstanceState,
+} from '@kbn/alerting-state-types';
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const actionsClient = actionsClientMock.create();
@@ -25,9 +31,10 @@ const logger = loggingSystemMock.create().get();
 
 let ruleRunMetricsStore: RuleRunMetricsStore;
 const rule = getRule({
+  id: 'rule-id-1',
   actions: [
     {
-      id: '1',
+      id: 'action-1',
       group: 'default',
       actionTypeId: 'test',
       frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
@@ -41,7 +48,7 @@ const rule = getRule({
       uuid: '111-111',
     },
     {
-      id: '2',
+      id: 'action-2',
       group: 'default',
       actionTypeId: 'test',
       frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
@@ -55,7 +62,7 @@ const rule = getRule({
       uuid: '222-222',
     },
     {
-      id: '3',
+      id: 'action-3',
       group: 'default',
       actionTypeId: 'test',
       frequency: { summary: true, notifyWhen: 'onActiveAlert' },
@@ -84,6 +91,21 @@ const getSchedulerContext = (params = {}) => {
   return { ...defaultSchedulerContext, rule, ...params, ruleRunMetricsStore };
 };
 
+const getResult = (actionId: string, alertId: string, actionUuid: string) => ({
+  actionToEnqueue: {
+    actionTypeId: 'test',
+    apiKey: 'MTIzOmFiYw==',
+    consumer: 'rule-consumer',
+    executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+    id: actionId,
+    uuid: actionUuid,
+    relatedSavedObjects: [{ id: 'rule-id-1', namespace: 'test1', type: 'alert', typeId: 'test' }],
+    source: { source: { id: 'rule-id-1', type: 'alert' }, type: 'SAVED_OBJECT' },
+    spaceId: 'test1',
+  },
+  actionToLog: { alertGroup: 'default', alertId, id: actionId, uuid: actionUuid, typeId: 'test' },
+});
+
 let clock: sinon.SinonFakeTimers;
 
 describe('Per-Alert Action Scheduler', () => {
@@ -93,6 +115,7 @@ describe('Per-Alert Action Scheduler', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.clearAllMocks();
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     mockActionsPlugin.isActionExecutable.mockReturnValue(true);
     mockActionsPlugin.getActionsClientWithRequest.mockResolvedValue(actionsClient);
@@ -163,67 +186,97 @@ describe('Per-Alert Action Scheduler', () => {
     expect(scheduler.actions).toEqual([actions[0]]);
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledWith(
-      `Skipping action \"2\" for rule \"1\" because the rule type \"Test\" does not support alert-as-data.`
+      `Skipping action \"2\" for rule \"rule-id-1\" because the rule type \"Test\" does not support alert-as-data.`
     );
   });
 
-  describe('generateExecutables', () => {
-    const newAlert1 = generateAlert({ id: 1 });
-    const newAlert2 = generateAlert({ id: 2 });
-    const alerts = { ...newAlert1, ...newAlert2 };
+  describe('getActionsToSchedule', () => {
+    let newAlert1: Record<
+      string,
+      Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>
+    >;
+    let newAlert2: Record<
+      string,
+      Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>
+    >;
+    let alerts: Record<
+      string,
+      Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>
+    >;
 
-    test('should generate executable for each alert and each action', async () => {
+    beforeEach(() => {
+      newAlert1 = generateAlert({ id: 1 });
+      newAlert2 = generateAlert({ id: 2 });
+      alerts = { ...newAlert1, ...newAlert2 };
+    });
+
+    test('should create action to schedule for each alert and each action', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
       expect(logger.debug).not.toHaveBeenCalled();
 
-      expect(executables).toHaveLength(4);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: rule.actions[1], alert: alerts['1'] },
-        { action: rule.actions[1], alert: alerts['2'] },
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-2', '1', '222-222'),
+        getResult('action-2', '2', '222-222'),
       ]);
     });
 
-    test('should skip generating executable when alert has maintenance window', async () => {
+    test('should skip creating actions to schedule when alert has maintenance window', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 1 has maintenance window, so only actions for alert 2 should be scheduled
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const newAlertWithMaintenanceWindow = generateAlert({
         id: 1,
         maintenanceWindowIds: ['mw-1'],
       });
       const alertsWithMaintenanceWindow = { ...newAlertWithMaintenanceWindow, ...newAlert2 };
-      const executables = await scheduler.generateExecutables({
-        alerts: alertsWithMaintenanceWindow,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithMaintenanceWindow,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `no scheduling of summary actions \"1\" for rule \"1\": has active maintenance windows mw-1.`
+        `no scheduling of summary actions \"action-1\" for rule \"rule-id-1\": has active maintenance windows mw-1.`
       );
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
-        `no scheduling of summary actions \"2\" for rule \"1\": has active maintenance windows mw-1.`
+        `no scheduling of summary actions \"action-2\" for rule \"rule-id-1\": has active maintenance windows mw-1.`
       );
 
-      expect(executables).toHaveLength(2);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: rule.actions[1], alert: alerts['2'] },
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '2', '111-111'),
+        getResult('action-2', '2', '222-222'),
       ]);
     });
 
-    test('should skip generating executable when alert has invalid action group', async () => {
+    test('should skip creating actions to schedule when alert has invalid action group', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 1 has invalid action group, so only actions for alert 2 should be scheduled
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const newAlertInvalidActionGroup = generateAlert({
         id: 1,
@@ -231,9 +284,8 @@ describe('Per-Alert Action Scheduler', () => {
         group: 'invalid',
       });
       const alertsWithInvalidActionGroup = { ...newAlertInvalidActionGroup, ...newAlert2 };
-      const executables = await scheduler.generateExecutables({
-        alerts: alertsWithInvalidActionGroup,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithInvalidActionGroup,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -247,15 +299,52 @@ describe('Per-Alert Action Scheduler', () => {
         `Invalid action group \"invalid\" for rule \"test\".`
       );
 
-      expect(executables).toHaveLength(2);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: rule.actions[1], alert: alerts['2'] },
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '2', '111-111'),
+        getResult('action-2', '2', '222-222'),
       ]);
     });
 
-    test('should skip generating executable when alert has pending recovered count greater than 0 and notifyWhen is onActiveAlert', async () => {
+    test('should skip creating actions to schedule when alert has no scheduled actions', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 1 has has no scheduled actions, so only actions for alert 2 should be scheduled
+      const scheduler = new PerAlertActionScheduler(getSchedulerContext());
+      const newAlertInvalidActionGroup = generateAlert({
+        id: 1,
+        scheduleActions: false,
+      });
+      const alertsWithInvalidActionGroup = { ...newAlertInvalidActionGroup, ...newAlert2 };
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithInvalidActionGroup,
+      });
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
+
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '2', '111-111'),
+        getResult('action-2', '2', '222-222'),
+      ]);
+    });
+
+    test('should skip creating actions to schedule when alert has pending recovered count greater than 0 and notifyWhen is onActiveAlert', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 1 has a pending recovered count > 0 & notifyWhen is onActiveAlert, so only actions for alert 2 should be scheduled
       const scheduler = new PerAlertActionScheduler(getSchedulerContext());
       const newAlertWithPendingRecoveredCount = generateAlert({
         id: 1,
@@ -265,23 +354,31 @@ describe('Per-Alert Action Scheduler', () => {
         ...newAlertWithPendingRecoveredCount,
         ...newAlert2,
       };
-      const executables = await scheduler.generateExecutables({
-        alerts: alertsWithPendingRecoveredCount,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithPendingRecoveredCount,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
-      expect(executables).toHaveLength(2);
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: rule.actions[1], alert: alerts['2'] },
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
+
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '2', '111-111'),
+        getResult('action-2', '2', '222-222'),
       ]);
     });
 
-    test('should skip generating executable when alert has pending recovered count greater than 0 and notifyWhen is onThrottleInterval', async () => {
+    test('should skip creating actions to schedule when alert has pending recovered count greater than 0 and notifyWhen is onThrottleInterval', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 1 has a pending recovered count > 0 & notifyWhen is onThrottleInterval, so only actions for alert 2 should be scheduled
       const onThrottleIntervalAction: SanitizedRuleAction = {
-        id: '2',
+        id: 'action-4',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
@@ -292,42 +389,46 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '222-222',
+        uuid: '444-444',
       };
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [rule.actions[0], onThrottleIntervalAction] },
       });
-      const newAlertWithPendingRecoveredCount = generateAlert({
-        id: 1,
-        pendingRecoveredCount: 3,
-      });
+      const newAlertWithPendingRecoveredCount = generateAlert({ id: 1, pendingRecoveredCount: 3 });
       const alertsWithPendingRecoveredCount = {
         ...newAlertWithPendingRecoveredCount,
         ...newAlert2,
       };
-      const executables = await scheduler.generateExecutables({
-        alerts: alertsWithPendingRecoveredCount,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithPendingRecoveredCount,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
-      expect(executables).toHaveLength(2);
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: onThrottleIntervalAction, alert: alerts['2'] },
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
+
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '2', '111-111'),
+        getResult('action-4', '2', '444-444'),
       ]);
     });
 
-    test('should skip generating executable when alert is muted', async () => {
+    test('should skip creating actions to schedule when alert is muted', async () => {
+      // 2 per-alert actions * 2 alerts = 4 actions to schedule
+      // but alert 2 is muted, so only actions for alert 1 should be scheduled
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, mutedInstanceIds: ['2'] },
       });
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -336,20 +437,27 @@ describe('Per-Alert Action Scheduler', () => {
         1,
         `skipping scheduling of actions for '2' in rule rule-label: rule is muted`
       );
-      expect(executables).toHaveLength(2);
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(2);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 2,
+        numberOfTriggeredActions: 2,
+      });
+
+      expect(results).toHaveLength(2);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-2', '1', '222-222'),
+      ]);
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'muted' } });
-
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[1], alert: alerts['1'] },
-      ]);
     });
 
-    test('should skip generating executable when alert action group has not changed and notifyWhen is onActionGroupChange', async () => {
+    test('should skip creating actions to schedule when alert action group has not changed and notifyWhen is onActionGroupChange', async () => {
       const onActionGroupChangeAction: SanitizedRuleAction = {
-        id: '2',
+        id: 'action-4',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onActionGroupChange', throttle: null },
@@ -360,7 +468,7 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '222-222',
+        uuid: '444-444',
       };
 
       const activeAlert1 = generateAlert({
@@ -380,9 +488,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], onActionGroupChangeAction] },
       });
 
-      const executables = await scheduler.generateExecutables({
-        alerts: alertsWithOngoingAlert,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithOngoingAlert,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -391,21 +498,28 @@ describe('Per-Alert Action Scheduler', () => {
         1,
         `skipping scheduling of actions for '2' in rule rule-label: alert is active but action group has not changed`
       );
-      expect(executables).toHaveLength(3);
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(3);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(3);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 3,
+        numberOfTriggeredActions: 3,
+      });
+
+      expect(results).toHaveLength(3);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-4', '1', '444-444'),
+      ]);
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'actionGroupHasNotChanged' } });
-
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alertsWithOngoingAlert['1'] },
-        { action: rule.actions[0], alert: alertsWithOngoingAlert['2'] },
-        { action: onActionGroupChangeAction, alert: alertsWithOngoingAlert['1'] },
-      ]);
     });
 
-    test('should skip generating executable when throttle interval has not passed and notifyWhen is onThrottleInterval', async () => {
+    test('should skip creating actions to schedule when throttle interval has not passed and notifyWhen is onThrottleInterval', async () => {
       const onThrottleIntervalAction: SanitizedRuleAction = {
-        id: '2',
+        id: 'action-5',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
@@ -416,13 +530,13 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '222-222',
+        uuid: '555-555',
       };
 
       const activeAlert2 = generateAlert({
         id: 2,
         lastScheduledActionsGroup: 'default',
-        throttledActions: { '222-222': { date: '1969-12-31T23:10:00.000Z' } },
+        throttledActions: { '555-555': { date: '1969-12-31T23:10:00.000Z' } },
       });
       const alertsWithOngoingAlert = { ...newAlert1, ...activeAlert2 };
 
@@ -431,9 +545,8 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], onThrottleIntervalAction] },
       });
 
-      const executables = await scheduler.generateExecutables({
-        alerts: alertsWithOngoingAlert,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithOngoingAlert,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -442,21 +555,28 @@ describe('Per-Alert Action Scheduler', () => {
         1,
         `skipping scheduling of actions for '2' in rule rule-label: rule is throttled`
       );
-      expect(executables).toHaveLength(3);
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(3);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(3);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 3,
+        numberOfTriggeredActions: 3,
+      });
+
+      expect(results).toHaveLength(3);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-5', '1', '555-555'),
+      ]);
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'throttled' } });
-
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alertsWithOngoingAlert['1'] },
-        { action: rule.actions[0], alert: alertsWithOngoingAlert['2'] },
-        { action: onThrottleIntervalAction, alert: alertsWithOngoingAlert['1'] },
-      ]);
     });
 
-    test('should not skip generating executable when throttle interval has passed and notifyWhen is onThrottleInterval', async () => {
+    test('should not skip creating actions to schedule when throttle interval has passed and notifyWhen is onThrottleInterval', async () => {
       const onThrottleIntervalAction: SanitizedRuleAction = {
-        id: '2',
+        id: 'action-5',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
@@ -467,7 +587,7 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '222-222',
+        uuid: '555-555',
       };
 
       const activeAlert2 = generateAlert({
@@ -482,24 +602,30 @@ describe('Per-Alert Action Scheduler', () => {
         rule: { ...rule, actions: [rule.actions[0], onThrottleIntervalAction] },
       });
 
-      const executables = await scheduler.generateExecutables({
-        alerts: alertsWithOngoingAlert,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alertsWithOngoingAlert,
       });
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
       expect(logger.debug).not.toHaveBeenCalled();
-      expect(executables).toHaveLength(4);
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
+
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-5', '1', '555-555'),
+        getResult('action-5', '2', '555-555'),
+      ]);
 
       // @ts-expect-error private variable
       expect(scheduler.skippedAlerts).toEqual({});
-
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alertsWithOngoingAlert['1'] },
-        { action: rule.actions[0], alert: alertsWithOngoingAlert['2'] },
-        { action: onThrottleIntervalAction, alert: alertsWithOngoingAlert['1'] },
-        { action: onThrottleIntervalAction, alert: alertsWithOngoingAlert['2'] },
-      ]);
     });
 
     test('should query for summarized alerts if useAlertDataForTemplate is true', async () => {
@@ -517,7 +643,7 @@ describe('Per-Alert Action Scheduler', () => {
       };
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
       const actionWithUseAlertDataForTemplate: SanitizedRuleAction = {
-        id: '1',
+        id: 'action-6',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
@@ -528,33 +654,38 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '111-111',
+        uuid: '666-666',
         useAlertDataForTemplate: true,
       };
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [rule.actions[0], actionWithUseAlertDataForTemplate] },
       });
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
         executionUuid: defaultSchedulerContext.executionId,
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
       });
 
-      expect(executables).toHaveLength(4);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: actionWithUseAlertDataForTemplate, alert: alerts['1'] },
-        { action: actionWithUseAlertDataForTemplate, alert: alerts['2'] },
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-6', '1', '666-666'),
+        getResult('action-6', '2', '666-666'),
       ]);
     });
 
@@ -573,7 +704,7 @@ describe('Per-Alert Action Scheduler', () => {
       };
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
       const actionWithUseAlertDataForTemplate: SanitizedRuleAction = {
-        id: '1',
+        id: 'action-6',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
@@ -584,34 +715,39 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '111-111',
+        uuid: '666-666',
         useAlertDataForTemplate: true,
       };
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [rule.actions[0], actionWithUseAlertDataForTemplate] },
       });
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
         start: new Date('1969-12-31T23:00:00.000Z'),
         end: new Date('1970-01-01T00:00:00.000Z'),
       });
 
-      expect(executables).toHaveLength(4);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: actionWithUseAlertDataForTemplate, alert: alerts['1'] },
-        { action: actionWithUseAlertDataForTemplate, alert: alerts['2'] },
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-6', '1', '666-666'),
+        getResult('action-6', '2', '666-666'),
       ]);
     });
 
@@ -630,7 +766,7 @@ describe('Per-Alert Action Scheduler', () => {
       };
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
       const actionWithAlertsFilter: SanitizedRuleAction = {
-        id: '1',
+        id: 'action-7',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
@@ -641,34 +777,39 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '111-111',
+        uuid: '777-777',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
       };
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
         executionUuid: defaultSchedulerContext.executionId,
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
       });
 
-      expect(executables).toHaveLength(4);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: actionWithAlertsFilter, alert: alerts['1'] },
-        { action: actionWithAlertsFilter, alert: alerts['2'] },
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-7', '1', '777-777'),
+        getResult('action-7', '2', '777-777'),
       ]);
     });
 
@@ -687,7 +828,7 @@ describe('Per-Alert Action Scheduler', () => {
       };
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
       const actionWithAlertsFilter: SanitizedRuleAction = {
-        id: '1',
+        id: 'action-7',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '6h' },
@@ -698,39 +839,44 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '111-111',
+        uuid: '777-777',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
       };
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
         start: new Date('1969-12-31T18:00:00.000Z'),
         end: new Date('1970-01-01T00:00:00.000Z'),
       });
 
-      expect(executables).toHaveLength(4);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: actionWithAlertsFilter, alert: alerts['1'] },
-        { action: actionWithAlertsFilter, alert: alerts['2'] },
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-7', '1', '777-777'),
+        getResult('action-7', '2', '777-777'),
       ]);
     });
 
-    test('should skip generating executable if alert does not match any alerts in summarized alerts', async () => {
+    test('should skip creating actions to schedule if alert does not match any alerts in summarized alerts', async () => {
       alertsClient.getProcessedAlerts.mockReturnValue(alerts);
       const summarizedAlerts = {
         new: {
@@ -745,7 +891,7 @@ describe('Per-Alert Action Scheduler', () => {
       };
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
       const actionWithAlertsFilter: SanitizedRuleAction = {
-        id: '1',
+        id: 'action-8',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
@@ -756,33 +902,38 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '111-111',
+        uuid: '888-888',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
       };
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
         executionUuid: defaultSchedulerContext.executionId,
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
       });
 
-      expect(executables).toHaveLength(3);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(3);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(3);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 3,
+        numberOfTriggeredActions: 3,
+      });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: actionWithAlertsFilter, alert: alerts['1'] },
+      expect(results).toHaveLength(3);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-8', '1', '888-888'),
       ]);
     });
 
@@ -801,7 +952,7 @@ describe('Per-Alert Action Scheduler', () => {
       };
       alertsClient.getSummarizedAlerts.mockResolvedValue(summarizedAlerts);
       const actionWithAlertsFilter: SanitizedRuleAction = {
-        id: '1',
+        id: 'action-9',
         group: 'default',
         actionTypeId: 'test',
         frequency: { summary: false, notifyWhen: 'onActiveAlert', throttle: null },
@@ -812,38 +963,178 @@ describe('Per-Alert Action Scheduler', () => {
           alertVal:
             'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
         },
-        uuid: '111-111',
+        uuid: '999-999',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
       };
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [rule.actions[0], actionWithAlertsFilter] },
       });
-      const executables = await scheduler.generateExecutables({
-        alerts,
-        throttledSummaryActions: {},
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
       });
 
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledTimes(1);
       expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
         excludedAlertInstanceIds: [],
         executionUuid: defaultSchedulerContext.executionId,
-        ruleId: '1',
+        ruleId: 'rule-id-1',
         spaceId: 'test1',
         alertsFilter: { query: { kql: 'kibana.alert.rule.name:foo', filters: [] } },
       });
 
-      expect(executables).toHaveLength(4);
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 4,
+      });
+
+      expect(results).toHaveLength(4);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-9', '1', '999-999'),
+        getResult('action-9', '2', '999-999'),
+      ]);
 
       expect(alerts['1'].getAlertAsData()).not.toBeUndefined();
       expect(alerts['2'].getAlertAsData()).not.toBeUndefined();
+    });
 
-      expect(executables).toEqual([
-        { action: rule.actions[0], alert: alerts['1'] },
-        { action: rule.actions[0], alert: alerts['2'] },
-        { action: actionWithAlertsFilter, alert: alerts['1'] },
-        { action: actionWithAlertsFilter, alert: alerts['2'] },
+    test('should skip creating actions to schedule if overall max actions limit exceeded', async () => {
+      const defaultContext = getSchedulerContext();
+      const scheduler = new PerAlertActionScheduler({
+        ...defaultContext,
+        taskRunnerContext: {
+          ...defaultContext.taskRunnerContext,
+          actionsConfigMap: {
+            default: { max: 3 },
+          },
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+      });
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(3);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 3,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Rule "rule-id-1" skipped scheduling action "action-2" because the maximum number of allowed actions has been reached.`
+      );
+
+      expect(results).toHaveLength(3);
+      expect(results).toEqual([
+        getResult('action-1', '1', '111-111'),
+        getResult('action-1', '2', '111-111'),
+        getResult('action-2', '1', '222-222'),
       ]);
+    });
+
+    test('should skip creating actions to schedule if connector type max actions limit exceeded', async () => {
+      const defaultContext = getSchedulerContext();
+      const scheduler = new PerAlertActionScheduler({
+        ...defaultContext,
+        taskRunnerContext: {
+          ...defaultContext.taskRunnerContext,
+          actionsConfigMap: {
+            default: { max: 1000 },
+            test: { max: 1 },
+          },
+        },
+      });
+      const results = await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: alerts,
+      });
+
+      expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
+
+      expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(4);
+      expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toEqual(1);
+      expect(ruleRunMetricsStore.getStatusByConnectorType('test')).toEqual({
+        numberOfGeneratedActions: 4,
+        numberOfTriggeredActions: 1,
+        triggeredActionsStatus: ActionsCompletion.PARTIAL,
+      });
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Rule "rule-id-1" skipped scheduling action "action-1" because the maximum number of allowed actions for connector type test has been reached.`
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results).toEqual([getResult('action-1', '1', '111-111')]);
+    });
+
+    test('should correctly update last scheduled actions for alert when action is "onActiveAlert"', async () => {
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default'>('1', {
+        state: { test: true },
+        meta: {},
+      });
+      alert.scheduleActions('default');
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, actions: [rule.actions[0]] },
+      });
+
+      expect(alert.getLastScheduledActions()).toBeUndefined();
+      expect(alert.hasScheduledActions()).toBe(true);
+      await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: { '1': alert },
+      });
+
+      expect(alert.getLastScheduledActions()).toEqual({
+        date: '1970-01-01T00:00:00.000Z',
+        group: 'default',
+      });
+      expect(alert.hasScheduledActions()).toBe(false);
+    });
+
+    test('should correctly update last scheduled actions for alert', async () => {
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default'>('1', {
+        state: { test: true },
+        meta: {},
+      });
+      alert.scheduleActions('default');
+      const onThrottleIntervalAction: SanitizedRuleAction = {
+        id: 'action-4',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '222-222',
+      };
+
+      expect(alert.getLastScheduledActions()).toBeUndefined();
+      expect(alert.hasScheduledActions()).toBe(true);
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, actions: [onThrottleIntervalAction] },
+      });
+
+      await scheduler.getActionsToSchedule({
+        activeCurrentAlerts: { '1': alert },
+      });
+
+      expect(alert.getLastScheduledActions()).toEqual({
+        date: '1970-01-01T00:00:00.000Z',
+        group: 'default',
+        actions: { '222-222': { date: '1970-01-01T00:00:00.000Z' } },
+      });
+      expect(alert.hasScheduledActions()).toBe(false);
     });
   });
 });

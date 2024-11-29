@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -65,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
         maintenanceWindow: 0,
         stackAlerts: 0,
         generalCases: 0,
+        generalCasesV2: 0,
         maps: 2,
         canvas: 2,
         ml: 0,
@@ -72,9 +74,11 @@ export default function ({ getService }: FtrProviderContext) {
         fleet: 0,
         osquery: 0,
         observabilityCases: 0,
+        observabilityCasesV2: 0,
         uptime: 0,
         slo: 0,
         infrastructure: 0,
+        inventory: 0,
         logs: 0,
         monitoring: 0,
         apm: 0,
@@ -82,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
         searchInferenceEndpoints: 0,
         siem: 0,
         securitySolutionCases: 0,
+        securitySolutionCasesV2: 0,
         securitySolutionAssistant: 0,
         securitySolutionAttackDiscovery: 0,
         discover: 0,
@@ -94,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         filesSharedImage: 0,
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
+        dataQuality: 0,
       });
     });
 

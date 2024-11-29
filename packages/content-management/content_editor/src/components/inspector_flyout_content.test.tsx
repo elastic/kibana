@@ -104,6 +104,24 @@ describe('<ContentEditorFlyoutContent />', () => {
       expect(find('saveButton').text()).toBe('Update foo');
     });
 
+    test('should save form only if something changes', async () => {
+      const onSave = jest.fn();
+
+      await act(async () => {
+        testBed = await setup({ onSave, isReadonly: false });
+      });
+
+      const { find, component } = testBed!;
+
+      await act(async () => {
+        find('saveButton').simulate('click');
+      });
+
+      component.update();
+
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
     test('should send back the updated item to the onSave() handler', async () => {
       const onSave = jest.fn();
 
@@ -116,19 +134,6 @@ describe('<ContentEditorFlyoutContent />', () => {
         component,
         form: { setInputValue },
       } = testBed!;
-
-      await waitForValidationResults();
-
-      await act(async () => {
-        find('saveButton').simulate('click');
-      });
-
-      expect(onSave).toHaveBeenCalledWith({
-        id: '123',
-        title: 'Foo',
-        description: 'Some description',
-        tags: ['id-1', 'id-2'],
-      });
 
       await act(async () => {
         setInputValue('metadataForm.nameInput', 'newTitle');
@@ -196,7 +201,17 @@ describe('<ContentEditorFlyoutContent />', () => {
         testBed = await setup({ onSave, isReadonly: false, services: { notifyError } });
       });
 
-      const { find, component } = testBed!;
+      const {
+        find,
+        component,
+        form: { setInputValue },
+      } = testBed!;
+
+      await act(async () => {
+        setInputValue('metadataForm.nameInput', 'changingTitleToUnblockDisabledButtonState');
+      });
+
+      await waitForValidationResults();
 
       component.update();
 

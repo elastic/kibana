@@ -19,6 +19,7 @@ import React from 'react';
 import { CloudSecurityPostureIntegrationPliBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
+  EndpointCustomNotificationLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
   RuleDetailsEndpointExceptionsLazy,
@@ -107,6 +108,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpointPolicyProtections',
     pli: ProductFeatureKey.endpointPolicyProtections,
     component: EndpointPolicyProtectionsLazy,
+  },
+  {
+    id: 'endpoint_custom_notification',
+    pli: ProductFeatureKey.endpointCustomNotification,
+    component: EndpointCustomNotificationLazy,
   },
   {
     id: 'ruleDetailsEndpointExceptions',

@@ -25,6 +25,19 @@ describe('BackLink', () => {
     expect(getByRole('link').getAttribute('href')).toBe(expectedUrl);
   });
 
+  it('renders back to selection link when onboardingLink param is provided', () => {
+    const expectedUrl = '/app/experimental-onboarding';
+    const queryParams = new URLSearchParams();
+    queryParams.set('onboardingLink', expectedUrl);
+    const { getByText, getByRole } = render(
+      <I18nProvider>
+        <BackLink queryParams={queryParams} href="/app/integrations" />
+      </I18nProvider>
+    );
+    expect(getByText('Back to selection')).toBeInTheDocument();
+    expect(getByRole('link').getAttribute('href')).toBe(expectedUrl);
+  });
+
   it('renders back to selection link with params', () => {
     const expectedUrl = '/app/experimental-onboarding&search=aws&category=infra';
     const queryParams = new URLSearchParams();

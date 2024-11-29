@@ -28,7 +28,6 @@ import type {
   InstallablePackage,
   Installation,
   RegistryPackage,
-  TemplateAgentPolicyInput,
 } from '../../types';
 
 import type { FleetAuthzRouteConfig } from '../security/types';
@@ -40,7 +39,10 @@ import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
-import type { CustomPackageDatasetConfiguration, EnsurePackageResult } from './packages/install';
+import {
+  type CustomPackageDatasetConfiguration,
+  type EnsurePackageResult,
+} from './packages/install';
 
 import type { FetchFindLatestPackageOptions } from './registry';
 import { getPackageFieldsMetadata } from './registry';
@@ -57,6 +59,7 @@ import {
 } from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
+import { createArchiveIteratorFromMap } from './archive/archive_iterator';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -116,12 +119,12 @@ export interface PackageClient {
     prerelease?: false;
   }): Promise<PackageList>;
 
-  getAgentPolicyInputs(
+  getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
     ignoreUnverified?: boolean
-  ): Promise<TemplateAgentPolicyInput[]>;
+  ): Promise<string>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -284,7 +287,7 @@ class PackageClientImpl implements PackageClient {
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
   }
 
-  public async getAgentPolicyInputs(
+  public async getAgentPolicyConfigYAML(
     pkgName: string,
     pkgVersion?: string,
     prerelease?: false,
@@ -298,16 +301,14 @@ class PackageClientImpl implements PackageClient {
       pkgVersion = pkg.version;
     }
 
-    const { inputs } = await getTemplateInputs(
+    return getTemplateInputs(
       this.internalSoClient,
       pkgName,
       pkgVersion,
-      'json',
+      'yml',
       prerelease,
       ignoreUnverified
     );
-
-    return inputs;
   }
 
   public async getPackage(
@@ -384,12 +385,14 @@ class PackageClientImpl implements PackageClient {
     }
 
     const { assetsMap } = esPackage;
+    const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
     const { installedTransforms } = await installTransforms({
       packageInstallContext: {
         assetsMap,
         packageInfo,
         paths,
+        archiveIterator,
       },
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,

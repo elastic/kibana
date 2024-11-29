@@ -8,7 +8,11 @@
 import { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import { registerConnectorTypes } from './connector_types';
-import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
+import {
+  validSlackApiChannelsRoute,
+  getWellKnownEmailServiceRoute,
+  getInferenceServicesRoute,
+} from './routes';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
@@ -39,6 +43,7 @@ export class StackConnectorsPlugin implements Plugin<void, void> {
 
     getWellKnownEmailServiceRoute(router);
     validSlackApiChannelsRoute(router, actions.getActionsConfigurationUtilities(), this.logger);
+    getInferenceServicesRoute(router);
 
     registerConnectorTypes({
       actions,

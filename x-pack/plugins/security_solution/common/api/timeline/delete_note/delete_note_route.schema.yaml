@@ -2,13 +2,6 @@ openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Notes API
   version: '2023-10-31'
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/note:
     delete:
@@ -44,10 +37,3 @@ paths:
       responses:
         '200':
           description: Indicates the note was successfully deleted.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object

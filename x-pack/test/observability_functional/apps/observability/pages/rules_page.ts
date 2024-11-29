@@ -29,7 +29,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     const {
       body: { data: rules },
     } = await supertest
-      .get(`${INTERNAL_RULE_ENDPOINT}/_find?search=${name}&search_fields=name`)
+      .post(`${INTERNAL_RULE_ENDPOINT}/_find`)
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        search: name,
+        search_fields: ['name'],
+      })
       .expect(200);
     return rules.find((rule: any) => rule.name === name);
   }

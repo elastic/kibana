@@ -11,8 +11,6 @@ import { EntityLink } from '.';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import type { ServiceEntitySummary } from '../../../../context/apm_service/use_service_entity_summary_fetcher';
 import * as useServiceEntitySummary from '../../../../context/apm_service/use_service_entity_summary_fetcher';
-import type { EntityManagerEnablementContextValue } from '../../../../context/entity_manager_context/entity_manager_context';
-import * as useEntityManagerEnablementContext from '../../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import * as useFetcher from '../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { fromQuery } from '../../../shared/links/url_helpers';
@@ -20,6 +18,7 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { Redirect } from 'react-router-dom';
 import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { ApmThemeProvider } from '../../../routing/app_root';
+import * as useEntityCentricExperienceSetting from '../../../../hooks/use_entity_centric_experience_setting';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'), // Keep other functionality intact
@@ -29,12 +28,12 @@ jest.mock('react-router-dom', () => ({
 export type HasApmData = APIReturnType<'GET /internal/apm/has_data'>;
 
 const renderEntityLink = ({
-  entityManagerMockReturnValue,
+  isEntityCentricExperienceEnabled = true,
   serviceEntitySummaryMockReturnValue,
   hasApmDataFetcherMockReturnValue,
   query = {},
 }: {
-  entityManagerMockReturnValue: Partial<EntityManagerEnablementContextValue>;
+  isEntityCentricExperienceEnabled?: boolean;
   serviceEntitySummaryMockReturnValue: ReturnType<
     typeof useServiceEntitySummary.useServiceEntitySummaryFetcher
   >;
@@ -45,10 +44,8 @@ const renderEntityLink = ({
   };
 }) => {
   jest
-    .spyOn(useEntityManagerEnablementContext, 'useEntityManagerEnablementContext')
-    .mockReturnValue(
-      entityManagerMockReturnValue as unknown as EntityManagerEnablementContextValue
-    );
+    .spyOn(useEntityCentricExperienceSetting, 'useEntityCentricExperienceSetting')
+    .mockReturnValue({ isEntityCentricExperienceEnabled });
 
   jest
     .spyOn(useServiceEntitySummary, 'useServiceEntitySummaryFetcher')
@@ -101,30 +98,9 @@ describe('Entity link', () => {
     jest.clearAllMocks();
   });
 
-  it('renders a loading spinner while fetching data', () => {
-    renderEntityLink({
-      entityManagerMockReturnValue: {
-        isEntityCentricExperienceViewEnabled: undefined,
-        isEnablementPending: true,
-      },
-      serviceEntitySummaryMockReturnValue: {
-        serviceEntitySummary: undefined,
-        serviceEntitySummaryStatus: FETCH_STATUS.LOADING,
-      },
-      hasApmDataFetcherMockReturnValue: {
-        data: undefined,
-        status: FETCH_STATUS.LOADING,
-      },
-    });
-    expect(screen.queryByTestId('apmEntityLinkLoadingSpinner')).toBeInTheDocument();
-  });
-
   it('renders EEM callout when EEM is enabled but service is not found on EEM indices', () => {
     renderEntityLink({
-      entityManagerMockReturnValue: {
-        isEntityCentricExperienceViewEnabled: true,
-        isEnablementPending: false,
-      },
+      isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: undefined,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
@@ -141,10 +117,7 @@ describe('Entity link', () => {
 
   it('renders Service Overview page when EEM is disabled', () => {
     renderEntityLink({
-      entityManagerMockReturnValue: {
-        isEntityCentricExperienceViewEnabled: false,
-        isEnablementPending: false,
-      },
+      isEntityCentricExperienceEnabled: false,
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: undefined,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
@@ -171,10 +144,7 @@ describe('Entity link', () => {
 
   it('renders Service Overview page when EEM is enabled but Service is not found on EEM but it has raw APM data', () => {
     renderEntityLink({
-      entityManagerMockReturnValue: {
-        isEntityCentricExperienceViewEnabled: true,
-        isEnablementPending: false,
-      },
+      isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: undefined,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
@@ -201,10 +171,7 @@ describe('Entity link', () => {
 
   it('renders Service Overview page when EEM is enabled and Service is found on EEM', () => {
     renderEntityLink({
-      entityManagerMockReturnValue: {
-        isEntityCentricExperienceViewEnabled: true,
-        isEnablementPending: false,
-      },
+      isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
@@ -231,10 +198,7 @@ describe('Entity link', () => {
 
   it('renders Service Overview page setting time range from data plugin', () => {
     renderEntityLink({
-      entityManagerMockReturnValue: {
-        isEntityCentricExperienceViewEnabled: true,
-        isEnablementPending: false,
-      },
+      isEntityCentricExperienceEnabled: true,
       serviceEntitySummaryMockReturnValue: {
         serviceEntitySummary: { dataStreamTypes: ['metrics'] } as unknown as ServiceEntitySummary,
         serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,

@@ -32,9 +32,13 @@ import { docLinks } from '../../../../../common/doc_links';
 import { DEFAULT_INGESTION_PIPELINE } from '../../../../../common';
 interface ConnectorIndexNameProps {
   connector: Connector;
+  isDisabled?: boolean;
 }
 
-export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connector }) => {
+export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
+  connector,
+  isDisabled,
+}) => {
   const { http } = useKibanaServices();
   const queryClient = useQueryClient();
   const { queryKey } = useConnector(connector.id);
@@ -88,6 +92,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
       </EuiFlexGroup>
       <EuiSpacer />
       <ConnectorIndexNameForm
+        isDisabled={isDisabled}
         indexName={newIndexName || ''}
         onChange={(name) => setNewIndexname(name)}
       />
@@ -108,7 +113,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
               <p>
                 <FormattedMessage
                   id="xpack.serverlessSearch.connectors.config.preprocessData.description"
-                  defaultMessage="Use ingest pipelines to preprocess data before indexing into Elasticsearch. Note that connector clients use the {clientIngestionPipeline} pipeline for preprocessing."
+                  defaultMessage="Use ingest pipelines to preprocess data before indexing into Elasticsearch. Note that self-managed connectors use the {clientIngestionPipeline} pipeline for preprocessing."
                   values={{
                     clientIngestionPipeline: <EuiCode>{DEFAULT_INGESTION_PIPELINE}</EuiCode>,
                   }}
@@ -145,7 +150,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
             <EuiButton
               data-test-subj="serverlessSearchConnectorIndexNameButton"
               color="primary"
-              isDisabled={!isValidIndexName(newIndexName)}
+              isDisabled={!isValidIndexName(newIndexName) || isDisabled}
               isLoading={isLoading}
               onClick={() => mutate({ inputName: newIndexName, sync: false })}
             >
@@ -162,7 +167,7 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({ connecto
                 !(
                   isValidIndexName(newIndexName) &&
                   [ConnectorStatus.CONFIGURED, ConnectorStatus.CONNECTED].includes(connector.status)
-                )
+                ) || isDisabled
               }
               fill
               isLoading={isLoading}

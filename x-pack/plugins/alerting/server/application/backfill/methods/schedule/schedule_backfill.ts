@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsFindResult } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { RuleAttributes } from '../../../../data/rule/types';
 import { findRulesSo } from '../../../../data/rule';
 import {
   alertingAuthorizationFilterOpts,
@@ -27,6 +26,7 @@ import type {
 } from './types';
 import { scheduleBackfillParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain } from '../../../rule/transforms';
+import { RawRule } from '../../../../types';
 
 export async function scheduleBackfill(
   context: RulesClientContext,
@@ -116,7 +116,7 @@ export async function scheduleBackfill(
   );
 
   const rulesFinder =
-    await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
+    await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
       {
         filter: kueryNodeFilterWithAuth,
         type: RULE_SAVED_OBJECT_TYPE,
@@ -125,7 +125,7 @@ export async function scheduleBackfill(
       }
     );
 
-  let rulesToSchedule: Array<SavedObjectsFindResult<RuleAttributes>> = [];
+  let rulesToSchedule: Array<SavedObjectsFindResult<RawRule>> = [];
   for await (const response of rulesFinder.find()) {
     for (const rule of response.saved_objects) {
       context.auditLogger?.log(
@@ -150,7 +150,7 @@ export async function scheduleBackfill(
     rules: rulesToSchedule.map(({ id, attributes, references }) => {
       const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
       return transformRuleAttributesToRuleDomain(
-        attributes as RuleAttributes,
+        attributes,
         {
           id,
           logger: context.logger,

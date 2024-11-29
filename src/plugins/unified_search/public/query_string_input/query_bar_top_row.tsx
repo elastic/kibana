@@ -209,7 +209,7 @@ export const SharingMetaFields = React.memo(function SharingMetaFields({
   try {
     const dateRangePretty = usePrettyDuration({
       timeFrom: toAbsoluteString(from),
-      timeTo: toAbsoluteString(to),
+      timeTo: toAbsoluteString(to, true),
       quickRanges: [],
       dateFormat,
     });
@@ -778,6 +778,13 @@ export const QueryBarTopRow = React.memo(
               {Boolean(isQueryLangSelected) && (
                 <ESQLMenuPopover
                   onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+                  onESQLQuerySubmit={(queryString: string) => {
+                    onSubmit({
+                      query: { esql: queryString } as QT,
+                      dateRange: dateRangeRef.current,
+                    });
+                  }}
+                  adHocDataview={props.indexPatterns?.[0]}
                 />
               )}
               <EuiFlexItem

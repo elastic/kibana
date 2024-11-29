@@ -1052,3 +1052,38 @@ export const hasWrongOperatorWithWildcard = (
     }
   });
 };
+
+/**
+ * Event filters helper where given an exceptions list,
+ * determine if both 'subject_name' and 'trusted' are
+ * included in an entry with 'code_signature'
+ */
+export const hasPartialCodeSignatureEntry = (
+  items: ExceptionsBuilderReturnExceptionItem[]
+): boolean => {
+  const { os_types: os = ['windows'], entries = [] } = items[0] || {};
+  let name = false;
+  let trusted = false;
+
+  for (const e of entries) {
+    if (e.type === 'nested' && e.field === 'process.Ext.code_signature') {
+      const includesNestedName = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'subject_name'
+      );
+      const includesNestedTrusted = e.entries.some(
+        (nestedEntry) => nestedEntry.field === 'trusted'
+      );
+      if (includesNestedName !== includesNestedTrusted) {
+        return true;
+      }
+    } else if (
+      e.field === 'process.code_signature.subject_name' ||
+      (os.includes('macos') && e.field === 'process.code_signature.team_id')
+    ) {
+      name = true;
+    } else if (e.field === 'process.code_signature.trusted') {
+      trusted = true;
+    }
+  }
+  return name !== trusted;
+};

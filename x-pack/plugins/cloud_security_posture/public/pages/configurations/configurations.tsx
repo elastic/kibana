@@ -12,6 +12,8 @@ import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_
 import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
+import { EuiSpacer } from '@elastic/eui';
+import { ThirdPartyIntegrationsCallout } from '../findings/third_party_integrations_callout';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage, defaultLoadingRenderer } from '../../components/cloud_posture_page';
 import { cloudPosturePages } from '../../common/navigation/constants';
@@ -45,6 +47,8 @@ export const Configurations = () => {
 
   return (
     <CloudPosturePage query={dataViewQuery}>
+      <EuiSpacer />
+      <ThirdPartyIntegrationsCallout />
       <Routes>
         <Route
           exact

@@ -7,6 +7,5 @@
 
 export * from './datatable_column';
 export * from './datatable';
-export { isTransposeId, getOriginalId } from './transpose_helpers';
 
 export type { DatatableProps, DatatableExpressionFunction } from './types';

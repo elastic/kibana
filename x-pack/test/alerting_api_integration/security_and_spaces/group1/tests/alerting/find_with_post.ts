@@ -207,12 +207,14 @@ const findTestUtils = (
                 expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
 
                 const secondResponse = await supertestWithoutAuth
-                  .get(
-                    `${getUrlPrefix(space.id)}/${
-                      describeType === 'public' ? 'api' : 'internal'
-                    }/alerting/rules/_find?per_page=${perPage}&sort_field=createdAt&page=2`
-                  )
-                  .auth(user.username, user.password);
+                  .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+                  .set('kbn-xsrf', 'kibana')
+                  .auth(user.username, user.password)
+                  .send({
+                    per_page: perPage,
+                    sort_field: 'createdAt',
+                    page: 2,
+                  });
 
                 expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
               }

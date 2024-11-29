@@ -10,7 +10,8 @@ import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { combineLatest, debounceTime, skipWhile, startWith, switchMap } from 'rxjs';
-import { DashboardContainer, DashboardCreationOptions } from '../..';
+import { DashboardContainer } from '../..';
+import { DashboardCreationOptions } from '../../..';
 import { DashboardContainerInput } from '../../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import {
@@ -26,12 +27,7 @@ import { isKeyEqualAsync, unsavedChangesDiffingFunctions } from './dashboard_dif
  * and the last saved input, so we can safely ignore any output reducers, and most componentState reducers.
  * This is only for performance reasons, because the diffing function itself can be quite heavy.
  */
-export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = [
-  'setTimeslice',
-  'setFullScreenMode',
-  'setExpandedPanelId',
-  'setHasUnsavedChanges',
-];
+export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = ['setTimeslice'];
 
 /**
  * Some keys will often have deviated from their last saved state, but should not persist over reloads
@@ -89,15 +85,14 @@ export function startDiffingDashboardState(
    * Create an observable stream that checks for unsaved changes in the Dashboard state
    * and the state of all of its legacy embeddable children.
    */
-  const dashboardUnsavedChanges = this.anyReducerRun.pipe(
-    startWith(null),
+  const dashboardUnsavedChanges = combineLatest([
+    this.anyReducerRun.pipe(startWith(null)),
+    this.lastSavedInput$,
+  ]).pipe(
     debounceTime(CHANGE_CHECK_DEBOUNCE),
-    switchMap(() => {
+    switchMap(([, lastSavedInput]) => {
       return (async () => {
-        const {
-          explicitInput: currentInput,
-          componentState: { lastSavedInput },
-        } = this.getState();
+        const { explicitInput: currentInput } = this.getState();
         const unsavedChanges = await getDashboardUnsavedChanges.bind(this)(
           lastSavedInput,
           currentInput
@@ -126,8 +121,8 @@ export function startDiffingDashboardState(
         Object.keys(omit(dashboardChanges, keysNotConsideredUnsavedChanges)).length > 0 ||
         unsavedPanelState !== undefined ||
         controlGroupChanges !== undefined;
-      if (hasUnsavedChanges !== this.getState().componentState.hasUnsavedChanges) {
-        this.dispatch.setHasUnsavedChanges(hasUnsavedChanges);
+      if (hasUnsavedChanges !== this.hasUnsavedChanges$.value) {
+        this.setHasUnsavedChanges(hasUnsavedChanges);
       }
 
       // backup unsaved changes if configured to do so
@@ -193,7 +188,7 @@ function backupUnsavedChanges(
   const dashboardStateToBackup = omit(dashboardChanges, keysToOmitFromSessionStorage);
 
   getDashboardBackupService().setState(
-    this.getDashboardSavedObjectId(),
+    this.savedObjectId.value,
     {
       ...dashboardStateToBackup,
       panels: dashboardChanges.panels,

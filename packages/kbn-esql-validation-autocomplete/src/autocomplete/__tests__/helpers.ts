@@ -8,9 +8,10 @@
  */
 
 import { camelCase } from 'lodash';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { builtinFunctions } from '../../definitions/builtin';
+import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import { groupingFunctionDefinitions } from '../../definitions/grouping';
@@ -18,7 +19,6 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { getFunctionSignatures } from '../../definitions/helpers';
 import { ESQLRealField } from '../../validation/types';
 import {
   FieldType,
@@ -122,7 +122,7 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string,
+  command: string | string[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
@@ -166,19 +166,23 @@ export function getFunctionSignaturesByReturnType(
 
   const deduped = Array.from(new Set(list));
 
+  const commands = Array.isArray(command) ? command : [command];
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
-      if (!supportedCommands.includes(command) && !supportedOptions?.includes(option || '')) {
+      if (
+        !commands.some((c) => supportedCommands.includes(c)) &&
+        !supportedOptions?.includes(option || '')
+      ) {
         return false;
       }
       const filteredByReturnType = signatures.filter(
         ({ returnType }) =>
           expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
       );
-      if (!filteredByReturnType.length) {
+      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
         return false;
       }
       if (paramsTypes?.length) {
@@ -214,13 +218,9 @@ export function getFunctionSignaturesByReturnType(
           label: name.toUpperCase(),
         };
       }
-      const printedSignatures = getFunctionSignatures(definition, {
-        withTypes: true,
-        capitalize: true,
-      });
       return {
         text: `${name.toUpperCase()}($0)`,
-        label: printedSignatures[0].declaration,
+        label: name.toUpperCase(),
       };
     });
 }
@@ -230,7 +230,11 @@ export function getFieldNamesByType(
 ) {
   const requestedType = Array.isArray(_requestedType) ? _requestedType : [_requestedType];
   return fields
-    .filter(({ type }) => requestedType.includes('any') || requestedType.includes(type))
+    .filter(
+      ({ type }) =>
+        (requestedType.includes('any') || requestedType.includes(type)) &&
+        !NOT_SUGGESTED_TYPES.includes(type)
+    )
     .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
@@ -249,7 +253,17 @@ export function getDateLiteralsByFieldType(_requestedType: FieldType | FieldType
 }
 
 export function createCustomCallbackMocks(
-  customFields?: ESQLRealField[],
+  /**
+   * Columns that will come from Elasticsearch since the last command
+   * e.g. the test case may be `FROM index | EVAL foo = 1 | KEEP /`
+   *
+   * In this case, the columns available for the KEEP command will be the ones
+   * that were available after the EVAL command
+   *
+   * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
+   * will include "foo" as a column.
+   */
+  customColumnsSinceLastCommand?: ESQLRealField[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -258,11 +272,13 @@ export function createCustomCallbackMocks(
     enrichFields: string[];
   }>
 ) {
-  const finalFields = customFields || fields;
+  const finalColumnsSinceLastCommand =
+    customColumnsSinceLastCommand ||
+    fields.filter(({ type }) => !NOT_SUGGESTED_TYPES.includes(type));
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {
-    getFieldsFor: jest.fn(async () => finalFields),
+    getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
   };
@@ -307,7 +323,7 @@ export const setup = async (caret = '/') => {
       querySansCaret,
       pos,
       ctx,
-      getAstAndSyntaxErrors,
+      (_query: string | undefined) => parse(_query, { withFormatting: true }),
       opts.callbacks ?? callbacks
     );
   };

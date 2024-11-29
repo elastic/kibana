@@ -5,23 +5,12 @@
  * 2.0.
  */
 
-import { compact, forEach, reduce } from 'lodash';
+import { compact } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { NodesIngestTotal } from '@elastic/elasticsearch/lib/api/types';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import {
-  generateHistoryTransformId,
-  generateHistoryBackfillTransformId,
-  generateHistoryIngestPipelineId,
-  generateHistoryIndexTemplateId,
-  generateLatestTransformId,
-  generateLatestIngestPipelineId,
-  generateLatestIndexTemplateId,
-} from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { EntityDefinitionState, EntityDefinitionWithState } from './types';
-import { isBackfillEnabled } from './helpers/is_backfill_enabled';
 
 export async function findEntityDefinitions({
   soClient,
@@ -31,6 +20,7 @@ export async function findEntityDefinitions({
   page = 1,
   perPage = 10,
   includeState = false,
+  type,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -39,12 +29,14 @@ export async function findEntityDefinitions({
   page?: number;
   perPage?: number;
   includeState?: boolean;
+  type?: string;
 }): Promise<EntityDefinition[] | EntityDefinitionWithState[]> {
   const filter = compact([
     typeof builtIn === 'boolean'
       ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${BUILT_IN_ID_PREFIX}*)`
       : undefined,
     id ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.id:(${id})` : undefined,
+    type ? `${SO_ENTITY_DEFINITION_TYPE}.attributes.type:(${type})` : undefined,
   ]).join(' AND ');
   const response = await soClient.find<EntityDefinition>({
     type: SO_ENTITY_DEFINITION_TYPE,
@@ -117,11 +109,9 @@ async function getTransformState({
   definition: EntityDefinition;
   esClient: ElasticsearchClient;
 }) {
-  const transformIds = [
-    generateHistoryTransformId(definition),
-    generateLatestTransformId(definition),
-    ...(isBackfillEnabled(definition) ? [generateHistoryBackfillTransformId(definition)] : []),
-  ];
+  const transformIds = (definition.installedComponents ?? [])
+    .filter(({ type }) => type === 'transform')
+    .map(({ id }) => id);
 
   const transformStats = await Promise.all(
     transformIds.map((id) => esClient.transform.getTransformStats({ transform_id: id }))
@@ -149,37 +139,18 @@ async function getIngestPipelineState({
   definition: EntityDefinition;
   esClient: ElasticsearchClient;
 }) {
-  const ingestPipelineIds = [
-    generateHistoryIngestPipelineId(definition),
-    generateLatestIngestPipelineId(definition),
-  ];
-  const [ingestPipelines, ingestPipelinesStats] = await Promise.all([
-    esClient.ingest.getPipeline({ id: ingestPipelineIds.join(',') }, { ignore: [404] }),
-    esClient.nodes.stats({
-      metric: 'ingest',
-      filter_path: ingestPipelineIds.map((id) => `nodes.*.ingest.pipelines.${id}`),
-    }),
-  ]);
+  const ingestPipelineIds = (definition.installedComponents ?? [])
+    .filter(({ type }) => type === 'ingest_pipeline')
+    .map(({ id }) => id);
 
-  const ingestStatsByPipeline = reduce(
-    ingestPipelinesStats.nodes,
-    (pipelines, { ingest }) => {
-      forEach(ingest?.pipelines, (value: NodesIngestTotal, key: string) => {
-        if (!pipelines[key]) {
-          pipelines[key] = { count: 0, failed: 0 };
-        }
-        pipelines[key].count += value.count ?? 0;
-        pipelines[key].failed += value.failed ?? 0;
-      });
-      return pipelines;
-    },
-    {} as Record<string, { count: number; failed: number }>
+  const ingestPipelines = await esClient.ingest.getPipeline(
+    { id: ingestPipelineIds.join(',') },
+    { ignore: [404] }
   );
 
   return ingestPipelineIds.map((id) => ({
     id,
     installed: !!ingestPipelines[id],
-    stats: ingestStatsByPipeline[id],
   }));
 }
 
@@ -190,10 +161,9 @@ async function getIndexTemplatesState({
   definition: EntityDefinition;
   esClient: ElasticsearchClient;
 }) {
-  const indexTemplatesIds = [
-    generateLatestIndexTemplateId(definition),
-    generateHistoryIndexTemplateId(definition),
-  ];
+  const indexTemplatesIds = (definition.installedComponents ?? [])
+    .filter(({ type }) => type === 'template')
+    .map(({ id }) => id);
   const templates = await Promise.all(
     indexTemplatesIds.map((id) =>
       esClient.indices

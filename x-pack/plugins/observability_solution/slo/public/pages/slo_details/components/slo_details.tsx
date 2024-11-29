@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { BurnRates } from '../../../components/slo/burn_rate/burn_rates';
-import { useBurnRateOptions } from '../hooks/use_burn_rate_options';
+import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
 import { EventsChartPanel } from './events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
 import { SLODetailsHistory } from './history/slo_details_history';
@@ -32,8 +31,6 @@ export interface Props {
   selectedTabId: SloTabId;
 }
 export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
-  const { burnRateOptions } = useBurnRateOptions(slo);
-
   const [range, setRange] = useState<{ from: Date; to: Date }>({
     from: moment().subtract(1, 'day').toDate(),
     to: new Date(),
@@ -50,39 +47,37 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
     return () => clearInterval(intervalId);
   }, [isAutoRefreshing]);
 
-  return selectedTabId === OVERVIEW_TAB_ID ? (
+  if (selectedTabId === HISTORY_TAB_ID) {
+    return (
+      <SLODetailsHistory
+        slo={slo}
+        isAutoRefreshing={isAutoRefreshing}
+        selectedTabId={selectedTabId}
+      />
+    );
+  }
+
+  if (selectedTabId === ALERTS_TAB_ID) {
+    return <SloDetailsAlerts slo={slo} />;
+  }
+
+  return (
     <EuiFlexGroup direction="column" gutterSize="xl">
       <SloRemoteCallout slo={slo} />
       <SloHealthCallout slo={slo} />
-      <EuiFlexItem>
-        <Overview slo={slo} />
-      </EuiFlexItem>
+      <Overview slo={slo} />
+
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexItem>
-          <BurnRates
-            slo={slo}
-            isAutoRefreshing={isAutoRefreshing}
-            burnRateOptions={burnRateOptions}
-            selectedTabId={selectedTabId}
-          />
-        </EuiFlexItem>
+        <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
+
         <HistoricalDataCharts
           slo={slo}
           selectedTabId={selectedTabId}
           isAutoRefreshing={isAutoRefreshing}
         />
-        <EuiFlexItem>
-          <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
-        </EuiFlexItem>
+
+        <EventsChartPanel slo={slo} range={range} selectedTabId={selectedTabId} />
       </EuiFlexGroup>
     </EuiFlexGroup>
-  ) : selectedTabId === ALERTS_TAB_ID ? (
-    <SloDetailsAlerts slo={slo} />
-  ) : (
-    <SLODetailsHistory
-      slo={slo}
-      isAutoRefreshing={isAutoRefreshing}
-      selectedTabId={selectedTabId}
-    />
   );
 }

@@ -6108,6 +6108,198 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.hasLockedHoverActions$",
+            "type": "Object",
+            "tags": [],
+            "label": "hasLockedHoverActions$",
+            "description": [],
+            "signature": [
+              "{ source: ",
+              "Observable",
+              "<any> | undefined; readonly value: boolean; error: (err: any) => void; forEach: { (next: (value: boolean) => void): Promise<void>; (next: (value: boolean) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; complete: () => void; getValue: () => boolean; closed: boolean; pipe: { (): ",
+              "Observable",
+              "<boolean>; <A>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<boolean, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; operator: ",
+              "Operator",
+              "<any, boolean> | undefined; lift: <R>(operator: ",
+              "Operator",
+              "<boolean, R>) => ",
+              "Observable",
+              "<R>; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<boolean>> | ((value: boolean) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: boolean) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructor): Promise<boolean | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<boolean | undefined>; }; observers: ",
+              "Observer",
+              "<boolean>[]; isStopped: boolean; hasError: boolean; thrownError: any; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<boolean>; }"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.lockHoverActions",
+            "type": "Function",
+            "tags": [],
+            "label": "lockHoverActions",
+            "description": [],
+            "signature": [
+              "(lock: boolean) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Embeddable.lockHoverActions.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "lock",
+                "description": [],
+                "path": "packages/presentation/presentation_publishing/interfaces/can_lock_hover_actions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.getEditHref",
             "type": "Function",
             "tags": [],
@@ -7502,7 +7694,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element"
+              "() => React.JSX.Element"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
@@ -7992,20 +8184,12 @@
         "signature": [
           "(props: ",
           "EmbeddablePanelProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/embeddable_panel/embeddable_panel.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-          },
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/dashboard_container/component/grid/dashboard_grid_item.tsx"
@@ -8069,7 +8253,7 @@
             "section": "def-public.EmbeddableRendererProps",
             "text": "EmbeddableRendererProps"
           },
-          "<I>) => JSX.Element"
+          "<I>) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
         "deprecated": false,
@@ -8111,7 +8295,7 @@
         "label": "EmbeddableRoot",
         "description": [],
         "signature": [
-          "({ embeddable, loading, error, input }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ embeddable, loading, error, input }: Props) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
         "deprecated": false,
@@ -8120,12 +8304,12 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.EmbeddableRoot.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ embeddable, loading, error, input }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
@@ -9011,7 +9195,7 @@
             "section": "def-public.PresentationPanelProps",
             "text": "PresentationPanelProps"
           },
-          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
+          "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
@@ -9019,7 +9203,7 @@
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
-          "<SerializedState>) => void) | undefined; }) => JSX.Element"
+          "<SerializedState>) => void) | undefined; }) => React.JSX.Element"
         ],
         "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
         "deprecated": false,
@@ -9125,7 +9309,7 @@
                     "section": "def-public.PresentationPanelProps",
                     "text": "PresentationPanelProps"
                   },
-                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\"> | undefined"
+                  "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\"> | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
                 "deprecated": false,
@@ -14283,12 +14467,7 @@
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/plugin.ts"
-            }
-          ],
+          "references": [],
           "returnComment": [],
           "children": [
             {
@@ -14507,16 +14686,7 @@
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/plugin.ts"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/plugin.tsx"
-            }
-          ],
+          "references": [],
           "children": [
             {
               "parentPluginId": "embeddable",
@@ -14871,10 +15041,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "lens",
-              "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx"
-            },
-            {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/services/dashboard_content_management_service/lib/migrate_dashboard_input.ts"
             },
@@ -14885,10 +15051,6 @@
             {
               "plugin": "dashboard",
               "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/dashboard_container/external_api/dashboard_renderer.tsx"
             },
             {
               "plugin": "investigateApp",
@@ -15024,7 +15186,15 @@
             },
             {
               "plugin": "canvas",
-              "path": "x-pack/plugins/canvas/public/services/kibana/embeddables.ts"
+              "path": "x-pack/plugins/canvas/public/components/workpad_header/editor_menu/editor_menu.tsx"
+            },
+            {
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
+            },
+            {
+              "plugin": "canvas",
+              "path": "x-pack/plugins/canvas/public/components/embeddable_flyout/flyout.component.tsx"
             }
           ],
           "children": [],

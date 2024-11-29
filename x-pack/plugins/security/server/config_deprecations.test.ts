@@ -46,6 +46,28 @@ describe('Config Deprecations', () => {
     expect(messages).toHaveLength(0);
   });
 
+  it('renames `xpack.security.experimental.fipsMode.enabled` to `xpack.security.fipsMode.enabled`', () => {
+    const config = {
+      xpack: {
+        security: {
+          experimental: {
+            fipsMode: {
+              enabled: true,
+            },
+          },
+        },
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.xpack.security.experimental?.fipsMode?.enabled).not.toBeDefined();
+    expect(migrated.xpack.security.fipsMode.enabled).toEqual(true);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"xpack.security.experimental.fipsMode.enabled\\" has been replaced by \\"xpack.security.fipsMode.enabled\\"",
+      ]
+    `);
+  });
+
   it('renames sessionTimeout to session.idleTimeout', () => {
     const config = {
       xpack: {

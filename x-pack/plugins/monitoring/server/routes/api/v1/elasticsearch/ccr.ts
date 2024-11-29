@@ -9,7 +9,7 @@ import { get, groupBy } from 'lodash';
 import {
   getIndexPatterns,
   getElasticsearchDataset,
-} from '../../../../lib/cluster/get_index_patterns';
+} from '../../../../../common/get_index_patterns';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
@@ -328,6 +328,7 @@ export function ccrRoute(server: MonitoringCore) {
           );
           const follows = remoteCluster ? `${leaderIndex} on ${remoteCluster}` : leaderIndex;
 
+          // @ts-expect-error `shards.error` type mismatch (error: string | undefined vs. error: { error: string | undefined })
           const shards: CcrShard[] = get(bucket, 'by_shard_id.buckets').map(
             (shardBucket: CcrShardBucket) => buildShardStats({ bucket, fullStats, shardBucket })
           );

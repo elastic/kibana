@@ -15,46 +15,46 @@ export default function createCappedActionsTests({ getService }: FtrProviderCont
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('Capped action type', () => {
+  describe('Capped connector type', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
 
     it('should not trigger actions more than connector types limit', async () => {
-      const { body: createdAction01 } = await supertest
+      const { body: createdConnector01 } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'MY action',
+          name: 'MY Connector',
           connector_type_id: 'test.capped',
           config: {},
           secrets: {},
         })
         .expect(200);
-      const { body: createdAction02 } = await supertest
+      const { body: createdConnector02 } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'MY action',
+          name: 'MY Connector',
           connector_type_id: 'test.capped',
           config: {},
           secrets: {},
         })
         .expect(200);
-      const { body: createdAction03 } = await supertest
+      const { body: createdConnector03 } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'MY action',
+          name: 'MY Connector',
           connector_type_id: 'test.capped',
           config: {},
           secrets: {},
         })
         .expect(200);
 
-      objectRemover.add(Spaces.space1.id, createdAction01.id, 'action', 'actions');
-      objectRemover.add(Spaces.space1.id, createdAction02.id, 'action', 'actions');
-      objectRemover.add(Spaces.space1.id, createdAction03.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector01.id, 'connector', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector02.id, 'connector', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector03.id, 'connector', 'actions');
 
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -71,17 +71,17 @@ export default function createCappedActionsTests({ getService }: FtrProviderCont
             },
             actions: [
               {
-                id: createdAction01.id,
+                id: createdConnector01.id,
                 group: 'default',
                 params: {},
               },
               {
-                id: createdAction02.id,
+                id: createdConnector02.id,
                 group: 'default',
                 params: {},
               },
               {
-                id: createdAction03.id,
+                id: createdConnector03.id,
                 group: 'default',
                 params: {},
               },

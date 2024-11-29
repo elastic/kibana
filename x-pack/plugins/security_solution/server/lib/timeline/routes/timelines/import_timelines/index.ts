@@ -7,18 +7,23 @@
 
 import { extname } from 'path';
 import type { Readable } from 'stream';
+import { get } from 'lodash/fp';
 
+import type { IKibanaResponse } from '@kbn/core-http-server';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_IMPORT_URL } from '../../../../../../common/constants';
 
 import type { ConfigType } from '../../../../../config';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { importTimelines } from './helpers';
-import { ImportTimelinesPayloadSchemaRt } from '../../../../../../common/api/timeline';
+import {
+  ImportTimelinesRequestBody,
+  type ImportTimelinesResponse,
+} from '../../../../../../common/api/timeline';
 import { buildFrameworkRequest } from '../../../utils/common';
 
 export { importTimelines } from './helpers';
@@ -27,8 +32,12 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
   router.versioned
     .post({
       path: `${TIMELINE_IMPORT_URL}`,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
       options: {
-        tags: ['access:securitySolution'],
         body: {
           maxBytes: config.maxTimelineImportPayloadBytes,
           output: 'stream',
@@ -39,11 +48,13 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
     .addVersion(
       {
         validate: {
-          request: { body: buildRouteValidationWithExcess(ImportTimelinesPayloadSchemaRt) },
+          request: {
+            body: buildRouteValidationWithZod(ImportTimelinesRequestBody),
+          },
         },
         version: '2023-10-31',
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<ImportTimelinesResponse>> => {
         try {
           const siemResponse = buildSiemResponse(response);
           const savedObjectsClient = (await context.core).savedObjects.client;
@@ -52,7 +63,7 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
           }
 
           const { file, isImmutable } = request.body;
-          const { filename } = file.hapi;
+          const filename = extractFilename(file);
           const fileExtension = extname(filename).toLowerCase();
 
           if (fileExtension !== '.ndjson') {
@@ -69,8 +80,11 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
             frameworkRequest,
             isImmutable === 'true'
           );
-          if (typeof res !== 'string') return response.ok({ body: res ?? {} });
-          else throw res;
+          if (res instanceof Error || typeof res === 'string') {
+            throw res;
+          } else {
+            return response.ok({ body: res });
+          }
         } catch (err) {
           const error = transformError(err);
           const siemResponse = buildSiemResponse(response);
@@ -82,3 +96,11 @@ export const importTimelinesRoute = (router: SecuritySolutionPluginRouter, confi
       }
     );
 };
+
+function extractFilename(fileObj: unknown) {
+  const filename = get('hapi.filename', fileObj);
+  if (filename && typeof filename === 'string') {
+    return filename;
+  }
+  throw new Error('`filename` missing in file');
+}

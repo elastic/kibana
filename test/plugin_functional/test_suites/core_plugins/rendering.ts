@@ -163,6 +163,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean?)',
         'monitoring.ui.min_interval_seconds (number?)',
         'monitoring.ui.show_license_expiration (boolean?)',
+        'monitoring.ui.logs.index (string?)',
         'newsfeed.fetchInterval (duration?)',
         'newsfeed.mainInterval (duration?)',
         'newsfeed.service.pathTemplate (string?)',
@@ -233,8 +234,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.deployments_url (string?)',
         'xpack.cloud.is_elastic_staff_owned (boolean?)',
         'xpack.cloud.trial_end_date (string?)',
-        'xpack.cloud_integrations.chat.chatURL (string?)',
-        'xpack.cloud_integrations.chat.trialBuffer (number?)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
         // Added here for documentation purposes.
         // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
@@ -275,6 +274,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.ui.enabled (boolean?)',
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
+        'xpack.index_management.enableProjectLevelRetentionChecks (boolean?|never)',
+        'xpack.integration_assistant.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          */
@@ -302,8 +303,19 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.ad.enabled (boolean)',
         'xpack.ml.dfa.enabled (boolean)',
         'xpack.ml.nlp.enabled (boolean)',
+        'xpack.ml.nlp.modelDeployment.allowStaticAllocations (boolean)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.max (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.min (number)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.static (number?)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
+        'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
         /**
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
@@ -316,7 +328,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean?)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration?)',
-        'xpack.search.homepage.ui.enabled (boolean?)',
+
+        'xpack.searchAssistant.ui.enabled (boolean?)',
         'xpack.searchInferenceEndpoints.ui.enabled (boolean?)',
         'xpack.searchPlayground.ui.enabled (boolean?)',
         'xpack.security.loginAssistanceMessage (string?)',
@@ -349,6 +362,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.thresholdRule.enabled (boolean?)',
         'xpack.observability_onboarding.ui.enabled (boolean?)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
+        'xpack.observabilityAIAssistant.scope (observability?|search?)',
+        'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
+        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
         'share.new_version.enabled (boolean?)',
         'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
         /**

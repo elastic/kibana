@@ -26,7 +26,7 @@ export const renderFullStoryLibraryFactory = (dist = true) =>
       headers: HttpResponseOptions['headers'];
     }> => {
       const srcBuffer = await fs.readFile(FULLSTORY_LIBRARY_PATH);
-      const hash = createHash('sha1');
+      const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
       hash.update(srcBuffer);
       const hashDigest = hash.digest('hex');
 

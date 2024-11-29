@@ -12,6 +12,7 @@ export const taskPollingLifecycleMock = {
   create(opts: { isStarted?: boolean; events$?: Observable<TaskLifecycleEvent> }) {
     return {
       attemptToRun: jest.fn(),
+      stop: jest.fn(),
       get isStarted() {
         return opts.isStarted ?? true;
       },

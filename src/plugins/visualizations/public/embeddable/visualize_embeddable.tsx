@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -38,6 +38,7 @@ import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfac
 import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { BehaviorSubject, switchMap } from 'rxjs';
+import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
@@ -178,6 +179,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         defaultPanelTitle,
         dataLoading: dataLoading$,
         dataViews: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+        rendered$: hasRendered$,
         supportedTriggers: () => [
           ACTION_CONVERT_TO_LENS,
           APPLY_FILTER_TRIGGER,
@@ -396,7 +398,6 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
                 if (hasRendered$.getValue() === true) return;
                 hasRendered$.next(true);
-                hasRendered$.complete();
               },
               onEvent: async (event) => {
                 // Visualize doesn't respond to sizing events, so ignore.
@@ -405,7 +406,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 }
                 const currentVis = vis$.getValue();
                 if (!disableTriggers) {
-                  const triggerId = get(
+                  const triggerId: string = get(
                     VIS_EVENT_TO_TRIGGER,
                     event.name,
                     VIS_EVENT_TO_TRIGGER.filter
@@ -454,6 +455,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const errorTextStyle = useErrorTextStyle();
 
         useEffect(() => {
           return () => {
@@ -495,9 +497,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
                     </h2>
                   }
                   body={
-                    <p>
+                    <EuiText css={errorTextStyle}>
                       {error.name}: {error.message}
-                    </p>
+                    </EuiText>
                   }
                 />
               )}

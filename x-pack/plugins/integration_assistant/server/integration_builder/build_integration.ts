@@ -16,6 +16,8 @@ import { createAgentInput } from './agent';
 import { createDataStream } from './data_stream';
 import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
+import { createReadme } from './readme_files';
+import { Field, flattenObjectsList } from '../util/samples';
 
 const initialVersion = '1.0.0';
 
@@ -37,17 +39,27 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
 
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
-
-  for (const dataStream of integration.dataStreams) {
+  const fieldsPerDatastream = integration.dataStreams.map((dataStream) => {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
-    createDataStream(integration.name, specificDataStreamDir, dataStream);
+    const dataStreamFields = createDataStream(integration.name, specificDataStreamDir, dataStream);
     createAgentInput(specificDataStreamDir, dataStream.inputTypes);
     createPipeline(specificDataStreamDir, dataStream.pipeline);
-    createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);
-  }
+    const fields = createFieldMapping(
+      integration.name,
+      dataStreamName,
+      specificDataStreamDir,
+      dataStream.docs
+    );
 
+    return {
+      datastream: dataStreamName,
+      fields: mergeAndSortFields(fields, dataStreamFields),
+    };
+  });
+
+  createReadme(packageDir, integration.name, fieldsPerDatastream);
   const zipBuffer = await createZipArchive(workingDir, packageDirectoryName);
 
   removeDirSync(workingDir);
@@ -67,7 +79,6 @@ function createDirectories(
 }
 
 function createPackage(packageDir: string, integration: Integration): void {
-  createReadme(packageDir, integration);
   createChangelog(packageDir);
   createBuildFile(packageDir);
   createPackageManifest(packageDir, integration);
@@ -102,26 +113,18 @@ function createChangelog(packageDir: string): void {
   createSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
 }
 
-function createReadme(packageDir: string, integration: Integration) {
-  const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
-  const mainReadmeDirPath = joinPath(packageDir, 'docs/');
-  ensureDirSync(mainReadmeDirPath);
-  ensureDirSync(readmeDirPath);
-  const readmeTemplate = nunjucks.render('package_readme.md.njk', {
-    package_name: integration.name,
-    data_streams: integration.dataStreams,
-  });
-
-  createSync(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
-  createSync(joinPath(mainReadmeDirPath, 'README.md'), readmeTemplate);
-}
-
 async function createZipArchive(workingDir: string, packageDirectoryName: string): Promise<Buffer> {
   const tmpPackageDir = joinPath(workingDir, packageDirectoryName);
   const zip = new AdmZip();
   zip.addLocalFolder(tmpPackageDir, packageDirectoryName);
   const buffer = zip.toBuffer();
   return buffer;
+}
+
+function mergeAndSortFields(fields: Field[], dataStreamFields: Field[]): Field[] {
+  const mergedFields = [...fields, ...dataStreamFields];
+
+  return flattenObjectsList(mergedFields);
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -182,12 +185,14 @@ function createPackageManifestDict(
   };
 
   if (package_logo !== undefined && package_logo !== '') {
-    data.icons = {
-      src: '/img/logo.svg',
-      title: `${package_title} Logo`,
-      size: '32x32',
-      type: 'image/svg+xml',
-    };
+    data.icons = [
+      {
+        src: '/img/logo.svg',
+        title: `${package_title} Logo`,
+        size: '32x32',
+        type: 'image/svg+xml',
+      },
+    ];
   }
   return data;
 }

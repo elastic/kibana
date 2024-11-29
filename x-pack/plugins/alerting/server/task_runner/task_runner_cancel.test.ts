@@ -32,12 +32,13 @@ import {
 } from '@kbn/core/server/mocks';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
+import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import {
   AlertingEventLogger,
   ContextOpts,
@@ -63,6 +64,7 @@ import { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
 
 jest.mock('uuid', () => ({
@@ -73,6 +75,9 @@ jest.mock('../lib/wrap_scoped_cluster_client', () => ({
 }));
 
 jest.mock('../lib/alerting_event_logger/alerting_event_logger');
+
+jest.mock('../rules_client/lib/get_alert_from_raw');
+const mockGetAlertFromRaw = getAlertFromRaw as jest.MockedFunction<typeof getAlertFromRaw>;
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -111,7 +116,6 @@ describe('Task Runner Cancel', () => {
   const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
   const backfillClient = backfillClientMock.create();
   const actionsClient = actionsClientMock.create();
-  const rulesClient = rulesClientMock.create();
   const ruleTypeRegistry = ruleTypeRegistryMock.create();
   const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
   const elasticsearchService = elasticsearchServiceMock.createInternalStart();
@@ -141,7 +145,6 @@ describe('Task Runner Cancel', () => {
     encryptedSavedObjectsClient,
     eventLogger: eventLoggerMock.create(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
-    getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     kibanaBaseUrl: 'https://localhost:5601',
     logger,
     maintenanceWindowsService,
@@ -155,6 +158,7 @@ describe('Task Runner Cancel', () => {
     supportsEphemeralTasks: false,
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
+    isServerless: false,
   };
 
   beforeEach(() => {
@@ -171,7 +175,6 @@ describe('Task Runner Cancel', () => {
       });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
-    taskRunnerFactoryInitializerParams.getRulesClientWithRequest.mockReturnValue(rulesClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
     );
@@ -186,7 +189,7 @@ describe('Task Runner Cancel', () => {
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
     });
-    rulesClient.getAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [],
       maintenanceWindowsWithoutScopedQueryIds: [],
@@ -225,53 +228,57 @@ describe('Task Runner Cancel', () => {
 
     testAlertingEventLogCalls({ status: 'ok' });
 
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledTimes(1);
-    expect(internalSavedObjectsRepository.update).toHaveBeenCalledWith(
-      RULE_SAVED_OBJECT_TYPE,
-      '1',
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledTimes(1);
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
       {
-        executionStatus: {
-          error: {
-            message: `test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m`,
-            reason: 'timeout',
-          },
-          lastDuration: 0,
-          lastExecutionDate: '1970-01-01T00:00:00.000Z',
-          status: 'error',
-          warning: null,
-        },
-        lastRun: {
-          alertsCount: {},
-          outcome: 'failed',
-          outcomeMsg: [
-            'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
-          ],
-          outcomeOrder: 20,
-          warning: 'timeout',
-        },
-        monitoring: {
-          run: {
-            calculated_metrics: {
-              success_ratio: 0,
-            },
-            history: [],
-            last_run: {
-              metrics: {
-                duration: 0,
-                gap_duration_s: null,
-                total_alerts_created: null,
-                total_alerts_detected: null,
-                total_indexing_duration_ms: null,
-                total_search_duration_ms: null,
+        id: `alert:1`,
+        index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+        doc: {
+          alert: {
+            executionStatus: {
+              error: {
+                message: `test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m`,
+                reason: 'timeout',
               },
-              timestamp: '1970-01-01T00:00:00.000Z',
+              lastDuration: 0,
+              lastExecutionDate: '1970-01-01T00:00:00.000Z',
+              status: 'error',
+              warning: null,
             },
+            lastRun: {
+              alertsCount: {},
+              outcome: 'failed',
+              outcomeMsg: [
+                'test:1: execution cancelled due to timeout - exceeded rule type timeout of 5m',
+              ],
+              outcomeOrder: 20,
+              warning: 'timeout',
+            },
+            monitoring: {
+              run: {
+                calculated_metrics: {
+                  success_ratio: 0,
+                },
+                history: [],
+                last_run: {
+                  metrics: {
+                    duration: 0,
+                    gap_duration_s: null,
+                    total_alerts_created: null,
+                    total_alerts_detected: null,
+                    total_indexing_duration_ms: null,
+                    total_search_duration_ms: null,
+                  },
+                  timestamp: '1970-01-01T00:00:00.000Z',
+                },
+              },
+            },
+            nextRun: '1970-01-01T00:00:10.000Z',
+            running: false,
           },
         },
-        nextRun: '1970-01-01T00:00:10.000Z',
-        running: false,
       },
-      { refresh: false, namespace: undefined }
+      { ignore: [404] }
     );
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledWith({

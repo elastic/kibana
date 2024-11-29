@@ -29,6 +29,7 @@ export const wrapHitsFactory =
     alertTimestampOverride,
     publicBaseUrl,
     ruleExecutionLogger,
+    intendedTimestamp,
   }: {
     completeRule: CompleteRule<RuleParams>;
     ignoreFields: Record<string, boolean>;
@@ -39,6 +40,7 @@ export const wrapHitsFactory =
     alertTimestampOverride: Date | undefined;
     publicBaseUrl: string | undefined;
     ruleExecutionLogger: IRuleExecutionLogForExecutors;
+    intendedTimestamp: Date | undefined;
   }) =>
   (
     events: Array<estypes.SearchHit<SignalSource>>,
@@ -67,6 +69,7 @@ export const wrapHitsFactory =
         ruleExecutionLogger,
         alertUuid: id,
         publicBaseUrl,
+        intendedTimestamp,
       });
 
       return {

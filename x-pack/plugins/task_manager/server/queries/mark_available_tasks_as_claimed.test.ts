@@ -70,7 +70,6 @@ describe('mark_available_tasks_as_claimed', () => {
         fieldUpdates,
         claimableTaskTypes: definitions.getAllTypes(),
         skippedTaskTypes: [],
-        unusedTaskTypes: [],
         taskMaxAttempts: Array.from(definitions).reduce((accumulator, [type, { maxAttempts }]) => {
           return { ...accumulator, [type]: maxAttempts || defaultMaxAttempts };
         }, {}),
@@ -153,8 +152,6 @@ if (doc['task.runAt'].size()!=0) {
     ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
       .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
       .join(' ')}
-    } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
-      ctx._source.task.status = "unrecognized";
     } else {
       ctx.op = "noop";
     }`,
@@ -167,7 +164,6 @@ if (doc['task.runAt'].size()!=0) {
           },
           claimableTaskTypes: ['sampleTask', 'otherTask'],
           skippedTaskTypes: [],
-          unusedTaskTypes: [],
           taskMaxAttempts: {
             sampleTask: 5,
             otherTask: 1,
@@ -242,7 +238,6 @@ if (doc['task.runAt'].size()!=0) {
           fieldUpdates,
           claimableTaskTypes: ['foo', 'bar'],
           skippedTaskTypes: [],
-          unusedTaskTypes: [],
           taskMaxAttempts: {
             foo: 5,
             bar: 2,

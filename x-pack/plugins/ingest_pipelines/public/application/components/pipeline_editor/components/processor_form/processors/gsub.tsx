@@ -37,7 +37,8 @@ const fieldsConfig: FieldsConfig = {
         validator: emptyField(
           i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.patternRequiredError', {
             defaultMessage: 'A value is required.',
-          })
+          }),
+          false
         ),
       },
       {

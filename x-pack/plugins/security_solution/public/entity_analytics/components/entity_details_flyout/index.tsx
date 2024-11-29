@@ -34,14 +34,16 @@ export const getInsightsInputTab = ({
 }: {
   name: string;
   fieldName: 'host.name' | 'user.name';
-}) => ({
-  id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-  'data-test-subj': INSIGHTS_TAB_TEST_ID,
-  name: (
-    <FormattedMessage
-      id="xpack.securitySolution.flyout.entityDetails.insightsDetails.insights.tabLabel"
-      defaultMessage="Insights"
-    />
-  ),
-  content: <InsightsTabCsp name={name} fieldName={fieldName} />,
-});
+}) => {
+  return {
+    id: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+    'data-test-subj': INSIGHTS_TAB_TEST_ID,
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.insightsDetails.insights.tabLabel"
+        defaultMessage="Insights"
+      />
+    ),
+    content: <InsightsTabCsp value={name} field={fieldName} />,
+  };
+};

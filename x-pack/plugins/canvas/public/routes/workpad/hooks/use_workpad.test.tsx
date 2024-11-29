@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { useWorkpad } from './use_workpad';
+import { spacesService } from '../../../services/kibana_services';
 
 const mockDispatch = jest.fn();
 const mockSelector = jest.fn();
@@ -25,20 +26,21 @@ const workpadResponse = {
   assets,
 };
 
-// Mock the hooks and actions used by the UseWorkpad hook
+// Mock the hooks, actions, and services used by the UseWorkpad hook
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
   useSelector: () => mockSelector,
 }));
 
-jest.mock('../../../services', () => ({
-  useWorkpadService: () => ({
-    resolve: mockResolveWorkpad,
-  }),
-  usePlatformService: () => ({
-    redirectLegacyUrl: mockRedirectLegacyUrl,
-  }),
+jest.mock('../../../services/canvas_workpad_service', () => ({
+  getCanvasWorkpadService: () => {
+    return {
+      resolve: mockResolveWorkpad,
+    };
+  },
 }));
+
+spacesService!.ui.redirectLegacyUrl = mockRedirectLegacyUrl;
 
 jest.mock('../../../state/actions/workpad', () => ({
   setWorkpad: (payload: any) => ({
@@ -60,7 +62,7 @@ describe('useWorkpad', () => {
       workpad: workpadResponse,
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
     try {
       await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
@@ -86,7 +88,7 @@ describe('useWorkpad', () => {
       aliasId,
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
     try {
       await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
@@ -116,7 +118,7 @@ describe('useWorkpad', () => {
       aliasPurpose: 'savedObjectConversion',
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
     try {
       await waitFor(() => expect(mockRedirectLegacyUrl).toHaveBeenCalled());
       expect(mockRedirectLegacyUrl).toBeCalledWith({

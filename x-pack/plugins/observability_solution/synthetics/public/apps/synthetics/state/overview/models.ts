@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
 import type { TrendTable } from '../../../../../common/types';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
 import { ConfigKey } from '../../../../../common/runtime_types';
@@ -17,12 +18,7 @@ export interface MonitorOverviewPageState extends MonitorFilterState {
   sortField: MonitorListSortField;
 }
 
-export type MonitorOverviewFlyoutConfig = {
-  configId: string;
-  id: string;
-  location: string;
-  locationId: string;
-} | null;
+export type MonitorOverviewFlyoutConfig = FlyoutParamProps | null;
 
 export interface MonitorOverviewState {
   flyoutConfig: MonitorOverviewFlyoutConfig;

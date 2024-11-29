@@ -18,7 +18,9 @@ const Label = euiStyled.div`
 `;
 
 interface Props {
-  error: APMError;
+  error: {
+    error: Pick<APMError['error'], 'log' | 'exception' | 'culprit'>;
+  };
 }
 export function SampleSummary({ error }: Props) {
   const logMessage = error.error.log?.message;

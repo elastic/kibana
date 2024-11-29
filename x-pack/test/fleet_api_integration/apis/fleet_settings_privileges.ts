@@ -51,6 +51,49 @@ const READ_SCENARIOS = [
     statusCode: 403,
   },
 ];
+// Scenarios updated for download_source and outputs routes that are slightly different
+const READ_SCENARIOS_2 = [
+  {
+    user: testUsers.fleet_all_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_settings_all_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_settings_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_read_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_all_only,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agents_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_no_access,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_read_only,
+    statusCode: 403,
+  },
+];
 
 const ALL_SCENARIOS = [
   {
@@ -106,12 +149,12 @@ export default function (providerContext: FtrProviderContext) {
     {
       method: 'GET',
       path: '/api/fleet/outputs',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'GET',
       path: '/api/fleet/outputs/test-privileges-output-1',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'POST',
@@ -226,12 +269,12 @@ export default function (providerContext: FtrProviderContext) {
     {
       method: 'GET',
       path: '/api/fleet/agent_download_sources',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'GET',
       path: '/api/fleet/agent_download_sources/test-privileges-download-source-1',
-      scenarios: READ_SCENARIOS,
+      scenarios: READ_SCENARIOS_2,
     },
     {
       method: 'POST',

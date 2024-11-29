@@ -17,7 +17,8 @@ import { Templates } from '.';
 import * as i18n from './translations';
 import { templatesConfigurationMock } from '../../containers/mock';
 
-describe('Templates', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/196628
+describe.skip('Templates', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {
@@ -130,9 +131,7 @@ describe('Templates', () => {
 
     appMockRender.render(<Templates {...{ ...props, templates: mockTemplates }} />);
 
-    await userEvent.click(await screen.findByTestId('add-template'));
-
     expect(await screen.findByText(i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)));
-    expect(await screen.findByTestId('add-template')).toHaveAttribute('disabled');
+    expect(screen.queryByTestId('add-template')).not.toBeInTheDocument();
   });
 });

@@ -8,11 +8,21 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { getUiSettings } from './ui_settings';
 
 export class EsqlServerPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: { contentManagement: ContentManagementServerSetup }) {
     core.uiSettings.register(getUiSettings());
+
+    plugins.contentManagement.favorites.registerFavoriteType('esql_query', {
+      typeMetadataSchema: schema.object({
+        queryString: schema.string(),
+        createdAt: schema.string(),
+        status: schema.string(),
+      }),
+    });
     return {};
   }
 

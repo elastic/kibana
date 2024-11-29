@@ -9,9 +9,10 @@ import { FilterStateStore } from '@kbn/es-query';
 
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
 import { VIEW_SELECTION } from '../../../common/constants';
-import type { TimelineResult } from '../../../common/api/timeline';
 import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import type { TimelineResponse } from '../../../common/api/timeline';
 import {
+  type ColumnHeaderResult,
   RowRendererIdEnum,
   TimelineTypeEnum,
   TimelineStatusEnum,
@@ -1898,7 +1899,6 @@ export const mockTimelineModel: TimelineModel = {
   indexNames: [],
   isFavorite: false,
   isLive: false,
-  isLoading: false,
   isSaving: false,
   isSelectAllChecked: false,
   kqlMode: 'filter',
@@ -1986,9 +1986,11 @@ export const mockDataTableModel: DataTableModel = {
   },
 };
 
-export const mockGetOneTimelineResult: TimelineResult = {
+export const mockGetOneTimelineResult: TimelineResponse = {
   savedObjectId: 'ef579e40-jibber-jabber',
-  columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
+  columns: timelineDefaults.columns.filter(
+    (column) => column.id !== 'event.action'
+  ) as ColumnHeaderResult[],
   dateRange: { start: '2020-03-18T13:46:38.929Z', end: '2020-03-18T13:52:38.929Z' },
   description: 'This is a sample rule description',
   eventType: 'all',
@@ -2011,15 +2013,6 @@ export const mockGetOneTimelineResult: TimelineResult = {
   savedQueryId: null,
   sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
   version: '1',
-};
-
-export const mockTimelineResult = {
-  data: {
-    getOneTimeline: mockGetOneTimelineResult,
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
 };
 
 export const defaultTimelineProps: CreateTimelineProps = {
@@ -2049,7 +2042,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
       eventCategoryField: 'event.category',
       query: '',
       size: 100,
-      tiebreakerField: '',
       timestampField: '@timestamp',
     },
     eventIdToNoteIds: {},
@@ -2081,7 +2073,6 @@ export const defaultTimelineProps: CreateTimelineProps = {
     indexNames: [],
     isFavorite: false,
     isLive: false,
-    isLoading: false,
     isSaving: false,
     isSelectAllChecked: false,
     itemsPerPage: 25,

@@ -10,8 +10,8 @@ import { withSpan } from '@kbn/apm-utils';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { resolveRuleSo } from '../../data/rule';
-import { RuleAttributes } from '../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RawRule } from '../../types';
 
 interface ResolveRuleSavedObjectParams {
   ruleId: string;
@@ -20,7 +20,7 @@ interface ResolveRuleSavedObjectParams {
 export async function resolveRuleSavedObject(
   context: RulesClientContext,
   params: ResolveRuleSavedObjectParams
-): Promise<SavedObjectsResolveResponse<RuleAttributes>> {
+): Promise<SavedObjectsResolveResponse<RawRule>> {
   const { ruleId } = params;
 
   context.auditLogger?.log(

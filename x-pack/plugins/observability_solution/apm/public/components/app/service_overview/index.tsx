@@ -11,7 +11,6 @@ import { AnnotationsContextProvider } from '../../../context/annotations/annotat
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
-import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { isApmSignal, isLogsSignal, isLogsOnlySignal } from '../../../utils/get_signal_type';
@@ -21,6 +20,7 @@ import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -28,7 +28,7 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { isEntityCentricExperienceViewEnabled } = useEntityManagerEnablementContext();
+  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
   const { serviceName, serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
 
   const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
@@ -68,8 +68,7 @@ export function ServiceOverview() {
   const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
 
   // Shows APM overview when entity has APM signal or when Entity centric is not enabled or when entity has no signal
-  const showApmOverview =
-    isEntityCentricExperienceViewEnabled === false || hasApmSignal || !hasSignal;
+  const showApmOverview = isEntityCentricExperienceEnabled === false || hasApmSignal || !hasSignal;
 
   if (serviceEntitySummaryStatus === FETCH_STATUS.LOADING) {
     return (
@@ -98,7 +97,7 @@ export function ServiceOverview() {
                   <EuiFlexItem>
                     <ServiceTabEmptyState
                       id="serviceOverview"
-                      onDissmiss={() => setDismissedLogsOnlyEmptyState(true)}
+                      onDismiss={() => setDismissedLogsOnlyEmptyState(true)}
                     />
                   </EuiFlexItem>
                 )}

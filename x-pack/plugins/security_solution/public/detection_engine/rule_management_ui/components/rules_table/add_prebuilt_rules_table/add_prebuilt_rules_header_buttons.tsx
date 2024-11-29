@@ -16,7 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useBoolean } from 'react-use';
+import useBoolean from 'react-use/lib/useBoolean';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { useAddPrebuiltRulesTableContext } from './add_prebuilt_rules_table_context';
 import * as i18n from './translations';
@@ -28,6 +28,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
       loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,
+      isInstallingAllRules,
       hasRulesToInstall,
     },
     actions: { installAllRules, installSelectedRules },
@@ -38,7 +39,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRuleInstalling = loadingRules.length > 0;
+  const isRuleInstalling = loadingRules.length > 0 || isInstallingAllRules;
   const isRequestInProgress = isRuleInstalling || isRefetching || isUpgradingSecurityPackages;
 
   const [isOverflowPopoverOpen, setOverflowPopover] = useBoolean(false);

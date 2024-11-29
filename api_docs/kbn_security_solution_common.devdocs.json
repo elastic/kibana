@@ -277,9 +277,9 @@
           "\nWrapper component that is composed of a header section and a content section.\nThe header can display an icon, a title (that can be a link), and an optional content section on the right.\nThe content section can display a loading spinner, an error message, or any other content.\nThe component can be expanded or collapsed by clicking on the chevron icon on the left of the title."
         ],
         "signature": [
-          "{ ({ header: { title, link, iconType, headerContent }, content: { loading, error }, expand: { expandable, expandedOnFirstRender }, \"data-test-subj\": dataTestSubj, children, }: React.PropsWithChildren<React.PropsWithChildren<",
+          "{ ({ header: { title, link, iconType, headerContent }, content: { loading, error, paddingSize: contentPaddingSize }, expand: { expandable, expandedOnFirstRender }, \"data-test-subj\": dataTestSubj, children, }: React.PropsWithChildren<",
           "ExpandablePanelPanelProps",
-          ">>): JSX.Element; displayName: string | undefined; }"
+          ">): React.JSX.Element; displayName: string | undefined; }"
         ],
         "path": "x-pack/packages/security-solution/common/src/flyout/common/components/expandable_panel.tsx",
         "deprecated": false,
@@ -290,12 +290,12 @@
             "id": "def-public.ExpandablePanel.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  header: { title, link, iconType, headerContent },\n  content: { loading, error } = { loading: false, error: false },\n  expand: { expandable, expandedOnFirstRender } = {\n    expandable: false,\n    expandedOnFirstRender: false,\n  },\n  'data-test-subj': dataTestSubj,\n  children,\n}",
+            "label": "{\n  header: { title, link, iconType, headerContent },\n  content: { loading, error, paddingSize: contentPaddingSize } = {\n    loading: false,\n    error: false,\n    paddingSize: 'm',\n  },\n  expand: { expandable, expandedOnFirstRender } = {\n    expandable: false,\n    expandedOnFirstRender: false,\n  },\n  'data-test-subj': dataTestSubj,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "ExpandablePanelPanelProps",
-              ">>"
+              ">"
             ],
             "path": "x-pack/packages/security-solution/common/src/flyout/common/components/expandable_panel.tsx",
             "deprecated": false,
@@ -326,14 +326,14 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.FlyoutBody.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,7 +347,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -364,7 +364,7 @@
           "\nUse this when you need to show an error state in the flyout"
         ],
         "signature": [
-          "{ (): JSX.Element; displayName: string | undefined; }"
+          "{ (): React.JSX.Element; displayName: string | undefined; }"
         ],
         "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_error.tsx",
         "deprecated": false,
@@ -393,14 +393,14 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.FlyoutFooter.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -414,7 +414,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -441,14 +441,14 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.FlyoutHeader.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -462,7 +462,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -489,14 +489,14 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.FlyoutHeaderTabs.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -510,7 +510,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -527,9 +527,9 @@
           "\nUse this when you need to show a loading state in the flyout"
         ],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubj, }: React.PropsWithChildren<",
+          "({ \"data-test-subj\": dataTestSubj, }: ",
           "FlyoutLoadingProps",
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_loading.tsx",
         "deprecated": false,
@@ -538,14 +538,12 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.FlyoutLoading.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  'data-test-subj': dataTestSubj = FLYOUT_LOADING_TEST_ID,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
-              "FlyoutLoadingProps",
-              ">"
+              "FlyoutLoadingProps"
             ],
             "path": "x-pack/packages/security-solution/common/src/flyout/common/components/flyout_loading.tsx",
             "deprecated": false,
@@ -578,14 +576,14 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.FlyoutNavigation.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -599,7 +597,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -628,14 +626,14 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.FlyoutTitle.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -649,7 +647,7 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -704,7 +702,7 @@
         "label": "HostDetailsButton",
         "description": [],
         "signature": [
-          "({ children, onClick, title, }: React.PropsWithChildren<HostDetailsButtonProps>) => JSX.Element"
+          "({ children, onClick, title, }: HostDetailsButtonProps) => React.JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/common/src/cells/renderers/host/button.tsx",
         "deprecated": false,
@@ -713,12 +711,12 @@
           {
             "parentPluginId": "@kbn/security-solution-common",
             "id": "def-public.HostDetailsButton.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{\n  children,\n  onClick,\n  title,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<HostDetailsButtonProps>"
+              "HostDetailsButtonProps"
             ],
             "path": "x-pack/packages/security-solution/common/src/cells/renderers/host/button.tsx",
             "deprecated": false,
@@ -739,7 +737,7 @@
         "signature": [
           "(props: ",
           "HostRightPanelParamProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/common/src/flyout/panels/host/right/index.tsx",
         "deprecated": false,

@@ -71,7 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('edits tsvb by-value embeddable', async () => {
         const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {
@@ -93,7 +92,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('edits vega by-value embeddable', async () => {
         const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await visualize.saveVisualizationAndReturn();
         await retry.try(async () => {

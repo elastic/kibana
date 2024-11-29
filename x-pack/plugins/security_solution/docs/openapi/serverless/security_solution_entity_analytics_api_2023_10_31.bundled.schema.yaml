@@ -267,6 +267,42 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
+  /api/entity_store/enable:
+    post:
+      operationId: InitEntityStore
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
+                filter:
+                  type: string
+                indexPattern:
+                  $ref: '#/components/schemas/IndexPattern'
+        description: Schema for the entity store initialization
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/EngineDescriptor'
+                    type: array
+                  succeeded:
+                    type: boolean
+          description: Successful response
+      summary: Initialize the Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -351,6 +387,10 @@ paths:
             schema:
               type: object
               properties:
+                fieldHistoryLength:
+                  default: 10
+                  description: The number of historical values to keep for each field.
+                  type: integer
                 filter:
                   type: string
                 indexPattern:
@@ -448,6 +488,54 @@ paths:
       summary: Stop an Entity Engine
       tags:
         - Security Entity Analytics API
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      operationId: ApplyEntityEngineDataviewIndices
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Successful response
+        '207':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    items:
+                      type: string
+                    type: array
+                  result:
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                    type: array
+                  success:
+                    type: boolean
+          description: Partial successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+          description: Error response
+      summary: Apply DataView indices to all installed engines
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -524,6 +612,57 @@ paths:
       summary: List Entity Store Entities
       tags:
         - Security Entity Analytics API
+  /api/entity_store/status:
+    get:
+      operationId: GetEntityStoreStatus
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  engines:
+                    items:
+                      $ref: '#/components/schemas/EngineDescriptor'
+                    type: array
+                  status:
+                    $ref: '#/components/schemas/StoreStatus'
+          description: Successful response
+      summary: Get the status of the Entity Store
+      tags:
+        - Security Entity Analytics API
+  /api/risk_score/engine/dangerously_delete_data:
+    delete:
+      description: >-
+        Cleaning up the the Risk Engine by removing the indices, mapping and
+        transforms
+      operationId: CleanUpRiskEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cleanup_successful:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
+          description: Unexpected error
+      summary: Cleanup the Risk Engine
+      tags:
+        - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       description: >-
@@ -592,6 +731,7 @@ components:
     AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - $ref: '#/components/schemas/AssetCriticalityRecordEcsParts'
         - type: object
           properties:
             '@timestamp':
@@ -601,6 +741,46 @@ components:
               type: string
           required:
             - '@timestamp'
+    AssetCriticalityRecordEcsParts:
+      type: object
+      properties:
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - asset
+        host:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+        user:
+          type: object
+          properties:
+            asset:
+              type: object
+              properties:
+                criticality:
+                  $ref: '#/components/schemas/AssetCriticalityLevel'
+              required:
+                - criticality
+            name:
+              type: string
+          required:
+            - name
+      required:
+        - asset
     AssetCriticalityRecordIdParts:
       type: object
       properties:
@@ -614,6 +794,27 @@ components:
       required:
         - id_value
         - id_field
+    CleanUpRiskEngineErrorResponse:
+      type: object
+      properties:
+        cleanup_successful:
+          example: false
+          type: boolean
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+      required:
+        - cleanup_successful
+        - errors
     CreateAssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
@@ -623,9 +824,27 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
+    EngineDataviewUpdateResult:
+      type: object
+      properties:
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              items:
+                type: string
+              type: array
+        type:
+          type: string
+      required:
+        - type
     EngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+        fieldHistoryLength:
+          type: integer
         filter:
           type: string
         indexPattern:
@@ -634,11 +853,18 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         type:
           $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - indexPattern
+        - status
+        - fieldHistoryLength
     EngineStatus:
       enum:
         - installing
         - started
         - stopped
+        - updating
+        - error
       type: string
     Entity:
       oneOf:
@@ -741,6 +967,9 @@ components:
     HostEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -751,42 +980,13 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
-              type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
-              items:
-                type: string
-              type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
+            name:
               type: string
             source:
               type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
+            - source
         host:
           type: object
           properties:
@@ -824,6 +1024,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - host
+        - entity
     IdField:
       enum:
         - host.name
@@ -898,6 +1102,14 @@ components:
         - index
         - description
         - category
+    StoreStatus:
+      enum:
+        - not_installed
+        - installing
+        - running
+        - stopped
+        - error
+      type: string
     TaskManagerUnavailableResponse:
       description: Task manager is unavailable
       type: object
@@ -913,6 +1125,9 @@ components:
     UserEntity:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
         asset:
           type: object
           properties:
@@ -923,42 +1138,12 @@ components:
         entity:
           type: object
           properties:
-            definitionId:
-              type: string
-            definitionVersion:
-              type: string
-            displayName:
-              type: string
-            firstSeenTimestamp:
-              format: date-time
-              type: string
-            id:
-              type: string
-            identityFields:
-              items:
-                type: string
-              type: array
-            lastSeenTimestamp:
-              format: date-time
-              type: string
-            schemaVersion:
+            name:
               type: string
             source:
               type: string
-            type:
-              enum:
-                - node
-              type: string
           required:
-            - lastSeenTimestamp
-            - schemaVersion
-            - definitionVersion
-            - displayName
-            - identityFields
-            - id
-            - type
-            - firstSeenTimestamp
-            - definitionId
+            - name
             - source
         user:
           type: object
@@ -993,6 +1178,10 @@ components:
               type: array
           required:
             - name
+      required:
+        - '@timestamp'
+        - user
+        - entity
   securitySchemes:
     BasicAuth:
       scheme: basic
@@ -1002,3 +1191,4 @@ security:
 tags:
   - description: ''
     name: Security Entity Analytics API
+    x-displayName: Security entity analytics

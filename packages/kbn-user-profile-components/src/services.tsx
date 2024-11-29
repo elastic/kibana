@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren, useContext } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext } from 'react';
 
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { NotificationsStart, ToastOptions } from '@kbn/core-notifications-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type { UserProfileAPIClient } from './types';
 

@@ -2,13 +2,6 @@ openapi: 3.0.0
 info:
   title: Elastic Security - Timeline - Favorite API
   version: '2023-10-31'
-servers:
-  - url: 'http://{kibana_host}:{port}'
-    variables:
-      kibana_host:
-        default: localhost
-      port:
-        default: '5601'
 paths:
   /api/timeline/_favorite:
     patch:
@@ -46,15 +39,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [data]
-                properties:
-                  data:
-                    type: object
-                    required: [persistFavorite]
-                    properties:
-                      persistFavorite:
-                        $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
+                $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
+
         '403':
           description: Indicates the user does not have the required permissions to persist the favorite status.
           content:

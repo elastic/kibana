@@ -108,6 +108,7 @@ describe('LensVisService attributes', () => {
                         "sourceField": "timestamp",
                       },
                     },
+                    "indexPatternId": "index-pattern-with-timefield-id",
                   },
                 },
               },
@@ -284,6 +285,7 @@ describe('LensVisService attributes', () => {
                         "sourceField": "timestamp",
                       },
                     },
+                    "indexPatternId": "index-pattern-with-timefield-id",
                   },
                 },
               },
@@ -434,6 +436,7 @@ describe('LensVisService attributes', () => {
                         "sourceField": "timestamp",
                       },
                     },
+                    "indexPatternId": "index-pattern-with-timefield-id",
                   },
                 },
               },
@@ -674,7 +677,8 @@ describe('LensVisService attributes', () => {
               },
             ],
             "query": Object {
-              "esql": "from logstash-* | limit 10",
+              "esql": "from logstash-* | limit 10
+      | EVAL timestamp=DATE_TRUNC(10 minute, timestamp) | stats results = count(*) by timestamp | rename timestamp as \`timestamp every 10 minute\`",
             },
             "visualization": Object {
               "gridConfig": Object {
@@ -706,7 +710,7 @@ describe('LensVisService attributes', () => {
           "timeField": "timestamp",
           "timeInterval": undefined,
         },
-        "suggestionType": "lensSuggestion",
+        "suggestionType": "histogramForESQL",
       }
     `);
   });
@@ -764,7 +768,7 @@ describe('LensVisService attributes', () => {
       columns: [],
       isPlainRecord: true,
       allSuggestions: [], // none available
-      hasHistogramSuggestionForESQL: true,
+      isTransformationalESQL: false,
     });
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });

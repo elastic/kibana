@@ -136,3 +136,14 @@ export const retrieveMetadataColumns = (esql: string): string[] => {
   const metadataOptions = options.find(({ name }) => name === 'metadata');
   return metadataOptions?.args.map((column) => (column as ESQLColumn).name) ?? [];
 };
+
+export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const columns: ESQLColumn[] = [];
+
+  walk(root, {
+    visitColumn: (node) => columns.push(node),
+  });
+
+  return columns.map((column) => column.name);
+};

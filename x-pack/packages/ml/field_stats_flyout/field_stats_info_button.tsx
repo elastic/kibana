@@ -10,20 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React, { type FC } from 'react';
 import { FieldIcon } from '@kbn/react-field';
 import { type Field } from '@kbn/ml-anomaly-utils';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
+import { useFieldStatsFlyoutThemeVars } from './use_field_stats_flyout_context';
 
 import { getKbnFieldIconType } from './get_kbn_field_icon_types';
-
-function useThemeVars() {
-  const { theme } = useKibana().services;
-
-  if (!theme) {
-    throw new TypeError('theme service not available in kibana-react context.');
-  }
-
-  return useCurrentEuiThemeVars(theme);
-}
 
 /**
  * Represents a field used for statistics.
@@ -81,13 +71,16 @@ export interface FieldStatsInfoButtonProps {
  */
 export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
   const { field, label, onButtonClick, disabled, isEmpty, hideTrigger } = props;
-  const themeVars = useThemeVars();
+  const theme = useFieldStatsFlyoutThemeVars();
+  const themeVars = useCurrentEuiThemeVars(theme);
+
   const emptyFieldMessage = isEmpty
     ? ' ' +
       i18n.translate('xpack.ml.newJob.wizard.fieldContextPopover.emptyFieldInSampleDocsMsg', {
         defaultMessage: '(no data found in 1000 sample records)',
       })
     : '';
+
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -135,14 +128,15 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
         grow={false}
         css={{
           paddingRight: themeVars.euiTheme.euiSizeXS,
-          paddingBottom: themeVars.euiTheme.euiSizeXS,
         }}
       >
-        <FieldIcon
-          color={isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined}
-          type={getKbnFieldIconType(field.type)}
-          fill="none"
-        />
+        {!hideTrigger ? (
+          <FieldIcon
+            color={isEmpty ? themeVars.euiTheme.euiColorDisabled : undefined}
+            type={getKbnFieldIconType(field.type)}
+            fill="none"
+          />
+        ) : null}
       </EuiFlexItem>
       <EuiText
         color={isEmpty ? 'subdued' : undefined}
@@ -150,7 +144,6 @@ export const FieldStatsInfoButton: FC<FieldStatsInfoButtonProps> = (props) => {
         aria-label={label}
         title={label}
         className="euiComboBoxOption__content"
-        css={{ paddingBottom: themeVars.euiTheme.euiSizeXS }}
       >
         {label}
       </EuiText>

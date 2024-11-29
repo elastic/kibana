@@ -74,7 +74,7 @@ export const PackagePolicyInputsSchema = {
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema)),
 };
 
-const ExperimentalDataStreamFeatures = schema.arrayOf(
+export const ExperimentalDataStreamFeaturesSchema = schema.arrayOf(
   schema.object({
     data_stream: schema.string(),
     features: schema.object({
@@ -98,7 +98,7 @@ export const PackagePolicyPackageSchema = schema.object({
       description: 'Package version',
     },
   }),
-  experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+  experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeaturesSchema),
   requires_root: schema.maybe(schema.boolean()),
 });
 
@@ -171,6 +171,16 @@ export const PackagePolicyBaseSchema = {
         }
       ),
     ])
+  ),
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
+      })
+    )
   ),
 };
 
@@ -286,6 +296,16 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   vars: schema.maybe(SimplifiedVarsSchema),
   inputs: SimplifiedPackagePolicyInputsSchema,
+  supports_agentless: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
+      })
+    )
+  ),
 });
 
 export const SimplifiedPackagePolicyPreconfiguredSchema = SimplifiedPackagePolicyBaseSchema.extends(

@@ -8,18 +8,17 @@
 import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import { Loading } from '../../loading';
-import { useExpressionsService } from '../../../services';
+import { getCanvasExpressionService } from '../../../services/canvas_expressions_service';
 import { DatasourcePreview as Component } from './datasource_preview';
 
 export const DatasourcePreview = (props) => {
   const [datatable, setDatatable] = useState();
-  const expressionsService = useExpressionsService();
 
   useEffect(() => {
-    expressionsService
+    getCanvasExpressionService()
       .interpretAst({ type: 'expression', chain: [props.function] }, {})
       .then(setDatatable);
-  }, [expressionsService, props.function, setDatatable]);
+  }, [props.function, setDatatable]);
 
   if (!datatable) {
     return <Loading {...props} />;

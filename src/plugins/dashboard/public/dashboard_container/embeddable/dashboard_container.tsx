@@ -11,7 +11,6 @@ import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
 import {
   BehaviorSubject,
   Subject,
@@ -26,7 +25,7 @@ import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -70,12 +69,8 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DASHBOARD_CONTAINER_TYPE, DashboardApi, DashboardLocatorParams } from '../..';
-import {
-  DashboardAttributes,
-  DashboardContainerInput,
-  DashboardPanelMap,
-  DashboardPanelState,
-} from '../../../common';
+import type { DashboardAttributes } from '../../../server/content_management';
+import { DashboardContainerInput, DashboardPanelMap, DashboardPanelState } from '../../../common';
 import {
   getReferencesForControls,
   getReferencesForPanelId,
@@ -104,12 +99,7 @@ import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_plac
 import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import {
-  DashboardPublicState,
-  DashboardReduxState,
-  DashboardStateFromSettingsFlyout,
-  UnsavedPanelState,
-} from '../types';
+import { DashboardReduxState, DashboardStateFromSettingsFlyout, UnsavedPanelState } from '../types';
 import { addFromLibrary, addOrUpdateEmbeddable, runInteractiveSave, runQuickSave } from './api';
 import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import {
@@ -118,10 +108,11 @@ import {
 } from './create/controls/dashboard_control_group_integration';
 import { initializeDashboard } from './create/create_dashboard';
 import {
-  DashboardCreationOptions,
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
+import { InitialComponentState, getDashboardApi } from '../../dashboard_api/get_dashboard_api';
+import type { DashboardCreationOptions } from '../..';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -163,6 +154,22 @@ export class DashboardContainer
   public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
   public anyReducerRun: Subject<null> = new Subject();
+  public setAnimatePanelTransforms: (animate: boolean) => void;
+  public setManaged: (managed: boolean) => void;
+  public setHasUnsavedChanges: (hasUnsavedChanges: boolean) => void;
+  public openOverlay: (ref: OverlayRef, options?: { focusedPanelId?: string }) => void;
+  public clearOverlays: () => void;
+  public highlightPanel: (panelRef: HTMLDivElement) => void;
+  public setScrollToPanelId: (id: string | undefined) => void;
+  public setFullScreenMode: (fullScreenMode: boolean) => void;
+  public setExpandedPanelId: (newId?: string) => void;
+  public setHighlightPanelId: (highlightPanelId: string | undefined) => void;
+  public setLastSavedInput: (lastSavedInput: DashboardContainerInput) => void;
+  public lastSavedInput$: PublishingSubject<DashboardContainerInput>;
+  public setSavedObjectId: (id: string | undefined) => void;
+  public expandPanel: (panelId: string) => void;
+  public scrollToPanel: (panelRef: HTMLDivElement) => Promise<void>;
+  public scrollToTop: () => void;
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
@@ -182,7 +189,6 @@ export class DashboardContainer
   public readonly executionContext: KibanaExecutionContext;
 
   private domNode?: HTMLElement;
-  private overlayRef?: OverlayRef;
 
   // performance monitoring
   public lastLoadStartTime?: number;
@@ -190,7 +196,6 @@ export class DashboardContainer
   public creationEndTime?: number;
   public firstLoad: boolean = true;
   private hadContentfulRender = false;
-  private scrollPosition?: number;
 
   // setup
   public untilContainerInitialized: () => Promise<void>;
@@ -224,7 +229,7 @@ export class DashboardContainer
     dashboardCreationStartTime?: number,
     parent?: Container,
     creationOptions?: DashboardCreationOptions,
-    initialComponentState?: DashboardPublicState
+    initialComponentState?: InitialComponentState
   ) {
     const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
     async function untilContainerInitialized(): Promise<void> {
@@ -284,7 +289,6 @@ export class DashboardContainer
       embeddable: this,
       reducers: dashboardContainerReducers,
       additionalMiddleware: [diffingMiddleware],
-      initialComponentState,
     });
     this.onStateChange = reduxTools.onStateChange;
     this.cleanupStateTools = reduxTools.cleanup;
@@ -298,67 +302,55 @@ export class DashboardContainer
       'id'
     ) as BehaviorSubject<string>;
 
-    this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
-    this.expandedPanelId = new BehaviorSubject(this.getExpandedPanelId());
-    this.focusedPanelId$ = new BehaviorSubject(this.getState().componentState.focusedPanelId);
-    this.managed$ = new BehaviorSubject(this.getState().componentState.managed);
-    this.fullScreenMode$ = new BehaviorSubject(this.getState().componentState.fullScreenMode);
-    this.hasRunMigrations$ = new BehaviorSubject(
-      this.getState().componentState.hasRunClientsideMigrations
+    const dashboardApi = getDashboardApi(
+      initialComponentState
+        ? initialComponentState
+        : {
+            anyMigrationRun: false,
+            isEmbeddedExternally: false,
+            lastSavedInput: initialInput,
+            lastSavedId: undefined,
+            fullScreenMode: false,
+            managed: false,
+          },
+      (id: string) => this.untilEmbeddableLoaded(id)
     );
-    this.hasUnsavedChanges$ = new BehaviorSubject(this.getState().componentState.hasUnsavedChanges);
-    this.hasOverlays$ = new BehaviorSubject(this.getState().componentState.hasOverlays);
+    this.animatePanelTransforms$ = dashboardApi.animatePanelTransforms$;
+    this.fullScreenMode$ = dashboardApi.fullScreenMode$;
+    this.hasUnsavedChanges$ = dashboardApi.hasUnsavedChanges$;
+    this.isEmbeddedExternally = dashboardApi.isEmbeddedExternally;
+    this.managed$ = dashboardApi.managed$;
+    this.setAnimatePanelTransforms = dashboardApi.setAnimatePanelTransforms;
+    this.setFullScreenMode = dashboardApi.setFullScreenMode;
+    this.setHasUnsavedChanges = dashboardApi.setHasUnsavedChanges;
+    this.setManaged = dashboardApi.setManaged;
+    this.expandedPanelId = dashboardApi.expandedPanelId;
+    this.focusedPanelId$ = dashboardApi.focusedPanelId$;
+    this.highlightPanelId$ = dashboardApi.highlightPanelId$;
+    this.highlightPanel = dashboardApi.highlightPanel;
+    this.setExpandedPanelId = dashboardApi.setExpandedPanelId;
+    this.setHighlightPanelId = dashboardApi.setHighlightPanelId;
+    this.scrollToPanelId$ = dashboardApi.scrollToPanelId$;
+    this.setScrollToPanelId = dashboardApi.setScrollToPanelId;
+    this.clearOverlays = dashboardApi.clearOverlays;
+    this.hasOverlays$ = dashboardApi.hasOverlays$;
+    this.openOverlay = dashboardApi.openOverlay;
+    this.hasRunMigrations$ = dashboardApi.hasRunMigrations$;
+    this.setLastSavedInput = dashboardApi.setLastSavedInput;
+    this.lastSavedInput$ = dashboardApi.lastSavedInput$;
+    this.savedObjectId = dashboardApi.savedObjectId;
+    this.setSavedObjectId = dashboardApi.setSavedObjectId;
+    this.expandPanel = dashboardApi.expandPanel;
+    this.scrollToPanel = dashboardApi.scrollToPanel;
+    this.scrollToTop = dashboardApi.scrollToTop;
+
     this.useMargins$ = new BehaviorSubject(this.getState().explicitInput.useMargins);
-    this.scrollToPanelId$ = new BehaviorSubject(this.getState().componentState.scrollToPanelId);
-    this.highlightPanelId$ = new BehaviorSubject(this.getState().componentState.highlightPanelId);
-    this.animatePanelTransforms$ = new BehaviorSubject(
-      this.getState().componentState.animatePanelTransforms
-    );
     this.panels$ = new BehaviorSubject(this.getState().explicitInput.panels);
-    this.embeddedExternally$ = new BehaviorSubject(
-      this.getState().componentState.isEmbeddedExternally
-    );
     this.publishingSubscription.add(
       this.onStateChange(() => {
         const state = this.getState();
-        if (this.savedObjectId.value !== this.getDashboardSavedObjectId()) {
-          this.savedObjectId.next(this.getDashboardSavedObjectId());
-        }
-        if (this.expandedPanelId.value !== this.getExpandedPanelId()) {
-          this.expandedPanelId.next(this.getExpandedPanelId());
-        }
-        if (this.focusedPanelId$.value !== state.componentState.focusedPanelId) {
-          this.focusedPanelId$.next(state.componentState.focusedPanelId);
-        }
-        if (this.managed$.value !== state.componentState.managed) {
-          this.managed$.next(state.componentState.managed);
-        }
-        if (this.fullScreenMode$.value !== state.componentState.fullScreenMode) {
-          this.fullScreenMode$.next(state.componentState.fullScreenMode);
-        }
-        if (this.hasRunMigrations$.value !== state.componentState.hasRunClientsideMigrations) {
-          this.hasRunMigrations$.next(state.componentState.hasRunClientsideMigrations);
-        }
-        if (this.hasUnsavedChanges$.value !== state.componentState.hasUnsavedChanges) {
-          this.hasUnsavedChanges$.next(state.componentState.hasUnsavedChanges);
-        }
-        if (this.hasOverlays$.value !== state.componentState.hasOverlays) {
-          this.hasOverlays$.next(state.componentState.hasOverlays);
-        }
         if (this.useMargins$.value !== state.explicitInput.useMargins) {
           this.useMargins$.next(state.explicitInput.useMargins);
-        }
-        if (this.scrollToPanelId$.value !== state.componentState.scrollToPanelId) {
-          this.scrollToPanelId$.next(state.componentState.scrollToPanelId);
-        }
-        if (this.highlightPanelId$.value !== state.componentState.highlightPanelId) {
-          this.highlightPanelId$.next(state.componentState.highlightPanelId);
-        }
-        if (this.animatePanelTransforms$.value !== state.componentState.animatePanelTransforms) {
-          this.animatePanelTransforms$.next(state.componentState.animatePanelTransforms);
-        }
-        if (this.embeddedExternally$.value !== state.componentState.isEmbeddedExternally) {
-          this.embeddedExternally$.next(state.componentState.isEmbeddedExternally);
         }
         if (this.panels$.value !== state.explicitInput.panels) {
           this.panels$.next(state.explicitInput.panels);
@@ -438,16 +430,12 @@ export class DashboardContainer
 
   public getAppContext() {
     const embeddableAppContext = this.creationOptions?.getEmbeddableAppContext?.(
-      this.getDashboardSavedObjectId()
+      this.savedObjectId.value
     );
     return {
       ...embeddableAppContext,
       currentAppId: embeddableAppContext?.currentAppId ?? DASHBOARD_APP_ID,
     };
-  }
-
-  public getDashboardSavedObjectId() {
-    return this.getState().componentState.lastSavedId;
   }
 
   protected createNewPanelState<
@@ -482,7 +470,7 @@ export class DashboardContainer
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
           <DashboardContext.Provider value={this as DashboardApi}>
-            <DashboardViewport />
+            <DashboardViewport dashboardContainer={this.domNode} />
           </DashboardContext.Provider>
         </ExitFullScreenButtonKibanaProvider>
       </KibanaRenderContextProvider>,
@@ -493,7 +481,7 @@ export class DashboardContainer
   public updateInput(changes: Partial<DashboardContainerInput>): void {
     // block the Dashboard from entering edit mode if this Dashboard is managed.
     if (
-      (this.getState().componentState.managed || !this.showWriteControls) &&
+      (this.managed$.value || !this.showWriteControls) &&
       changes.viewMode?.toLowerCase() === ViewMode.EDIT?.toLowerCase()
     ) {
       const { viewMode, ...rest } = changes;
@@ -570,7 +558,7 @@ export class DashboardContainer
     duplicateDashboardPanel.bind(this)(id);
   }
 
-  public canRemovePanels = () => !this.getExpandedPanelId();
+  public canRemovePanels = () => this.expandedPanelId.value === undefined;
 
   public getTypeDisplayName = () => dashboardTypeDisplayName;
   public getTypeDisplayNameLowerCase = () => dashboardTypeDisplayLowercase;
@@ -578,17 +566,17 @@ export class DashboardContainer
   public savedObjectId: BehaviorSubject<string | undefined>;
   public expandedPanelId: BehaviorSubject<string | undefined>;
   public focusedPanelId$: BehaviorSubject<string | undefined>;
-  public managed$: BehaviorSubject<boolean | undefined>;
-  public fullScreenMode$: BehaviorSubject<boolean | undefined>;
-  public hasRunMigrations$: BehaviorSubject<boolean | undefined>;
-  public hasUnsavedChanges$: BehaviorSubject<boolean | undefined>;
-  public hasOverlays$: BehaviorSubject<boolean | undefined>;
+  public managed$: BehaviorSubject<boolean>;
+  public fullScreenMode$: BehaviorSubject<boolean>;
+  public hasRunMigrations$: BehaviorSubject<boolean>;
+  public hasUnsavedChanges$: BehaviorSubject<boolean>;
+  public hasOverlays$: BehaviorSubject<boolean>;
   public useMargins$: BehaviorSubject<boolean>;
   public scrollToPanelId$: BehaviorSubject<string | undefined>;
   public highlightPanelId$: BehaviorSubject<string | undefined>;
-  public animatePanelTransforms$: BehaviorSubject<boolean | undefined>;
+  public animatePanelTransforms$: BehaviorSubject<boolean>;
   public panels$: BehaviorSubject<DashboardPanelMap>;
-  public embeddedExternally$: BehaviorSubject<boolean | undefined>;
+  public isEmbeddedExternally: boolean;
   public uuid$: BehaviorSubject<string>;
 
   public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
@@ -598,7 +586,7 @@ export class DashboardContainer
       panelType,
       true
     );
-    if (this.getExpandedPanelId() !== undefined) {
+    if (this.expandedPanelId.value !== undefined) {
       this.setExpandedPanelId(newId);
     }
     this.setHighlightPanelId(newId);
@@ -720,21 +708,6 @@ export class DashboardContainer
     return panel;
   };
 
-  public expandPanel = (panelId: string) => {
-    const isPanelExpanded = Boolean(this.getExpandedPanelId());
-
-    if (isPanelExpanded) {
-      this.setExpandedPanelId(undefined);
-      this.setScrollToPanelId(panelId);
-      return;
-    }
-
-    this.setExpandedPanelId(panelId);
-    if (window.scrollY > 0) {
-      this.scrollPosition = window.scrollY;
-    }
-  };
-
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh(refreshControlGroup: boolean = true) {
@@ -746,13 +719,12 @@ export class DashboardContainer
   }
 
   public async asyncResetToLastSavedState() {
-    this.dispatch.resetToLastSavedInput({});
+    this.dispatch.resetToLastSavedInput(this.lastSavedInput$.value);
     const {
       explicitInput: { timeRange, refreshInterval },
-      componentState: {
-        lastSavedInput: { timeRestore: lastSavedTimeRestore },
-      },
     } = this.getState();
+
+    const { timeRestore: lastSavedTimeRestore } = this.lastSavedInput$.value;
 
     if (this.controlGroupApi$.value) {
       await this.controlGroupApi$.value.asyncResetUnsavedChanges();
@@ -802,15 +774,11 @@ export class DashboardContainer
     this.searchSessionId = searchSessionId;
     this.searchSessionId$.next(searchSessionId);
 
-    batch(() => {
-      this.dispatch.setLastSavedInput(
-        omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
-      );
-      this.dispatch.setManaged(loadDashboardReturn?.managed);
-      this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
-      this.dispatch.setLastSavedId(newSavedObjectId);
-      this.setExpandedPanelId(undefined);
-    });
+    this.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
+    this.setManaged(loadDashboardReturn?.managed ?? false);
+    this.setExpandedPanelId(undefined);
+    this.setLastSavedInput(omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput'));
+    this.setSavedObjectId(newSavedObjectId);
     this.firstLoad = true;
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
@@ -824,10 +792,6 @@ export class DashboardContainer
     (this.dataViews as BehaviorSubject<DataView[] | undefined>).next(newDataViews);
   };
 
-  public getExpandedPanelId = () => {
-    return this.getState().componentState.expandedPanelId;
-  };
-
   public getPanelsState = () => {
     return this.getState().explicitInput.panels;
   };
@@ -837,7 +801,6 @@ export class DashboardContainer
     return {
       description: state.explicitInput.description,
       hidePanelTitles: state.explicitInput.hidePanelTitles,
-      lastSavedId: state.componentState.lastSavedId,
       syncColors: state.explicitInput.syncColors,
       syncCursor: state.explicitInput.syncCursor,
       syncTooltips: state.explicitInput.syncTooltips,
@@ -852,16 +815,12 @@ export class DashboardContainer
     this.dispatch.setStateFromSettingsFlyout(settings);
   };
 
-  public setExpandedPanelId = (newId?: string) => {
-    this.dispatch.setExpandedPanelId(newId);
-  };
-
   public setViewMode = (viewMode: ViewMode) => {
+    // block the Dashboard from entering edit mode if this Dashboard is managed.
+    if (this.managed$.value && viewMode?.toLowerCase() === ViewMode.EDIT) {
+      return;
+    }
     this.dispatch.setViewMode(viewMode);
-  };
-
-  public setFullScreenMode = (fullScreenMode: boolean) => {
-    this.dispatch.setFullScreenMode(fullScreenMode);
   };
 
   public setQuery = (query?: Query | undefined) => this.updateInput({ query });
@@ -870,21 +829,6 @@ export class DashboardContainer
 
   public setTags = (tags: string[]) => {
     this.updateInput({ tags });
-  };
-
-  public openOverlay = (ref: OverlayRef, options?: { focusedPanelId?: string }) => {
-    this.clearOverlays();
-    this.dispatch.setHasOverlays(true);
-    this.overlayRef = ref;
-    if (options?.focusedPanelId) {
-      this.setFocusedPanelId(options?.focusedPanelId);
-    }
-  };
-
-  public clearOverlays = () => {
-    this.dispatch.setHasOverlays(false);
-    this.dispatch.setFocusedPanelId(undefined);
-    this.overlayRef?.close();
   };
 
   public getPanelCount = () => {
@@ -909,59 +853,6 @@ export class DashboardContainer
     return titles;
   }
 
-  public setScrollToPanelId = (id: string | undefined) => {
-    this.dispatch.setScrollToPanelId(id);
-  };
-
-  public scrollToPanel = async (panelRef: HTMLDivElement) => {
-    const id = this.getState().componentState.scrollToPanelId;
-    if (!id) return;
-
-    this.untilEmbeddableLoaded(id).then(() => {
-      this.setScrollToPanelId(undefined);
-      if (this.scrollPosition) {
-        panelRef.ontransitionend = () => {
-          // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
-          // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
-          window.scrollTo({ top: this.scrollPosition });
-          this.scrollPosition = undefined;
-          panelRef.ontransitionend = null;
-        };
-        return;
-      }
-
-      panelRef.scrollIntoView({ block: 'center' });
-    });
-  };
-
-  public scrollToTop = () => {
-    window.scroll(0, 0);
-  };
-
-  public setHighlightPanelId = (id: string | undefined) => {
-    this.dispatch.setHighlightPanelId(id);
-  };
-
-  public highlightPanel = (panelRef: HTMLDivElement) => {
-    const id = this.getState().componentState.highlightPanelId;
-
-    if (id && panelRef) {
-      this.untilEmbeddableLoaded(id).then(() => {
-        panelRef.classList.add('dshDashboardGrid__item--highlighted');
-        // Removes the class after the highlight animation finishes
-        setTimeout(() => {
-          panelRef.classList.remove('dshDashboardGrid__item--highlighted');
-        }, 5000);
-      });
-    }
-    this.setHighlightPanelId(undefined);
-  };
-
-  public setFocusedPanelId = (id: string | undefined) => {
-    this.dispatch.setFocusedPanelId(id);
-    this.setScrollToPanelId(id);
-  };
-
   public setPanels = (panels: DashboardPanelMap) => {
     this.dispatch.setPanels(panels);
   };
@@ -985,22 +876,28 @@ export class DashboardContainer
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
     return {
       rawState,
-      references,
+      // references from old installations may not be prefixed with panel id
+      // fall back to passing all references in these cases to preserve backwards compatability
+      references: references.length > 0 ? references : this.savedObjectReferences,
     };
   };
 
   public getSerializedStateForControlGroup = () => {
     return {
       rawState: this.controlGroupInput
-        ? (this.controlGroupInput as ControlGroupSerializedState)
-        : ({
-            controlStyle: 'oneLine',
+        ? this.controlGroupInput
+        : {
+            labelPosition: 'oneLine',
             chainingSystem: 'HIERARCHICAL',
-            showApplySelections: false,
-            panelsJSON: '{}',
-            ignoreParentSettingsJSON:
-              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as ControlGroupSerializedState),
+            autoApplySelections: true,
+            controls: [],
+            ignoreParentSettings: {
+              ignoreFilters: false,
+              ignoreQuery: false,
+              ignoreTimerange: false,
+              ignoreValidations: false,
+            },
+          },
       references: getReferencesForControls(this.savedObjectReferences),
     };
   };

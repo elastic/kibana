@@ -249,6 +249,38 @@ describe('licensing plugin', () => {
       });
     });
 
+    describe('#getLicense', () => {
+      it('awaits for the license and returns it', async () => {
+        plugin = new LicensingPlugin(
+          coreMock.createPluginInitializerContext({
+            // disable polling mechanism
+            api_polling_frequency: moment.duration(50000),
+            license_cache_duration: moment.duration(1000),
+          })
+        );
+        const esClient = createEsClient({
+          license: buildRawLicense(),
+          features: {},
+        });
+
+        const coreSetup = createCoreSetupWith(esClient);
+        plugin.setup(coreSetup);
+        const { license$, getLicense } = plugin.start();
+
+        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(0);
+
+        const firstLicense = await getLicense();
+        let fromObservable;
+        license$.subscribe((license) => (fromObservable = license));
+        expect(firstLicense).toStrictEqual(fromObservable);
+        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // the initial resolution
+
+        const secondLicense = await getLicense();
+        expect(secondLicense).toStrictEqual(fromObservable);
+        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1); // still only one call
+      });
+    });
+
     describe('#refresh', () => {
       it('forces refresh immediately', async () => {
         plugin = new LicensingPlugin(

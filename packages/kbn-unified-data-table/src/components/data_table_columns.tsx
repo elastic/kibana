@@ -46,7 +46,7 @@ export const getColumnDisplayName = (
 
   if (columnName === '_source') {
     return i18n.translate('unifiedDataTable.grid.documentHeader', {
-      defaultMessage: 'Document',
+      defaultMessage: 'Summary',
     });
   }
 
@@ -258,6 +258,7 @@ function buildEuiGridColumn({
     },
     cellActions,
     visibleCellActions,
+    displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
   };
 
   if (column.id === dataView.timeFieldName) {

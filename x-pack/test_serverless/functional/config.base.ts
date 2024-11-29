@@ -11,7 +11,9 @@ import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
 
-export function createTestConfig(options: CreateTestConfigOptions) {
+export function createTestConfig<TServices extends {} = typeof services>(
+  options: CreateTestConfigOptions<TServices>
+) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
@@ -19,11 +21,15 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       ...svlSharedConfig.getAll(),
 
       pageObjects,
-      services,
+      services: { ...services, ...options.services },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...(options.esServerArgs ?? []),
         ],
       },
@@ -32,6 +38,11 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
+          // Ensures the existing E2E tests are backwards compatible with the old rule create flyout
+          // Remove this experiment once all of the migration has been completed
+          `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
+            'isUsingRuleCreateFlyout',
+          ])}`,
           ...(options.kbnServerArgs ?? []),
         ],
       },
@@ -116,6 +127,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         integrations: {
           pathname: '/app/integrations',
         },
+        ...(options.apps ?? {}),
       },
       // choose where screenshots should be saved
       screenshots: {

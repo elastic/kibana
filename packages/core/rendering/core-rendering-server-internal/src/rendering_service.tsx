@@ -20,10 +20,11 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
-  type UserProvidedValues,
   type DarkModeValue,
   parseDarkModeValue,
+  parseThemeNameValue,
   type UiSettingsParams,
+  type UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
@@ -148,23 +149,29 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    let settingsUserValues: Record<string, UserProvidedValues> = {};
-    let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
-
-    if (!isAnonymousPage) {
-      const userValues = await Promise.all([
-        uiSettings.client?.getUserProvided(),
-        uiSettings.globalClient?.getUserProvided(),
-      ]);
-
-      settingsUserValues = userValues[0];
-      globalSettingsUserValues = userValues[1];
-    }
-
-    const defaultSettings = await withAsyncDefaultValues(
-      request,
-      uiSettings.client?.getRegistered()
-    );
+    // Grouping all async HTTP requests to run them concurrently for performance reasons.
+    const [
+      defaultSettings,
+      settingsUserValues = {},
+      globalSettingsUserValues = {},
+      userSettingDarkMode,
+    ] = await Promise.all([
+      // All sites
+      withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
+      // Only non-anonymous pages
+      ...(!isAnonymousPage
+        ? ([
+            uiSettings.client?.getUserProvided(),
+            uiSettings.globalClient?.getUserProvided(),
+            // dark mode
+            userSettings?.getUserSettingDarkMode(request),
+          ] as [
+            Promise<Record<string, UserProvidedValues>>,
+            Promise<Record<string, UserProvidedValues>>,
+            Promise<DarkModeValue> | undefined
+          ])
+        : []),
+    ]);
 
     const settings = {
       defaults: defaultSettings,
@@ -196,10 +203,6 @@ export class RenderingService {
     }
 
     // dark mode
-    const userSettingDarkMode = isAnonymousPage
-      ? undefined
-      : await userSettings?.getUserSettingDarkMode(request);
-
     const isThemeOverridden = settings.user['theme:darkMode']?.isOverridden ?? false;
 
     let darkMode: DarkModeValue;
@@ -209,10 +212,11 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
+    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
+
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
         darkMode: mode,
-        themeVersion,
         baseHref: staticAssetsHrefBase,
       });
     const commonStylesheetPaths = getCommonStylesheetPaths({
@@ -273,6 +277,7 @@ export class RenderingService {
         },
         theme: {
           darkMode,
+          name: themeName,
           version: themeVersion,
           stylesheetPaths: {
             default: themeStylesheetPaths(false),

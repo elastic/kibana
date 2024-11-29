@@ -154,6 +154,12 @@ export const getUrlPathCompletionItems = (
   };
   return (
     filterTermsWithoutName(autoCompleteSet)
+      .filter(
+        (term) =>
+          // Only keep dot-prefixed terms if the user typed in a dot
+          !(typeof term.name === 'string' && term.name.startsWith('.')) ||
+          lineContent.trim().endsWith('.')
+      )
       // map autocomplete items to completion items
       .map((item) => {
         return {

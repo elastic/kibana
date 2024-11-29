@@ -969,12 +969,12 @@ export const getAlertHighlightedFields = (
   alertData: AlertData,
   ruleCustomHighlightedFields: string[]
 ): EventSummaryField[] => {
-  const eventCategory = get(alertData, EVENT_CATEGORY);
+  const eventCategory = get(alertData, EVENT_CATEGORY) as string | string[];
   const eventCode = get(alertData, EVENT_CODE);
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
   const eventCategories = {
     primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
-    allEventCategories: [eventCategory],
+    allEventCategories: Array.isArray(eventCategory) ? eventCategory : [eventCategory],
   };
 
   const fieldsToDisplay = getEventFieldsToDisplay({

@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
@@ -22,6 +23,7 @@ const paramSchema = schema.object({
 export const updateApiKeyRoute = (
   router: AlertingRouter,
   licenseState: ILicenseState,
+  docLinks: DocLinksServiceSetup,
   usageCounter?: UsageCounter,
   isServerless?: boolean
 ) => {
@@ -35,7 +37,15 @@ export const updateApiKeyRoute = (
         access: isServerless ? 'internal' : 'public',
         summary: 'Update the API key for an alert',
         tags: ['oas-tag:alerting'],
-        deprecated: true,
+        deprecated: {
+          documentationUrl: docLinks.links.alerting.legacyRuleApiDeprecations,
+          severity: 'warning',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: '/api/alerting/rule/{id}/_update_api_key',
+          },
+        },
       },
     },
     handleDisabledApiKeysError(

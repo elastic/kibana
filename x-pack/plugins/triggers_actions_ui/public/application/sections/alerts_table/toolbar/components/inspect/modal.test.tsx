@@ -43,7 +43,7 @@ describe('Modal Inspect', () => {
   };
 
   const renderModalInspectQuery = () => {
-    const theme = { theme$: of({ darkMode: false }) };
+    const theme = { theme$: of({ darkMode: false, name: 'amsterdam' }) };
     return render(<ModalInspectQuery {...defaultProps} />, {
       wrapper: ({ children }) => (
         <KibanaThemeProvider theme={theme}>{children}</KibanaThemeProvider>

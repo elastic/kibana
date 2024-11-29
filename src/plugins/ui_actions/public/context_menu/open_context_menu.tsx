@@ -174,6 +174,7 @@ export function openContextMenu(
     <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <EuiPopover
         className="embPanel__optionsMenuPopover"
+        // @ts-expect-error @types/react@18 upgrade - Type 'HTMLElement' is not assignable to type 'NonNullable<ReactNode> | undefined'
         button={container}
         isOpen={true}
         closePopover={onClose}

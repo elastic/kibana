@@ -19,10 +19,6 @@ import {
   PluginInitializerContext,
   SecurityServiceStart,
 } from '@kbn/core/public';
-import {
-  EntityManagerPublicPluginSetup,
-  EntityManagerPublicPluginStart,
-} from '@kbn/entityManager-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
@@ -38,7 +34,7 @@ import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
@@ -73,6 +69,7 @@ import { from } from 'rxjs';
 import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import { registerEmbeddables } from './embeddable/register_embeddables';
@@ -86,7 +83,6 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
-import { registerServiceInventoryViewTypeContext } from './analytics/register_service_inventory_view_type_context';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
@@ -100,7 +96,6 @@ export interface ApmPluginSetupDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
-  licensing: LicensingPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   ml?: MlPluginSetup;
   observability: ObservabilityPublicSetup;
@@ -111,7 +106,6 @@ export interface ApmPluginSetupDeps {
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
   cloud?: CloudSetup;
-  entityManager: EntityManagerPublicPluginSetup;
 }
 
 export interface ApmServices {
@@ -127,7 +121,7 @@ export interface ApmPluginStartDeps {
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;
-  licensing: void;
+  licensing: LicensingPluginStart;
   maps?: MapsStartApi;
   ml?: MlPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -148,7 +142,7 @@ export interface ApmPluginStartDeps {
   dashboard: DashboardStart;
   metricsDataAccess: MetricsDataPluginStart;
   uiSettings: IUiSettingsClient;
-  entityManager: EntityManagerPublicPluginStart;
+  logsShared: LogsSharedClientStartExports;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -156,7 +150,7 @@ const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
 });
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service Inventory',
 });
 
 const serviceGroupsTitle = i18n.translate('xpack.apm.navigation.serviceGroupsTitle', {
@@ -203,7 +197,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     const { featureFlags } = config;
 
     if (pluginSetupDeps.home) {
-      pluginSetupDeps.home.environment.update({ apmUi: true });
       pluginSetupDeps.home.featureCatalogue.register(featureCatalogueEntry);
     }
 
@@ -279,7 +272,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     };
 
     this.telemetry.setup({ analytics: core.analytics });
-    registerServiceInventoryViewTypeContext(core.analytics);
 
     // Registers a status check callback for the tutorial to call and verify if the APM integration is installed on fleet.
     pluginSetupDeps.home?.tutorials.registerCustomStatusCheck(
@@ -293,16 +285,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Registers custom component that is going to be render on fleet section
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialFleetInstructions',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/tutorial_fleet_instructions')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgent',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/config_agent')
     );
 
     pluginSetupDeps.home?.tutorials.registerCustomComponent(
       'TutorialConfigAgentRumScript',
+      // @ts-expect-error @types/react@18 is not assignable to type 'ReactNode'. Types in registerCustomComponent are incorrect
       () => import('./tutorial/config_agent/rum_script')
     );
 
@@ -353,12 +348,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     core.application.register({
       id: 'apm',
-      title: 'APM',
+      title: 'Applications',
       order: 8300,
       euiIconType: 'logoObservability',
       appRoute: '/app/apm',
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
+      keywords: ['apm'],
       deepLinks: [
         {
           id: 'service-groups-list',

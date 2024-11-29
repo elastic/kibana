@@ -8,21 +8,28 @@
 import { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { compact } from 'lodash';
+import { CombinedSummarizedAlerts } from '../../../types';
 import { RuleTypeState, RuleAlertData, parseDuration } from '../../../../common';
 import { GetSummarizedAlertsParams } from '../../../alerts_client/types';
-import { getSummarizedAlerts } from '../get_summarized_alerts';
 import {
+  buildRuleUrl,
+  formatActionToEnqueue,
+  getSummarizedAlerts,
+  getSummaryActionTimeBounds,
   isActionOnInterval,
   isSummaryAction,
   isSummaryActionThrottled,
   logNumberOfFilteredAlerts,
-} from '../rule_action_helper';
+  shouldScheduleAction,
+} from '../lib';
 import {
   ActionSchedulerOptions,
-  Executable,
-  GenerateExecutablesOpts,
+  ActionsToSchedule,
+  GetActionsToScheduleOpts,
   IActionScheduler,
 } from '../types';
+import { injectActionParams } from '../../inject_action_params';
+import { transformSummaryActionParams } from '../../transform_action_params';
 
 export class SummaryActionScheduler<
   Params extends RuleTypeParams,
@@ -73,13 +80,20 @@ export class SummaryActionScheduler<
     return 0;
   }
 
-  public async generateExecutables({
-    alerts,
+  public async getActionsToSchedule({
+    activeCurrentAlerts,
+    recoveredCurrentAlerts,
     throttledSummaryActions,
-  }: GenerateExecutablesOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
-    Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>
+  }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
+    ActionsToSchedule[]
   > {
-    const executables = [];
+    const alerts = { ...activeCurrentAlerts, ...recoveredCurrentAlerts };
+    const executables: Array<{
+      action: RuleAction;
+      summarizedAlerts: CombinedSummarizedAlerts;
+    }> = [];
+    const results: ActionsToSchedule[] = [];
+
     for (const action of this.actions) {
       if (
         // if summary action is throttled, we won't send any notifications
@@ -88,7 +102,7 @@ export class SummaryActionScheduler<
         const actionHasThrottleInterval = isActionOnInterval(action);
         const optionsBase = {
           spaceId: this.context.taskInstance.params.spaceId,
-          ruleId: this.context.taskInstance.params.alertId,
+          ruleId: this.context.rule.id,
           excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
           alertsFilter: action.alertsFilter,
         };
@@ -122,6 +136,95 @@ export class SummaryActionScheduler<
       }
     }
 
-    return executables;
+    if (executables.length === 0) return [];
+
+    this.context.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
+
+    for (const { action, summarizedAlerts } of executables) {
+      const { actionTypeId } = action;
+
+      if (
+        !shouldScheduleAction({
+          action,
+          actionsConfigMap: this.context.taskRunnerContext.actionsConfigMap,
+          isActionExecutable: this.context.taskRunnerContext.actionsPlugin.isActionExecutable,
+          logger: this.context.logger,
+          ruleId: this.context.rule.id,
+          ruleRunMetricsStore: this.context.ruleRunMetricsStore,
+        })
+      ) {
+        continue;
+      }
+
+      this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActions();
+      this.context.ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(
+        actionTypeId
+      );
+
+      if (isActionOnInterval(action) && throttledSummaryActions) {
+        throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
+      }
+
+      const { start, end } = getSummaryActionTimeBounds(
+        action,
+        this.context.rule.schedule,
+        this.context.previousStartedAt
+      );
+
+      const ruleUrl = buildRuleUrl({
+        end,
+        getViewInAppRelativeUrl: this.context.ruleType.getViewInAppRelativeUrl,
+        kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
+        logger: this.context.logger,
+        rule: this.context.rule,
+        spaceId: this.context.taskInstance.params.spaceId,
+        start,
+      });
+
+      const actionToRun = {
+        ...action,
+        params: injectActionParams({
+          actionTypeId: action.actionTypeId,
+          ruleUrl,
+          ruleName: this.context.rule.name,
+          actionParams: transformSummaryActionParams({
+            alerts: summarizedAlerts,
+            rule: this.context.rule,
+            ruleTypeId: this.context.ruleType.id,
+            actionId: action.id,
+            actionParams: action.params,
+            spaceId: this.context.taskInstance.params.spaceId,
+            actionsPlugin: this.context.taskRunnerContext.actionsPlugin,
+            actionTypeId: action.actionTypeId,
+            kibanaBaseUrl: this.context.taskRunnerContext.kibanaBaseUrl,
+            ruleUrl: ruleUrl?.absoluteUrl,
+          }),
+        }),
+      };
+
+      results.push({
+        actionToEnqueue: formatActionToEnqueue({
+          action: actionToRun,
+          apiKey: this.context.apiKey,
+          executionId: this.context.executionId,
+          ruleConsumer: this.context.ruleConsumer,
+          ruleId: this.context.rule.id,
+          ruleTypeId: this.context.ruleType.id,
+          spaceId: this.context.taskInstance.params.spaceId,
+        }),
+        actionToLog: {
+          id: action.id,
+          uuid: action.uuid,
+          typeId: action.actionTypeId,
+          alertSummary: {
+            new: summarizedAlerts.new.count,
+            ongoing: summarizedAlerts.ongoing.count,
+            recovered: summarizedAlerts.recovered.count,
+          },
+        },
+      });
+    }
+
+    return results;
   }
 }

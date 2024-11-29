@@ -16,9 +16,11 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initPutSpacesApi } from './put';
+import { API_VERSIONS } from '../../../../common';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
 import { SpacesService } from '../../../spaces_service';
@@ -36,6 +38,7 @@ describe('PUT /api/spaces/space', () => {
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
+    const versionedRouterMock = router.versioned as MockedVersionedRouter;
 
     const coreStart = coreMock.createStart();
 
@@ -53,13 +56,9 @@ describe('PUT /api/spaces/space', () => {
       basePath: httpService.basePath,
     });
 
-    const featuresPluginMockStart = featuresPluginMock.createStart();
-
-    featuresPluginMockStart.getKibanaFeatures.mockReturnValue([]);
-
     const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMockStart);
+    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,
@@ -75,11 +74,12 @@ describe('PUT /api/spaces/space', () => {
       isServerless: false,
     });
 
-    const [routeDefinition, routeHandler] = router.put.mock.calls[0];
+    const { handler, config } = versionedRouterMock.getRoute('put', '/api/spaces/space/{id}')
+      .versions[API_VERSIONS.public.v1];
 
     return {
-      routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
-      routeHandler,
+      routeValidation: (config.validate as any).request as RouteValidatorConfig<{}, {}, {}>,
+      routeHandler: handler,
       savedObjectsRepositoryMock,
     };
   };

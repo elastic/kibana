@@ -300,6 +300,12 @@ export const MAX_LENGTH_ERROR = (field: string, length: number) =>
       'The length of the {field} is too long. The maximum length is {length} characters.',
   });
 
+export const SAFE_INTEGER_NUMBER_ERROR = (field: string) =>
+  i18n.translate('xpack.cases.customFields.safeIntegerNumberError', {
+    values: { field },
+    defaultMessage: `The value of the {field} should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.`,
+  });
+
 export const MAX_TAGS_ERROR = (length: number) =>
   i18n.translate('xpack.cases.createCase.maxTagsError', {
     values: { length },

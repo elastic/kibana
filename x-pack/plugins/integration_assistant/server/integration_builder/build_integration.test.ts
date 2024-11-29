@@ -14,6 +14,7 @@ import { createAgentInput } from './agent';
 import { createPipeline } from './pipeline';
 import { DataStream, Docs, InputType, Pipeline, Integration } from '../../common';
 import yaml from 'js-yaml';
+import { createReadme } from './readme_files';
 
 const mockedDataPath = 'path';
 const mockedId = 123;
@@ -23,6 +24,10 @@ jest.mock('./data_stream');
 jest.mock('./fields');
 jest.mock('./agent');
 jest.mock('./pipeline');
+jest.mock('./readme_files');
+
+(createFieldMapping as jest.Mock).mockReturnValue([]);
+(createDataStream as jest.Mock).mockReturnValue([]);
 
 (generateUniqueId as jest.Mock).mockReturnValue(mockedId);
 
@@ -107,18 +112,7 @@ describe('buildPackage', () => {
     // _dev files
     expect(ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/_dev/build`);
     expect(createSync).toHaveBeenCalledWith(
-      `${integrationPath}/_dev/build/docs/README.md`,
-      expect.any(String)
-    );
-    expect(createSync).toHaveBeenCalledWith(
       `${integrationPath}/_dev/build/build.yml`,
-      expect.any(String)
-    );
-
-    // Docs files
-    expect(ensureDirSync).toHaveBeenCalledWith(`${integrationPath}/docs/`);
-    expect(createSync).toHaveBeenCalledWith(
-      `${integrationPath}/docs/README.md`,
       expect.any(String)
     );
 
@@ -188,6 +182,52 @@ describe('buildPackage', () => {
       secondDataStreamDocs
     );
   });
+
+  it('Should call createReadme once with sorted fields', async () => {
+    jest.clearAllMocks();
+
+    const firstDSFieldsMapping = [{ name: 'name a', description: 'description 1', type: 'type 1' }];
+
+    const firstDataStreamFields = [
+      { name: 'name b', description: 'description 1', type: 'type 1' },
+    ];
+
+    const secondDSFieldsMapping = [
+      { name: 'name c', description: 'description 2', type: 'type 2' },
+      { name: 'name e', description: 'description 3', type: 'type 3' },
+    ];
+
+    const secondDataStreamFields = [
+      { name: 'name d', description: 'description 2', type: 'type 2' },
+    ];
+
+    (createFieldMapping as jest.Mock).mockReturnValueOnce(firstDSFieldsMapping);
+    (createDataStream as jest.Mock).mockReturnValueOnce(firstDataStreamFields);
+
+    (createFieldMapping as jest.Mock).mockReturnValueOnce(secondDSFieldsMapping);
+    (createDataStream as jest.Mock).mockReturnValueOnce(secondDataStreamFields);
+
+    await buildPackage(testIntegration);
+
+    expect(createReadme).toHaveBeenCalledWith(integrationPath, testIntegration.name, [
+      {
+        datastream: firstDatastreamName,
+        fields: [
+          { name: 'name a', description: 'description 1', type: 'type 1' },
+
+          { name: 'name b', description: 'description 1', type: 'type 1' },
+        ],
+      },
+      {
+        datastream: secondDatastreamName,
+        fields: [
+          { name: 'name c', description: 'description 2', type: 'type 2' },
+          { name: 'name d', description: 'description 2', type: 'type 2' },
+          { name: 'name e', description: 'description 3', type: 'type 3' },
+        ],
+      },
+    ]);
+  });
 });
 
 describe('renderPackageManifestYAML', () => {
@@ -237,6 +277,13 @@ describe('renderPackageManifestYAML', () => {
     expect(manifest.name).toBe(integration.name);
     expect(manifest.type).toBe('integration');
     expect(manifest.description).toBe(integration.description);
-    expect(manifest.icons).toBeTruthy();
+    expect(Array.isArray(manifest.icons)).toBe(true);
+    expect((manifest.icons as object[]).length).toBe(1);
+    expect((manifest.icons as object[])[0]).toEqual({
+      src: '/img/logo.svg',
+      title: 'Sample Integration Logo',
+      size: '32x32',
+      type: 'image/svg+xml',
+    });
   });
 });

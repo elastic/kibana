@@ -15,28 +15,31 @@ import type {
 import type { BaseProfileProvider, BaseProfileService } from '../profile_service';
 import { createExampleDataSourceProfileProvider } from './example/example_data_source_profile/profile';
 import { createExampleDocumentProfileProvider } from './example/example_document_profile';
-import { createExampleRootProfileProvider } from './example/example_root_pofile';
-import { createLogsDataSourceProfileProviders } from './common/logs_data_source_profile';
-import { createLogDocumentProfileProvider } from './common/log_document_profile';
+import {
+  createExampleSolutionViewRootProfileProvider,
+  createExampleRootProfileProvider,
+} from './example/example_root_profile';
+import { createObservabilityLogsDataSourceProfileProviders } from './observability/logs_data_source_profile';
+import { createObservabilityLogDocumentProfileProvider } from './observability/log_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
 import {
   createProfileProviderServices,
   ProfileProviderServices,
 } from './profile_provider_services';
-import type { DiscoverStartPlugins } from '../../types';
+import type { DiscoverServices } from '../../build_services';
+import { createObservabilityRootProfileProvider } from './observability/observability_root_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
  * @param options Register profile provider options
  */
 export const registerProfileProviders = async ({
-  plugins,
   rootProfileService,
   dataSourceProfileService,
   documentProfileService,
   enabledExperimentalProfileIds,
+  services,
 }: {
-  plugins: DiscoverStartPlugins;
   /**
    * Root profile service
    */
@@ -53,10 +56,9 @@ export const registerProfileProviders = async ({
    * Array of experimental profile IDs which are enabled in `kibana.yml`
    */
   enabledExperimentalProfileIds: string[];
+  services: DiscoverServices;
 }) => {
-  const providerServices = await createProfileProviderServices({
-    logsDataAccessPlugin: plugins.logsDataAccess,
-  });
+  const providerServices = await createProfileProviderServices(services);
   const rootProfileProviders = createRootProfileProviders(providerServices);
   const dataSourceProfileProviders = createDataSourceProfileProviders(providerServices);
   const documentProfileProviders = createDocumentProfileProviders(providerServices);
@@ -85,8 +87,8 @@ export const registerProfileProviders = async ({
  * @param options Register enabled profile providers options
  */
 export const registerEnabledProfileProviders = <
-  TProvider extends BaseProfileProvider<{}>,
-  TService extends BaseProfileService<TProvider, {}>
+  TProvider extends BaseProfileProvider<{}, {}>,
+  TService extends BaseProfileService<TProvider>
 >({
   profileService,
   providers: availableProviders,
@@ -119,7 +121,9 @@ export const registerEnabledProfileProviders = <
  */
 const createRootProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleRootProfileProvider(),
+  createExampleSolutionViewRootProfileProvider(),
   createSecurityRootProfileProvider(providerServices),
+  createObservabilityRootProfileProvider(providerServices),
 ];
 
 /**
@@ -129,7 +133,7 @@ const createRootProfileProviders = (providerServices: ProfileProviderServices) =
  */
 const createDataSourceProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDataSourceProfileProvider(),
-  ...createLogsDataSourceProfileProviders(providerServices),
+  ...createObservabilityLogsDataSourceProfileProviders(providerServices),
 ];
 
 /**
@@ -139,5 +143,5 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
  */
 const createDocumentProfileProviders = (providerServices: ProfileProviderServices) => [
   createExampleDocumentProfileProvider(),
-  createLogDocumentProfileProvider(providerServices),
+  createObservabilityLogDocumentProfileProvider(providerServices),
 ];

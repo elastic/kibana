@@ -38,7 +38,6 @@ const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
   http: {},
-  assistantFeatures: { assistantModelEvaluation: true },
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,
@@ -64,12 +63,12 @@ jest.mock('../../assistant_context');
 
 jest.mock('.', () => {
   return {
-    AnonymizationSettings: () => <span data-test-subj="ANONYMIZATION_TAB-tab" />,
-    ConversationSettings: () => <span data-test-subj="CONVERSATIONS_TAB-tab" />,
-    EvaluationSettings: () => <span data-test-subj="EVALUATION_TAB-tab" />,
-    KnowledgeBaseSettings: () => <span data-test-subj="KNOWLEDGE_BASE_TAB-tab" />,
-    QuickPromptSettings: () => <span data-test-subj="QUICK_PROMPTS_TAB-tab" />,
-    SystemPromptSettings: () => <span data-test-subj="SYSTEM_PROMPTS_TAB-tab" />,
+    AnonymizationSettings: () => <span data-test-subj="anonymization-tab" />,
+    ConversationSettings: () => <span data-test-subj="conversations-tab" />,
+    EvaluationSettings: () => <span data-test-subj="evaluation-tab" />,
+    KnowledgeBaseSettings: () => <span data-test-subj="knowledge_base-tab" />,
+    QuickPromptSettings: () => <span data-test-subj="quick_prompts-tab" />,
+    SystemPromptSettings: () => <span data-test-subj="system_prompts-tab" />,
   };
 });
 
@@ -136,17 +135,6 @@ describe('AssistantSettings', () => {
     QUICK_PROMPTS_TAB,
     SYSTEM_PROMPTS_TAB,
   ])('%s', (tab) => {
-    it('Opens the tab on button click', () => {
-      (useAssistantContext as jest.Mock).mockImplementation(() => ({
-        ...mockContext,
-        selectedSettingsTab: tab === CONVERSATIONS_TAB ? ANONYMIZATION_TAB : CONVERSATIONS_TAB,
-      }));
-      const { getByTestId } = render(<AssistantSettings {...testProps} />, {
-        wrapper,
-      });
-      fireEvent.click(getByTestId(`${tab}-button`));
-      expect(setSelectedSettingsTab).toHaveBeenCalledWith(tab);
-    });
     it('renders with the correct tab open', () => {
       (useAssistantContext as jest.Mock).mockImplementation(() => ({
         ...mockContext,

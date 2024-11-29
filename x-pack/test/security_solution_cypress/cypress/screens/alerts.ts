@@ -203,6 +203,8 @@ export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRende
 
 export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
 
+export const ALERT_TABLE_SUMMARY_VIEW_SELECTOR = '[data-test-subj="summary-view-selector"]';
+
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
@@ -256,3 +258,11 @@ export const ALERT_DETAILS_TAKE_ACTION_BUTTON =
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
 export const TOOLTIP = '[data-test-subj="message-tool-tip"]';
+
+export const HOVER_ACTIONS = {
+  ADD_TO_TIMELINE: '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]',
+  FILTER_FOR: '[data-test-subj="actionItem-security-default-cellActions-filterIn"]',
+  FILTER_OUT: '[data-test-subj="actionItem-security-default-cellActions-filterOut"]',
+  COPY: '[data-test-subj="actionItem-security-default-cellActions-copyToClipboard"]',
+  SHOW_TOP: '[data-test-subj="actionItem-security-default-cellActions-showTopN"]',
+};

@@ -114,11 +114,12 @@ export const renderApp = (
     data: plugins.data,
     esConfig,
     getChromeStyle$: chrome.getChromeStyle$,
+    getNavLinks: chrome.navLinks.getAll,
     guidedOnboarding,
     history,
     indexMappingComponent,
-    isSearchHomepageEnabled: plugins.searchHomepage?.isHomepageFeatureEnabled() ?? false,
     isSidebarEnabled,
+    kibanaVersion,
     lens,
     ml,
     navigateToUrl,
@@ -128,7 +129,6 @@ export const renderApp = (
       params.setHeaderActionMenu(
         HeaderActions ? renderHeaderActions.bind(null, HeaderActions, store, params) : undefined
       ),
-    searchHomepage: plugins.searchHomepage,
     searchPlayground: plugins.searchPlayground,
     searchInferenceEndpoints: plugins.searchInferenceEndpoints,
     security,

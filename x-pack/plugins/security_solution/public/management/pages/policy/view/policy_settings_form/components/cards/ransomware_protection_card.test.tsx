@@ -11,7 +11,7 @@ import { createAppRootMockRenderer } from '../../../../../../../common/mock/endp
 import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import React from 'react';
 import { ProtectionModes } from '../../../../../../../../common/endpoint/types';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { createLicenseServiceMock } from '../../../../../../../../common/license/mocks';
 import { licenseService as licenseServiceMocked } from '../../../../../../../common/hooks/__mocks__/use_license';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';

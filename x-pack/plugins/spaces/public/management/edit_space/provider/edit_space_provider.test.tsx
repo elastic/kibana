@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 
@@ -20,10 +20,15 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { EditSpaceProvider, useEditSpaceServices, useEditSpaceStore } from './edit_space_provider';
+import {
+  EditSpaceProviderRoot,
+  useEditSpaceServices,
+  useEditSpaceStore,
+} from './edit_space_provider';
 import { spacesManagerMock } from '../../../spaces_manager/spaces_manager.mock';
 import { getPrivilegeAPIClientMock } from '../../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../../roles_api_client.mock';
+import { getSecurityLicenseMock } from '../../security_license.mock';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -45,7 +50,7 @@ const SUTProvider = ({
 }: PropsWithChildren<Partial<Pick<ApplicationStart, 'capabilities'>>>) => {
   return (
     <IntlProvider locale="en">
-      <EditSpaceProvider
+      <EditSpaceProviderRoot
         {...{
           logger,
           i18n,
@@ -56,14 +61,16 @@ const SUTProvider = ({
           spacesManager,
           serverBasePath: '',
           getUrlForApp: (_) => _,
+          getIsRoleManagementEnabled: () => Promise.resolve(() => undefined),
           getRolesAPIClient: getRolesAPIClientMock,
           getPrivilegesAPIClient: getPrivilegeAPIClientMock,
+          getSecurityLicense: getSecurityLicenseMock,
           navigateToUrl: jest.fn(),
           capabilities,
         }}
       >
         {children}
-      </EditSpaceProvider>
+      </EditSpaceProviderRoot>
     </IntlProvider>
   );
 };
@@ -81,10 +88,8 @@ describe('EditSpaceProvider', () => {
     });
 
     it('throws when the hook is used within a tree that does not have the provider', () => {
-      const { result } = renderHook(useEditSpaceServices);
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toEqual(
-        expect.stringMatching('EditSpaceService Context is missing.')
+      expect(() => renderHook(useEditSpaceServices)).toThrow(
+        /EditSpaceService Context is missing./
       );
     });
   });
@@ -102,12 +107,7 @@ describe('EditSpaceProvider', () => {
     });
 
     it('throws when the hook is used within a tree that does not have the provider', () => {
-      const { result } = renderHook(useEditSpaceStore);
-
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toEqual(
-        expect.stringMatching('EditSpaceStore Context is missing.')
-      );
+      expect(() => renderHook(useEditSpaceStore)).toThrow(/EditSpaceStore Context is missing./);
     });
   });
 });

@@ -171,6 +171,9 @@ const createInternalSetupContractMock = () => {
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),
+    getDeprecatedRoutes: jest.fn(),
+    getRegisteredDeprecatedApis: jest.fn(),
+    registerOnPostValidation: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
@@ -207,6 +210,7 @@ const createSetupContractMock = <
     createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
     registerOnPreRouting: internalMock.registerOnPreRouting,
     registerOnPreAuth: jest.fn(),
+    getDeprecatedRoutes: jest.fn(),
     registerAuth: internalMock.registerAuth,
     registerOnPostAuth: internalMock.registerOnPostAuth,
     registerOnPreResponse: internalMock.registerOnPreResponse,
@@ -276,6 +280,7 @@ const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
 
 const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
   next: jest.fn(),
+  authzResultNext: jest.fn(),
 });
 
 const createOnPreRoutingToolkitMock = (): jest.Mocked<OnPreRoutingToolkit> => ({

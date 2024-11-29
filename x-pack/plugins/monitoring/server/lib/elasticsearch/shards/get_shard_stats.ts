@@ -9,7 +9,7 @@ import { get } from 'lodash';
 import { ElasticsearchModifiedSource, ElasticsearchResponse } from '../../../../common/types/es';
 import { Globals } from '../../../static_globals';
 import { LegacyRequest } from '../../../types';
-import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../../common/get_index_patterns';
 import { createQuery } from '../../create_query';
 import { ElasticsearchMetric } from '../../metrics';
 import { calculateIndicesTotals } from './calculate_shard_stat_indices_totals';
@@ -37,7 +37,7 @@ export function handleResponse(
       cluster,
       'elasticsearch.cluster.stats.state.master_node',
       get(cluster, 'cluster_state.master_node')
-    );
+    ) as string;
     nodes = resp.aggregations?.nodes.buckets.reduce(normalizeNodeShards(masterNode), {}) ?? [];
   }
 

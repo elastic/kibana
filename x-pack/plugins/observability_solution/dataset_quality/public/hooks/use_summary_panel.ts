@@ -16,10 +16,9 @@ const useSummaryPanel = () => {
   const { service } = useDatasetQualityContext();
   const {
     filteredItems,
-    isSizeStatsAvailable,
     canUserMonitorDataset,
     canUserMonitorAnyDataStream,
-    loading,
+    loading: isTableLoading,
   } = useDatasetQualityTable();
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
@@ -32,9 +31,10 @@ const useSummaryPanel = () => {
     percentages: filteredItems.map((item) => item.degradedDocs.percentage),
   };
 
-  const isDatasetsQualityLoading = useSelector(service, (state) =>
+  const isDegradedDocsLoading = useSelector(service, (state) =>
     state.matches('stats.degradedDocs.fetching')
   );
+  const isDatasetsQualityLoading = isDegradedDocsLoading || isTableLoading;
 
   /*
     User Authorization
@@ -43,7 +43,7 @@ const useSummaryPanel = () => {
     (item) => item.userPrivileges?.canMonitor ?? true
   );
 
-  const isUserAuthorizedForDataset = !loading
+  const isUserAuthorizedForDataset = !isTableLoading
     ? canUserMonitorDataset && canUserMonitorAnyDataStream && canUserMonitorAllFilteredDataStreams
     : true;
 
@@ -84,13 +84,12 @@ const useSummaryPanel = () => {
 
     isEstimatedDataLoading,
     estimatedData,
-    isEstimatedDataDisabled: !isSizeStatsAvailable,
 
     isDatasetsActivityLoading,
     datasetsActivity,
 
     numberOfDatasets: filteredItems.length,
-    numberOfDocuments: filteredItems.reduce((acc, curr) => acc + curr.degradedDocs.docsCount, 0),
+    numberOfDocuments: filteredItems.reduce((acc, curr) => acc + curr.docsInTimeRange!, 0),
   };
 };
 

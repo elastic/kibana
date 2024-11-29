@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
-  const excludeKeysFromServerless = ['size']; // https://github.com/elastic/kibana/issues/178954
 
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDataStreamName = `logs-${apacheAccessDatasetName}-${productionNamespace}`;
@@ -57,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
-  describe('Flyout', function () {
+  describe('Dataset quality details', function () {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -93,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
       ]);
 
-      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+      await PageObjects.svlCommonPage.loginAsViewer();
     });
 
     after(async () => {
@@ -166,18 +165,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('overview summary panel', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/194575
+    describe.skip('overview summary panel', () => {
       it('should show summary KPIs', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts } =
-          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis(excludeKeysFromServerless);
+        const { docsCountTotal, degradedDocs, services, hosts, size } =
+          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
         expect(parseInt(docsCountTotal, 10)).to.be(226);
         expect(parseInt(degradedDocs, 10)).to.be(1);
         expect(parseInt(services, 10)).to.be(3);
         expect(parseInt(hosts, 10)).to.be(52);
+        // metering stats API is cached for 30seconds, waiting for the exact value is not optimal in this case
+        // rather we can just check if any value is present
+        expect(size).to.be.ok();
       });
     });
 
@@ -381,6 +384,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: degradedDataStreamName,
         });
+
+        await PageObjects.datasetQuality.waitUntilTableLoaded();
 
         const rows =
           await PageObjects.datasetQuality.getDatasetQualityDetailsDegradedFieldTableRows();

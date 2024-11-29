@@ -31,57 +31,57 @@ export const EditSpaceTabFooter: React.FC<Props> = ({
   onClickSubmit,
   onClickDeleteSpace,
 }) => {
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="spaceAround">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <>
-      {isLoading && (
-        <EuiFlexGroup justifyContent="spaceAround">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+    <EuiFlexGroup>
+      {isDirty && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            fill
+            onClick={onClickSubmit}
+            data-test-subj="save-space-button"
+          >
+            <FormattedMessage
+              id="xpack.spaces.management.spaceDetails.footerActions.updateSpace"
+              defaultMessage="Apply changes"
+            />
+          </EuiButton>
+        </EuiFlexItem>
       )}
-      {!isLoading && (
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onClickDeleteSpace}
-              color="danger"
-              data-test-subj="delete-space-button"
-            >
-              <FormattedMessage
-                id="xpack.spaces.management.spaceDetails.footerActions.deleteSpace"
-                defaultMessage="Delete space"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={true} />
 
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClickCancel} data-test-subj="cancel-space-button">
-              <FormattedMessage
-                id="xpack.spaces.management.spaceDetails.footerActions.cancel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={onClickCancel} data-test-subj="cancel-space-button">
+          <FormattedMessage
+            id="xpack.spaces.management.spaceDetails.footerActions.cancel"
+            defaultMessage="Cancel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={true} />
 
-          {isDirty && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                fill
-                onClick={onClickSubmit}
-                data-test-subj="save-space-button"
-              >
-                <FormattedMessage
-                  id="xpack.spaces.management.spaceDetails.footerActions.updateSpace"
-                  defaultMessage="Update space"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      )}
-    </>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          onClick={onClickDeleteSpace}
+          color="danger"
+          iconType="trash"
+          data-test-subj="delete-space-button"
+        >
+          <FormattedMessage
+            id="xpack.spaces.management.spaceDetails.footerActions.deleteSpace"
+            defaultMessage="Delete space"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

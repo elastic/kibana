@@ -319,6 +319,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
       fieldNotices={renderInfoCallout()}
       fullWidth
     >
+      {/* @ts-expect-error Type '() => React.JSX.Element' is not assignable to type 'string'. */}
       {isDisabledDueToLicense ? <div /> : renderField}
     </DescribedFormRow>
   );

@@ -7,7 +7,6 @@
 
 import React, { memo, PropsWithChildren, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
-import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';

@@ -1,11 +1,15 @@
 {
   "type": "plugin",
   "id": "@kbn/management-plugin",
-  "owner": "@elastic/kibana-management",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "management",
-    "server": true,
     "browser": true,
+    "server": true,
     "requiredPlugins": [
       "share"
     ],

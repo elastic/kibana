@@ -19,8 +19,6 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -83,6 +81,7 @@ import { NextStep } from '../../components/next_step';
 import { useRuleForms, useRuleFormsErrors, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { SaveWithErrorsModal } from '../../components/save_with_errors_confirmation';
+import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -123,11 +122,7 @@ const CreateRulePageComponent: React.FC = () => {
     useListsConfig();
   const { addSuccess } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
-  const {
-    application,
-    data: { dataViews },
-    triggersActionsUi,
-  } = useKibana().services;
+  const { application, triggersActionsUi } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
@@ -176,8 +171,6 @@ const CreateRulePageComponent: React.FC = () => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
-    eqlOptionsSelected,
-    setEqlOptionsSelected,
   } = useRuleForms({
     defineStepDefault,
     aboutStepDefault: stepAboutDefaultValue,
@@ -204,7 +197,6 @@ const CreateRulePageComponent: React.FC = () => {
   const { mutateAsync: createRule, isLoading: isCreateRuleLoading } = useCreateRule();
   const ruleType = defineStepData.ruleType;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
-  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
   const [prevRuleType, setPrevRuleType] = useState<string>();
@@ -256,20 +248,6 @@ const CreateRulePageComponent: React.FC = () => {
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
-  useEffect(() => {
-    const fetchDV = async () => {
-      const dataViewsRefs = await dataViews.getIdsWithTitle();
-      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
-        (acc, item) => ({
-          ...acc,
-          [item.id]: item,
-        }),
-        {}
-      );
-      setDataViewOptions(dataViewIdIndexPatternMap);
-    };
-    fetchDV();
-  }, [dataViews]);
   const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
@@ -412,10 +390,9 @@ const CreateRulePageComponent: React.FC = () => {
 
   const createRuleFromFormData = useCallback(
     async (enabled: boolean) => {
-      const localDefineStepData: DefineStepRule = defineFieldsTransform({
-        ...defineStepForm.getFormData(),
-        eqlOptions: eqlOptionsSelected,
-      });
+      const localDefineStepData: DefineStepRule = defineFieldsTransform(
+        defineStepForm.getFormData()
+      );
       const localAboutStepData = aboutStepForm.getFormData();
       const localScheduleStepData = scheduleStepForm.getFormData();
       const localActionsStepData = actionsStepForm.getFormData();
@@ -455,7 +432,6 @@ const CreateRulePageComponent: React.FC = () => {
       createRule,
       defineFieldsTransform,
       defineStepForm,
-      eqlOptionsSelected,
       navigateToApp,
       ruleType,
       scheduleStepForm,
@@ -573,27 +549,22 @@ const CreateRulePageComponent: React.FC = () => {
         >
           <StepDefineRule
             isLoading={isCreateRuleLoading || loading}
-            kibanaDataViews={dataViewOptions}
             indicesConfig={indicesConfig}
             threatIndicesConfig={threatIndicesConfig}
             form={defineStepForm}
-            optionsSelected={eqlOptionsSelected}
-            setOptionsSelected={setEqlOptionsSelected}
             indexPattern={indexPattern}
             isIndexPatternLoading={isIndexPatternLoading}
             isQueryBarValid={isQueryBarValid}
             setIsQueryBarValid={setIsQueryBarValid}
             setIsThreatQueryBarValid={setIsThreatQueryBarValid}
-            ruleType={defineStepData.ruleType}
             index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
-            groupByFields={defineStepData.groupByFields}
+            alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
             dataSourceType={defineStepData.dataSourceType}
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
             thresholdFields={defineStepData.threshold.field}
-            enableThresholdSuppression={defineStepData.enableThresholdSuppression}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -606,18 +577,10 @@ const CreateRulePageComponent: React.FC = () => {
     ),
     [
       activeStep,
-      dataViewOptions,
       defineRuleNextStep,
-      defineStepData.dataSourceType,
-      defineStepData.groupByFields,
+      defineStepData,
       memoizedIndex,
-      defineStepData.queryBar.saved_id,
-      defineStepData.queryBar.title,
-      defineStepData.ruleType,
-      defineStepData.shouldLoadQueryDynamically,
-      defineStepData.threatIndex,
       defineStepForm,
-      eqlOptionsSelected,
       indexPattern,
       indicesConfig,
       isCreateRuleLoading,
@@ -625,10 +588,7 @@ const CreateRulePageComponent: React.FC = () => {
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
-      setEqlOptionsSelected,
       threatIndicesConfig,
-      defineStepData.threshold.field,
-      defineStepData.enableThresholdSuppression,
     ]
   );
   const memoDefineStepExtraAction = useMemo(
@@ -789,7 +749,6 @@ const CreateRulePageComponent: React.FC = () => {
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
-            ruleType={ruleType}
             form={actionsStepForm}
           />
 
@@ -841,7 +800,6 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       isStartingJobs,
       loading,
-      ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
     ]

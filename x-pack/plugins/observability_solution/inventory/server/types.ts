@@ -13,6 +13,11 @@ import type {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
 } from '@kbn/data-views-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import {
+  RuleRegistryPluginStartContract,
+  RuleRegistryPluginSetupContract,
+} from '@kbn/rule-registry-plugin/server';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -21,12 +26,15 @@ export interface InventorySetupDependencies {
   entityManager: EntityManagerServerPluginSetup;
   inference: InferenceServerSetup;
   dataViews: DataViewsServerPluginSetup;
+  features: FeaturesPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
 }
 
 export interface InventoryStartDependencies {
   entityManager: EntityManagerServerPluginStart;
   inference: InferenceServerStart;
   dataViews: DataViewsServerPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
 }
 
 export interface InventoryServerSetup {}

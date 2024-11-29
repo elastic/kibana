@@ -24,10 +24,10 @@ import { useZoomHandlers } from '../../lib/app_handler_creators';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { LAUNCHED_FULLSCREEN, LAUNCHED_FULLSCREEN_AUTOPLAY } from '../../../common/lib/constants';
 import { WorkpadRoutingContext } from '../../routes/workpad';
-import { usePlatformService } from '../../services';
 import { Workpad as WorkpadComponent, Props } from './workpad.component';
 import { State } from '../../../types';
 import { useIncomingEmbeddable } from '../hooks';
+import { coreServices } from '../../services/kibana_services';
 
 type ContainerProps = Pick<Props, 'registerLayout' | 'unregisterLayout'>;
 
@@ -40,9 +40,7 @@ export const Workpad: FC<ContainerProps> = (props) => {
   const { isFullscreen, setFullscreen, undo, redo, autoplayInterval, nextPage, previousPage } =
     useContext(WorkpadRoutingContext);
 
-  const platformService = usePlatformService();
-
-  const hasHeaderBanner = useObservable(platformService.hasHeaderBanner$());
+  const hasHeaderBanner = useObservable<boolean>(coreServices.chrome.hasHeaderBanner$());
 
   const propsFromState = useSelector((state: State) => {
     const { width, height, id: workpadId, css: workpadCss } = getWorkpad(state);

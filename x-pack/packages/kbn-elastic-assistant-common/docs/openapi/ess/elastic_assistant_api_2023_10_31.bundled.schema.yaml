@@ -1194,6 +1194,7 @@ components:
       enum:
         - OpenAI
         - Azure OpenAI
+        - Other
       type: string
     Reader:
       additionalProperties: true
@@ -1237,3 +1238,4 @@ security:
 tags:
   - description: Manage and interact with Security Assistant resources.
     name: Security AI Assistant API
+    x-displayName: Security AI assistant

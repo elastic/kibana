@@ -35,7 +35,7 @@
             "section": "def-common.SolutionSideNavProps",
             "text": "SolutionSideNavProps"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
         "path": "x-pack/packages/security-solution/side_nav/src/index.tsx",
         "deprecated": false,
@@ -429,22 +429,6 @@
             "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-solution-side-nav",
-            "id": "def-common.SolutionSideNavProps.onMount",
-            "type": "Function",
-            "tags": [],
-            "label": "onMount",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/side_nav/src/solution_side_nav.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false

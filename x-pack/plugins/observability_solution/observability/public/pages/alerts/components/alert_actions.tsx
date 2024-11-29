@@ -19,15 +19,15 @@ import { i18n } from '@kbn/i18n';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
+import type { EventNonEcsData } from '../../../../common/typings';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { parseAlert } from '../helpers/parse_alert';
-import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
+import { observabilityFeatureId, type ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
 
@@ -58,7 +58,7 @@ export function AlertActions({
 
   const data = useMemo(
     () =>
-      Object.entries(alert ?? {}).reduce<TimelineNonEcsData[]>(
+      Object.entries(alert ?? {}).reduce<EventNonEcsData[]>(
         (acc, [field, value]) => [...acc, { field, value: value as string[] }],
         []
       ),
@@ -159,7 +159,7 @@ export function AlertActions({
   );
 
   const actionsMenuItems = [
-    ...(userCasesPermissions.create && userCasesPermissions.read
+    ...(userCasesPermissions.createComment && userCasesPermissions.read
       ? [
           <EuiContextMenuItem
             data-test-subj="add-to-existing-case-action"

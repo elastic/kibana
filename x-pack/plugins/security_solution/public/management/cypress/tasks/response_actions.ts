@@ -80,7 +80,7 @@ export const fillUpNewEsqlRule = (name = 'Test', description = 'Test', query: st
   cy.getByTestSubj('create-new-rule').click();
   cy.getByTestSubj('stepDefineRule').within(() => {
     cy.getByTestSubj('esqlRuleType').click();
-    cy.getByTestSubj('detectionEngineStepDefineRuleEsqlQueryBar').within(() => {
+    cy.getByTestSubj('ruleEsqlQueryBar').within(() => {
       cy.getByTestSubj('globalQueryBar').click();
       cy.getByTestSubj('kibanaCodeEditor').type(query);
     });
@@ -114,13 +114,12 @@ export const getRunningProcesses = (command: string): Cypress.Chainable<number> 
     .getByTestSubj('processesOutput-processListTable', { timeout: 120000 })
     .findByTestSubj('processesOutput-command')
     .contains(command)
-    .parents('td')
-    .siblings('td')
-    .eq(1)
-    .find('span')
-    .then((span) => {
+    .parents('tr')
+    .findByTestSubj('processesOutput-pid')
+    .find('.euiTableCellContent')
+    .then((cellContent) => {
       // get pid
-      return Number(span.text());
+      return Number(cellContent.text());
     });
 };
 

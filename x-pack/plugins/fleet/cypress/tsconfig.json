@@ -3,6 +3,7 @@
   "include": [
     "**/*",
     "../cypress.config.ts",
+    "../cypress.config.space_awareness.ts",
     "../../../../typings/**/*"
   ],
   "exclude": [
@@ -29,5 +30,6 @@
       "force": true
     },
     "@kbn/rison",
+    "@kbn/actions-plugin",
   ]
 }

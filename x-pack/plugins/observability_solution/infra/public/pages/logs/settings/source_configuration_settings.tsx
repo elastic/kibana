@@ -20,6 +20,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Prompt } from '@kbn/observability-shared-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import { LogsDeprecationCallout } from '../../../components/logs_deprecation_callout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { settingsTitle } from '../../../translations';
@@ -98,6 +99,7 @@ export const LogsSettingsPage = () => {
         data-test-subj="sourceConfigurationContent"
         restrictWidth
       >
+        <LogsDeprecationCallout page="settings" />
         <Prompt
           prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
         />

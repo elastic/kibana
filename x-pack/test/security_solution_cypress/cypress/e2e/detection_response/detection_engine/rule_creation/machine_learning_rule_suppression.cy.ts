@@ -8,12 +8,11 @@
 import { getMachineLearningRule } from '../../../../objects/rule';
 import { TOOLTIP } from '../../../../screens/common';
 import {
-  ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_WARNING,
 } from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
@@ -103,7 +102,7 @@ describe(
 
           it('displays a warning message on the suppression fields', () => {
             cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
-            cy.get(ALERT_SUPPRESSION_FIELDS).should(
+            cy.get(ALERT_SUPPRESSION_WARNING).should(
               'contain.text',
               'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.'
             );
@@ -129,9 +128,6 @@ describe(
                 'have.text',
                 'Suppress and group alerts for events with missing fields'
               );
-
-              // suppression functionality should be under Tech Preview
-              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
             });
 
             fillAboutRuleMinimumAndContinue(mlRule);
@@ -163,9 +159,6 @@ describe(
                 'have.text',
                 'Do not suppress alerts for events with missing fields'
               );
-
-              // suppression functionality should be under Tech Preview
-              cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
             });
 
             fillAboutRuleMinimumAndContinue(mlRule);

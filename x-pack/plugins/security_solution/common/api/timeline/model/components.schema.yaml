@@ -56,11 +56,15 @@ components:
             end:
               oneOf:
                 - type: string
+                  nullable: true
                 - type: number
+                  nullable: true
             start:
               oneOf:
                 - type: string
+                  nullable: true
                 - type: number
+                  nullable: true
         description:
           type: string
           nullable: true
@@ -149,54 +153,78 @@ components:
         updatedBy:
           type: string
           nullable: true
-    TimelineResponse:
+    SavedTimelineWithSavedObjectId:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
         - type: object
-          required:
-            - savedObjectId
-            - version
+          required: [savedObjectId, version]
           properties:
-            eventIdToNoteIds:
-              type: array
-              items:
-                $ref: '#/components/schemas/Note'
-            notes:
-              type: array
-              items:
-                $ref: '#/components/schemas/Note'
-            noteIds:
-              type: array
-              items:
-                type: string
-            pinnedEventIds:
-              type: array
-              items:
-                type: string
-            pinnedEventsSaveObject:
-              type: array
-              items:
-                $ref: '#/components/schemas/PinnedEvent'
             savedObjectId:
               type: string
             version:
               type: string
+    TimelineResponse:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - $ref: '#/components/schemas/SavedTimelineWithSavedObjectId'
+        - type: object
+          properties:
+            eventIdToNoteIds:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/Note'
+            notes:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/Note'
+            noteIds:
+              type: array
+              nullable: true
+              items:
+                type: string
+            pinnedEventIds:
+              type: array
+              nullable: true
+              items:
+                type: string
+            pinnedEventsSaveObject:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/PinnedEvent'
+    ResolvedTimeline:
+      type: object
+      required: [timeline, outcome]
+      properties:
+        timeline:
+          $ref: '#/components/schemas/TimelineSavedToReturnObject'
+        outcome:
+          $ref: '#/components/schemas/SavedObjectResolveOutcome'
+        alias_target_id:
+          type: string
+        alias_purpose:
+          $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
+    SavedObjectResolveOutcome:
+      type: string
+      enum:
+        - exactMatch
+        - aliasMatch
+        - conflict
+    SavedObjectResolveAliasPurpose:
+      type: string
+      enum:
+        - savedObjectConversion
+        - savedObjectImport
     FavoriteTimelineResponse:
       type: object
-      required:
-        - savedObjectId
-        - version
+      required: [savedObjectId, version]
       properties:
         savedObjectId:
           type: string
         version:
           type: string
-        code:
-          type: number
-          nullable: true
-        message:
-          type: string
-          nullable: true
         templateTimelineId:
           type: string
           nullable: true
@@ -209,35 +237,46 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FavoriteTimelineResult'
+    PersistTimelineResponse:
+      $ref: '#/components/schemas/TimelineResponse'
     ColumnHeaderResult:
       type: object
       properties:
         aggregatable:
           type: boolean
+          nullable: true
         category:
           type: string
+          nullable: true
         columnHeaderType:
           type: string
+          nullable: true
         description:
           type: string
+          nullable: true
         example:
-          oneOf:
-            - type: string
-            - type: number
+          type: string
+          nullable: true
         indexes:
           type: array
+          nullable: true
           items:
             type: string
         id:
           type: string
+          nullable: true
         name:
           type: string
+          nullable: true
         placeholder:
           type: string
+          nullable: true
         searchable:
           type: boolean
+          nullable: true
         type:
           type: string
+          nullable: true
     QueryMatchResult:
       type: object
       properties:
@@ -248,8 +287,13 @@ components:
           type: string
           nullable: true
         value:
-          type: string
-          nullable: true
+          oneOf:
+            - type: string
+              nullable: true
+            - type: array
+              nullable: true
+              items:
+                type: string
         displayValue:
           type: string
           nullable: true
@@ -305,6 +349,10 @@ components:
           nullable: true
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
+          nullable: true
+        type:
+          $ref: '#/components/schemas/DataProviderType'
+          nullable: true
     BareNoteWithoutExternalRefs:
       type: object
       properties:
@@ -419,42 +467,60 @@ components:
       type: object
       properties:
         exists:
-          type: boolean
+          type: string
+          nullable: true
         meta:
           type: object
+          nullable: true
           properties:
             alias:
               type: string
+              nullable: true
             controlledBy:
               type: string
+              nullable: true
             disabled:
               type: boolean
+              nullable: true
             field:
               type: string
+              nullable: true
             formattedValue:
               type: string
+              nullable: true
             index:
               type: string
+              nullable: true
             key:
               type: string
+              nullable: true
             negate:
               type: boolean
+              nullable: true
             params:
               type: string
+              nullable: true
             type:
               type: string
+              nullable: true
             value:
               type: string
+              nullable: true
         match_all:
           type: string
+          nullable: true
         missing:
           type: string
+          nullable: true
         query:
           type: string
+          nullable: true
         range:
           type: string
+          nullable: true
         script:
           type: string
+          nullable: true
     SerializedFilterQueryResult:
       type: object
       properties:
@@ -531,6 +597,11 @@ components:
         - description
         - updated
         - created
+    SortDirection:
+      type: string
+      enum:
+        - asc
+        - desc
     TimelineStatus:
       type: string
       enum:
@@ -544,6 +615,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/SavedTimeline'
         - type: object
+          required: [savedObjectId, version, pinnedEventIds, eventNotes, globalNotes]
           properties:
             savedObjectId:
               type: string
@@ -551,21 +623,56 @@ components:
             version:
               type: string
               nullable: true
-            globalNotes:
-              nullable: true
-              type: array
-              items:
-                $ref: '#/components/schemas/BareNote'
-            eventNotes:
-              nullable: true
-              type: array
-              items:
-                $ref: '#/components/schemas/BareNote'
             pinnedEventIds:
-              nullable: true
               type: array
+              nullable: true
               items:
                 type: string
+            eventNotes:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/BareNote'
+            globalNotes:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/BareNote'
+    TimelineSavedToReturnObject:
+      allOf:
+        - $ref: '#/components/schemas/SavedTimeline'
+        - type: object
+          required: [savedObjectId, version]
+          properties:
+            savedObjectId:
+              type: string
+            version:
+              type: string
+            eventIdToNoteIds:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/Note'
+            notes:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/Note'
+            noteIds:
+              type: array
+              nullable: true
+              items:
+                type: string
+            pinnedEventIds:
+              type: array
+              nullable: true
+              items:
+                type: string
+            pinnedEventsSaveObject:
+              type: array
+              nullable: true
+              items:
+                $ref: '#/components/schemas/PinnedEvent'
     ImportTimelineResult:
       type: object
       properties:
@@ -591,46 +698,19 @@ components:
                     type: string
                   status_code:
                     type: number
-    ExportedTimelines:
-      allOf:
-        - $ref: '#/components/schemas/SavedTimeline'
+    TimelineErrorResponse:
+      oneOf:
         - type: object
+          required: [message, status_code]
           properties:
-            globalNotes:
-              type: array
-              items:
-                $ref: '#/components/schemas/Note'
-            eventNotes:
-              type: array
-              items:
-                $ref: '#/components/schemas/Note'
-            pinnedEventIds:
-              type: array
-              items:
-                type: string
-    Readable:
-      type: object
-      properties:
-        _maxListeners:
-          type: object
-          additionalProperties: true
-        _readableState:
-          type: object
-          additionalProperties: true
-        _read:
-          type: object
-          additionalProperties: true
-        readable:
-          type: boolean
-        _events:
-          type: object
-          additionalProperties: true
-        _eventsCount:
-          type: number
-        _data:
-          type: object
-          additionalProperties: true
-        _position:
-          type: number
-        _encoding:
-          type: string
+            message:
+              type: string
+            status_code:
+              type: number
+        - type: object
+          required: [message, statusCode]
+          properties:
+            message:
+              type: string
+            statusCode:
+              type: number

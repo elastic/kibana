@@ -4214,4 +4214,30 @@ describe('xy_visualization', () => {
       `);
     });
   });
+  describe('switchVisualizationType', () => {
+    it('should switch all the layers to the new visualization type if layerId is not specified (AI assistant case)', () => {
+      const state = exampleState();
+      state.layers[1] = state.layers[0];
+      state.layers[1].layerId = 'second';
+      state.layers[2] = state.layers[0];
+      state.layers[2].layerId = 'third';
+      const newType = 'bar';
+      const newState = xyVisualization.switchVisualizationType!(newType, state);
+      expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
+      expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual(newType);
+      expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual(newType);
+    });
+    it('should switch only the second layer to the new visualization type if layerId is specified (chart switch case)', () => {
+      const state = exampleState();
+      state.layers[1] = { ...state.layers[0] };
+      state.layers[1].layerId = 'second';
+      state.layers[2] = { ...state.layers[0] };
+      state.layers[2].layerId = 'third';
+      const newType = 'bar';
+      const newState = xyVisualization.switchVisualizationType!(newType, state, 'first');
+      expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual(newType);
+      expect((newState.layers[1] as XYDataLayerConfig).seriesType).toEqual('area');
+      expect((newState.layers[2] as XYDataLayerConfig).seriesType).toEqual('area');
+    });
+  });
 });

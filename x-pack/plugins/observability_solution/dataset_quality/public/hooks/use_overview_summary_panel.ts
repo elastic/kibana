@@ -7,6 +7,7 @@
 
 import { useSelector } from '@xstate/react';
 import { formatNumber } from '@elastic/eui';
+import { mapPercentageToQuality } from '../../common/utils';
 import { BYTE_NUMBER_FORMAT, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 
@@ -26,10 +27,9 @@ export const useOverviewSummaryPanel = () => {
     .map((key: string) => services[key].length)
     .reduce((a, b) => a + b, 0);
 
-  const totalDocsCount = formatNumber(dataStreamDetails?.docsCount ?? 0, NUMBER_FORMAT);
+  const totalDocsCount = formatNumber(dataStreamDetails.docsCount, NUMBER_FORMAT);
 
-  const sizeInBytesAvailable = dataStreamDetails?.sizeBytes !== null;
-  const sizeInBytes = formatNumber(dataStreamDetails?.sizeBytes ?? 0, BYTE_NUMBER_FORMAT);
+  const sizeInBytes = formatNumber(dataStreamDetails.sizeBytes, BYTE_NUMBER_FORMAT);
   const isUserAllowedToSeeSizeInBytes = dataStreamDetails?.userPrivileges?.canMonitor ?? true;
 
   const hosts = dataStreamDetails?.hosts ?? {};
@@ -55,15 +55,22 @@ export const useOverviewSummaryPanel = () => {
     NUMBER_FORMAT
   );
 
+  const degradedPercentage =
+    Number(totalDocsCount) > 0
+      ? (Number(totalDegradedDocsCount) / Number(totalDocsCount)) * 100
+      : 0;
+
+  const quality = mapPercentageToQuality(degradedPercentage);
+
   return {
     totalDocsCount,
-    sizeInBytesAvailable,
     sizeInBytes,
     isUserAllowedToSeeSizeInBytes,
     totalServicesCount,
     totalHostsCount,
     isSummaryPanelLoading,
     totalDegradedDocsCount,
+    quality,
   };
 };
 

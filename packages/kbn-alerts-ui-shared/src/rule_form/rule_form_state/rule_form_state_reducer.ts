@@ -8,7 +8,7 @@
  */
 
 import { RuleActionParams } from '@kbn/alerting-types';
-import { omit } from 'lodash';
+import { isEmpty, omit, isEqual } from 'lodash';
 import { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../../common';
 import { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
@@ -106,13 +106,21 @@ export type RuleFormStateReducerAction =
         uuid: string;
         errors: RuleFormParamsErrors;
       };
+    }
+  | {
+      type: 'runValidation';
     };
 
 const getUpdateWithValidation =
   (ruleFormState: RuleFormState) =>
   (updater: () => RuleFormData): RuleFormState => {
-    const { minimumScheduleInterval, selectedRuleTypeModel, multiConsumerSelection } =
-      ruleFormState;
+    const {
+      minimumScheduleInterval,
+      selectedRuleTypeModel,
+      multiConsumerSelection,
+      selectedRuleType,
+      formData: originalFormData,
+    } = ruleFormState;
 
     const formData = updater();
 
@@ -121,17 +129,35 @@ const getUpdateWithValidation =
       ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
     };
 
+    const baseErrors = validateRuleBase({
+      formData: formDataWithMultiConsumer,
+      minimumScheduleInterval,
+    });
+
+    const paramsErrors = validateRuleParams({
+      formData: formDataWithMultiConsumer,
+      ruleTypeModel: selectedRuleTypeModel,
+    });
+
+    // We need to do this because the Missing Monitor Data rule type
+    // for whatever reason does not initialize the params with any data,
+    // therefore the expression component renders as blank
+    if (selectedRuleType.id === 'monitoring_alert_missing_monitoring_data') {
+      if (isEmpty(formData.params) && !isEmpty(paramsErrors)) {
+        Object.keys(paramsErrors).forEach((key) => {
+          formData.params[key] = null;
+        });
+      }
+    }
+
+    const touched = !isEqual(originalFormData, formData);
+
     return {
       ...ruleFormState,
       formData,
-      baseErrors: validateRuleBase({
-        formData: formDataWithMultiConsumer,
-        minimumScheduleInterval,
-      }),
-      paramsErrors: validateRuleParams({
-        formData: formDataWithMultiConsumer,
-        ruleTypeModel: selectedRuleTypeModel,
-      }),
+      baseErrors,
+      paramsErrors,
+      touched,
     };
   };
 
@@ -222,6 +248,7 @@ export const ruleFormStateReducer = (
       return {
         ...ruleFormState,
         multiConsumerSelection: payload,
+        touched: true,
       };
     }
     case 'setMetadata': {
@@ -325,6 +352,9 @@ export const ruleFormStateReducer = (
           [uuid]: newActionsParamsError,
         },
       };
+    }
+    case 'runValidation': {
+      return updateWithValidation(() => formData);
     }
     default: {
       return ruleFormState;

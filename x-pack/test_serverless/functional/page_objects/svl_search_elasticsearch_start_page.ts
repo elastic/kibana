@@ -30,12 +30,31 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
         );
       });
     },
+    async expectToBeOnMLFileUploadPage() {
+      await retry.tryForTime(60 * 1000, async () => {
+        expect(await browser.getCurrentUrl()).contain('/app/ml/filedatavisualizer');
+      });
+    },
     async expectIndexNameToExist() {
       await testSubjects.existOrFail('indexNameField');
     },
     async setIndexNameValue(value: string) {
       await testSubjects.existOrFail('indexNameField');
       await testSubjects.setValue('indexNameField', value);
+    },
+    async expectCloseCreateIndexButtonExists() {
+      await testSubjects.existOrFail('closeCreateIndex');
+    },
+    async clickCloseCreateIndexButton() {
+      await testSubjects.existOrFail('closeCreateIndex');
+      await testSubjects.click('closeCreateIndex');
+    },
+    async expectSkipButtonExists() {
+      await testSubjects.existOrFail('createIndexSkipBtn');
+    },
+    async clickSkipButton() {
+      await testSubjects.existOrFail('createIndexSkipBtn');
+      await testSubjects.click('createIndexSkipBtn');
     },
     async expectCreateIndexButtonToExist() {
       await testSubjects.existOrFail('createIndexBtn');
@@ -66,6 +85,43 @@ export function SvlSearchElasticsearchStartPageProvider({ getService }: FtrProvi
     async clickCodeViewButton() {
       await testSubjects.existOrFail('createIndexCodeViewBtn');
       await testSubjects.click('createIndexCodeViewBtn');
+    },
+    async clickFileUploadLink() {
+      await testSubjects.existOrFail('uploadFileLink');
+      await testSubjects.click('uploadFileLink');
+    },
+    async expectAnalyzeLogsLink() {
+      await testSubjects.existOrFail('analyzeLogsBtn');
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'href')).equal(
+        'https://www.elastic.co/guide/en/serverless/current/elasticsearch-ingest-your-data.html'
+      );
+      expect(await testSubjects.getAttribute('analyzeLogsBtn', 'target')).equal('_blank');
+    },
+    async expectO11yTrialLink() {
+      await testSubjects.existOrFail('startO11yTrialBtn');
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'href')).match(
+        /^https?\:\/\/.*\/projects\/create\/observability\/start/
+      );
+      expect(await testSubjects.getAttribute('startO11yTrialBtn', 'target')).equal('_blank');
+    },
+    async expectAPIKeyVisibleInCodeBlock(apiKey: string) {
+      await testSubjects.existOrFail('createIndex-code-block');
+      await retry.try(async () => {
+        expect(await testSubjects.getVisibleText('createIndex-code-block')).to.contain(apiKey);
+      });
+    },
+
+    async expectAPIKeyPreGenerated() {
+      await testSubjects.existOrFail('apiKeyHasBeenGenerated');
+    },
+
+    async expectAPIKeyNotPreGenerated() {
+      await testSubjects.existOrFail('apiKeyHasNotBeenGenerated');
+    },
+
+    async expectAPIKeyFormNotAvailable() {
+      await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
+      await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
     },
   };
 }

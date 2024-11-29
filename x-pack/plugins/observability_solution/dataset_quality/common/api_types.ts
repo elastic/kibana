@@ -31,11 +31,30 @@ export const dataStreamStatRt = rt.intersection([
     sizeBytes: rt.number,
     lastActivity: rt.number,
     integration: rt.string,
-    totalDocs: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+    totalDocs: rt.number,
   }),
 ]);
 
 export type DataStreamStat = rt.TypeOf<typeof dataStreamStatRt>;
+
+export const dataStreamDocsStatRt = rt.type({
+  dataset: rt.string,
+  count: rt.number,
+});
+
+export type DataStreamDocsStat = rt.TypeOf<typeof dataStreamDocsStatRt>;
+
+export const getDataStreamTotalDocsResponseRt = rt.type({
+  totalDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamTotalDocsResponse = rt.TypeOf<typeof getDataStreamTotalDocsResponseRt>;
+
+export const getDataStreamDegradedDocsResponseRt = rt.type({
+  degradedDocs: rt.array(dataStreamDocsStatRt),
+});
+
+export type DataStreamDegradedDocsResponse = rt.TypeOf<typeof getDataStreamDegradedDocsResponseRt>;
 
 export const integrationDashboardRT = rt.type({
   id: rt.string,
@@ -84,15 +103,6 @@ export const getIntegrationsResponseRt = rt.exact(
 
 export type IntegrationResponse = rt.TypeOf<typeof getIntegrationsResponseRt>;
 
-export const degradedDocsRt = rt.type({
-  dataset: rt.string,
-  count: rt.number,
-  docsCount: rt.number,
-  percentage: rt.number,
-});
-
-export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
-
 export const degradedFieldRt = rt.type({
   name: rt.string,
   count: rt.number,
@@ -103,6 +113,7 @@ export const degradedFieldRt = rt.type({
       y: rt.number,
     })
   ),
+  indexFieldWasLastPresentIn: rt.string,
 });
 
 export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
@@ -120,7 +131,47 @@ export const degradedFieldValuesRt = rt.type({
 
 export type DegradedFieldValues = rt.TypeOf<typeof degradedFieldValuesRt>;
 
+export const degradedFieldAnalysisRt = rt.intersection([
+  rt.type({
+    isFieldLimitIssue: rt.boolean,
+    fieldCount: rt.number,
+    totalFieldLimit: rt.number,
+  }),
+  rt.partial({
+    ignoreMalformed: rt.boolean,
+    nestedFieldLimit: rt.number,
+    fieldMapping: rt.partial({
+      type: rt.string,
+      ignore_above: rt.number,
+    }),
+    defaultPipeline: rt.string,
+  }),
+]);
+
+export type DegradedFieldAnalysis = rt.TypeOf<typeof degradedFieldAnalysisRt>;
+
+export const updateFieldLimitResponseRt = rt.intersection([
+  rt.type({
+    isComponentTemplateUpdated: rt.union([rt.boolean, rt.undefined]),
+    isLatestBackingIndexUpdated: rt.union([rt.boolean, rt.undefined]),
+    customComponentTemplateName: rt.string,
+  }),
+  rt.partial({
+    error: rt.string,
+  }),
+]);
+
+export type UpdateFieldLimitResponse = rt.TypeOf<typeof updateFieldLimitResponseRt>;
+
+export const dataStreamRolloverResponseRt = rt.type({
+  acknowledged: rt.boolean,
+});
+
+export type DataStreamRolloverResponse = rt.TypeOf<typeof dataStreamRolloverResponseRt>;
+
 export const dataStreamSettingsRt = rt.partial({
+  lastBackingIndexName: rt.string,
+  indexTemplate: rt.string,
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
   integration: rt.string,
   datasetUserPrivileges: datasetUserPrivilegesRt,
@@ -132,7 +183,7 @@ export const dataStreamDetailsRt = rt.partial({
   lastActivity: rt.number,
   degradedDocsCount: rt.number,
   docsCount: rt.number,
-  sizeBytes: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+  sizeBytes: rt.number,
   services: rt.record(rt.string, rt.array(rt.string)),
   hosts: rt.record(rt.string, rt.array(rt.string)),
   userPrivileges: userPrivilegesRt,
@@ -147,18 +198,12 @@ export const getDataStreamsStatsResponseRt = rt.exact(
   })
 );
 
-export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
-  rt.type({
-    degradedDocs: rt.array(degradedDocsRt),
-  })
-);
-
 export const getDataStreamsSettingsResponseRt = rt.exact(dataStreamSettingsRt);
 
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
-  estimatedDataInBytes: rt.union([rt.number, rt.null]), // Null in serverless: https://github.com/elastic/kibana/issues/178954
+  estimatedDataInBytes: rt.number,
 });
 
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(

@@ -21,6 +21,7 @@ import {
   useEuiTheme,
   transparentize,
   useIsWithinMinBreakpoint,
+  EuiButton,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { useNavigation as useServices } from '../../services';
@@ -45,6 +46,24 @@ const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   }
 `;
 
+const getButtonStyles = (euiTheme: EuiThemeComputed<{}>, isActive: boolean) => css`
+  background-color: ${isActive ? transparentize(euiTheme.colors.lightShade, 0.5) : 'transparent'};
+  transform: none !important; /* don't translateY 1px */
+  color: inherit;
+  font-weight: inherit;
+  padding-inline: ${euiTheme.size.s};
+  & > span {
+    justify-content: flex-start;
+    position: relative;
+  }
+  & .euiIcon {
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: translateY(50%);
+  }
+`;
+
 interface Props {
   item: ChromeProjectNavigationNode;
   navigateToUrl: NavigateToUrlFn;
@@ -60,7 +79,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const href = deepLink?.url ?? item.href;
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
-  const isActive = isActiveFromUrl(item.path, activeNodes);
+  const hasLandingPage = Boolean(href);
+  const isExpanded = selectedNode?.path === path;
+  const isActive = hasLandingPage ? isActiveFromUrl(item.path, activeNodes) : isExpanded;
 
   const itemClassNames = classNames(
     'sideNavItem',
@@ -68,37 +89,59 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     getStyles(euiTheme)
   );
 
+  const buttonClassNames = classNames('sideNavItem', getButtonStyles(euiTheme, isActive));
+
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isActive,
   });
+
   const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${path}`, {
     [`panelOpener-id-${id}`]: id,
     [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 
+  const togglePanel = useCallback(() => {
+    if (selectedNode?.id === item.id) {
+      closePanel();
+    } else {
+      openPanel(item);
+    }
+  }, [selectedNode?.id, item, closePanel, openPanel]);
+
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
       if (!href) {
+        togglePanel();
         return;
       }
       e.preventDefault();
       navigateToUrl(href);
       closePanel();
     },
-    [closePanel, href, navigateToUrl]
+    [closePanel, href, navigateToUrl, togglePanel]
   );
 
   const onIconClick = useCallback(() => {
-    if (selectedNode?.id === item.id) {
-      closePanel();
-    } else {
-      openPanel(item);
-    }
-  }, [openPanel, closePanel, item, selectedNode]);
+    togglePanel();
+  }, [togglePanel]);
 
-  const isExpanded = selectedNode?.path === path;
+  if (!hasLandingPage) {
+    return (
+      <EuiButton
+        onClick={onLinkClick}
+        iconSide="right"
+        iconType="arrowRight"
+        size="s"
+        fullWidth
+        className={buttonClassNames}
+        data-test-subj={dataTestSubj}
+      >
+        {title}
+      </EuiButton>
+    );
+  }
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">

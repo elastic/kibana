@@ -7,15 +7,19 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { useMemo } from 'react';
-import type { CriticalityLevels } from '../../../../../common/constants';
+import {
+  ASSET_CRITICALITY_INDEX_PATTERN,
+  RISK_SCORE_INDEX_PATTERN,
+  type CriticalityLevels,
+} from '../../../../../common/constants';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import type { EntitySource } from '../components/entity_source_filter';
+import { EntitySourceTag } from '../types';
 
 interface UseEntitiesListFiltersParams {
   selectedSeverities: RiskSeverity[];
   selectedCriticalities: CriticalityLevels[];
-  selectedSources: EntitySource[];
+  selectedSources: EntitySourceTag[];
 }
 
 export const useEntitiesListFilters = ({
@@ -26,35 +30,50 @@ export const useEntitiesListFilters = ({
   const { filterQuery: globalQuery } = useGlobalFilterQuery();
 
   return useMemo(() => {
-    const criticalityFilter: QueryDslQueryContainer[] = selectedCriticalities.map((value) => ({
-      term: {
-        'asset.criticality': value,
-      },
-    }));
-
-    const sourceFilter: QueryDslQueryContainer[] = selectedSources.map((value) => ({
-      term: {
-        'entity.source': value,
-      },
-    }));
-
-    const severityFilter: QueryDslQueryContainer[] = selectedSeverities.map((value) => ({
-      bool: {
-        should: [
+    const criticalityFilter: QueryDslQueryContainer[] = selectedCriticalities.length
+      ? [
           {
-            term: {
-              'host.risk.calculated_level': value,
+            bool: {
+              should: selectedCriticalities.map((value) => ({
+                term: {
+                  'asset.criticality': value,
+                },
+              })),
             },
           },
+        ]
+      : [];
+
+    const sourceFilter: QueryDslQueryContainer[] = selectedSources.length
+      ? [
           {
-            term: {
-              'user.risk.calculated_level': value,
+            bool: {
+              should: selectedSources.map((tag) => getSourceTagFilterQuery(tag)),
             },
           },
-        ],
-        minimum_should_match: 1,
-      },
-    }));
+        ]
+      : [];
+
+    const severityFilter: QueryDslQueryContainer[] = selectedSeverities.length
+      ? [
+          {
+            bool: {
+              should: selectedSeverities.flatMap((value) => [
+                {
+                  term: {
+                    'host.risk.calculated_level': value,
+                  },
+                },
+                {
+                  term: {
+                    'user.risk.calculated_level': value,
+                  },
+                },
+              ]),
+            },
+          },
+        ]
+      : [];
 
     const filterList: QueryDslQueryContainer[] = [
       ...severityFilter,
@@ -66,4 +85,38 @@ export const useEntitiesListFilters = ({
     }
     return filterList;
   }, [globalQuery, selectedCriticalities, selectedSeverities, selectedSources]);
+};
+
+const getSourceTagFilterQuery = (tag: EntitySourceTag): QueryDslQueryContainer => {
+  if (tag === EntitySourceTag.risk) {
+    return {
+      wildcard: {
+        'entity.source': RISK_SCORE_INDEX_PATTERN,
+      },
+    };
+  }
+  if (tag === EntitySourceTag.criticality) {
+    return {
+      wildcard: {
+        'entity.source': ASSET_CRITICALITY_INDEX_PATTERN,
+      },
+    };
+  }
+
+  return {
+    bool: {
+      must_not: [
+        {
+          wildcard: {
+            'entity.source': ASSET_CRITICALITY_INDEX_PATTERN,
+          },
+        },
+        {
+          wildcard: {
+            'entity.source': RISK_SCORE_INDEX_PATTERN,
+          },
+        },
+      ],
+    },
+  };
 };

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, ReactChildren } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFormRow, EuiSpacer, EuiCheckableCard, useGeneratedHtmlId } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
@@ -17,7 +17,7 @@ interface Props {
   options: Array<{
     label: string;
     value: string;
-    children: ReactChildren;
+    children: React.ReactNode;
     'data-test-subj'?: string;
   }>;
   euiFieldProps?: Record<string, any>;

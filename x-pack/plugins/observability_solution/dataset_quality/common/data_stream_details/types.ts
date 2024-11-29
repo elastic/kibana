@@ -8,3 +8,14 @@
 export interface GetDataStreamIntegrationParams {
   integrationName: string;
 }
+
+export interface AnalyzeDegradedFieldsParams {
+  dataStream: string;
+  lastBackingIndex: string;
+  degradedField: string;
+}
+
+export interface UpdateFieldLimitParams {
+  dataStream: string;
+  newFieldLimit: number;
+}

@@ -117,14 +117,13 @@ export class SpaceSelector extends Component<Props, State> {
     }
 
     return (
-      <KibanaPageTemplate
-        className="spcSpaceSelector"
-        data-test-subj="kibanaSpaceSelector"
-        panelled
-      >
+      <KibanaPageTemplate className="spcSpaceSelector" data-test-subj="kibanaSpaceSelector">
         {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
         <EuiPortal>
-          <div className="spcSelectorBackground" role="presentation" />
+          <div
+            className="spcSelectorBackground spcSelectorBackground__nonMixinAttributes"
+            role="presentation"
+          />
         </EuiPortal>
 
         <KibanaPageTemplate.Section color="transparent" paddingSize="xl">

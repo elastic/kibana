@@ -5,33 +5,54 @@
  * 2.0.
  */
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type {
   MappingProperty,
   MappingPropertyBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import type {
+  IndexManagementPluginSetup,
+  IndexManagementPluginStart,
+} from '@kbn/index-management-shared-types';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
+import type { AvailableLanguages } from './code_examples';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
+  startAppId: string;
+  startRoute: string;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchIndicesPluginStart {}
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+export interface SearchIndicesPluginStart {
+  enabled: boolean;
+  startAppId: AppDeepLinkId;
+  startRoute: string;
+}
+
+export interface AppPluginSetupDependencies {
+  console?: ConsolePluginSetup;
+  cloud?: CloudSetup;
+  indexManagement: IndexManagementPluginSetup;
+  share: SharePluginSetup;
+  serverless?: ServerlessPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface SearchIndicesAppPluginStartDependencies {
   console?: ConsolePluginStart;
   cloud?: CloudStart;
   share: SharePluginStart;
+  serverless?: ServerlessPluginStart;
   usageCollection?: UsageCollectionStart;
+  indexManagement: IndexManagementPluginStart;
 }
 
 export interface SearchIndicesServicesContextDeps {
@@ -41,7 +62,6 @@ export interface SearchIndicesServicesContextDeps {
 export type SearchIndicesServicesContext = CoreStart &
   SearchIndicesAppPluginStartDependencies & {
     history: AppMountParameters['history'];
-    indexManagement: IndexManagementPluginStart;
   };
 
 export interface AppUsageTracker {
@@ -77,6 +97,11 @@ export interface CreateIndexCodeDefinition {
 }
 
 export interface CreateIndexCodeExamples {
+  exampleType: string;
+  installTitle: string;
+  installDescription: string;
+  createIndexTitle: string;
+  createIndexDescription: string;
   sense: CreateIndexCodeDefinition;
   curl: CreateIndexCodeDefinition;
   python: CreateIndexCodeDefinition;
@@ -85,7 +110,7 @@ export interface CreateIndexCodeExamples {
 
 export interface IngestCodeSnippetParameters extends CodeSnippetParameters {
   indexName: string;
-  sampleDocument: object;
+  sampleDocuments: object[];
   mappingProperties: Record<string, MappingProperty>;
 }
 
@@ -98,12 +123,24 @@ export interface IngestDataCodeDefinition {
 }
 
 export interface IngestDataCodeExamples {
-  title: string;
-  ingestTitle: string;
-  description: string;
+  addMappingsTitle: string;
+  addMappingsDescription: string;
+  installTitle: string;
+  installDescription: string;
   defaultMapping: Record<string, MappingProperty>;
   sense: IngestDataCodeDefinition;
   curl: IngestDataCodeDefinition;
   python: IngestDataCodeDefinition;
   javascript: IngestDataCodeDefinition;
+}
+
+export interface CreateIndexFormState {
+  indexName: string;
+  defaultIndexName: string;
+  codingLanguage: AvailableLanguages;
+}
+
+export enum CreateIndexViewMode {
+  UI = 'ui',
+  Code = 'code',
 }

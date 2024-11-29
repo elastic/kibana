@@ -8,10 +8,15 @@
 import * as Gemini from '@google/generative-ai';
 import { from, map, switchMap } from 'rxjs';
 import { Readable } from 'stream';
+import {
+  Message,
+  MessageRole,
+  ToolChoiceType,
+  ToolOptions,
+  ToolSchema,
+  ToolSchemaType,
+} from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
-import { Message, MessageRole } from '../../../../common/chat_complete';
-import { ToolChoiceType, ToolOptions } from '../../../../common/chat_complete/tools';
-import type { ToolSchema, ToolSchemaType } from '../../../../common/chat_complete/tool_schema';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';

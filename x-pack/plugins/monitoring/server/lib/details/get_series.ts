@@ -22,7 +22,7 @@ import {
   DS_INDEX_PATTERN_METRICS,
 } from '../../../common/constants';
 import { formatUTCTimestampForTimezone } from '../format_timezone';
-import { getIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 import type { Metric } from '../metrics/metrics';
 
@@ -64,7 +64,7 @@ function defaultCalculation(
   metric?: Metric,
   defaultSizeInSeconds?: number
 ) {
-  const legacyValue: number = get(bucket, key, null);
+  const legacyValue: number = get(bucket, key, -1);
   const mbValue = bucket.metric_mb_deriv?.normalized_value ?? null;
   let value;
   if (mbValue !== null && !isNaN(mbValue) && mbValue > 0) {

@@ -23,9 +23,9 @@ import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { usePermissions } from '../../hooks/use_permissions';
-import { useCreateRule } from '../../hooks/use_create_rule';
+import { useCreateRule } from '../../hooks/use_create_burn_rate_rule';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
-import { useKibana } from '../../utils/kibana_react';
+import { useKibana } from '../../hooks/use_kibana';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
@@ -45,11 +45,11 @@ jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
 jest.mock('../../hooks/use_permissions');
-jest.mock('../../hooks/use_create_rule');
+jest.mock('../../hooks/use_create_burn_rate_rule');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../../utils/kibana_react', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 

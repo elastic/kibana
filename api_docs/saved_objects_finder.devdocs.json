@@ -37,13 +37,23 @@
           },
           " | undefined) => (props: ",
           {
+            "pluginId": "@kbn/shared-ux-table-persist",
+            "scope": "common",
+            "docId": "kibKbnSharedUxTablePersistPluginApi",
+            "section": "def-common.HOCProps",
+            "text": "HOCProps"
+          },
+          "<",
+          "SavedObjectFinderItem",
+          ", ",
+          {
             "pluginId": "savedObjectsFinder",
             "scope": "public",
             "docId": "kibSavedObjectsFinderPluginApi",
             "section": "def-public.SavedObjectFinderProps",
             "text": "SavedObjectFinderProps"
           },
-          ") => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
         "deprecated": false,
@@ -127,13 +137,23 @@
         "signature": [
           "(props: ",
           {
+            "pluginId": "@kbn/shared-ux-table-persist",
+            "scope": "common",
+            "docId": "kibKbnSharedUxTablePersistPluginApi",
+            "section": "def-common.HOCProps",
+            "text": "HOCProps"
+          },
+          "<",
+          "SavedObjectFinderItem",
+          ", ",
+          {
             "pluginId": "savedObjectsFinder",
             "scope": "public",
             "docId": "kibSavedObjectsFinderPluginApi",
             "section": "def-public.SavedObjectFinderProps",
             "text": "SavedObjectFinderProps"
           },
-          ") => JSX.Element"
+          ">) => React.JSX.Element"
         ],
         "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
         "deprecated": false,
@@ -148,12 +168,23 @@
             "description": [],
             "signature": [
               {
+                "pluginId": "@kbn/shared-ux-table-persist",
+                "scope": "common",
+                "docId": "kibKbnSharedUxTablePersistPluginApi",
+                "section": "def-common.HOCProps",
+                "text": "HOCProps"
+              },
+              "<",
+              "SavedObjectFinderItem",
+              ", ",
+              {
                 "pluginId": "savedObjectsFinder",
                 "scope": "public",
                 "docId": "kibSavedObjectsFinderPluginApi",
                 "section": "def-public.SavedObjectFinderProps",
                 "text": "SavedObjectFinderProps"
-              }
+              },
+              ">"
             ],
             "path": "src/plugins/saved_objects_finder/public/finder/index.tsx",
             "deprecated": false,
@@ -495,6 +526,20 @@
             "type": "string",
             "tags": [],
             "label": "name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/saved_objects_finder/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsFinder",
+            "id": "def-common.FinderAttributes.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
             "description": [],
             "signature": [
               "string | undefined"

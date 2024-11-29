@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
+import type { SuperTest } from 'supertest';
+
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SPACES } from '../../common/lib/spaces';
 import { createTestSuiteFactory } from '../../common/suites/create';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createSpacesOnlySuite({ getService }: FtrProviderContext) {

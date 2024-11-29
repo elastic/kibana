@@ -21,6 +21,10 @@ jest.mock('./rule_actions', () => ({
   },
 }));
 
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
   hasSaveRulesCapability: jest.fn(() => true),

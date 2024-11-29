@@ -38,7 +38,6 @@
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
     "@kbn/core-analytics-browser",
-    "@kbn/core-analytics-browser",
     "@kbn/security-plugin-types-common",
     "@kbn/core-application-browser",
     "@kbn/unsaved-changes-prompt",
@@ -48,10 +47,14 @@
     "@kbn/react-kibana-mount",
     "@kbn/shared-ux-utility",
     "@kbn/core-application-common",
-    "@kbn/security-authorization-core",
     "@kbn/core-notifications-browser",
     "@kbn/logging",
     "@kbn/core-logging-browser-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/ui-theme",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-lifecycle-server"
   ],
   "exclude": [
     "target/**/*",

@@ -14,6 +14,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import {
+  analyticsServiceMock,
   chromeServiceMock,
   coreMock,
   docLinksServiceMock,
@@ -45,6 +46,7 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { urlTrackerMock } from './url_tracker.mock';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
+import { DiscoverEBTManager } from '../services/discover_ebt_manager';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -142,12 +144,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
   };
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const theme = themeServiceMock.createSetupContract({ darkMode: false });
+  const theme = themeServiceMock.createSetupContract({ darkMode: false, name: 'amsterdam' });
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
 
   return {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: corePluginMock.application,
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
@@ -245,6 +248,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     singleDocLocator: { getRedirectUrl: jest.fn(() => '') },
     urlTracker: urlTrackerMock,
     profilesManager: profilesManagerMock,
+    ebtManager: new DiscoverEBTManager(),
     setHeaderActionMenu: jest.fn(),
   } as unknown as DiscoverServices;
 }

@@ -79,6 +79,8 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:detection_engine:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` excluding `e2e/detection_response/detection_engine` directory in headless mode |
 | cypress:ai_assistant:run:ess | Runs all tests tagged as ESS in the `e2e/ai_assistant` directory in headless mode |
 | cypress:ai_assistant:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode |
+| cypress:cloud_security_posture:run:ess | Runs all tests tagged as ESS in the `e2e/cloud_security_posture` directory in headless mode |
+| cypress:cloud_security_posture:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/cloud_security_posture` directory in headless mode |
 | cypress:detection_engine:exceptions:run:serverless | Runs all tests tagged as ESS in the `e2e/detection_response/detection_engine/exceptions` directory in headless mode |
 | cypress:investigations:run:ess | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:ess | Runs all tests tagged as ESS in the `e2e/explore` directory in headless mode |
@@ -88,6 +90,7 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:run:qa:serverless:entity_analytics | Runs all tests tagged as SERVERLESS placed in the `e2e/entity_analytics` directory in headless mode using the QA environment and real MKI projects.|
 | cypress:run:qa:serverless:explore | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode using the QA environment and real MKI prorjects. |
 | cypress:run:qa:serverless:investigations | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode using the QA environment and reak MKI projects. |
+| cypress:run:qa:serverless:cloud_security_posture | Runs all tests tagged as SERVERLESS in the `e2e/cloud_security_posture` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management` directory, excluding `e2e/detection_response/rule_management/prebuilt_rules` in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:rule_management:prebuilt_rules | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/rule_management/prebuilt_rules` directory in headless mode using the QA environment and reak MKI projects. |
 | cypress:run:qa:serverless:detection_engine | Runs all tests tagged as SERVERLESS in the `e2e/detection_response/detection_engine` directory, excluding `e2e/detection_response/detection_engine/exceptions` in headless mode using the QA environment and reak MKI projects. |
