@@ -6,7 +6,7 @@ import { EuiButton, EuiHorizontalRule, EuiPageTemplate, EuiTitle, EuiText } from
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { PLUGIN_ID } from '../../common';
 
 interface AssetInventoryAppDeps {
   basename: string;
@@ -52,11 +52,7 @@ export const AssetInventoryApp = ({
             <EuiPageTemplate.Header>
               <EuiTitle size="l">
                 <h1>
-                  <FormattedMessage
-                    id="assetInventory.helloWorldText"
-                    defaultMessage="{name}"
-                    values={{ name: PLUGIN_NAME }}
-                  />
+                  <FormattedMessage id="assetInventory.helloWorldText" defaultMessage="Inventory" />
                 </h1>
               </EuiTitle>
             </EuiPageTemplate.Header>
