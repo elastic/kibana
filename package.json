@@ -1309,7 +1309,7 @@
     "zod": "^3.22.3"
   },
   "devDependencies": {
-    "@apidevtools/swagger-parser": "^10.0.3",
+    "@apidevtools/swagger-parser": "^10.1.0",
     "@babel/cli": "^7.24.7",
     "@babel/core": "^7.24.7",
     "@babel/eslint-parser": "^7.24.7",
@@ -1790,7 +1790,7 @@
     "null-loader": "^3.0.0",
     "nyc": "^15.1.0",
     "oboe": "^2.1.4",
-    "openapi-types": "^10.0.0",
+    "openapi-types": "^12.1.3",
     "p-reflect": "2.1.0",
     "peggy": "^1.2.0",
     "picomatch": "^2.3.1",
