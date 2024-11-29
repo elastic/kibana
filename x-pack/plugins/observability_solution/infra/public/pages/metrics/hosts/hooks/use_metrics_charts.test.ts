@@ -6,16 +6,14 @@
  */
 
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import { renderHook } from '@testing-library/react-hooks';
+import { waitFor, renderHook } from '@testing-library/react';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 import { useMetricsCharts } from './use_metrics_charts';
 
 describe('useMetricsCharts', () => {
   it('should return an array of charts with breakdown config', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useMetricsCharts({ dataViewId: 'dataViewId' })
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useMetricsCharts({ dataViewId: 'dataViewId' }));
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(result.current).toHaveLength(11);
 
@@ -29,10 +27,8 @@ describe('useMetricsCharts', () => {
   });
 
   it('should return an array of charts with correct order', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useMetricsCharts({ dataViewId: 'dataViewId' })
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useMetricsCharts({ dataViewId: 'dataViewId' }));
+    await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = [
       'cpuUsage',
