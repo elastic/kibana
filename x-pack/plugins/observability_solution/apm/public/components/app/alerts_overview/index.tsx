@@ -13,6 +13,7 @@ import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { apmAlertingFeatureIds } from '../../../../common/alerting/config/apm_alerting_feature_ids';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
@@ -75,14 +76,6 @@ export function AlertsOverview() {
     [history]
   );
 
-  const alertsTableFeatureIds = [
-    AlertConsumers.APM,
-    AlertConsumers.OBSERVABILITY,
-    AlertConsumers.SLO,
-    AlertConsumers.LOGS,
-    AlertConsumers.INFRASTRUCTURE,
-  ];
-
   return (
     <EuiPanel borderRadius="none" hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -115,7 +108,7 @@ export function AlertsOverview() {
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={alertsTableFeatureIds}
+              featureIds={apmAlertingFeatureIds}
               query={esQuery}
               showAlertStatusWithFlapping
               cellContext={{ observabilityRuleTypeRegistry }}
