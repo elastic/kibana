@@ -11,16 +11,24 @@ import { EntityV2 } from '@kbn/entities-schema';
 import { ESQLSearchResponse } from '@kbn/es-types';
 import { EntitySource } from '.';
 
+function getLatestDate(date1?: string, date2?: string) {
+  if (!date1 && !date2) return;
+
+  return new Date(
+    Math.max(date1 ? Date.parse(date1) : 0, date2 ? Date.parse(date2) : 0)
+  ).toISOString();
+}
+
 function mergeEntities(metadataFields: string[], entity1: EntityV2, entity2: EntityV2): EntityV2 {
-  const merged: EntityV2 = {
-    ...entity1,
-    'entity.last_seen_timestamp': new Date(
-      Math.max(
-        Date.parse(entity1['entity.last_seen_timestamp']),
-        Date.parse(entity2['entity.last_seen_timestamp'])
-      )
-    ).toISOString(),
-  };
+  const merged: EntityV2 = { ...entity1 };
+
+  const latestTimestamp = getLatestDate(
+    entity1['entity.last_seen_timestamp'],
+    entity2['entity.last_seen_timestamp']
+  );
+  if (latestTimestamp) {
+    merged['entity.last_seen_timestamp'] = latestTimestamp;
+  }
 
   for (const [key, value] of Object.entries(entity2).filter(([_key]) =>
     metadataFields.includes(_key)

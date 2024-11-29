@@ -99,6 +99,11 @@ describe('mergeEntitiesList', () => {
           'entity.type': 'service',
           'host.name': 'host-3',
         },
+        {
+          'entity.id': 'foo',
+          'entity.type': 'service',
+          'host.name': 'host-3',
+        },
       ];
 
       const mergedEntities = mergeEntitiesList(
@@ -118,6 +123,32 @@ describe('mergeEntitiesList', () => {
         'entity.last_seen_timestamp': '2024-11-20T20:00:00.000Z',
         'entity.type': 'service',
         'host.name': ['host-1', 'host-2', 'host-3'],
+      });
+    });
+
+    it('works without entity.last_seen_timestamp', () => {
+      const entities = [
+        {
+          'entity.id': 'foo',
+          'entity.type': 'service',
+          'host.name': 'host-1',
+        },
+        {
+          'entity.id': 'foo',
+          'entity.type': 'service',
+          'host.name': 'host-2',
+        },
+      ];
+
+      const mergedEntities = mergeEntitiesList(
+        [{ metadata_fields: ['host.name'] }, { metadata_fields: ['host.name'] }] as EntitySource[],
+        entities
+      );
+      expect(mergedEntities.length).toEqual(1);
+      expect(mergedEntities[0]).toEqual({
+        'entity.id': 'foo',
+        'entity.type': 'service',
+        'host.name': ['host-1', 'host-2'],
       });
     });
 

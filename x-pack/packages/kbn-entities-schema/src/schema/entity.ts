@@ -25,8 +25,8 @@ export interface MetadataRecord {
 
 export interface EntityV2 {
   'entity.id': string;
-  'entity.last_seen_timestamp': string;
   'entity.type': string;
+  'entity.last_seen_timestamp'?: string;
   [metadata: string]: any;
 }
 
