@@ -12,6 +12,7 @@ import {
 import { Logger } from '@kbn/core/server';
 import { intersection, isEmpty, uniq } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import {
   AlertOverviewStatus,
   AlertStatusConfigs,
@@ -37,10 +38,7 @@ import { parseArrayFilters } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { getConditionType, StatusRuleParams } from '../../../common/rules/status_rule';
 import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -64,6 +62,7 @@ export class StatusRuleExecutor {
   options: StatusRuleExecutorOptions;
   logger: Logger;
   ruleName: string;
+  monitorConfigRepository: MonitorConfigRepository;
 
   constructor(
     server: SyntheticsServerSetup,
@@ -80,6 +79,10 @@ export class StatusRuleExecutor {
     this.esClient = new SyntheticsEsClient(this.soClient, scopedClusterClient.asCurrentUser, {
       heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
     });
+    this.monitorConfigRepository = new MonitorConfigRepository(
+      savedObjectsClient,
+      server.encryptedSavedObjects.getClient()
+    );
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
     this.hasCustomCondition = !isEmpty(this.params);
@@ -119,8 +122,7 @@ export class StatusRuleExecutor {
       projects: this.params?.projects,
     });
 
-    this.monitors = await getAllMonitors({
-      soClient: this.soClient,
+    this.monitors = await this.monitorConfigRepository.getAll({
       filter: filtersStr,
     });
 

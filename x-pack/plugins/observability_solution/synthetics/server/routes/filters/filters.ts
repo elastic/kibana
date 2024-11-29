@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SyntheticsRestApiRouteFactory } from '../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
+import { monitorAttributes, syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { ConfigKey, MonitorFiltersResult } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
@@ -87,31 +87,31 @@ export const getSyntheticsFilters: SyntheticsRestApiRouteFactory<MonitorFiltersR
 const aggs = {
   monitorTypes: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.MONITOR_TYPE}.keyword`,
+      field: `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}.keyword`,
       size: 10000,
     },
   },
   tags: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.TAGS}`,
+      field: `${monitorAttributes}.${ConfigKey.TAGS}`,
       size: 10000,
     },
   },
   locations: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.LOCATIONS}.id`,
+      field: `${monitorAttributes}.${ConfigKey.LOCATIONS}.id`,
       size: 10000,
     },
   },
   projects: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}`,
+      field: `${monitorAttributes}.${ConfigKey.PROJECT_ID}`,
       size: 10000,
     },
   },
   schedules: {
     terms: {
-      field: `${syntheticsMonitorType}.attributes.${ConfigKey.SCHEDULE}.number`,
+      field: `${monitorAttributes}.${ConfigKey.SCHEDULE}.number`,
       size: 10000,
     },
   },

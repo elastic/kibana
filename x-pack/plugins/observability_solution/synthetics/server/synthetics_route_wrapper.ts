@@ -7,6 +7,7 @@
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { isEmpty } from 'lodash';
 import { isKibanaResponse } from '@kbn/core-http-server';
+import { MonitorConfigRepository } from './services/monitor_config_repository';
 import { isTestUser, SyntheticsEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
@@ -47,7 +48,14 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
 
     server.syntheticsEsClient = syntheticsEsClient;
 
+    const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
+
     const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+    const monitorConfigRepository = new MonitorConfigRepository(
+      savedObjectsClient,
+      encryptedSavedObjectsClient
+    );
 
     try {
       const res = await uptimeRoute.handler({
@@ -59,6 +67,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
         server,
         spaceId,
         syntheticsMonitorClient,
+        monitorConfigRepository,
       });
       if (isKibanaResponse(res)) {
         return res;

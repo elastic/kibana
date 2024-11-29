@@ -4,13 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  SavedObjectsUpdateResponse,
-  SavedObjectsClientContract,
-  SavedObjectsFindResult,
-} from '@kbn/core/server';
+import { SavedObjectsUpdateResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getSavedObjectKqlFilter } from '../../routes/common';
 import { InvalidLocationError } from './normalizers/common_fields';
 import { SyntheticsServerSetup } from '../../types';
@@ -25,7 +20,6 @@ import {
 } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import {
   ConfigKey,
-  SyntheticsMonitorWithSecretsAttributes,
   EncryptedSyntheticsMonitorAttributes,
   ServiceLocationErrors,
   ProjectMonitor,
@@ -76,7 +70,6 @@ export class ProjectMonitorFormatter {
   private publicLocations: Locations;
   private privateLocations: SyntheticsPrivateLocations;
   private savedObjectsClient: SavedObjectsClientContract;
-  private encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   private monitors: ProjectMonitor[] = [];
   public createdMonitors: string[] = [];
   public updatedMonitors: string[] = [];
@@ -87,14 +80,12 @@ export class ProjectMonitorFormatter {
   private routeContext: RouteContext;
 
   constructor({
-    encryptedSavedObjectsClient,
     projectId,
     spaceId,
     monitors,
     routeContext,
   }: {
     routeContext: RouteContext;
-    encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
     projectId: string;
     spaceId: string;
     monitors: ProjectMonitor[];
@@ -103,7 +94,6 @@ export class ProjectMonitorFormatter {
     this.projectId = projectId;
     this.spaceId = spaceId;
     this.savedObjectsClient = routeContext.savedObjectsClient;
-    this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.syntheticsMonitorClient = routeContext.syntheticsMonitorClient;
     this.monitors = monitors;
     this.server = routeContext.server;
@@ -262,9 +252,8 @@ export class ProjectMonitorFormatter {
       field: ConfigKey.JOURNEY_ID,
       values: journeyIds,
     });
-    const finder = this.savedObjectsClient.createPointInTimeFinder<ExistingMonitor>({
-      type: syntheticsMonitorType,
-      perPage: 5000,
+
+    const result = await this.routeContext.monitorConfigRepository.find<ExistingMonitor>({
       filter: `${this.projectFilter} AND ${journeyFilter}`,
       fields: [
         ConfigKey.JOURNEY_ID,
@@ -274,21 +263,12 @@ export class ProjectMonitorFormatter {
       ],
     });
 
-    const hits: PreviousMonitorForUpdate[] = [];
-    for await (const result of finder.find()) {
-      hits.push(
-        ...result.saved_objects.map((monitor) => {
-          return {
-            ...monitor.attributes,
-            updated_at: monitor.updated_at,
-          };
-        })
-      );
-    }
-
-    finder.close().catch(() => {});
-
-    return hits;
+    return result.saved_objects.map<PreviousMonitorForUpdate>((monitor) => {
+      return {
+        ...monitor.attributes,
+        updated_at: monitor.updated_at,
+      };
+    });
   };
 
   private createMonitorsBulk = async (monitors: SyntheticsMonitor[]) => {
@@ -363,25 +343,11 @@ export class ProjectMonitorFormatter {
       field: ConfigKey.CONFIG_ID,
       values: configIds,
     });
-    const finder =
-      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        {
-          filter: monitorFilter,
-          type: syntheticsMonitorType,
-          perPage: 500,
-          namespaces: [this.spaceId],
-        }
-      );
 
-    const decryptedMonitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> =
-      [];
-    for await (const result of finder.find()) {
-      decryptedMonitors.push(...result.saved_objects);
-    }
-
-    finder.close().catch(() => {});
-
-    return decryptedMonitors;
+    return await this.routeContext.monitorConfigRepository.findDecryptedMonitors({
+      filter: monitorFilter,
+      spaceId: this.spaceId,
+    });
   };
 
   private updateMonitorsBulk = async (
