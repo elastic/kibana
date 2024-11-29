@@ -367,7 +367,7 @@ export async function syncStream({
   logger,
 }: SyncStreamParams) {
   if (!definition.managed) {
-    // TODOL For now, we just don't allow reads at all - later on we will relax this to allow certain operations, but they will use a completely different syncing logic
+    // TODO For now, we just don't allow reads at all - later on we will relax this to allow certain operations, but they will use a completely different syncing logic
     throw new Error('Cannot sync an unmanaged stream');
   }
   const componentTemplate = generateLayer(definition.id, definition);
