@@ -160,6 +160,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   isK8s,
   cloudSecurityIntegration,
   installedPackagePolicy,
+  hasIncomingDataStep = true,
 }) => {
   const core = useStartServices();
   const { docLinks } = core;
@@ -271,7 +272,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
         })
       );
     }
-    if (selectedPolicy) {
+    if (selectedPolicy && hasIncomingDataStep) {
       steps.push(
         IncomingDataConfirmationStep({
           agentIds: enrolledAgentIds,
@@ -295,18 +296,19 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     selectionType,
     cloudSecurityIntegration,
     apiKeyData,
+    hasIncomingDataStep,
     mode,
     setMode,
     enrollToken,
-    installManagedCommands,
-    isK8s,
     fleetServerHost,
+    installManagedCommands,
+    gcpProjectId,
+    isK8s,
     onClickViewAgents,
     link,
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
-    gcpProjectId,
   ]);
 
   if (!agentVersion) {
