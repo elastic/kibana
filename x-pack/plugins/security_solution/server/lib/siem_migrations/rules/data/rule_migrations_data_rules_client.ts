@@ -309,15 +309,13 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
     if (installable) {
       filter.push(
-        ...[
           { term: { translation_result: 'full' } },
           {
             nested: {
               path: 'elastic_rule',
               query: { bool: { must_not: { exists: { field: 'elastic_rule.id' } } } },
             },
-          },
-        ]
+          }
       );
     }
     return { bool: { filter } };
