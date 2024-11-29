@@ -25,7 +25,6 @@
       "dashboard",
       "data",
       "dataViews",
-      "discover",
       "ecsDataQualityDashboard",
       "elasticAssistant",
       "embeddable",
@@ -61,7 +60,8 @@
       "entityManager",
       "inference",
       "productDocBase",
-      "telemetry"
+      "telemetry",
+      "discoverShared"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

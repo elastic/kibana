@@ -14,6 +14,7 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
+import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
 
 interface Props {
   contextId: string;
@@ -34,6 +35,8 @@ const HostNameComponent: React.FC<Props> = ({
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
+  const isInSecurityApp = useIsInSecurityApp();
+
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
   const isInTimelineContext =
@@ -47,6 +50,10 @@ const HostNameComponent: React.FC<Props> = ({
         onClick();
       }
 
+      /*
+       * if and only if renderer is running inside security solution app
+       * we check for event and timeline context
+       * */
       if (!eventContext || !isInTimelineContext) {
         return;
       }
@@ -74,13 +81,21 @@ const HostNameComponent: React.FC<Props> = ({
         Component={Component}
         hostName={hostName}
         isButton={isButton}
-        onClick={isInTimelineContext ? openHostDetailsSidePanel : undefined}
+        onClick={isInTimelineContext || !isInSecurityApp ? openHostDetailsSidePanel : undefined}
         title={title}
       >
         <TruncatableText data-test-subj="draggable-truncatable-content">{hostName}</TruncatableText>
       </HostDetailsLink>
     ),
-    [Component, hostName, isButton, isInTimelineContext, openHostDetailsSidePanel, title]
+    [
+      Component,
+      hostName,
+      isButton,
+      isInTimelineContext,
+      openHostDetailsSidePanel,
+      title,
+      isInSecurityApp,
+    ]
   );
 
   return isString(value) && hostName.length > 0 ? content : getEmptyTagValue();
