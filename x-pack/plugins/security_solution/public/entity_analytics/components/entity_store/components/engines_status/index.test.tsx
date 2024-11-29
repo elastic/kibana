@@ -11,9 +11,9 @@ import { EngineStatus } from '.';
 
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 
-const mockUseEntityEngineStatusNew = jest.fn();
-jest.mock('../../hooks/use_entity_engine_status', () => ({
-  useEntityEngineStatusNew: () => mockUseEntityEngineStatusNew(),
+const mockUseEntityStore = jest.fn();
+jest.mock('../../hooks/use_entity_store', () => ({
+  useEntityStoreStatus: () => mockUseEntityStore(),
 }));
 
 const mockDownloadBlob = jest.fn();
@@ -27,7 +27,7 @@ describe('EngineStatus', () => {
   });
 
   it('renders loading spinner when data is loading', () => {
-    mockUseEntityEngineStatusNew.mockReturnValue({
+    mockUseEntityStore.mockReturnValue({
       data: undefined,
       isLoading: true,
       error: null,
@@ -39,7 +39,7 @@ describe('EngineStatus', () => {
   });
 
   it('renders error state when there is an error', () => {
-    mockUseEntityEngineStatusNew.mockReturnValue({
+    mockUseEntityStore.mockReturnValue({
       data: null,
       isLoading: false,
       error: new Error('Error'),
@@ -51,7 +51,7 @@ describe('EngineStatus', () => {
   });
 
   it('renders "No engines found" message when there are no engines', () => {
-    mockUseEntityEngineStatusNew.mockReturnValue({
+    mockUseEntityStore.mockReturnValue({
       data: { engines: [] },
       isLoading: false,
       error: null,
@@ -71,7 +71,7 @@ describe('EngineStatus', () => {
         },
       ],
     };
-    mockUseEntityEngineStatusNew.mockReturnValue({ data: mockData, isLoading: false, error: null });
+    mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
     render(<EngineStatus />, { wrapper: TestProviders });
 
@@ -88,7 +88,7 @@ describe('EngineStatus', () => {
         },
       ],
     };
-    mockUseEntityEngineStatusNew.mockReturnValue({ data: mockData, isLoading: false, error: null });
+    mockUseEntityStore.mockReturnValue({ data: mockData, isLoading: false, error: null });
 
     render(<EngineStatus />, { wrapper: TestProviders });
 

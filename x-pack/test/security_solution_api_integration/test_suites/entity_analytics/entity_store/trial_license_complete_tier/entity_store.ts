@@ -247,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('status with components', () => {
         it('should return empty list when when no engines have been initialized', async () => {
           const { body } = await api
-            .getEntityStoreStatus({ query: { withComponents: true } })
+            .getEntityStoreStatus({ query: { include_components: true } })
             .expect(200);
 
           expect(body).toEqual({
@@ -260,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
           await utils.initEntityEngineForEntityTypesAndWait(['host']);
 
           const { body } = await api
-            .getEntityStoreStatus({ query: { withComponents: true } })
+            .getEntityStoreStatus({ query: { include_components: true } })
             .expect(200);
 
           expect(body.engines[0].components).toEqual([
