@@ -55,6 +55,10 @@ export const forkStreamsRoute = createServerRoute({
         id: params.path.id,
       });
 
+      if (rootDefinition.managed === false) {
+        throw new MalformedStreamId('Cannot fork a stream that is not managed');
+      }
+
       const childDefinition = { ...params.body.stream, children: [] };
 
       // check whether root stream has a child of the given name already

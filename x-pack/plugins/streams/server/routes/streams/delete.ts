@@ -16,7 +16,12 @@ import {
   SecurityException,
 } from '../../lib/streams/errors';
 import { createServerRoute } from '../create_server_route';
-import { syncStream, readStream, deleteStreamObjects } from '../../lib/streams/stream_crud';
+import {
+  syncStream,
+  readStream,
+  deleteStreamObjects,
+  deleteUnmanagedStreamObjects,
+} from '../../lib/streams/stream_crud';
 import { MalformedStreamId } from '../../lib/streams/errors/malformed_stream_id';
 import { getParentId } from '../../lib/streams/helpers/hierarchy';
 
@@ -83,6 +88,10 @@ export async function deleteStream(
 ) {
   try {
     const { definition } = await readStream({ scopedClusterClient, id });
+    if (!definition.managed) {
+      await deleteUnmanagedStreamObjects({ scopedClusterClient, id, logger });
+      return;
+    }
     for (const child of definition.children) {
       await deleteStream(scopedClusterClient, child.id, logger);
     }

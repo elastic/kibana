@@ -12,20 +12,24 @@ import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { isRoot } from '../helpers/hierarchy';
 import { getProcessingPipelineName } from './name';
 
+function generateProcessingSteps(definition: StreamDefinition) {
+  return definition.processing.map((processor) => {
+    const { type, ...config } = processor.config;
+    return {
+      [type]: {
+        ...config,
+        if: processor.condition ? conditionToPainless(processor.condition) : undefined,
+      },
+    };
+  });
+}
+
 export function generateIngestPipeline(id: string, definition: StreamDefinition) {
   return {
     id: getProcessingPipelineName(id),
     processors: [
       ...(isRoot(definition.id) ? logsDefaultPipelineProcessors : []),
-      ...definition.processing.map((processor) => {
-        const { type, ...config } = processor.config;
-        return {
-          [type]: {
-            ...config,
-            if: processor.condition ? conditionToPainless(processor.condition) : undefined,
-          },
-        };
-      }),
+      ...generateProcessingSteps(definition),
       {
         pipeline: {
           name: `${id}@stream.reroutes`,
@@ -38,5 +42,11 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
       managed: true,
     },
     version: ASSET_VERSION,
+  };
+}
+
+export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
+  return {
+    processors: generateProcessingSteps(definition),
   };
 }

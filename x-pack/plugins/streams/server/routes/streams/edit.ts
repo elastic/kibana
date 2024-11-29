@@ -49,6 +49,17 @@ export const editStreamRoute = createServerRoute({
   handler: async ({ response, params, logger, request, getScopedClients }) => {
     try {
       const { scopedClusterClient } = await getScopedClients({ request });
+      const streamDefinition = { ...params.body };
+
+      if (!streamDefinition.managed) {
+        await syncStream({
+          scopedClusterClient,
+          definition: { ...streamDefinition, id: params.path.id },
+          rootDefinition: undefined,
+          logger,
+        });
+        return;
+      }
 
       await validateStreamChildren(scopedClusterClient, params.path.id, params.body.children);
       await validateAncestorFields(scopedClusterClient, params.path.id, params.body.fields);
@@ -56,8 +67,6 @@ export const editStreamRoute = createServerRoute({
 
       const parentId = getParentId(params.path.id);
       let parentDefinition: StreamDefinition | undefined;
-
-      const streamDefinition = { ...params.body };
 
       // always need to go from the leaves to the parent when syncing ingest pipelines, otherwise data
       // will be routed before the data stream is ready
@@ -88,7 +97,7 @@ export const editStreamRoute = createServerRoute({
 
       await syncStream({
         scopedClusterClient,
-        definition: { ...streamDefinition, id: params.path.id, managed: false },
+        definition: { ...streamDefinition, id: params.path.id, managed: true },
         rootDefinition: parentDefinition,
         logger,
       });
