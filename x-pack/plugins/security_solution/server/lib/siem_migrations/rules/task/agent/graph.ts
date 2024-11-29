@@ -33,7 +33,7 @@ export function getRuleMigrationAgent({
   const siemMigrationAgentGraph = new StateGraph(migrateRuleState)
     // Nodes
     .addNode('matchPrebuiltRule', matchPrebuiltRuleNode)
-    .addNode('translationSubGraph', translationSubGraphNode)
+    .addNode('translationSubGraph', translationSubGraph)
     // Edges
     .addEdge(START, 'matchPrebuiltRule')
     .addConditionalEdges('matchPrebuiltRule', matchedPrebuiltRuleConditional)
